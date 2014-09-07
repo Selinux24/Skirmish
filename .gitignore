@@ -1,0 +1,14 @@
+# git ignore file
+1 SpriteDrawing\bin*/
+1 SpriteDrawing\obj*/
+2 ModelDrawing\bin*/
+2 ModelDrawing\obj*/
+3 SceneTest\bin*/
+3 SceneTest\obj*/
+4 Collada\bin*/
+4 Collada\obj*/
+5 Skybox\bin*/
+5 Skybox\obj*/
+Common\bin*/
+Common\obj*/
+*.suo
