@@ -1,15 +1,39 @@
 # git ignore file
 1 SpriteDrawing\bin*/
+1 SpriteDrawing\bin\Debug*/
+1 SpriteDrawing\bin\Release*/
 1 SpriteDrawing\obj*/
+1 SpriteDrawing\obj\Debug*/
+1 SpriteDrawing\obj\Release*/
 2 ModelDrawing\bin*/
+2 ModelDrawing\bin\Debug*/
+2 ModelDrawing\bin\Release*/
 2 ModelDrawing\obj*/
+2 ModelDrawing\obj\Debug*/
+2 ModelDrawing\obj\Release*/
 3 SceneTest\bin*/
+3 SceneTest\bin\Debug*/
+3 SceneTest\bin\Release*/
 3 SceneTest\obj*/
+3 SceneTest\obj\Debug*/
+3 SceneTest\obj\Release*/
 4 Collada\bin*/
+4 Collada\bin\Debug*/
+4 Collada\bin\Release*/
 4 Collada\obj*/
+4 Collada\obj\Debug*/
+4 Collada\obj\Release*/
 5 Skybox\bin*/
+5 Skybox\bin\Debug*/
+5 Skybox\bin\Release*/
 5 Skybox\obj*/
+5 Skybox\obj\Debug*/
+5 Skybox\obj\Release*/
 Engine\bin*/
+Engine\bin\Debug*/
+Engine\bin\Release*/
 Engine\obj*/
+Engine\obj\Debug*/
+Engine\obj\Release*/
 *.suo
 .nuget*/
