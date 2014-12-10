@@ -1,5 +1,5 @@
 ﻿using System;
-using Common;
+using Engine;
 using SharpDX;
 using SharpDX.DirectInput;
 
@@ -7,42 +7,71 @@ namespace Skybox
 {
     public class TestScene3D : Scene3D
     {
-        Cubemap skybox = null;
-        BasicModel ruins = null;
-        TextControl text = null;
+        float globalScale = 5f;
+
+        Terrain ruins = null;
+        Model lamp = null;
+        TextControl title = null;
+        TextControl fps = null;
 
         public TestScene3D(Game game)
             : base(game)
         {
-            this.ruins = this.AddModel(
-                "ruinas.dae",
-                Matrix.Identity,
-                Matrix.Identity,
-                Matrix.Scaling(4f),
-                1);
 
-            this.skybox = this.AddCubemap(
-                "sunset.dds",
-                99);
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            this.Game.Input.LockToCenter = true;
+            this.Game.Input.HideMouse();
+
+            TerrainDescription desc = new TerrainDescription()
+            {
+                AddSkydom = true,
+                SkydomTexture = "sunset.dds",
+            };
+
+            this.ruins = this.AddTerrain("ruinas.dae", desc);
+            this.lamp = this.AddModel("Poly.dae");
 
             this.Lights.PointLightEnabled = true;
             this.Lights.PointLight.Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f);
             this.Lights.PointLight.Diffuse = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
             this.Lights.PointLight.Specular = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
-            this.Lights.PointLight.Attributes = new Vector3(1.0f, 0.0f, 0.1f);
+            this.Lights.PointLight.Attributes = new Vector3(1.0f, 0.0f, 0.0f);
             this.Lights.PointLight.Range = 20.0f;
 
-            this.text = this.AddText("Arial", 12);
-            this.text.SetText(0, 0, "Hello World!");
-            this.text.SetText(0, 0, "Hola!");
-            this.text.SetText(0, 0, "Hola qué tal!");
+            this.title = this.AddText("Tahoma", 18, Color.White);
+            this.title.Text = "Collada Scene with Skybox";
+            this.title.Position = Vector2.Zero;
 
-            this.Camera.Position = Vector3.One * 20f;
-            this.Camera.Interest = Vector3.Zero;
+            this.fps = this.AddText("Lucida Casual", 12, Color.Yellow);
+            this.fps.Text = null;
+            this.fps.Position = new Vector2(0, 24);
+
+            this.InitializeCamera();
+            this.InitializeTerrain();
         }
-        public override void Update()
+        private void InitializeTerrain()
         {
-            base.Update();
+            this.ruins.Manipulator.SetScale(globalScale);
+            this.lamp.Manipulator.SetScale(0.01f * globalScale);
+        }
+        private void InitializeCamera()
+        {
+            this.Camera.NearPlaneDistance = 0.5f;
+            this.Camera.FarPlaneDistance = 50.0f * globalScale;
+            this.Camera.Position = Vector3.UnitY + this.ruins.Manipulator.Position * globalScale;
+            this.Camera.Interest = Vector3.UnitY + Vector3.UnitZ + this.ruins.Manipulator.Position * globalScale;
+            this.Camera.MovementDelta = 8f;
+            this.Camera.SlowMovementDelta = 4f;
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
 
             if (this.Game.Input.KeyJustReleased(Key.Escape))
             {
@@ -51,15 +80,29 @@ namespace Skybox
 
             this.UpdateCamera();
 
-            this.Lights.PointLight.Position.X = 25.0f * (float)Math.Cos(0.4f * this.Game.GameTime.TotalTime.TotalSeconds);
-            this.Lights.PointLight.Position.Y = 3f;
-            this.Lights.PointLight.Position.Z = 25.0f * (float)Math.Sin(0.4f * this.Game.GameTime.TotalTime.TotalSeconds);
+            Vector3 position = Vector3.Zero;
 
-            this.text.SetText(0, 0, this.Game.Form.Text);
+            float d = globalScale * 0.5f;
+
+            position.X = 3.0f * d * (float)Math.Cos(0.4f * this.Game.GameTime.TotalSeconds);
+            position.Y = globalScale;
+            position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
+
+            this.Lights.PointLight.Position = position;
+            this.lamp.Manipulator.SetPosition(position);
+
+            this.fps.Text = this.Game.RuntimeText;
         }
-
         private void UpdateCamera()
         {
+            if (this.Game.Input.KeyJustReleased(Key.Home))
+            {
+                if (this.Game.Input.KeyPressed(Key.LeftShift) || this.Game.Input.KeyPressed(Key.RightShift))
+                {
+                    this.InitializeCamera();
+                }
+            }
+
             bool slow = this.Game.Input.KeyPressed(Key.LeftShift);
 
             if (this.Game.Input.KeyPressed(Key.A))

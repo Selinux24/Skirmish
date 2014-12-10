@@ -1,0 +1,29 @@
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\sharpdx_direct3d11_effects_x64.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\sharpdx_direct3d11_effects_x86.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\Resources\background.jpg
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\Resources\smiley.jpg
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\Resources\seafloor.dds
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SpriteDrawing.exe
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SpriteDrawing.pdb
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\Engine.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.D3DCompiler.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.Direct2D1.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.Direct3D11.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.Direct3D11.Effects.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.DirectInput.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.DXGI.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\Engine.pdb
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.D3DCompiler.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.Direct2D1.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.Direct3D11.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.Direct3D11.Effects.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.DirectInput.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SharpDX.DXGI.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\obj\x86\Debug\SpriteDrawing.Properties.Resources.resources
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\obj\x86\Debug\1 SpriteDrawing.csproj.GenerateResource.Cache
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\obj\x86\Debug\SpriteDrawing.exe
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\obj\x86\Debug\SpriteDrawing.pdb
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\bin\Debug\SpriteDrawing.exe.config
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\1 SpriteDrawing\obj\x86\Debug\1 SpriteDrawing.csprojResolveAssemblyReference.cache

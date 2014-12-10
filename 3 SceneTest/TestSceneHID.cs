@@ -1,19 +1,26 @@
-﻿using Common;
+﻿using Engine;
 
 namespace SceneTest
 {
     public class TestSceneHID : Scene3D
     {
-        private BasicSprite background = null;
-        private BasicSprite sprite = null;
+        private Sprite background = null;
+        private Sprite sprite = null;
 
         public TestSceneHID(Game game)
             : base(game)
         {
+
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+
             this.background = this.AddSprite(
                 "background.jpg",
-                game.Graphics.Width,
-                game.Graphics.Height,
+                this.Game.Form.RenderWidth,
+                this.Game.Form.RenderHeight,
                 0);
 
             this.sprite = this.AddSprite(

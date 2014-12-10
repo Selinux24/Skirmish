@@ -1,21 +1,28 @@
-﻿using Common;
+﻿using Engine;
 using SharpDX.DirectInput;
 
 namespace SpriteDrawing
 {
     public class TestScene : Scene3D
     {
-        private BasicSprite background = null;
-        private BasicSprite spriteFixed = null;
-        private BasicSprite spriteMov = null;
+        private Sprite background = null;
+        private Sprite spriteFixed = null;
+        private Sprite spriteMov = null;
 
         public TestScene(Game game)
             : base(game)
         {
+
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+
             this.background = this.AddSprite(
                 "background.jpg",
-                game.Form.ClientSize.Width,
-                game.Form.ClientSize.Height,
+                this.Game.Form.ClientSize.Width,
+                this.Game.Form.ClientSize.Height,
                 99);
 
             this.spriteMov = this.AddSprite(
@@ -32,9 +39,9 @@ namespace SpriteDrawing
 
             this.spriteMov.SetPosition(256, 0);
         }
-        public override void Update()
+        public override void Update(GameTime gameTime)
         {
-            base.Update();
+            base.Update(gameTime);
 
             if (this.Game.Input.KeyJustReleased(Key.Escape))
             {

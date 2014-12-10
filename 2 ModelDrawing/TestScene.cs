@@ -1,44 +1,44 @@
-﻿using Common;
-using Common.Utils;
+﻿using Engine;
+using Engine.Common;
+using Engine.Content;
 using SharpDX;
-using SharpDX.Direct3D;
 using SharpDX.DirectInput;
 
 namespace ModelDrawing
 {
     public class TestScene : Scene3D
     {
-        private BasicModel colorModel = null;
-        private BasicModel textureModel = null;
-        private BasicModel normalColorModel = null;
-        private BasicModel normalTextureModel = null;
+        private Model colorModel = null;
+        private Model textureModel = null;
+        private Model normalColorModel = null;
+        private Model normalTextureModel = null;
         private Material materialColor = new Material()
         {
-            Ambient = Color4.White,
-            Diffuse = Color4.White,
-            Emission = Color4.Black,
-            Specular = Color4.Black,
-            Reflective = new Color4(0.0f, 0.0f, 0.0f, 0.0f),
+            AmbientColor = Color4.White,
+            DiffuseColor = Color4.White,
+            EmissionColor = Color4.Black,
+            SpecularColor = Color4.Black,
+            ReflectiveColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f),
             Transparent = new Color4(0.0f, 0.0f, 0.0f, 0.0f),
             IndexOfRefraction = 1,
         };
         private Material materialTexture = new Material()
         {
-            Ambient = Color4.Black,
-            Diffuse = Color4.White,
-            Emission = Color4.Black,
-            Specular = Color4.Black,
-            Reflective = new Color4(0.0f, 0.0f, 0.0f, 0.0f),
+            AmbientColor = Color4.Black,
+            DiffuseColor = Color4.White,
+            EmissionColor = Color4.Black,
+            SpecularColor = Color4.Black,
+            ReflectiveColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f),
             Transparent = new Color4(0.0f, 0.0f, 0.0f, 0.0f),
             IndexOfRefraction = 1,
-            Texture = new TextureDescription()
-            {
-                Name = "seafloor.dds",
-                TextureArray = new string[] { "resources/seafloor.dds" },
-            },
+            //Texture = new TextureDescription()
+            //{
+            //    Name = "seafloor.dds",
+            //    TextureArray = new string[] { "resources/seafloor.dds" },
+            //},
         };
 
-        private BasicModel[] models = null;
+        private Model[] models = null;
         private int selected = 0;
 
         private bool moveLight = false;
@@ -46,14 +46,21 @@ namespace ModelDrawing
         public TestScene(Game game)
             : base(game)
         {
-            this.colorModel = this.AddModel(this.CreatePositionColor(game));
-            this.textureModel = this.AddModel(this.CreatePositionTexture(game));
-            this.normalColorModel = this.AddModel(this.CreatePositionNormalColor(game));
-            this.normalTextureModel = this.AddModel(this.CreatePositionNormalTexture(game));
 
-            this.SetPositions();
+        }
 
-            this.models = new BasicModel[] 
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            this.colorModel = this.AddModel(this.InitializePositionColor(this.Game));
+            this.textureModel = this.AddModel(this.InitializePositionTexture(this.Game));
+            this.normalColorModel = this.AddModel(this.InitializePositionNormalColor(this.Game));
+            this.normalTextureModel = this.AddModel(this.InitializePositionNormalTexture(this.Game));
+
+            this.InitializePositions();
+
+            this.models = new Model[] 
             {  
                 this.colorModel,
                 this.textureModel,
@@ -68,15 +75,14 @@ namespace ModelDrawing
             this.Lights.DirectionalLight2.Direction = Vector3.BackwardLH;
             this.Lights.DirectionalLight3.Direction = Vector3.BackwardLH;
         }
-
-        private void SetPositions()
+        private void InitializePositions()
         {
-            this.colorModel.Transform.SetPosition(Vector3.UnitX * 1f);
-            this.normalColorModel.Transform.SetPosition(Vector3.UnitX * 3f);
-            this.textureModel.Transform.SetPosition(Vector3.UnitX * -3f);
-            this.normalTextureModel.Transform.SetPosition(Vector3.UnitX * -1f);
+            this.colorModel.Manipulator.SetPosition(Vector3.UnitX * 1f);
+            this.normalColorModel.Manipulator.SetPosition(Vector3.UnitX * 3f);
+            this.textureModel.Manipulator.SetPosition(Vector3.UnitX * -3f);
+            this.normalTextureModel.Manipulator.SetPosition(Vector3.UnitX * -1f);
         }
-        private Geometry CreatePositionColor(Game game)
+        private ModelContent InitializePositionColor(Game game)
         {
             VertexPositionColor[] vertices = new VertexPositionColor[]
             {
@@ -92,13 +98,12 @@ namespace ModelDrawing
                 0, 2, 3,
             };
 
-            return game.Graphics.Device.CreateGeometry(
-                materialColor,
-                vertices,
-                PrimitiveTopology.TriangleList,
-                indices);
+            ModelContent modelInfo = null;
+            //modelInfo = ModelInfo.CreateModel(vertices, indices);
+
+            return modelInfo;
         }
-        private Geometry CreatePositionTexture(Game game)
+        private ModelContent InitializePositionTexture(Game game)
         {
             VertexPositionTexture[] vertices = new VertexPositionTexture[]
             {
@@ -114,13 +119,12 @@ namespace ModelDrawing
                 0, 2, 3,
             };
 
-            return game.Graphics.Device.CreateGeometry(
-                materialTexture,
-                vertices,
-                PrimitiveTopology.TriangleList,
-                indices);
+            ModelContent modelInfo = null;
+            //modelInfo = ModelInfo.CreateModel(vertices, indices);
+
+            return modelInfo;
         }
-        private Geometry CreatePositionNormalColor(Game game)
+        private ModelContent InitializePositionNormalColor(Game game)
         {
             VertexPositionNormalColor[] vertices = new VertexPositionNormalColor[]
             {
@@ -136,13 +140,12 @@ namespace ModelDrawing
                 0, 2, 3,
             };
 
-            return game.Graphics.Device.CreateGeometry(
-                materialColor,
-                vertices,
-                PrimitiveTopology.TriangleList,
-                indices);
+            ModelContent modelInfo = null;
+            //modelInfo = ModelInfo.CreateModel(vertices, indices);
+
+            return modelInfo;
         }
-        private Geometry CreatePositionNormalTexture(Game game)
+        private ModelContent InitializePositionNormalTexture(Game game)
         {
             VertexPositionNormalTexture[] vertices = new VertexPositionNormalTexture[]
             {
@@ -158,15 +161,15 @@ namespace ModelDrawing
                 0, 2, 3,
             };
 
-            return game.Graphics.Device.CreateGeometry(
-                materialTexture,
-                vertices,
-                PrimitiveTopology.TriangleList,
-                indices);
+            ModelContent modelInfo = null;
+            //modelInfo = ModelInfo.CreateModel(vertices, indices);
+
+            return modelInfo;
         }
-        public override void Update()
+
+        public override void Update(GameTime gameTime)
         {
-            base.Update();
+            base.Update(gameTime);
 
             if (this.Game.Input.KeyJustReleased(Key.Escape))
             {
@@ -190,11 +193,11 @@ namespace ModelDrawing
                 }
             }
 
-            BasicModel selectedModel = this.models[this.selected];
+            Model selectedModel = this.models[this.selected];
 
             if (this.Game.Input.KeyJustReleased(Key.Home))
             {
-                this.SetPositions();
+                this.InitializePositions();
             }
 
             if (this.Game.Input.KeyPressed(Key.A))
@@ -202,7 +205,7 @@ namespace ModelDrawing
                 if (this.moveLight)
                     this.Lights.DirectionalLight1.Direction += Vector3.UnitX * -0.1f;
                 else
-                    selectedModel.Transform.MoveLeft(0.1f);
+                    selectedModel.Manipulator.MoveLeft(0.1f);
             }
 
             if (this.Game.Input.KeyPressed(Key.D))
@@ -210,7 +213,7 @@ namespace ModelDrawing
                 if (this.moveLight)
                     this.Lights.DirectionalLight1.Direction += Vector3.UnitX * 0.1f;
                 else
-                    selectedModel.Transform.MoveRight(0.1f);
+                    selectedModel.Manipulator.MoveRight(0.1f);
             }
 
             if (this.Game.Input.KeyPressed(Key.W))
@@ -218,7 +221,7 @@ namespace ModelDrawing
                 if (this.moveLight)
                     this.Lights.DirectionalLight1.Direction += Vector3.UnitY * 0.1f;
                 else
-                    selectedModel.Transform.MoveUp(0.1f);
+                    selectedModel.Manipulator.MoveUp(0.1f);
             }
 
             if (this.Game.Input.KeyPressed(Key.S))
@@ -226,17 +229,17 @@ namespace ModelDrawing
                 if (this.moveLight)
                     this.Lights.DirectionalLight1.Direction += Vector3.UnitY * -0.1f;
                 else
-                    selectedModel.Transform.MoveDown(0.1f);
+                    selectedModel.Manipulator.MoveDown(0.1f);
             }
 
             if (this.Game.Input.KeyPressed(Key.Z))
             {
-                selectedModel.Transform.MoveForward(0.1f);
+                selectedModel.Manipulator.MoveForward(0.1f);
             }
 
             if (this.Game.Input.KeyPressed(Key.X))
             {
-                selectedModel.Transform.MoveBackward(0.1f);
+                selectedModel.Manipulator.MoveBackward(0.1f);
             }
         }
     }

@@ -1,0 +1,47 @@
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\sharpdx_direct3d11_effects_x64.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\sharpdx_direct3d11_effects_x86.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\aniCube.png
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Ground.dae
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter - black.png
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter - gray.png
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter - green.png
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter.dae
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Poly.png
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\TexturedCube.dae
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Poly.dae
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\tree0.dds
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\tree1.dds
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\tree2.dds
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\tree3.dds
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\sunset.dds
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Ground.png
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\TexturedCube.png
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.exe.manifest
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.application
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.exe
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.pdb
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Engine.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.D3DCompiler.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.Direct2D1.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.Direct3D11.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.Direct3D11.Effects.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.DirectInput.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.DXGI.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Engine.pdb
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.D3DCompiler.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.Direct2D1.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.Direct3D11.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.Direct3D11.Effects.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.DirectInput.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.DXGI.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\obj\x86\Debug\Collada.Properties.Resources.resources
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\obj\x86\Debug\4 Collada.csproj.GenerateResource.Cache
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\obj\x86\Debug\Collada.exe.manifest
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\obj\x86\Debug\Collada.application
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\obj\x86\Debug\Collada.exe
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\obj\x86\Debug\Collada.pdb
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.exe.config
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\obj\x86\Debug\4 Collada.csprojResolveAssemblyReference.cache
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\aniCube.dae

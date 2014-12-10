@@ -1,5 +1,5 @@
 ﻿using System;
-using Common;
+using Engine;
 using SharpDX;
 using SharpDX.DirectInput;
 
@@ -11,83 +11,47 @@ namespace Collada
         private readonly Vector3 minSize = new Vector3(0.5f);
         private readonly Vector3 maxSize = new Vector3(2f);
 
-        private InstancingModel lamps = null;
-        private InstancingModel helicopters = null;
-        private BasicModel ground = null;
-        private Billboard bb = null;
+        private TextControl title = null;
+        private Terrain theGround = null;
+        private ModelInstanced lamps = null;
+        private ModelInstanced helicopters = null;
+        private Model aniModel = null;
+
+        private bool chaseCamera = false;
 
         public TestScene3D(Game game)
             : base(game)
         {
-            GameEnvironment.Background = Color.CornflowerBlue.ToColor4();
 
-            this.Lights.FogStart = this.Camera.FarPlaneDistance * 0.25f;
-            this.Lights.FogRange = this.Camera.FarPlaneDistance * 0.75f;
-            this.Lights.FogColor = Color.CornflowerBlue.ToColor4();
+        }
 
-            this.Lights.PointLightEnabled = true;
-            this.Lights.PointLight.Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f);
-            this.Lights.PointLight.Diffuse = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
-            this.Lights.PointLight.Specular = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
-            this.Lights.PointLight.Attributes = new Vector3(1.0f, 0.0f, 0.0f);
-            this.Lights.PointLight.Range = 4.0f;
+        public override void Initialize()
+        {
+            base.Initialize();
 
-            this.Lights.SpotLightEnabled = true;
-            this.Lights.SpotLight.Direction = Vector3.Down;
-            this.Lights.SpotLight.Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
-            this.Lights.SpotLight.Diffuse = new Color4(1.0f, 1.0f, 0.0f, 1.0f);
-            this.Lights.SpotLight.Specular = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
-            this.Lights.SpotLight.Attributes = new Vector3(1.0f, 0.0f, 0.0f);
-            this.Lights.SpotLight.Spot = 16f;
-            this.Lights.SpotLight.Range = 10000.0f;
+            this.title = this.AddText("Tahoma", 18, Color.White);
+            this.title.Text = "Collada Scene with billboards and skinned instanced models";
+            this.title.Position = Vector2.Zero;
 
-            this.Game.Input.HideMouse();
+            TerrainDescription terrainDescription = new TerrainDescription()
+            {
+                AddVegetation = true,
+                VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", },
+                Saturation = 0.5f,
+                MinSize = Vector2.One * 3f,
+                MaxSize = Vector2.One * 5f,
+                Seed = 1024,
+            };
 
-            this.Camera.Position = Vector3.UnitZ * 12f + Vector3.UnitX * 24f + Vector3.UnitY * 12f;
-            this.Camera.Interest = Vector3.Zero;
-            this.Camera.Mode = CameraModes.Free;
-
+            this.theGround = this.AddTerrain("Ground.dae", Matrix.Scaling(20, 40, 20), terrainDescription);
+            this.aniModel = this.AddModel("anicube.dae");
+            this.helicopters = this.AddInstancingModel("Helicopter.dae", 15);
             this.lamps = this.AddInstancingModel("Poly.dae", 2);
-            this.helicopters = this.AddInstancingModel("Helicopter.dae", 6);
-
-            this.lamps[1].Following = this.helicopters[0];
-            this.lamps[1].FollowingRelative = Matrix.Translation(0, -1, 0);
-
-            Matrix groundScale = Matrix.Scaling(5f, 5f, 5f);
-
-            this.ground = this.AddModel(
-                "Ground.dae",
-                Matrix.Identity, Matrix.Identity, groundScale);
-            this.bb = this.AddBillboard(
-                "Ground.dae",
-                Matrix.Identity, Matrix.Identity, groundScale,
-                new string[] 
-                {
-                    "tree0.dds",
-                    "tree1.dds",
-                    "tree2.dds",
-                    "tree3.dds",
-                },
-                0.75f);
 
             this.InitializeTransforms();
+            this.InitializeCamera();
+            this.InitializeEnvironment();
         }
-        public override void Update()
-        {
-            base.Update();
-
-            if (this.Game.Input.KeyJustReleased(Key.Escape))
-            {
-                this.Game.Exit();
-            }
-
-            this.UpdateCamera();
-
-            this.UpdateHelicopter();
-
-            this.UpdateLights();
-        }
-
         private void InitializeTransforms()
         {
             int rows = 3;
@@ -104,49 +68,188 @@ namespace Collada
                 if (x >= rows) x = 0;
                 z = i / rows;
 
-                this.helicopters[i].SetPosition((Vector3.UnitX * (x++ * left)) + (Vector3.UnitY * 15f) + (Vector3.UnitZ * (z * -back)));
-                this.helicopters[i].SetRotation(Quaternion.Identity);
-                this.helicopters[i].SetScale(1);
+                float posX = (x++ * left);
+                float posZ = (z * -back);
+
+                Vector3? v = this.theGround.SetToGround(posX, posZ);
+                if (v.HasValue)
+                {
+                    this.helicopters[i].SetPosition(v.Value + (Vector3.UnitY * 15f));
+                }
             }
+
+            Vector3? aniModelPosition = this.theGround.SetToGround(0, 0);
+            if (aniModelPosition.HasValue)
+            {
+                this.aniModel.Manipulator.SetPosition(aniModelPosition.Value);
+            }
+
+            this.aniModel.Manipulator.SetScale(0.5f);
+        }
+        private void InitializeCamera()
+        {
+            this.Camera.NearPlaneDistance = 0.5f;
+            this.Camera.FarPlaneDistance = 250;
+
+            this.Camera.Mode = CameraModes.Free;
+            //this.Camera.Position = new Vector3(-5, 15, -10);
+            this.Camera.Position = this.helicopters.Manipulator.Position + (Vector3.One * 10f);
+            this.Camera.Interest = this.helicopters.Manipulator.Position + (Vector3.UnitY * 2.5f);
+        }
+        private void InitializeEnvironment()
+        {
+            GameEnvironment.Background = Color.CornflowerBlue;
+
+            this.Lights.FogStart = this.Camera.FarPlaneDistance * 0.25f;
+            this.Lights.FogRange = this.Camera.FarPlaneDistance * 0.75f;
+            this.Lights.FogColor = Color.CornflowerBlue;
+
+            this.Lights.PointLightEnabled = true;
+            this.Lights.PointLight.Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f);
+            this.Lights.PointLight.Diffuse = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
+            this.Lights.PointLight.Specular = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
+            this.Lights.PointLight.Attributes = new Vector3(1.0f, 0.0f, 0.0f);
+            this.Lights.PointLight.Range = 4.0f;
+
+            this.Lights.SpotLightEnabled = true;
+            this.Lights.SpotLight.Direction = Vector3.Down;
+            this.Lights.SpotLight.Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
+            this.Lights.SpotLight.Diffuse = new Color4(1.0f, 1.0f, 0.0f, 1.0f);
+            this.Lights.SpotLight.Specular = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
+            this.Lights.SpotLight.Attributes = new Vector3(1.0f, 0.0f, 0.0f);
+            this.Lights.SpotLight.Spot = 16f;
+            this.Lights.SpotLight.Range = 10000.0f;
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            #region First lamp
+
+            float lampPosX = 4.0f * (float)Math.Cos(0.3f * this.Game.GameTime.TotalSeconds);
+            float lampPosZ = 4.0f * (float)Math.Sin(0.3f * this.Game.GameTime.TotalSeconds);
+
+            Vector3? lampPos = this.theGround.SetToGround(lampPosX, lampPosZ);
+            if (lampPos.HasValue)
+            {
+                this.lamps[0].SetPosition(lampPos.Value + (Vector3.UnitY * 3f));
+            }
+
+            #endregion
+
+            #region Second lamp
+
+            this.lamps[1].Following = this.helicopters.Manipulator;
+            this.lamps[1].FollowingRelative = Matrix.Translation(0, 5, 0);
+
+            #endregion
+
+            base.Update(gameTime);
+
+            if (this.Game.Input.KeyJustReleased(Key.Escape))
+            {
+                this.Game.Exit();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Key.Home))
+            {
+                if (this.Game.Input.KeyPressed(Key.LeftShift) || this.Game.Input.KeyPressed(Key.RightShift))
+                {
+                    this.InitializeCamera();
+                }
+                else
+                {
+                    this.InitializeTransforms();
+
+                    this.Camera.Interest = this.helicopters.Manipulator.Position;
+                }
+            }
+
+            if (this.Game.Input.KeyPressed(Key.LeftControl))
+            {
+                this.UpdateTerrain();
+            }
+            else
+            {
+                this.UpdateCamera();
+            }
+
+            this.UpdateHelicopter();
+
+            this.UpdateLights();
         }
         private void UpdateCamera()
         {
-            bool slow = this.Game.Input.KeyPressed(Key.LeftShift);
-
-            if (this.Game.Input.KeyPressed(Key.A))
+            if (this.Game.Input.KeyJustReleased(Key.C))
             {
-                this.Camera.MoveLeft(this.Game.GameTime, slow);
+                this.chaseCamera = !this.chaseCamera;
             }
 
-            if (this.Game.Input.KeyPressed(Key.D))
+            if (!this.chaseCamera)
             {
-                this.Camera.MoveRight(this.Game.GameTime, slow);
-            }
+                bool slow = this.Game.Input.KeyPressed(Key.LeftShift);
 
+                if (this.Game.Input.KeyPressed(Key.A))
+                {
+                    this.Camera.MoveLeft(this.Game.GameTime, slow);
+                }
+
+                if (this.Game.Input.KeyPressed(Key.D))
+                {
+                    this.Camera.MoveRight(this.Game.GameTime, slow);
+                }
+
+                if (this.Game.Input.KeyPressed(Key.W))
+                {
+                    this.Camera.MoveForward(this.Game.GameTime, slow);
+                }
+
+                if (this.Game.Input.KeyPressed(Key.S))
+                {
+                    this.Camera.MoveBackward(this.Game.GameTime, slow);
+                }
+
+                this.Camera.RotateMouse(
+                    this.Game.GameTime,
+                    this.Game.Input.MouseX,
+                    this.Game.Input.MouseY);
+            }
+            else
+            {
+                Vector3 position = this.helicopters.Manipulator.Position;
+                Vector3 interest = (position - (this.helicopters.Manipulator.Forward * 10f));
+                position += this.helicopters.Manipulator.Up * 2f;
+                position += this.helicopters.Manipulator.Forward * -2f;
+
+                this.Camera.Position = position;
+                this.Camera.Interest = interest;
+            }
+        }
+        private void UpdateTerrain()
+        {
             if (this.Game.Input.KeyPressed(Key.W))
             {
-                this.Camera.MoveForward(this.Game.GameTime, slow);
+                this.theGround.Manipulator.MoveForward(delta);
             }
 
             if (this.Game.Input.KeyPressed(Key.S))
             {
-                this.Camera.MoveBackward(this.Game.GameTime, slow);
+                this.theGround.Manipulator.MoveBackward(delta);
             }
 
-            this.Camera.RotateMouse(
-                this.Game.GameTime,
-                this.Game.Input.MouseX,
-                this.Game.Input.MouseY);
+            if (this.Game.Input.KeyPressed(Key.A))
+            {
+                this.theGround.Manipulator.MoveLeft(delta);
+            }
+
+            if (this.Game.Input.KeyPressed(Key.D))
+            {
+                this.theGround.Manipulator.MoveRight(delta);
+            }
         }
         private void UpdateLights()
         {
-            this.Lights.PointLight.Position.X = 4.0f * (float)Math.Cos(0.3f * this.Game.GameTime.TotalTime.TotalSeconds);
-            this.Lights.PointLight.Position.Y = 3f;
-            this.Lights.PointLight.Position.Z = 4.0f * (float)Math.Sin(0.3f * this.Game.GameTime.TotalTime.TotalSeconds);
-
-            this.lamps[0].SetPosition(this.Lights.PointLight.Position);
-
-            this.Lights.SpotLight.Position = this.helicopters.Transform.Position;
+            this.Lights.PointLight.Position = this.lamps[0].Position;
+            this.Lights.SpotLight.Position = this.lamps[1].Position;
 
             if (this.Game.Input.KeyJustReleased(Key.NumberPad0))
             {
@@ -184,11 +287,6 @@ namespace Collada
         }
         private void UpdateHelicopter()
         {
-            if (this.Game.Input.KeyJustReleased(Key.Home))
-            {
-                this.InitializeTransforms();
-            }
-
             if (this.Game.Input.KeyJustReleased(Key.Tab))
             {
                 this.helicopters.Next();
@@ -196,62 +294,62 @@ namespace Collada
 
             if (this.Game.Input.KeyPressed(Key.O))
             {
-                this.helicopters.Transform.MoveLeft(delta);
+                this.helicopters.Manipulator.MoveLeft(delta);
             }
 
             if (this.Game.Input.KeyPressed(Key.P))
             {
-                this.helicopters.Transform.MoveRight(delta);
+                this.helicopters.Manipulator.MoveRight(delta);
             }
 
             if (this.Game.Input.KeyPressed(Key.Z))
             {
-                this.helicopters.Transform.MoveUp(delta);
+                this.helicopters.Manipulator.MoveUp(delta);
             }
 
             if (this.Game.Input.KeyPressed(Key.X))
             {
-                this.helicopters.Transform.MoveDown(delta);
+                this.helicopters.Manipulator.MoveDown(delta);
             }
 
             if (this.Game.Input.KeyPressed(Key.Up))
             {
-                this.helicopters.Transform.MoveForward(delta);
+                this.helicopters.Manipulator.MoveForward(delta);
             }
 
             if (this.Game.Input.KeyPressed(Key.Down))
             {
-                this.helicopters.Transform.MoveBackward(delta);
+                this.helicopters.Manipulator.MoveBackward(delta);
             }
 
             if (this.Game.Input.KeyPressed(Key.Left))
             {
-                this.helicopters.Transform.YawLeft(delta * 0.1f);
+                this.helicopters.Manipulator.YawLeft(delta * 0.1f);
             }
 
             if (this.Game.Input.KeyPressed(Key.Right))
             {
-                this.helicopters.Transform.YawRight(delta * 0.1f);
+                this.helicopters.Manipulator.YawRight(delta * 0.1f);
             }
 
             if (this.Game.Input.KeyPressed(Key.U))
             {
-                this.helicopters.Transform.RollLeft(delta * 0.1f);
+                this.helicopters.Manipulator.RollLeft(delta * 0.1f);
             }
 
             if (this.Game.Input.KeyPressed(Key.I))
             {
-                this.helicopters.Transform.RollRight(delta * 0.1f);
+                this.helicopters.Manipulator.RollRight(delta * 0.1f);
             }
 
             if (this.Game.Input.KeyPressed(Key.Add))
             {
-                this.helicopters.Transform.Scale(delta, minSize, maxSize);
+                this.helicopters.Manipulator.Scale(delta, minSize, maxSize);
             }
 
             if (this.Game.Input.KeyPressed(Key.Subtract))
             {
-                this.helicopters.Transform.Scale(-delta, minSize, maxSize);
+                this.helicopters.Manipulator.Scale(-delta, minSize, maxSize);
             }
         }
     }

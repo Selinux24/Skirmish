@@ -1,0 +1,27 @@
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\sharpdx_direct3d11_effects_x64.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\sharpdx_direct3d11_effects_x86.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\Resources\seafloor.dds
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\ModelDrawing.exe
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\ModelDrawing.pdb
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\Engine.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.D3DCompiler.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.Direct2D1.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.Direct3D11.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.Direct3D11.Effects.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.DirectInput.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.DXGI.dll
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\Engine.pdb
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.D3DCompiler.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.Direct2D1.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.Direct3D11.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.Direct3D11.Effects.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.DirectInput.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\SharpDX.DXGI.xml
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\obj\x86\Debug\ModelDrawing.Properties.Resources.resources
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\obj\x86\Debug\2 ModelDrawing.csproj.GenerateResource.Cache
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\obj\x86\Debug\ModelDrawing.exe
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\obj\x86\Debug\ModelDrawing.pdb
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\bin\Debug\ModelDrawing.exe.config
+C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\2 ModelDrawing\obj\x86\Debug\2 ModelDrawing.csprojResolveAssemblyReference.cache

@@ -9,6 +9,7 @@
 4 Collada\obj*/
 5 Skybox\bin*/
 5 Skybox\obj*/
-Common\bin*/
-Common\obj*/
+Engine\bin*/
+Engine\obj*/
 *.suo
+.nuget*/
