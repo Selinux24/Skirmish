@@ -1,1 +1,0 @@
-C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.exe.config

@@ -5,35 +5,47 @@
 1 SpriteDrawing\obj*/
 1 SpriteDrawing\obj\Debug*/
 1 SpriteDrawing\obj\Release*/
+1 SpriteDrawing\obj\x86\Debug*/
+1 SpriteDrawing\obj\x86\Release*/
 2 ModelDrawing\bin*/
 2 ModelDrawing\bin\Debug*/
 2 ModelDrawing\bin\Release*/
 2 ModelDrawing\obj*/
 2 ModelDrawing\obj\Debug*/
 2 ModelDrawing\obj\Release*/
+2 ModelDrawing\obj\x86\Debug*/
+2 ModelDrawing\obj\x86\Release*/
 3 SceneTest\bin*/
 3 SceneTest\bin\Debug*/
 3 SceneTest\bin\Release*/
 3 SceneTest\obj*/
 3 SceneTest\obj\Debug*/
 3 SceneTest\obj\Release*/
+3 SceneTest\obj\x86\Debug*/
+3 SceneTest\obj\x86\Release*/
 4 Collada\bin*/
 4 Collada\bin\Debug*/
 4 Collada\bin\Release*/
 4 Collada\obj*/
 4 Collada\obj\Debug*/
 4 Collada\obj\Release*/
+4 Collada\obj\x86\Debug*/
+4 Collada\obj\x86\Release*/
 5 Skybox\bin*/
 5 Skybox\bin\Debug*/
 5 Skybox\bin\Release*/
 5 Skybox\obj*/
 5 Skybox\obj\Debug*/
 5 Skybox\obj\Release*/
+5 Skybox\obj\x86\Debug*/
+5 Skybox\obj\x86\Release*/
 Engine\bin*/
 Engine\bin\Debug*/
 Engine\bin\Release*/
 Engine\obj*/
 Engine\obj\Debug*/
 Engine\obj\Release*/
+Engine\obj\x86\Debug*/
+Engine\obj\x86\Release*/
 *.suo
 .nuget*/
