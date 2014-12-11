@@ -200,6 +200,31 @@ namespace Engine.Content
                 Geometry = geometry,
             };
         }
+        public static ModelContent GenerateBoundingBox(Color color)
+        {
+            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
+
+            string geoName = "spriteGeometry";
+
+            Vertex[] verts = null;
+            uint[] indices = null;
+            CreateBoxWired(1, 1, 1, color, out verts, out indices);
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = PrimitiveTopology.LineList,
+                VertexType = VertexTypes.PositionColor,
+                Vertices = verts,
+                Indices = indices,
+            };
+
+            geometry.Add(geoName, new[] { geo });
+
+            return new ModelContent()
+            {
+                Geometry = geometry,
+            };
+        }
 
         public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out Vertex[] v, out uint[] i)
         {
@@ -303,6 +328,42 @@ namespace Engine.Content
             // Fill in the right face index data
             i[30] = 20; i[31] = 21; i[32] = 22;
             i[33] = 20; i[34] = 22; i[35] = 23;
+        }
+        public static void CreateBoxWired(float width, float height, float depth, Color color, out Vertex[] v, out uint[] i)
+        {
+            v = new Vertex[8];
+            i = new uint[24];
+
+            float w2 = 0.5f * width;
+            float h2 = 0.5f * height;
+            float d2 = 0.5f * depth;
+
+            v[0] = Vertex.CreateVertexPositionColor(new Vector3(-w2, -h2, -d2), color);
+            v[1] = Vertex.CreateVertexPositionColor(new Vector3(-w2, +h2, -d2), color);
+            v[2] = Vertex.CreateVertexPositionColor(new Vector3(+w2, -h2, -d2), color);
+            v[3] = Vertex.CreateVertexPositionColor(new Vector3(+w2, +h2, -d2), color);
+
+            v[4] = Vertex.CreateVertexPositionColor(new Vector3(-w2, -h2, +d2), color);
+            v[5] = Vertex.CreateVertexPositionColor(new Vector3(-w2, +h2, +d2), color);
+            v[6] = Vertex.CreateVertexPositionColor(new Vector3(+w2, -h2, +d2), color);
+            v[7] = Vertex.CreateVertexPositionColor(new Vector3(+w2, +h2, +d2), color);
+
+            int index = 0;
+
+            i[index++] = 0; i[index++] = 1;
+            i[index++] = 0; i[index++] = 2;
+            i[index++] = 3; i[index++] = 1;
+            i[index++] = 3; i[index++] = 2;
+
+            i[index++] = 4; i[index++] = 5;
+            i[index++] = 4; i[index++] = 6;
+            i[index++] = 7; i[index++] = 5;
+            i[index++] = 7; i[index++] = 6;
+
+            i[index++] = 0; i[index++] = 4;
+            i[index++] = 1; i[index++] = 5;
+            i[index++] = 2; i[index++] = 6;
+            i[index++] = 3; i[index++] = 7;
         }
         public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out Vertex[] v, out uint[] i)
         {

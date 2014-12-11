@@ -10,6 +10,8 @@ namespace Engine
     public class Model : ModelBase
     {
         private EffectBasic effect;
+        private Volume volume;
+        OrientedBoundingBox a;
 
         public Manipulator Manipulator { get; private set; }
 
@@ -20,6 +22,9 @@ namespace Engine
             this.LoadEffectLayouts(this.effect);
 
             this.Manipulator = new Manipulator();
+
+            ModelContent modelVolume = ModelContent.GenerateBoundingBox(Color.Red);
+            this.volume = new Volume(game, scene, modelVolume);
         }
         public override void Dispose()
         {
@@ -30,12 +35,27 @@ namespace Engine
                 this.effect.Dispose();
                 this.effect = null;
             }
+
+            if (this.volume != null)
+            {
+                this.volume.Dispose();
+                this.volume = null;
+            }
         }
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
             this.Manipulator.Update(gameTime);
+
+            Vector3 scale = this.BoundingBox.Maximum - this.BoundingBox.Minimum;
+            Vector3 position = (this.BoundingBox.Maximum + this.BoundingBox.Minimum) * 0.5f;
+
+            this.volume.Manipulator.SetScale(this.Manipulator.Scaling * scale);
+            this.volume.Manipulator.SetRotation(this.Manipulator.Rotation);
+            this.volume.Manipulator.SetPosition(this.Manipulator.Position + position);
+
+            this.volume.Update(gameTime);
         }
         public override void Draw(GameTime gameTime)
         {
@@ -71,13 +91,21 @@ namespace Engine
                     foreach (string material in dictionary.Keys)
                     {
                         Mesh mesh = dictionary[material];
-                        MeshMaterial mat = this.Materials[material];
+                        MeshMaterial mat = material != NoMaterial ? this.Materials[material] : null;
                         string techniqueName = this.Techniques[mesh];
 
                         #region Per object update
 
-                        this.effect.ObjectBuffer.Material = new BufferMaterials(mat.Material);
-                        this.effect.UpdatePerObject(mat.DiffuseTexture);
+                        if (mat != null)
+                        {
+                            this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
+                            this.effect.UpdatePerObject(mat.DiffuseTexture);
+                        }
+                        else
+                        {
+                            this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
+                            this.effect.UpdatePerObject(null);
+                        }
 
                         #endregion
 
@@ -94,6 +122,8 @@ namespace Engine
                     }
                 }
             }
+
+            this.volume.Draw(gameTime);
         }
     }
 }

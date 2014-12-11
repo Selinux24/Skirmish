@@ -19,6 +19,8 @@ namespace SceneTest
         {
             base.Initialize();
 
+            this.ContentPath = "Resources3D";
+
             this.model = this.AddModel("poly.dae");
         }
 
@@ -65,37 +67,6 @@ namespace SceneTest
             {
                 this.model.Manipulator.MoveBackward(0.1f);
             }
-
-            this.UpdateCamera();
-        }
-        private void UpdateCamera()
-        {
-            bool slow = this.Game.Input.KeyPressed(Key.LeftShift);
-
-            if (this.Game.Input.KeyPressed(Key.A))
-            {
-                this.Camera.MoveLeft(this.Game.GameTime, slow);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.D))
-            {
-                this.Camera.MoveRight(this.Game.GameTime, slow);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.W))
-            {
-                this.Camera.MoveForward(this.Game.GameTime, slow);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.S))
-            {
-                this.Camera.MoveBackward(this.Game.GameTime, slow);
-            }
-
-            this.Camera.RotateMouse(
-                this.Game.GameTime,
-                this.Game.Input.MouseX,
-                this.Game.Input.MouseY);
         }
     }
 }

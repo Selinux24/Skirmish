@@ -278,6 +278,8 @@
     <Compile Include="Collada\Transforms.cs" />
     <Compile Include="Common\Vertex.cs" />
     <Compile Include="Common\Weight.cs" />
+    <Compile Include="VolumeInstanced.cs" />
+    <Compile Include="Volume.cs" />
     <Compile Include="Cubemap.cs" />
     <Compile Include="Effects\EffectBillboard.cs" />
     <Compile Include="Effects\EffectBasic.cs" />

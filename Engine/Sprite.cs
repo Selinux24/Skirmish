@@ -63,13 +63,21 @@ namespace Engine
                     foreach (string material in dictionary.Keys)
                     {
                         Mesh mesh = dictionary[material];
-                        MeshMaterial mat = this.Materials[material];
+                        MeshMaterial mat = material != NoMaterial ? this.Materials[material] : null;
                         string techniqueName = this.Techniques[mesh];
 
                         #region Per object update
 
-                        this.effect.ObjectBuffer.Material = new BufferMaterials(mat.Material);
-                        this.effect.UpdatePerObject(mat.DiffuseTexture);
+                        if (mat != null)
+                        {
+                            this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
+                            this.effect.UpdatePerObject(mat.DiffuseTexture);
+                        }
+                        else
+                        {
+                            this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
+                            this.effect.UpdatePerObject(null);
+                        }
 
                         #endregion
 

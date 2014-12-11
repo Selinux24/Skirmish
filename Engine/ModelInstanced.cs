@@ -1,4 +1,5 @@
 ﻿using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+using SharpDX;
 
 namespace Engine
 {
@@ -10,6 +11,7 @@ namespace Engine
     {
         private EffectInstancing effect;
         private VertexInstancingData[] instancingData = null;
+        private VolumeInstanced volume;
 
         private Manipulator[] instances = null;
         private int currentInstance = 0;
@@ -46,6 +48,9 @@ namespace Engine
             this.effect = new EffectInstancing(game.Graphics.Device);
             this.LoadEffectLayouts(this.effect);
 
+            ModelContent modelVolume = ModelContent.GenerateBoundingBox(Color.Red);
+            this.volume = new VolumeInstanced(game, scene, modelVolume, instances);
+
             this.instancingData = new VertexInstancingData[instances];
 
             this.instances = new Manipulator[instances];
@@ -72,13 +77,22 @@ namespace Engine
             {
                 for (int i = 0; i < this.instances.Length; i++)
                 {
-                    this.instances[i].Update(gameTime);
+                    Manipulator man = this.instances[i];
 
-                    VertexInstancingData bi = this.instancingData[i];
-                    bi.Local = this.instances[i].LocalTransform;
-                    this.instancingData[i] = bi;
+                    man.Update(gameTime);
+
+                    this.instancingData[i].Local = man.LocalTransform;
+
+                    Vector3 scale = this.BoundingBox.Maximum - this.BoundingBox.Minimum;
+                    Vector3 position = ((this.BoundingBox.Maximum + this.BoundingBox.Minimum) * 0.5f);
+
+                    this.volume[i].SetScale(man.Scaling * scale);
+                    this.volume[i].SetRotation(man.Rotation);
+                    this.volume[i].SetPosition(man.Position + position);
                 }
             }
+
+            this.volume.Update(gameTime);
         }
         public override void Draw(GameTime gameTime)
         {
@@ -108,14 +122,22 @@ namespace Engine
                 {
                     foreach (string material in dictionary.Keys)
                     {
-                        MeshMaterial mat = this.Materials[material];
                         MeshInstanced mesh = (MeshInstanced)dictionary[material];
+                        MeshMaterial mat = material != NoMaterial ? this.Materials[material] : null;
                         string techniqueName = this.Techniques[mesh];
 
                         #region Per object update
 
-                        this.effect.ObjectBuffer.Material = new BufferMaterials(mat.Material);
-                        this.effect.UpdatePerObject(mat.DiffuseTexture);
+                        if (mat != null)
+                        {
+                            this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
+                            this.effect.UpdatePerObject(mat.DiffuseTexture);
+                        }
+                        else
+                        {
+                            this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
+                            this.effect.UpdatePerObject(null);
+                        }
 
                         #endregion
 
@@ -134,6 +156,8 @@ namespace Engine
                     }
                 }
             }
+
+            this.volume.Draw(gameTime);
         }
         public void Next()
         {

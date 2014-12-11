@@ -8,6 +8,11 @@ namespace Engine
     public class Manipulator
     {
         /// <summary>
+        /// One radian
+        /// </summary>
+        private const float RADIAN = 0.0174532924f;
+
+        /// <summary>
         /// Final transform for the controller
         /// </summary>
         private Matrix localTransform = Matrix.Identity;
@@ -35,66 +40,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Gets Forward vector
-        /// </summary>
-        public Vector3 Forward
-        {
-            get
-            {
-                return this.localTransform.Forward;
-            }
-        }
-        /// <summary>
-        /// Gets Backward vector
-        /// </summary>
-        public Vector3 Backward
-        {
-            get
-            {
-                return this.localTransform.Backward;
-            }
-        }
-        /// <summary>
-        /// Gets Left vector
-        /// </summary>
-        public Vector3 Left
-        {
-            get
-            {
-                return this.localTransform.Left;
-            }
-        }
-        /// <summary>
-        /// Gets Right vector
-        /// </summary>
-        public Vector3 Right
-        {
-            get
-            {
-                return this.localTransform.Right;
-            }
-        }
-        /// <summary>
-        /// Gets Up vector
-        /// </summary>
-        public Vector3 Up
-        {
-            get
-            {
-                return this.localTransform.Up;
-            }
-        }
-        /// <summary>
-        /// Gets Down vector
-        /// </summary>
-        public Vector3 Down
-        {
-            get
-            {
-                return this.localTransform.Down;
-            }
-        }
-        /// <summary>
         /// Gets Scaling component
         /// </summary>
         public Vector3 Scaling
@@ -102,6 +47,16 @@ namespace Engine
             get
             {
                 return this.scaling;
+            }
+        }
+        /// <summary>
+        /// Rotation component
+        /// </summary>
+        public Quaternion Rotation
+        {
+            get
+            {
+                return this.rotation;
             }
         }
         /// <summary>
@@ -115,13 +70,37 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Gets or sets the controller thats this instance is following
+        /// Gets Forward vector
         /// </summary>
-        public Manipulator Following { get; set; }
+        public Vector3 Forward { get; private set; }
         /// <summary>
-        /// Gers or set the relative vector position to the followed controller
+        /// Gets Backward vector
         /// </summary>
-        public Matrix FollowingRelative { get; set; }
+        public Vector3 Backward { get; private set; }
+        /// <summary>
+        /// Gets Left vector
+        /// </summary>
+        public Vector3 Left { get; private set; }
+        /// <summary>
+        /// Gets Right vector
+        /// </summary>
+        public Vector3 Right { get; private set; }
+        /// <summary>
+        /// Gets Up vector
+        /// </summary>
+        public Vector3 Up { get; private set; }
+        /// <summary>
+        /// Gets Down vector
+        /// </summary>
+        public Vector3 Down { get; private set; }
+        /// <summary>
+        /// Linear velocity modifier
+        /// </summary>
+        public float LinearVelocity = 1f;
+        /// <summary>
+        /// Angular velocity modifier
+        /// </summary>
+        public float AngularVelocity = 1f;
 
         /// <summary>
         /// Contructor
@@ -131,9 +110,6 @@ namespace Engine
             this.position = Vector3.Zero;
             this.rotation = Quaternion.Identity;
             this.scaling = new Vector3(1);
-
-            this.Following = null;
-            this.FollowingRelative = Matrix.Identity;
         }
         /// <summary>
         /// Update internal state
@@ -141,23 +117,18 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            if (this.Following != null)
-            {
-                this.localTransform =
-                    Matrix.Scaling(this.scaling) *
-                    Matrix.RotationQuaternion(this.Following.rotation) *
-                    Matrix.Translation(this.Following.position) *
-                    this.FollowingRelative;
+            Matrix sca = Matrix.Scaling(this.scaling);
+            Matrix rot = Matrix.RotationQuaternion(this.rotation);
+            Matrix tra = Matrix.Translation(this.position);
 
-                this.localTransform.Decompose(out this.scaling, out this.rotation, out this.position);
-            }
-            else
-            {
-                this.localTransform =
-                    Matrix.Scaling(this.scaling) *
-                    Matrix.RotationQuaternion(this.rotation) *
-                    Matrix.Translation(this.position);
-            }
+            this.localTransform = sca * rot * tra;
+
+            this.Forward = rot.Forward;
+            this.Backward = rot.Backward;
+            this.Left = rot.Left;
+            this.Right = rot.Right;
+            this.Up = rot.Up;
+            this.Down = rot.Down;
         }
 
         /// <summary>
@@ -172,49 +143,49 @@ namespace Engine
         /// Increments position component d distance along forward vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveForward(float d)
+        public void MoveForward(float d = 1f)
         {
-            this.position += this.Forward * -d;
+            this.position += this.Forward * -d * this.LinearVelocity;
         }
         /// <summary>
         /// Increments position component d distance along backward vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveBackward(float d)
+        public void MoveBackward(float d = 1f)
         {
-            this.position += this.Backward * -d;
+            this.position += this.Backward * -d * this.LinearVelocity;
         }
         /// <summary>
         /// Increments position component d distance along left vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveLeft(float d)
+        public void MoveLeft(float d = 1f)
         {
-            this.position += this.Left * d;
+            this.position += this.Left * d * this.LinearVelocity;
         }
         /// <summary>
         /// Increments position component d distance along right vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveRight(float d)
+        public void MoveRight(float d = 1f)
         {
-            this.position += this.Right * d;
+            this.position += this.Right * d * this.LinearVelocity;
         }
         /// <summary>
         /// Increments position component d distance along up vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveUp(float d)
+        public void MoveUp(float d = 1f)
         {
-            this.position += this.Up * d;
+            this.position += this.Up * d * this.LinearVelocity;
         }
         /// <summary>
         /// Increments position component d distance along down vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void MoveDown(float d)
+        public void MoveDown(float d = 1f)
         {
-            this.position += this.Down * d;
+            this.position += this.Down * d * this.LinearVelocity;
         }
         /// <summary>
         /// Increments rotation component by axis
@@ -230,49 +201,49 @@ namespace Engine
         /// Increments rotation yaw (Y) to the left
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void YawLeft(float a)
+        public void YawLeft(float a = RADIAN)
         {
-            this.Rotate(-a, 0, 0);
+            this.Rotate(-a * this.AngularVelocity, 0, 0);
         }
         /// <summary>
         /// Increments rotation yaw (Y) to the right
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void YawRight(float a)
+        public void YawRight(float a = RADIAN)
         {
-            this.Rotate(a, 0, 0);
+            this.Rotate(a * this.AngularVelocity, 0, 0);
         }
         /// <summary>
         /// Increments rotation pitch (X) up
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void PitchUp(float a)
+        public void PitchUp(float a = RADIAN)
         {
-            this.Rotate(0, -a, 0);
+            this.Rotate(0, -a * this.AngularVelocity, 0);
         }
         /// <summary>
         /// Increments rotation pitch (X) down
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void PitchDown(float a)
+        public void PitchDown(float a = RADIAN)
         {
-            this.Rotate(0, a, 0);
+            this.Rotate(0, a * this.AngularVelocity, 0);
         }
         /// <summary>
         /// Increments rotation roll (Z) left
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void RollLeft(float a)
+        public void RollLeft(float a = RADIAN)
         {
-            this.Rotate(0, 0, a);
+            this.Rotate(0, 0, a * this.AngularVelocity);
         }
         /// <summary>
         /// Increments rotation roll (Z) right
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void RollRight(float a)
+        public void RollRight(float a = RADIAN)
         {
-            this.Rotate(0, 0, -a);
+            this.Rotate(0, 0, -a * this.AngularVelocity);
         }
         /// <summary>
         /// Clamped scale increment

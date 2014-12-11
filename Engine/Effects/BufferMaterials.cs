@@ -22,7 +22,7 @@ namespace Engine.Effects
             }
         }
 
-        public BufferMaterials(Material material)
+        public void SetMaterial(Material material)
         {
             this.Ambient = material.AmbientColor;
             this.Diffuse = material.DiffuseColor;

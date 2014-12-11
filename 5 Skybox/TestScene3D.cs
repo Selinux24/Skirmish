@@ -7,12 +7,12 @@ namespace Skybox
 {
     public class TestScene3D : Scene3D
     {
-        float globalScale = 5f;
+        private float globalScale = 5f;
 
-        Terrain ruins = null;
-        Model lamp = null;
-        TextControl title = null;
-        TextControl fps = null;
+        private Terrain ruins = null;
+        private Model lamp = null;
+        private TextControl title = null;
+        private TextControl fps = null;
 
         public TestScene3D(Game game)
             : base(game)
