@@ -3,7 +3,6 @@ using System.Windows.Forms;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
-using SharpDX.Windows;
 using BindFlags = SharpDX.Direct3D11.BindFlags;
 using BlendOperation = SharpDX.Direct3D11.BlendOperation;
 using BlendOption = SharpDX.Direct3D11.BlendOption;

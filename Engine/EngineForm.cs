@@ -6,6 +6,8 @@ namespace Engine
 {
     public class EngineForm : RenderForm
     {
+        private bool initialized = false;
+
         public bool VerticalSync { get; set; }
         public bool FullScreen { get; set; }
         public bool ShowMouse { get; set; }
@@ -14,12 +16,15 @@ namespace Engine
         public Point ScreenCenter { get; private set; }
         public bool Active { get; private set; }
 
-        public EngineForm(string name)
+        public EngineForm(string name, int screenWidth, int screenHeight, bool vSync, bool fullScreen, bool showMouse = false)
             : base(name)
         {
-            this.VerticalSync = false;
-            this.FullScreen = false;
-            this.ShowMouse = false;
+            this.Size = new Size(screenWidth, screenHeight);
+            this.VerticalSync = vSync;
+            this.FullScreen = fullScreen;
+            this.ShowMouse = showMouse;
+
+            this.initialized = true;
 
             this.UpdateProperties();
         }
@@ -57,17 +62,20 @@ namespace Engine
 
         private void UpdateProperties()
         {
-            if (this.FullScreen)
+            if (this.initialized)
             {
-                this.RenderWidth = this.Width;
-                this.RenderHeight = this.Height;
-                this.ScreenCenter = new Point(this.Location.X + (this.Width / 2), this.Location.Y + (this.Height / 2));
-            }
-            else
-            {
-                this.RenderWidth = this.ClientSize.Width;
-                this.RenderHeight = this.ClientSize.Height;
-                this.ScreenCenter = new Point(this.Location.X + (this.ClientSize.Width / 2), this.Location.Y + (this.ClientSize.Height / 2));
+                if (this.FullScreen)
+                {
+                    this.RenderWidth = this.Width;
+                    this.RenderHeight = this.Height;
+                    this.ScreenCenter = new Point(this.Location.X + (this.Width / 2), this.Location.Y + (this.Height / 2));
+                }
+                else
+                {
+                    this.RenderWidth = this.ClientSize.Width;
+                    this.RenderHeight = this.ClientSize.Height;
+                    this.ScreenCenter = new Point(this.Location.X + (this.ClientSize.Width / 2), this.Location.Y + (this.ClientSize.Height / 2));
+                }
             }
         }
     }

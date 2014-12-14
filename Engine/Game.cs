@@ -24,13 +24,7 @@ namespace Engine
 
             #region Form
 
-            this.Form = new EngineForm(name)
-            {
-                Size = new Size(screenWidth, screenHeight),
-                VerticalSync = vSync,
-                FullScreen = fullScreen,
-                ShowMouse = showMouse,
-            };
+            this.Form = new EngineForm(name, screenWidth, screenHeight, vSync, fullScreen, showMouse);
 
             this.Form.UserResized += (sender, eventArgs) =>
             {
