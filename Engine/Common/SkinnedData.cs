@@ -37,6 +37,7 @@ namespace Engine.Common
                 return this.animations[clipName];
             }
         }
+        public float AnimationVelocity = 1f;
 
         /// <summary>
         /// Nombre del clip a aplicar
@@ -99,7 +100,7 @@ namespace Engine.Common
                 }
                 else
                 {
-                    this.Time += gameTime.ElapsedSeconds;
+                    this.Time += gameTime.ElapsedSeconds * this.AnimationVelocity;
 
                     this.UpdateFinalTransforms(clip, this.Time);
 

@@ -225,6 +225,31 @@ namespace Engine.Content
                 Geometry = geometry,
             };
         }
+        public static ModelContent GenerateBoundingSphere(uint sliceCount, uint stackCount, Color color)
+        {
+            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
+
+            string geoName = "spriteGeometry";
+
+            Vertex[] verts = null;
+            uint[] indices = null;
+            CreateSphereWired(1f, sliceCount, stackCount, color, out verts, out indices);
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = PrimitiveTopology.LineList,
+                VertexType = VertexTypes.PositionColor,
+                Vertices = verts,
+                Indices = indices,
+            };
+
+            geometry.Add(geoName, new[] { geo });
+
+            return new ModelContent()
+            {
+                Geometry = geometry,
+            };
+        }
 
         public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out Vertex[] v, out uint[] i)
         {
@@ -488,6 +513,46 @@ namespace Engine.Content
                 indexList.Add(baseIndex + index);
                 indexList.Add(baseIndex + index + 1);
             }
+
+            v = vertList.ToArray();
+            i = indexList.ToArray();
+        }
+        public static void CreateSphereWired(float radius, uint sliceCount, uint stackCount, Color color, out Vertex[] v, out uint[] i)
+        {
+            List<Vertex> vertList = new List<Vertex>();
+            List<uint> indexList = new List<uint>();
+
+            //North pole
+            vertList.Add(Vertex.CreateVertexPositionColor(new Vector3(0.0f, +radius, 0.0f), color));
+
+            float phiStep = MathUtil.Pi / (stackCount + 1);
+            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
+
+            //Compute vertices for each stack ring (do not count the poles as rings).
+            for (int st = 1; st < (stackCount + 1); ++st)
+            {
+                float phi = st * phiStep;
+
+                //Vertices of ring.
+                for (int sl = 0; sl <= sliceCount; ++sl)
+                {
+                    float theta = sl * thetaStep;
+
+                    //Spherical to cartesian
+                    Vector3 position = new Vector3(
+                        radius * (float)Math.Sin(phi) * (float)Math.Cos(theta),
+                        radius * (float)Math.Cos(phi),
+                        radius * (float)Math.Sin(phi) * (float)Math.Sin(theta));
+
+                    indexList.Add((uint)vertList.Count);
+                    indexList.Add(sl == sliceCount ? (uint)vertList.Count - sliceCount : (uint)vertList.Count + 1);
+
+                    vertList.Add(Vertex.CreateVertexPositionColor(position, color));
+                }
+            }
+
+            //South pole
+            vertList.Add(Vertex.CreateVertexPositionColor(new Vector3(0.0f, -radius, 0.0f), color));
 
             v = vertList.ToArray();
             i = indexList.ToArray();

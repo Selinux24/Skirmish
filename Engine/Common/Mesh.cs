@@ -259,5 +259,18 @@ namespace Engine.Common
                 this.IndexCount = this.indices.Count;
             }
         }
+
+
+        public BoundingSphere ComputeBoundingSphere(Matrix transform)
+        {
+            //TODO: Apply transform to all vertices and recompute bsphere
+            return this.BoundingSphere;
+        }
+
+        public BoundingBox ComputeBoundingBox(Matrix transform)
+        {
+            //TODO: Apply transform to all vertices and recompute bbox
+            return this.BoundingBox;
+        }
     }
 }

@@ -100,8 +100,8 @@ namespace Collada
 
             for (int i = 0; i < this.helicopters.Count; i++)
             {
-                this.helicopters[i].LinearVelocity = 0.2f;
-                this.helicopters[i].AngularVelocity = 2f;
+                this.helicopters[i].LinearVelocity = 10f;
+                this.helicopters[i].AngularVelocity = 45f;
 
                 if (x >= rows) x = 0;
                 z = i / rows;
@@ -136,13 +136,13 @@ namespace Collada
                 this.InitializeHelicopters();
             }
 
-            this.UpdateCamera();
-            this.UpdateEnvironment();
-            this.UpdateHelicopters();
+            this.UpdateCamera(gameTime);
+            this.UpdateEnvironment(gameTime);
+            this.UpdateHelicopters(gameTime);
 
             this.fps.Text = this.Game.RuntimeText;
         }
-        private void UpdateCamera()
+        private void UpdateCamera(GameTime gameTime)
         {
             if (this.Game.Input.KeyJustReleased(Key.C))
             {
@@ -189,7 +189,7 @@ namespace Collada
                 this.Camera.Interest = interest;
             }
         }
-        private void UpdateEnvironment()
+        private void UpdateEnvironment(GameTime gameTime)
         {
             #region First lamp
 
@@ -256,7 +256,7 @@ namespace Collada
                 }
             }
         }
-        private void UpdateHelicopters()
+        private void UpdateHelicopters(GameTime gameTime)
         {
             if (this.Game.Input.KeyJustReleased(Key.Tab))
             {
@@ -265,62 +265,62 @@ namespace Collada
 
             if (this.Game.Input.KeyPressed(Key.O))
             {
-                this.helicopters.Manipulator.MoveLeft();
+                this.helicopters.Manipulator.MoveLeft(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.P))
             {
-                this.helicopters.Manipulator.MoveRight();
+                this.helicopters.Manipulator.MoveRight(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.Z))
             {
-                this.helicopters.Manipulator.MoveUp();
+                this.helicopters.Manipulator.MoveUp(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.X))
             {
-                this.helicopters.Manipulator.MoveDown();
+                this.helicopters.Manipulator.MoveDown(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.Up))
             {
-                this.helicopters.Manipulator.MoveForward();
+                this.helicopters.Manipulator.MoveForward(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.Down))
             {
-                this.helicopters.Manipulator.MoveBackward();
+                this.helicopters.Manipulator.MoveBackward(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.Left))
             {
-                this.helicopters.Manipulator.YawLeft();
+                this.helicopters.Manipulator.YawLeft(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.Right))
             {
-                this.helicopters.Manipulator.YawRight();
+                this.helicopters.Manipulator.YawRight(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.U))
             {
-                this.helicopters.Manipulator.RollLeft();
+                this.helicopters.Manipulator.RollLeft(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.I))
             {
-                this.helicopters.Manipulator.RollRight();
+                this.helicopters.Manipulator.RollRight(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.Add))
             {
-                this.helicopters.Manipulator.Scale(0.1f, minScaleSize, maxScaleSize);
+                this.helicopters.Manipulator.Scale(gameTime, 0.1f, minScaleSize, maxScaleSize);
             }
 
             if (this.Game.Input.KeyPressed(Key.Subtract))
             {
-                this.helicopters.Manipulator.Scale(-0.1f, minScaleSize, maxScaleSize);
+                this.helicopters.Manipulator.Scale(gameTime, -0.1f, minScaleSize, maxScaleSize);
             }
 
             #region Second lamp

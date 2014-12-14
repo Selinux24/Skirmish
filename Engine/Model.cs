@@ -10,12 +10,12 @@ namespace Engine
     public class Model : ModelBase
     {
         private EffectBasic effect;
-        private Volume volume;
-        OrientedBoundingBox a;
+        private VolumeBox volumeBox;
+        private VolumeSphere volumeSphere;
 
         public Manipulator Manipulator { get; private set; }
 
-        public Model(Game game, Scene3D scene, ModelContent model)
+        public Model(Game game, Scene3D scene, ModelContent model, bool debug = false)
             : base(game, scene, model)
         {
             this.effect = new EffectBasic(game.Graphics.Device);
@@ -23,8 +23,11 @@ namespace Engine
 
             this.Manipulator = new Manipulator();
 
-            ModelContent modelVolume = ModelContent.GenerateBoundingBox(Color.Red);
-            this.volume = new Volume(game, scene, modelVolume);
+            if (debug)
+            {
+                this.volumeBox = new VolumeBox(game, scene, Color.Red);
+                this.volumeSphere = new VolumeSphere(game, scene, 30, 10, Color.Yellow);
+            }
         }
         public override void Dispose()
         {
@@ -36,10 +39,16 @@ namespace Engine
                 this.effect = null;
             }
 
-            if (this.volume != null)
+            if (this.volumeBox != null)
             {
-                this.volume.Dispose();
-                this.volume = null;
+                this.volumeBox.Dispose();
+                this.volumeBox = null;
+            }
+
+            if (this.volumeSphere != null)
+            {
+                this.volumeSphere.Dispose();
+                this.volumeSphere = null;
             }
         }
         public override void Update(GameTime gameTime)
@@ -48,14 +57,23 @@ namespace Engine
 
             this.Manipulator.Update(gameTime);
 
-            Vector3 scale = this.BoundingBox.Maximum - this.BoundingBox.Minimum;
-            Vector3 position = (this.BoundingBox.Maximum + this.BoundingBox.Minimum) * 0.5f;
+            if (this.volumeBox != null)
+            {
+                BoundingBox bbox = this.ComputeBoundingBox(this.Manipulator.LocalTransform);
 
-            this.volume.Manipulator.SetScale(this.Manipulator.Scaling * scale);
-            this.volume.Manipulator.SetRotation(this.Manipulator.Rotation);
-            this.volume.Manipulator.SetPosition(this.Manipulator.Position + position);
+                this.volumeBox.Manipulator.SetScale(this.Manipulator.Scaling * (bbox.Maximum - bbox.Minimum));
+                this.volumeBox.Manipulator.SetPosition(this.Manipulator.Position + ((bbox.Maximum + bbox.Minimum) * 0.5f));
+                this.volumeBox.Update(gameTime);
+            }
 
-            this.volume.Update(gameTime);
+            if (this.volumeSphere != null)
+            {
+                BoundingSphere bsphere = this.ComputeBoundingSphere(this.Manipulator.LocalTransform);
+
+                this.volumeSphere.Manipulator.SetScale(this.Manipulator.Scaling * bsphere.Radius);
+                this.volumeSphere.Manipulator.SetPosition(this.Manipulator.Position + bsphere.Center);
+                this.volumeSphere.Update(gameTime);
+            }
         }
         public override void Draw(GameTime gameTime)
         {
@@ -123,7 +141,8 @@ namespace Engine
                 }
             }
 
-            this.volume.Draw(gameTime);
+            if (this.volumeBox != null) this.volumeBox.Draw(gameTime);
+            if (this.volumeSphere != null) this.volumeSphere.Draw(gameTime);
         }
     }
 }

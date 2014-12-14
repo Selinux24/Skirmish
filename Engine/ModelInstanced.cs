@@ -11,7 +11,8 @@ namespace Engine
     {
         private EffectInstancing effect;
         private VertexInstancingData[] instancingData = null;
-        private VolumeInstanced volume;
+        private VolumeBoxInstanced volumeBox;
+        private VolumeSphereInstanced volumeSphere;
 
         private Manipulator[] instances = null;
         private int currentInstance = 0;
@@ -37,19 +38,17 @@ namespace Engine
             }
         }
 
-        public ModelInstanced(Game game, Scene3D scene, ModelContent model, int instances)
-            : this(game, scene, model, instances, false)
-        {
-
-        }
-        public ModelInstanced(Game game, Scene3D scene, ModelContent model, int instances, bool randomTimePos)
+        public ModelInstanced(Game game, Scene3D scene, ModelContent model, int instances, bool debug = false)
             : base(game, scene, model, true, instances)
         {
             this.effect = new EffectInstancing(game.Graphics.Device);
             this.LoadEffectLayouts(this.effect);
 
-            ModelContent modelVolume = ModelContent.GenerateBoundingBox(Color.Red);
-            this.volume = new VolumeInstanced(game, scene, modelVolume, instances);
+            if (debug)
+            {
+                this.volumeBox = new VolumeBoxInstanced(game, scene, Color.Red, instances);
+                this.volumeSphere = new VolumeSphereInstanced(game, scene, 30, 10, Color.Yellow, instances);
+            }
 
             this.instancingData = new VertexInstancingData[instances];
 
@@ -68,6 +67,18 @@ namespace Engine
                 this.effect.Dispose();
                 this.effect = null;
             }
+
+            if (this.volumeBox != null)
+            {
+                this.volumeBox.Dispose();
+                this.volumeBox = null;
+            }
+
+            if (this.volumeSphere != null)
+            {
+                this.volumeSphere.Dispose();
+                this.volumeSphere = null;
+            }
         }
         public override void Update(GameTime gameTime)
         {
@@ -83,16 +94,27 @@ namespace Engine
 
                     this.instancingData[i].Local = man.LocalTransform;
 
-                    Vector3 scale = this.BoundingBox.Maximum - this.BoundingBox.Minimum;
-                    Vector3 position = ((this.BoundingBox.Maximum + this.BoundingBox.Minimum) * 0.5f);
+                    if (this.volumeBox != null)
+                    {
+                        BoundingBox bbox = this.ComputeBoundingBox(man.LocalTransform);
 
-                    this.volume[i].SetScale(man.Scaling * scale);
-                    this.volume[i].SetRotation(man.Rotation);
-                    this.volume[i].SetPosition(man.Position + position);
+                        this.volumeBox[i].SetScale(man.Scaling * (bbox.Maximum - bbox.Minimum));
+                        this.volumeBox[i].SetRotation(man.Rotation);
+                        this.volumeBox[i].SetPosition(man.Position + ((bbox.Maximum + bbox.Minimum) * 0.5f));
+                    }
+
+                    if (this.volumeSphere != null)
+                    {
+                        BoundingSphere bsphere = this.ComputeBoundingSphere(man.LocalTransform);
+
+                        this.volumeSphere[i].SetScale(man.Scaling * bsphere.Radius);
+                        this.volumeSphere[i].SetPosition(man.Position + bsphere.Center);
+                    }
                 }
             }
 
-            this.volume.Update(gameTime);
+            if (this.volumeBox != null) this.volumeBox.Update(gameTime);
+            if (this.volumeSphere != null) this.volumeSphere.Update(gameTime);
         }
         public override void Draw(GameTime gameTime)
         {
@@ -142,7 +164,7 @@ namespace Engine
                         #endregion
 
                         mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(techniqueName));
-                        
+
                         mesh.WriteInstancingData(this.DeviceContext, this.instancingData);
 
                         EffectTechnique technique = this.effect.GetTechnique(techniqueName);
@@ -157,7 +179,8 @@ namespace Engine
                 }
             }
 
-            this.volume.Draw(gameTime);
+            if (this.volumeBox != null) this.volumeBox.Draw(gameTime);
+            if (this.volumeSphere != null) this.volumeSphere.Draw(gameTime);
         }
         public void Next()
         {

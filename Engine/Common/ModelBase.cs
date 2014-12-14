@@ -681,6 +681,43 @@ namespace Engine.Common
             }
         }
 
+
+        protected BoundingBox ComputeBoundingBox(Matrix transform)
+        {
+            BoundingBox box = new BoundingBox();
+
+            if (this.Meshes != null)
+            {
+                foreach (MeshMaterialsDictionary dict in this.Meshes.Values)
+                {
+                    foreach (Mesh mesh in dict.Values)
+                    {
+                        box = BoundingBox.Merge(box, mesh.ComputeBoundingBox(transform));
+                    }
+                }
+            }
+
+            return box;
+        }
+
+        protected BoundingSphere ComputeBoundingSphere(Matrix transform)
+        {
+            BoundingSphere sphere = new BoundingSphere();
+
+            if (this.Meshes != null)
+            {
+                foreach (MeshMaterialsDictionary dict in this.Meshes.Values)
+                {
+                    foreach (Mesh mesh in dict.Values)
+                    {
+                        sphere = BoundingSphere.Merge(sphere, mesh.ComputeBoundingSphere(transform));
+                    }
+                }
+            }
+
+            return sphere;
+        }
+
         /// <summary>
         /// Read the vertex list creating structuring them with a vertex type
         /// </summary>

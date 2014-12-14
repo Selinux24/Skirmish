@@ -9,11 +9,14 @@ namespace Engine
     public abstract class Scene3D : Scene
     {
         private List<Drawable> components = new List<Drawable>();
+        private bool debugMode = false;
 
         public Scene3D(Game game)
             : base(game)
         {
-
+#if DEBUG
+            this.debugMode = true;
+#endif
         }
         public override void Initialize()
         {
@@ -86,7 +89,7 @@ namespace Engine
         {
             ModelContent geo = LoaderCOLLADA.Load(this.ContentPath, modelFilename, transform);
 
-            Model newModel = new Model(this.Game, this, geo);
+            Model newModel = new Model(this.Game, this, geo, debugMode);
 
             this.AddComponent(newModel, order);
 
@@ -94,7 +97,7 @@ namespace Engine
         }
         public Model AddModel(ModelContent geometry, int order = 0)
         {
-            Model newModel = new Model(this.Game, this, geometry);
+            Model newModel = new Model(this.Game, this, geometry, debugMode);
 
             this.AddComponent(newModel, order);
 
@@ -108,7 +111,7 @@ namespace Engine
         {
             ModelContent geo = LoaderCOLLADA.Load(this.ContentPath, modelFilename, transform);
 
-            ModelInstanced newModel = new ModelInstanced(this.Game, this, geo, instances);
+            ModelInstanced newModel = new ModelInstanced(this.Game, this, geo, instances, debugMode);
 
             this.AddComponent(newModel, order);
 
@@ -116,7 +119,7 @@ namespace Engine
         }
         public ModelInstanced AddInstancingModel(ModelContent geometry, int instances, int order = 0)
         {
-            ModelInstanced newModel = new ModelInstanced(this.Game, this, geometry, instances);
+            ModelInstanced newModel = new ModelInstanced(this.Game, this, geometry, instances, debugMode);
 
             this.AddComponent(newModel, order);
 
@@ -134,7 +137,7 @@ namespace Engine
         }
         public Terrain AddTerrain(ModelContent geometry, TerrainDescription description, int order = 0)
         {
-            Terrain newModel = new Terrain(this.Game, this, geometry, this.ContentPath, description);
+            Terrain newModel = new Terrain(this.Game, this, geometry, this.ContentPath, description, debugMode);
 
             this.AddComponent(newModel, order);
 

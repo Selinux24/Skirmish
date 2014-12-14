@@ -40,32 +40,32 @@ namespace SceneTest
 
             if (this.Game.Input.KeyPressed(Key.A))
             {
-                this.model.Manipulator.MoveLeft(0.1f);
+                this.model.Manipulator.MoveLeft(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.D))
             {
-                this.model.Manipulator.MoveRight(0.1f);
+                this.model.Manipulator.MoveRight(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.W))
             {
-                this.model.Manipulator.MoveUp(0.1f);
+                this.model.Manipulator.MoveUp(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.S))
             {
-                this.model.Manipulator.MoveDown(0.1f);
+                this.model.Manipulator.MoveDown(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.Z))
             {
-                this.model.Manipulator.MoveForward(0.1f);
+                this.model.Manipulator.MoveForward(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Key.X))
             {
-                this.model.Manipulator.MoveBackward(0.1f);
+                this.model.Manipulator.MoveBackward(gameTime);
             }
         }
     }

@@ -135,57 +135,9 @@ namespace Engine
         /// Increments position component d length along d vector
         /// </summary>
         /// <param name="d">Distance</param>
-        public void Move(Vector3 d)
+        private void Move(Vector3 d)
         {
             this.position += d;
-        }
-        /// <summary>
-        /// Increments position component d distance along forward vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveForward(float d = 1f)
-        {
-            this.position += this.Forward * -d * this.LinearVelocity;
-        }
-        /// <summary>
-        /// Increments position component d distance along backward vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveBackward(float d = 1f)
-        {
-            this.position += this.Backward * -d * this.LinearVelocity;
-        }
-        /// <summary>
-        /// Increments position component d distance along left vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveLeft(float d = 1f)
-        {
-            this.position += this.Left * d * this.LinearVelocity;
-        }
-        /// <summary>
-        /// Increments position component d distance along right vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveRight(float d = 1f)
-        {
-            this.position += this.Right * d * this.LinearVelocity;
-        }
-        /// <summary>
-        /// Increments position component d distance along up vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveUp(float d = 1f)
-        {
-            this.position += this.Up * d * this.LinearVelocity;
-        }
-        /// <summary>
-        /// Increments position component d distance along down vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        public void MoveDown(float d = 1f)
-        {
-            this.position += this.Down * d * this.LinearVelocity;
         }
         /// <summary>
         /// Increments rotation component by axis
@@ -193,67 +145,118 @@ namespace Engine
         /// <param name="yaw">Yaw (Y) amount (radians)</param>
         /// <param name="pitch">Pitch (X) amount (radians)</param>
         /// <param name="roll">Roll (Z) amount (radians)</param>
-        public void Rotate(float yaw, float pitch, float roll)
+        private void Rotate(float yaw, float pitch, float roll)
         {
             this.rotation *= Quaternion.RotationYawPitchRoll(yaw, pitch, roll);
         }
+
+        /// <summary>
+        /// Increments position component d distance along forward vector
+        /// </summary>
+        /// <param name="d">Distance</param>
+        public void MoveForward(GameTime gameTime, float d = 1f)
+        {
+            this.position += this.Forward * -d * this.LinearVelocity * gameTime.ElapsedSeconds;
+        }
+        /// <summary>
+        /// Increments position component d distance along backward vector
+        /// </summary>
+        /// <param name="d">Distance</param>
+        public void MoveBackward(GameTime gameTime, float d = 1f)
+        {
+            this.position += this.Backward * -d * this.LinearVelocity * gameTime.ElapsedSeconds;
+        }
+        /// <summary>
+        /// Increments position component d distance along left vector
+        /// </summary>
+        /// <param name="d">Distance</param>
+        public void MoveLeft(GameTime gameTime, float d = 1f)
+        {
+            this.position += this.Left * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+        }
+        /// <summary>
+        /// Increments position component d distance along right vector
+        /// </summary>
+        /// <param name="d">Distance</param>
+        public void MoveRight(GameTime gameTime, float d = 1f)
+        {
+            this.position += this.Right * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+        }
+        /// <summary>
+        /// Increments position component d distance along up vector
+        /// </summary>
+        /// <param name="d">Distance</param>
+        public void MoveUp(GameTime gameTime, float d = 1f)
+        {
+            this.position += this.Up * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+        }
+        /// <summary>
+        /// Increments position component d distance along down vector
+        /// </summary>
+        /// <param name="d">Distance</param>
+        public void MoveDown(GameTime gameTime, float d = 1f)
+        {
+            this.position += this.Down * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+        }
+
         /// <summary>
         /// Increments rotation yaw (Y) to the left
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void YawLeft(float a = RADIAN)
+        public void YawLeft(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(-a * this.AngularVelocity, 0, 0);
+            this.Rotate(-a * this.AngularVelocity * gameTime.ElapsedSeconds, 0, 0);
         }
         /// <summary>
         /// Increments rotation yaw (Y) to the right
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void YawRight(float a = RADIAN)
+        public void YawRight(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(a * this.AngularVelocity, 0, 0);
+            this.Rotate(a * this.AngularVelocity * gameTime.ElapsedSeconds, 0, 0);
         }
         /// <summary>
         /// Increments rotation pitch (X) up
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void PitchUp(float a = RADIAN)
+        public void PitchUp(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, -a * this.AngularVelocity, 0);
+            this.Rotate(0, -a * this.AngularVelocity * gameTime.ElapsedSeconds, 0);
         }
         /// <summary>
         /// Increments rotation pitch (X) down
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void PitchDown(float a = RADIAN)
+        public void PitchDown(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, a * this.AngularVelocity, 0);
+            this.Rotate(0, a * this.AngularVelocity * gameTime.ElapsedSeconds, 0);
         }
         /// <summary>
         /// Increments rotation roll (Z) left
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void RollLeft(float a = RADIAN)
+        public void RollLeft(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, 0, a * this.AngularVelocity);
+            this.Rotate(0, 0, a * this.AngularVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments rotation roll (Z) right
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void RollRight(float a = RADIAN)
+        public void RollRight(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, 0, -a * this.AngularVelocity);
+            this.Rotate(0, 0, -a * this.AngularVelocity * gameTime.ElapsedSeconds);
         }
+
         /// <summary>
         /// Clamped scale increment
         /// </summary>
         /// <param name="scale">Scale amount (percent 0 to x)</param>
         /// <param name="minSize">Min scaling component</param>
         /// <param name="maxSize">Max scaling component</param>
-        public void Scale(float scale, Vector3? minSize = null, Vector3? maxSize = null)
+        public void Scale(GameTime gameTime, float scale, Vector3? minSize = null, Vector3? maxSize = null)
         {
-            this.Scale(new Vector3(scale), minSize, maxSize);
+            this.Scale(gameTime, new Vector3(scale), minSize, maxSize);
         }
         /// <summary>
         /// Clamped scale increment
@@ -263,9 +266,9 @@ namespace Engine
         /// <param name="scaleZ">Z axis scale amount (percent 0 to x)</param>
         /// <param name="minSize">Min scaling component</param>
         /// <param name="maxSize">Max scaling component</param>
-        public void Scale(float scaleX, float scaleY, float scaleZ, Vector3? minSize = null, Vector3? maxSize = null)
+        public void Scale(GameTime gameTime, float scaleX, float scaleY, float scaleZ, Vector3? minSize = null, Vector3? maxSize = null)
         {
-            this.Scale(new Vector3(scaleX, scaleY, scaleZ), minSize, maxSize);
+            this.Scale(gameTime, new Vector3(scaleX, scaleY, scaleZ), minSize, maxSize);
         }
         /// <summary>
         /// Clamped scale increment
@@ -273,9 +276,9 @@ namespace Engine
         /// <param name="scale">Scaling component</param>
         /// <param name="minSize">Min scaling component</param>
         /// <param name="maxSize">Max scaling component</param>
-        public void Scale(Vector3 scale, Vector3? minSize = null, Vector3? maxSize = null)
+        public void Scale(GameTime gameTime, Vector3 scale, Vector3? minSize = null, Vector3? maxSize = null)
         {
-            Vector3 newScaling = this.scaling + scale;
+            Vector3 newScaling = this.scaling + (scale * gameTime.ElapsedSeconds);
 
             if (maxSize.HasValue)
             {

@@ -50,12 +50,12 @@ namespace Engine
             }
         }
 
-        public Terrain(Game game, Scene3D scene, ModelContent terrainContent, string contentFolder, TerrainDescription description)
+        public Terrain(Game game, Scene3D scene, ModelContent terrainContent, string contentFolder, TerrainDescription description, bool debugMode = false)
             : base(game, scene)
         {
             this.Manipulator = new Manipulator();
 
-            this.terrain = new Model(game, scene, terrainContent);
+            this.terrain = new Model(game, scene, terrainContent, debugMode);
             this.terrainCache = terrainContent.ComputeTriangleList();
 
             if (description != null && description.AddVegetation)
