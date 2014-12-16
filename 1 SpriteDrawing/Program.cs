@@ -6,7 +6,7 @@ namespace SpriteDrawing
     {
         static void Main()
         {
-            using (Game cl = new Game("1 SpriteDrawing", 400, 267, true, false))
+            using (Game cl = new Game("1 SpriteDrawing", 800, 600, false))
             {
                 cl.AddScene(new TestScene(cl) { Active = true, });
 

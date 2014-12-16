@@ -6,8 +6,10 @@ namespace Collada
     {
         static void Main()
         {
-            using (Game cl = new Game("4 Collada", 680, 480, false, false))
+            using (Game cl = new Game("4 Collada", 400, 300, false))
             {
+                cl.Form.ShowMouse = false;
+
                 cl.AddScene(new TestScene3D(cl) { Active = true, });
 
                 cl.Run();

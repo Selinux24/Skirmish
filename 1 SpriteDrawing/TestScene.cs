@@ -5,6 +5,8 @@ namespace SpriteDrawing
 {
     public class TestScene : Scene3D
     {
+        private const float delta = 25f;
+
         private Sprite background = null;
         private Sprite spriteFixed = null;
         private Sprite spriteMov = null;
@@ -19,23 +21,25 @@ namespace SpriteDrawing
         {
             base.Initialize();
 
+            this.spriteMov = this.AddSprite(
+                "smiley.jpg",
+                128,
+                128,
+                1);
+
+            this.spriteFixed = this.AddSprite(
+                "seafloor.dds",
+                256,
+                256,
+                2);
+
             this.background = this.AddSprite(
                 "background.jpg",
                 this.Game.Form.ClientSize.Width,
                 this.Game.Form.ClientSize.Height,
                 99);
 
-            this.spriteMov = this.AddSprite(
-                "smiley.jpg",
-                128,
-                128,
-                0);
-
-            this.spriteFixed = this.AddSprite(
-                "seafloor.dds",
-                256,
-                256,
-                1);
+            this.background.FitScreen = true;
 
             this.spriteMov.SetPosition(256, 0);
         }
@@ -53,24 +57,24 @@ namespace SpriteDrawing
                 this.spriteMov.SetPosition(0, 0);
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.A))
+            if (this.Game.Input.KeyPressed(Key.A))
             {
-                this.spriteMov.MoveLeft(1f);
+                this.spriteMov.MoveLeft(gameTime, delta);
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.D))
+            if (this.Game.Input.KeyPressed(Key.D))
             {
-                this.spriteMov.MoveRight(1f);
+                this.spriteMov.MoveRight(gameTime, delta);
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.W))
+            if (this.Game.Input.KeyPressed(Key.W))
             {
-                this.spriteMov.MoveUp(1f);
+                this.spriteMov.MoveUp(gameTime, delta);
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.S))
+            if (this.Game.Input.KeyPressed(Key.S))
             {
-                this.spriteMov.MoveDown(1f);
+                this.spriteMov.MoveDown(gameTime, delta);
             }
         }
     }

@@ -90,5 +90,11 @@ namespace Engine
                 this.Camera = null;
             }
         }
+        public virtual void HandleResizing()
+        {
+            this.Camera.SetLens(
+                this.Game.Form.RenderWidth,
+                this.Game.Form.RenderHeight);
+        }
     }
 }

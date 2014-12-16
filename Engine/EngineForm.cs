@@ -8,75 +8,66 @@ namespace Engine
     {
         private bool initialized = false;
 
-        public bool VerticalSync { get; set; }
-        public bool FullScreen { get; set; }
         public bool ShowMouse { get; set; }
         public int RenderWidth { get; private set; }
         public int RenderHeight { get; private set; }
-        public Point ScreenCenter { get; private set; }
+        public Point RelativeCenter { get; private set; }
+        public Point AbsoluteCenter { get; private set; }
         public bool Active { get; private set; }
 
-        public EngineForm(string name, int screenWidth, int screenHeight, bool vSync, bool fullScreen, bool showMouse = false)
+        public EngineForm(string name, int screenWidth, int screenHeight, bool fullScreen)
             : base(name)
         {
-            this.Size = new Size(screenWidth, screenHeight);
-            this.VerticalSync = vSync;
-            this.FullScreen = fullScreen;
-            this.ShowMouse = showMouse;
+            this.IsFullscreen = fullScreen;
+            this.AllowUserResizing = !fullScreen;
+            this.ShowMouse = !fullScreen;
+
+            if (fullScreen)
+            {
+                this.Size = new Size(screenWidth, screenHeight);
+            }
+            else
+            {
+                this.ClientSize = new Size(screenWidth, screenHeight);
+            }
+
+            this.Active = true;
 
             this.initialized = true;
-
-            this.UpdateProperties();
         }
 
-        protected override void OnSizeChanged(EventArgs e)
+        protected override void OnInvalidated(System.Windows.Forms.InvalidateEventArgs e)
         {
-            base.OnSizeChanged(e);
+            base.OnInvalidated(e);
 
-            this.UpdateProperties();
-        }
-        protected override void OnClientSizeChanged(EventArgs e)
-        {
-            base.OnClientSizeChanged(e);
-
-            this.UpdateProperties();
-        }
-        protected override void OnResizeEnd(EventArgs e)
-        {
-            base.OnResizeEnd(e);
-
-            this.UpdateProperties();
-        }
-        protected override void OnMouseEnter(EventArgs e)
-        {
-            base.OnMouseEnter(e);
-
-            this.Active = EngineForm.ActiveForm == this;
-        }
-        protected override void OnMouseLeave(EventArgs e)
-        {
-            base.OnMouseLeave(e);
-
-            this.Active = false;
-        }
-
-        private void UpdateProperties()
-        {
             if (this.initialized)
             {
-                if (this.FullScreen)
+                if (this.IsFullscreen)
                 {
-                    this.RenderWidth = this.Width;
-                    this.RenderHeight = this.Height;
-                    this.ScreenCenter = new Point(this.Location.X + (this.Width / 2), this.Location.Y + (this.Height / 2));
+                    this.RenderWidth = this.Size.Width;
+                    this.RenderHeight = this.Size.Height;
                 }
                 else
                 {
                     this.RenderWidth = this.ClientSize.Width;
                     this.RenderHeight = this.ClientSize.Height;
-                    this.ScreenCenter = new Point(this.Location.X + (this.ClientSize.Width / 2), this.Location.Y + (this.ClientSize.Height / 2));
                 }
+
+                this.RelativeCenter = new Point(this.RenderWidth / 2, this.RenderHeight / 2);
+                this.AbsoluteCenter = new Point(this.Location.X + this.RelativeCenter.X, this.Location.Y + this.RelativeCenter.Y);
             }
+        }
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+
+            this.Active = this.ShowMouse ? this.Focused : (EngineForm.ActiveForm == this);
+        }
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);
+
+            this.Active = this.ShowMouse ? this.Focused : false;
         }
     }
 }

@@ -84,8 +84,6 @@ namespace Engine
         }
         public override void Dispose()
         {
-            base.Dispose();
-
             if (this.terrain != null)
             {
                 this.terrain.Dispose();
@@ -106,8 +104,6 @@ namespace Engine
         }
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-
             this.Manipulator.Update(gameTime);
 
             this.terrain.Manipulator.SetPosition(this.Manipulator.Position);
@@ -127,8 +123,6 @@ namespace Engine
         }
         public override void Draw(GameTime gameTime)
         {
-            base.Draw(gameTime);
-
             this.terrain.Draw(gameTime);
 
             if (this.vegetation != null)
@@ -140,6 +134,10 @@ namespace Engine
             {
                 this.skydom.Draw(gameTime);
             }
+        }
+        public override void HandleResizing()
+        {
+            
         }
 
         public Vector3? SetToGround(float x, float z)

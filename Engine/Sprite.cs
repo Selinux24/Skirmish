@@ -11,13 +11,27 @@ namespace Engine
     {
         private EffectBasic effect = null;
 
+        private Matrix local = Matrix.Identity;
+
+        private float baseWidth { get; set; }
+        private float baseHeight { get; set; }
+
+        public bool FitScreen { get; set; }
+        public float Width { get; set; }
+        public float Height { get; set; }
         public Vector2 Position { get; private set; }
 
-        public Sprite(Game game, Scene3D scene, ModelContent model)
-            : base(game, scene, model)
+        public Sprite(Game game, Scene3D scene, string texture, float width, float height)
+            : base(game, scene, ModelContent.GenerateSprite(scene.ContentPath, texture))
         {
             this.effect = new EffectBasic(game.Graphics.Device);
             this.LoadEffectLayouts(this.effect);
+
+            this.Width = width;
+            this.Height = height;
+
+            this.baseWidth = width / game.Form.RenderWidth;
+            this.baseHeight = height / game.Form.RenderHeight;
         }
         public override void Dispose()
         {
@@ -29,14 +43,26 @@ namespace Engine
                 this.effect = null;
             }
         }
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            Vector3 pos = new Vector3(
+                this.Position.X - this.Game.Form.RelativeCenter.X,
+                this.Position.Y + this.Game.Form.RelativeCenter.Y, 
+                0f);
+
+            this.local =
+                Matrix.Scaling(this.Width, this.Height, 1f) *
+                Matrix.Translation(pos);
+        }
         public override void Draw(GameTime gameTime)
         {
             if (this.Meshes != null)
             {
                 #region Per frame update
 
-                Matrix local = Matrix.Translation(this.Position.X, this.Position.Y, 0f);
-                Matrix world = this.Scene.World * local;
+                Matrix world = this.Scene.World * this.local;
                 Matrix worldInverse = Matrix.Invert(world);
                 Matrix worldViewProjection = world * this.Scene.ViewProjectionOrthogonal;
 
@@ -95,26 +121,36 @@ namespace Engine
                 }
             }
         }
+        public override void HandleResizing()
+        {
+            base.HandleResizing();
 
-        public virtual void Move(Vector2 d)
-        {
-            this.Position += d;
+            if (this.FitScreen)
+            {
+                this.Width = this.baseWidth * this.Game.Form.RenderWidth;
+                this.Height = this.baseHeight * this.Game.Form.RenderHeight;
+            }
         }
-        public virtual void MoveLeft(float d)
+
+        public virtual void Move(GameTime gameTime, Vector2 d)
         {
-            this.Position += Vector2.UnitX * -d;
+            this.Position += d * gameTime.ElapsedSeconds;
         }
-        public virtual void MoveRight(float d)
+        public virtual void MoveLeft(GameTime gameTime, float d)
         {
-            this.Position += Vector2.UnitX * d;
+            this.Position += Vector2.UnitX * -d * gameTime.ElapsedSeconds;
         }
-        public virtual void MoveUp(float d)
+        public virtual void MoveRight(GameTime gameTime, float d)
         {
-            this.Position += Vector2.UnitY * d;
+            this.Position += Vector2.UnitX * d * gameTime.ElapsedSeconds;
         }
-        public virtual void MoveDown(float d)
+        public virtual void MoveUp(GameTime gameTime, float d)
         {
-            this.Position += Vector2.UnitY * -d;
+            this.Position += Vector2.UnitY * d * gameTime.ElapsedSeconds;
+        }
+        public virtual void MoveDown(GameTime gameTime, float d)
+        {
+            this.Position += Vector2.UnitY * -d * gameTime.ElapsedSeconds;
         }
 
         public virtual void SetPosition(float x, float y)

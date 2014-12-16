@@ -59,19 +59,6 @@ namespace Engine
                 base.Scene = value;
             }
         }
-        public Vector2 Position
-        {
-            get
-            {
-                return this.position;
-            }
-            set
-            {
-                this.position = value;
-
-                this.MapText();
-            }
-        }
         public string Text
         {
             get
@@ -85,7 +72,6 @@ namespace Engine
                 this.MapText();
             }
         }
-        public Color4 Color { get; set; }
         public int CharacterCount
         {
             get
@@ -100,10 +86,62 @@ namespace Engine
                 }
             }
         }
+        public Color4 ForeColor { get; set; }
+        public Color4 BackColor { get; set; }
+        public readonly string Font = null;
+
+        public Vector2 Position
+        {
+            get
+            {
+                return this.position;
+            }
+            set
+            {
+                this.position = value;
+
+                this.MapText();
+            }
+        }
+        public int Left
+        {
+            get
+            {
+                return (int)this.position.X;
+            }
+            set
+            {
+                this.position.X = value;
+
+                this.MapText();
+            }
+        }
+        public int Top
+        {
+            get
+            {
+                return (int)this.position.Y;
+            }
+            set
+            {
+                this.position.Y = value;
+
+                this.MapText();
+            }
+        }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
 
         public TextControl(Game game, Scene3D scene, string font, int size, Color color)
+            : this(game, scene, font, size, color, Color.Transparent)
+        {
+            
+        }
+        public TextControl(Game game, Scene3D scene, string font, int size, Color color, Color backColor)
             : base(game, scene)
         {
+            this.Font = string.Format("{0} {1}", font, size);
+
             this.effect = new EffectFont(game.Graphics.Device);
             this.technique = this.effect.AddInputLayout(VertexTypes.PositionTexture);
             this.inputLayout = this.effect.GetInputLayout(this.technique);
@@ -121,7 +159,8 @@ namespace Engine
             this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferWrite(new uint[FontMap.MAXTEXTLENGTH * 6]);
             this.indexCount = 0;
 
-            this.Color = color;
+            this.ForeColor = color;
+            this.BackColor = backColor;
         }
         public override void Dispose()
         {
@@ -137,6 +176,10 @@ namespace Engine
                 this.texture = null;
             }
         }
+        public override void Update(GameTime gameTime)
+        {
+            
+        }
         public override void Draw(GameTime gameTime)
         {
             if (!string.IsNullOrWhiteSpace(this.text))
@@ -145,7 +188,7 @@ namespace Engine
 
                 this.effect.FrameBuffer.World = this.Scene.World;
                 this.effect.FrameBuffer.WorldViewProjection = this.Scene.World * this.Scene.ViewProjectionOrthogonal;
-                this.effect.FrameBuffer.Color = this.Color;
+                this.effect.FrameBuffer.Color = this.ForeColor;
                 this.effect.UpdatePerFrame(this.texture);
 
                 #endregion
@@ -177,27 +220,35 @@ namespace Engine
                     {
                         this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
                     }
-      
+
                     Counters.DrawCallsPerFrame++;
                 }
             }
+        }
+        public override void HandleResizing()
+        {
+            this.MapText();
         }
         private void MapText()
         {
             VertexPositionTexture[] v;
             uint[] i;
+            Vector2 size;
             this.fontMap.MapSentence(
                 this.text,
                 this.position,
                 this.Game.Form.RenderWidth,
                 this.Game.Form.RenderHeight,
-                out v, out i);
+                out v, out i, out size);
 
             this.Game.Graphics.DeviceContext.WriteBuffer(this.vertexBuffer, v);
             this.Game.Graphics.DeviceContext.WriteBuffer(this.indexBuffer, i);
 
             this.vertexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
             this.indexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
+
+            this.Width = (int)size.X;
+            this.Height = (int)size.Y;
         }
     }
 
@@ -218,6 +269,7 @@ namespace Engine
     {
         public const int MAXTEXTLENGTH = 1024;
         public const int TEXTURESIZE = 1024;
+        public const uint KeyCodes = 512;
 
         public string Font { get; private set; }
         public int Size { get; private set; }
@@ -226,9 +278,9 @@ namespace Engine
         {
             get
             {
-                List<char> cList = new List<char>();
+                List<char> cList = new List<char>((int)KeyCodes);
 
-                for (int i = 1; i < 512; i++)
+                for (uint i = 1; i < KeyCodes; i++)
                 {
                     char c = (char)i;
                     if (!char.IsControl(c))
@@ -278,6 +330,11 @@ namespace Engine
                             int.MaxValue,
                             fmt);
 
+                        if (c == ' ')
+                        {
+                            s.Width = fnt.SizeInPoints;
+                        }
+
                         if (left + s.Width >= TEXTURESIZE)
                         {
                             left = 0f;
@@ -296,8 +353,8 @@ namespace Engine
                         {
                             X = (int)left,
                             Y = (int)top,
-                            Width = (int)s.Width,
-                            Height = (int)s.Height,
+                            Width = (int)Math.Round(s.Width),
+                            Height = (int)Math.Round(s.Height),
                         };
 
                         map.Add(c, chr);
@@ -314,8 +371,17 @@ namespace Engine
             }
         }
 
-        public void MapSentence(string text, Vector2 pos, float formWidth, float formHeight, out VertexPositionTexture[] vertices, out uint[] indices)
+        public void MapSentence(
+            string text, 
+            Vector2 pos, 
+            float formWidth, 
+            float formHeight, 
+            out VertexPositionTexture[] vertices, 
+            out uint[] indices,
+            out Vector2 size)
         {
+            size = Vector2.Zero;
+
             List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
             List<uint> indexList = new List<uint>();
 
@@ -331,6 +397,8 @@ namespace Engine
             {
                 text += string.Empty.PadRight(MAXTEXTLENGTH - text.Length);
             }
+
+            int height = 0;
 
             foreach (char c in text)
             {
@@ -364,11 +432,15 @@ namespace Engine
                     Array.ForEach(cv, (v) => { vertList.Add(VertexPositionTexture.Create(v)); });
 
                     pos.X += chr.Width - (int)(this.Size / 6);
+                    if (chr.Height > height) height = chr.Height;
                 }
             }
 
+            pos.Y = height;
+
             vertices = vertList.ToArray();
             indices = indexList.ToArray();
+            size = pos;
         }
     }
 }

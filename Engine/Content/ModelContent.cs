@@ -34,6 +34,102 @@ namespace Engine.Content
         /// </summary>
         public SkinningContent SkinningInfo { get; set; }
 
+        public static ModelContent GenerateSprite(string contentFolder, string texture)
+        {
+            return GenerateSprite(contentFolder, texture, 1, 1, 0, 0);
+        }
+        public static ModelContent GenerateSprite(string contentFolder, string texture, float width, float height, float formWidth, float formHeight)
+        {
+            Dictionary<string, ImageContent> images = new Dictionary<string, ImageContent>();
+            Dictionary<string, MaterialContent> materials = new Dictionary<string, MaterialContent>();
+            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
+
+            string imageName = "spriteTexture";
+            string materialName = "spriteMaterial";
+            string geoName = "spriteGeometry";
+
+            ImageContent image = new ImageContent()
+            {
+                Path = ContentManager.FindContent(contentFolder, texture),
+            };
+
+            MaterialContent material = MaterialContent.Default;
+            material.DiffuseTexture = imageName;
+
+            Vertex[] verts = null;
+            uint[] indices = null;
+            CreateSprite(Vector2.Zero, width, height, formWidth, formHeight, out verts, out indices);
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = PrimitiveTopology.TriangleList,
+                VertexType = VertexTypes.PositionTexture,
+                Vertices = verts,
+                Indices = indices,
+                Material = materialName,
+            };
+
+            images.Add(imageName, image);
+            materials.Add(materialName, material);
+            geometry.Add(geoName, new[] { geo });
+
+            return new ModelContent()
+            {
+                Images = images,
+                Materials = materials,
+                Geometry = geometry,
+            };
+        }
+        public static ModelContent GenerateBoundingBox(Color color)
+        {
+            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
+
+            string geoName = "spriteGeometry";
+
+            Vertex[] verts = null;
+            uint[] indices = null;
+            CreateBoxWired(1, 1, 1, color, out verts, out indices);
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = PrimitiveTopology.LineList,
+                VertexType = VertexTypes.PositionColor,
+                Vertices = verts,
+                Indices = indices,
+            };
+
+            geometry.Add(geoName, new[] { geo });
+
+            return new ModelContent()
+            {
+                Geometry = geometry,
+            };
+        }
+        public static ModelContent GenerateBoundingSphere(uint sliceCount, uint stackCount, Color color)
+        {
+            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
+
+            string geoName = "spriteGeometry";
+
+            Vertex[] verts = null;
+            uint[] indices = null;
+            CreateSphereWired(1f, sliceCount, stackCount, color, out verts, out indices);
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = PrimitiveTopology.LineList,
+                VertexType = VertexTypes.PositionColor,
+                Vertices = verts,
+                Indices = indices,
+            };
+
+            geometry.Add(geoName, new[] { geo });
+
+            return new ModelContent()
+            {
+                Geometry = geometry,
+            };
+        }
         public static ModelContent GenerateVegetationBillboard(string contentFolder, string[] textures, Triangle[] triList, float saturation, Vector2 minSize, Vector2 maxSize, int seed = 0)
         {
             Random rnd = new Random(seed);
@@ -155,98 +251,6 @@ namespace Engine.Content
             {
                 Images = images,
                 Materials = materials,
-                Geometry = geometry,
-            };
-        }
-        public static ModelContent GenerateSprite(string contentFolder, string texture, float width, float height, float formWidth, float formHeight)
-        {
-            Dictionary<string, ImageContent> images = new Dictionary<string, ImageContent>();
-            Dictionary<string, MaterialContent> materials = new Dictionary<string, MaterialContent>();
-            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
-
-            string imageName = "spriteTexture";
-            string materialName = "spriteMaterial";
-            string geoName = "spriteGeometry";
-
-            ImageContent image = new ImageContent()
-            {
-                Path = ContentManager.FindContent(contentFolder, texture),
-            };
-
-            MaterialContent material = MaterialContent.Default;
-            material.DiffuseTexture = imageName;
-
-            Vertex[] verts = null;
-            uint[] indices = null;
-            CreateSprite(Vector2.Zero, width, height, formWidth, formHeight, out verts, out indices);
-
-            SubMeshContent geo = new SubMeshContent()
-            {
-                Topology = PrimitiveTopology.TriangleList,
-                VertexType = VertexTypes.PositionTexture,
-                Vertices = verts,
-                Indices = indices,
-                Material = materialName,
-            };
-
-            images.Add(imageName, image);
-            materials.Add(materialName, material);
-            geometry.Add(geoName, new[] { geo });
-
-            return new ModelContent()
-            {
-                Images = images,
-                Materials = materials,
-                Geometry = geometry,
-            };
-        }
-        public static ModelContent GenerateBoundingBox(Color color)
-        {
-            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
-
-            string geoName = "spriteGeometry";
-
-            Vertex[] verts = null;
-            uint[] indices = null;
-            CreateBoxWired(1, 1, 1, color, out verts, out indices);
-
-            SubMeshContent geo = new SubMeshContent()
-            {
-                Topology = PrimitiveTopology.LineList,
-                VertexType = VertexTypes.PositionColor,
-                Vertices = verts,
-                Indices = indices,
-            };
-
-            geometry.Add(geoName, new[] { geo });
-
-            return new ModelContent()
-            {
-                Geometry = geometry,
-            };
-        }
-        public static ModelContent GenerateBoundingSphere(uint sliceCount, uint stackCount, Color color)
-        {
-            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
-
-            string geoName = "spriteGeometry";
-
-            Vertex[] verts = null;
-            uint[] indices = null;
-            CreateSphereWired(1f, sliceCount, stackCount, color, out verts, out indices);
-
-            SubMeshContent geo = new SubMeshContent()
-            {
-                Topology = PrimitiveTopology.LineList,
-                VertexType = VertexTypes.PositionColor,
-                Vertices = verts,
-                Indices = indices,
-            };
-
-            geometry.Add(geoName, new[] { geo });
-
-            return new ModelContent()
-            {
                 Geometry = geometry,
             };
         }

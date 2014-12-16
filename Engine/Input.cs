@@ -123,7 +123,7 @@ namespace Engine
 
             if (this.LockToCenter)
             {
-                this.SetMousePosition(this.form.ScreenCenter);
+                this.SetMousePosition(this.form.AbsoluteCenter);
             }
         }
 

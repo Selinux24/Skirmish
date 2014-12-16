@@ -681,7 +681,10 @@ namespace Engine.Common
             }
         }
 
-
+        /// <summary>
+        /// Compute bounding box against transformed vertices
+        /// </summary>
+        /// <param name="transform">Transform</param>
         protected BoundingBox ComputeBoundingBox(Matrix transform)
         {
             BoundingBox box = new BoundingBox();
@@ -699,7 +702,10 @@ namespace Engine.Common
 
             return box;
         }
-
+        /// <summary>
+        /// Compute bounding sphere against transformed vertices
+        /// </summary>
+        /// <param name="transform">Transform</param>
         protected BoundingSphere ComputeBoundingSphere(Matrix transform)
         {
             BoundingSphere sphere = new BoundingSphere();
@@ -774,8 +780,6 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-
             if (this.SkinnedData != null)
             {
                 this.SkinnedData.Update(gameTime);
@@ -837,8 +841,13 @@ namespace Engine.Common
                 this.NormalMaps.Clear();
                 this.NormalMaps = null;
             }
-
-            base.Dispose();
+        }
+        /// <summary>
+        /// Handle viewport resize
+        /// </summary>
+        public override void HandleResizing()
+        {
+            
         }
     }
 }

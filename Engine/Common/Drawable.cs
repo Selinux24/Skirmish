@@ -3,11 +3,12 @@ using SharpDX.Direct3D11;
 
 namespace Engine.Common
 {
-    public class Drawable : IDisposable
+    public abstract class Drawable : IDisposable
     {
-        public Game Game { get; private set; }
-        public virtual Scene Scene { get; set; }
-        public DeviceContext DeviceContext { get { return this.Game.Graphics.DeviceContext; } }
+        public virtual Game Game { get; private set; }
+        public virtual Scene Scene { get; protected set; }
+        public virtual Device Device { get { return this.Game.Graphics.Device; } }
+        public virtual DeviceContext DeviceContext { get { return this.Game.Graphics.DeviceContext; } }
         public string Name { get; set; }
         public bool Visible { get; set; }
         public bool Active { get; set; }
@@ -21,18 +22,10 @@ namespace Engine.Common
             this.Visible = true;
             this.Order = 0;
         }
-        public virtual void Update(GameTime gameTime)
-        {
-
-        }
-        public virtual void Draw(GameTime gameTime)
-        {
-
-        }
-        public virtual void Dispose()
-        {
-
-        }
+        public abstract void Update(GameTime gameTime);
+        public abstract void Draw(GameTime gameTime);
+        public abstract void Dispose();
+        public abstract void HandleResizing();
         public override string ToString()
         {
             return string.Format("Type: {0}; Name: {1}; Order: {2}", this.GetType(), this.Name, this.Order);

@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "5 Skybox", "5 Skybox\5 Skyb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csproj", "{A4BAC380-82CB-4DB8-953F-A291F0BEF559}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Z Game Logic", "Z Game Logic\Z Game Logic.csproj", "{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +97,16 @@ Global
 		{A4BAC380-82CB-4DB8-953F-A291F0BEF559}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A4BAC380-82CB-4DB8-953F-A291F0BEF559}.Release|x86.ActiveCfg = Release|x86
 		{A4BAC380-82CB-4DB8-953F-A291F0BEF559}.Release|x86.Build.0 = Release|x86
+		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Debug|x86.ActiveCfg = Debug|x86
+		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Debug|x86.Build.0 = Debug|x86
+		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Release|Any CPU.ActiveCfg = Release|x86
+		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Release|Mixed Platforms.Build.0 = Release|x86
+		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Release|x86.ActiveCfg = Release|x86
+		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

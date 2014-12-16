@@ -61,13 +61,6 @@ namespace Engine
 
         public Device Device { get; private set; }
         public DeviceContext DeviceContext { get; private set; }
-        public bool FullScreen
-        {
-            get
-            {
-                return this.swapChain.IsFullScreen;
-            }
-        }
 
         public Graphics(EngineForm form, bool vsync, bool fullScreen, int refreshRate = 0, int multiSampleCount = 0)
         {
@@ -113,7 +106,7 @@ namespace Engine
             this.Device = device;
             this.DeviceContext = device.ImmediateContext;
 
-            this.PrepareDevice(form, false);
+            this.PrepareDevice(displayMode.Width, displayMode.Height, false);
 
             #region Alt + Enter
 
@@ -122,7 +115,7 @@ namespace Engine
                 factory.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAltEnter);
             }
 
-            form.KeyDown += (sender, eventArgs) =>
+            form.KeyUp += (sender, eventArgs) =>
             {
                 if (eventArgs.Alt && eventArgs.KeyCode == Keys.Enter)
                 {
@@ -132,15 +125,13 @@ namespace Engine
 
             #endregion
         }
-        public void PrepareDevice(EngineForm form, bool resizing)
+        public void PrepareDevice(int width, int height, bool resizing)
         {
             if (resizing)
             {
                 this.DisposeResources();
 
-                this.swapChain.ResizeBuffers(2, 0, 0, Format.Unknown, SwapChainFlags.AllowModeSwitch);
-
-                form.FullScreen = this.swapChain.IsFullScreen;
+                this.swapChain.ResizeBuffers(2, width, height, this.BufferFormat, SwapChainFlags.AllowModeSwitch);
             }
 
             #region Render Target
@@ -158,8 +149,8 @@ namespace Engine
                 this.Device,
                 new Texture2DDescription()
                 {
-                    Width = form.RenderWidth,
-                    Height = form.RenderHeight,
+                    Width = width,
+                    Height = height,
                     MipLevels = 1,
                     ArraySize = 1,
                     Format = this.DepthFormat,
@@ -306,14 +297,12 @@ namespace Engine
                 alphaToCoverageDesc.AlphaToCoverageEnable = true;
                 alphaToCoverageDesc.IndependentBlendEnable = false;
                 alphaToCoverageDesc.RenderTarget[0].IsBlendEnabled = false;
-                //--
                 alphaToCoverageDesc.RenderTarget[0].SourceBlend = BlendOption.One;
                 alphaToCoverageDesc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
                 alphaToCoverageDesc.RenderTarget[0].BlendOperation = BlendOperation.Add;
                 alphaToCoverageDesc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 alphaToCoverageDesc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
                 alphaToCoverageDesc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                //--
                 alphaToCoverageDesc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
 
                 this.blendAlphaToCoverage = new BlendState(this.Device, alphaToCoverageDesc);
@@ -348,8 +337,8 @@ namespace Engine
             {
                 X = 0,
                 Y = 0,
-                Width = form.RenderWidth,
-                Height = form.RenderHeight,
+                Width = width,
+                Height = height,
                 MinDepth = 0.0f,
                 MaxDepth = 1.0f,
             });
@@ -488,9 +477,6 @@ namespace Engine
                                         Height = height,
                                     },
                                     out result);
-
-                                result.Width = width;
-                                result.Height = height;
 
                                 found = true;
                             }

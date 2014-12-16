@@ -23,6 +23,8 @@ namespace SceneTest
                 this.Game.Form.RenderWidth,
                 this.Game.Form.RenderHeight,
                 0);
+
+            this.background.FitScreen = true;
         }
     }
 }

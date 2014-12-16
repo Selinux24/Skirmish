@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using SharpDX.Windows;
 
 namespace Engine
@@ -18,29 +17,23 @@ namespace Engine
         public Graphics Graphics { get; private set; }
         public string RuntimeText { get; private set; }
 
-        public Game(string name, int screenWidth, int screenHeight, bool vSync, bool fullScreen, bool showMouse = false, int refreshRate = 0, int multiSampleCount = 0)
+        public Game(string name, int screenWidth, int screenHeight, bool fullScreen, bool vSync = false, int refreshRate = 0, int multiSampleCount = 0)
         {
             this.name = name;
 
+            this.GameTime = new GameTime();
+
             #region Form
 
-            this.Form = new EngineForm(name, screenWidth, screenHeight, vSync, fullScreen, showMouse);
+            this.Form = new EngineForm(name, screenWidth, screenHeight, fullScreen);
 
             this.Form.UserResized += (sender, eventArgs) =>
             {
                 if (this.Graphics != null)
                 {
-                    this.Graphics.PrepareDevice((EngineForm)sender, true);
+                    this.Graphics.PrepareDevice(this.Form.RenderWidth, this.Form.RenderHeight, true);
 
-                    if (this.scenes.Count > 0)
-                    {
-                        for (int i = 0; i < this.scenes.Count; i++)
-                        {
-                            this.scenes[i].Camera.SetLens(
-                                this.Form.RenderWidth,
-                                this.Form.RenderHeight);
-                        }
-                    }
+                    this.scenes.ForEach(s => s.HandleResizing());
                 }
             };
 
@@ -55,8 +48,6 @@ namespace Engine
             };
 
             #endregion
-
-            this.GameTime = new GameTime();
 
             this.Input = new Input(this.Form);
 

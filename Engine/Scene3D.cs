@@ -68,6 +68,15 @@ namespace Engine
                 }
             }
         }
+        public override void HandleResizing()
+        {
+            base.HandleResizing();
+
+            for (int i = 0; i < this.components.Count; i++)
+            {
+                this.components[i].HandleResizing();
+            }
+        }
         public override void Dispose()
         {
             base.Dispose();
@@ -143,15 +152,11 @@ namespace Engine
 
             return newModel;
         }
-        public Cubemap AddCubemap(string texture, int radius, int order = 0)
+        public Cubemap AddSkydom(string texture, int radius, int order = 0)
         {
             ModelContent skydom = ModelContent.GenerateSkydom(this.ContentPath, texture, radius);
 
-            return AddCubemap(skydom, order);
-        }
-        public Cubemap AddCubemap(ModelContent geometry, int order = 0)
-        {
-            Cubemap newModel = new Cubemap(this.Game, this, geometry);
+            Cubemap newModel = new Cubemap(this.Game, this, skydom);
 
             this.AddComponent(newModel, order);
 
@@ -159,22 +164,12 @@ namespace Engine
         }
         public Sprite AddSprite(string texture, int width, int height, int order = 0)
         {
-            ModelContent sprite = ModelContent.GenerateSprite(
-                this.ContentPath,
+            Sprite newModel = new Sprite(
+                this.Game,
+                this,
                 texture,
                 width,
-                height,
-                this.Game.Form.Width,
-                this.Game.Form.Height);
-
-            return AddSprite(sprite, order);
-        }
-        public Sprite AddSprite(ModelContent geometry, int order = 0)
-        {
-            Sprite newModel = new Sprite(
-               this.Game,
-               this,
-               geometry);
+                height);
 
             this.AddComponent(newModel, order);
 
