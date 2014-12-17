@@ -27,8 +27,7 @@ float4 PSFont(PSVertexPositionTexture input) : SV_TARGET
 
 	if(litColor.a != 0.0f)
 	{
-		litColor.a = 1.0f;
-		litColor = litColor * gColor;
+		litColor *= gColor;
 	}
 
 	return litColor;

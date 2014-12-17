@@ -6,7 +6,7 @@ namespace Collada
     {
         static void Main()
         {
-            using (Game cl = new Game("4 Collada", 400, 300, false))
+            using (Game cl = new Game("4 Collada", 1366, 720, true))
             {
                 cl.Form.ShowMouse = false;
 
