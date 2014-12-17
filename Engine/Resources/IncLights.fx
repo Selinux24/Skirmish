@@ -26,6 +26,8 @@ SamplerState samAnisotropic
 	AddressV = WRAP;
 };
 
+SamplerState samFont;
+
 struct Material
 {
 	float4 Ambient;

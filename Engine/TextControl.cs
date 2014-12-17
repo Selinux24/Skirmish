@@ -7,6 +7,7 @@ using SharpDX.DXGI;
 using Bitmap = System.Drawing.Bitmap;
 using Brushes = System.Drawing.Brushes;
 using Buffer = SharpDX.Direct3D11.Buffer;
+using Device = SharpDX.Direct3D11.Device;
 using CompositingMode = System.Drawing.Drawing2D.CompositingMode;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using Font = System.Drawing.Font;
@@ -43,7 +44,6 @@ namespace Engine
         private Buffer indexBuffer = null;
         private int indexCount = 0;
 
-        private ShaderResourceView texture = null;
         private FontMap fontMap = null;
         private Vector2 position = Vector2.Zero;
         private string text = null;
@@ -146,10 +146,7 @@ namespace Engine
             this.technique = this.effect.AddInputLayout(VertexTypes.PositionTexture);
             this.inputLayout = this.effect.GetInputLayout(this.technique);
 
-            using (MemoryStream mstr = FontMap.MapFont(font, size, out this.fontMap))
-            {
-                this.texture = game.Graphics.Device.LoadTexture(mstr.GetBuffer());
-            }
+            this.fontMap = FontMap.MapFont(game.Graphics.Device, font, size);
 
             this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4]);
             this.vertexBufferStride = VertexPositionTexture.SizeInBytes;
@@ -169,12 +166,6 @@ namespace Engine
                 this.effect.Dispose();
                 this.effect = null;
             }
-
-            if (this.texture != null)
-            {
-                this.texture.Dispose();
-                this.texture = null;
-            }
         }
         public override void Update(GameTime gameTime)
         {
@@ -189,7 +180,7 @@ namespace Engine
                 this.effect.FrameBuffer.World = this.Scene.World;
                 this.effect.FrameBuffer.WorldViewProjection = this.Scene.World * this.Scene.ViewProjectionOrthogonal;
                 this.effect.FrameBuffer.Color = this.ForeColor;
-                this.effect.UpdatePerFrame(this.texture);
+                this.effect.UpdatePerFrame(this.fontMap.Texture);
 
                 #endregion
 
@@ -265,14 +256,17 @@ namespace Engine
         }
     }
 
-    public class FontMap : Dictionary<char, FontChar>
+    public class FontMap : Dictionary<char, FontChar>, IDisposable
     {
+        private static List<FontMap> gCache = new List<FontMap>();
+
         public const int MAXTEXTLENGTH = 1024;
         public const int TEXTURESIZE = 1024;
         public const uint KeyCodes = 512;
 
         public string Font { get; private set; }
         public int Size { get; private set; }
+        public ShaderResourceView Texture { get; private set; }
 
         public static char[] ValidKeys
         {
@@ -293,82 +287,91 @@ namespace Engine
             }
         }
 
-        public static MemoryStream MapFont(string font, int size, out FontMap map)
+        public static FontMap MapFont(Device device, string font, int size)
         {
-            map = new FontMap()
+            FontMap map = gCache.Find(f => f.Font == font && f.Size == size);
+            if (map == null)
             {
-                Font = font,
-                Size = size,
-            };
-
-            using (Bitmap bmp = new Bitmap(TEXTURESIZE, TEXTURESIZE))
-            using (Graph gra = Graph.FromImage(bmp))
-            {
-                gra.TextContrast = 12;
-                gra.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;
-                gra.CompositingMode = CompositingMode.SourceCopy;
-
-                gra.FillRegion(
-                    Brushes.Transparent,
-                    new Region(new RectangleF(0, 0, TEXTURESIZE, TEXTURESIZE)));
-
-                using (StringFormat fmt = StringFormat.GenericDefault)
-                using (Font fnt = new Font(font, size, FontStyle.Regular, GraphicsUnit.Pixel))
+                map = new FontMap()
                 {
-                    float left = 0f;
-                    float top = 0f;
+                    Font = font,
+                    Size = size,
+                };
 
-                    char[] keys = FontMap.ValidKeys;
+                using (Bitmap bmp = new Bitmap(TEXTURESIZE, TEXTURESIZE))
+                using (Graph gra = Graph.FromImage(bmp))
+                {
+                    gra.TextContrast = 12;
+                    gra.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;
+                    gra.CompositingMode = CompositingMode.SourceCopy;
 
-                    for (int i = 0; i < keys.Length; i++)
+                    gra.FillRegion(
+                        Brushes.Transparent,
+                        new Region(new RectangleF(0, 0, TEXTURESIZE, TEXTURESIZE)));
+
+                    using (StringFormat fmt = StringFormat.GenericDefault)
+                    using (Font fnt = new Font(font, size, FontStyle.Regular, GraphicsUnit.Pixel))
                     {
-                        char c = keys[i];
+                        float left = 0f;
+                        float top = 0f;
 
-                        SizeF s = gra.MeasureString(
-                            c.ToString(),
-                            fnt,
-                            int.MaxValue,
-                            fmt);
+                        char[] keys = FontMap.ValidKeys;
 
-                        if (c == ' ')
+                        for (int i = 0; i < keys.Length; i++)
                         {
-                            s.Width = fnt.SizeInPoints;
+                            char c = keys[i];
+
+                            SizeF s = gra.MeasureString(
+                                c.ToString(),
+                                fnt,
+                                int.MaxValue,
+                                fmt);
+
+                            if (c == ' ')
+                            {
+                                s.Width = fnt.SizeInPoints;
+                            }
+
+                            if (left + s.Width >= TEXTURESIZE)
+                            {
+                                left = 0f;
+                                top += s.Height;
+                            }
+
+                            gra.DrawString(
+                                c.ToString(),
+                                fnt,
+                                Brushes.White,
+                                left,
+                                top,
+                                fmt);
+
+                            FontChar chr = new FontChar()
+                            {
+                                X = (int)left,
+                                Y = (int)top,
+                                Width = (int)Math.Round(s.Width),
+                                Height = (int)Math.Round(s.Height),
+                            };
+
+                            map.Add(c, chr);
+
+                            left += s.Width;
                         }
+                    }
 
-                        if (left + s.Width >= TEXTURESIZE)
-                        {
-                            left = 0f;
-                            top += s.Height;
-                        }
+                    using (MemoryStream mstr = new MemoryStream())
+                    {
+                        bmp.Save(mstr, ImageFormat.Png);
 
-                        gra.DrawString(
-                            c.ToString(),
-                            fnt,
-                            Brushes.White,
-                            left,
-                            top,
-                            fmt);
-
-                        FontChar chr = new FontChar()
-                        {
-                            X = (int)left,
-                            Y = (int)top,
-                            Width = (int)Math.Round(s.Width),
-                            Height = (int)Math.Round(s.Height),
-                        };
-
-                        map.Add(c, chr);
-
-                        left += s.Width;
+                        map.Texture = device.LoadTexture(mstr.GetBuffer());
                     }
                 }
 
-                MemoryStream mstr = new MemoryStream();
-
-                bmp.Save(mstr, ImageFormat.Png);
-
-                return mstr;
+                gCache.Add(map);
             }
+
+            return map;
         }
 
         public void MapSentence(
@@ -441,6 +444,15 @@ namespace Engine
             vertices = vertList.ToArray();
             indices = indexList.ToArray();
             size = pos;
+        }
+
+        public void Dispose()
+        {
+            if (this.Texture != null)
+            {
+                this.Texture.Dispose();
+                this.Texture = null;
+            }
         }
     }
 }

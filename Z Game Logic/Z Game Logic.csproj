@@ -55,12 +55,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions.cs" />
+    <Compile Include="Rules\ActionsMelee.cs" />
+    <Compile Include="Rules\ActionsMorale.cs" />
+    <Compile Include="Rules\ActionsMovement.cs" />
+    <Compile Include="Rules\ActionsShooting.cs" />
+    <Compile Include="Rules\ActionTypes.cs" />
+    <Compile Include="Rules\HealthStates.cs" />
+    <Compile Include="Rules\Item.cs" />
+    <Compile Include="Rules\Melee.cs" />
+    <Compile Include="Rules\MoraleStates.cs" />
     <Compile Include="Rules\Phase.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rules\Skirmish.cs" />
     <Compile Include="Rules\Soldier.cs" />
-    <Compile Include="Rules\SoldierAction.cs" />
+    <Compile Include="Rules\Actions.cs" />
+    <Compile Include="Rules\SoldierClasses.cs" />
     <Compile Include="Rules\Team.cs" />
     <Compile Include="Rules\TeamRole.cs" />
     <Compile Include="TestScene3D.cs" />

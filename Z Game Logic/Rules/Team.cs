@@ -9,22 +9,61 @@ namespace GameLogic.Rules
         public string Name { get; set; }
         public string Faction { get; set; }
         public TeamRole Role { get; set; }
-        public Soldier Leader { get; set; }
+        public Soldier Leader
+        {
+            get
+            {
+                return this.soldiers[0];
+            }
+        }
         public Soldier[] Soldiers
         {
             get
             {
                 return this.soldiers.ToArray();
             }
-            set
-            {
-                this.soldiers.Clear();
+        }
 
-                if(value != null && value.Length >0)
-                {
-                    this.soldiers.AddRange(value);
-                }
+        public int AirStrikeProbability { get; set; }
+        public int AirStrikeRequests { get; set; }
+        public int AirStrikePenetration { get; set; }
+        public int AirStrikeDamage { get; set; }
+        public int OrdnanceProbability { get; set; }
+        public int OrdnanceRequests { get; set; }
+        public int OrdnancePenetration { get; set; }
+        public int OrdnanceDamage { get; set; }
+        public int ReinforcementProbability { get; set; }
+
+        public Team(string name)
+        {
+            this.Name = name;
+
+            this.AirStrikeProbability = 0;
+            this.AirStrikeRequests = 0;
+            this.AirStrikePenetration = 0;
+            this.AirStrikeDamage = 0;
+            this.OrdnanceProbability = 0;
+            this.OrdnanceRequests = 0;
+            this.OrdnancePenetration = 0;
+            this.OrdnanceDamage = 0;
+            this.ReinforcementProbability = 0;
+        }
+
+        public void NextTurn()
+        {
+            foreach (Soldier soldier in this.soldiers)
+            {
+                soldier.NextTurn();
             }
+        }
+        public Actions[] GetActions(Phase phase, Soldier soldier, ActionTypes actionType = ActionTypes.All)
+        {
+            return new Actions[] { };
+        }
+
+        public void AddSoldier(string name, SoldierClasses soldierClass)
+        {
+            this.soldiers.Add(new Soldier(name, soldierClass));
         }
 
         public override string ToString()

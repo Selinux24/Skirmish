@@ -7,6 +7,7 @@ namespace GameLogic.Rules
     {
         private List<Team> teams = new List<Team>();
         private Dictionary<Team, bool> turnInfo = new Dictionary<Team, bool>();
+        private List<Melee> melees = new List<Melee>();
 
         private int currentTurn = 0;
         private Phase currentPhase = Phase.Movement;
@@ -80,21 +81,18 @@ namespace GameLogic.Rules
 
         public void AddTeam(string name, string faction, TeamRole role, int soldiers)
         {
-            List<Soldier> soldierList = new List<Soldier>(soldiers);
-
-            for (int i = 0; i < soldiers; i++)
+            Team team = new Team(name)
             {
-                soldierList.Add(new Soldier() { Name = string.Format("John Smith {0:00} of {1}", i + 1, name) });
-            }
-
-            Team team = new Team()
-            {
-                Name = name,
                 Faction = faction,
                 Role = role,
-                Leader = soldierList[0],
-                Soldiers = soldierList.ToArray(),
             };
+
+            team.AddSoldier(string.Format("Hannibal Smith of {0}", name), SoldierClasses.Line);
+
+            for (int i = 1; i < soldiers; i++)
+            {
+                team.AddSoldier(string.Format("John Smith {0:00} of {1}", i, name), SoldierClasses.Line);
+            }
 
             this.teams.Add(team);
         }
@@ -115,24 +113,28 @@ namespace GameLogic.Rules
 
         public Soldier NextSoldier(bool selectIdle)
         {
-            Soldier current = this.CurrentSoldier;
-
-            Soldier[] selectables = selectIdle ? this.IdleSoldiers : this.Soldiers;
-            if (selectables.Length > 0)
+            Soldier[] soldiers = this.Soldiers;
+            if (soldiers.Length > 0)
             {
-                int index = Array.IndexOf(selectables, current);
-                if (index >= 0)
+                if (selectIdle)
                 {
-                    this.currentSoldier = index + 1;
+                    Soldier[] idles = this.IdleSoldiers;
+                    if (idles.Length > 0)
+                    {
+                        if (this.CurrentSoldier.IdleForPhase(this.currentPhase))
+                        {
+                            this.NextSoldierIndex();
+                        }
+
+                        while (!this.CurrentSoldier.IdleForPhase(this.currentPhase))
+                        {
+                            this.NextSoldierIndex();
+                        }
+                    }
                 }
                 else
                 {
-                    this.currentSoldier = Array.IndexOf(this.Soldiers, selectables[0]);
-                }
-
-                if (this.currentSoldier > this.Soldiers.Length - 1)
-                {
-                    this.currentSoldier = 0;
+                    this.NextSoldierIndex();
                 }
             }
 
@@ -163,24 +165,60 @@ namespace GameLogic.Rules
 
             return this.CurrentSoldier;
         }
+        private void NextSoldierIndex()
+        {
+            this.currentSoldier++;
 
-        public SoldierAction[] GetActions()
-        {
-            return SoldierAction.GetActions(this.currentPhase, this.CurrentTeam, this.CurrentSoldier);
+            if (this.currentSoldier > this.Soldiers.Length - 1)
+            {
+                this.currentSoldier = 0;
+            }
         }
-        public void DoAction(SoldierAction action)
+        private void PrevSoldierIndex()
         {
-            if (SoldierAction.DoAction(action, this.currentPhase, this.CurrentTeam, this.CurrentSoldier))
+            this.currentSoldier--;
+
+            if (this.currentSoldier < 0)
+            {
+                this.currentSoldier = this.Soldiers.Length - 1;
+            }
+        }
+
+        public Actions[] GetActions()
+        {
+            return Actions.GetActions(this.currentPhase, this.CurrentTeam, this.CurrentSoldier, ActionTypes.Manual);
+        }
+        public void DoAction(Actions action)
+        {
+            if (action.Execute())
             {
                 this.NextSoldier(true);
             }
         }
+        public Melee GetMelee(Soldier soldier)
+        {
+            return this.melees.Find(m => m.ContainsSoldier(soldier));
+        }
+        public void JoinMelee(Soldier active, Soldier passive)
+        {
+            Melee melee = this.GetMelee(passive);
+            if (melee == null)
+            {
+                melee = new Melee();
 
-        public void NextPhase()
+                this.melees.Add(melee);
+
+                melee.AddFighter(passive);
+            }
+
+            melee.AddFighter(active);
+        }
+
+        public void Next()
         {
             if (this.currentPhase == Phase.End)
             {
-                //All phases done for this team. Select next team
+                #region All phases done for this team. Select next team
 
                 //Get current
                 Team currentTeam = this.CurrentTeam;
@@ -192,30 +230,78 @@ namespace GameLogic.Rules
                 currentTeam = this.CurrentTeam;
                 if (currentTeam == null)
                 {
-                    //Next turn
+                    #region No idle teams, next turn
+
                     this.currentTurn++;
 
                     //Mark all teams idle
                     this.turnInfo.Clear();
                     foreach (Team team in this.teams)
                     {
+                        team.NextTurn();
+
                         this.turnInfo.Add(team, true);
                     }
+
+                    this.currentPhase = 0;
+                    this.currentSoldier = 0;
+
+                    #endregion
+                }
+                else
+                {
+                    #region Next team
+
+                    this.currentPhase = 0;
+                    this.currentSoldier = 0;
+
+                    #endregion
                 }
 
-                this.currentPhase = 0;
-
-                //Select first idle soldier for this phase
-                this.currentSoldier = 0;
+                #endregion
             }
             else
             {
-                //Done with current phase
-                this.currentPhase++;
+                #region Done with current phase, next phase
 
-                //Select first idle soldier for this phase
+                if (this.currentPhase == Phase.Melee)
+                {
+                    //Resolve melees
+                    foreach (Melee melee in this.melees)
+                    {
+                        melee.Resolve();
+                    }
+
+                    this.melees.RemoveAll(m => m.Done == true);
+                }
+
+                this.currentPhase++;
                 this.currentSoldier = 0;
+
+                //Do automatic actions
+                foreach (Soldier soldier in this.Soldiers)
+                {
+                    Actions[] actions = soldier.GetActions(this.currentPhase, ActionTypes.Automatic);
+                    if (actions.Length > 0)
+                    {
+                        foreach (Actions ac in actions)
+                        {
+                            ac.Execute();
+                        }
+                    }
+                }
+
+                #endregion
             }
+        }
+
+        public Team[] EnemyOf(Team team)
+        {
+            return teams.FindAll(t => t.Faction != team.Faction && t.Role != TeamRole.Neutral).ToArray();
+        }
+        public Team[] FriendOf(Team team)
+        {
+            return teams.FindAll(t => t.Faction == team.Faction || t.Role == TeamRole.Neutral).ToArray();
         }
 
         public override string ToString()
