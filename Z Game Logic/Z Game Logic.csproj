@@ -61,8 +61,10 @@
     <Compile Include="Rules\ActionsMovement.cs" />
     <Compile Include="Rules\ActionsShooting.cs" />
     <Compile Include="Rules\ActionTypes.cs" />
+    <Compile Include="Rules\Area.cs" />
     <Compile Include="Rules\HealthStates.cs" />
     <Compile Include="Rules\Item.cs" />
+    <Compile Include="Rules\ItemClasses.cs" />
     <Compile Include="Rules\Melee.cs" />
     <Compile Include="Rules\MoraleStates.cs" />
     <Compile Include="Rules\Phase.cs" />
@@ -72,8 +74,11 @@
     <Compile Include="Rules\Soldier.cs" />
     <Compile Include="Rules\Actions.cs" />
     <Compile Include="Rules\SoldierClasses.cs" />
+    <Compile Include="Rules\SoldierStates.cs" />
     <Compile Include="Rules\Team.cs" />
     <Compile Include="Rules\TeamRole.cs" />
+    <Compile Include="Rules\Victory.cs" />
+    <Compile Include="Rules\Weapon.cs" />
     <Compile Include="TestScene3D.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

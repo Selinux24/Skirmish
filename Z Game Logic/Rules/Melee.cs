@@ -65,26 +65,49 @@ namespace GameLogic.Rules
         {
             for (int i = 1; i <= 10; i++)
             {
-                Soldier[] iSoldiers = this.soldiers.FindAll(s => s.Initiative == i).ToArray();
+                Soldier[] iSoldiers = this.soldiers.FindAll(s => s.CurrentInitiative == i).ToArray();
                 if (iSoldiers.Length > 0)
                 {
                     foreach (Soldier s in iSoldiers)
                     {
                         Soldier enemy = this.GetRandomEnemy(s);
-
-                        enemy.FightTest(s);
+                        if (enemy != null)
+                        {
+                            if (s.FightingTest())
+                            {
+                                enemy.HitTest(s.CurrentMeleeWeapon);
+                            }
+                        }
                     }
                 }
             }
 
-            this.soldiers.RemoveAll(s => s.Health == HealthStates.Disabled);
+            this.soldiers.ForEach((s) => 
+            {
+                if (s.CurrentHealth == HealthStates.Disabled) s.MeleeDisolved();
+            });
+
+            this.soldiers.RemoveAll(s => s.CurrentHealth == HealthStates.Disabled);
+        }
+        public void Disolve()
+        {
+            foreach (Soldier s in soldiers)
+            {
+                s.MeleeDisolved();
+            }
         }
 
         private Soldier GetRandomEnemy(Soldier soldier)
         {
             Soldier[] enemyList = this.soldiers.FindAll(s => s.Team.Faction != soldier.Team.Faction).ToArray();
+            if (enemyList.Length > 0)
+            {
+                Random rnd = new Random();
 
-            return enemyList[0];
+                return enemyList[rnd.Next(0, enemyList.Length - 1)];
+            }
+
+            return null;
         }
     }
 }

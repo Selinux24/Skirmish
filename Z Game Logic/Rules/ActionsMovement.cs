@@ -4,7 +4,7 @@ namespace GameLogic.Rules
 {
     public abstract class ActionsMovement : Actions
     {
-        public int Distance { get; set; }
+        public int WastedPoints { get; set; }
 
         public static ActionsMovement[] List
         {
@@ -38,8 +38,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForMelee = false;
+            this.Active.Move(this.WastedPoints);
 
             return true;
         }
@@ -54,9 +53,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
+            this.Active.Run(this.WastedPoints);
 
             return true;
         }
@@ -71,8 +68,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForMelee = false;
+            this.Active.Move(this.WastedPoints);
 
             return true;
         }
@@ -87,8 +83,8 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
+            this.Active.Assault(this.WastedPoints);
+            this.Passive.Assault(0);
 
             return true;
         }
@@ -103,9 +99,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
+            this.Active.SetState(SoldierStates.CoveringFire, this.Area);
 
             return true;
         }
@@ -120,9 +114,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = true;
-            this.Active.IdleForMelee = false;
+            this.Active.ReloadTest(this.WastedPoints);
 
             return true;
         }
@@ -137,9 +129,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = true;
-            this.Active.IdleForMelee = false;
+            this.Active.RepairTest(this.WastedPoints);
 
             return true;
         }
@@ -154,9 +144,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = true;
-            this.Active.IdleForMelee = false;
+            this.Active.Inventory(this.WastedPoints);
 
             return true;
         }
@@ -167,15 +155,12 @@ namespace GameLogic.Rules
         public UseMovementItem()
         {
             this.Name = "Use Item";
+            this.ItemAction = true;
         }
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
-
-            this.Item.Use();
+            this.Active.UseItemForMovementPhase(this.WastedPoints);
 
             return true;
         }
@@ -186,13 +171,12 @@ namespace GameLogic.Rules
         public Communications()
         {
             this.Name = "Communications";
+            this.LeadersOnly = true;
         }
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
+            this.Active.CommunicationsTest();
 
             return true;
         }
@@ -208,9 +192,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
+            this.Active.FindCover();
 
             return true;
         }
@@ -226,9 +208,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
+            this.Active.RunAway();
 
             return true;
         }

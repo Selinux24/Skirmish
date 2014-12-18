@@ -3,6 +3,8 @@ namespace GameLogic.Rules
 {
     public abstract class ActionsShooting : Actions
     {
+        public int WastedPoints { get; set; }
+
         public static ActionsShooting[] List
         {
             get
@@ -28,17 +30,9 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
-
-            if (this.Passive.Health == HealthStates.Healthy)
+            if (this.Active.ShootingTest(this.WastedPoints))
             {
-                this.Passive.Health = HealthStates.Wounded;
-            }
-            else if (this.Passive.Health == HealthStates.Wounded)
-            {
-                this.Passive.Health = HealthStates.Disabled;
+                this.Passive.HitTest(this.Active.CurrentShootingWeapon);
             }
 
             return true;
@@ -54,9 +48,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
+            this.Active.SetState(SoldierStates.SupressingFire, this.Area);
 
             return true;
         }
@@ -67,13 +59,12 @@ namespace GameLogic.Rules
         public Support()
         {
             this.Name = "Support";
+            this.NeedsCommunicator = true;
         }
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
+            this.Active.SupportTest();
 
             return true;
         }
@@ -84,15 +75,12 @@ namespace GameLogic.Rules
         public UseShootingItem()
         {
             this.Name = "Use Item";
+            this.ItemAction = true;
         }
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
-
-            this.Item.Use();
+            this.Active.UseItemForShootingPhase(this.WastedPoints);
 
             return true;
         }
@@ -103,21 +91,14 @@ namespace GameLogic.Rules
         public FirstAid()
         {
             this.Name = "First Aid";
+            this.Classes = SoldierClasses.Medic;
         }
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
-
-            if (this.Passive.Health == HealthStates.Disabled)
+            if (this.Active.FirstAidTest(this.WastedPoints))
             {
-                this.Passive.Health = HealthStates.Wounded;
-            }
-            else if (this.Passive.Health == HealthStates.Wounded)
-            {
-                this.Passive.Health = HealthStates.Healthy;
+                this.Passive.HealingTest(10);
             }
 
             return true;

@@ -26,7 +26,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMorale = false;
+            this.Active.TakeControlTest();
 
             return true;
         }
@@ -41,11 +41,7 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
-
-            this.Item.Use();
+            this.Active.UseItemForMoralePhase();
 
             return true;
         }

@@ -11,28 +11,10 @@ namespace GameLogic.Rules
             {
                 return new ActionsMelee[]
                 {
-                    new Fight(),
                     new Leave(),
                     new UseMeleeItem(),
                 };
             }
-        }
-    }
-
-    public class Fight : ActionsMelee
-    {
-        public Fight()
-        {
-            this.Name = "Fight";
-        }
-
-        public override bool Execute()
-        {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
-
-            return true;
         }
     }
 
@@ -45,11 +27,10 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
-
-            this.Melee.RemoveFighter(this.Active);
+            if (this.Active.LeaveMeleeTest())
+            {
+                this.Melee.RemoveFighter(this.Active);
+            }
 
             return true;
         }
@@ -60,15 +41,12 @@ namespace GameLogic.Rules
         public UseMeleeItem()
         {
             this.Name = "Use Item";
+            this.ItemAction = true;
         }
 
         public override bool Execute()
         {
-            this.Active.IdleForMovement = false;
-            this.Active.IdleForShooting = false;
-            this.Active.IdleForMelee = false;
-
-            this.Item.Use();
+            this.Active.UseItemForMeleePhase();
 
             return true;
         }

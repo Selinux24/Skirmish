@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System;
+using System.Linq;
 
 namespace GameLogic.Rules
 {
@@ -89,14 +90,17 @@ namespace GameLogic.Rules
 
             team.AddSoldier(string.Format("Hannibal Smith of {0}", name), SoldierClasses.Line);
 
-            for (int i = 1; i < soldiers; i++)
+            for (int i = 1; i < soldiers - 2; i++)
             {
                 team.AddSoldier(string.Format("John Smith {0:00} of {1}", i, name), SoldierClasses.Line);
             }
 
+            team.AddSoldier(string.Format("Puro Smith of {0}", name), SoldierClasses.Heavy);
+
+            team.AddSoldier(string.Format("Doc Smith of {0}", name), SoldierClasses.Medic);
+
             this.teams.Add(team);
         }
-
         public void Start()
         {
             this.currentTurn = 1;
@@ -109,6 +113,33 @@ namespace GameLogic.Rules
             }
 
             this.currentSoldier = 0;
+        }
+        public Victory IsFinished()
+        {
+            //Victory conditions...
+            Team[] activeTeams = teams.FindAll(t =>
+                t.Role != TeamRole.Neutral &&
+                Array.Exists(t.Soldiers, s => s.CurrentHealth != HealthStates.Disabled)).ToArray();
+
+            string[] factions = activeTeams.Distinct((a) => { return a.Faction; }).ToArray();
+            if (factions.Length == 1)
+            {
+                return new Victory()
+                {
+                    Text = factions[0] + " wins!",
+                };
+            }
+            else if (factions.Length == 0)
+            {
+                return new Victory()
+                {
+                    Text = "Draw...",
+                };
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public Soldier NextSoldier(bool selectIdle)
@@ -186,14 +217,18 @@ namespace GameLogic.Rules
 
         public Actions[] GetActions()
         {
-            return Actions.GetActions(this.currentPhase, this.CurrentTeam, this.CurrentSoldier, ActionTypes.Manual);
+            Melee melee = this.GetMelee(this.CurrentSoldier);
+
+            return Actions.GetActions(
+                this.currentPhase,
+                this.CurrentTeam,
+                this.CurrentSoldier,
+                melee != null,
+                ActionTypes.Manual);
         }
-        public void DoAction(Actions action)
+        public bool DoAction(Actions action)
         {
-            if (action.Execute())
-            {
-                this.NextSoldier(true);
-            }
+            return action.Execute();
         }
         public Melee GetMelee(Soldier soldier)
         {
@@ -270,8 +305,13 @@ namespace GameLogic.Rules
                     foreach (Melee melee in this.melees)
                     {
                         melee.Resolve();
-                    }
 
+                        if (melee.Done)
+                        {
+                            melee.Disolve();
+                        }
+                    }
+                    
                     this.melees.RemoveAll(m => m.Done == true);
                 }
 
@@ -281,7 +321,9 @@ namespace GameLogic.Rules
                 //Do automatic actions
                 foreach (Soldier soldier in this.Soldiers)
                 {
-                    Actions[] actions = soldier.GetActions(this.currentPhase, ActionTypes.Automatic);
+                    Melee melee = this.GetMelee(soldier);
+
+                    Actions[] actions = soldier.GetActions(this.currentPhase, melee != null, ActionTypes.Automatic);
                     if (actions.Length > 0)
                     {
                         foreach (Actions ac in actions)
@@ -306,7 +348,12 @@ namespace GameLogic.Rules
 
         public override string ToString()
         {
-            return string.Format("Battle -> {0} teams. Turn {0} | Phase {1}", this.currentTurn, this.currentPhase, this.teams.Count);
+            return string.Format(
+                "Battle -> {0} teams. Turn {1} | Phase {2}. Melees {3}",
+                this.teams.Count,
+                this.currentTurn, 
+                this.currentPhase, 
+                this.melees.Count);
         }
     }
 }

@@ -56,14 +56,14 @@ namespace GameLogic.Rules
                 soldier.NextTurn();
             }
         }
-        public Actions[] GetActions(Phase phase, Soldier soldier, ActionTypes actionType = ActionTypes.All)
+        public Actions[] GetActions(Phase phase, Soldier soldier, bool onMelee, ActionTypes actionType = ActionTypes.All)
         {
             return new Actions[] { };
         }
 
         public void AddSoldier(string name, SoldierClasses soldierClass)
         {
-            this.soldiers.Add(new Soldier(name, soldierClass));
+            this.soldiers.Add(new Soldier(name, soldierClass, this));
         }
 
         public override string ToString()

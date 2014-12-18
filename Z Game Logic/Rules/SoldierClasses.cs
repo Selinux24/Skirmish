@@ -1,11 +1,12 @@
 ﻿
 namespace GameLogic.Rules
 {
-    public enum SoldierClasses
+    public enum SoldierClasses : int
     {
-        Line,
-        Support,
-        Heavy,
-        Medic,
+        None = 0,
+        Line = 1,
+        Support = 2,
+        Heavy = 4,
+        Medic = 8,
     }
 }
