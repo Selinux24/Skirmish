@@ -41,6 +41,7 @@ namespace Engine
         private int vertexCount = 0;
         private int vertexBufferStride = 0;
         private int vertexBufferOffset = 0;
+        private VertexBufferBinding[] vertexBufferBinding = null;
         private Buffer indexBuffer = null;
         private int indexCount = 0;
 
@@ -59,6 +60,7 @@ namespace Engine
                 base.Scene = value;
             }
         }
+        public readonly string Font = null;
         public string Text
         {
             get
@@ -67,9 +69,12 @@ namespace Engine
             }
             set
             {
-                this.text = value;
+                if (!string.Equals(this.text, value))
+                {
+                    this.text = value;
 
-                this.MapText();
+                    this.MapText();
+                }
             }
         }
         public int CharacterCount
@@ -88,7 +93,7 @@ namespace Engine
         }
         public Color4 ForeColor { get; set; }
         public Color4 BackColor { get; set; }
-        public readonly string Font = null;
+        public Vector2 BackColorRelative { get; set; }
 
         public Vector2 Position
         {
@@ -99,8 +104,6 @@ namespace Engine
             set
             {
                 this.position = value;
-
-                this.MapText();
             }
         }
         public int Left
@@ -112,8 +115,6 @@ namespace Engine
             set
             {
                 this.position.X = value;
-
-                this.MapText();
             }
         }
         public int Top
@@ -125,8 +126,6 @@ namespace Engine
             set
             {
                 this.position.Y = value;
-
-                this.MapText();
             }
         }
         public int Width { get; private set; }
@@ -135,7 +134,7 @@ namespace Engine
         public TextControl(Game game, Scene3D scene, string font, int size, Color color)
             : this(game, scene, font, size, color, Color.Transparent)
         {
-            
+
         }
         public TextControl(Game game, Scene3D scene, string font, int size, Color color, Color backColor)
             : base(game, scene)
@@ -152,12 +151,19 @@ namespace Engine
             this.vertexBufferStride = VertexPositionTexture.SizeInBytes;
             this.vertexBufferOffset = 0;
             this.vertexCount = 0;
+            this.vertexBufferBinding = new VertexBufferBinding[]
+            {
+                new VertexBufferBinding(this.vertexBuffer, this.vertexBufferStride, this.vertexBufferOffset),
+            };
 
             this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferWrite(new uint[FontMap.MAXTEXTLENGTH * 6]);
             this.indexCount = 0;
 
             this.ForeColor = color;
             this.BackColor = backColor;
+            this.BackColorRelative = Vector2.One;
+
+            this.MapText();
         }
         public override void Dispose()
         {
@@ -169,56 +175,62 @@ namespace Engine
         }
         public override void Update(GameTime gameTime)
         {
-            
+
         }
         public override void Draw(GameTime gameTime)
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
-                #region Per frame update
-
-                this.effect.FrameBuffer.World = this.Scene.World;
-                this.effect.FrameBuffer.WorldViewProjection = this.Scene.World * this.Scene.ViewProjectionOrthogonal;
-                this.effect.FrameBuffer.Color = this.ForeColor;
-                this.effect.UpdatePerFrame(this.fontMap.Texture);
-
-                #endregion
-
-                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
-
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(
-                    0,
-                    new VertexBufferBinding[]
-                    {
-                        new VertexBufferBinding(this.vertexBuffer, this.vertexBufferStride, this.vertexBufferOffset),
-                    });
-
                 this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-
+                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
+                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
                 this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
 
-                EffectTechnique technique = this.effect.GetTechnique("FontDrawer");
-
-                for (int p = 0; p < technique.Description.PassCount; p++)
-                {
-                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
-
-                    if (this.indexBuffer != null)
-                    {
-                        this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
-                    }
-                    else
-                    {
-                        this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
-                    }
-
-                    Counters.DrawCallsPerFrame++;
-                }
+                this.DrawText(this.Position, this.ForeColor);
+                if (this.BackColor != Color.Transparent) this.DrawText(this.Position + this.BackColorRelative, this.BackColor);
             }
         }
+        private void DrawText(Vector2 position, Color4 color)
+        {
+            #region Per frame update
+
+            Vector3 pos = new Vector3(
+                position.X - this.Game.Form.RelativeCenter.X,
+                -position.Y + this.Game.Form.RelativeCenter.Y,
+                0f);
+
+            Matrix world = this.Scene.World * Matrix.Translation(pos);
+            Matrix worldViewProjection = world * this.Scene.ViewProjectionOrthogonal;
+
+            this.effect.FrameBuffer.World = world;
+            this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;
+            this.effect.FrameBuffer.Color = color;
+            this.effect.UpdatePerFrame(this.fontMap.Texture);
+
+            #endregion
+
+            EffectTechnique technique = this.effect.GetTechnique("FontDrawer");
+
+            for (int p = 0; p < technique.Description.PassCount; p++)
+            {
+                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                if (this.indexBuffer != null)
+                {
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+                }
+                else
+                {
+                    this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
+                }
+
+                Counters.DrawCallsPerFrame++;
+            }
+        }
+
         public override void HandleResizing()
         {
-            this.MapText();
+            
         }
         private void MapText()
         {
@@ -227,9 +239,6 @@ namespace Engine
             Vector2 size;
             this.fontMap.MapSentence(
                 this.text,
-                this.position,
-                this.Game.Form.RenderWidth,
-                this.Game.Form.RenderHeight,
                 out v, out i, out size);
 
             this.Game.Graphics.DeviceContext.WriteBuffer(this.vertexBuffer, v);
@@ -259,6 +268,16 @@ namespace Engine
     public class FontMap : Dictionary<char, FontChar>, IDisposable
     {
         private static List<FontMap> gCache = new List<FontMap>();
+
+        internal static void ClearCache()
+        {
+            foreach (FontMap map in gCache)
+            {
+                map.Dispose();
+            }
+
+            gCache.Clear();
+        }
 
         public const int MAXTEXTLENGTH = 1024;
         public const int TEXTURESIZE = 1024;
@@ -375,15 +394,14 @@ namespace Engine
         }
 
         public void MapSentence(
-            string text, 
-            Vector2 pos, 
-            float formWidth, 
-            float formHeight, 
-            out VertexPositionTexture[] vertices, 
+            string text,
+            out VertexPositionTexture[] vertices,
             out uint[] indices,
             out Vector2 size)
         {
             size = Vector2.Zero;
+
+            Vector2 pos = Vector2.Zero;
 
             List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
             List<uint> indexList = new List<uint>();
@@ -415,8 +433,8 @@ namespace Engine
                         pos,
                         chr.Width,
                         chr.Height,
-                        formWidth,
-                        formHeight,
+                        0,
+                        0,
                         out cv,
                         out ci);
 

@@ -183,6 +183,14 @@ namespace Engine
 
             return newModel;
         }
+        public TextControl AddText(string font, int fontSize, Color color, Color backColor, int order = 0)
+        {
+            TextControl newModel = new TextControl(this.Game, this, font, fontSize, color, backColor);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
         private void AddComponent(Drawable component, int order)
         {
             if (order == 0)

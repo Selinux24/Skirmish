@@ -91,6 +91,8 @@ namespace Engine
                 this.scenes = null;
             }
 
+            FontMap.ClearCache();
+
             if (this.Input != null)
             {
                 this.Input.Dispose();

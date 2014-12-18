@@ -131,7 +131,7 @@ namespace Engine
             {
                 this.DisposeResources();
 
-                this.swapChain.ResizeBuffers(2, width, height, this.BufferFormat, SwapChainFlags.AllowModeSwitch);
+                this.swapChain.ResizeBuffers(2, width, height, this.BufferFormat, SwapChainFlags.None);
             }
 
             #region Render Target
