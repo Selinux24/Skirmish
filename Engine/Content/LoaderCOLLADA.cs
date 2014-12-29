@@ -41,20 +41,21 @@ namespace Engine.Content
 
             EnumAxisConversion conversion = GetAxisConversion(dae.Asset.UpAxis, upAxis);
 
+            ModelContent modelContent = new ModelContent();
+
             #region Scene Objects
 
-            Dictionary<string, ImageContent> dictImages = ProcessLibraryImages(dae, contentFolder);
-            Dictionary<string, MaterialContent> dictMaterials = ProcessLibraryMaterial(dae);
-            
-            Dictionary<string, SubMeshContent[]> dictGeometries = ProcessLibraryGeometries(dae, conversion, transform);
-            Dictionary<string, ControllerContent> dictControllers = ProcessLibraryControllers(dae, conversion, transform);
-            Dictionary<string, AnimationContent[]> dictAnimations = ProcessLibraryAnimations(dae, conversion, transform);
+            ProcessLibraryImages(dae, modelContent, contentFolder);
+            ProcessLibraryMaterial(dae, modelContent);
+
+            ProcessLibraryGeometries(dae, modelContent, conversion, transform);
+            ProcessLibraryControllers(dae, modelContent, conversion, transform);
+            ProcessLibraryAnimations(dae, modelContent, conversion, transform);
 
             #endregion
 
             #region Scene Relations
 
-            SkinningContent skinningInfo = null;
             Joint skeleton = null;
 
             if (dae.Scene.InstanceVisualScene != null)
@@ -119,7 +120,7 @@ namespace Engine.Content
 
                             if (node.HasController)
                             {
-                                if (skinningInfo != null)
+                                if (modelContent.SkinningInfo != null)
                                 {
                                     throw new Exception("Only one skin controller definition per file!");
                                 }
@@ -132,7 +133,7 @@ namespace Engine.Content
                                     {
                                         string controllerName = ic.Url.Replace("#", "");
 
-                                        skinningInfo = new SkinningContent()
+                                        modelContent.SkinningInfo = new SkinningContent()
                                         {
                                             //TODO: Where to apply this transform?
                                             Transform = trn.Matrix.ChangeAxis(conversion),
@@ -151,15 +152,9 @@ namespace Engine.Content
 
             #endregion
 
-            return new ModelContent()
-            {
-                Images = dictImages,
-                Materials = dictMaterials,
-                Geometry = dictGeometries,
-                Controllers = dictControllers,
-                Animations = dictAnimations,
-                SkinningInfo = skinningInfo,
-            };
+            modelContent.Prepare();
+
+            return modelContent;
         }
         /// <summary>
         /// Axis conversion selection
@@ -201,10 +196,8 @@ namespace Engine.Content
 
         #region Dictionary loaders
 
-        public static Dictionary<string, ImageContent> ProcessLibraryImages(COLLADA dae, string contentFolder)
+        public static void ProcessLibraryImages(COLLADA dae, ModelContent modelContent, string contentFolder)
         {
-            Dictionary<string, ImageContent> res = new Dictionary<string, ImageContent>();
-
             if (dae.LibraryImages != null && dae.LibraryImages.Length > 0)
             {
                 foreach (Image image in dae.LibraryImages)
@@ -220,16 +213,12 @@ namespace Engine.Content
                         info.Path = ContentManager.FindContent(contentFolder, Uri.UnescapeDataString(image.InitFrom));
                     }
 
-                    res[image.Id] = info;
+                    modelContent.Images[image.Id] = info;
                 }
             }
-
-            return res;
         }
-        public static Dictionary<string, MaterialContent> ProcessLibraryMaterial(COLLADA dae)
+        public static void ProcessLibraryMaterial(COLLADA dae, ModelContent modelContent)
         {
-            Dictionary<string, MaterialContent> res = new Dictionary<string, MaterialContent>();
-
             if (dae.LibraryMaterials != null && dae.LibraryMaterials.Length > 0 &&
                 dae.LibraryEffects != null && dae.LibraryEffects.Length > 0)
             {
@@ -259,16 +248,12 @@ namespace Engine.Content
                         }
                     }
 
-                    res[material.Id] = info;
+                    modelContent.Materials[material.Id] = info;
                 }
             }
-
-            return res;
         }
-        public static Dictionary<string, SubMeshContent[]> ProcessLibraryGeometries(COLLADA dae, EnumAxisConversion conversion, Matrix transform)
+        public static void ProcessLibraryGeometries(COLLADA dae, ModelContent modelContent, EnumAxisConversion conversion, Matrix transform)
         {
-            Dictionary<string, SubMeshContent[]> res = new Dictionary<string, SubMeshContent[]>();
-
             if (dae.LibraryGeometries != null && dae.LibraryGeometries.Length > 0)
             {
                 foreach (Geometry geometry in dae.LibraryGeometries)
@@ -276,17 +261,16 @@ namespace Engine.Content
                     SubMeshContent[] info = ProcessGeometry(geometry, conversion, transform);
                     if (info != null && info.Length > 0)
                     {
-                        res[geometry.Id] = info;
+                        foreach (SubMeshContent subMesh in info)
+                        {
+                            modelContent.Geometry.Add(geometry.Id, subMesh.Material, subMesh);
+                        }
                     }
                 }
             }
-
-            return res;
         }
-        public static Dictionary<string, ControllerContent> ProcessLibraryControllers(COLLADA dae, EnumAxisConversion conversion, Matrix transform)
+        public static void ProcessLibraryControllers(COLLADA dae, ModelContent modelContent, EnumAxisConversion conversion, Matrix transform)
         {
-            Dictionary<string, ControllerContent> res = new Dictionary<string, ControllerContent>();
-
             if (dae.LibraryControllers != null && dae.LibraryControllers.Length > 0)
             {
                 foreach (Controller controller in dae.LibraryControllers)
@@ -294,17 +278,13 @@ namespace Engine.Content
                     ControllerContent info = ProcessController(controller, conversion, transform);
                     if (info != null)
                     {
-                        res[controller.Id] = info;
+                        modelContent.Controllers[controller.Id] = info;
                     }
                 }
             }
-
-            return res;
         }
-        public static Dictionary<string, AnimationContent[]> ProcessLibraryAnimations(COLLADA dae, EnumAxisConversion conversion, Matrix transform)
+        public static void ProcessLibraryAnimations(COLLADA dae, ModelContent modelContent, EnumAxisConversion conversion, Matrix transform)
         {
-            Dictionary<string, AnimationContent[]> res = new Dictionary<string, AnimationContent[]>();
-
             if (dae.LibraryAnimations != null && dae.LibraryAnimations.Length > 0)
             {
                 foreach (Animation animation in dae.LibraryAnimations)
@@ -312,12 +292,10 @@ namespace Engine.Content
                     AnimationContent[] info = ProcessAnimation(animation, conversion);
                     if (info != null && info.Length > 0)
                     {
-                        res[animation.Id] = info;
+                        modelContent.Animations[animation.Id] = info;
                     }
                 }
             }
-
-            return res;
         }
 
         #endregion
@@ -415,7 +393,7 @@ namespace Engine.Content
 
             foreach (PolyList polyList in polyLists)
             {
-                List<Vertex> verts = new List<Vertex>();
+                List<VertexData> verts = new List<VertexData>();
 
                 VertexTypes vertexType = EnumerateSemantics(polyList.Inputs);
 
@@ -436,7 +414,7 @@ namespace Engine.Content
 
                     for (int v = 0; v < n; v++)
                     {
-                        Vertex vert = new Vertex()
+                        VertexData vert = new VertexData()
                         {
                             FaceIndex = i,
                         };

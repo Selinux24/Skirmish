@@ -5,7 +5,7 @@ using SharpDX.Direct3D11;
 namespace Engine.Common
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPositionNormalTextureTangent : IVertex
+    public struct VertexPositionNormalTextureTangent : IVertexData
     {
         public Vector3 Position;
         public Vector3 Normal;
@@ -30,7 +30,7 @@ namespace Engine.Common
                 new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 32, 0, InputClassification.PerVertexData, 0),
             };
         }
-        public static VertexPositionNormalTextureTangent Create(Vertex v)
+        public static VertexPositionNormalTextureTangent Create(VertexData v)
         {
             return new VertexPositionNormalTextureTangent
             {
@@ -56,7 +56,7 @@ namespace Engine.Common
                 return SizeInBytes;
             }
         }
-        public IVertex Convert(Vertex v)
+        public IVertexData Convert(VertexData v)
         {
             return new VertexPositionNormalTextureTangent()
             {

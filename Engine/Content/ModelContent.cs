@@ -9,26 +9,98 @@ namespace Engine.Content
 
     public class ModelContent
     {
+        public const string StaticMesh = "static";
+        public const string NoMaterial = "none";
+
+        #region Classes
+
+        public class ImageDictionary : Dictionary<string, ImageContent>
+        {
+
+        }
+
+        public class MaterialDictionary : Dictionary<string, MaterialContent>
+        {
+
+        }
+
+        public class GeometryDictionary : Dictionary<string, Dictionary<string, SubMeshContent>>
+        {
+            public void Add(string meshName, string materialName, SubMeshContent meshContent)
+            {
+                if (!this.ContainsKey(meshName))
+                {
+                    this.Add(meshName, new Dictionary<string, SubMeshContent>());
+                }
+
+                this[meshName].Add(materialName, meshContent);
+            }
+
+            public SubMeshContent[] GetMeshesByMaterial(string material)
+            {
+                List<SubMeshContent> res = new List<SubMeshContent>();
+
+                foreach (string mesh in this.Keys)
+                {
+                    SubMeshContent meshContent = this[mesh][material];
+                    if (meshContent != null)
+                    {
+                        res.Add(meshContent);
+                    }
+                }
+
+                return res.ToArray();
+            }
+        }
+
+        public class ControllerDictionary : Dictionary<string, ControllerContent>
+        {
+            /// <summary>
+            /// Skin name list
+            /// </summary>
+            public string[] Skins
+            {
+                get
+                {
+                    List<string> skins = new List<string>();
+
+                    foreach (ControllerContent controller in this.Values)
+                    {
+                        if (!skins.Contains(controller.Skin)) skins.Add(controller.Skin);
+                    }
+
+                    return skins.ToArray();
+                }
+            }
+        }
+
+        public class AnimationDictionary : Dictionary<string, AnimationContent[]>
+        {
+
+        }
+
+        #endregion
+
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        public Dictionary<string, ImageContent> Images = null;
+        public ImageDictionary Images = new ImageDictionary();
         /// <summary>
         /// Material dictionary
         /// </summary>
-        public Dictionary<string, MaterialContent> Materials = null;
+        public MaterialDictionary Materials = new MaterialDictionary();
         /// <summary>
         /// Geometry dictionary
         /// </summary>
-        public Dictionary<string, SubMeshContent[]> Geometry = null;
+        public GeometryDictionary Geometry = new GeometryDictionary();
         /// <summary>
         /// Controller dictionary
         /// </summary>
-        public Dictionary<string, ControllerContent> Controllers = null;
+        public ControllerDictionary Controllers = new ControllerDictionary();
         /// <summary>
         /// Animation dictionary
         /// </summary>
-        public Dictionary<string, AnimationContent[]> Animations = null;
+        public AnimationDictionary Animations = new AnimationDictionary();
         /// <summary>
         /// Skinning information
         /// </summary>
@@ -40,9 +112,7 @@ namespace Engine.Content
         }
         public static ModelContent GenerateSprite(string contentFolder, string texture, float width, float height, float formWidth, float formHeight)
         {
-            Dictionary<string, ImageContent> images = new Dictionary<string, ImageContent>();
-            Dictionary<string, MaterialContent> materials = new Dictionary<string, MaterialContent>();
-            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
+            ModelContent modelContent = new ModelContent();
 
             string imageName = "spriteTexture";
             string materialName = "spriteMaterial";
@@ -56,7 +126,7 @@ namespace Engine.Content
             MaterialContent material = MaterialContent.Default;
             material.DiffuseTexture = imageName;
 
-            Vertex[] verts = null;
+            VertexData[] verts = null;
             uint[] indices = null;
             CreateSprite(Vector2.Zero, width, height, formWidth, formHeight, out verts, out indices);
 
@@ -69,24 +139,19 @@ namespace Engine.Content
                 Material = materialName,
             };
 
-            images.Add(imageName, image);
-            materials.Add(materialName, material);
-            geometry.Add(geoName, new[] { geo });
+            modelContent.Images.Add(imageName, image);
+            modelContent.Materials.Add(materialName, material);
+            modelContent.Geometry.Add(geoName, materialName, geo);
 
-            return new ModelContent()
-            {
-                Images = images,
-                Materials = materials,
-                Geometry = geometry,
-            };
+            modelContent.Prepare();
+
+            return modelContent;
         }
         public static ModelContent GenerateBoundingBox(Color color)
         {
-            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
+            ModelContent modelContent = new ModelContent();
 
-            string geoName = "spriteGeometry";
-
-            Vertex[] verts = null;
+            VertexData[] verts = null;
             uint[] indices = null;
             CreateBoxWired(1, 1, 1, color, out verts, out indices);
 
@@ -98,20 +163,17 @@ namespace Engine.Content
                 Indices = indices,
             };
 
-            geometry.Add(geoName, new[] { geo });
+            modelContent.Geometry.Add(ModelContent.StaticMesh, ModelContent.NoMaterial, geo);
 
-            return new ModelContent()
-            {
-                Geometry = geometry,
-            };
+            modelContent.Prepare();
+
+            return modelContent;
         }
         public static ModelContent GenerateBoundingSphere(uint sliceCount, uint stackCount, Color color)
         {
-            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
+            ModelContent modelContent = new ModelContent();
 
-            string geoName = "spriteGeometry";
-
-            Vertex[] verts = null;
+            VertexData[] verts = null;
             uint[] indices = null;
             CreateSphereWired(1f, sliceCount, stackCount, color, out verts, out indices);
 
@@ -123,18 +185,19 @@ namespace Engine.Content
                 Indices = indices,
             };
 
-            geometry.Add(geoName, new[] { geo });
+            modelContent.Geometry.Add(ModelContent.StaticMesh, ModelContent.NoMaterial, geo);
 
-            return new ModelContent()
-            {
-                Geometry = geometry,
-            };
+            modelContent.Prepare();
+
+            return modelContent;
         }
         public static ModelContent GenerateVegetationBillboard(string contentFolder, string[] textures, Triangle[] triList, float saturation, Vector2 minSize, Vector2 maxSize, int seed = 0)
         {
+            ModelContent modelContent = new ModelContent();
+
             Random rnd = new Random(seed);
 
-            List<Vertex> vertices = new List<Vertex>();
+            List<VertexData> vertices = new List<VertexData>();
 
             #region Find billboard positions
 
@@ -168,15 +231,11 @@ namespace Engine.Content
 
                     bbpos.Y += bbsize.Y * 0.5f;
 
-                    vertices.Add(Vertex.CreateVertexBillboard(bbpos, bbsize));
+                    vertices.Add(VertexData.CreateVertexBillboard(bbpos, bbsize));
                 }
             }
 
             #endregion
-
-            Dictionary<string, ImageContent> images = new Dictionary<string, ImageContent>();
-            Dictionary<string, MaterialContent> materials = new Dictionary<string, MaterialContent>();
-            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
 
             string imageName = "billboard";
             string materialName = "billboardMaterial";
@@ -187,12 +246,12 @@ namespace Engine.Content
                 Paths = ContentManager.FindContent(contentFolder, textures),
             };
 
-            images.Add(imageName, imageContent);
+            modelContent.Images.Add(imageName, imageContent);
 
             MaterialContent material = MaterialContent.Default;
             material.DiffuseTexture = imageName;
 
-            materials.Add(materialName, material);
+            modelContent.Materials.Add(materialName, material);
 
             SubMeshContent geo = new SubMeshContent()
             {
@@ -203,20 +262,15 @@ namespace Engine.Content
                 Material = materialName,
             };
 
-            geometry.Add(geoName, new[] { geo });
+            modelContent.Geometry.Add(geoName, materialName, geo);
 
-            return new ModelContent()
-            {
-                Images = images,
-                Materials = materials,
-                Geometry = geometry,
-            };
+            modelContent.Prepare();
+
+            return modelContent;
         }
         public static ModelContent GenerateSkydom(string contentFolder, string texture, float radius)
         {
-            Dictionary<string, ImageContent> images = new Dictionary<string, ImageContent>();
-            Dictionary<string, MaterialContent> materials = new Dictionary<string, MaterialContent>();
-            Dictionary<string, SubMeshContent[]> geometry = new Dictionary<string, SubMeshContent[]>();
+            ModelContent modelContent = new ModelContent();
 
             string imageName = "cubeTexture";
             string materialName = "sphereMaterial";
@@ -230,7 +284,7 @@ namespace Engine.Content
             MaterialContent material = MaterialContent.Default;
             material.DiffuseTexture = imageName;
 
-            Vertex[] verts = null;
+            VertexData[] verts = null;
             uint[] indices = null;
             CreateSphere(radius, 20, 20, out verts, out indices);
 
@@ -243,21 +297,18 @@ namespace Engine.Content
                 Material = materialName,
             };
 
-            images.Add(imageName, image);
-            materials.Add(materialName, material);
-            geometry.Add(geoName, new[] { geo });
+            modelContent.Images.Add(imageName, image);
+            modelContent.Materials.Add(materialName, material);
+            modelContent.Geometry.Add(geoName, materialName, geo);
 
-            return new ModelContent()
-            {
-                Images = images,
-                Materials = materials,
-                Geometry = geometry,
-            };
+            modelContent.Prepare();
+
+            return modelContent;
         }
 
-        public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out Vertex[] v, out uint[] i)
+        public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out VertexData[] v, out uint[] i)
         {
-            v = new Vertex[4];
+            v = new VertexData[4];
             i = new uint[6];
 
             float left = (formWidth * 0.5f * -1f) + position.X;
@@ -289,9 +340,9 @@ namespace Engine.Content
             i[4] = 3;
             i[5] = 1;
         }
-        public static void CreateBox(float width, float height, float depth, out Vertex[] v, out uint[] i)
+        public static void CreateBox(float width, float height, float depth, out VertexData[] v, out uint[] i)
         {
-            v = new Vertex[24];
+            v = new VertexData[24];
             i = new uint[36];
 
             float w2 = 0.5f * width;
@@ -299,40 +350,40 @@ namespace Engine.Content
             float d2 = 0.5f * depth;
 
             // Fill in the front face vertex data.
-            v[0] = Vertex.CreateVertexPosition(new Vector3(-w2, -h2, -d2));
-            v[1] = Vertex.CreateVertexPosition(new Vector3(-w2, +h2, -d2));
-            v[2] = Vertex.CreateVertexPosition(new Vector3(+w2, +h2, -d2));
-            v[3] = Vertex.CreateVertexPosition(new Vector3(+w2, -h2, -d2));
+            v[0] = VertexData.CreateVertexPosition(new Vector3(-w2, -h2, -d2));
+            v[1] = VertexData.CreateVertexPosition(new Vector3(-w2, +h2, -d2));
+            v[2] = VertexData.CreateVertexPosition(new Vector3(+w2, +h2, -d2));
+            v[3] = VertexData.CreateVertexPosition(new Vector3(+w2, -h2, -d2));
 
             // Fill in the back face vertex data.
-            v[4] = Vertex.CreateVertexPosition(new Vector3(-w2, -h2, +d2));
-            v[5] = Vertex.CreateVertexPosition(new Vector3(+w2, -h2, +d2));
-            v[6] = Vertex.CreateVertexPosition(new Vector3(+w2, +h2, +d2));
-            v[7] = Vertex.CreateVertexPosition(new Vector3(-w2, +h2, +d2));
+            v[4] = VertexData.CreateVertexPosition(new Vector3(-w2, -h2, +d2));
+            v[5] = VertexData.CreateVertexPosition(new Vector3(+w2, -h2, +d2));
+            v[6] = VertexData.CreateVertexPosition(new Vector3(+w2, +h2, +d2));
+            v[7] = VertexData.CreateVertexPosition(new Vector3(-w2, +h2, +d2));
 
             // Fill in the top face vertex data.
-            v[8] = Vertex.CreateVertexPosition(new Vector3(-w2, +h2, -d2));
-            v[9] = Vertex.CreateVertexPosition(new Vector3(-w2, +h2, +d2));
-            v[10] = Vertex.CreateVertexPosition(new Vector3(+w2, +h2, +d2));
-            v[11] = Vertex.CreateVertexPosition(new Vector3(+w2, +h2, -d2));
+            v[8] = VertexData.CreateVertexPosition(new Vector3(-w2, +h2, -d2));
+            v[9] = VertexData.CreateVertexPosition(new Vector3(-w2, +h2, +d2));
+            v[10] = VertexData.CreateVertexPosition(new Vector3(+w2, +h2, +d2));
+            v[11] = VertexData.CreateVertexPosition(new Vector3(+w2, +h2, -d2));
 
             // Fill in the bottom face vertex data.
-            v[12] = Vertex.CreateVertexPosition(new Vector3(-w2, -h2, -d2));
-            v[13] = Vertex.CreateVertexPosition(new Vector3(+w2, -h2, -d2));
-            v[14] = Vertex.CreateVertexPosition(new Vector3(+w2, -h2, +d2));
-            v[15] = Vertex.CreateVertexPosition(new Vector3(-w2, -h2, +d2));
+            v[12] = VertexData.CreateVertexPosition(new Vector3(-w2, -h2, -d2));
+            v[13] = VertexData.CreateVertexPosition(new Vector3(+w2, -h2, -d2));
+            v[14] = VertexData.CreateVertexPosition(new Vector3(+w2, -h2, +d2));
+            v[15] = VertexData.CreateVertexPosition(new Vector3(-w2, -h2, +d2));
 
             // Fill in the left face vertex data.
-            v[16] = Vertex.CreateVertexPosition(new Vector3(-w2, -h2, +d2));
-            v[17] = Vertex.CreateVertexPosition(new Vector3(-w2, +h2, +d2));
-            v[18] = Vertex.CreateVertexPosition(new Vector3(-w2, +h2, -d2));
-            v[19] = Vertex.CreateVertexPosition(new Vector3(-w2, -h2, -d2));
+            v[16] = VertexData.CreateVertexPosition(new Vector3(-w2, -h2, +d2));
+            v[17] = VertexData.CreateVertexPosition(new Vector3(-w2, +h2, +d2));
+            v[18] = VertexData.CreateVertexPosition(new Vector3(-w2, +h2, -d2));
+            v[19] = VertexData.CreateVertexPosition(new Vector3(-w2, -h2, -d2));
 
             // Fill in the right face vertex data.
-            v[20] = Vertex.CreateVertexPosition(new Vector3(+w2, -h2, -d2));
-            v[21] = Vertex.CreateVertexPosition(new Vector3(+w2, +h2, -d2));
-            v[22] = Vertex.CreateVertexPosition(new Vector3(+w2, +h2, +d2));
-            v[23] = Vertex.CreateVertexPosition(new Vector3(+w2, -h2, +d2));
+            v[20] = VertexData.CreateVertexPosition(new Vector3(+w2, -h2, -d2));
+            v[21] = VertexData.CreateVertexPosition(new Vector3(+w2, +h2, -d2));
+            v[22] = VertexData.CreateVertexPosition(new Vector3(+w2, +h2, +d2));
+            v[23] = VertexData.CreateVertexPosition(new Vector3(+w2, -h2, +d2));
 
             // Fill in the front face index data
             i[0] = 0; i[1] = 1; i[2] = 2;
@@ -358,24 +409,24 @@ namespace Engine.Content
             i[30] = 20; i[31] = 21; i[32] = 22;
             i[33] = 20; i[34] = 22; i[35] = 23;
         }
-        public static void CreateBoxWired(float width, float height, float depth, Color color, out Vertex[] v, out uint[] i)
+        public static void CreateBoxWired(float width, float height, float depth, Color color, out VertexData[] v, out uint[] i)
         {
-            v = new Vertex[8];
+            v = new VertexData[8];
             i = new uint[24];
 
             float w2 = 0.5f * width;
             float h2 = 0.5f * height;
             float d2 = 0.5f * depth;
 
-            v[0] = Vertex.CreateVertexPositionColor(new Vector3(-w2, -h2, -d2), color);
-            v[1] = Vertex.CreateVertexPositionColor(new Vector3(-w2, +h2, -d2), color);
-            v[2] = Vertex.CreateVertexPositionColor(new Vector3(+w2, -h2, -d2), color);
-            v[3] = Vertex.CreateVertexPositionColor(new Vector3(+w2, +h2, -d2), color);
+            v[0] = VertexData.CreateVertexPositionColor(new Vector3(-w2, -h2, -d2), color);
+            v[1] = VertexData.CreateVertexPositionColor(new Vector3(-w2, +h2, -d2), color);
+            v[2] = VertexData.CreateVertexPositionColor(new Vector3(+w2, -h2, -d2), color);
+            v[3] = VertexData.CreateVertexPositionColor(new Vector3(+w2, +h2, -d2), color);
 
-            v[4] = Vertex.CreateVertexPositionColor(new Vector3(-w2, -h2, +d2), color);
-            v[5] = Vertex.CreateVertexPositionColor(new Vector3(-w2, +h2, +d2), color);
-            v[6] = Vertex.CreateVertexPositionColor(new Vector3(+w2, -h2, +d2), color);
-            v[7] = Vertex.CreateVertexPositionColor(new Vector3(+w2, +h2, +d2), color);
+            v[4] = VertexData.CreateVertexPositionColor(new Vector3(-w2, -h2, +d2), color);
+            v[5] = VertexData.CreateVertexPositionColor(new Vector3(-w2, +h2, +d2), color);
+            v[6] = VertexData.CreateVertexPositionColor(new Vector3(+w2, -h2, +d2), color);
+            v[7] = VertexData.CreateVertexPositionColor(new Vector3(+w2, +h2, +d2), color);
 
             int index = 0;
 
@@ -394,9 +445,9 @@ namespace Engine.Content
             i[index++] = 2; i[index++] = 6;
             i[index++] = 3; i[index++] = 7;
         }
-        public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out Vertex[] v, out uint[] i)
+        public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out VertexData[] v, out uint[] i)
         {
-            List<Vertex> vertList = new List<Vertex>();
+            List<VertexData> vertList = new List<VertexData>();
 
             //
             // Compute the vertices stating at the top pole and moving down the stacks.
@@ -407,7 +458,7 @@ namespace Engine.Content
             // a rectangular texture onto a sphere.
 
             //TODO: Tangents and Binormals
-            vertList.Add(Vertex.CreateVertexPositionNormalTextureTangent(
+            vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
                 new Vector3(0.0f, +radius, 0.0f),
                 new Vector3(0.0f, +1.0f, 0.0f),
                 new Vector3(1.0f, 0.0f, 0.0f),
@@ -453,7 +504,7 @@ namespace Engine.Content
                     texture.X = theta / MathUtil.Pi * 2f;
                     texture.Y = phi / MathUtil.Pi;
 
-                    vertList.Add(Vertex.CreateVertexPositionNormalTextureTangent(
+                    vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
                         position,
                         normal,
                         tangent,
@@ -462,7 +513,7 @@ namespace Engine.Content
                 }
             }
 
-            vertList.Add(Vertex.CreateVertexPositionNormalTextureTangent(
+            vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
                 new Vector3(0.0f, -radius, 0.0f),
                 new Vector3(0.0f, -1.0f, 0.0f),
                 new Vector3(1.0f, 0.0f, 0.0f),
@@ -521,13 +572,13 @@ namespace Engine.Content
             v = vertList.ToArray();
             i = indexList.ToArray();
         }
-        public static void CreateSphereWired(float radius, uint sliceCount, uint stackCount, Color color, out Vertex[] v, out uint[] i)
+        public static void CreateSphereWired(float radius, uint sliceCount, uint stackCount, Color color, out VertexData[] v, out uint[] i)
         {
-            List<Vertex> vertList = new List<Vertex>();
+            List<VertexData> vertList = new List<VertexData>();
             List<uint> indexList = new List<uint>();
 
             //North pole
-            vertList.Add(Vertex.CreateVertexPositionColor(new Vector3(0.0f, +radius, 0.0f), color));
+            vertList.Add(VertexData.CreateVertexPositionColor(new Vector3(0.0f, +radius, 0.0f), color));
 
             float phiStep = MathUtil.Pi / (stackCount + 1);
             float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
@@ -551,24 +602,130 @@ namespace Engine.Content
                     indexList.Add((uint)vertList.Count);
                     indexList.Add(sl == sliceCount ? (uint)vertList.Count - sliceCount : (uint)vertList.Count + 1);
 
-                    vertList.Add(Vertex.CreateVertexPositionColor(position, color));
+                    vertList.Add(VertexData.CreateVertexPositionColor(position, color));
                 }
             }
 
             //South pole
-            vertList.Add(Vertex.CreateVertexPositionColor(new Vector3(0.0f, -radius, 0.0f), color));
+            vertList.Add(VertexData.CreateVertexPositionColor(new Vector3(0.0f, -radius, 0.0f), color));
 
             v = vertList.ToArray();
             i = indexList.ToArray();
         }
 
+        private static SubMeshContent GroupMeshes(SubMeshContent[] meshArray)
+        {
+            if (meshArray.Length == 1)
+            {
+                return meshArray[0];
+            }
+            else
+            {
+                List<VertexData> vertices = new List<VertexData>();
+                List<uint> indices = new List<uint>();
+
+                uint indexOffset = 0;
+
+                foreach (SubMeshContent mesh in meshArray)
+                {
+                    if (mesh.Vertices != null && mesh.Vertices.Length > 0)
+                    {
+                        foreach (VertexData v in mesh.Vertices)
+                        {
+                            vertices.Add(v);
+                        }
+                    }
+
+                    if (mesh.Indices != null && mesh.Indices.Length > 0)
+                    {
+                        foreach (uint i in mesh.Indices)
+                        {
+                            indices.Add(indexOffset + i);
+                        }
+                    }
+
+                    indexOffset = (uint)vertices.Count;
+                }
+
+                return new SubMeshContent()
+                {
+                    Material = meshArray[0].Material,
+                    Topology = meshArray[0].Topology,
+                    VertexType = meshArray[0].VertexType,
+                    Indices = indices.ToArray(),
+                    Vertices = vertices.ToArray(),
+                };
+            }
+        }
+
+        public ModelContent()
+        {
+
+        }
+
+        public void Prepare()
+        {
+            GeometryDictionary newDict = new GeometryDictionary();
+
+            if (this.Materials.Count > 0)
+            {
+                if (this.Controllers.Skins.Length > 0)
+                {
+                    //Skinned
+                    foreach (string skin in this.Controllers.Skins)
+                    {
+                        foreach (string material in this.Materials.Keys)
+                        {
+                            List<SubMeshContent> skinnedM = new List<SubMeshContent>();
+
+                            if (this.Geometry[skin].ContainsKey(material))
+                            {
+                                skinnedM.Add(this.Geometry[skin][material]);
+                            }
+
+                            if (skinnedM.Count > 0)
+                            {
+                                SubMeshContent gmesh = GroupMeshes(skinnedM.ToArray());
+
+                                newDict.Add(skin, material, gmesh);
+                            }
+                        }
+                    }
+                }
+
+                foreach (string material in this.Materials.Keys)
+                {
+                    List<SubMeshContent> staticM = new List<SubMeshContent>();
+
+                    foreach (string mesh in this.Geometry.Keys)
+                    {
+                        if (!Array.Exists(this.Controllers.Skins, s => s == mesh))
+                        {
+                            if (this.Geometry[mesh].ContainsKey(material))
+                            {
+                                staticM.Add(this.Geometry[mesh][material]);
+                            }
+                        }
+                    }
+
+                    if (staticM.Count > 0)
+                    {
+                        SubMeshContent gmesh = GroupMeshes(staticM.ToArray());
+
+                        newDict.Add(StaticMesh, material, gmesh);
+                    }
+                }
+            }
+
+            this.Geometry = newDict;
+        }
         public Triangle[] ComputeTriangleList()
         {
             List<Triangle> list = new List<Triangle>();
 
-            foreach (SubMeshContent[] gList in this.Geometry.Values)
+            foreach (Dictionary<string, SubMeshContent> gDict in this.Geometry.Values)
             {
-                foreach (SubMeshContent g in gList)
+                foreach (SubMeshContent g in gDict.Values)
                 {
                     list.AddRange(g.ComputeTriangleList());
                 }
@@ -580,9 +737,9 @@ namespace Engine.Content
         {
             BoundingSphere bsphere = new BoundingSphere();
 
-            foreach (SubMeshContent[] gList in this.Geometry.Values)
+            foreach (Dictionary<string, SubMeshContent> gDict in this.Geometry.Values)
             {
-                foreach (SubMeshContent g in gList)
+                foreach (SubMeshContent g in gDict.Values)
                 {
                     bsphere = BoundingSphere.Merge(bsphere, g.BoundingSphere);
                 }
@@ -594,15 +751,24 @@ namespace Engine.Content
         {
             BoundingBox bbox = new BoundingBox();
 
-            foreach (SubMeshContent[] gList in this.Geometry.Values)
+            foreach (Dictionary<string, SubMeshContent> gDict in this.Geometry.Values)
             {
-                foreach (SubMeshContent g in gList)
+                foreach (SubMeshContent g in gDict.Values)
                 {
                     bbox = BoundingBox.Merge(bbox, g.BoundingBox);
                 }
             }
 
             return bbox;
+        }
+        public ControllerContent GetControllerForMesh(string meshName)
+        {
+            foreach (ControllerContent controller in this.Controllers.Values)
+            {
+                if (controller.Skin == meshName) return controller;
+            }
+
+            return null;
         }
     }
 }

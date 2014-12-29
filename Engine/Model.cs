@@ -10,8 +10,6 @@ namespace Engine
     public class Model : ModelBase
     {
         private EffectBasic effect;
-        private VolumeBox volumeBox;
-        private VolumeSphere volumeSphere;
 
         public Manipulator Manipulator { get; private set; }
 
@@ -22,12 +20,6 @@ namespace Engine
             this.LoadEffectLayouts(this.effect);
 
             this.Manipulator = new Manipulator();
-
-            if (debug)
-            {
-                this.volumeBox = new VolumeBox(game, scene, Color.Red);
-                this.volumeSphere = new VolumeSphere(game, scene, 30, 10, Color.Yellow);
-            }
         }
         public override void Dispose()
         {
@@ -38,42 +30,12 @@ namespace Engine
                 this.effect.Dispose();
                 this.effect = null;
             }
-
-            if (this.volumeBox != null)
-            {
-                this.volumeBox.Dispose();
-                this.volumeBox = null;
-            }
-
-            if (this.volumeSphere != null)
-            {
-                this.volumeSphere.Dispose();
-                this.volumeSphere = null;
-            }
         }
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
             this.Manipulator.Update(gameTime);
-
-            if (this.volumeBox != null)
-            {
-                BoundingBox bbox = this.ComputeBoundingBox(this.Manipulator.LocalTransform);
-
-                this.volumeBox.Manipulator.SetScale(this.Manipulator.Scaling * (bbox.Maximum - bbox.Minimum));
-                this.volumeBox.Manipulator.SetPosition(this.Manipulator.Position + ((bbox.Maximum + bbox.Minimum) * 0.5f));
-                this.volumeBox.Update(gameTime);
-            }
-
-            if (this.volumeSphere != null)
-            {
-                BoundingSphere bsphere = this.ComputeBoundingSphere(this.Manipulator.LocalTransform);
-
-                this.volumeSphere.Manipulator.SetScale(this.Manipulator.Scaling * bsphere.Radius);
-                this.volumeSphere.Manipulator.SetPosition(this.Manipulator.Position + bsphere.Center);
-                this.volumeSphere.Update(gameTime);
-            }
         }
         public override void Draw(GameTime gameTime)
         {
@@ -140,9 +102,6 @@ namespace Engine
                     }
                 }
             }
-
-            if (this.volumeBox != null) this.volumeBox.Draw(gameTime);
-            if (this.volumeSphere != null) this.volumeSphere.Draw(gameTime);
         }
     }
 }

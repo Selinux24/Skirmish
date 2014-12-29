@@ -6,7 +6,7 @@ namespace Engine.Effects
     using Engine.Common;
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct BufferMaterials : IBuffer
+    public struct BufferMaterials : IBufferData
     {
         public Color4 Ambient;
         public Color4 Diffuse;

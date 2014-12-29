@@ -5,7 +5,7 @@ using SharpDX.Direct3D11;
 namespace Engine.Common
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPositionTexture : IVertex
+    public struct VertexPositionTexture : IVertexData
     {
         public Vector3 Position;
         public Vector2 Texture;
@@ -25,7 +25,7 @@ namespace Engine.Common
                 new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 12, 0, InputClassification.PerVertexData, 0),
             };
         }
-        public static VertexPositionTexture Create(Vertex v)
+        public static VertexPositionTexture Create(VertexData v)
         {
             return new VertexPositionTexture
             {
@@ -48,7 +48,7 @@ namespace Engine.Common
                 return SizeInBytes;
             }
         }
-        public IVertex Convert(Vertex v)
+        public IVertexData Convert(VertexData v)
         {
             return new VertexPositionTexture()
             {

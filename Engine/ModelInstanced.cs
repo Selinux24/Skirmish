@@ -11,8 +11,6 @@ namespace Engine
     {
         private EffectInstancing effect;
         private VertexInstancingData[] instancingData = null;
-        private VolumeBoxInstanced volumeBox;
-        private VolumeSphereInstanced volumeSphere;
 
         private Manipulator[] instances = null;
         private int currentInstance = 0;
@@ -44,12 +42,6 @@ namespace Engine
             this.effect = new EffectInstancing(game.Graphics.Device);
             this.LoadEffectLayouts(this.effect);
 
-            if (debug)
-            {
-                this.volumeBox = new VolumeBoxInstanced(game, scene, Color.Red, instances);
-                this.volumeSphere = new VolumeSphereInstanced(game, scene, 30, 10, Color.Yellow, instances);
-            }
-
             this.instancingData = new VertexInstancingData[instances];
 
             this.instances = new Manipulator[instances];
@@ -67,18 +59,6 @@ namespace Engine
                 this.effect.Dispose();
                 this.effect = null;
             }
-
-            if (this.volumeBox != null)
-            {
-                this.volumeBox.Dispose();
-                this.volumeBox = null;
-            }
-
-            if (this.volumeSphere != null)
-            {
-                this.volumeSphere.Dispose();
-                this.volumeSphere = null;
-            }
         }
         public override void Update(GameTime gameTime)
         {
@@ -93,28 +73,8 @@ namespace Engine
                     man.Update(gameTime);
 
                     this.instancingData[i].Local = man.LocalTransform;
-
-                    if (this.volumeBox != null)
-                    {
-                        BoundingBox bbox = this.ComputeBoundingBox(man.LocalTransform);
-
-                        this.volumeBox[i].SetScale(man.Scaling * (bbox.Maximum - bbox.Minimum));
-                        this.volumeBox[i].SetRotation(man.Rotation);
-                        this.volumeBox[i].SetPosition(man.Position + ((bbox.Maximum + bbox.Minimum) * 0.5f));
-                    }
-
-                    if (this.volumeSphere != null)
-                    {
-                        BoundingSphere bsphere = this.ComputeBoundingSphere(man.LocalTransform);
-
-                        this.volumeSphere[i].SetScale(man.Scaling * bsphere.Radius);
-                        this.volumeSphere[i].SetPosition(man.Position + bsphere.Center);
-                    }
                 }
             }
-
-            if (this.volumeBox != null) this.volumeBox.Update(gameTime);
-            if (this.volumeSphere != null) this.volumeSphere.Update(gameTime);
         }
         public override void Draw(GameTime gameTime)
         {
@@ -178,9 +138,6 @@ namespace Engine
                     }
                 }
             }
-
-            if (this.volumeBox != null) this.volumeBox.Draw(gameTime);
-            if (this.volumeSphere != null) this.volumeSphere.Draw(gameTime);
         }
         public void Next()
         {

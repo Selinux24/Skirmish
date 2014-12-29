@@ -5,7 +5,7 @@ using SharpDX.Direct3D11;
 namespace Engine.Common
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPositionColor : IVertex
+    public struct VertexPositionColor : IVertexData
     {
         public Vector3 Position;
         public Color4 Color;
@@ -25,7 +25,7 @@ namespace Engine.Common
                 new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 12, 0, InputClassification.PerVertexData, 0),
             };
         }
-        public static VertexPositionColor Create(Vertex v)
+        public static VertexPositionColor Create(VertexData v)
         {
             return new VertexPositionColor
             {
@@ -48,7 +48,7 @@ namespace Engine.Common
                 return SizeInBytes;
             }
         }
-        public IVertex Convert(Vertex v)
+        public IVertexData Convert(VertexData v)
         {
             return new VertexPositionColor()
             {

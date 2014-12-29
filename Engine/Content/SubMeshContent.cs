@@ -8,12 +8,12 @@ namespace Engine.Content
 
     public class SubMeshContent
     {
-        private Vertex[] vertices;
+        private VertexData[] vertices;
         private uint[] indices;
 
         public PrimitiveTopology Topology { get; set; }
         public VertexTypes VertexType { get; set; }
-        public Vertex[] Vertices
+        public VertexData[] Vertices
         {
             get
             {
@@ -57,7 +57,7 @@ namespace Engine.Content
         {
             List<Vector3> list = new List<Vector3>();
 
-            foreach (Vertex v in this.Vertices)
+            foreach (VertexData v in this.Vertices)
             {
                 if (v.Position.HasValue)
                 {
@@ -71,7 +71,7 @@ namespace Engine.Content
         {
             List<Vector3> list = new List<Vector3>();
 
-            foreach (Vertex v in this.Vertices)
+            foreach (VertexData v in this.Vertices)
             {
                 if (v.Position.HasValue)
                 {

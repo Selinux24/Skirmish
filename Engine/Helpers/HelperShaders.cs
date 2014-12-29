@@ -1,16 +1,61 @@
-﻿using System.IO;
-using System.Runtime.InteropServices;
+﻿using System;
+using System.IO;
 using SharpDX;
 using SharpDX.D3DCompiler;
 using SharpDX.Direct3D11;
 
 namespace Engine.Helpers
 {
-    using Engine.Common;
     using Engine.Properties;
 
     public static class HelperShaders
     {
+        #region Classes
+
+        public class VertexShaderDescription : IDisposable
+        {
+            public VertexShader Shader { get; private set; }
+            public InputLayout Layout { get; private set; }
+
+            internal VertexShaderDescription(VertexShader shader, InputLayout layout)
+            {
+                this.Shader = shader;
+                this.Layout = layout;
+            }
+            public void Dispose()
+            {
+                if (this.Shader != null)
+                {
+                    this.Shader.Dispose();
+                    this.Shader = null;
+                }
+
+                if (this.Layout != null)
+                {
+                    this.Layout.Dispose();
+                    this.Layout = null;
+                }
+            }
+        }
+
+        public class PixelShaderDescription : IDisposable
+        {
+            public PixelShader Shader { get; private set; }
+
+            internal PixelShaderDescription(PixelShader shader)
+            {
+                this.Shader = shader;
+            }
+            public void Dispose()
+            {
+                if (this.Shader != null)
+                {
+                    this.Shader.Dispose();
+                    this.Shader = null;
+                }
+            }
+        }
+
         public class ShaderIncludeManager : CallbackBase, Include
         {
             public void Close(Stream stream)
@@ -21,11 +66,13 @@ namespace Engine.Helpers
 
             public Stream Open(IncludeType type, string fileName, Stream parentStream)
             {
-                object o = Resources.ResourceManager.GetObject(Path.GetFileNameWithoutExtension(fileName));
+                byte[] o = (byte[])Resources.ResourceManager.GetObject(Path.GetFileNameWithoutExtension(fileName));
 
-                return new MemoryStream((byte[])o);
+                return new MemoryStream(o);
             }
         }
+
+        #endregion
 
         public static string VSProfile = "vs_5_0";
         public static string PSProfile = "ps_5_0";
@@ -200,38 +247,6 @@ namespace Engine.Helpers
                     cmpResult.Bytecode.Data,
                     SharpDX.D3DCompiler.EffectFlags.None);
             }
-        }
-
-        public static Buffer CreateConstantBuffer<T>(this Device device) where T : struct
-        {
-            int size = ((Marshal.SizeOf(typeof(T)) + 15) / 16) * 16;
-
-            BufferDescription description = new BufferDescription()
-            {
-                Usage = ResourceUsage.Dynamic,
-                SizeInBytes = size,
-                BindFlags = BindFlags.ConstantBuffer,
-                CpuAccessFlags = CpuAccessFlags.Write,
-                OptionFlags = ResourceOptionFlags.None,
-                StructureByteStride = 0,
-            };
-
-            return new Buffer(device, description);
-        }
-
-        public static void WriteConstantBuffer<T>(this DeviceContext deviceContext,
-            Buffer constantBuffer,
-            T value,
-            long offset) where T : struct
-        {
-            DataStream stream;
-            deviceContext.MapSubresource(constantBuffer, MapMode.WriteDiscard, MapFlags.None, out stream);
-            using (stream)
-            {
-                stream.Position = offset;
-                stream.Write(value);
-            }
-            deviceContext.UnmapSubresource(constantBuffer, 0);
         }
     }
 }

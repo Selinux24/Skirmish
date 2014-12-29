@@ -16,8 +16,15 @@ namespace Engine
         public Input Input { get; private set; }
         public Graphics Graphics { get; private set; }
         public string RuntimeText { get; private set; }
+        public int SceneCount
+        {
+            get
+            {
+                return this.scenes.Count;
+            }
+        }
 
-        public Game(string name, int screenWidth, int screenHeight, bool fullScreen, bool vSync = false, int refreshRate = 0, int multiSampleCount = 0)
+        public Game(string name, int screenWidth, int screenHeight, bool fullScreen, int refreshRate = 0, int multiSampleCount = 0)
         {
             this.name = name;
 
@@ -51,7 +58,7 @@ namespace Engine
 
             this.Input = new Input(this.Form);
 
-            this.Graphics = new Graphics(this.Form, vSync, fullScreen, refreshRate, multiSampleCount);
+            this.Graphics = new Graphics(this.Form, fullScreen, refreshRate, multiSampleCount);
         }
         public void Run()
         {

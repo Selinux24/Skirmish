@@ -5,7 +5,7 @@ using SharpDX.Direct3D11;
 namespace Engine.Common
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexSkinnedPosition : IVertex
+    public struct VertexSkinnedPosition : IVertexData
     {
         public Vector3 Position;
         public float Weight1;
@@ -32,7 +32,7 @@ namespace Engine.Common
                 new InputElement("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 24, 0, InputClassification.PerVertexData, 0 ),
             };
         }
-        public static VertexSkinnedPosition Create(Vertex v, Weight[] vw)
+        public static VertexSkinnedPosition Create(VertexData v, Weight[] vw)
         {
             return new VertexSkinnedPosition
             {
@@ -61,7 +61,7 @@ namespace Engine.Common
                 return SizeInBytes;
             }
         }
-        public IVertex Convert(Vertex v)
+        public IVertexData Convert(VertexData v)
         {
             return new VertexSkinnedPosition()
             {

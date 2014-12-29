@@ -25,7 +25,7 @@ namespace Engine.Helpers
 {
     public static class HelperResources
     {
-        public static Buffer CreateVertexBufferImmutable<T>(this Device device, IList<T> data)
+        public static Buffer CreateVertexBufferImmutable<T>(this Device device, T[] data)
            where T : struct
         {
             return CreateBuffer<T>(
@@ -35,7 +35,7 @@ namespace Engine.Helpers
                 BindFlags.VertexBuffer,
                 CpuAccessFlags.None);
         }
-        public static Buffer CreateIndexBufferImmutable<T>(this Device device, IList<T> data)
+        public static Buffer CreateIndexBufferImmutable<T>(this Device device, T[] data)
             where T : struct
         {
             return CreateBuffer<T>(
@@ -45,7 +45,7 @@ namespace Engine.Helpers
                 BindFlags.IndexBuffer,
                 CpuAccessFlags.None);
         }
-        public static Buffer CreateVertexBufferWrite<T>(this Device device, IList<T> data)
+        public static Buffer CreateVertexBufferWrite<T>(this Device device, T[] data)
             where T : struct
         {
             return CreateBuffer<T>(
@@ -55,7 +55,7 @@ namespace Engine.Helpers
                 BindFlags.VertexBuffer,
                 CpuAccessFlags.Write);
         }
-        public static Buffer CreateIndexBufferWrite<T>(this Device device, IList<T> data)
+        public static Buffer CreateIndexBufferWrite<T>(this Device device, T[] data)
             where T : struct
         {
             return CreateBuffer<T>(
@@ -65,17 +65,31 @@ namespace Engine.Helpers
                 BindFlags.IndexBuffer,
                 CpuAccessFlags.Write);
         }
-        public static Buffer CreateBuffer<T>(this Device device, IList<T> data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        public static Buffer CreateConstantBuffer<T>(this Device device)
             where T : struct
         {
-            int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Count;
+            int size = ((Marshal.SizeOf(typeof(T)) + 15) / 16) * 16;
+
+            BufferDescription description = new BufferDescription()
+            {
+                Usage = ResourceUsage.Dynamic,
+                SizeInBytes = size,
+                BindFlags = BindFlags.ConstantBuffer,
+                CpuAccessFlags = CpuAccessFlags.Write,
+                OptionFlags = ResourceOptionFlags.None,
+                StructureByteStride = 0,
+            };
+
+            return new Buffer(device, description);
+        }
+        public static Buffer CreateBuffer<T>(this Device device, T[] data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+            where T : struct
+        {
+            int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Length;
 
             using (DataStream d = new DataStream(sizeInBytes, true, true))
             {
-                foreach (T v in data)
-                {
-                    d.Write<T>(v);
-                }
+                d.WriteRange(data);
                 d.Position = 0;
 
                 return new Buffer(
@@ -93,7 +107,8 @@ namespace Engine.Helpers
             }
         }
 
-        public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, T[] data) where T : struct
+        public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, T[] data)
+            where T : struct
         {
             if (data != null && data.Length > 0)
             {
@@ -107,10 +122,21 @@ namespace Engine.Helpers
                 deviceContext.UnmapSubresource(buffer, 0);
             }
         }
+        public static void WriteConstantBuffer<T>(this DeviceContext deviceContext, Buffer constantBuffer, T value, long offset)
+            where T : struct
+        {
+            DataStream stream;
+            deviceContext.MapSubresource(constantBuffer, MapMode.WriteDiscard, MapFlags.None, out stream);
+            using (stream)
+            {
+                stream.Position = offset;
+                stream.Write(value);
+            }
+            deviceContext.UnmapSubresource(constantBuffer, 0);
+        }
 
         public static ShaderResourceView LoadTexture(this Device device, byte[] buffer)
         {
-            //TODO: Image description needed to load from buffer
             return ShaderResourceView.FromMemory(device, buffer, ImageLoadInformation.Default);
         }
         public static ShaderResourceView LoadTexture(this Device device, string filename)

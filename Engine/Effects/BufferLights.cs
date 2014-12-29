@@ -6,7 +6,7 @@ namespace Engine.Effects
     using Engine.Common;
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct BufferLights : IBuffer
+    public struct BufferLights : IBufferData
     {
         public BufferDirectionalLight DirectionalLight1;
         public BufferDirectionalLight DirectionalLight2;
@@ -50,7 +50,7 @@ namespace Engine.Effects
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct BufferDirectionalLight : IBuffer
+    public struct BufferDirectionalLight : IBufferData
     {
         public Color4 Ambient;
         public Color4 Diffuse;
@@ -85,7 +85,7 @@ namespace Engine.Effects
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct BufferPointLight : IBuffer
+    public struct BufferPointLight : IBufferData
     {
         public Color4 Ambient;
         public Color4 Diffuse;
@@ -124,7 +124,7 @@ namespace Engine.Effects
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct BufferSpotLight : IBuffer
+    public struct BufferSpotLight : IBufferData
     {
         public Color4 Ambient;
         public Color4 Diffuse;

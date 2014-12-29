@@ -7,7 +7,7 @@ using InputElement = SharpDX.Direct3D11.InputElement;
 namespace Engine.Common
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexInstancingData : IBuffer
+    public struct VertexInstancingData : IBufferData
     {
         public Matrix Local;
 
@@ -34,10 +34,6 @@ namespace Engine.Common
             this.Local = local;
         }
 
-        public void SetPosition(Vector3 position)
-        {
-            this.Local = Matrix.Translation(position);
-        }
         public int Stride
         {
             get

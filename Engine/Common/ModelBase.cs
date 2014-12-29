@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using SharpDX;
-using SharpDX.Direct3D;
-using Device = SharpDX.Direct3D11.Device;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Common
@@ -16,7 +14,15 @@ namespace Engine.Common
 
         protected class MeshDictionary : Dictionary<string, MeshMaterialsDictionary>
         {
+            public void Add(string meshName, string materialName, Mesh mesh)
+            {
+                if (!this.ContainsKey(meshName))
+                {
+                    this.Add(meshName, new MeshMaterialsDictionary());
+                }
 
+                this[meshName].Add(materialName, mesh);
+            }
         }
         protected class MeshMaterialsDictionary : Dictionary<string, Mesh>
         {
@@ -71,14 +77,6 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Bounding box
-        /// </summary>
-        public BoundingBox BoundingBox { get; protected set; }
-        /// <summary>
-        /// Bounding sphere
-        /// </summary>
-        public BoundingSphere BoundingSphere { get; protected set; }
-        /// <summary>
         /// Materials dictionary
         /// </summary>
         protected MaterialDictionary Materials = new MaterialDictionary();
@@ -105,236 +103,6 @@ namespace Engine.Common
 
         #region Static Helpers
 
-        /// <summary>
-        /// Groups meshes by material and create buffers for each group
-        /// </summary>
-        /// <param name="device">Device</param>
-        /// <param name="skinnedData">Skinned data</param>
-        /// <param name="materials">Materials</param>
-        /// <param name="meshes">Meshes</param>
-        /// <param name="maxInstances">Instances</param>
-        /// <returns>Returns the mesh dictionary by material</returns>
-        private static MeshDictionary GroupMeshes(
-            Device device,
-            SkinnedData skinnedData,
-            Dictionary<string, MeshMaterial> materials,
-            Dictionary<string, Mesh[]> meshes,
-            int maxInstances)
-        {
-            MeshDictionary dictionary = new MeshDictionary();
-
-            #region Process skin data
-
-            if (skinnedData != null)
-            {
-                foreach (string skin in skinnedData.Skins)
-                {
-                    MeshMaterialsDictionary meshSkinned = new MeshMaterialsDictionary();
-
-                    #region By material
-
-                    if (materials.Count > 0)
-                    {
-                        foreach (string material in materials.Keys)
-                        {
-                            Mesh[] meshArray = Array.FindAll<Mesh>(meshes[skin], m => m.Material == material);
-                            if (meshArray != null && meshArray.Length > 0)
-                            {
-                                Mesh mesh = GroupMeshesSkinned(device, material, meshArray, maxInstances);
-
-                                meshSkinned.Add(material, mesh);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Mesh mesh = GroupMeshesSkinned(device, null, meshes[skin], maxInstances);
-
-                        meshSkinned.Add(NoMaterial, mesh);
-                    }
-
-                    #endregion
-
-                    if (meshSkinned.Count > 0)
-                    {
-                        dictionary.Add(skin, meshSkinned);
-                    }
-                }
-            }
-
-            #endregion
-
-            #region Process static data
-
-            MeshMaterialsDictionary meshStatic = new MeshMaterialsDictionary();
-
-            if (materials.Count > 0)
-            {
-                foreach (string material in materials.Keys)
-                {
-                    #region Process by material
-
-                    List<Mesh> list = new List<Mesh>();
-
-                    foreach (string mesh in meshes.Keys)
-                    {
-                        if (skinnedData == null || !Array.Exists(skinnedData.Skins, s => s == mesh))
-                        {
-                            Mesh[] meshArray = Array.FindAll<Mesh>(meshes[mesh], m => m.Material == material);
-                            if (meshArray != null && meshArray.Length > 0)
-                            {
-                                list.AddRange(meshArray);
-                            }
-                        }
-                    }
-
-                    if (list.Count > 0)
-                    {
-                        Mesh gMesh = GroupMeshes(device, material, list.ToArray(), maxInstances);
-
-                        meshStatic.Add(material, gMesh);
-                    }
-
-                    #endregion
-                }
-            }
-            else
-            {
-                List<Mesh> list = new List<Mesh>();
-
-                foreach (string mesh in meshes.Keys)
-                {
-                    if (skinnedData == null || !Array.Exists(skinnedData.Skins, s => s == mesh))
-                    {
-                        list.AddRange(meshes[mesh]);
-                    }
-                }
-
-                if (list.Count > 0)
-                {
-                    Mesh gMesh = GroupMeshes(device, null, list.ToArray(), maxInstances);
-
-                    meshStatic.Add(NoMaterial, gMesh);
-                }
-            }
-
-            if (meshStatic.Count > 0)
-            {
-                dictionary.Add(StaticMesh, meshStatic);
-            }
-
-            #endregion
-
-            return dictionary;
-        }
-        /// <summary>
-        /// Static mesh grouping
-        /// </summary>
-        /// <param name="device">Device</param>
-        /// <param name="material">Material name</param>
-        /// <param name="meshArray">Mesh list</param>
-        /// <param name="maxInstances">Maximum instances of group</param>
-        /// <returns>Returns the new mesh</returns>
-        private static Mesh GroupMeshes(Device device, string material, Mesh[] meshArray, int maxInstances)
-        {
-            Mesh mesh = null;
-
-            if (meshArray.Length == 1)
-            {
-                mesh = meshArray[0];
-
-                mesh.CreateVertexBuffer(device);
-                mesh.CreateIndexBuffer(device);
-
-                if (mesh is MeshInstanced)
-                {
-                    ((MeshInstanced)mesh).CreateInstancingBuffer(device);
-                }
-            }
-            else
-            {
-                if (meshArray[0] is MeshInstanced)
-                {
-                    MeshInstanced iMesh = MeshInstanced.Merge(
-                        device,
-                        material,
-                        Array.ConvertAll(meshArray, c => c as MeshInstanced),
-                        maxInstances);
-
-                    iMesh.CreateVertexBuffer(device);
-                    iMesh.CreateIndexBuffer(device);
-                    iMesh.CreateInstancingBuffer(device);
-
-                    mesh = iMesh;
-                }
-                else
-                {
-                    mesh = Mesh.Merge(
-                        device,
-                        material,
-                        meshArray);
-
-                    mesh.CreateVertexBuffer(device);
-                    mesh.CreateIndexBuffer(device);
-                }
-            }
-
-            return mesh;
-        }
-        /// <summary>
-        /// Skinned mesh grouping
-        /// </summary>
-        /// <param name="device">Device</param>
-        /// <param name="material">Material name</param>
-        /// <param name="meshArray">Mesh list</param>
-        /// <param name="maxInstances">Maximum instances of group</param>
-        /// <returns>Returns the new mesh</returns>
-        private static Mesh GroupMeshesSkinned(Device device, string material, Mesh[] meshArray, int maxInstances)
-        {
-            Mesh mesh = null;
-
-            if (meshArray.Length == 1)
-            {
-                mesh = meshArray[0];
-
-                mesh.CreateVertexBuffer(device);
-                mesh.CreateIndexBuffer(device);
-
-                if (mesh is MeshInstanced)
-                {
-                    ((MeshInstanced)mesh).CreateInstancingBuffer(device);
-                }
-            }
-            else
-            {
-                if (meshArray[0] is MeshInstanced)
-                {
-                    MeshInstanced iMesh = MeshInstanced.Merge(
-                         device,
-                         material,
-                         Array.ConvertAll(meshArray, c => c as MeshInstanced),
-                         maxInstances);
-
-                    iMesh.CreateVertexBuffer(device);
-                    iMesh.CreateIndexBuffer(device);
-                    iMesh.CreateInstancingBuffer(device);
-
-                    mesh = iMesh;
-                }
-                else
-                {
-                    mesh = Mesh.Merge(
-                        device,
-                        material,
-                        meshArray);
-
-                    mesh.CreateVertexBuffer(device);
-                    mesh.CreateIndexBuffer(device);
-                }
-            }
-
-            return mesh;
-        }
         /// <summary>
         /// Perform transform flatten for skinning
         /// </summary>
@@ -435,15 +203,18 @@ namespace Engine.Common
             this.InitializeMaterials(modelContent);
 
             //Skins & Meshes
-            Dictionary<string, Mesh[]> meshes;
-            string[] skinList;
-            this.InitializeGeometry(modelContent, instanced, instances, out meshes, out skinList);
+            this.InitializeGeometry(modelContent, instanced, instances);
 
             //Animation
-            this.InitializeSkinnedData(modelContent, skinList);
+            this.InitializeSkinnedData(modelContent);
 
-            //Material grouping
-            this.Meshes = GroupMeshes(this.Game.Graphics.Device, this.SkinnedData, this.Materials, meshes, instances);
+            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+            {
+                foreach (Mesh mesh in dictionary.Values)
+                {
+                    mesh.Initialize(this.Device);
+                }
+            }
         }
         /// <summary>
         /// Initialize textures
@@ -530,105 +301,98 @@ namespace Engine.Common
         /// <param name="instances">Instance count</param>
         /// <param name="meshes">Mesh dictionary created</param>
         /// <param name="skinList">Skins readed</param>
-        protected virtual void InitializeGeometry(ModelContent modelContent, bool instanced, int instances, out Dictionary<string, Mesh[]> meshes, out string[] skinList)
+        protected virtual void InitializeGeometry(ModelContent modelContent, bool instanced, int instances)
         {
-            meshes = new Dictionary<string, Mesh[]>();
-            skinList = null;
-
-            if (modelContent.Controllers != null)
+            foreach (string meshName in modelContent.Geometry.Keys)
             {
-                List<string> list = new List<string>();
+                Dictionary<string, SubMeshContent> dict = modelContent.Geometry[meshName];
 
-                foreach (string controller in modelContent.Controllers.Keys)
+                if (meshName == ModelContent.StaticMesh)
                 {
-                    ControllerContent cInfo = modelContent.Controllers[controller];
+                    foreach (string material in dict.Keys)
+                    {
+                        SubMeshContent geometry = dict[material];
+
+                        IVertexData[] vertexList = VertexData.Convert(
+                            geometry.VertexType, 
+                            geometry.Vertices, 
+                            null);
+
+                        Mesh nMesh = null;
+
+                        if (instanced)
+                        {
+                            nMesh = new MeshInstanced(
+                                geometry.Material,
+                                geometry.Topology,
+                                vertexList,
+                                geometry.Indices,
+                                instances);
+                        }
+                        else
+                        {
+                            nMesh = new Mesh(
+                                geometry.Material,
+                                geometry.Topology,
+                                vertexList,
+                                geometry.Indices);
+                        }
+
+                        this.Meshes.Add(meshName, geometry.Material, nMesh);
+                    }
+                }
+                else
+                {
+                    ControllerContent cInfo = modelContent.GetControllerForMesh(meshName);
 
                     Matrix bindShapeMatrix = cInfo.BindShapeMatrix;
                     Weight[] weights = cInfo.Weights;
-                    SubMeshContent[] geometryList = modelContent.Geometry[cInfo.Skin];
 
-                    list.Add(cInfo.Skin);
-
-                    List<Mesh> meshList = new List<Mesh>();
-
-                    foreach (SubMeshContent g in geometryList)
+                    foreach (string material in dict.Keys)
                     {
-                        VertexTypes vertexType = Vertex.GetSkinnedEquivalent(g.VertexType);
+                        SubMeshContent geometry = dict[material];
 
-                        Mesh nMesh = ReadVertexList(
-                            g.Topology,
-                            vertexType,
-                            g.Vertices,
-                            weights,
-                            g.Indices,
-                            g.BoundingBox,
-                            g.BoundingSphere,
-                            g.Material,
-                            instanced,
-                            instances);
+                        IVertexData[] vertexList = VertexData.Convert(
+                            VertexData.GetSkinnedEquivalent(geometry.VertexType), 
+                            geometry.Vertices, 
+                            weights);
 
-                        meshList.Add(nMesh);
+                        Mesh nMesh = null;
+
+                        if (instanced)
+                        {
+                            nMesh = new MeshInstanced(
+                                geometry.Material,
+                                geometry.Topology,
+                                vertexList,
+                                geometry.Indices,
+                                instances);
+                        }
+                        else
+                        {
+                            nMesh = new Mesh(
+                                geometry.Material,
+                                geometry.Topology,
+                                vertexList,
+                                geometry.Indices);
+                        }
+
+                        this.Meshes.Add(meshName, geometry.Material, nMesh);
                     }
-
-                    meshes.Add(cInfo.Skin, meshList.ToArray());
-                }
-
-                skinList = list.ToArray();
-            }
-
-            foreach (string mesh in modelContent.Geometry.Keys)
-            {
-                if (!meshes.ContainsKey(mesh))
-                {
-                    SubMeshContent[] geometryList = modelContent.Geometry[mesh];
-
-                    List<Mesh> meshList = new List<Mesh>();
-
-                    foreach (SubMeshContent g in geometryList)
-                    {
-                        Mesh nMesh = ReadVertexList(
-                            g.Topology,
-                            g.VertexType,
-                            g.Vertices,
-                            null,
-                            g.Indices,
-                            g.BoundingBox,
-                            g.BoundingSphere,
-                            g.Material,
-                            instanced,
-                            instances);
-
-                        meshList.Add(nMesh);
-                    }
-
-                    meshes.Add(mesh, meshList.ToArray());
                 }
             }
-
-            BoundingBox bbox = new BoundingBox();
-            BoundingSphere bsphere = new BoundingSphere();
-
-            foreach (Mesh[] mList in meshes.Values)
-            {
-                foreach (Mesh m in mList)
-                {
-                    bbox = BoundingBox.Merge(bbox, m.BoundingBox);
-                    bsphere = BoundingSphere.Merge(bsphere, m.BoundingSphere);
-                }
-            }
-
-            this.BoundingBox = bbox;
-            this.BoundingSphere = bsphere;
         }
         /// <summary>
         /// Initialize skinned data
         /// </summary>
         /// <param name="modelContent">Model content</param>
         /// <param name="skinList">Skins</param>
-        protected virtual void InitializeSkinnedData(ModelContent modelContent, string[] skinList)
+        protected virtual void InitializeSkinnedData(ModelContent modelContent)
         {
             if (modelContent.SkinningInfo != null)
             {
+                string[] skins = modelContent.Controllers.Skins;
+
                 ControllerContent controller = modelContent.Controllers[modelContent.SkinningInfo.Controller];
 
                 List<int> hierarchy = new List<int>();
@@ -654,7 +418,7 @@ namespace Engine.Common
                 animations.Add(SkinnedData.DEFAULTCLIP, clip);
 
                 this.SkinnedData = SkinnedData.Create(
-                    skinList,
+                    skins,
                     hierarchy.ToArray(),
                     offsets.ToArray(),
                     animations);
@@ -678,99 +442,6 @@ namespace Engine.Common
 
                     this.Techniques.Add(m, technique);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Compute bounding box against transformed vertices
-        /// </summary>
-        /// <param name="transform">Transform</param>
-        protected BoundingBox ComputeBoundingBox(Matrix transform)
-        {
-            BoundingBox box = new BoundingBox();
-
-            if (this.Meshes != null)
-            {
-                foreach (MeshMaterialsDictionary dict in this.Meshes.Values)
-                {
-                    foreach (Mesh mesh in dict.Values)
-                    {
-                        box = BoundingBox.Merge(box, mesh.ComputeBoundingBox(transform));
-                    }
-                }
-            }
-
-            return box;
-        }
-        /// <summary>
-        /// Compute bounding sphere against transformed vertices
-        /// </summary>
-        /// <param name="transform">Transform</param>
-        protected BoundingSphere ComputeBoundingSphere(Matrix transform)
-        {
-            BoundingSphere sphere = new BoundingSphere();
-
-            if (this.Meshes != null)
-            {
-                foreach (MeshMaterialsDictionary dict in this.Meshes.Values)
-                {
-                    foreach (Mesh mesh in dict.Values)
-                    {
-                        sphere = BoundingSphere.Merge(sphere, mesh.ComputeBoundingSphere(transform));
-                    }
-                }
-            }
-
-            return sphere;
-        }
-
-        /// <summary>
-        /// Read the vertex list creating structuring them with a vertex type
-        /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="weights">Weights</param>
-        /// <param name="indices">Indices</param>
-        /// <param name="material">Material name</param>
-        /// <param name="instanced">Is instanced</param>
-        /// <param name="instances">Max instances</param>
-        /// <returns>Returns the formatted vertex list into the mesh</returns>
-        private Mesh ReadVertexList(
-            PrimitiveTopology topology,
-            VertexTypes vertexType,
-            Vertex[] vertices,
-            Weight[] weights,
-            uint[] indices,
-            BoundingBox bbox,
-            BoundingSphere bsphere,
-            string material,
-            bool instanced,
-            int instances)
-        {
-            IVertex[] vertexList = Vertex.Convert(vertexType, vertices, weights);
-
-            if (instanced)
-            {
-                return MeshInstanced.Create(
-                    this.Game.Graphics.Device,
-                    material,
-                    topology,
-                    vertexList,
-                    indices,
-                    bbox,
-                    bsphere,
-                    instances);
-            }
-            else
-            {
-                return Mesh.Create(
-                    this.Game.Graphics.Device,
-                    material,
-                    topology,
-                    vertexList,
-                    indices,
-                    bbox,
-                    bsphere);
             }
         }
 
@@ -847,7 +518,7 @@ namespace Engine.Common
         /// </summary>
         public override void HandleResizing()
         {
-            
+
         }
     }
 }

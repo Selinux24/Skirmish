@@ -24,31 +24,6 @@ namespace Engine
             }
         }
         public Manipulator Manipulator { get; private set; }
-        public BoundingBox BoundingBox
-        {
-            get
-            {
-                return new BoundingBox()
-                {
-                    Maximum = Vector3.TransformCoordinate(this.terrain.BoundingBox.Maximum, this.Manipulator.LocalTransform),
-                    Minimum = Vector3.TransformCoordinate(this.terrain.BoundingBox.Minimum, this.Manipulator.LocalTransform),
-                };
-            }
-        }
-        public BoundingSphere BoundingSphere
-        {
-            get
-            {
-                float maxScaling = System.Math.Max(this.Manipulator.Scaling.X, this.Manipulator.Scaling.Y);
-                maxScaling = System.Math.Max(maxScaling, this.Manipulator.Scaling.Z);
-
-                return new BoundingSphere()
-                {
-                    Center = Vector3.TransformCoordinate(this.terrain.BoundingSphere.Center, this.Manipulator.LocalTransform),
-                    Radius = this.terrain.BoundingSphere.Radius * maxScaling,
-                };
-            }
-        }
 
         public Terrain(Game game, Scene3D scene, ModelContent terrainContent, string contentFolder, TerrainDescription description, bool debugMode = false)
             : base(game, scene)
@@ -77,7 +52,7 @@ namespace Engine
                 ModelContent skydomContent = ModelContent.GenerateSkydom(
                     contentFolder,
                     description.SkydomTexture,
-                    this.terrain.BoundingSphere.Radius * 2f);
+                    1000f);
 
                 this.skydom = new Cubemap(game, scene, skydomContent);
             }
@@ -146,7 +121,7 @@ namespace Engine
 
             Ray ray = new Ray()
             {
-                Position = new Vector3(x, this.BoundingBox.Maximum.Y + 1f, z),
+                Position = new Vector3(x, 1000f, z),
                 Direction = Vector3.Down,
             };
 

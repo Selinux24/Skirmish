@@ -5,7 +5,7 @@ using SharpDX.Direct3D11;
 namespace Engine.Common
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexSkinnedPositionColor : IVertex
+    public struct VertexSkinnedPositionColor : IVertexData
     {
         public Vector3 Position;
         public Color4 Color;
@@ -34,7 +34,7 @@ namespace Engine.Common
                 new InputElement("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 40, 0, InputClassification.PerVertexData, 0 ),
            };
         }
-        public static VertexSkinnedPositionColor Create(Vertex v, Weight[] vw)
+        public static VertexSkinnedPositionColor Create(VertexData v, Weight[] vw)
         {
             return new VertexSkinnedPositionColor
             {
@@ -64,7 +64,7 @@ namespace Engine.Common
                 return SizeInBytes;
             }
         }
-        public IVertex Convert(Vertex v)
+        public IVertexData Convert(VertexData v)
         {
             return new VertexSkinnedPositionColor()
             {

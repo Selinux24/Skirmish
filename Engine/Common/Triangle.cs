@@ -100,7 +100,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="vertices">Vertices</param>
         /// <returns>Return the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Vertex[] vertices)
+        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, VertexData[] vertices)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
@@ -133,7 +133,7 @@ namespace Engine.Common
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         /// <returns>Return the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Vertex[] vertices, uint[] indices)
+        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, VertexData[] vertices, uint[] indices)
         {
             List<Triangle> triangleList = new List<Triangle>();
 

@@ -257,7 +257,7 @@
     <Compile Include="Collada\VertexWeights.cs" />
     <Compile Include="Collada\Vertices.cs" />
     <Compile Include="Collada\VisualScene.cs" />
-    <Compile Include="Common\IBuffer.cs" />
+    <Compile Include="Common\IBufferData.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalColor.cs" />
     <Compile Include="Common\VertexSkinnedPositionColor.cs" />
     <Compile Include="Common\VertexSkinnedPositionTexture.cs" />
@@ -276,7 +276,7 @@
     <Compile Include="Content\SkinningContent.cs" />
     <Compile Include="Common\MeshInstanced.cs" />
     <Compile Include="Collada\Transforms.cs" />
-    <Compile Include="Common\Vertex.cs" />
+    <Compile Include="Common\VertexData.cs" />
     <Compile Include="Common\Weight.cs" />
     <Compile Include="VolumeInstanced.cs" />
     <Compile Include="Volume.cs" />
@@ -287,7 +287,6 @@
     <Compile Include="EngineForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Common\Material.cs" />
     <Compile Include="ModelInstanced.cs" />
     <Compile Include="SceneLightDirectional.cs" />
@@ -330,7 +329,7 @@
     <Compile Include="Common\Intersections.cs" />
     <Compile Include="Common\VertexBillboard.cs" />
     <Compile Include="Common\VertexInstancingData.cs" />
-    <Compile Include="Common\IVertex.cs" />
+    <Compile Include="Common\IVertexData.cs" />
     <Compile Include="Effects\BufferMaterials.cs" />
     <Compile Include="Helpers\Texture2DFormats.cs" />
     <Compile Include="Common\VertexPositionNormalTexture.cs" />
@@ -338,13 +337,11 @@
     <Compile Include="Common\VertexPositionNormalColor.cs" />
     <Compile Include="Common\VertexPositionColor.cs" />
     <Compile Include="Common\Drawable.cs" />
-    <Compile Include="Helpers\PixelShaderDescription.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\HelperResources.cs" />
     <Compile Include="Helpers\HelperShaders.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalTexture.cs" />
     <Compile Include="Common\VertexPositionTexture.cs" />
-    <Compile Include="Helpers\VertexShaderDescription.cs" />
     <Compile Include="Common\VertexTypes.cs" />
     <Compile Include="Terrain.cs" />
   </ItemGroup>

@@ -427,7 +427,7 @@ namespace Engine
                 {
                     FontChar chr = this[c];
 
-                    Vertex[] cv;
+                    VertexData[] cv;
                     uint[] ci;
                     ModelContent.CreateSprite(
                         pos,

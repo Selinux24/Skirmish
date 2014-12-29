@@ -119,7 +119,7 @@ float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 
-	litColor.a = gMaterial.Diffuse.a;
+	litColor.a *= gMaterial.Diffuse.a;
 
 	return litColor;
 }

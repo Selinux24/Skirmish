@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using Buffer = SharpDX.Direct3D11.Buffer;
@@ -24,17 +21,21 @@ namespace Engine.Common
         /// </summary>
         protected Buffer VertexBuffer;
         /// <summary>
+        /// Vertex buffer binding
+        /// </summary>
+        protected VertexBufferBinding[] VertexBufferBinding = new VertexBufferBinding[0];
+        /// <summary>
+        /// Vertices cache
+        /// </summary>
+        protected IVertexData[] Vertices = null;
+        /// <summary>
         /// Index buffer
         /// </summary>
         protected Buffer IndexBuffer;
         /// <summary>
-        /// Vertices cache
-        /// </summary>
-        protected ICollection vertices = null;
-        /// <summary>
         /// Indices cache
         /// </summary>
-        protected ICollection indices = null;
+        protected uint[] Indices = null;
 
         /// <summary>
         /// Material name
@@ -61,10 +62,6 @@ namespace Engine.Common
         /// </summary>
         public int VertexBufferStride { get; protected set; }
         /// <summary>
-        /// Offset
-        /// </summary>
-        public int VertexBufferOffset { get; protected set; }
-        /// <summary>
         /// Vertex count
         /// </summary>
         public int VertexCount { get; protected set; }
@@ -72,90 +69,6 @@ namespace Engine.Common
         /// Index count
         /// </summary>
         public int IndexCount { get; protected set; }
-        /// <summary>
-        /// Bounding box
-        /// </summary>
-        public BoundingBox BoundingBox { get; protected set; }
-        /// <summary>
-        /// Bounding sphere
-        /// </summary>
-        public BoundingSphere BoundingSphere { get; protected set; }
-
-        /// <summary>
-        /// Creates a Mesh
-        /// </summary>
-        /// <typeparam name="T">Vertex type</typeparam>
-        /// <param name="device">Device</param>
-        /// <param name="material">Material name</param>
-        /// <param name="topology">Topology</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="indices">Indices</param>
-        /// <returns>Returns a new mesh</returns>
-        public static Mesh Create(Device device, string material, PrimitiveTopology topology, IVertex[] vertices, uint[] indices, BoundingBox bbox, BoundingSphere bsphere)
-        {
-            VertexTypes vertexType = vertices[0].VertexType;
-
-            Mesh mesh = new Mesh(material, vertexType, topology);
-
-            mesh.vertices = vertices;
-            mesh.indices = indices;
-            mesh.BoundingBox = bbox;
-            mesh.BoundingSphere = bsphere;
-
-            return mesh;
-        }
-        /// <summary>
-        /// Merges a list of meshes
-        /// </summary>
-        /// <typeparam name="T">Vertex type</typeparam>
-        /// <param name="device">Device</param>
-        /// <param name="material">Material name</param>
-        /// <param name="meshes">Mesh list</param>
-        /// <returns>Returns a new mesh</returns>
-        public static Mesh Merge(Device device, string material, Mesh[] meshes)
-        {
-            List<IVertex> vertices = new List<IVertex>();
-            List<uint> indices = new List<uint>();
-            BoundingBox bbox = new BoundingBox();
-            BoundingSphere bsphere = new BoundingSphere();
-
-            uint indexOffset = 0;
-
-            foreach (Mesh mesh in meshes)
-            {
-                if (mesh.vertices != null && mesh.vertices.Count > 0)
-                {
-                    foreach (IVertex v in mesh.vertices)
-                    {
-                        vertices.Add(v);
-                    }
-                }
-
-                if (mesh.indices != null && mesh.indices.Count > 0)
-                {
-                    foreach (uint i in mesh.indices)
-                    {
-                        indices.Add(indexOffset + i);
-                    }
-                }
-
-                bbox = BoundingBox.Merge(bbox, mesh.BoundingBox);
-                bsphere = BoundingSphere.Merge(bsphere, mesh.BoundingSphere);
-
-                indexOffset = (uint)vertices.Count;
-
-                mesh.Dispose();
-            }
-
-            return Mesh.Create(
-                device, 
-                material, 
-                meshes[0].Topology, 
-                vertices.ToArray(), 
-                indices.ToArray(),
-                bbox,
-                bsphere);
-        }
 
         /// <summary>
         /// Constructor
@@ -163,13 +76,46 @@ namespace Engine.Common
         /// <param name="material">Material name</param>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="topology">Topology</param>
-        protected Mesh(string material, VertexTypes vertexType, PrimitiveTopology topology)
+        public Mesh(string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices)
         {
             this.Material = material;
-            this.VertextType = vertexType;
             this.Topology = topology;
-            this.Textured = Vertex.IsTextured(vertexType);
-            this.Skinned = Vertex.IsSkinned(vertexType);
+            this.Vertices = vertices;
+            this.Indices = indices;
+            this.VertextType = vertices[0].VertexType;
+            this.Textured = VertexData.IsTextured(vertices[0].VertexType);
+            this.Skinned = VertexData.IsSkinned(vertices[0].VertexType);
+        }
+        /// <summary>
+        /// Initializes the mesh graphics content
+        /// </summary>
+        /// <param name="device">Device</param>
+        public virtual void Initialize(Device device)
+        {
+            if (this.Vertices != null && this.Vertices.Length > 0)
+            {
+                this.VertexBuffer = VertexData.CreateVertexBuffer(device, this.Vertices);
+                this.VertexBufferStride = this.Vertices[0].Stride;
+                this.VertexCount = this.Vertices.Length;
+
+                this.AddVertexBufferBinding(new VertexBufferBinding(this.VertexBuffer, this.VertexBufferStride, 0));
+            }
+
+            if (this.Indices != null && this.Indices.Length > 0)
+            {
+                this.IndexBuffer = device.CreateIndexBufferImmutable((uint[])this.Indices);
+                this.IndexCount = this.Indices.Length;
+            }
+        }
+        /// <summary>
+        /// Adds binding to precached buffer bindings for input assembler
+        /// </summary>
+        /// <param name="binding">Binding</param>
+        public virtual void AddVertexBufferBinding(VertexBufferBinding binding)
+        {
+            Array.Resize(ref this.VertexBufferBinding, this.VertexBufferBinding.Length + 1);
+
+            this.VertexBufferBinding[this.VertexBufferBinding.Length - 1] = binding;
         }
         /// <summary>
         /// Dispose
@@ -215,62 +161,37 @@ namespace Engine.Common
         public virtual void SetInputAssembler(DeviceContext deviceContext, InputLayout inputLayout)
         {
             deviceContext.InputAssembler.InputLayout = inputLayout;
-
-            deviceContext.InputAssembler.SetVertexBuffers(
-                0,
-                new VertexBufferBinding[]
-                {
-                    new VertexBufferBinding(this.VertexBuffer, this.VertexBufferStride, this.VertexBufferOffset),
-                });
-
             deviceContext.InputAssembler.PrimitiveTopology = this.Topology;
-
+            deviceContext.InputAssembler.SetVertexBuffers(0, this.VertexBufferBinding);
             deviceContext.InputAssembler.SetIndexBuffer(this.IndexBuffer, Format.R32_UInt, 0);
         }
         /// <summary>
-        /// Creates vertex buffer
+        /// Writes vertex data
         /// </summary>
-        /// <param name="device">Device</param>
-        public void CreateVertexBuffer(Device device)
+        /// <param name="deviceContext">Immediate context</param>
+        /// <param name="data">Vertex data</param>
+        public virtual void WriteVertexData(DeviceContext deviceContext, IVertexData[] data)
         {
-            Buffer buffer;
-            int stride;
-            Vertex.CreateVertexBuffer(
-                device,
-                this.VertextType,
-                this.vertices,
-                out buffer,
-                out stride);
+            this.Vertices = data;
 
-            this.VertexBuffer = buffer;
-            this.VertexBufferStride = stride;
-            this.VertexBufferOffset = 0;
-            this.VertexCount = this.vertices.Count;
-        }
-        /// <summary>
-        /// Creates index buffer
-        /// </summary>
-        /// <param name="device">Device</param>
-        public void CreateIndexBuffer(Device device)
-        {
-            if (this.indices != null && this.indices.Count > 0)
+            if (this.VertexBuffer != null && this.Vertices != null && this.Vertices.Length > 0)
             {
-                this.IndexBuffer = device.CreateIndexBufferImmutable((uint[])this.indices);
-                this.IndexCount = this.indices.Count;
+                VertexData.WriteVertexBuffer(deviceContext, this.VertexBuffer, this.Vertices);
             }
         }
-
-
-        public BoundingSphere ComputeBoundingSphere(Matrix transform)
+        /// <summary>
+        /// Writes index data
+        /// </summary>
+        /// <param name="deviceContext">Immediate context</param>
+        /// <param name="data">Index data</param>
+        public virtual void WriteIndexData(DeviceContext deviceContext, uint[] data)
         {
-            //TODO: Apply transform to all vertices and recompute bsphere
-            return this.BoundingSphere;
-        }
+            this.Indices = data;
 
-        public BoundingBox ComputeBoundingBox(Matrix transform)
-        {
-            //TODO: Apply transform to all vertices and recompute bbox
-            return this.BoundingBox;
+            if (this.IndexBuffer != null && this.Indices != null && this.Indices.Length > 0)
+            {
+                deviceContext.WriteBuffer(this.IndexBuffer, this.Indices);
+            }
         }
     }
 }

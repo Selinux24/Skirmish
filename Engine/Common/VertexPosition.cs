@@ -5,7 +5,7 @@ using SharpDX.Direct3D11;
 namespace Engine.Common
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexPosition : IVertex
+    public struct VertexPosition : IVertexData
     {
         public Vector3 Position;
 
@@ -23,7 +23,7 @@ namespace Engine.Common
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
             };
         }
-        public static VertexPosition Create(Vertex v)
+        public static VertexPosition Create(VertexData v)
         {
             return new VertexPosition
             {
@@ -45,7 +45,7 @@ namespace Engine.Common
                 return SizeInBytes;
             }
         }
-        public IVertex Convert(Vertex v)
+        public IVertexData Convert(VertexData v)
         {
             return new VertexPosition()
             {

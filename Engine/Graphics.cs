@@ -62,17 +62,16 @@ namespace Engine
         public Device Device { get; private set; }
         public DeviceContext DeviceContext { get; private set; }
 
-        public Graphics(EngineForm form, bool vsync, bool fullScreen, int refreshRate = 0, int multiSampleCount = 0)
+        public Graphics(EngineForm form, bool fullScreen, int refreshRate = 0, int multiSampleCount = 0)
         {
-            this.vsyncEnabled = vsync;
-
             ModeDescription displayMode = this.FindModeDescription(
+                this.BufferFormat,
                 form.RenderWidth,
                 form.RenderHeight,
-                vsync,
                 fullScreen,
-                this.BufferFormat,
                 refreshRate);
+
+            this.vsyncEnabled = displayMode.RefreshRate != new Rational(0, 1);
 
             using (Device tmpDevice = new Device(DriverType.Hardware))
             {
@@ -418,20 +417,8 @@ namespace Engine
             }
         }
 
-        private ModeDescription FindModeDescription(int width, int height, bool vSync, bool fullScreen, Format format, int refreshRate = 0)
+        private ModeDescription FindModeDescription(Format format, int width, int height, bool fullScreen, int refreshRate = 0)
         {
-            ModeDescription result = new ModeDescription()
-            {
-                Width = width,
-                Height = height,
-                Format = format,
-                RefreshRate = new Rational(0, 1),
-                ScanlineOrdering = DisplayModeScanlineOrder.Unspecified,
-                Scaling = DisplayModeScaling.Unspecified,
-            };
-
-            bool found = false;
-
             using (Factory factory = new Factory())
             {
                 using (Adapter adapter = factory.GetAdapter(0))
@@ -445,51 +432,55 @@ namespace Engine
                                 DisplayModeEnumerationFlags.Interlaced);
 
                             ModeDescription[] displayModes = Array.FindAll(displayModeList, d =>
-                                d.Format == format &&
                                 d.Width == width &&
                                 d.Height == height &&
                                 (refreshRate == 0 || (d.RefreshRate.Numerator / d.RefreshRate.Denominator) + 1 == refreshRate));
 
                             if (displayModes.Length > 0)
                             {
-                                result = displayModes[0];
-
-                                if (!vSync) result.RefreshRate = new Rational(0, 1);
-
-                                found = true;
+                                return displayModes[0];
                             }
                         }
                         catch
                         {
-                            found = false;
+
                         }
 
-                        if (!found)
+                        try
                         {
-                            try
-                            {
-                                adapterOutput.GetClosestMatchingMode(
-                                    null,
-                                    new ModeDescription()
-                                    {
-                                        Format = format,
-                                        Width = width,
-                                        Height = height,
-                                    },
-                                    out result);
+                            ModeDescription result;
+                            adapterOutput.GetClosestMatchingMode(
+                                null,
+                                new ModeDescription()
+                                {
+                                    Format = format,
+                                    Width = width,
+                                    Height = height,
+                                },
+                                out result);
 
-                                found = true;
-                            }
-                            catch
-                            {
-                                found = false;
-                            }
+                            result.Width = width;
+                            result.Height = height;
+
+                            return result;
+                        }
+                        catch
+                        {
+
                         }
                     }
                 }
             }
 
-            return result;
+            return new ModeDescription()
+            {
+                Width = width,
+                Height = height,
+                Format = format,
+                RefreshRate = new Rational(0, 1),
+                Scaling = DisplayModeScaling.Unspecified,
+                ScanlineOrdering = DisplayModeScanlineOrder.Unspecified,
+            };
         }
         private void DisposeResources()
         {

@@ -6,7 +6,7 @@ using InputElement = SharpDX.Direct3D11.InputElement;
 namespace Engine.Common
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexSkinnedPositionNormalTextureTangent : IVertex
+    public struct VertexSkinnedPositionNormalTextureTangent : IVertexData
     {
         public Vector3 Position;
         public Vector3 Normal;
@@ -40,7 +40,7 @@ namespace Engine.Common
                 new InputElement("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 60, 0, InputClassification.PerVertexData, 0 ),
             };
         }
-        public static VertexSkinnedPositionNormalTextureTangent Create(Vertex v, Weight[] vw)
+        public static VertexSkinnedPositionNormalTextureTangent Create(VertexData v, Weight[] vw)
         {
             return new VertexSkinnedPositionNormalTextureTangent
             {
@@ -73,7 +73,7 @@ namespace Engine.Common
                 return SizeInBytes;
             }
         }
-        public IVertex Convert(Vertex v)
+        public IVertexData Convert(VertexData v)
         {
             return new VertexSkinnedPositionNormalTextureTangent()
             {

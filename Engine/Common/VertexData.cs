@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using SharpDX;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Device = SharpDX.Direct3D11.Device;
+using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 
 namespace Engine.Common
 {
     using Engine.Helpers;
 
     [Serializable]
-    public struct Vertex
+    public struct VertexData
     {
         public int FaceIndex;
         public int VertexIndex;
@@ -24,58 +24,58 @@ namespace Engine.Common
         public float[] Weights;
         public byte[] BoneIndices;
 
-        public static Vertex CreateVertexBillboard(Vector3 position, Vector2 size)
+        public static VertexData CreateVertexBillboard(Vector3 position, Vector2 size)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Size = size,
             };
         }
-        public static Vertex CreateVertexPosition(Vector3 position)
+        public static VertexData CreateVertexPosition(Vector3 position)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
             };
         }
-        public static Vertex CreateVertexPositionColor(Vector3 position, Color4 color)
+        public static VertexData CreateVertexPositionColor(Vector3 position, Color4 color)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Color = color,
             };
         }
-        public static Vertex CreateVertexPositionTexture(Vector3 position, Vector2 texture)
+        public static VertexData CreateVertexPositionTexture(Vector3 position, Vector2 texture)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Texture = texture,
             };
         }
-        public static Vertex CreateVertexPositionNormalColor(Vector3 position, Vector3 normal, Color4 color)
+        public static VertexData CreateVertexPositionNormalColor(Vector3 position, Vector3 normal, Color4 color)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Normal = normal,
                 Color = color,
             };
         }
-        public static Vertex CreateVertexPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 texture)
+        public static VertexData CreateVertexPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 texture)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Normal = normal,
                 Texture = texture,
             };
         }
-        public static Vertex CreateVertexPositionNormalTextureTangent(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture)
+        public static VertexData CreateVertexPositionNormalTextureTangent(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Normal = normal,
@@ -84,18 +84,18 @@ namespace Engine.Common
                 Texture = texture,
             };
         }
-        public static Vertex CreateVertexSkinnedPosition(Vector3 position, float[] weights, byte[] boneIndices)
+        public static VertexData CreateVertexSkinnedPosition(Vector3 position, float[] weights, byte[] boneIndices)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Weights = weights,
                 BoneIndices = boneIndices,
             };
         }
-        public static Vertex CreateVertexSkinnedPositionColor(Vector3 position, Color4 color, float[] weights, byte[] boneIndices)
+        public static VertexData CreateVertexSkinnedPositionColor(Vector3 position, Color4 color, float[] weights, byte[] boneIndices)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Color = color,
@@ -103,9 +103,9 @@ namespace Engine.Common
                 BoneIndices = boneIndices,
             };
         }
-        public static Vertex CreateVertexSkinnedPositionTexture(Vector3 position, Vector2 texture, float[] weights, byte[] boneIndices)
+        public static VertexData CreateVertexSkinnedPositionTexture(Vector3 position, Vector2 texture, float[] weights, byte[] boneIndices)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Texture = texture,
@@ -113,9 +113,9 @@ namespace Engine.Common
                 BoneIndices = boneIndices,
             };
         }
-        public static Vertex CreateVertexSkinnedPositionNormalColor(Vector3 position, Vector3 normal, Color4 color, float[] weights, byte[] boneIndices)
+        public static VertexData CreateVertexSkinnedPositionNormalColor(Vector3 position, Vector3 normal, Color4 color, float[] weights, byte[] boneIndices)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Normal = normal,
@@ -124,9 +124,9 @@ namespace Engine.Common
                 BoneIndices = boneIndices,
             };
         }
-        public static Vertex CreateVertexSkinnedPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 texture, float[] weights, byte[] boneIndices)
+        public static VertexData CreateVertexSkinnedPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 texture, float[] weights, byte[] boneIndices)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Normal = normal,
@@ -135,9 +135,9 @@ namespace Engine.Common
                 BoneIndices = boneIndices,
             };
         }
-        public static Vertex CreateVertexSkinnedPositionNormalTextureTangent(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture, float[] weights, byte[] boneIndices)
+        public static VertexData CreateVertexSkinnedPositionNormalTextureTangent(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture, float[] weights, byte[] boneIndices)
         {
-            return new Vertex()
+            return new VertexData()
             {
                 Position = position,
                 Normal = normal,
@@ -183,87 +183,134 @@ namespace Engine.Common
             return VertexTypes.Unknown;
         }
 
-        public static void CreateVertexBuffer(Device device, VertexTypes vertexType, ICollection vertices, out Buffer buffer, out int stride)
+        public static Buffer CreateVertexBuffer(Device device, IVertexData[] vertices)
         {
-            buffer = null;
-            stride = -1;
+            Buffer buffer = null;
 
-            if (vertices != null && vertices.Count > 0)
+            if (vertices != null && vertices.Length > 0)
             {
-                if (vertexType == VertexTypes.Billboard)
+                if (vertices[0].VertexType == VertexTypes.Billboard)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexBillboard)v));
-                    stride = VertexBillboard.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexBillboard)v));
                 }
-                else if (vertexType == VertexTypes.Position)
+                else if (vertices[0].VertexType == VertexTypes.Position)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexPosition)v));
-                    stride = VertexPosition.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPosition)v));
                 }
-                else if (vertexType == VertexTypes.PositionColor)
+                else if (vertices[0].VertexType == VertexTypes.PositionColor)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexPositionColor)v));
-                    stride = VertexPositionColor.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionColor)v));
                 }
-                else if (vertexType == VertexTypes.PositionNormalColor)
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexPositionNormalColor)v));
-                    stride = VertexPositionNormalColor.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalColor)v));
                 }
-                else if (vertexType == VertexTypes.PositionTexture)
+                else if (vertices[0].VertexType == VertexTypes.PositionTexture)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexPositionTexture)v));
-                    stride = VertexPositionTexture.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionTexture)v));
                 }
-                else if (vertexType == VertexTypes.PositionNormalTexture)
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexPositionNormalTexture)v));
-                    stride = VertexPositionNormalTexture.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTexture)v));
                 }
-                else if (vertexType == VertexTypes.PositionNormalTextureTangent)
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexPositionNormalTextureTangent)v));
-                    stride = VertexPositionNormalTextureTangent.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTextureTangent)v));
                 }
-                else if (vertexType == VertexTypes.PositionSkinned)
+                else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexSkinnedPosition)v));
-                    stride = VertexSkinnedPosition.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPosition)v));
                 }
-                else if (vertexType == VertexTypes.PositionColorSkinned)
+                else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexSkinnedPositionColor)v));
-                    stride = VertexSkinnedPositionColor.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionColor)v));
                 }
-                else if (vertexType == VertexTypes.PositionNormalColorSkinned)
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexSkinnedPositionNormalColor)v));
-                    stride = VertexSkinnedPositionNormalColor.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalColor)v));
                 }
-                else if (vertexType == VertexTypes.PositionTextureSkinned)
+                else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexSkinnedPositionTexture)v));
-                    stride = VertexSkinnedPositionTexture.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionTexture)v));
                 }
-                else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
-                    stride = VertexSkinnedPositionNormalTexture.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
                 }
-                else if (vertexType == VertexTypes.PositionNormalTextureTangentSkinned)
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
                 {
-                    buffer = device.CreateVertexBufferImmutable(Array.ConvertAll((IVertex[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
-                    stride = VertexSkinnedPositionNormalTextureTangent.SizeInBytes;
+                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
                 }
                 else
                 {
-                    throw new Exception(string.Format("Unknown vertex type: {0}", vertexType));
+                    throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
                 }
             }
+
+            return buffer;
         }
-        public static IVertex[] Convert(VertexTypes vertexType, Vertex[] vertices, Weight[] weights)
+        public static void WriteVertexBuffer(DeviceContext deviceContext, Buffer buffer, IVertexData[] vertices)
         {
-            List<IVertex> vertexList = new List<IVertex>();
+            if (vertices[0].VertexType == VertexTypes.Billboard)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexBillboard)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.Position)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPosition)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionColor)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionTexture)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTextureTangent)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPosition)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
+            }
+            else
+            {
+                throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
+            }
+        }
+        public static IVertexData[] Convert(VertexTypes vertexType, VertexData[] vertices, Weight[] weights)
+        {
+            List<IVertexData> vertexList = new List<IVertexData>();
 
             if (vertexType == VertexTypes.Billboard)
             {
@@ -357,7 +404,7 @@ namespace Engine.Common
             return vertexList.ToArray();
         }
 
-        public static void CalculateNormals(Vertex vertex1, Vertex vertex2, Vertex vertex3, out Vector3 tangent, out Vector3 binormal, out Vector3 normal)
+        public static void CalculateNormals(VertexData vertex1, VertexData vertex2, VertexData vertex3, out Vector3 tangent, out Vector3 binormal, out Vector3 normal)
         {
             // Calculate the two vectors for the face.
             Vector3 vector1 = vertex2.Position.Value - vertex1.Position.Value;

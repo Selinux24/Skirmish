@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.Common
 {
-    public interface IBuffer
+    public interface IBufferData
     {
         int Stride { get; }
     }
