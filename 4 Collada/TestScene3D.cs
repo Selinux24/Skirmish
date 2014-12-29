@@ -44,8 +44,8 @@ namespace Collada
                 AddVegetation = true,
                 VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", },
                 Saturation = 0.5f,
-                MinSize = Vector2.One * 3f,
-                MaxSize = Vector2.One * 5f,
+                MinSize = Vector2.One * 2f,
+                MaxSize = Vector2.One * 4f,
                 Seed = 1024,
             };
 
