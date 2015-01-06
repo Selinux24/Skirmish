@@ -7,20 +7,38 @@ namespace Engine
     using Engine.Content;
     using Engine.Effects;
 
+    /// <summary>
+    /// Basic Model
+    /// </summary>
     public class Model : ModelBase
     {
+        /// <summary>
+        /// Effect to draw
+        /// </summary>
         private EffectBasic effect;
 
-        public Manipulator Manipulator { get; private set; }
+        /// <summary>
+        /// Model manipulator
+        /// </summary>
+        public Manipulator3D Manipulator { get; private set; }
 
-        public Model(Game game, Scene3D scene, ModelContent model, bool debug = false)
-            : base(game, scene, model)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game class</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="content">Content</param>
+        public Model(Game game, Scene3D scene, ModelContent content)
+            : base(game, scene, content)
         {
             this.effect = new EffectBasic(game.Graphics.Device);
             this.LoadEffectLayouts(this.effect);
 
-            this.Manipulator = new Manipulator();
+            this.Manipulator = new Manipulator3D();
         }
+        /// <summary>
+        /// Resource disposing
+        /// </summary>
         public override void Dispose()
         {
             base.Dispose();
@@ -31,12 +49,20 @@ namespace Engine
                 this.effect = null;
             }
         }
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
             this.Manipulator.Update(gameTime);
         }
+        /// <summary>
+        /// Draw
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Draw(GameTime gameTime)
         {
             if (this.Meshes != null)
@@ -58,9 +84,9 @@ namespace Engine
 
                 #region Per skinning update
 
-                if (this.SkinnedData != null)
+                if (this.SkinningData != null)
                 {
-                    this.effect.SkinningBuffer.FinalTransforms = this.SkinnedData.FinalTransforms;
+                    this.effect.SkinningBuffer.FinalTransforms = this.SkinningData.FinalTransforms;
                     this.effect.UpdatePerSkinning();
                 }
 
@@ -71,7 +97,7 @@ namespace Engine
                     foreach (string material in dictionary.Keys)
                     {
                         Mesh mesh = dictionary[material];
-                        MeshMaterial mat = material != NoMaterial ? this.Materials[material] : null;
+                        MeshMaterial mat = this.Materials[material];
                         string techniqueName = this.Techniques[mesh];
 
                         #region Per object update

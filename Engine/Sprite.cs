@@ -7,20 +7,49 @@ namespace Engine
     using Engine.Content;
     using Engine.Effects;
 
+    /// <summary>
+    /// Sprite drawer
+    /// </summary>
     public class Sprite : ModelBase
     {
+        /// <summary>
+        /// Effect
+        /// </summary>
         private EffectBasic effect = null;
+        /// <summary>
+        /// Source width
+        /// </summary>
+        private readonly float sourceWidth;
+        /// <summary>
+        /// Source height
+        /// </summary>
+        private readonly float sourceHeight;
 
-        private Matrix local = Matrix.Identity;
-
-        private float baseWidth { get; set; }
-        private float baseHeight { get; set; }
-
+        /// <summary>
+        /// Indicates whether the sprite has to maintain proportion with window size
+        /// </summary>
         public bool FitScreen { get; set; }
+        /// <summary>
+        /// Width
+        /// </summary>
         public float Width { get; set; }
+        /// <summary>
+        /// Height
+        /// </summary>
         public float Height { get; set; }
-        public Vector2 Position { get; private set; }
+        /// <summary>
+        /// Manipulator
+        /// </summary>
+        public Manipulator2D Manipulator { get; private set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="texture">Texture</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
         public Sprite(Game game, Scene3D scene, string texture, float width, float height)
             : base(game, scene, ModelContent.GenerateSprite(scene.ContentPath, texture))
         {
@@ -30,9 +59,14 @@ namespace Engine
             this.Width = width;
             this.Height = height;
 
-            this.baseWidth = width / game.Form.RenderWidth;
-            this.baseHeight = height / game.Form.RenderHeight;
+            this.sourceWidth = width / game.Form.RenderWidth;
+            this.sourceHeight = height / game.Form.RenderHeight;
+
+            this.Manipulator = new Manipulator2D();
         }
+        /// <summary>
+        /// Resource disposing
+        /// </summary>
         public override void Dispose()
         {
             base.Dispose();
@@ -43,26 +77,27 @@ namespace Engine
                 this.effect = null;
             }
         }
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            Vector3 pos = new Vector3(
-                this.Position.X - this.Game.Form.RelativeCenter.X,
-                this.Position.Y + this.Game.Form.RelativeCenter.Y, 
-                0f);
-
-            this.local =
-                Matrix.Scaling(this.Width, this.Height, 1f) *
-                Matrix.Translation(pos);
+            this.Manipulator.Update(gameTime, this.Game.Form.RelativeCenter, this.Width, this.Height);
         }
+        /// <summary>
+        /// Draw
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Draw(GameTime gameTime)
         {
             if (this.Meshes != null)
             {
                 #region Per frame update
 
-                Matrix world = this.Scene.World * this.local;
+                Matrix world = this.Scene.World * this.Manipulator.LocalTransform;
                 Matrix worldInverse = Matrix.Invert(world);
                 Matrix worldViewProjection = world * this.Scene.ViewProjectionOrthogonal;
 
@@ -76,9 +111,9 @@ namespace Engine
 
                 #region Per skinning update
 
-                if (this.SkinnedData != null)
+                if (this.SkinningData != null)
                 {
-                    this.effect.SkinningBuffer.FinalTransforms = this.SkinnedData.FinalTransforms;
+                    this.effect.SkinningBuffer.FinalTransforms = this.SkinningData.FinalTransforms;
                     this.effect.UpdatePerSkinning();
                 }
 
@@ -89,7 +124,7 @@ namespace Engine
                     foreach (string material in dictionary.Keys)
                     {
                         Mesh mesh = dictionary[material];
-                        MeshMaterial mat = material != NoMaterial ? this.Materials[material] : null;
+                        MeshMaterial mat = this.Materials[material];
                         string techniqueName = this.Techniques[mesh];
 
                         #region Per object update
@@ -121,45 +156,18 @@ namespace Engine
                 }
             }
         }
-        public override void HandleResizing()
+        /// <summary>
+        /// Resize handling
+        /// </summary>
+        public override void HandleWindowResize()
         {
-            base.HandleResizing();
+            base.HandleWindowResize();
 
             if (this.FitScreen)
             {
-                this.Width = this.baseWidth * this.Game.Form.RenderWidth;
-                this.Height = this.baseHeight * this.Game.Form.RenderHeight;
+                this.Width = this.sourceWidth * this.Game.Form.RenderWidth;
+                this.Height = this.sourceHeight * this.Game.Form.RenderHeight;
             }
-        }
-
-        public virtual void Move(GameTime gameTime, Vector2 d)
-        {
-            this.Position += d * gameTime.ElapsedSeconds;
-        }
-        public virtual void MoveLeft(GameTime gameTime, float d)
-        {
-            this.Position += Vector2.UnitX * -d * gameTime.ElapsedSeconds;
-        }
-        public virtual void MoveRight(GameTime gameTime, float d)
-        {
-            this.Position += Vector2.UnitX * d * gameTime.ElapsedSeconds;
-        }
-        public virtual void MoveUp(GameTime gameTime, float d)
-        {
-            this.Position += Vector2.UnitY * d * gameTime.ElapsedSeconds;
-        }
-        public virtual void MoveDown(GameTime gameTime, float d)
-        {
-            this.Position += Vector2.UnitY * -d * gameTime.ElapsedSeconds;
-        }
-
-        public virtual void SetPosition(float x, float y)
-        {
-            this.SetPosition(new Vector2(x, y));
-        }
-        public virtual void SetPosition(Vector2 position)
-        {
-            this.Position = position;
         }
     }
 }

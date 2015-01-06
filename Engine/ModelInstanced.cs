@@ -1,5 +1,4 @@
 ﻿using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using SharpDX;
 
 namespace Engine
 {
@@ -7,27 +6,52 @@ namespace Engine
     using Engine.Content;
     using Engine.Effects;
 
+    /// <summary>
+    /// Instaced model
+    /// </summary>
     public class ModelInstanced : ModelBase
     {
+        /// <summary>
+        /// Effect to draw
+        /// </summary>
         private EffectInstancing effect;
+        /// <summary>
+        /// Instancing data per instance
+        /// </summary>
         private VertexInstancingData[] instancingData = null;
-
-        private Manipulator[] instances = null;
+        /// <summary>
+        /// Manipulator list per instance
+        /// </summary>
+        private Manipulator3D[] instances = null;
+        /// <summary>
+        /// Selected instance index
+        /// </summary>
         private int currentInstance = 0;
-        public Manipulator this[int index]
+        /// <summary>
+        /// Gets manipulator instance per instance index
+        /// </summary>
+        /// <param name="index">Instance index</param>
+        /// <returns>Returns instance manipulator</returns>
+        public Manipulator3D this[int index]
         {
             get
             {
                 return this.instances[index];
             }
         }
-        public Manipulator Manipulator
+        /// <summary>
+        /// Gets selected instance manipulator
+        /// </summary>
+        public Manipulator3D Manipulator
         {
             get
             {
                 return this.instances[currentInstance];
             }
         }
+        /// <summary>
+        /// Gets instance count
+        /// </summary>
         public int Count
         {
             get
@@ -36,20 +60,30 @@ namespace Engine
             }
         }
 
-        public ModelInstanced(Game game, Scene3D scene, ModelContent model, int instances, bool debug = false)
-            : base(game, scene, model, true, instances)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game class</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="content">Content</param>
+        /// <param name="instances">Number of instances</param>
+        public ModelInstanced(Game game, Scene3D scene, ModelContent content, int instances)
+            : base(game, scene, content, true, instances)
         {
             this.effect = new EffectInstancing(game.Graphics.Device);
             this.LoadEffectLayouts(this.effect);
 
             this.instancingData = new VertexInstancingData[instances];
 
-            this.instances = new Manipulator[instances];
+            this.instances = new Manipulator3D[instances];
             for (int i = 0; i < instances; i++)
             {
-                this.instances[i] = new Manipulator();
+                this.instances[i] = new Manipulator3D();
             }
         }
+        /// <summary>
+        /// Resource disposing
+        /// </summary>
         public override void Dispose()
         {
             base.Dispose();
@@ -60,6 +94,10 @@ namespace Engine
                 this.effect = null;
             }
         }
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -68,7 +106,7 @@ namespace Engine
             {
                 for (int i = 0; i < this.instances.Length; i++)
                 {
-                    Manipulator man = this.instances[i];
+                    Manipulator3D man = this.instances[i];
 
                     man.Update(gameTime);
 
@@ -76,6 +114,10 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Draw
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Draw(GameTime gameTime)
         {
             if (this.Meshes != null)
@@ -92,9 +134,9 @@ namespace Engine
 
                 #region Per skinning update
 
-                if (this.SkinnedData != null)
+                if (this.SkinningData != null)
                 {
-                    this.effect.SkinningBuffer.FinalTransforms = this.SkinnedData.FinalTransforms;
+                    this.effect.SkinningBuffer.FinalTransforms = this.SkinningData.FinalTransforms;
                     this.effect.UpdatePerSkinning();
                 }
 
@@ -105,7 +147,7 @@ namespace Engine
                     foreach (string material in dictionary.Keys)
                     {
                         MeshInstanced mesh = (MeshInstanced)dictionary[material];
-                        MeshMaterial mat = material != NoMaterial ? this.Materials[material] : null;
+                        MeshMaterial mat = this.Materials[material];
                         string techniqueName = this.Techniques[mesh];
 
                         #region Per object update
@@ -139,6 +181,9 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Select next instance from current
+        /// </summary>
         public void Next()
         {
             this.currentInstance++;
@@ -148,6 +193,9 @@ namespace Engine
                 this.currentInstance = 0;
             }
         }
+        /// <summary>
+        /// Select previous instance from current
+        /// </summary>
         public void Previous()
         {
             this.currentInstance--;

@@ -2,9 +2,18 @@
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Bone animation
+    /// </summary>
     public struct BoneAnimation
     {
+        /// <summary>
+        /// Keyframe list
+        /// </summary>
         public Keyframe[] Keyframes;
+        /// <summary>
+        /// Start time
+        /// </summary>
         public float StartTime
         {
             get
@@ -12,6 +21,9 @@ namespace Engine.Common
                 return this.Keyframes[0].Time;
             }
         }
+        /// <summary>
+        /// End time
+        /// </summary>
         public float EndTime
         {
             get
@@ -19,6 +31,12 @@ namespace Engine.Common
                 return this.Keyframes[this.Keyframes.Length - 1].Time;
             }
         }
+
+        /// <summary>
+        /// Interpolate bone transformation
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <returns>Return interpolated transformation</returns>
         public Matrix Interpolate(float time)
         {
             Keyframe start = this.Keyframes[0];

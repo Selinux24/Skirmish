@@ -6,16 +6,43 @@ namespace Engine
 {
     using Engine.Common;
 
+    /// <summary>
+    /// Game class
+    /// </summary>
     public class Game : IDisposable
     {
-        private string name = null;
+        /// <summary>
+        /// Scene list
+        /// </summary>
         private List<Scene> scenes = new List<Scene>();
 
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name = null;
+        /// <summary>
+        /// Game form
+        /// </summary>
         public EngineForm Form { get; private set; }
+        /// <summary>
+        /// Game time
+        /// </summary>
         public GameTime GameTime { get; private set; }
+        /// <summary>
+        /// Input helper
+        /// </summary>
         public Input Input { get; private set; }
+        /// <summary>
+        /// Graphics helper
+        /// </summary>
         public Graphics Graphics { get; private set; }
+        /// <summary>
+        /// Runtime stats
+        /// </summary>
         public string RuntimeText { get; private set; }
+        /// <summary>
+        /// Number of scenes
+        /// </summary>
         public int SceneCount
         {
             get
@@ -23,10 +50,29 @@ namespace Engine
                 return this.scenes.Count;
             }
         }
+        /// <summary>
+        /// Number of active scenes
+        /// </summary>
+        public int ActiveScenesCount
+        {
+            get
+            {
+                return this.scenes.FindAll(s => s.Active == true).Count;
+            }
+        }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="screenWidth">Window width</param>
+        /// <param name="screenHeight">Window height</param>
+        /// <param name="fullScreen">Full screen window</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampleCount">Multi-sample count</param>
         public Game(string name, int screenWidth, int screenHeight, bool fullScreen, int refreshRate = 0, int multiSampleCount = 0)
         {
-            this.name = name;
+            this.Name = name;
 
             this.GameTime = new GameTime();
 
@@ -40,7 +86,7 @@ namespace Engine
                 {
                     this.Graphics.PrepareDevice(this.Form.RenderWidth, this.Form.RenderHeight, true);
 
-                    this.scenes.ForEach(s => s.HandleResizing());
+                    this.scenes.ForEach(s => s.HandleWindowResize());
                 }
             };
 
@@ -58,12 +104,19 @@ namespace Engine
 
             this.Input = new Input(this.Form);
 
-            this.Graphics = new Graphics(this.Form, fullScreen, refreshRate, multiSampleCount);
+            this.Graphics = new Graphics(this.Form, refreshRate, multiSampleCount);
         }
+        /// <summary>
+        /// Begins render loop
+        /// </summary>
         public void Run()
         {
             RenderLoop.Run(this.Form, this.Frame);
         }
+        /// <summary>
+        /// Adds scene to collection
+        /// </summary>
+        /// <param name="scene">Scene</param>
         public void AddScene(Scene scene)
         {
             this.scenes.Add(scene);
@@ -75,6 +128,10 @@ namespace Engine
 
             scene.Initialize();
         }
+        /// <summary>
+        /// Remove scene from collection
+        /// </summary>
+        /// <param name="scene">Scene</param>
         public void RemoveScene(Scene scene)
         {
             if (this.scenes.Contains(scene))
@@ -85,6 +142,9 @@ namespace Engine
                 scene = null;
             }
         }
+        /// <summary>
+        /// Dispose opened resources
+        /// </summary>
         public void Dispose()
         {
             if (this.scenes.Count > 0)
@@ -118,11 +178,17 @@ namespace Engine
                 this.Form = null;
             }
         }
+        /// <summary>
+        /// Close game
+        /// </summary>
         public void Exit()
         {
             this.Form.Close();
         }
 
+        /// <summary>
+        /// Per frame logic
+        /// </summary>
         private void Frame()
         {
             this.GameTime.Update();
@@ -167,7 +233,7 @@ namespace Engine
             {
                 this.RuntimeText = string.Format(
                     "{0} - FPS: {1} Frame Time: {2:0.0000} (ms) Draw Calls: {3}",
-                    this.name,
+                    this.Name,
                     Counters.FrameCount,
                     Counters.FrameTime / Counters.FrameCount,
                     Counters.DrawCallsPerFrame);
@@ -180,6 +246,10 @@ namespace Engine
 
             Counters.ClearFrame();
         }
+        /// <summary>
+        /// Handle game form focus
+        /// </summary>
+        /// <param name="hasFocus">Indicates whether the game window has focus</param>
         private void HandleFocus(bool hasFocus)
         {
             if (this.Input != null)

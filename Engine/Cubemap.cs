@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+﻿using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
 {
@@ -7,20 +6,38 @@ namespace Engine
     using Engine.Content;
     using Engine.Effects;
 
+    /// <summary>
+    /// Cubemap drawer
+    /// </summary>
     public class Cubemap : ModelBase
     {
+        /// <summary>
+        /// Effect
+        /// </summary>
         private EffectCubemap effect = null;
 
-        public Manipulator Manipulator { get; private set; }
+        /// <summary>
+        /// Manipulator
+        /// </summary>
+        public Manipulator3D Manipulator { get; private set; }
 
-        public Cubemap(Game game, Scene3D scene, ModelContent geometry)
-            : base(game, scene, geometry)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game class</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="content">Content</param>
+        public Cubemap(Game game, Scene3D scene, ModelContent content)
+            : base(game, scene, content)
         {
             this.effect = new EffectCubemap(game.Graphics.Device);
             this.LoadEffectLayouts(this.effect);
 
-            this.Manipulator = new Manipulator();
+            this.Manipulator = new Manipulator3D();
         }
+        /// <summary>
+        /// Resource disposing
+        /// </summary>
         public override void Dispose()
         {
             base.Dispose();
@@ -31,12 +48,20 @@ namespace Engine
                 this.effect = null;
             }
         }
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
             this.Manipulator.Update(gameTime);
         }
+        /// <summary>
+        /// Draw
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Draw(GameTime gameTime)
         {
             if (this.Meshes != null)

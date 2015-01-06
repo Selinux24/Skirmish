@@ -5,22 +5,62 @@ namespace Engine.Common
 {
     using Engine.Content;
 
+    /// <summary>
+    /// Material description
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct Material
     {
+        /// <summary>
+        /// Default material
+        /// </summary>
         public static readonly Material Default = new Material(MaterialContent.Default);
 
+        /// <summary>
+        /// Ambient color
+        /// </summary>
         public Color4 AmbientColor;
+        /// <summary>
+        /// Diffuse color
+        /// </summary>
         public Color4 DiffuseColor;
+        /// <summary>
+        /// Emission color
+        /// </summary>
         public Color4 EmissionColor;
+        /// <summary>
+        /// Index of refraction
+        /// </summary>
         public float IndexOfRefraction;
+        /// <summary>
+        /// Reflective color
+        /// </summary>
         public Color4 ReflectiveColor;
+        /// <summary>
+        /// Reflectivity factor
+        /// </summary>
         public float Reflectivity;
+        /// <summary>
+        /// Shininess factor
+        /// </summary>
         public float Shininess;
+        /// <summary>
+        /// Specular color
+        /// </summary>
         public Color4 SpecularColor;
+        /// <summary>
+        /// Transparency factor
+        /// </summary>
         public float Transparency;
+        /// <summary>
+        /// Transparent color
+        /// </summary>
         public Color4 Transparent;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="effect">Effect content</param>
         public Material(MaterialContent effect)
         {
             this.AmbientColor = effect.AmbientColor;

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
-using Effect = SharpDX.Direct3D11.Effect;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectPassDescription = SharpDX.Direct3D11.EffectPassDescription;
 using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using InputElement = SharpDX.Direct3D11.InputElement;
 using InputLayout = SharpDX.Direct3D11.InputLayout;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
@@ -15,13 +12,18 @@ using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 namespace Engine.Effects
 {
     using Engine.Common;
-    using Engine.Helpers;
     using Engine.Properties;
 
+    /// <summary>
+    /// Cube map effect
+    /// </summary>
     public class EffectCubemap : Drawer
     {
         #region Buffers
 
+        /// <summary>
+        /// Per frame update buffer
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         public struct PerFrameBuffer
         {
@@ -38,13 +40,18 @@ namespace Engine.Effects
 
         #endregion
 
-        private Device device = null;
-        private Effect effect = null;
-        private Dictionary<string, InputLayout> layouts = new Dictionary<string, InputLayout>();
-
+        /// <summary>
+        /// World view projection effect variable
+        /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
+        /// <summary>
+        /// Texture effect variable
+        /// </summary>
         private EffectShaderResourceVariable cubeTexture = null;
 
+        /// <summary>
+        /// World view projection matrix
+        /// </summary>
         protected Matrix WorldViewProjection
         {
             get
@@ -56,6 +63,9 @@ namespace Engine.Effects
                 this.worldViewProjection.SetMatrix(value);
             }
         }
+        /// <summary>
+        /// Texture
+        /// </summary>
         protected ShaderResourceView CubeTexture
         {
             get
@@ -68,38 +78,27 @@ namespace Engine.Effects
             }
         }
 
+        /// <summary>
+        /// Per frame buffer structure
+        /// </summary>
         public EffectCubemap.PerFrameBuffer FrameBuffer = new EffectCubemap.PerFrameBuffer();
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="device">Graphics device</param>
         public EffectCubemap(Device device)
-            : base()
+            : base(device, Resources.ShaderCubemap)
         {
-            this.device = device;
-            this.effect = device.LoadEffect(Resources.ShaderCubemap);
-
-            this.worldViewProjection = this.effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.cubeTexture = this.effect.GetVariableByName("gCubemap").AsShaderResource();
+            this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.cubeTexture = this.Effect.GetVariableByName("gCubemap").AsShaderResource();
         }
-        public void Dispose()
-        {
-            if (this.effect != null)
-            {
-                this.effect.Dispose();
-                this.effect = null;
-            }
-        }
-        public EffectTechnique GetTechnique(string technique)
-        {
-            return this.effect.GetTechniqueByName(technique);
-        }
-        public void UpdatePerFrame()
-        {
-            this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
-        }
-        public void UpdatePerObject(ShaderResourceView cubeTexture)
-        {
-            this.CubeTexture = cubeTexture;
-        }
-        public string AddInputLayout(VertexTypes vertexType)
+        /// <summary>
+        /// Finds technique and input layout for vertex type
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <returns>Returns technique name for specified vertex type</returns>
+        public override string AddVertexType(VertexTypes vertexType)
         {
             string technique = null;
             InputLayout layout = null;
@@ -110,21 +109,14 @@ namespace Engine.Effects
 
                 InputElement[] input = VertexPosition.GetInput();
 
-                EffectPassDescription desc = effect.GetTechniqueByName(technique).GetPassByIndex(0).Description;
+                EffectPassDescription desc = Effect.GetTechniqueByName(technique).GetPassByIndex(0).Description;
 
                 layout = new InputLayout(
-                    this.device,
+                    this.Device,
                     desc.Signature,
                     input);
 
-                if (!this.layouts.ContainsKey(technique))
-                {
-                    this.layouts.Add(technique, layout);
-                }
-                else
-                {
-                    this.layouts[technique] = layout;
-                }
+                this.AddInputLayout(technique, layout);
 
                 return technique;
             }
@@ -133,9 +125,20 @@ namespace Engine.Effects
                 throw new Exception("VertexType unknown");
             }
         }
-        public InputLayout GetInputLayout(string techniqueName)
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        public void UpdatePerFrame()
         {
-            return this.layouts[techniqueName];
+            this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
+        }
+        /// <summary>
+        /// Update per model object data
+        /// </summary>
+        /// <param name="texture">Texture</param>
+        public void UpdatePerObject(ShaderResourceView cubeTexture)
+        {
+            this.CubeTexture = cubeTexture;
         }
     }
 }

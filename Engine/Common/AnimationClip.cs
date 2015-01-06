@@ -3,10 +3,19 @@ using SharpDX;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Animation clip
+    /// </summary>
     public struct AnimationClip
     {
+        /// <summary>
+        /// Bone animation list
+        /// </summary>
         public BoneAnimation[] BoneAnimations;
 
+        /// <summary>
+        /// Start time
+        /// </summary>
         public float StartTime
         {
             get
@@ -21,6 +30,9 @@ namespace Engine.Common
                 return maxValue;
             }
         }
+        /// <summary>
+        /// End time
+        /// </summary>
         public float EndTime
         {
             get
@@ -35,6 +47,12 @@ namespace Engine.Common
                 return minValue;
             }
         }
+
+        /// <summary>
+        /// Interpolate animation
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="boneTransforms">Current bone transformations</param>
         public void Interpolate(float time, ref Matrix[] boneTransforms)
         {
             for (int i = 0; i < this.BoneAnimations.Length; i++)

@@ -8,12 +8,12 @@ namespace GameLogic
 
     public class SceneHUD : Scene3D
     {
-        private TextControl txtTitle = null;
-        private TextControl txtGame = null;
-        private TextControl txtTeam = null;
-        private TextControl txtSoldier = null;
-        private TextControl txtActionList = null;
-        private TextControl txtAction = null;
+        private TextDrawer txtTitle = null;
+        private TextDrawer txtGame = null;
+        private TextDrawer txtTeam = null;
+        private TextDrawer txtSoldier = null;
+        private TextDrawer txtActionList = null;
+        private TextDrawer txtAction = null;
 
         private Sprite sprHUD = null;
 

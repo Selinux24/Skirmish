@@ -2,11 +2,23 @@
 
 namespace Engine.Content
 {
+    /// <summary>
+    /// Image content
+    /// </summary>
     public class ImageContent
     {
+        /// <summary>
+        /// Path list
+        /// </summary>
         private string[] paths = null;
 
+        /// <summary>
+        /// Image data in stream
+        /// </summary>
         public MemoryStream Stream { get; set; }
+        /// <summary>
+        /// Image path
+        /// </summary>
         public string Path
         {
             get
@@ -18,6 +30,9 @@ namespace Engine.Content
                 this.paths = new[] { value };
             }
         }
+        /// <summary>
+        /// Image array paths
+        /// </summary>
         public string[] Paths
         {
             get
@@ -29,6 +44,9 @@ namespace Engine.Content
                 this.paths = value;
             }
         }
+        /// <summary>
+        /// Gets whether the image content is an image array
+        /// </summary>
         public bool IsArray
         {
             get
@@ -36,9 +54,19 @@ namespace Engine.Content
                 return this.paths != null && this.paths.Length > 1;
             }
         }
+        /// <summary>
+        /// Gets or sets whether the image content is cubic
+        /// </summary>
         public bool IsCubic { get; set; }
+        /// <summary>
+        /// Cubic face size
+        /// </summary>
         public int CubicFaceSize { get; set; }
 
+        /// <summary>
+        /// Gets text representation of instance
+        /// </summary>
+        /// <returns>Returns text representation of instance</returns>
         public override string ToString()
         {
             if (!string.IsNullOrEmpty(this.Path))

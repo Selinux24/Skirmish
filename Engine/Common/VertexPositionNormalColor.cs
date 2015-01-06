@@ -4,20 +4,16 @@ using SharpDX.Direct3D11;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Position normal color vertex format
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexPositionNormalColor : IVertexData
     {
-        public Vector3 Position;
-        public Vector3 Normal;
-        public Color4 Color;
-
-        public static int SizeInBytes
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexPositionNormalColor));
-            }
-        }
+        /// <summary>
+        /// Defined input colection
+        /// </summary>
+        /// <returns></returns>
         public static InputElement[] GetInput()
         {
             return new InputElement[]
@@ -27,16 +23,22 @@ namespace Engine.Common
                 new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 24, 0, InputClassification.PerVertexData, 0),
             };
         }
-        public static VertexPositionNormalColor Create(VertexData v)
-        {
-            return new VertexPositionNormalColor
-            {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.Black,
-            };
-        }
 
+        /// <summary>
+        /// Position
+        /// </summary>
+        public Vector3 Position;
+        /// <summary>
+        /// Normal
+        /// </summary>
+        public Vector3 Normal;
+        /// <summary>
+        /// Color
+        /// </summary>
+        public Color4 Color;
+        /// <summary>
+        /// Vertex type
+        /// </summary>
         public VertexTypes VertexType
         {
             get
@@ -44,22 +46,21 @@ namespace Engine.Common
                 return VertexTypes.PositionNormalColor;
             }
         }
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
         public int Stride
         {
             get
             {
-                return SizeInBytes;
+                return Marshal.SizeOf(typeof(VertexPositionNormalColor));
             }
         }
-        public IVertexData Convert(VertexData v)
-        {
-            return new VertexPositionNormalColor()
-            {
-                Position = v.Position.Value,
-                Normal = v.Normal.Value,
-                Color = v.Color.Value,
-            };
-        }
+
+        /// <summary>
+        /// Text representation of vertex
+        /// </summary>
+        /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
             return string.Format("Position: {0} Normal: {1}; Color: {2}", this.Position, this.Normal, this.Color);

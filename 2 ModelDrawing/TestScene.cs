@@ -68,8 +68,8 @@ namespace ModelDrawing
                 this.normalTextureModel,
             };
 
-            this.Camera.Position = Vector3.UnitZ * -8f + Vector3.UnitY * 4f;
-            this.Camera.Interest = Vector3.Zero;
+            this.Camera.Goto(Vector3.UnitZ * -8f + Vector3.UnitY * 4f);
+            this.Camera.LookTo(Vector3.Zero);
 
             this.Lights.DirectionalLight1.Direction = Vector3.BackwardLH;
             this.Lights.DirectionalLight2.Direction = Vector3.BackwardLH;

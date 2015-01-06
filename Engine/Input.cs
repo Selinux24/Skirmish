@@ -6,7 +6,7 @@ using SharpDX.DirectInput;
 namespace Engine
 {
     /// <summary>
-    /// Input de teclado y ratón
+    /// Mouse and keyboard input
     /// </summary>
     public class Input : IDisposable
     {
@@ -15,27 +15,27 @@ namespace Engine
         /// </summary>
         private DirectInput input = null;
         /// <summary>
-        /// Ratón
+        /// Mouse
         /// </summary>
         private Mouse mouse = null;
         /// <summary>
-        /// Teclado
+        /// Keyboard
         /// </summary>
         private Keyboard keyboard = null;
         /// <summary>
-        /// Estado previo del ratón
+        /// Previous mouse state
         /// </summary>
         private MouseState previousMouseState;
         /// <summary>
-        /// Estado actual del ratón
+        /// Current mouse state
         /// </summary>
         private MouseState currentMouseState;
         /// <summary>
-        /// Estado previo del teclado
+        /// Previous keyboard state
         /// </summary>
         private KeyboardState previousKeyboardState;
         /// <summary>
-        /// Estado actual del teclado
+        /// Current keyboard state
         /// </summary>
         private KeyboardState currentKeyboardState;
         /// <summary>
@@ -44,47 +44,47 @@ namespace Engine
         private EngineForm form;
 
         /// <summary>
-        /// Valor del eje X del ratón
+        /// Mouse X axis value
         /// </summary>
         public int MouseX { get { return this.currentMouseState.X; } }
         /// <summary>
-        /// Valor del eje Y del ratón
+        /// Mouse Y axis value
         /// </summary>
         public int MouseY { get { return this.currentMouseState.Y; } }
         /// <summary>
-        /// Indica si el botón izquierdo del ratón acaba de ser soltado
+        /// Gets if left mouse button is just released
         /// </summary>
         public bool LeftMouseButtonJustReleased { get { return this.MouseButtonJustReleased(MouseButtons.LeftButton); } }
         /// <summary>
-        /// Indica si el botón izquierdo del ratón acaba de ser presionado
+        /// Gets if left mouse button is just pressed
         /// </summary>
         public bool LeftMouseButtonJustPressed { get { return this.MouseButtonJustPressed(MouseButtons.LeftButton); } }
         /// <summary>
-        /// Indica si el botón izquierdo del ratón está siendo presionado
+        /// Gets if left mouse button is pressed now
         /// </summary>
         public bool LeftMouseButtonPressed { get { return this.MouseButtonPressed(MouseButtons.LeftButton); } }
         /// <summary>
-        /// Indica si el botón derecho del ratón acaba de ser soltado
+        /// Gets if right mouse button is just released
         /// </summary>
         public bool RightMouseButtonJustReleased { get { return this.MouseButtonJustReleased(MouseButtons.RightButton); } }
         /// <summary>
-        /// Indica si el botón derecho del ratón acaba de ser presionado
+        /// Gets if right mouse button is just pressed
         /// </summary>
         public bool RightMouseButtonJustPressed { get { return this.MouseButtonJustPressed(MouseButtons.RightButton); } }
         /// <summary>
-        /// Indica si el botón derecho del ratón está siendo presionado
+        /// Gets if right mouse button is pressed now
         /// </summary>
         public bool RightMouseButtonPressed { get { return this.MouseButtonPressed(MouseButtons.RightButton); } }
         /// <summary>
-        /// Indica si el botón medio del ratón acaba de ser soltado
+        /// Gets if middle mouse button is just released
         /// </summary>
         public bool MiddleMouseButtonJustReleased { get { return this.MouseButtonJustReleased(MouseButtons.MiddleButton); } }
         /// <summary>
-        /// Indica si el botón medio del ratón acaba de ser presionado
+        /// Gets if middle mouse button is just pressed
         /// </summary>
         public bool MiddleMouseButtonJustPressed { get { return this.MouseButtonJustPressed(MouseButtons.MiddleButton); } }
         /// <summary>
-        /// Indica si el botón medio del ratón está siendo presionado
+        /// Gets if middle mouse button is pressed now
         /// </summary>
         public bool MiddleMouseButtonPressed { get { return this.MouseButtonPressed(MouseButtons.MiddleButton); } }
         /// <summary>
@@ -110,9 +110,8 @@ namespace Engine
             this.keyboard.Acquire();
         }
         /// <summary>
-        /// Actualiza el estado del componente
+        /// Updates input state
         /// </summary>
-        /// <param name="gameTime">Tiempo de juego</param>
         public void Update()
         {
             this.previousMouseState = this.currentMouseState;
@@ -123,10 +122,12 @@ namespace Engine
 
             if (this.LockToCenter)
             {
-                this.SetMousePosition(this.form.AbsoluteCenter);
+                this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
             }
         }
-
+        /// <summary>
+        /// Clear state
+        /// </summary>
         public void Clear()
         {
             this.previousMouseState = this.currentMouseState = new MouseState();
@@ -134,7 +135,7 @@ namespace Engine
             this.previousKeyboardState = this.currentKeyboardState = new KeyboardState();
         }
         /// <summary>
-        /// Libera los objetos
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
@@ -157,9 +158,10 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Indica si la tecla especificada acaba de ser soltada
+        /// Gets if specified key is just released
         /// </summary>
-        /// <param name="key">Tecla</param>
+        /// <param name="key">Key</param>
+        /// <returns>Returns true if the specified key is just released</returns>
         public bool KeyJustReleased(Key key)
         {
             if (this.previousKeyboardState != null)
@@ -170,9 +172,10 @@ namespace Engine
             return false;
         }
         /// <summary>
-        /// Indica si la tecla especificada acaba de ser presionada
+        /// Gets if specified key is just pressed
         /// </summary>
-        /// <param name="key">Tecla</param>
+        /// <param name="key">Key</param>
+        /// <returns>Returns true if the specified key is just pressed</returns>
         public bool KeyJustPressed(Key key)
         {
             if (this.previousKeyboardState != null)
@@ -183,16 +186,19 @@ namespace Engine
             return false;
         }
         /// <summary>
-        /// Indica si la tecla especificada está siendo presionada
+        /// Gets if specified key is pressed now
         /// </summary>
-        /// <param name="key">Tecla</param>
+        /// <param name="key">Key</param>
+        /// <returns>Returns true if the specified key is pressed now</returns>
         public bool KeyPressed(Key key)
         {
             return this.currentKeyboardState.IsPressed(key);
         }
         /// <summary>
-        /// Indica si el botón del ratón acaba de ser soltado
+        /// Gets if specified mouse button is just released
         /// </summary>
+        /// <param name="button">Mouse button</param>
+        /// <returns>Returns true if the specified mouse button is just released</returns>
         public bool MouseButtonJustReleased(MouseButtons button)
         {
             if (this.previousMouseState != null)
@@ -203,8 +209,10 @@ namespace Engine
             return false;
         }
         /// <summary>
-        /// Indica si el botón del ratón acaba de ser presionado
+        /// Gets if specified mouse button is just pressed
         /// </summary>
+        /// <param name="button">Mouse button</param>
+        /// <returns>Returns true if the specified mouse button is just pressed</returns>
         public bool MouseButtonJustPressed(MouseButtons button)
         {
             if (this.previousMouseState != null)
@@ -215,21 +223,23 @@ namespace Engine
             return false;
         }
         /// <summary>
-        /// Indica si el botón del ratón está siendo presionado
+        /// Gets if specified mouse button is pressed now
         /// </summary>
+        /// <param name="button">Mouse button</param>
+        /// <returns>Returns true if the specified mouse button is pressed now</returns>
         public bool MouseButtonPressed(MouseButtons button)
         {
             return this.currentMouseState.Buttons[(int)button];
         }
         /// <summary>
-        /// Muestra el cursor del ratón
+        /// Shows mouse cursor
         /// </summary>
         public void ShowMouse()
         {
             System.Windows.Forms.Cursor.Show();
         }
         /// <summary>
-        /// Oculta el cursor del ratón
+        /// Hides mouse cursor
         /// </summary>
         public void HideMouse()
         {

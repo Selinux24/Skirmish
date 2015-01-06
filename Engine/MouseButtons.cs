@@ -2,40 +2,40 @@
 namespace Engine
 {
     /// <summary>
-    /// Botones del ratón
+    /// Mouse buttons
     /// </summary>
     public enum MouseButtons : int
     {
         /// <summary>
-        /// Botón izquierdo del ratón
+        /// Left
         /// </summary>
         LeftButton = 0,
         /// <summary>
-        /// Botón derecho del ratón
+        /// Right
         /// </summary>
         RightButton = 1,
         /// <summary>
-        /// Botón central del ratón
+        /// Middle
         /// </summary>
         MiddleButton = 2,
         /// <summary>
-        /// Bótón cuarto del ratón
+        /// D4
         /// </summary>
         D4Button = 3,
         /// <summary>
-        /// Bótón quinto del ratón
+        /// D5
         /// </summary>
         D5Button = 4,
         /// <summary>
-        /// Bótón sexto del ratón
+        /// D6
         /// </summary>
         D6Button = 5,
         /// <summary>
-        /// Bótón séptimo del ratón
+        /// D7
         /// </summary>
         D7Button = 6,
         /// <summary>
-        /// Bótón octavo del ratón
+        /// D8
         /// </summary>
         D8Button = 7,
     }

@@ -6,18 +6,15 @@ using InputElement = SharpDX.Direct3D11.InputElement;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Instancing data
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexInstancingData : IBufferData
     {
-        public Matrix Local;
-
-        public static int SizeInBytes
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexInstancingData));
-            }
-        }
+        /// <summary>
+        /// Defined input colection
+        /// </summary>
         public static InputElement[] GetInput()
         {
             return new InputElement[]
@@ -29,17 +26,28 @@ namespace Engine.Common
             };
         }
 
-        public VertexInstancingData(Matrix local)
-        {
-            this.Local = local;
-        }
-
+        /// <summary>
+        /// Local transformation for the instance
+        /// </summary>
+        public Matrix Local;
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
         public int Stride
         {
             get
             {
                 return Marshal.SizeOf(typeof(VertexInstancingData));
             }
+        }
+        
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="local">Local transform</param>
+        public VertexInstancingData(Matrix local)
+        {
+            this.Local = local;
         }
     };
 }

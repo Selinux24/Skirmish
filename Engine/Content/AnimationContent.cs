@@ -3,9 +3,18 @@ namespace Engine.Content
 {
     using Engine.Common;
 
+    /// <summary>
+    /// Animation content
+    /// </summary>
     public class AnimationContent
     {
+        /// <summary>
+        /// Target
+        /// </summary>
         public string Target { get; set; }
+        /// <summary>
+        /// Joint
+        /// </summary>
         public string Joint
         {
             get
@@ -20,8 +29,15 @@ namespace Engine.Content
                 return null;
             }
         }
+        /// <summary>
+        /// Keyframe list
+        /// </summary>
         public Keyframe[] Keyframes { get; set; }
 
+        /// <summary>
+        /// Gets text representation of instance
+        /// </summary>
+        /// <returns>Returns text representation of instance</returns>
         public override string ToString()
         {
             if (this.Keyframes != null && this.Keyframes.Length > 0)

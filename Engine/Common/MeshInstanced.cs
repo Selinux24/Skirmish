@@ -18,9 +18,9 @@ namespace Engine.Common
         /// </summary>
         protected Buffer InstancingBuffer = null;
         /// <summary>
-        /// Instancing data cache
+        /// Maximum number of instances
         /// </summary>
-        protected VertexInstancingData[] InstancingData = null;
+        protected int MaxInstaces = 0;
 
         /// <summary>
         /// Stride of instancing data
@@ -40,7 +40,7 @@ namespace Engine.Common
         public MeshInstanced(string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, int maxInstances)
             : base(material, topology, vertices, indices)
         {
-            this.InstancingData = new VertexInstancingData[maxInstances];
+            this.MaxInstaces = maxInstances;
         }
         /// <summary>
         /// Dispose
@@ -63,11 +63,13 @@ namespace Engine.Common
         {
             base.Initialize(device);
 
-            if (this.InstancingData != null && this.InstancingData.Length > 0)
+            if (this.MaxInstaces > 0)
             {
-                this.InstancingBuffer = device.CreateVertexBufferWrite(this.InstancingData);
-                this.InstanceCount = InstancingData.Length;
-                this.InstancingBufferStride = InstancingData[0].Stride;
+                VertexInstancingData[] instancingData = new VertexInstancingData[this.MaxInstaces];
+
+                this.InstancingBuffer = device.CreateVertexBufferWrite(instancingData);
+                this.InstanceCount = this.MaxInstaces;
+                this.InstancingBufferStride = instancingData[0].Stride;
 
                 this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
             }
@@ -77,47 +79,20 @@ namespace Engine.Common
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="deviceContext">Immediate context</param>
-        /// <param name="count">Vertex or index count</param>
-        public override void Draw(GameTime gameTime, DeviceContext deviceContext, int count = 0)
+        public override void Draw(GameTime gameTime, DeviceContext deviceContext)
         {
-            if (this.IndexBuffer != null)
+            if (this.Indexed)
             {
                 deviceContext.DrawIndexedInstanced(
-                    count == 0 ? this.IndexCount : count,
+                    this.IndexCount,
                     this.InstanceCount,
                     0, 0, 0);
             }
             else
             {
                 deviceContext.DrawInstanced(
-                    count == 0 ? this.VertexCount : count,
+                    this.VertexCount,
                     this.InstanceCount,
-                    0, 0);
-            }
-
-            Counters.DrawCallsPerFrame++;
-        }
-        /// <summary>
-        /// Draw mesh geometry
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="deviceContext">Immediate context</param>
-        /// <param name="instanceCount">Instances to draw</param>
-        /// <param name="count">Vertex or index count</param>
-        public virtual void Draw(GameTime gameTime, DeviceContext deviceContext, int instanceCount, int count = 0)
-        {
-            if (this.IndexBuffer != null)
-            {
-                deviceContext.DrawIndexedInstanced(
-                    count == 0 ? this.IndexCount : count,
-                    instanceCount == 0 ? this.InstanceCount : instanceCount,
-                    0, 0, 0);
-            }
-            else
-            {
-                deviceContext.DrawInstanced(
-                    count == 0 ? this.VertexCount : count,
-                    instanceCount == 0 ? this.InstanceCount : instanceCount,
                     0, 0);
             }
 
@@ -130,11 +105,9 @@ namespace Engine.Common
         /// <param name="data">Instancig data</param>
         public virtual void WriteInstancingData(DeviceContext deviceContext, VertexInstancingData[] data)
         {
-            this.InstancingData = data;
-
-            if (this.InstancingBuffer != null && this.InstancingData != null && this.InstancingData.Length > 0)
+            if (this.InstancingBuffer != null && data != null && data.Length > 0)
             {
-                deviceContext.WriteBuffer(this.InstancingBuffer, this.InstancingData);
+                deviceContext.WriteBuffer(this.InstancingBuffer, data);
             }
         }
     }

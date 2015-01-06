@@ -4,19 +4,16 @@ using SharpDX.Direct3D11;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Position texture format
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexPositionTexture : IVertexData
     {
-        public Vector3 Position;
-        public Vector2 Texture;
-
-        public static int SizeInBytes
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexPositionTexture));
-            }
-        }
+        /// <summary>
+        /// Defined input colection
+        /// </summary>
+        /// <returns></returns>
         public static InputElement[] GetInput()
         {
             return new InputElement[]
@@ -25,15 +22,18 @@ namespace Engine.Common
                 new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 12, 0, InputClassification.PerVertexData, 0),
             };
         }
-        public static VertexPositionTexture Create(VertexData v)
-        {
-            return new VertexPositionTexture
-            {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero
-            };
-        }
 
+        /// <summary>
+        /// Position
+        /// </summary>
+        public Vector3 Position;
+        /// <summary>
+        /// Texture UV
+        /// </summary>
+        public Vector2 Texture;
+        /// <summary>
+        /// Vertex type
+        /// </summary>
         public VertexTypes VertexType
         {
             get
@@ -41,21 +41,21 @@ namespace Engine.Common
                 return VertexTypes.PositionTexture;
             }
         }
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
         public int Stride
         {
             get
             {
-                return SizeInBytes;
+                return Marshal.SizeOf(typeof(VertexPositionTexture));
             }
         }
-        public IVertexData Convert(VertexData v)
-        {
-            return new VertexPositionTexture()
-            {
-                Position = v.Position.Value,
-                Texture = v.Texture.Value,
-            };
-        }
+
+        /// <summary>
+        /// Text representation of vertex
+        /// </summary>
+        /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
             return string.Format("Position: {0}; Texture: {1}", this.Position, this.Texture);

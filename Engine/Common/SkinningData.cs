@@ -3,19 +3,51 @@ using SharpDX;
 
 namespace Engine.Common
 {
-    public class SkinnedData
-    {
-        public const string DEFAULTCLIP = "default";
+    using Engine.Helpers;
 
+    /// <summary>
+    /// Skinning data
+    /// </summary>
+    public class SkinningData
+    {
+        /// <summary>
+        /// Default clip name
+        /// </summary>
+        public const string DefaultClip = "default";
+
+        /// <summary>
+        /// Animation dictionary by bone
+        /// </summary>
         private Dictionary<string, AnimationClip> animations = new Dictionary<string, AnimationClip>();
+        /// <summary>
+        /// Bone offsets collection
+        /// </summary>
         private Matrix[] boneOffsets = null;
+        /// <summary>
+        /// Bone hierarchy collection
+        /// </summary>
         private int[] boneHierarchy = null;
+        /// <summary>
+        /// Transformation current to parent list
+        /// </summary>
         private Matrix[] toParentTransforms = null;
+        /// <summary>
+        /// Transformation current to root list
+        /// </summary>
         private Matrix[] toRootTransforms = null;
 
+        /// <summary>
+        /// Skin list
+        /// </summary>
         public string[] Skins = null;
         //TODO: diccionario de clips calculados
+        /// <summary>
+        /// Final transform list
+        /// </summary>
         public Matrix[] FinalTransforms = null;
+        /// <summary>
+        /// Number of bones
+        /// </summary>
         public int BoneCount
         {
             get
@@ -23,13 +55,25 @@ namespace Engine.Common
                 return this.boneOffsets.Length;
             }
         }
+        /// <summary>
+        /// Default clip
+        /// </summary>
         public AnimationClip Default
         {
             get
             {
-                return this.animations[DEFAULTCLIP];
+                return this.animations[DefaultClip];
             }
         }
+        /// <summary>
+        /// Clip name list
+        /// </summary>
+        public string[] Clips { get; private set; }
+        /// <summary>
+        /// Gets clip by name
+        /// </summary>
+        /// <param name="clipName"></param>
+        /// <returns>Returns clip by name</returns>
         public AnimationClip this[string clipName]
         {
             get
@@ -37,55 +81,63 @@ namespace Engine.Common
                 return this.animations[clipName];
             }
         }
+        /// <summary>
+        /// Animation velocity modifier
+        /// </summary>
         public float AnimationVelocity = 1f;
 
         /// <summary>
-        /// Nombre del clip a aplicar
+        /// Current clip name
         /// </summary>
         public string ClipName { get; private set; }
         /// <summary>
-        /// Posición temporal en el clip
+        /// Clip position
         /// </summary>
         public float Time { get; set; }
         /// <summary>
-        /// Obtiene o establece si el clip se repite o no
+        /// Gets or sets if clip must be looped
         /// </summary>
         public bool Loop { get; set; }
 
-        public static SkinnedData Create(string[] skins, int[] boneHierarchy, Matrix[] boneOffsets, Dictionary<string, AnimationClip> animations)
+        /// <summary>
+        /// Generates skinning data from animation info
+        /// </summary>
+        /// <param name="skins">Skins</param>
+        /// <param name="boneHierarchy">Bone hierarchy</param>
+        /// <param name="boneOffsets">Bone offsets</param>
+        /// <param name="animations">Animation dictionary</param>
+        /// <returns>Returns skinning data</returns>
+        public static SkinningData Create(string[] skins, int[] boneHierarchy, Matrix[] boneOffsets, Dictionary<string, AnimationClip> animations)
         {
-            return new SkinnedData
+            List<string> clipNames = new List<string>();
+
+            foreach (string key in animations.Keys)
+            {
+                clipNames.Add(key);
+            }
+
+            return new SkinningData
             {
                 animations = animations,
                 boneOffsets = boneOffsets,
                 boneHierarchy = boneHierarchy,
-                toParentTransforms = GenerateMatrixArray(boneOffsets.Length, Matrix.Identity),
-                toRootTransforms = GenerateMatrixArray(boneOffsets.Length, Matrix.Identity),
+                toParentTransforms = Helper.CreateArray(boneOffsets.Length, Matrix.Identity),
+                toRootTransforms = Helper.CreateArray(boneOffsets.Length, Matrix.Identity),
 
                 Skins = skins,
-                FinalTransforms = GenerateMatrixArray(boneOffsets.Length, Matrix.Identity),
+                FinalTransforms = Helper.CreateArray(boneOffsets.Length, Matrix.Identity),
 
-                ClipName = DEFAULTCLIP,
+                Clips = clipNames.ToArray(),
+                ClipName = DefaultClip,
                 Time = 0f,
                 Loop = true,
             };
         }
-        private static Matrix[] GenerateMatrixArray(int length, Matrix defaultValue)
-        {
-            Matrix[] matrixArray = new Matrix[length];
-
-            for (int i = 0; i < length; i++)
-            {
-                matrixArray[i] = defaultValue;
-            }
-
-            return matrixArray;
-        }
 
         /// <summary>
-        /// Actualiza el estado interno de la instancia
+        /// Update state
         /// </summary>
-        /// <param name="gameTime">Tiempo de juego</param>
+        /// <param name="gameTime">Game time</param>
         public virtual void Update(GameTime gameTime)
         {
             if (this.ClipName != null)
@@ -120,17 +172,24 @@ namespace Engine.Common
                 }
             }
         }
+        /// <summary>
+        /// Update final transform list
+        /// </summary>
+        /// <param name="clip">Clip</param>
+        /// <param name="time">Time</param>
         private void UpdateFinalTransforms(AnimationClip clip, float time)
         {
             int numBones = this.boneOffsets.Length;
 
-            this.toParentTransforms = GenerateMatrixArray(numBones, Matrix.Identity);
-            this.toRootTransforms = GenerateMatrixArray(numBones, Matrix.Identity);
-
+            //Get relative transformations from each bone to his parent
             clip.Interpolate(time, ref this.toParentTransforms);
 
+            //Compute transformations from each bone to root
+
+            //First bone has no parents. Share transform
             this.toRootTransforms[0] = this.toParentTransforms[0];
 
+            //Next bones multiply transforms from tail to root
             for (int i = 1; i < numBones; i++)
             {
                 int parentIndex = this.boneHierarchy[i];
@@ -141,6 +200,7 @@ namespace Engine.Common
                 this.toRootTransforms[i] = toParent * parentToRoot;
             }
 
+            //Apply bone offsets (rest pose)
             for (int i = 0; i < numBones; i++)
             {
                 Matrix offset = this.boneOffsets[i];
@@ -148,6 +208,14 @@ namespace Engine.Common
 
                 this.FinalTransforms[i] = offset * toRoot;
             }
+        }
+        /// <summary>
+        /// Sets clip to play
+        /// </summary>
+        /// <param name="clipName">Clip name</param>
+        public void SetClip(string clipName)
+        {
+            this.ClipName = clipName;
         }
     }
 }

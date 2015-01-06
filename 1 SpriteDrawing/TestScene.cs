@@ -41,7 +41,7 @@ namespace SpriteDrawing
 
             this.background.FitScreen = true;
 
-            this.spriteMov.SetPosition(256, 0);
+            this.spriteMov.Manipulator.SetPosition(256, 0);
         }
         public override void Update(GameTime gameTime)
         {
@@ -54,27 +54,27 @@ namespace SpriteDrawing
 
             if (this.Game.Input.KeyJustReleased(Key.Home))
             {
-                this.spriteMov.SetPosition(0, 0);
+                this.spriteMov.Manipulator.SetPosition(0, 0);
             }
 
             if (this.Game.Input.KeyPressed(Key.A))
             {
-                this.spriteMov.MoveLeft(gameTime, delta);
+                this.spriteMov.Manipulator.MoveLeft(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Key.D))
             {
-                this.spriteMov.MoveRight(gameTime, delta);
+                this.spriteMov.Manipulator.MoveRight(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Key.W))
             {
-                this.spriteMov.MoveUp(gameTime, delta);
+                this.spriteMov.Manipulator.MoveUp(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Key.S))
             {
-                this.spriteMov.MoveDown(gameTime, delta);
+                this.spriteMov.Manipulator.MoveDown(gameTime, delta);
             }
         }
     }

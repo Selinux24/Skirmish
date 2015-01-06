@@ -11,8 +11,8 @@ namespace Skybox
 
         private Terrain ruins = null;
         private Model lamp = null;
-        private TextControl title = null;
-        private TextControl fps = null;
+        private TextDrawer title = null;
+        private TextDrawer fps = null;
 
         public TestScene3D(Game game)
             : base(game)
@@ -63,8 +63,8 @@ namespace Skybox
         {
             this.Camera.NearPlaneDistance = 0.5f;
             this.Camera.FarPlaneDistance = 50.0f * globalScale;
-            this.Camera.Position = Vector3.UnitY + this.ruins.Manipulator.Position * globalScale;
-            this.Camera.Interest = Vector3.UnitY + Vector3.UnitZ + this.ruins.Manipulator.Position * globalScale;
+            this.Camera.Goto(Vector3.UnitY + this.ruins.Manipulator.Position * globalScale);
+            this.Camera.LookTo(Vector3.UnitY + Vector3.UnitZ + this.ruins.Manipulator.Position * globalScale);
             this.Camera.MovementDelta = 8f;
             this.Camera.SlowMovementDelta = 4f;
         }

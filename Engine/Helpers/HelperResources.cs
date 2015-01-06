@@ -23,10 +23,20 @@ using Texture2DDescription = SharpDX.Direct3D11.Texture2DDescription;
 
 namespace Engine.Helpers
 {
+    /// <summary>
+    /// Helper methods for graphic resources
+    /// </summary>
     public static class HelperResources
     {
+        /// <summary>
+        /// Creates an inmutable vertex buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
         public static Buffer CreateVertexBufferImmutable<T>(this Device device, T[] data)
-           where T : struct
+            where T : struct
         {
             return CreateBuffer<T>(
                 device,
@@ -35,6 +45,13 @@ namespace Engine.Helpers
                 BindFlags.VertexBuffer,
                 CpuAccessFlags.None);
         }
+        /// <summary>
+        /// Creates an inmutable index buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
         public static Buffer CreateIndexBufferImmutable<T>(this Device device, T[] data)
             where T : struct
         {
@@ -45,6 +62,13 @@ namespace Engine.Helpers
                 BindFlags.IndexBuffer,
                 CpuAccessFlags.None);
         }
+        /// <summary>
+        /// Creates an writable vertex buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
         public static Buffer CreateVertexBufferWrite<T>(this Device device, T[] data)
             where T : struct
         {
@@ -55,6 +79,13 @@ namespace Engine.Helpers
                 BindFlags.VertexBuffer,
                 CpuAccessFlags.Write);
         }
+        /// <summary>
+        /// Creates an writable index buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
         public static Buffer CreateIndexBufferWrite<T>(this Device device, T[] data)
             where T : struct
         {
@@ -65,23 +96,42 @@ namespace Engine.Helpers
                 BindFlags.IndexBuffer,
                 CpuAccessFlags.Write);
         }
-        public static Buffer CreateConstantBuffer<T>(this Device device)
+        /// <summary>
+        /// Creates a buffer for the data type specified
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="usage">Resource usage</param>
+        /// <param name="binding">Binding</param>
+        /// <param name="access">Cpu access</param>
+        /// <returns>Returns created buffer</returns>
+        public static Buffer CreateBuffer<T>(this Device device, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
             where T : struct
         {
             int size = ((Marshal.SizeOf(typeof(T)) + 15) / 16) * 16;
 
             BufferDescription description = new BufferDescription()
             {
-                Usage = ResourceUsage.Dynamic,
+                Usage = usage,
                 SizeInBytes = size,
-                BindFlags = BindFlags.ConstantBuffer,
-                CpuAccessFlags = CpuAccessFlags.Write,
+                BindFlags = binding,
+                CpuAccessFlags = access,
                 OptionFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
 
             return new Buffer(device, description);
         }
+        /// <summary>
+        /// Creates a buffer for the data type specified
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="data">Data</param>
+        /// <param name="usage">Resource usage</param>
+        /// <param name="binding">Binding</param>
+        /// <param name="access">Cpu access</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
         public static Buffer CreateBuffer<T>(this Device device, T[] data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
             where T : struct
         {
@@ -107,6 +157,13 @@ namespace Engine.Helpers
             }
         }
 
+        /// <summary>
+        /// Write data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="data">Complete data</param>
         public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, T[] data)
             where T : struct
         {
@@ -122,27 +179,53 @@ namespace Engine.Helpers
                 deviceContext.UnmapSubresource(buffer, 0);
             }
         }
-        public static void WriteConstantBuffer<T>(this DeviceContext deviceContext, Buffer constantBuffer, T value, long offset)
+        /// <summary>
+        /// Write data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="data">Data</param>
+        /// <param name="offset">Offset to write in buffer</param>
+        public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, T data, long offset)
             where T : struct
         {
             DataStream stream;
-            deviceContext.MapSubresource(constantBuffer, MapMode.WriteDiscard, MapFlags.None, out stream);
+            deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out stream);
             using (stream)
             {
                 stream.Position = offset;
-                stream.Write(value);
+                stream.Write(data);
             }
-            deviceContext.UnmapSubresource(constantBuffer, 0);
+            deviceContext.UnmapSubresource(buffer, 0);
         }
 
+        /// <summary>
+        /// Loads a texture from memory in the graphics device
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="buffer">Data buffer</param>
+        /// <returns>Returns the resource view</returns>
         public static ShaderResourceView LoadTexture(this Device device, byte[] buffer)
         {
             return ShaderResourceView.FromMemory(device, buffer, ImageLoadInformation.Default);
         }
+        /// <summary>
+        /// Loads a texture from file in the graphics device
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="filename">Path to file</param>
+        /// <returns>Returns the resource view</returns>
         public static ShaderResourceView LoadTexture(this Device device, string filename)
         {
             return ShaderResourceView.FromFile(device, filename);
         }
+        /// <summary>
+        /// Loads a texture array from a file collection in the graphics device
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="filenames">Path file collection</param>
+        /// <returns>Returns the resource view</returns>
         public static ShaderResourceView LoadTextureArray(this Device device, string[] filenames)
         {
             List<Texture2D> textureList = new List<Texture2D>();
@@ -238,6 +321,13 @@ namespace Engine.Helpers
                 return result;
             }
         }
+        /// <summary>
+        /// Loads a cube texture from file in the graphics device
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="faceSize">Face size</param>
+        /// <returns>Returns the resource view</returns>
         public static ShaderResourceView LoadTextureCube(this Device device, string filename, int faceSize)
         {
             Format format = Format.R8G8B8A8_UNorm;

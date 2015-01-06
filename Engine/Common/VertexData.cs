@@ -9,21 +9,63 @@ namespace Engine.Common
 {
     using Engine.Helpers;
 
+    /// <summary>
+    /// Vertex helper
+    /// </summary>
     [Serializable]
     public struct VertexData
     {
+        /// <summary>
+        /// Face index
+        /// </summary>
         public int FaceIndex;
+        /// <summary>
+        /// Vertex index
+        /// </summary>
         public int VertexIndex;
+        /// <summary>
+        /// Position
+        /// </summary>
         public Vector3? Position;
+        /// <summary>
+        /// Normal
+        /// </summary>
         public Vector3? Normal;
+        /// <summary>
+        /// Tangent
+        /// </summary>
         public Vector3? Tangent;
+        /// <summary>
+        /// Binormal
+        /// </summary>
         public Vector3? BiNormal;
+        /// <summary>
+        /// Texture UV
+        /// </summary>
         public Vector2? Texture;
+        /// <summary>
+        /// Color
+        /// </summary>
         public Color4? Color;
+        /// <summary>
+        /// Sprite size
+        /// </summary>
         public Vector2? Size;
+        /// <summary>
+        /// Vertex weights
+        /// </summary>
         public float[] Weights;
+        /// <summary>
+        /// Bone weights
+        /// </summary>
         public byte[] BoneIndices;
 
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="size">Sprite size</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexBillboard(Vector3 position, Vector2 size)
         {
             return new VertexData()
@@ -32,6 +74,11 @@ namespace Engine.Common
                 Size = size,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexPosition(Vector3 position)
         {
             return new VertexData()
@@ -39,6 +86,12 @@ namespace Engine.Common
                 Position = position,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="color">Color</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexPositionColor(Vector3 position, Color4 color)
         {
             return new VertexData()
@@ -47,6 +100,12 @@ namespace Engine.Common
                 Color = color,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexPositionTexture(Vector3 position, Vector2 texture)
         {
             return new VertexData()
@@ -55,6 +114,13 @@ namespace Engine.Common
                 Texture = texture,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="normal">Normal</param>
+        /// <param name="color">Color</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexPositionNormalColor(Vector3 position, Vector3 normal, Color4 color)
         {
             return new VertexData()
@@ -64,6 +130,13 @@ namespace Engine.Common
                 Color = color,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="normal">Normal</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 texture)
         {
             return new VertexData()
@@ -73,6 +146,15 @@ namespace Engine.Common
                 Texture = texture,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="normal">Normal</param>
+        /// <param name="tangent">Tangent</param>
+        /// <param name="binormal">Binormal</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexPositionNormalTextureTangent(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture)
         {
             return new VertexData()
@@ -84,6 +166,13 @@ namespace Engine.Common
                 Texture = texture,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="weights">Weights</param>
+        /// <param name="boneIndices">Bone indices</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexSkinnedPosition(Vector3 position, float[] weights, byte[] boneIndices)
         {
             return new VertexData()
@@ -93,6 +182,14 @@ namespace Engine.Common
                 BoneIndices = boneIndices,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="color">Color</param>
+        /// <param name="weights">Weights</param>
+        /// <param name="boneIndices">Bone indices</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexSkinnedPositionColor(Vector3 position, Color4 color, float[] weights, byte[] boneIndices)
         {
             return new VertexData()
@@ -103,6 +200,14 @@ namespace Engine.Common
                 BoneIndices = boneIndices,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="texture">Texture</param>
+        /// <param name="weights">Weights</param>
+        /// <param name="boneIndices">Bone indices</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexSkinnedPositionTexture(Vector3 position, Vector2 texture, float[] weights, byte[] boneIndices)
         {
             return new VertexData()
@@ -113,6 +218,15 @@ namespace Engine.Common
                 BoneIndices = boneIndices,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="normal">Normal</param>
+        /// <param name="color">Color</param>
+        /// <param name="weights">Weights</param>
+        /// <param name="boneIndices">Bone indices</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexSkinnedPositionNormalColor(Vector3 position, Vector3 normal, Color4 color, float[] weights, byte[] boneIndices)
         {
             return new VertexData()
@@ -124,6 +238,15 @@ namespace Engine.Common
                 BoneIndices = boneIndices,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="normal">Normal</param>
+        /// <param name="texture">Texture</param>
+        /// <param name="weights">Weights</param>
+        /// <param name="boneIndices">Bone indices</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexSkinnedPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 texture, float[] weights, byte[] boneIndices)
         {
             return new VertexData()
@@ -135,6 +258,17 @@ namespace Engine.Common
                 BoneIndices = boneIndices,
             };
         }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="normal">Normal</param>
+        /// <param name="tangent">Tangent</param>
+        /// <param name="binormal">Binormal</param>
+        /// <param name="texture">Texture</param>
+        /// <param name="weights">Weights</param>
+        /// <param name="boneIndices">Bone indices</param>
+        /// <returns>Returns helper</returns>
         public static VertexData CreateVertexSkinnedPositionNormalTextureTangent(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture, float[] weights, byte[] boneIndices)
         {
             return new VertexData()
@@ -148,6 +282,238 @@ namespace Engine.Common
                 BoneIndices = boneIndices,
             };
         }
+
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexBillboard CreateVertexBillboard(VertexData v)
+        {
+            return new VertexBillboard
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Size = v.Size.HasValue ? v.Size.Value : Vector2.One,
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexPosition CreateVertexPosition(VertexData v)
+        {
+            return new VertexPosition
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexPositionColor CreateVertexPositionColor(VertexData v)
+        {
+            return new VertexPositionColor
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Color = v.Color.HasValue ? v.Color.Value : Color4.Black,
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexPositionNormalColor CreateVertexPositionNormalColor(VertexData v)
+        {
+            return new VertexPositionNormalColor
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
+                Color = v.Color.HasValue ? v.Color.Value : Color4.Black,
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexPositionNormalTexture CreateVertexPositionNormalTexture(VertexData v)
+        {
+            return new VertexPositionNormalTexture
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
+                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexPositionNormalTextureTangent CreateVertexPositionNormalTextureTangent(VertexData v)
+        {
+            return new VertexPositionNormalTextureTangent
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
+                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.Zero,
+                BiNormal = v.BiNormal.HasValue ? v.BiNormal.Value : Vector3.Zero,
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexPositionTexture CreateVertexPositionTexture(VertexData v)
+        {
+            return new VertexPositionTexture
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <param name="vw">Weights</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexSkinnedPosition CreateVertexSkinnedPosition(VertexData v, Weight[] vw)
+        {
+            return new VertexSkinnedPosition
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
+                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
+                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <param name="vw">Weights</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexSkinnedPositionColor CreateVertexSkinnedPositionColor(VertexData v, Weight[] vw)
+        {
+            return new VertexSkinnedPositionColor
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Color = v.Color.HasValue ? v.Color.Value : Color4.Black,
+                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
+                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
+                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <param name="vw">Weights</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexSkinnedPositionNormalColor CreateVertexSkinnedPositionNormalColor(VertexData v, Weight[] vw)
+        {
+            return new VertexSkinnedPositionNormalColor
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
+                Color = v.Color.HasValue ? v.Color.Value : Color4.Black,
+                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
+                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
+                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <param name="vw">Weights</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexSkinnedPositionNormalTexture CreateVertexSkinnedPositionNormalTexture(VertexData v, Weight[] vw)
+        {
+            return new VertexSkinnedPositionNormalTexture
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
+                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
+                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
+                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <param name="vw">Weights</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexSkinnedPositionNormalTextureTangent CreateVertexSkinnedPositionNormalTextureTangent(VertexData v, Weight[] vw)
+        {
+            return new VertexSkinnedPositionNormalTextureTangent
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
+                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.Zero,
+                BiNormal = v.BiNormal.HasValue ? v.BiNormal.Value : Vector3.Zero,
+                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
+                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
+                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <param name="vw">Weights</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexSkinnedPositionTexture CreateVertexSkinnedPositionTexture(VertexData v, Weight[] vw)
+        {
+            return new VertexSkinnedPositionTexture
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
+                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
+                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+            };
+        }
+
+        /// <summary>
+        /// Gets whether specified vertex type is skinned or not
+        /// </summary>
+        /// <param name="vertexTypes">Vertex type</param>
+        /// <returns>Returns true if the vertex type contains skinning info</returns>
         public static bool IsSkinned(VertexTypes vertexTypes)
         {
             return
@@ -158,6 +524,11 @@ namespace Engine.Common
                 vertexTypes == VertexTypes.PositionNormalTextureSkinned ||
                 vertexTypes == VertexTypes.PositionNormalTextureTangentSkinned;
         }
+        /// <summary>
+        /// Gets whether specified vertex type is textured or not
+        /// </summary>
+        /// <param name="vertexTypes">Vertex type</param>
+        /// <returns>Returns true if the vertex type contains texture map info</returns>
         public static bool IsTextured(VertexTypes vertexTypes)
         {
             return
@@ -171,6 +542,11 @@ namespace Engine.Common
                 vertexTypes == VertexTypes.PositionNormalTextureSkinned ||
                 vertexTypes == VertexTypes.PositionNormalTextureTangentSkinned;
         }
+        /// <summary>
+        /// Gets skinned equivalent for specified non skinning type
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <returns>Returns skinned equivalent for specified non skinning type</returns>
         public static VertexTypes GetSkinnedEquivalent(VertexTypes vertexType)
         {
             if (vertexType == VertexTypes.Position) return VertexTypes.PositionSkinned;
@@ -183,6 +559,12 @@ namespace Engine.Common
             return VertexTypes.Unknown;
         }
 
+        /// <summary>
+        /// Create vertex buffer from vertices
+        /// </summary>
+        /// <param name="device">Device</param>
+        /// <param name="vertices">Vertices</param>
+        /// <returns>Return new buffer</returns>
         public static Buffer CreateVertexBuffer(Device device, IVertexData[] vertices)
         {
             Buffer buffer = null;
@@ -191,55 +573,55 @@ namespace Engine.Common
             {
                 if (vertices[0].VertexType == VertexTypes.Billboard)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexBillboard)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexBillboard)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.Position)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPosition)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPosition)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionColor)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionColor)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionColor)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalColor)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalColor)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionTexture)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionTexture)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionTexture)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTexture)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTexture)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTextureTangent)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTextureTangent)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPosition)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPosition)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionColor)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionColor)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalColor)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalColor)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionTexture)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionTexture)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
                 {
-                    buffer = device.CreateIndexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
+                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
                 }
                 else
                 {
@@ -249,6 +631,12 @@ namespace Engine.Common
 
             return buffer;
         }
+        /// <summary>
+        /// Writes vertex buffer data
+        /// </summary>
+        /// <param name="deviceContext">Graphics context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="vertices">Vertices</param>
         public static void WriteVertexBuffer(DeviceContext deviceContext, Buffer buffer, IVertexData[] vertices)
         {
             if (vertices[0].VertexType == VertexTypes.Billboard)
@@ -308,37 +696,44 @@ namespace Engine.Common
                 throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
             }
         }
+        /// <summary>
+        /// Converts helpers to vertices
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="vertices">Helpers</param>
+        /// <param name="weights">Weight information</param>
+        /// <returns>Returns generated vertices</returns>
         public static IVertexData[] Convert(VertexTypes vertexType, VertexData[] vertices, Weight[] weights)
         {
             List<IVertexData> vertexList = new List<IVertexData>();
 
             if (vertexType == VertexTypes.Billboard)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexBillboard.Create(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexBillboard(v)); });
             }
             else if (vertexType == VertexTypes.Position)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexPosition.Create(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPosition(v)); });
             }
             else if (vertexType == VertexTypes.PositionColor)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexPositionColor.Create(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionColor(v)); });
             }
             else if (vertexType == VertexTypes.PositionNormalColor)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexPositionNormalColor.Create(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionNormalColor(v)); });
             }
             else if (vertexType == VertexTypes.PositionTexture)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexPositionTexture.Create(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionTexture(v)); });
             }
             else if (vertexType == VertexTypes.PositionNormalTexture)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexPositionNormalTexture.Create(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionNormalTexture(v)); });
             }
             else if (vertexType == VertexTypes.PositionNormalTextureTangent)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexPositionNormalTextureTangent.Create(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionNormalTextureTangent(v)); });
             }
 
             else if (vertexType == VertexTypes.PositionSkinned)
@@ -347,7 +742,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexSkinnedPosition.Create(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPosition(v, vw));
                 });
             }
             else if (vertexType == VertexTypes.PositionColorSkinned)
@@ -356,7 +751,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexSkinnedPositionColor.Create(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPositionColor(v, vw));
                 });
             }
             else if (vertexType == VertexTypes.PositionNormalColorSkinned)
@@ -365,7 +760,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexSkinnedPositionNormalColor.Create(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalColor(v, vw));
                 });
             }
             else if (vertexType == VertexTypes.PositionTextureSkinned)
@@ -374,7 +769,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexSkinnedPositionTexture.Create(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPositionTexture(v, vw));
                 });
             }
             else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
@@ -383,7 +778,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexSkinnedPositionNormalTexture.Create(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalTexture(v, vw));
                 });
             }
             else if (vertexType == VertexTypes.PositionNormalTextureTangentSkinned)
@@ -392,7 +787,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexSkinnedPositionNormalTextureTangent.Create(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalTextureTangent(v, vw));
                 });
             }
 
@@ -404,6 +799,15 @@ namespace Engine.Common
             return vertexList.ToArray();
         }
 
+        /// <summary>
+        /// Calculate tangent, normal and binormals of vertices
+        /// </summary>
+        /// <param name="vertex1">Vertex 1</param>
+        /// <param name="vertex2">Vertex 2</param>
+        /// <param name="vertex3">Vertex 3</param>
+        /// <param name="tangent">Tangen result</param>
+        /// <param name="binormal">Binormal result</param>
+        /// <param name="normal">Normal result</param>
         public static void CalculateNormals(VertexData vertex1, VertexData vertex2, VertexData vertex3, out Vector3 tangent, out Vector3 binormal, out Vector3 normal)
         {
             // Calculate the two vectors for the face.
@@ -439,6 +843,10 @@ namespace Engine.Common
             normal.Normalize();
         }
 
+        /// <summary>
+        /// Transforms helper by given matrix
+        /// </summary>
+        /// <param name="transform">Transformation matrix</param>
         public void Transform(Matrix transform)
         {
             if (!transform.IsIdentity)
@@ -480,6 +888,10 @@ namespace Engine.Common
                 }
             }
         }
+
+        /// <summary>
+        /// Gets text representation of instance
+        /// </summary>
         public override string ToString()
         {
             string text = null;

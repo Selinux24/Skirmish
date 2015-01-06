@@ -2,24 +2,24 @@
 namespace Engine
 {
     /// <summary>
-    /// Eje isométrico
+    /// Isometrix axis
     /// </summary>
     public enum IsometricAxis
     {
         /// <summary>
-        /// Noroeste
+        /// North west
         /// </summary>
         NW = 0,
         /// <summary>
-        /// Noreste
+        /// North east
         /// </summary>
         NE = 1,
         /// <summary>
-        /// Sudeste
+        /// South east
         /// </summary>
         SE = 2,
         /// <summary>
-        /// Sudoeste
+        /// South west
         /// </summary>
         SW = 3,
     }

@@ -4,19 +4,25 @@ using System.Diagnostics;
 namespace Engine
 {
     /// <summary>
-    /// Tiempo de juego
+    /// Game time
     /// </summary>
     public class GameTime
     {
+        /// <summary>
+        /// Stop watch
+        /// </summary>
         private Stopwatch watch = new Stopwatch();
+        /// <summary>
+        /// Previous elapsed time for per frame calculations
+        /// </summary>
         private TimeSpan previousElapsedTime;
 
         /// <summary>
-        /// Tiempo transcurrido desde la última actualización
+        /// Elapsed time since last frame
         /// </summary>
         public TimeSpan ElapsedTime { get; private set; }
         /// <summary>
-        /// Tiempo transcurrido total
+        /// Total time
         /// </summary>
         public TimeSpan TotalTime
         {
@@ -26,7 +32,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Segundos transcurridos desde la última actualización
+        /// Elapsed seconds since last frame
         /// </summary>
         public float ElapsedSeconds
         {
@@ -35,7 +41,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Segundos transcurridos desde el inicio
+        /// Total seconds
         /// </summary>
         public float TotalSeconds
         {
@@ -54,7 +60,7 @@ namespace Engine
         }
 
         /// <summary>
-        /// Resetea el cronómetro.
+        /// Resets the stop watch
         /// </summary>
         public void Reset()
         {
@@ -63,7 +69,7 @@ namespace Engine
             this.watch.Reset();
         }
         /// <summary>
-        /// Inicia el cronómetro.
+        /// Starts the stop watch
         /// </summary>
         public void Start()
         {
@@ -72,7 +78,7 @@ namespace Engine
             this.watch.Start();
         }
         /// <summary>
-        /// Para el cronómetro.
+        /// Stops the stop watch
         /// </summary>
         public void Stop()
         {
@@ -81,7 +87,7 @@ namespace Engine
             this.Update();
         }
         /// <summary>
-        /// Actualiza la foto temporal del cronómetro.
+        /// Updates the stop watch counters
         /// </summary>
         public void Update()
         {

@@ -6,13 +6,31 @@ namespace Engine.Content
 {
     using Engine.Common;
 
+    /// <summary>
+    /// Sub mesh content
+    /// </summary>
     public class SubMeshContent
     {
+        /// <summary>
+        /// Vertices
+        /// </summary>
         private VertexData[] vertices;
+        /// <summary>
+        /// Indices
+        /// </summary>
         private uint[] indices;
 
+        /// <summary>
+        /// Vertex Topology
+        /// </summary>
         public PrimitiveTopology Topology { get; set; }
+        /// <summary>
+        /// Vertex type
+        /// </summary>
         public VertexTypes VertexType { get; set; }
+        /// <summary>
+        /// Vertices
+        /// </summary>
         public VertexData[] Vertices
         {
             get
@@ -27,6 +45,9 @@ namespace Engine.Content
                 this.BoundingSphere = this.ComputeBoundingSphere();
             }
         }
+        /// <summary>
+        /// Indices
+        /// </summary>
         public uint[] Indices
         {
             get
@@ -38,10 +59,23 @@ namespace Engine.Content
                 this.indices = value;
             }
         }
+        /// <summary>
+        /// Material
+        /// </summary>
         public string Material { get; set; }
+        /// <summary>
+        /// Bounding box
+        /// </summary>
         public BoundingBox BoundingBox { get; private set; }
+        /// <summary>
+        /// Bounding sphere
+        /// </summary>
         public BoundingSphere BoundingSphere { get; private set; }
 
+        /// <summary>
+        /// Compute triangle list
+        /// </summary>
+        /// <returns>Returns computed triangle list</returns>
         public Triangle[] ComputeTriangleList()
         {
             if (this.indices != null && this.indices.Length > 0)
@@ -53,6 +87,10 @@ namespace Engine.Content
                 return Triangle.ComputeTriangleList(this.Topology, this.vertices);
             }
         }
+        /// <summary>
+        /// Compute bounding sphere
+        /// </summary>
+        /// <returns>Returns computed bounding sphere</returns>
         private BoundingSphere ComputeBoundingSphere()
         {
             List<Vector3> list = new List<Vector3>();
@@ -67,6 +105,10 @@ namespace Engine.Content
 
             return BoundingSphere.FromPoints(list.ToArray());
         }
+        /// <summary>
+        /// Compute bounding box
+        /// </summary>
+        /// <returns>Returns computed bounding box</returns>
         private BoundingBox ComputeBoundingBox()
         {
             List<Vector3> list = new List<Vector3>();
@@ -82,6 +124,10 @@ namespace Engine.Content
             return BoundingBox.FromPoints(list.ToArray());
         }
 
+        /// <summary>
+        /// Gets text representation of instance
+        /// </summary>
+        /// <returns>Returns text representation of instance</returns>
         public override string ToString()
         {
             string text = null;

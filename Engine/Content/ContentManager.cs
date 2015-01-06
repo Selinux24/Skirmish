@@ -2,8 +2,17 @@
 
 namespace Engine.Content
 {
+    /// <summary>
+    /// Content manager
+    /// </summary>
     public static class ContentManager
     {
+        /// <summary>
+        /// Finds content
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="resourcePath">Resource path</param>
+        /// <returns>Returns resource path</returns>
         public static string FindContent(string contentFolder, string resourcePath)
         {
             if (string.IsNullOrEmpty(resourcePath))
@@ -27,7 +36,12 @@ namespace Engine.Content
                 }
             }
         }
-
+        /// <summary>
+        /// Finds content
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="resourcePaths">Resource path list</param>
+        /// <returns>Returns resource path list</returns>
         public static string[] FindContent(string contentFolder, string[] resourcePaths)
         {
             if (resourcePaths != null && resourcePaths.Length > 0)

@@ -3,12 +3,12 @@
 namespace Engine
 {
     /// <summary>
-    /// Composición de luces de la escena
+    /// Scene lights
     /// </summary>
     public class SceneLight
     {
         /// <summary>
-        /// Luz 1 habilitada
+        /// Enables or disabled first directional light
         /// </summary>
         public bool DirectionalLight1Enabled
         {
@@ -22,7 +22,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Luz 2 habilitada
+        /// Enables or disabled second directional light
         /// </summary>
         public bool DirectionalLight2Enabled
         {
@@ -36,7 +36,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Luz 3 habilitada
+        /// Enables or disabled third directional light
         /// </summary>
         public bool DirectionalLight3Enabled
         {
@@ -50,19 +50,19 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Luz direccional 1
+        /// Gets or sets first directional light
         /// </summary>
         public SceneLightDirectional DirectionalLight1 { get; set; }
         /// <summary>
-        /// Luz direccional 2
+        /// Gets or sets second directional light
         /// </summary>
         public SceneLightDirectional DirectionalLight2 { get; set; }
         /// <summary>
-        /// Luz direccional 3
+        /// Gets or sets third directional light
         /// </summary>
         public SceneLightDirectional DirectionalLight3 { get; set; }
         /// <summary>
-        /// Luz habilitada
+        /// Enables or disables first point light
         /// </summary>
         public bool PointLightEnabled
         {
@@ -76,11 +76,11 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Esfera de luz
+        /// Gets or sets first point light
         /// </summary>
         public SceneLightPoint PointLight { get; set; }
         /// <summary>
-        /// Luz habilitada
+        /// Enables or disables first spot light
         /// </summary>
         public bool SpotLightEnabled
         {
@@ -94,19 +94,19 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Cono de luz
+        /// Gets or sets first spot light
         /// </summary>
         public SceneLightSpot SpotLight { get; set; }
         /// <summary>
-        /// Distancia de inicio de la niebla
+        /// Fog start value
         /// </summary>
         public float FogStart = 0f;
         /// <summary>
-        /// Distancia de niebla
+        /// Fog range value
         /// </summary>
         public float FogRange = 0f;
         /// <summary>
-        /// Color de la niebla
+        /// Fog color
         /// </summary>
         public Color4 FogColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
 

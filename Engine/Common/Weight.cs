@@ -1,15 +1,32 @@
-﻿using System;
-
+﻿
 namespace Engine.Common
 {
-    [Serializable]
+    /// <summary>
+    /// Weight info
+    /// </summary>
     public struct Weight
     {
+        /// <summary>
+        /// Vertex index of this weight
+        /// </summary>
         public int VertexIndex;
+        /// <summary>
+        /// Bone index of this weight
+        /// </summary>
         public int BoneIndex;
+        /// <summary>
+        /// Joint name
+        /// </summary>
         public string Joint;
+        /// <summary>
+        /// Value
+        /// </summary>
         public float WeightValue;
 
+        /// <summary>
+        /// Gets text representation of this weight
+        /// </summary>
+        /// <returns>Returns text representation of this weight</returns>
         public override string ToString()
         {
             string text = null;

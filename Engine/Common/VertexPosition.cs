@@ -4,18 +4,16 @@ using SharpDX.Direct3D11;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Position vertex format
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexPosition : IVertexData
     {
-        public Vector3 Position;
-
-        public static int SizeInBytes
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexPosition));
-            }
-        }
+        /// <summary>
+        /// Defined input colection
+        /// </summary>
+        /// <returns></returns>
         public static InputElement[] GetInput()
         {
             return new InputElement[]
@@ -23,14 +21,14 @@ namespace Engine.Common
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
             };
         }
-        public static VertexPosition Create(VertexData v)
-        {
-            return new VertexPosition
-            {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-            };
-        }
 
+        /// <summary>
+        /// Position
+        /// </summary>
+        public Vector3 Position;
+        /// <summary>
+        /// Vertex type
+        /// </summary>
         public VertexTypes VertexType
         {
             get
@@ -38,20 +36,21 @@ namespace Engine.Common
                 return VertexTypes.Position;
             }
         }
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
         public int Stride
         {
             get
             {
-                return SizeInBytes;
+                return Marshal.SizeOf(typeof(VertexPosition));
             }
         }
-        public IVertexData Convert(VertexData v)
-        {
-            return new VertexPosition()
-            {
-                Position = v.Position.Value,
-            };
-        }
+
+        /// <summary>
+        /// Text representation of vertex
+        /// </summary>
+        /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
             return string.Format("Position: {0}", this.Position);

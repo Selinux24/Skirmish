@@ -4,20 +4,16 @@ using SharpDX.Direct3D11;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Position normal texture vertex format
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexPositionNormalTexture : IVertexData
     {
-        public Vector3 Position;
-        public Vector3 Normal;
-        public Vector2 Texture;
-
-        public static int SizeInBytes
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexPositionNormalTexture));
-            }
-        }
+        /// <summary>
+        /// Defined input colection
+        /// </summary>
+        /// <returns></returns>
         public static InputElement[] GetInput()
         {
             return new InputElement[]
@@ -27,16 +23,22 @@ namespace Engine.Common
                 new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, 0, InputClassification.PerVertexData, 0),
             };
         }
-        public static VertexPositionNormalTexture Create(VertexData v)
-        {
-            return new VertexPositionNormalTexture
-            {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero
-            };
-        }
 
+        /// <summary>
+        /// Position
+        /// </summary>
+        public Vector3 Position;
+        /// <summary>
+        /// Normal
+        /// </summary>
+        public Vector3 Normal;
+        /// <summary>
+        /// Texture UV
+        /// </summary>
+        public Vector2 Texture;
+        /// <summary>
+        /// Vertex type
+        /// </summary>
         public VertexTypes VertexType
         {
             get
@@ -44,22 +46,21 @@ namespace Engine.Common
                 return VertexTypes.PositionNormalTexture;
             }
         }
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
         public int Stride
         {
             get
             {
-                return SizeInBytes;
+                return Marshal.SizeOf(typeof(VertexPositionNormalTexture));
             }
         }
-        public IVertexData Convert(VertexData v)
-        {
-            return new VertexPositionNormalTexture()
-            {
-                Position = v.Position.Value,
-                Normal = v.Normal.Value,
-                Texture = v.Texture.Value,
-            };
-        }
+
+        /// <summary>
+        /// Text representation of vertex
+        /// </summary>
+        /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
             return string.Format("Position: {0}; Normal: {1}; Texture: {2}", this.Position, this.Normal, this.Texture);

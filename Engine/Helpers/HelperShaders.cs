@@ -8,10 +8,16 @@ namespace Engine.Helpers
 {
     using Engine.Properties;
 
+    /// <summary>
+    /// Helper methods for shaders and effects
+    /// </summary>
     public static class HelperShaders
     {
         #region Classes
 
+        /// <summary>
+        /// Vertex shader description
+        /// </summary>
         public class VertexShaderDescription : IDisposable
         {
             public VertexShader Shader { get; private set; }
@@ -37,7 +43,9 @@ namespace Engine.Helpers
                 }
             }
         }
-
+        /// <summary>
+        /// Pixel shader description
+        /// </summary>
         public class PixelShaderDescription : IDisposable
         {
             public PixelShader Shader { get; private set; }
@@ -55,7 +63,9 @@ namespace Engine.Helpers
                 }
             }
         }
-
+        /// <summary>
+        /// Include manager
+        /// </summary>
         public class ShaderIncludeManager : CallbackBase, Include
         {
             public void Close(Stream stream)
@@ -74,10 +84,27 @@ namespace Engine.Helpers
 
         #endregion
 
+        /// <summary>
+        /// Vertex shader profile
+        /// </summary>
         public static string VSProfile = "vs_5_0";
+        /// <summary>
+        /// Pixel shader profile
+        /// </summary>
         public static string PSProfile = "ps_5_0";
+        /// <summary>
+        /// Effect profile
+        /// </summary>
         public static string FXProfile = "fx_5_0";
 
+        /// <summary>
+        /// Loads vertex shader from file
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="input">Input elements</param>
+        /// <returns>Retuns vertex shader description</returns>
         public static VertexShaderDescription LoadVertexShader(
             this Device device,
             string filename,
@@ -90,7 +117,15 @@ namespace Engine.Helpers
                 entryPoint,
                 input);
         }
-
+        /// <summary>
+        /// Loads vertex shader from file
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="input">Input elements</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Retuns vertex shader description</returns>
         public static VertexShaderDescription LoadVertexShader(
             this Device device,
             string filename,
@@ -105,7 +140,14 @@ namespace Engine.Helpers
                 input,
                 out compilationErrors);
         }
-
+        /// <summary>
+        /// Loads vertex shader from byte code
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="input">Input elements</param>
+        /// <returns>Retuns vertex shader description</returns>
         public static VertexShaderDescription LoadVertexShader(
             this Device device,
             byte[] byteCode,
@@ -113,7 +155,6 @@ namespace Engine.Helpers
             InputElement[] input)
         {
             string compilationErrors;
-
             return LoadVertexShader(
                 device,
                 byteCode,
@@ -121,7 +162,15 @@ namespace Engine.Helpers
                 input,
                 out compilationErrors);
         }
-
+        /// <summary>
+        /// Loads vertex shader from byte code
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="input">Input elements</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Retuns vertex shader description</returns>
         public static VertexShaderDescription LoadVertexShader(
             this Device device,
             byte[] byteCode,
@@ -130,8 +179,15 @@ namespace Engine.Helpers
             out string compilationErrors)
         {
             compilationErrors = null;
-
-            using (CompilationResult cmpResult = LoadVertexShader(device, byteCode, entryPoint, VSProfile))
+            using (ShaderIncludeManager includeManager = new ShaderIncludeManager())
+            using (CompilationResult cmpResult = ShaderBytecode.Compile(
+                byteCode,
+                entryPoint,
+                VSProfile,
+                ShaderFlags.EnableStrictness,
+                EffectFlags.None,
+                null,
+                includeManager))
             {
                 if (cmpResult.HasErrors)
                 {
@@ -150,23 +206,13 @@ namespace Engine.Helpers
                 return new VertexShaderDescription(vertexShader, layout);
             }
         }
-
-        private static CompilationResult LoadVertexShader(
-            this Device device,
-            byte[] byteCode,
-            string entryPoint,
-            string profile)
-        {
-            return ShaderBytecode.Compile(
-                byteCode,
-                entryPoint,
-                profile,
-                ShaderFlags.EnableStrictness,
-                EffectFlags.None,
-                null,
-                new ShaderIncludeManager());
-        }
-
+        /// <summary>
+        /// Loads a pixel shader from file
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <returns>Returns pixel shader description</returns>
         public static PixelShaderDescription LoadPixelShader(
             this Device device,
             string filename,
@@ -179,7 +225,14 @@ namespace Engine.Helpers
                 entryPoint,
                 out compilationErrors);
         }
-
+        /// <summary>
+        /// Loads a pixel shader from file
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns pixel shader description</returns>
         public static PixelShaderDescription LoadPixelShader(
             this Device device,
             string filename,
@@ -192,7 +245,13 @@ namespace Engine.Helpers
                 entryPoint,
                 out compilationErrors);
         }
-
+        /// <summary>
+        /// Loads a pixel shader from byte code
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <returns>Returns pixel shader description</returns>
         public static PixelShaderDescription LoadPixelShader(
             this Device device,
             byte[] byteCode,
@@ -205,7 +264,14 @@ namespace Engine.Helpers
                 entryPoint,
                 out compilationErrors);
         }
-
+        /// <summary>
+        /// Loads a pixel shader from byte code
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns pixel shader description</returns>
         public static PixelShaderDescription LoadPixelShader(
             this Device device,
             byte[] byteCode,
@@ -214,6 +280,7 @@ namespace Engine.Helpers
         {
             compilationErrors = null;
 
+            using (ShaderIncludeManager includeManager = new ShaderIncludeManager())
             using (CompilationResult cmpResult = ShaderBytecode.Compile(
                 byteCode,
                 entryPoint,
@@ -221,7 +288,7 @@ namespace Engine.Helpers
                 ShaderFlags.EnableStrictness,
                 EffectFlags.None,
                 null,
-                new ShaderIncludeManager()))
+                includeManager))
             {
                 if (cmpResult.HasErrors)
                 {
@@ -231,21 +298,30 @@ namespace Engine.Helpers
                 return new PixelShaderDescription(new PixelShader(device, cmpResult.Bytecode));
             }
         }
-
+        /// <summary>
+        /// Loads an effect from byte code
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <returns>Returns loaded effect</returns>
         public static Effect LoadEffect(
             this Device device,
             byte[] byteCode)
         {
-            using (CompilationResult cmpResult = HelperShaders.LoadVertexShader(
-                device,
+            using (ShaderIncludeManager includeManager = new ShaderIncludeManager())
+            using (CompilationResult cmpResult = ShaderBytecode.Compile(
                 byteCode,
                 null,
-                HelperShaders.FXProfile))
+                FXProfile,
+                ShaderFlags.EnableStrictness,
+                EffectFlags.None,
+                null,
+                includeManager))
             {
                 return new Effect(
                     device,
                     cmpResult.Bytecode.Data,
-                    SharpDX.D3DCompiler.EffectFlags.None);
+                    EffectFlags.None);
             }
         }
     }

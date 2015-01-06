@@ -4,19 +4,16 @@ using SharpDX.Direct3D11;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Position color vertex format
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexPositionColor : IVertexData
     {
-        public Vector3 Position;
-        public Color4 Color;
-
-        public static int SizeInBytes
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexPositionColor));
-            }
-        }
+        /// <summary>
+        /// Defined input colection
+        /// </summary>
+        /// <returns></returns>
         public static InputElement[] GetInput()
         {
             return new InputElement[]
@@ -25,15 +22,18 @@ namespace Engine.Common
                 new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 12, 0, InputClassification.PerVertexData, 0),
             };
         }
-        public static VertexPositionColor Create(VertexData v)
-        {
-            return new VertexPositionColor
-            {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.Black,
-            };
-        }
 
+        /// <summary>
+        /// Position
+        /// </summary>
+        public Vector3 Position;
+        /// <summary>
+        /// Color
+        /// </summary>
+        public Color4 Color;
+        /// <summary>
+        /// Vertex type
+        /// </summary>
         public VertexTypes VertexType
         {
             get
@@ -41,21 +41,21 @@ namespace Engine.Common
                 return VertexTypes.PositionColor;
             }
         }
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
         public int Stride
         {
             get
             {
-                return SizeInBytes;
+                return Marshal.SizeOf(typeof(VertexPositionColor));
             }
         }
-        public IVertexData Convert(VertexData v)
-        {
-            return new VertexPositionColor()
-            {
-                Position = v.Position.Value,
-                Color = v.Color.Value,
-            };
-        }
+
+        /// <summary>
+        /// Text representation of vertex
+        /// </summary>
+        /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
             return string.Format("Position: {0}; Color: {1}", this.Position, this.Color);

@@ -5,13 +5,31 @@ namespace Engine
     using Engine.Common;
     using Engine.Content;
 
+    /// <summary>
+    /// Terrain model
+    /// </summary>
     public class Terrain : Drawable
     {
+        /// <summary>
+        /// Geometry
+        /// </summary>
         private Model terrain = null;
+        /// <summary>
+        /// Vegetation
+        /// </summary>
         private Billboard vegetation = null;
+        /// <summary>
+        /// Skydom
+        /// </summary>
         private Cubemap skydom = null;
+        /// <summary>
+        /// Position cache
+        /// </summary>
         private Triangle[] terrainCache = null;
 
+        /// <summary>
+        /// Current scene
+        /// </summary>
         public new Scene3D Scene
         {
             get
@@ -23,15 +41,26 @@ namespace Engine
                 base.Scene = value;
             }
         }
-        public Manipulator Manipulator { get; private set; }
+        /// <summary>
+        /// Manipulator
+        /// </summary>
+        public Manipulator3D Manipulator { get; private set; }
 
-        public Terrain(Game game, Scene3D scene, ModelContent terrainContent, string contentFolder, TerrainDescription description, bool debugMode = false)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game class</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="content">Geometry content</param>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="description">Terrain description</param>
+        public Terrain(Game game, Scene3D scene, ModelContent content, string contentFolder, TerrainDescription description)
             : base(game, scene)
         {
-            this.Manipulator = new Manipulator();
+            this.Manipulator = new Manipulator3D();
 
-            this.terrain = new Model(game, scene, terrainContent, debugMode);
-            this.terrainCache = terrainContent.ComputeTriangleList();
+            this.terrain = new Model(game, scene, content);
+            this.terrainCache = content.ComputeTriangleList();
 
             if (description != null && description.AddVegetation)
             {
@@ -57,6 +86,9 @@ namespace Engine
                 this.skydom = new Cubemap(game, scene, skydomContent);
             }
         }
+        /// <summary>
+        /// Dispose of created resources
+        /// </summary>
         public override void Dispose()
         {
             if (this.terrain != null)
@@ -77,6 +109,10 @@ namespace Engine
                 this.skydom = null;
             }
         }
+        /// <summary>
+        /// Objects updating
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
             this.Manipulator.Update(gameTime);
@@ -96,6 +132,10 @@ namespace Engine
                 this.skydom.Update(gameTime);
             }
         }
+        /// <summary>
+        /// Objects drawing
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Draw(GameTime gameTime)
         {
             this.terrain.Draw(gameTime);
@@ -110,12 +150,14 @@ namespace Engine
                 this.skydom.Draw(gameTime);
             }
         }
-        public override void HandleResizing()
-        {
-            
-        }
 
-        public Vector3? SetToGround(float x, float z)
+        /// <summary>
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <returns>Returns ground position if exists</returns>
+        public Vector3? FindGroundPosition(float x, float z)
         {
             Vector3? position = null;
 
@@ -142,16 +184,43 @@ namespace Engine
         }
     }
 
+    /// <summary>
+    /// Terrain description
+    /// </summary>
     public class TerrainDescription
     {
+        /// <summary>
+        /// Indicates whether the new terrain has vegetation
+        /// </summary>
         public bool AddVegetation = false;
+        /// <summary>
+        /// Texture names array for vegetation
+        /// </summary>
         public string[] VegetarionTextures = null;
+        /// <summary>
+        /// Vegetation saturation per triangle
+        /// </summary>
         public float Saturation = 0f;
+        /// <summary>
+        /// Vegetation sprite minimum size
+        /// </summary>
         public Vector2 MinSize = Vector2.Zero;
+        /// <summary>
+        /// Vegetation sprite maximum size
+        /// </summary>
         public Vector2 MaxSize = Vector2.Zero;
+        /// <summary>
+        /// Seed for random position generation
+        /// </summary>
         public int Seed = 0;
 
+        /// <summary>
+        /// Indicates whether the new terrain has skydom
+        /// </summary>
         public bool AddSkydom = false;
+        /// <summary>
+        /// Skydom cube texture
+        /// </summary>
         public string SkydomTexture = null;
     }
 }

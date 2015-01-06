@@ -13,8 +13,8 @@ namespace Collada
         private readonly Vector3 minScaleSize = new Vector3(0.5f);
         private readonly Vector3 maxScaleSize = new Vector3(2f);
 
-        private TextControl title = null;
-        private TextControl fps = null;
+        private TextDrawer title = null;
+        private TextDrawer fps = null;
         private Terrain ground = null;
         private ModelInstanced lamps = null;
         private ModelInstanced helicopters = null;
@@ -43,7 +43,7 @@ namespace Collada
             {
                 AddVegetation = true,
                 VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", },
-                Saturation = 0.5f,
+                Saturation = 0.05f,
                 MinSize = Vector2.One * 2f,
                 MaxSize = Vector2.One * 4f,
                 Seed = 1024,
@@ -109,7 +109,7 @@ namespace Collada
                 float posX = (x++ * left);
                 float posZ = (z * -back);
 
-                Vector3? v = this.ground.SetToGround(posX, posZ);
+                Vector3? v = this.ground.FindGroundPosition(posX, posZ);
                 if (v.HasValue)
                 {
                     this.helicopters[i].SetScale(1);
@@ -118,8 +118,8 @@ namespace Collada
                 }
             }
 
-            this.Camera.Position = this.helicopters.Manipulator.Position + (Vector3.One * 10f);
-            this.Camera.Interest = this.helicopters.Manipulator.Position + (Vector3.UnitY * 2.5f);
+            this.Camera.Goto(this.helicopters.Manipulator.Position + (Vector3.One * 10f));
+            this.Camera.LookTo(this.helicopters.Manipulator.Position + (Vector3.UnitY * 2.5f));
         }
 
         public override void Update(GameTime gameTime)
@@ -185,8 +185,8 @@ namespace Collada
                 position += this.helicopters.Manipulator.Up * 2f;
                 position += this.helicopters.Manipulator.Forward * -2f;
 
-                this.Camera.Position = position;
-                this.Camera.Interest = interest;
+                this.Camera.Goto(position);
+                this.Camera.LookTo(interest);
             }
         }
         private void UpdateEnvironment(GameTime gameTime)
@@ -198,7 +198,7 @@ namespace Collada
             float lampPosX = r * (float)Math.Cos(1f / r * this.Game.GameTime.TotalSeconds);
             float lampPosZ = r * (float)Math.Sin(1f / r * this.Game.GameTime.TotalSeconds);
 
-            Vector3? lampPos = this.ground.SetToGround(lampPosX, lampPosZ);
+            Vector3? lampPos = this.ground.FindGroundPosition(lampPosX, lampPosZ);
             if (lampPos.HasValue)
             {
                 this.lamps[0].SetPosition(lampPos.Value + (Vector3.UnitY * 30f));

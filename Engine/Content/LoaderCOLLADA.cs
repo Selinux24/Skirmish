@@ -196,6 +196,12 @@ namespace Engine.Content
 
         #region Dictionary loaders
 
+        /// <summary>
+        /// Process images
+        /// </summary>
+        /// <param name="dae">Dae object</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="contentFolder">Content folder</param>
         public static void ProcessLibraryImages(COLLADA dae, ModelContent modelContent, string contentFolder)
         {
             if (dae.LibraryImages != null && dae.LibraryImages.Length > 0)
@@ -217,6 +223,11 @@ namespace Engine.Content
                 }
             }
         }
+        /// <summary>
+        /// Process materials
+        /// </summary>
+        /// <param name="dae">Dae object</param>
+        /// <param name="modelContent">Model content</param>
         public static void ProcessLibraryMaterial(COLLADA dae, ModelContent modelContent)
         {
             if (dae.LibraryMaterials != null && dae.LibraryMaterials.Length > 0 &&
@@ -252,6 +263,13 @@ namespace Engine.Content
                 }
             }
         }
+        /// <summary>
+        /// Process geometry
+        /// </summary>
+        /// <param name="dae">Dae object</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Transformation</param>
         public static void ProcessLibraryGeometries(COLLADA dae, ModelContent modelContent, EnumAxisConversion conversion, Matrix transform)
         {
             if (dae.LibraryGeometries != null && dae.LibraryGeometries.Length > 0)
@@ -269,6 +287,13 @@ namespace Engine.Content
                 }
             }
         }
+        /// <summary>
+        /// Process controllers
+        /// </summary>
+        /// <param name="dae">Dae object</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Transformation</param>
         public static void ProcessLibraryControllers(COLLADA dae, ModelContent modelContent, EnumAxisConversion conversion, Matrix transform)
         {
             if (dae.LibraryControllers != null && dae.LibraryControllers.Length > 0)
@@ -283,6 +308,13 @@ namespace Engine.Content
                 }
             }
         }
+        /// <summary>
+        /// Process animations
+        /// </summary>
+        /// <param name="dae">Dae object</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Transformation</param>
         public static void ProcessLibraryAnimations(COLLADA dae, ModelContent modelContent, EnumAxisConversion conversion, Matrix transform)
         {
             if (dae.LibraryAnimations != null && dae.LibraryAnimations.Length > 0)
@@ -302,6 +334,13 @@ namespace Engine.Content
 
         #region Geometry
 
+        /// <summary>
+        /// Process geometry list
+        /// </summary>
+        /// <param name="geometry">Geometry info</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessGeometry(Geometry geometry, EnumAxisConversion conversion, Matrix transform)
         {
             SubMeshContent[] info = null;
@@ -321,6 +360,13 @@ namespace Engine.Content
 
             return info;
         }
+        /// <summary>
+        /// Process mesh
+        /// </summary>
+        /// <param name="mesh">Mesh</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessMesh(Collada.Mesh mesh, EnumAxisConversion conversion, Matrix transform)
         {
             SubMeshContent[] res = null;
@@ -357,34 +403,96 @@ namespace Engine.Content
 
             return res;
         }
+        /// <summary>
+        /// Process spline
+        /// </summary>
+        /// <param name="mesh">Mesh</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessSpline(Spline spline, EnumAxisConversion conversion, Matrix transform)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Process convex mesh
+        /// </summary>
+        /// <param name="mesh">Mesh</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessConvexMesh(ConvexMesh convexMesh, EnumAxisConversion conversion, Matrix transform)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Process lines
+        /// </summary>
+        /// <param name="lines">Lines</param>
+        /// <param name="meshSources">Mesh sources</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessLines(Lines[] lines, Source[] meshSources, EnumAxisConversion conversion, Matrix transform)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Process line strips
+        /// </summary>
+        /// <param name="lines">Line strips</param>
+        /// <param name="meshSources">Mesh sources</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessLineStrips(LineStrips[] lines, Source[] meshSources, EnumAxisConversion conversion, Matrix transform)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Process triangles
+        /// </summary>
+        /// <param name="triangles">Triangles</param>
+        /// <param name="meshSources">Mesh sources</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessTriangles(Triangles[] triangles, Source[] meshSources, EnumAxisConversion conversion, Matrix transform)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Process triangle fans
+        /// </summary>
+        /// <param name="triFans">Triangle fans</param>
+        /// <param name="meshSources">Mesh sources</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessTriFans(TriFans[] triFans, Source[] meshSources, EnumAxisConversion conversion, Matrix transform)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Process triangle strips
+        /// </summary>
+        /// <param name="triStrips">Triangle strips</param>
+        /// <param name="meshSources">Mesh sources</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessTriStrips(TriStrips[] triStrips, Source[] meshSources, EnumAxisConversion conversion, Matrix transform)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Process polygon list
+        /// </summary>
+        /// <param name="polyLists">Polygon list</param>
+        /// <param name="meshSources">Mesh sources</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessPolyList(PolyList[] polyLists, Source[] meshSources, EnumAxisConversion conversion, Matrix transform)
         {
             List<SubMeshContent> res = new List<SubMeshContent>();
@@ -443,10 +551,23 @@ namespace Engine.Content
 
             return res.ToArray();
         }
+        /// <summary>
+        /// Process polygons
+        /// </summary>
+        /// <param name="polygons">Polygons</param>
+        /// <param name="meshSources">Mesh sources</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessPolygons(Polygons[] polygons, Source[] meshSources, EnumAxisConversion conversion, Matrix transform)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Enumerate semantics
+        /// </summary>
+        /// <param name="inputs">Input list</param>
+        /// <returns>Return vertex types of inputs</returns>
         private static VertexTypes EnumerateSemantics(Input[] inputs)
         {
             if (Array.Exists(inputs, i => i.Semantic == EnumSemantics.Vertex))
@@ -491,6 +612,13 @@ namespace Engine.Content
 
         #region Controllers
 
+        /// <summary>
+        /// Process controller
+        /// </summary>
+        /// <param name="controller">Controller</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns controller content</returns>
         private static ControllerContent ProcessController(Controller controller, EnumAxisConversion conversion, Matrix transform)
         {
             ControllerContent res = null;
@@ -506,6 +634,14 @@ namespace Engine.Content
 
             return res;
         }
+        /// <summary>
+        /// Process skin
+        /// </summary>
+        /// <param name="name">Skin name</param>
+        /// <param name="skin">Skin information</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns controller content</returns>
         private static ControllerContent ProcessSkin(string name, Skin skin, EnumAxisConversion conversion, Matrix transform)
         {
             ControllerContent res = new ControllerContent();
@@ -527,10 +663,26 @@ namespace Engine.Content
 
             return res;
         }
+        /// <summary>
+        /// Process morph
+        /// </summary>
+        /// <param name="name">Morph name</param>
+        /// <param name="morph">Morph information</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <returns>Returns controller content</returns>
         private static ControllerContent ProcessMorph(string name, Morph morph, EnumAxisConversion conversion, Matrix transform)
         {
             throw new NotImplementedException();
         }
+        /// <summary>
+        /// Process vertext weight information
+        /// </summary>
+        /// <param name="skin">Skin information</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <param name="transform">Initial transformation</param>
+        /// <param name="inverseBindMatrixList">Inverse bind matrix list result</param>
+        /// <param name="weightList">Weight list result</param>
         private static void ProcessVertexWeights(Skin skin, EnumAxisConversion conversion, Matrix transform, out Matrix[] inverseBindMatrixList, out Weight[] weightList)
         {
             List<Matrix> ibmList = new List<Matrix>();
@@ -617,6 +769,12 @@ namespace Engine.Content
 
         #region Animation
 
+        /// <summary>
+        /// Process animation
+        /// </summary>
+        /// <param name="animation">Animation information</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <returns>Retuns animation content list</returns>
         private static AnimationContent[] ProcessAnimation(Animation animation, EnumAxisConversion conversion)
         {
             List<AnimationContent> res = new List<AnimationContent>();
@@ -691,6 +849,13 @@ namespace Engine.Content
 
         #region Armatures
 
+        /// <summary>
+        /// Process skeleton
+        /// </summary>
+        /// <param name="parent">Parent joint</param>
+        /// <param name="node">Armature node</param>
+        /// <param name="conversion">Axis conversion</param>
+        /// <returns>Return skeleton joint hierarchy</returns>
         private static Joint ProcessJoints(Joint parent, Node node, EnumAxisConversion conversion)
         {
             Matrix parentMatrix = (parent != null ? parent.Local : Matrix.Identity);
@@ -723,6 +888,11 @@ namespace Engine.Content
 
         #region Effects
 
+        /// <summary>
+        /// Process effect information
+        /// </summary>
+        /// <param name="profile">Profile</param>
+        /// <returns>Returns material content</returns>
         private static MaterialContent ProcessTechniqueFX(ProfileCOMMON profile)
         {
             TechniqueCOMMON technique = profile.Technique;
@@ -882,6 +1052,12 @@ namespace Engine.Content
                 Transparent = transparentColor,
             };
         }
+        /// <summary>
+        /// Finds texture
+        /// </summary>
+        /// <param name="profile">Profile</param>
+        /// <param name="texture">Texture information</param>
+        /// <returns>Returns texture name</returns>
         private static string FindTexture(ProfileCOMMON profile, BasicTexture texture)
         {
             if (texture != null)

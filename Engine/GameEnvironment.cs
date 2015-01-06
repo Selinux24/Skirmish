@@ -3,12 +3,12 @@
 namespace Engine
 {
     /// <summary>
-    /// Matrices globales de transformación 
+    /// Global variables 
     /// </summary>
     public static class GameEnvironment
     {
         /// <summary>
-        /// Color de fondo
+        /// Background color
         /// </summary>
         public static Color4 Background = Color.CornflowerBlue.ToColor4();
     }

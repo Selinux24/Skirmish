@@ -5,38 +5,41 @@ using SharpDX.Direct3D;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Triangle
+    /// </summary>
     public struct Triangle
     {
         /// <summary>
-        /// Puntos del triángulo
+        /// First point
         /// </summary>
         public Vector3 Point1;
         /// <summary>
-        /// Puntos del triángulo
+        /// Second point
         /// </summary>
         public Vector3 Point2;
         /// <summary>
-        /// Puntos del triángulo
+        /// Third point
         /// </summary>
         public Vector3 Point3;
         /// <summary>
-        /// Centro del triángulo
+        /// Center
         /// </summary>
         public Vector3 Center;
         /// <summary>
-        /// Indices
+        /// First index
         /// </summary>
         public int I1;
         /// <summary>
-        /// Indices
+        /// Second index
         /// </summary>
         public int I2;
         /// <summary>
-        /// Plano en el que está contenido el triángulo
+        /// Plane
         /// </summary>
         public Plane Plane;
         /// <summary>
-        /// Obtiene la normal del plano que contiene el triángulo
+        /// Normal
         /// </summary>
         public Vector3 Normal
         {
@@ -46,7 +49,7 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Max
+        /// Min
         /// </summary>
         public Vector3 Min
         {
@@ -56,7 +59,7 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Min
+        /// Max
         /// </summary>
         public Vector3 Max
         {
@@ -66,9 +69,9 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Área del triángulo
+        /// Triangle area
         /// </summary>
-        /// <remarks>Fórmula de Herón</remarks>
+        /// <remarks>Heron</remarks>
         public float Area
         {
             get
@@ -84,14 +87,13 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Factor de inclinación del triángulo
+        /// Inclination angle
         /// </summary>
-        /// <remarks>Resultado de calcular el producto escalar entre la normal y el vector UP</remarks>
         public float Inclination
         {
             get
             {
-                return Math.Abs(Vector3.Dot(this.Normal, Vector3.Up));
+                return Helpers.Helper.Angle(this.Normal, Vector3.Up);
             }
         }
 
@@ -177,16 +179,16 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="point1">Punto 1</param>
-        /// <param name="point2">Punto 2</param>
-        /// <param name="point3">Punto 3</param>
+        /// <param name="point1">Point 1</param>
+        /// <param name="point2">Point 2</param>
+        /// <param name="point3">Point 3</param>
         public Triangle(Vector3 point1, Vector3 point2, Vector3 point3)
         {
             this.Point1 = point1;
             this.Point2 = point2;
             this.Point3 = point3;
             this.Center = Vector3.Multiply(point1 + point2 + point3, 1.0f / 3.0f);
-            this.Plane = new Plane(this.Point2, this.Point1, this.Point3);
+            this.Plane = new Plane(this.Point1, this.Point2, this.Point3);
 
             Vector3 n = this.Plane.Normal;
             float absX = (float)Math.Abs(n.X);
@@ -223,10 +225,11 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Obtiene si el punto especificado está contenido en el triángulo
+        /// Tests if point is in triangle
         /// </summary>
-        /// <param name="point">Punto</param>
-        /// <returns>Devuelve verdadero si el punto está contenido en el triángulo, o falso en el resto de los casos</returns>
+        /// <param name="tri">Triangle</param>
+        /// <param name="point">Point</param>
+        /// <returns>Returns true if point is in triangle</returns>
         public static bool PointInTriangle(Triangle tri, Vector3 point)
         {
             Vector3 u = new Vector3(
@@ -270,11 +273,11 @@ namespace Engine.Common
             return (a >= 0 && (a + b) <= 1);
         }
         /// <summary>
-        /// Obtiene el valor de la componente del vector especificado por índice
+        /// Gest vector component value by index
         /// </summary>
         /// <param name="vector">Vector</param>
-        /// <param name="index">Indice 0, 1 o 2 para obtener las componentes x, y o z</param>
-        /// <returns>Devuelve la componente del vector especificada por el índice</returns>
+        /// <param name="index">Index. 0, 1, 2 for components x, y, z</param>
+        /// <returns>Return specified component value</returns>
         public static float PointFromVector(Vector3 vector, int index)
         {
             if (index == 0)
@@ -295,11 +298,11 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Obtiene el punto más cercano al punto especificado en el triángulo
+        /// Gets closest point in triangle from another point
         /// </summary>
-        /// <param name="tri">Triángulo</param>
-        /// <param name="point">Punto</param>
-        /// <returns>Devuelve el punto más cercano al punto especificado en el triángulo</returns>
+        /// <param name="tri">Triangle</param>
+        /// <param name="point">Point</param>
+        /// <returns>Returns closest point in triangle from another point</returns>
         public static Vector3 ClosestPointInTriangle(Triangle tri, Vector3 point)
         {
             Vector3 diff = tri.Point1 - point;
@@ -504,19 +507,30 @@ namespace Engine.Common
             return tri.Point1 + s * edge1 + t * edge2;
         }
         /// <summary>
-        /// Obtiene la representación en texto del triángulo
+        /// Text representation
         /// </summary>
         public override string ToString()
         {
             return string.Format("Vertex 1 {0}; Vertex 2 {1}; Vertex 3 {2};", this.Point1, this.Point2, this.Point3);
         }
 
+        /// <summary>
+        /// Intersection test between ray and triangle
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray)
         {
             Vector3 position;
 
             return Intersects(ref ray, out position);
         }
+        /// <summary>
+        /// Intersection test between ray and triangle
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="distance">Distance from ray origin and intersection point, if any</param>
+        /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray, out float distance)
         {
             distance = 0;
@@ -535,6 +549,12 @@ namespace Engine.Common
 
             return false;
         }
+        /// <summary>
+        /// Intersection test between ray and triangle
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="point">Intersection point, if any</param>
+        /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray, out Vector3 point)
         {
             if (ray.Intersects(ref this.Plane, out point))
@@ -548,5 +568,4 @@ namespace Engine.Common
             return false;
         }
     }
-
 }

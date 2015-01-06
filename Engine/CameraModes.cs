@@ -2,28 +2,28 @@
 namespace Engine
 {
     /// <summary>
-    /// Modos de cámara
+    /// Camera modes
     /// </summary>
     public enum CameraModes
     {
         /// <summary>
-        /// Primera persaona
+        /// First person
         /// </summary>
         FirstPerson,
         /// <summary>
-        /// Tercera persona
+        /// Third persona
         /// </summary>
         ThirdPerson,
         /// <summary>
-        /// Libre
+        /// Free
         /// </summary>
         Free,
         /// <summary>
-        /// Isométrica
+        /// Isometric
         /// </summary>
         FreeIsometric,
         /// <summary>
-        /// Fija
+        /// Fixed
         /// </summary>
         Fixed,
     }

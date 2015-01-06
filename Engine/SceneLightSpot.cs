@@ -3,44 +3,44 @@
 namespace Engine
 {
     /// <summary>
-    /// Cono de luz de distancia finita
+    /// Spot light
     /// </summary>
     public class SceneLightSpot
     {
         /// <summary>
-        /// Componente de brillo ambiental
+        /// Ambient light
         /// </summary>
         public Color4 Ambient = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
-        /// Componente de absorción
+        /// Diffuse absorption light
         /// </summary>
         public Color4 Diffuse = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
-        /// Componente de refracción
+        /// Refraction light
         /// </summary>
         public Color4 Specular = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
-        /// Posición de la luz
+        /// Ligth position
         /// </summary>
         public Vector3 Position = Vector3.Zero;
         /// <summary>
-        /// Radio de luminosidad
+        /// Light range
         /// </summary>
         public float Range = 0.0f;
         /// <summary>
-        /// Vector dirección
+        /// Ligth direction
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
         /// <summary>
-        /// Radio del punto de luz
+        /// Spot radious
         /// </summary>
         public float Spot = 0.0f;
         /// <summary>
-        /// Atributos
+        /// Light attributes
         /// </summary>
         public Vector3 Attributes = Vector3.Zero;
         /// <summary>
-        /// Obtiene o establece si la luz está encendida
+        /// Enables or disables the light
         /// </summary>
         public bool Enabled = false;
     }

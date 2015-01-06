@@ -3,28 +3,28 @@
 namespace Engine
 {
     /// <summary>
-    /// Luz direccional de distancia infinita
+    /// Directional light
     /// </summary>
     public class SceneLightDirectional
     {
         /// <summary>
-        /// Componente de brillo ambiental
+        /// Ambient light
         /// </summary>
         public Color4 Ambient = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
-        /// Componente de absorción
+        /// Diffuse absorption light
         /// </summary>
         public Color4 Diffuse = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
-        /// Componente de refracción
+        /// Refraction light
         /// </summary>
         public Color4 Specular = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
-        /// Vector dirección
+        /// Light direction
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
         /// <summary>
-        /// Obtiene o establece si la luz está encendida
+        /// Enables or disables the light
         /// </summary>
         public bool Enabled = false;
     }

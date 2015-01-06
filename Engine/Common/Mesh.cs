@@ -29,6 +29,10 @@ namespace Engine.Common
         /// </summary>
         protected IVertexData[] Vertices = null;
         /// <summary>
+        /// Indexed model
+        /// </summary>
+        protected bool Indexed = false;
+        /// <summary>
         /// Index buffer
         /// </summary>
         protected Buffer IndexBuffer;
@@ -81,6 +85,7 @@ namespace Engine.Common
             this.Material = material;
             this.Topology = topology;
             this.Vertices = vertices;
+            this.Indexed = (indices != null && indices.Length > 0);
             this.Indices = indices;
             this.VertextType = vertices[0].VertexType;
             this.Textured = VertexData.IsTextured(vertices[0].VertexType);
@@ -139,16 +144,15 @@ namespace Engine.Common
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="deviceContext">Immediate context</param>
-        /// <param name="count">vertex or index count</param>
-        public virtual void Draw(GameTime gameTime, DeviceContext deviceContext, int count = 0)
+        public virtual void Draw(GameTime gameTime, DeviceContext deviceContext)
         {
-            if (this.IndexBuffer != null)
+            if (this.Indexed)
             {
-                deviceContext.DrawIndexed(count == 0 ? this.IndexCount : count, 0, 0);
+                deviceContext.DrawIndexed(this.IndexCount, 0, 0);
             }
             else
             {
-                deviceContext.Draw(count == 0 ? this.VertexCount : count, 0);
+                deviceContext.Draw(this.VertexCount, 0);
             }
 
             Counters.DrawCallsPerFrame++;

@@ -4,19 +4,16 @@ using SharpDX.Direct3D11;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Billboard vertex format
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct VertexBillboard : IVertexData
     {
-        public Vector3 Position;
-        public Vector2 Size;
-
-        public static int SizeInBytes
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexBillboard));
-            }
-        }
+        /// <summary>
+        /// Defined input colection
+        /// </summary>
+        /// <returns></returns>
         public static InputElement[] GetInput()
         {
             return new InputElement[]
@@ -25,15 +22,18 @@ namespace Engine.Common
                 new InputElement("SIZE", 0, SharpDX.DXGI.Format.R32G32_Float, 12, 0, InputClassification.PerVertexData, 0),
             };
         }
-        public static VertexBillboard Create(VertexData v)
-        {
-            return new VertexBillboard
-            {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Size = v.Size.HasValue ? v.Size.Value : Vector2.One,
-            };
-        }
 
+        /// <summary>
+        /// Position
+        /// </summary>
+        public Vector3 Position;
+        /// <summary>
+        /// Sprite size
+        /// </summary>
+        public Vector2 Size;
+        /// <summary>
+        /// Vertex type
+        /// </summary>
         public VertexTypes VertexType
         {
             get
@@ -41,21 +41,21 @@ namespace Engine.Common
                 return VertexTypes.Billboard;
             }
         }
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
         public int Stride
         {
             get
             {
-                return SizeInBytes;
+                return Marshal.SizeOf(typeof(VertexBillboard));
             }
         }
-        public IVertexData Convert(VertexData v)
-        {
-            return new VertexBillboard()
-            {
-                Position = v.Position.Value,
-                Size = v.Size.Value,
-            };
-        }
+
+        /// <summary>
+        /// Text representation of vertex
+        /// </summary>
+        /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
             return string.Format("Position: {0}; Size: {1}", this.Position, this.Size);

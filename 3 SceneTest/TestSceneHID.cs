@@ -7,17 +7,17 @@ namespace SceneTest
     {
         private Sprite sprite = null;
 
-        private TextControl title = null;
-        private TextControl txt0 = null;
-        private TextControl txt1 = null;
-        private TextControl txt2 = null;
-        private TextControl txt3 = null;
-        private TextControl txt4 = null;
-        private TextControl txt5 = null;
-        private TextControl txt6 = null;
-        private TextControl txt7 = null;
-        private TextControl txt8 = null;
-        private TextControl txt9 = null;
+        private TextDrawer title = null;
+        private TextDrawer txt0 = null;
+        private TextDrawer txt1 = null;
+        private TextDrawer txt2 = null;
+        private TextDrawer txt3 = null;
+        private TextDrawer txt4 = null;
+        private TextDrawer txt5 = null;
+        private TextDrawer txt6 = null;
+        private TextDrawer txt7 = null;
+        private TextDrawer txt8 = null;
+        private TextDrawer txt9 = null;
 
         private int currentSize = 10;
 

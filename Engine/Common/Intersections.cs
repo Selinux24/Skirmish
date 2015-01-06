@@ -3,28 +3,29 @@
 namespace Engine.Common
 {
     /// <summary>
-    /// Intersecciones
+    /// Intersections
     /// </summary>
     public static class Intersections
     {
         /// <summary>
-        /// Obtiene si hay intersección entre el rayo y el plano
+        /// Intersection test between ray and plane
         /// </summary>
-        /// <param name="ray">Rayo</param>
-        /// <param name="plane">Plano</param>
-        /// <param name="intersectionPoint">Punto de interseccion</param>
-        /// <param name="distanceToPoint">Distancia al punto de interscción desde el origen del rayo</param>
-        /// <param name="segmentMode">Indica si usar el rayo como un segmento en vez de como un rayo</param>
-        /// <returns>Devuelve verdadero si hay intersección, y falso en el resto de los casos</returns>
+        /// <param name="ray">Ray</param>
+        /// <param name="plane">Plane</param>
+        /// <param name="intersectionPoint">Intersection point</param>
+        /// <param name="distanceToPoint">Distance to intersection point from ray origin</param>
+        /// <param name="segmentMode">Segment mode</param>
+        /// <returns>Returns true if test returns intersection point</returns>
         public static bool RayAndPlane(Ray ray, Plane plane, out Vector3? intersectionPoint, out float? distanceToPoint, bool segmentMode)
         {
             intersectionPoint = null;
             distanceToPoint = null;
 
-            // Calcular la intersección del rayo con el plano
-            float distance;
-            if (ray.Intersects(ref plane, out distance))
+            Vector3 intersection;
+            if (ray.Intersects(ref plane, out intersection))
             {
+                float distance = Vector3.Distance(intersection, ray.Position);
+
                 if (segmentMode)
                 {
                     if (distance > ray.Direction.Length())
@@ -33,52 +34,54 @@ namespace Engine.Common
                     }
                 }
 
-                // Obtener el punto de contacto en el plano y la distancia
+                intersectionPoint = intersection;
                 distanceToPoint = distance;
-                intersectionPoint = ray.Position + (ray.Direction * distanceToPoint.Value);
 
                 return true;
             }
-            else
-            {
-                //No hay contacto
-                return false;
-            }
+
+            return false;
         }
         /// <summary>
-        /// Obtiene si existe intersección entre el rayo y el triángulo
+        /// Intersection test between ray and triangle
         /// </summary>
-        /// <param name="ray">Rayo</param>
-        /// <param name="tri">Triángulo</param>
-        /// <param name="intersectionPoint">Punto de interseccion</param>
-        /// <param name="distanceToPoint">Distancia al punto de interscción desde el origen del rayo</param>
-        /// <param name="segmentMode">Indica si usar el rayo como un segmento en vez de como un rayo</param>
-        /// <returns>Devuelve verdadero si hay intersección, y falso en el resto de los casos</returns>
+        /// <param name="ray">Ray</param>
+        /// <param name="tri">Triangle</param>
+        /// <param name="intersectionPoint">Intersection point</param>
+        /// <param name="distanceToPoint">Distance to intersection point from ray origin</param>
+        /// <param name="segmentMode">Segment mode</param>
+        /// <returns>Returns true if test returns intersection point</returns>
         public static bool RayAndTriangle(Ray ray, Triangle tri, out Vector3? intersectionPoint, out float? distanceToPoint, bool segmentMode)
         {
             intersectionPoint = null;
             distanceToPoint = null;
 
-            float denom = Vector3.Dot(tri.Plane.Normal, ray.Direction);
-            if (denom == 0f)
+            Vector3 intersection;
+            if (tri.Plane.Intersects(ref ray, out intersection))
             {
-                return false;
-            }
-
-            float t = -(tri.Plane.D + Vector3.Dot(tri.Plane.Normal, ray.Position)) / denom;
-            if (t <= 0.0f)
-            {
-                return false;
-            }
-
-            Vector3 intersection = ray.Position + (t * ray.Direction);
-            if (Triangle.PointInTriangle(tri, intersection))
-            {
-                float distance = Vector3.Distance(ray.Position, intersection);
+                float distance = Vector3.Distance(intersection, ray.Position);
 
                 if (segmentMode)
                 {
-                    if (distance <= ray.Direction.Length())
+                    if (distance > ray.Direction.Length())
+                    {
+                        return false;
+                    }
+                }
+
+                if (Triangle.PointInTriangle(tri, intersection))
+                {
+                    if (segmentMode)
+                    {
+                        if (distance <= ray.Direction.Length())
+                        {
+                            intersectionPoint = intersection;
+                            distanceToPoint = distance;
+
+                            return true;
+                        }
+                    }
+                    else
                     {
                         intersectionPoint = intersection;
                         distanceToPoint = distance;
@@ -86,26 +89,19 @@ namespace Engine.Common
                         return true;
                     }
                 }
-                else
-                {
-                    intersectionPoint = intersection;
-                    distanceToPoint = distance;
-
-                    return true;
-                }
             }
 
             return false;
         }
         /// <summary>
-        /// Obtiene si hay intersección entre el rayo y la colección de triángulos
+        /// Intersection test between ray and triangle list
         /// </summary>
-        /// <param name="ray">Rayo</param>
-        /// <param name="triangleList">Lista de triángulos</param>
-        /// <param name="intersectionPoint">Punto de interseccion</param>
-        /// <param name="distanceToPoint">Distancia al punto de interscción desde el origen del rayo</param>
-        /// <param name="segmentMode">Indica si usar el rayo como un segmento en vez de como un rayo</param>
-        /// <returns>Devuelve verdadero si hay intersección, y falso en el resto de los casos</returns>
+        /// <param name="ray">Ray</param>
+        /// <param name="triangleList">Triangle soup</param>
+        /// <param name="intersectionPoint">Intersection point</param>
+        /// <param name="distanceToPoint">Distance to intersection point from ray origin</param>
+        /// <param name="segmentMode">Segment mode</param>
+        /// <returns>Returns true if test returns intersection point</returns>
         public static bool RayAndTriangleSoup(Ray ray, Triangle[] triangleList, out Vector3? intersectionPoint, out float? distanceToPoint, bool segmentMode)
         {
             intersectionPoint = null;

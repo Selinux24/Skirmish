@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
-using Effect = SharpDX.Direct3D11.Effect;
-using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectPassDescription = SharpDX.Direct3D11.EffectPassDescription;
 using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
 using InputElement = SharpDX.Direct3D11.InputElement;
 using InputLayout = SharpDX.Direct3D11.InputLayout;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
@@ -16,13 +13,18 @@ using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 namespace Engine.Effects
 {
     using Engine.Common;
-    using Engine.Helpers;
     using Engine.Properties;
 
+    /// <summary>
+    /// Font effect
+    /// </summary>
     public class EffectFont : Drawer
     {
         #region Buffers
 
+        /// <summary>
+        /// Per frame update buffer
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         public struct PerFrameBuffer
         {
@@ -41,15 +43,26 @@ namespace Engine.Effects
 
         #endregion
 
-        private Device device = null;
-        private Effect effect = null;
-        private Dictionary<string, InputLayout> layouts = new Dictionary<string, InputLayout>();
-
+        /// <summary>
+        /// World matrix effect variable
+        /// </summary>
         private EffectMatrixVariable world = null;
+        /// <summary>
+        /// World view projection effect variable
+        /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
+        /// <summary>
+        /// Color effect variable
+        /// </summary>
         private EffectVectorVariable color = null;
+        /// <summary>
+        /// Texture effect variable
+        /// </summary>
         private EffectShaderResourceVariable texture = null;
 
+        /// <summary>
+        /// World matrix
+        /// </summary>
         protected Matrix World
         {
             get
@@ -61,6 +74,9 @@ namespace Engine.Effects
                 this.world.SetMatrix(value);
             }
         }
+        /// <summary>
+        /// World view projection matrix
+        /// </summary>
         protected Matrix WorldViewProjection
         {
             get
@@ -72,17 +88,9 @@ namespace Engine.Effects
                 this.worldViewProjection.SetMatrix(value);
             }
         }
-        protected ShaderResourceView Texture
-        {
-            get
-            {
-                return this.texture.GetResource();
-            }
-            set
-            {
-                this.texture.SetResource(value);
-            }
-        }
+        /// <summary>
+        /// Color
+        /// </summary>
         protected Color4 Color
         {
             get
@@ -94,33 +102,44 @@ namespace Engine.Effects
                 this.color.Set(value);
             }
         }
-
-        public EffectFont.PerFrameBuffer FrameBuffer = new EffectFont.PerFrameBuffer();
-
-        public EffectFont(Device device)
-            : base()
+        /// <summary>
+        /// Texture
+        /// </summary>
+        protected ShaderResourceView Texture
         {
-            this.device = device;
-            this.effect = device.LoadEffect(Resources.ShaderFont);
-
-            this.world = this.effect.GetVariableByName("gWorld").AsMatrix();
-            this.worldViewProjection = this.effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.color = this.effect.GetVariableByName("gColor").AsVector();
-            this.texture = this.effect.GetVariableByName("gTexture").AsShaderResource();
-        }
-        public void Dispose()
-        {
-            if (this.effect != null)
+            get
             {
-                this.effect.Dispose();
-                this.effect = null;
+                return this.texture.GetResource();
+            }
+            set
+            {
+                this.texture.SetResource(value);
             }
         }
-        public EffectTechnique GetTechnique(string technique)
+
+        /// <summary>
+        /// Per frame buffer structure
+        /// </summary>
+        public EffectFont.PerFrameBuffer FrameBuffer = new EffectFont.PerFrameBuffer();
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        public EffectFont(Device device)
+            : base(device, Resources.ShaderFont)
         {
-            return this.effect.GetTechniqueByName(technique);
+            this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
+            this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.color = this.Effect.GetVariableByName("gColor").AsVector();
+            this.texture = this.Effect.GetVariableByName("gTexture").AsShaderResource();
         }
-        public string AddInputLayout(VertexTypes vertexType)
+        /// <summary>
+        /// Finds technique and input layout for vertex type
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <returns>Returns technique name for specified vertex type</returns>
+        public override string AddVertexType(VertexTypes vertexType)
         {
             string technique = null;
             InputLayout layout = null;
@@ -131,21 +150,14 @@ namespace Engine.Effects
 
                 InputElement[] input = VertexPositionTexture.GetInput();
 
-                EffectPassDescription desc = effect.GetTechniqueByName(technique).GetPassByIndex(0).Description;
+                EffectPassDescription desc = Effect.GetTechniqueByName(technique).GetPassByIndex(0).Description;
 
                 layout = new InputLayout(
-                    this.device,
+                    this.Device,
                     desc.Signature,
                     input);
 
-                if (!this.layouts.ContainsKey(technique))
-                {
-                    this.layouts.Add(technique, layout);
-                }
-                else
-                {
-                    this.layouts[technique] = layout;
-                }
+                this.AddInputLayout(technique, layout);
 
                 return technique;
             }
@@ -154,10 +166,9 @@ namespace Engine.Effects
                 throw new Exception("VertexType unknown");
             }
         }
-        public InputLayout GetInputLayout(string techniqueName)
-        {
-            return this.layouts[techniqueName];
-        }
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
         public void UpdatePerFrame(ShaderResourceView texture)
         {
             this.World = this.FrameBuffer.World;

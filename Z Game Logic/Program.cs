@@ -1,5 +1,6 @@
 ﻿using System;
 using Engine;
+using SharpDX;
 
 namespace GameLogic
 {
@@ -30,6 +31,8 @@ namespace GameLogic
         {
             using (game = new Game("Game Logic", 800, 600, false))
             {
+                GameEnvironment.Background = Color.Black;
+
                 game.AddScene(new SceneHUD(game) { Active = true, UseZBuffer = false, Order = 1 });
 
                 game.Run();

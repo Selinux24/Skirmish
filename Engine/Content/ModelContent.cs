@@ -9,8 +9,14 @@ namespace Engine.Content
 
     public class ModelContent
     {
-        public const string StaticMesh = "static";
-        public const string NoMaterial = "none";
+        /// <summary>
+        /// Static mesh name
+        /// </summary>
+        public const string StaticMesh = "_base_static_mesh_";
+        /// <summary>
+        /// Unspecified material name
+        /// </summary>
+        public const string NoMaterial = "_base_material_unspecified_";
 
         #region Classes
 
@@ -197,6 +203,8 @@ namespace Engine.Content
 
             Random rnd = new Random(seed);
 
+            float maxAngle = 60f;
+
             List<VertexData> vertices = new List<VertexData>();
 
             #region Find billboard positions
@@ -204,34 +212,34 @@ namespace Engine.Content
             foreach (Triangle tri in triList)
             {
                 float area = tri.Area;
-                float inc = tri.Inclination;
+                float inc = MathUtil.RadiansToDegrees(tri.Inclination);
 
-                if (inc < 0.33f) inc = 0;
+                if (inc > maxAngle)
+                {
+                    inc = 0;
+                }
+                else
+                {
+                    inc = (inc + maxAngle) / maxAngle;
+                }
 
-                int num = rnd.Next((int)(area * saturation * inc));
+                int num = (int)(area * saturation * inc * 0.1f);
                 for (int b = 0; b < num; b++)
                 {
                     //Buscar un punto en el triángulo
-                    Vector3 bbpos = Vector3.Zero;
-                    bool found = false;
-                    while (!found)
+                    Vector3 v = rnd.NextVector3(tri.Min, tri.Max);
+                    Ray ray = new Ray(new Vector3(v.X, 1000f, v.Z), Vector3.Down);
+                    Vector3? iPoint = null;
+                    float? distanceToPoint = null;
+                    if (Intersections.RayAndTriangle(ray, tri, out iPoint, out distanceToPoint, false))
                     {
-                        Vector3 v = rnd.NextVector3(tri.Min, tri.Max);
-                        Ray ray = new Ray(new Vector3(v.X, 1000f, v.Z), Vector3.Down);
-                        Vector3? iPoint = null;
-                        float? distanceToPoint = null;
-                        if (Intersections.RayAndTriangle(ray, tri, out iPoint, out distanceToPoint, false))
-                        {
-                            bbpos = iPoint.Value;
-                            found = true;
-                        }
+                        Vector2 bbsize = rnd.NextVector2(minSize, maxSize);
+
+                        Vector3 bbpos = iPoint.Value;
+                        bbpos.Y += bbsize.Y * 0.5f;
+
+                        vertices.Add(VertexData.CreateVertexBillboard(bbpos, bbsize));
                     }
-
-                    Vector2 bbsize = rnd.NextVector2(minSize, maxSize);
-
-                    bbpos.Y += bbsize.Y * 0.5f;
-
-                    vertices.Add(VertexData.CreateVertexBillboard(bbpos, bbsize));
                 }
             }
 
@@ -255,7 +263,7 @@ namespace Engine.Content
 
             SubMeshContent geo = new SubMeshContent()
             {
-                Topology = PrimitiveTopology.TriangleList,
+                Topology = PrimitiveTopology.PointList,
                 VertexType = VertexTypes.Billboard,
                 Vertices = vertices.ToArray(),
                 Indices = null,

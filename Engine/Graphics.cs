@@ -38,37 +38,100 @@ namespace Engine
 {
     using Engine.Helpers;
 
+    /// <summary>
+    /// Graphics class
+    /// </summary>
     public class Graphics : IDisposable
     {
+        /// <summary>
+        /// Vertical sync enabled
+        /// </summary>
         private bool vsyncEnabled = false;
+        /// <summary>
+        /// Multisample count
+        /// </summary>
         private int msCount = 1;
+        /// <summary>
+        /// Multisample quality
+        /// </summary>
         private int msQuality = 0;
+        /// <summary>
+        /// Swap chain
+        /// </summary>
         private SwapChain swapChain = null;
+        /// <summary>
+        /// Render target view
+        /// </summary>
         private RenderTargetView renderTargetView = null;
+        /// <summary>
+        /// Depth stencil buffer
+        /// </summary>
         private Texture2D depthStencilBuffer = null;
+        /// <summary>
+        /// Depth stencil view
+        /// </summary>
         private DepthStencilView depthStencilView = null;
 
+        /// <summary>
+        /// Depth stencil state with z-buffer enabled
+        /// </summary>
         private DepthStencilState depthStencilzBufferEnabled = null;
+        /// <summary>
+        /// Depth stencil state with z-buffer disabled
+        /// </summary>
         private DepthStencilState depthStencilzBufferDisabled = null;
+        /// <summary>
+        /// Blend state for alpha blending
+        /// </summary>
         private BlendState blendAlphaToCoverage = null;
+        /// <summary>
+        /// Blend state for transparent blending
+        /// </summary>
         private BlendState blendTransparent = null;
+        /// <summary>
+        /// Default rasterizer
+        /// </summary>
         private RasterizerState rasterizerDefault = null;
+        /// <summary>
+        /// Wireframe rasterizer
+        /// </summary>
         private RasterizerState rasterizerWireframe = null;
+        /// <summary>
+        /// No-cull rasterizer
+        /// </summary>
         private RasterizerState rasterizerNoCull = null;
 
+        /// <summary>
+        /// Back buffer format
+        /// </summary>
         protected Format BufferFormat = Texture2DFormats.R8G8B8A8_UNorm;
+        /// <summary>
+        /// Depth buffer format
+        /// </summary>
         protected Format DepthFormat = BackBufferFormats.D24_UNorm_S8_UInt;
 
+        /// <summary>
+        /// Graphics device
+        /// </summary>
         public Device Device { get; private set; }
+        /// <summary>
+        /// Graphics inmmediate context
+        /// </summary>
         public DeviceContext DeviceContext { get; private set; }
 
-        public Graphics(EngineForm form, bool fullScreen, int refreshRate = 0, int multiSampleCount = 0)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="form">Game form</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampleCount">Multisample count</param>
+        public Graphics(EngineForm form, int refreshRate = 0, int multiSampleCount = 0)
         {
             ModeDescription displayMode = this.FindModeDescription(
                 this.BufferFormat,
                 form.RenderWidth,
                 form.RenderHeight,
-                fullScreen,
+                form.IsFullscreen,
                 refreshRate);
 
             this.vsyncEnabled = displayMode.RefreshRate != new Rational(0, 1);
@@ -95,7 +158,7 @@ namespace Engine
                     Usage = Usage.RenderTargetOutput,
                     OutputHandle = form.Handle,
                     SampleDescription = new SampleDescription(this.msCount, this.msQuality),
-                    IsWindowed = !fullScreen,
+                    IsWindowed = !form.IsFullscreen,
                     SwapEffect = SwapEffect.Discard,
                     Flags = SwapChainFlags.None,
                 },
@@ -124,6 +187,12 @@ namespace Engine
 
             #endregion
         }
+        /// <summary>
+        /// Prepare device
+        /// </summary>
+        /// <param name="width">Render width</param>
+        /// <param name="height">Render height</param>
+        /// <param name="resizing">Sets whether the render screen is resizing or not</param>
         public void PrepareDevice(int width, int height, bool resizing)
         {
             if (resizing)
@@ -344,6 +413,9 @@ namespace Engine
 
             #endregion
         }
+        /// <summary>
+        /// Begin frame
+        /// </summary>
         public void Begin()
         {
             this.SetDefaultRasterizer();
@@ -360,6 +432,9 @@ namespace Engine
                 this.renderTargetView,
                 GameEnvironment.Background);
         }
+        /// <summary>
+        /// End frame
+        /// </summary>
         public void End()
         {
             if (this.vsyncEnabled)
@@ -371,34 +446,58 @@ namespace Engine
                 this.swapChain.Present(0, PresentFlags.None);
             }
         }
+        /// <summary>
+        /// Enables z-buffer
+        /// </summary>
         public void EnableZBuffer()
         {
             this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(this.depthStencilzBufferEnabled);
         }
+        /// <summary>
+        /// Disables z-buffer
+        /// </summary>
         public void DisableZBuffer()
         {
             this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(this.depthStencilzBufferDisabled);
         }
+        /// <summary>
+        /// Sets alpha rendering blend state
+        /// </summary>
         public void SetBlendAlphaToCoverage()
         {
             this.Device.ImmediateContext.OutputMerger.SetBlendState(this.blendAlphaToCoverage, Color.Transparent, -1);
         }
+        /// <summary>
+        /// Sets transparent blend state
+        /// </summary>
         public void SetBlendTransparent()
         {
             this.Device.ImmediateContext.OutputMerger.SetBlendState(this.blendTransparent, Color.Transparent, -1);
         }
+        /// <summary>
+        /// Sets default rasterizer
+        /// </summary>
         public void SetDefaultRasterizer()
         {
             this.Device.ImmediateContext.Rasterizer.State = this.rasterizerDefault;
         }
+        /// <summary>
+        /// Sets wireframe rasterizer
+        /// </summary>
         public void SetWireframeRasterizer()
         {
             this.Device.ImmediateContext.Rasterizer.State = this.rasterizerWireframe;
         }
+        /// <summary>
+        /// Sets no-cull rasterizer
+        /// </summary>
         public void SetNoCullRasterizer()
         {
             this.Device.ImmediateContext.Rasterizer.State = this.rasterizerNoCull;
         }
+        /// <summary>
+        /// Dispose created resources
+        /// </summary>
         public void Dispose()
         {
             if (this.swapChain != null)
@@ -417,6 +516,15 @@ namespace Engine
             }
         }
 
+        /// <summary>
+        /// Finds mode description
+        /// </summary>
+        /// <param name="format">Format</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="fullScreen">True for full screen modes</param>
+        /// <param name="refreshRate">Refresh date</param>
+        /// <returns>Returns found mode description</returns>
         private ModeDescription FindModeDescription(Format format, int width, int height, bool fullScreen, int refreshRate = 0)
         {
             using (Factory factory = new Factory())
@@ -482,6 +590,9 @@ namespace Engine
                 ScanlineOrdering = DisplayModeScanlineOrder.Unspecified,
             };
         }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
         private void DisposeResources()
         {
             if (this.renderTargetView != null)

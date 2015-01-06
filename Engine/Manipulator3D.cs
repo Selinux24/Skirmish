@@ -3,9 +3,9 @@
 namespace Engine
 {
     /// <summary>
-    /// Transform manipulator
+    /// 3D manipulator
     /// </summary>
-    public class Manipulator
+    public class Manipulator3D
     {
         /// <summary>
         /// One radian
@@ -105,7 +105,7 @@ namespace Engine
         /// <summary>
         /// Contructor
         /// </summary>
-        public Manipulator()
+        public Manipulator3D()
         {
             this.position = Vector3.Zero;
             this.rotation = Quaternion.Identity;

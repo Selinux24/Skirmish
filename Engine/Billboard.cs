@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+﻿using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
 {
@@ -7,20 +6,38 @@ namespace Engine
     using Engine.Content;
     using Engine.Effects;
 
+    /// <summary>
+    /// Billboard drawer
+    /// </summary>
     public class Billboard : ModelBase
     {
+        /// <summary>
+        /// Effect
+        /// </summary>
         private EffectBillboard effect;
 
-        public Manipulator Manipulator { get; private set; }
+        /// <summary>
+        /// Manipulator
+        /// </summary>
+        public Manipulator3D Manipulator { get; private set; }
 
-        public Billboard(Game game, Scene3D scene, ModelContent geometry)
-            : base(game, scene, geometry)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game class</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="content">Content</param>
+        public Billboard(Game game, Scene3D scene, ModelContent content)
+            : base(game, scene, content)
         {
             this.effect = new EffectBillboard(game.Graphics.Device);
             this.LoadEffectLayouts(this.effect);
 
-            this.Manipulator = new Manipulator();
+            this.Manipulator = new Manipulator3D();
         }
+        /// <summary>
+        /// Resource disposing
+        /// </summary>
         public override void Dispose()
         {
             base.Dispose();
@@ -31,16 +48,26 @@ namespace Engine
                 this.effect = null;
             }
         }
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
             this.Manipulator.Update(gameTime);
         }
+        /// <summary>
+        /// Draw
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Draw(GameTime gameTime)
         {
             if (this.Meshes != null)
             {
+                this.Game.Graphics.SetBlendTransparent();
+
                 #region Per frame update
 
                 this.effect.FrameBuffer.WorldViewProjection = this.Scene.World * this.Manipulator.LocalTransform * this.Scene.ViewProjectionPerspective;
@@ -54,7 +81,7 @@ namespace Engine
                     foreach (string material in dictionary.Keys)
                     {
                         Mesh mesh = dictionary[material];
-                        MeshMaterial mat = material != NoMaterial ? this.Materials[material] : null;
+                        MeshMaterial mat = this.Materials[material];
                         string techniqueName = this.Techniques[mesh];
 
                         #region Per object update

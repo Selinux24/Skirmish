@@ -8,12 +8,29 @@ namespace Engine.Common
     using Engine.Content;
     using Engine.Helpers;
 
+    /// <summary>
+    /// Model basic implementation
+    /// </summary>
     public abstract class ModelBase : Drawable
     {
         #region Classes
 
+        /// <summary>
+        /// Mesh by mesh name dictionary
+        /// </summary>
+        /// <remarks>
+        /// A mesh could be composed of one or more sub-meshes, depending on the number of different specified materials
+        /// Key: mesh name
+        /// Value: dictionary of meshes by material
+        /// </remarks>
         protected class MeshDictionary : Dictionary<string, MeshMaterialsDictionary>
         {
+            /// <summary>
+            /// Adds new mesh to dictionary
+            /// </summary>
+            /// <param name="meshName">Mesh name</param>
+            /// <param name="materialName">Material name</param>
+            /// <param name="mesh">Mesh object</param>
             public void Add(string meshName, string materialName, Mesh mesh)
             {
                 if (!this.ContainsKey(meshName))
@@ -24,43 +41,76 @@ namespace Engine.Common
                 this[meshName].Add(materialName, mesh);
             }
         }
+        /// <summary>
+        /// Mesh by material dictionary
+        /// </summary>
         protected class MeshMaterialsDictionary : Dictionary<string, Mesh>
         {
 
         }
+        /// <summary>
+        /// Material by name dictionary
+        /// </summary>
         protected class MaterialDictionary : Dictionary<string, MeshMaterial>
         {
-
-        }
-        protected class TextureDictionary : Dictionary<string, ShaderResourceView>
-        {
-            public new ShaderResourceView this[string material]
+            /// <summary>
+            /// Gets material description by name
+            /// </summary>
+            /// <param name="material">Material name</param>
+            /// <returns>Return material description by name if exists</returns>
+            public new MeshMaterial this[string material]
             {
                 get
                 {
                     if (!string.IsNullOrEmpty(material))
                     {
-                        if (!base.ContainsKey(material))
+                        if (base.ContainsKey(material))
                         {
-                            throw new Exception(string.Format("Texture resource not found: {0}", material));
+                            return base[material];
                         }
-
-                        return base[material];
                     }
 
                     return null;
                 }
             }
         }
+        /// <summary>
+        /// Texture by material dictionary
+        /// </summary>
+        protected class TextureDictionary : Dictionary<string, ShaderResourceView>
+        {
+            /// <summary>
+            /// Gets textures by image name
+            /// </summary>
+            /// <param name="image">Image name</param>
+            /// <returns>Return texture by image name if exists</returns>
+            public new ShaderResourceView this[string image]
+            {
+                get
+                {
+                    if (!string.IsNullOrEmpty(image))
+                    {
+                        if (!base.ContainsKey(image))
+                        {
+                            throw new Exception(string.Format("Texture resource not found: {0}", image));
+                        }
+
+                        return base[image];
+                    }
+
+                    return null;
+                }
+            }
+        }
+        /// <summary>
+        /// Effect technique by mesh dictionary
+        /// </summary>
         protected class TechniqueDictionary : Dictionary<Mesh, string>
         {
 
         }
 
         #endregion
-
-        public const string StaticMesh = "static";
-        public const string NoMaterial = "none";
 
         /// <summary>
         /// Scene
@@ -99,7 +149,7 @@ namespace Engine.Common
         /// <summary>
         /// Datos de animación
         /// </summary>
-        protected SkinnedData SkinnedData = null;
+        protected SkinningData SkinningData = null;
 
         #region Static Helpers
 
@@ -179,13 +229,13 @@ namespace Engine.Common
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="scene">Scene</param>
-        /// <param name="modelContent">Model content</param>
+        /// <param name="content">Model content</param>
         /// <param name="instanced">Is instanced</param>
         /// <param name="instances">Instance count</param>
-        public ModelBase(Game game, Scene3D scene, ModelContent modelContent, bool instanced = false, int instances = 0)
+        public ModelBase(Game game, Scene3D scene, ModelContent content, bool instanced = false, int instances = 0)
             : base(game, scene)
         {
-            this.Initialize(modelContent, instanced, instances);
+            this.Initialize(content, instanced, instances);
         }
 
         /// <summary>
@@ -415,9 +465,9 @@ namespace Engine.Common
 
                 Dictionary<string, AnimationClip> animations = new Dictionary<string, AnimationClip>();
 
-                animations.Add(SkinnedData.DEFAULTCLIP, clip);
+                animations.Add(SkinningData.DefaultClip, clip);
 
-                this.SkinnedData = SkinnedData.Create(
+                this.SkinningData = SkinningData.Create(
                     skins,
                     hierarchy.ToArray(),
                     offsets.ToArray(),
@@ -428,7 +478,7 @@ namespace Engine.Common
         /// Load effect layouts for each mesh
         /// </summary>
         /// <param name="drawer">Drawer</param>
-        protected virtual void LoadEffectLayouts(Effects.Drawer drawer)
+        protected virtual void LoadEffectLayouts(Effects.IDrawer drawer)
         {
             foreach (string material in this.Meshes.Keys)
             {
@@ -438,7 +488,7 @@ namespace Engine.Common
                 {
                     Mesh m = dictMat[mesh];
 
-                    string technique = drawer.AddInputLayout(m.VertextType);
+                    string technique = drawer.AddVertexType(m.VertextType);
 
                     this.Techniques.Add(m, technique);
                 }
@@ -451,9 +501,9 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
-            if (this.SkinnedData != null)
+            if (this.SkinningData != null)
             {
-                this.SkinnedData.Update(gameTime);
+                this.SkinningData.Update(gameTime);
             }
         }
         /// <summary>
@@ -514,11 +564,26 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Handle viewport resize
+        /// Sets clip to play
         /// </summary>
-        public override void HandleResizing()
+        /// <param name="clipName">Clip name</param>
+        public void SetClip(string clipName)
         {
-
+            if (this.SkinningData != null)
+            {
+                this.SkinningData.SetClip(clipName);
+            }
+        }
+        /// <summary>
+        /// Sets clip velocity
+        /// </summary>
+        /// <param name="velocity">Velocity</param>
+        public void SetAnimationVelocity(float velocity)
+        {
+            if (this.SkinningData != null)
+            {
+                this.SkinningData.AnimationVelocity = velocity;
+            }
         }
     }
 }
