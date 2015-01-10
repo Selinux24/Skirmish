@@ -31,7 +31,6 @@ namespace Engine
             : base(game, scene, content)
         {
             this.effect = new EffectBillboard(game.Graphics.Device);
-            this.LoadEffectLayouts(this.effect);
 
             this.Manipulator = new Manipulator3D();
         }
@@ -82,26 +81,26 @@ namespace Engine
                     {
                         Mesh mesh = dictionary[material];
                         MeshMaterial mat = this.Materials[material];
-                        string techniqueName = this.Techniques[mesh];
+                        EffectTechnique technique = this.effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
                         #region Per object update
 
                         if (mat != null)
                         {
                             this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
+                            this.effect.ObjectBuffer.TextureCount = (uint)mat.DiffuseTexture.Description.Texture2DArray.ArraySize;
                             this.effect.UpdatePerObject(mat.DiffuseTexture);
                         }
                         else
                         {
                             this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
+                            this.effect.ObjectBuffer.TextureCount = (uint)this.Textures.Count;
                             this.effect.UpdatePerObject(null);
                         }
 
                         #endregion
 
-                        mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(techniqueName));
-
-                        EffectTechnique technique = this.effect.GetTechnique(techniqueName);
+                        mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(technique));
 
                         for (int p = 0; p < technique.Description.PassCount; p++)
                         {

@@ -118,6 +118,28 @@ namespace Engine
         /// Graphics inmmediate context
         /// </summary>
         public DeviceContext DeviceContext { get; private set; }
+        /// <summary>
+        /// Device description
+        /// </summary>
+        public readonly string DeviceDescription = null;
+
+        /// <summary>
+        /// Gets desktop mode description
+        /// </summary>
+        /// <returns>Returns current desktop mode description</returns>
+        public static OutputDescription GetDesktopMode()
+        {
+            using (Factory factory = new Factory())
+            {
+                using (Adapter adapter = factory.GetAdapter(0))
+                {
+                    using (Output adapterOutput = adapter.GetOutput(0))
+                    {
+                        return adapterOutput.Description;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -127,46 +149,69 @@ namespace Engine
         /// <param name="multiSampleCount">Multisample count</param>
         public Graphics(EngineForm form, int refreshRate = 0, int multiSampleCount = 0)
         {
+            Adapter1 adapter = null;
             ModeDescription displayMode = this.FindModeDescription(
                 this.BufferFormat,
                 form.RenderWidth,
                 form.RenderHeight,
                 form.IsFullscreen,
-                refreshRate);
+                refreshRate,
+                out adapter);
 
-            this.vsyncEnabled = displayMode.RefreshRate != new Rational(0, 1);
-
-            using (Device tmpDevice = new Device(DriverType.Hardware))
+            using (adapter)
             {
-                int quality = tmpDevice.CheckMultisampleQualityLevels(this.BufferFormat, multiSampleCount);
-                if (quality > 0)
+                this.vsyncEnabled = displayMode.RefreshRate != new Rational(0, 1);
+
+                using (Device tmpDevice = new Device(adapter))
                 {
-                    this.msCount = multiSampleCount;
-                    this.msQuality = quality - 1;
+                    int quality = tmpDevice.CheckMultisampleQualityLevels(this.BufferFormat, multiSampleCount);
+                    if (quality > 0)
+                    {
+                        this.msCount = multiSampleCount;
+                        this.msQuality = quality - 1;
+                    }
                 }
-            }
 
-            Device device = null;
-            Device.CreateWithSwapChain(
-                DriverType.Hardware,
-                DeviceCreationFlags.None,
-                new[] { FeatureLevel.Level_11_0 },
-                new SwapChainDescription()
+                DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
+
+#if DEBUG
+                creationFlags |= DeviceCreationFlags.Debug;
+#endif
+
+                Device device = null;
+                Device.CreateWithSwapChain(
+                    adapter,
+                    creationFlags,
+                    new[] 
                 {
-                    BufferCount = 1,
-                    ModeDescription = displayMode,
-                    Usage = Usage.RenderTargetOutput,
-                    OutputHandle = form.Handle,
-                    SampleDescription = new SampleDescription(this.msCount, this.msQuality),
-                    IsWindowed = !form.IsFullscreen,
-                    SwapEffect = SwapEffect.Discard,
-                    Flags = SwapChainFlags.None,
+                    FeatureLevel.Level_11_0,
+                    FeatureLevel.Level_10_1,
+                    FeatureLevel.Level_10_0,
+                    FeatureLevel.Level_9_3,
+                    FeatureLevel.Level_9_2, 
+                    FeatureLevel.Level_9_1, 
                 },
-                out device,
-                out this.swapChain);
+                    new SwapChainDescription()
+                    {
+                        BufferCount = 1,
+                        ModeDescription = displayMode,
+                        Usage = Usage.RenderTargetOutput,
+                        OutputHandle = form.Handle,
+                        SampleDescription = new SampleDescription(this.msCount, this.msQuality),
+                        IsWindowed = !form.IsFullscreen,
+                        SwapEffect = SwapEffect.Discard,
+                        Flags = SwapChainFlags.None,
+                    },
+                    out device,
+                    out this.swapChain);
 
-            this.Device = device;
-            this.DeviceContext = device.ImmediateContext;
+                this.Device = device;
+                this.DeviceContext = device.ImmediateContext;
+                this.DeviceDescription = string.Format(
+                    "{0} {1}GB",
+                    adapter.Description1.Description,
+                    Math.Round((float)adapter.Description1.DedicatedVideoMemory / (float)(1024 * 1024 * 1024)));
+            }
 
             this.PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -418,10 +463,6 @@ namespace Engine
         /// </summary>
         public void Begin()
         {
-            this.SetDefaultRasterizer();
-            this.SetBlendAlphaToCoverage();
-            this.EnableZBuffer();
-
             this.DeviceContext.ClearDepthStencilView(
                 this.depthStencilView,
                 DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
@@ -524,14 +565,45 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="fullScreen">True for full screen modes</param>
         /// <param name="refreshRate">Refresh date</param>
+        /// <param name="adapter">Selected adapter</param>
         /// <returns>Returns found mode description</returns>
-        private ModeDescription FindModeDescription(Format format, int width, int height, bool fullScreen, int refreshRate = 0)
+        private ModeDescription FindModeDescription(Format format, int width, int height, bool fullScreen, int refreshRate, out Adapter1 adapter)
         {
-            using (Factory factory = new Factory())
+            adapter = null;
+
+            using (Factory1 factory = new Factory1())
             {
-                using (Adapter adapter = factory.GetAdapter(0))
+                if (factory.GetAdapterCount1() > 1)
                 {
-                    using (Output adapterOutput = adapter.GetOutput(0))
+                    Adapter1 selectedAdapter = null;
+
+                    //Select best adapter
+                    Array.ForEach(factory.Adapters1, a =>
+                    {
+                        if (selectedAdapter == null)
+                        {
+                            selectedAdapter = a;
+                        }
+                        else
+                        {
+                            if (selectedAdapter.Description1.DedicatedVideoMemory < a.Description1.DedicatedVideoMemory)
+                            {
+                                selectedAdapter = a;
+                            }
+                        }
+                    });
+
+                    adapter = selectedAdapter;
+                }
+                else
+                {
+                    //Select first adapter
+                    adapter = factory.GetAdapter1(0);
+                }
+
+                using (Adapter1 firstAdapter = factory.GetAdapter1(0))
+                {
+                    using (Output adapterOutput = firstAdapter.GetOutput(0))
                     {
                         try
                         {

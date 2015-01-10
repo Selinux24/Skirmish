@@ -29,7 +29,7 @@ PSVertexPosition VSCubic(VSVertexPosition input)
 
 float4 PSCubic(PSVertexPosition input) : SV_Target
 {
-	return gCubemap.Sample(samLinear, input.positionLocal);
+	return gCubemap.Sample(SamplerLinear, input.positionLocal);
 }
 
 technique11 Cubemap

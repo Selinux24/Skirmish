@@ -3,13 +3,11 @@ using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
-using EffectPassDescription = SharpDX.Direct3D11.EffectPassDescription;
 using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
 using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
+using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using EffectVariable = SharpDX.Direct3D11.EffectVariable;
 using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
-using InputElement = SharpDX.Direct3D11.InputElement;
-using InputLayout = SharpDX.Direct3D11.InputLayout;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
@@ -48,6 +46,7 @@ namespace Engine.Effects
         public struct PerObjectBuffer
         {
             public BufferMaterials Material;
+            public uint TextureCount;
 
             public static int Size
             {
@@ -59,6 +58,11 @@ namespace Engine.Effects
         }
 
         #endregion
+
+        /// <summary>
+        /// Billboard drawing technique
+        /// </summary>
+        public readonly EffectTechnique Billboard = null;
 
         /// <summary>
         /// Directional lights effect variable
@@ -97,9 +101,13 @@ namespace Engine.Effects
         /// </summary>
         private EffectVariable material = null;
         /// <summary>
+        /// Texture count variable
+        /// </summary>
+        private EffectScalarVariable textureCount = null;
+        /// <summary>
         /// Texture effect variable
         /// </summary>
-        private EffectShaderResourceVariable texture = null;
+        private EffectShaderResourceVariable textures = null;
 
         /// <summary>
         /// Directional lights
@@ -272,17 +280,31 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Texture
+        /// Texture count
         /// </summary>
-        protected ShaderResourceView Texture
+        protected uint TextureCount
         {
             get
             {
-                return this.texture.GetResource();
+                return (uint)this.textureCount.GetInt();
             }
             set
             {
-                this.texture.SetResource(value);
+                this.textureCount.Set(value);
+            }
+        }
+        /// <summary>
+        /// Texture
+        /// </summary>
+        protected ShaderResourceView Textures
+        {
+            get
+            {
+                return this.textures.GetResource();
+            }
+            set
+            {
+                this.textures.SetResource(value);
             }
         }
 
@@ -302,6 +324,10 @@ namespace Engine.Effects
         public EffectBillboard(Device device)
             : base(device, Resources.ShaderBillboard)
         {
+            this.Billboard = this.Effect.GetTechniqueByName("Billboard");
+
+            this.AddInputLayout(this.Billboard, VertexBillboard.GetInput());
+
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
             this.pointLight = this.Effect.GetVariableByName("gPointLight");
             this.spotLight = this.Effect.GetVariableByName("gSpotLight");
@@ -311,38 +337,31 @@ namespace Engine.Effects
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.material = this.Effect.GetVariableByName("gMaterial");
-            this.texture = this.Effect.GetVariableByName("gTreeMapArray").AsShaderResource();
+            this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
+            this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
         }
         /// <summary>
-        /// Finds technique and input layout for vertex type
+        /// Get technique by vertex type
         /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <returns>Returns technique name for specified vertex type</returns>
-        public override string AddVertexType(VertexTypes vertexType)
+        /// <param name="vertexType">VertexType</param>
+        /// <param name="stage">Stage</param>
+        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
+        public override EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage)
         {
-            string technique = null;
-            InputLayout layout = null;
-
-            if (vertexType == VertexTypes.Billboard)
+            if (stage == DrawingStages.Drawing)
             {
-                technique = "Billboard";
-
-                InputElement[] input = VertexBillboard.GetInput();
-
-                EffectPassDescription desc = Effect.GetTechniqueByName(technique).GetPassByIndex(0).Description;
-
-                layout = new InputLayout(
-                    this.Device,
-                    desc.Signature,
-                    input);
-
-                this.AddInputLayout(technique, layout);
-
-                return technique;
+                if (vertexType == VertexTypes.Billboard)
+                {
+                    return this.Billboard;
+                }
+                else
+                {
+                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                }
             }
             else
             {
-                throw new Exception("VertexType unknown");
+                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
             }
         }
         /// <summary>
@@ -371,7 +390,8 @@ namespace Engine.Effects
         public void UpdatePerObject(ShaderResourceView texture)
         {
             this.Material = this.ObjectBuffer.Material;
-            this.Texture = texture;
+            this.TextureCount = this.ObjectBuffer.TextureCount;
+            this.Textures = texture;
         }
     }
 }

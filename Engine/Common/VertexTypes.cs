@@ -15,6 +15,10 @@ namespace Engine.Common
         /// Billboard
         /// </summary>
         Billboard,
+        /// <summary>
+        /// Particles
+        /// </summary>
+        Particle,
 
         /// <summary>
         /// Position

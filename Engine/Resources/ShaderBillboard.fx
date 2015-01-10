@@ -16,11 +16,12 @@ cbuffer cbPerFrame : register (b0)
 cbuffer cbPerObject : register (b1)
 {
 	Material gMaterial;
+	uint gTextureCount;
 };
 
-cbuffer cbFixed
+cbuffer cbFixed : register (b2)
 {
-	float2 gTexC[4] =
+	float2 gQuadTexC[4] = 
 	{
 		float2(0.0f, 1.0f),
 		float2(0.0f, 0.0f),
@@ -29,7 +30,7 @@ cbuffer cbFixed
 	};
 };
 
-Texture2DArray gTreeMapArray;
+Texture2DArray gTextureArray;
 
 GSVertexBillboard VSBillboard(VSVertexBillboard vin)
 {
@@ -68,7 +69,7 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 		gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
 		gout.positionWorld = v[i].xyz;
 		gout.normalWorld = up;
-		gout.tex = gTexC[i];
+		gout.tex = gQuadTexC[i];
 		gout.primitiveID = primID;
 
 		outputStream.Append(gout);
@@ -92,8 +93,8 @@ float4 PSBillboard(PSVertexBillboard input) : SV_Target
 
 	LightOutput lOutput = ComputeLights(lInput);
 
-	float3 uvw = float3(input.tex, input.primitiveID%4);
-	float4 textureColor = gTreeMapArray.Sample(samLinear, uvw);
+	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
+	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
 	clip(textureColor.a - 0.05f);
 
 	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;

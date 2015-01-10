@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using SharpDX.Windows;
+using SharpDX.DXGI;
 
 namespace Engine
 {
@@ -28,6 +30,10 @@ namespace Engine
         /// Game time
         /// </summary>
         public GameTime GameTime { get; private set; }
+        /// <summary>
+        /// CPU stats
+        /// </summary>
+        public PerformanceCounter CPUStats { get; private set; }
         /// <summary>
         /// Input helper
         /// </summary>
@@ -70,13 +76,23 @@ namespace Engine
         /// <param name="fullScreen">Full screen window</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampleCount">Multi-sample count</param>
-        public Game(string name, int screenWidth, int screenHeight, bool fullScreen, int refreshRate = 0, int multiSampleCount = 0)
+        public Game(string name, int screenWidth = 0, int screenHeight = 0, bool fullScreen = true, int refreshRate = 0, int multiSampleCount = 0)
         {
             this.Name = name;
 
             this.GameTime = new GameTime();
 
+            this.CPUStats = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+
             #region Form
+
+            if (screenWidth == 0 || screenHeight == 0)
+            {
+                OutputDescription mode = Graphics.GetDesktopMode();
+
+                screenWidth = mode.DesktopBounds.Width;
+                screenHeight = mode.DesktopBounds.Height;
+            }
 
             this.Form = new EngineForm(name, screenWidth, screenHeight, fullScreen);
 
@@ -210,8 +226,6 @@ namespace Engine
                 {
                     this.scenes[i].Update(this.GameTime);
 
-                    this.Graphics.SetDefaultRasterizer();
-
                     if (this.scenes[i].UseZBuffer)
                     {
                         this.Graphics.EnableZBuffer();
@@ -229,14 +243,18 @@ namespace Engine
 
             Counters.FrameCount++;
             Counters.FrameTime += this.GameTime.ElapsedSeconds;
+
             if (Counters.FrameTime >= 1.0f)
             {
                 this.RuntimeText = string.Format(
-                    "{0} - FPS: {1} Frame Time: {2:0.0000} (ms) Draw Calls: {3}",
+                    "{0} - {1} - FPS: {2:000} Draw Calls: {3:00} Frame Time: {4:0.0000} (secs) Total Time: {5:0000} (secs) CPU: {6:0.00}%",
+                    this.Graphics.DeviceDescription,
                     this.Name,
                     Counters.FrameCount,
-                    Counters.FrameTime / Counters.FrameCount,
-                    Counters.DrawCallsPerFrame);
+                    Counters.DrawCallsPerFrame,
+                    this.GameTime.ElapsedSeconds,
+                    this.GameTime.TotalSeconds,
+                    this.CPUStats.NextValue());
 #if DEBUG
                 this.Form.Text = this.RuntimeText;
 #endif

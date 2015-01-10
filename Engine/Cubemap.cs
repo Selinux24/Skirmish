@@ -31,7 +31,6 @@ namespace Engine
             : base(game, scene, content)
         {
             this.effect = new EffectCubemap(game.Graphics.Device);
-            this.LoadEffectLayouts(this.effect);
 
             this.Manipulator = new Manipulator3D();
         }
@@ -79,7 +78,7 @@ namespace Engine
                     {
                         Mesh mesh = dictionary[material];
                         MeshMaterial mat = this.Materials[material];
-                        string techniqueName = this.Techniques[mesh];
+                        EffectTechnique technique = this.effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
                         #region Per object update
 
@@ -87,9 +86,7 @@ namespace Engine
 
                         #endregion
 
-                        mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(techniqueName));
-
-                        EffectTechnique technique = this.effect.GetTechnique(techniqueName);
+                        mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(technique));
 
                         for (int p = 0; p < technique.Description.PassCount; p++)
                         {

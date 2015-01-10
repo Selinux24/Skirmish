@@ -23,7 +23,7 @@ PSVertexPositionTexture VSFont(VSVertexPositionTexture input)
 
 float4 PSFont(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 litColor = gTexture.Sample(samFont, input.tex);
+    float4 litColor = gTexture.Sample(SamplerFont, input.tex);
 
 	if(litColor.a != 0.0f)
 	{

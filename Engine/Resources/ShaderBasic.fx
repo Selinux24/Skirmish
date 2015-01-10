@@ -109,7 +109,7 @@ PSVertexPositionTexture VSPositionTexture(VSVertexPositionTexture input)
 
 float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 litColor = gTexture.Sample(samAnisotropic, input.tex);
+    float4 litColor = gTexture.Sample(SamplerAnisotropic, input.tex);
 
 	if(gFogRange > 0)
 	{
@@ -153,7 +153,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 
 	LightOutput lOutput = ComputeLights(lInput);
 
-	float4 textureColor = gTexture.Sample(samAnisotropic, input.tex);
+	float4 textureColor = gTexture.Sample(SamplerAnisotropic, input.tex);
 
 	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
 
@@ -211,7 +211,7 @@ float4 PSPositionNormalTextureSkinned(PSVertexPositionNormalTexture input) : SV_
 
 	LightOutput lOutput = ComputeLights(lInput);
 
-	float4 textureColor = gTexture.Sample(samAnisotropic, input.tex);
+	float4 textureColor = gTexture.Sample(SamplerAnisotropic, input.tex);
 
 	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
 
@@ -229,7 +229,7 @@ technique11 PositionColor
 {
 	pass P0
 	{
-		SetRasterizerState(Solid);
+		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionColor()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionColor()));
@@ -240,7 +240,7 @@ technique11 PositionNormalColor
 {
 	pass P0
 	{
-		SetRasterizerState(Solid);
+		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalColor()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalColor()));
@@ -251,7 +251,7 @@ technique11 PositionTexture
 {
 	pass P0
 	{
-		SetRasterizerState(Solid);
+		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTexture()));
@@ -262,7 +262,7 @@ technique11 PositionNormalTexture
 {
 	pass P0
 	{
-		SetRasterizerState(Solid);
+		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTexture()));
@@ -273,7 +273,7 @@ technique11 PositionNormalTextureSkinned
 {
 	pass P0
 	{
-		SetRasterizerState(Solid);
+		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureSkinned()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTextureSkinned()));

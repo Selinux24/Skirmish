@@ -115,7 +115,7 @@ PSVertexPositionTexture VSPositionTexture(VSVertexPositionTextureI input)
 
 float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 litColor = gTexture.Sample(samAnisotropic, input.tex);
+	float4 litColor = gTexture.Sample(SamplerAnisotropic, input.tex);
 
 	if(gFogRange > 0)
 	{
@@ -161,7 +161,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 
 	LightOutput lOutput = ComputeLights(lInput);
 
-	float4 textureColor = gTexture.Sample(samAnisotropic, input.tex);
+	float4 textureColor = gTexture.Sample(SamplerAnisotropic, input.tex);
 
 	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
 
@@ -221,7 +221,7 @@ float4 PSPositionNormalTextureSkinned(PSVertexPositionNormalTexture input) : SV_
 
 	LightOutput lOutput = ComputeLights(lInput);
 
-	float4 textureColor = gTexture.Sample(samAnisotropic, input.tex);
+	float4 textureColor = gTexture.Sample(SamplerAnisotropic, input.tex);
 
 	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
 

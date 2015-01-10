@@ -82,6 +82,9 @@ namespace Engine
             {
                 if (this.components[i].Visible)
                 {
+                    this.Game.Graphics.SetDefaultRasterizer();
+                    this.Game.Graphics.SetBlendAlphaToCoverage();
+
                     this.components[i].Draw(gameTime);
                 }
             }
@@ -305,6 +308,20 @@ namespace Engine
         public TextDrawer AddText(string font, int fontSize, Color color, Color shadowColor, int order = 0)
         {
             TextDrawer newModel = new TextDrawer(this.Game, this, font, fontSize, color, shadowColor);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
+        /// Adds particle system
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new particle system</returns>
+        public ParticleSystem AddParticleSystem(ParticleSystemDescription description, int order = 0)
+        {
+            ParticleSystem newModel = new ParticleSystem(this.Game, this, description);
 
             this.AddComponent(newModel, order);
 

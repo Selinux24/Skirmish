@@ -1,23 +1,45 @@
-RasterizerState Solid
+RasterizerState RasterizerSolid
 {
 	FillMode = SOLID;
 	CullMode = BACK;
 };
-
-RasterizerState WireFrame
+RasterizerState RasterizerWireFrame
 {
 	FillMode = WIREFRAME;
 	CullMode = NONE;
 };
 
-SamplerState samLinear
+DepthStencilState StencilDisableDepth
+{
+    DepthEnable = FALSE;
+    DepthWriteMask = ZERO;
+};
+DepthStencilState StencilNoDepthWrites
+{
+    DepthEnable = TRUE;
+    DepthWriteMask = ZERO;
+};
+
+BlendState BlendAdditive
+{
+    AlphaToCoverageEnable = FALSE;
+    BlendEnable[0] = TRUE;
+    SrcBlend = SRC_ALPHA;
+    DestBlend = ONE;
+    BlendOp = ADD;
+    SrcBlendAlpha = ZERO;
+    DestBlendAlpha = ZERO;
+    BlendOpAlpha = ADD;
+    RenderTargetWriteMask[0] = 0x0F;
+};
+
+SamplerState SamplerLinear
 {
 	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = WRAP;
 	AddressV = WRAP;
 };
-
-SamplerState samAnisotropic
+SamplerState SamplerAnisotropic
 {
 	Filter = ANISOTROPIC;
 	MaxAnisotropy = 4;
@@ -25,8 +47,7 @@ SamplerState samAnisotropic
 	AddressU = WRAP;
 	AddressV = WRAP;
 };
-
-SamplerState samFont;
+SamplerState SamplerFont;
 
 struct Material
 {

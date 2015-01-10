@@ -11,22 +11,23 @@ namespace Engine.Effects
     public interface IDrawer : IDisposable
     {
         /// <summary>
-        /// Finds technique and input layout for vertex type
+        /// Get technique by vertex type
         /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <returns>Returns technique name for specified vertex type</returns>
-        string AddVertexType(VertexTypes vertexType);
-        /// <summary>
-        /// Gest technique by name
-        /// </summary>
-        /// <param name="technique">Technique name</param>
-        /// <returns>Returns technique description</returns>
-        EffectTechnique GetTechnique(string technique);
+        /// <param name="vertexType">VertexType</param>
+        /// <param name="stage">Stage</param>
+        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
+        EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage);
         /// <summary>
         /// Gets input layout by technique name
         /// </summary>
         /// <param name="technique">Technique name</param>
         /// <returns>Returns input layout for technique</returns>
-        InputLayout GetInputLayout(string technique);
+        InputLayout GetInputLayout(EffectTechnique technique);
+        /// <summary>
+        /// Add input layout to dictionary
+        /// </summary>
+        /// <param name="technique">Technique name</param>
+        /// <param name="input">Input elements</param>
+        void AddInputLayout(EffectTechnique technique, InputElement[] input);
     }
 }

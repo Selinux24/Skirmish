@@ -71,7 +71,6 @@ namespace Engine
             : base(game, scene, content, true, instances)
         {
             this.effect = new EffectInstancing(game.Graphics.Device);
-            this.LoadEffectLayouts(this.effect);
 
             this.instancingData = new VertexInstancingData[instances];
 
@@ -148,7 +147,7 @@ namespace Engine
                     {
                         MeshInstanced mesh = (MeshInstanced)dictionary[material];
                         MeshMaterial mat = this.Materials[material];
-                        string techniqueName = this.Techniques[mesh];
+                        EffectTechnique technique = this.effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
                         #region Per object update
 
@@ -165,11 +164,9 @@ namespace Engine
 
                         #endregion
 
-                        mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(techniqueName));
+                        mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(technique));
 
                         mesh.WriteInstancingData(this.DeviceContext, this.instancingData);
-
-                        EffectTechnique technique = this.effect.GetTechnique(techniqueName);
 
                         for (int p = 0; p < technique.Description.PassCount; p++)
                         {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D;
@@ -18,6 +19,8 @@ using ResourceOptionFlags = SharpDX.Direct3D11.ResourceOptionFlags;
 using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using ShaderResourceViewDescription = SharpDX.Direct3D11.ShaderResourceViewDescription;
+using Texture1D = SharpDX.Direct3D11.Texture1D;
+using Texture1DDescription = SharpDX.Direct3D11.Texture1DDescription;
 using Texture2D = SharpDX.Direct3D11.Texture2D;
 using Texture2DDescription = SharpDX.Direct3D11.Texture2DDescription;
 
@@ -101,19 +104,20 @@ namespace Engine.Helpers
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="device">Graphics device</param>
+        /// <param name="length">Buffer length</param>
         /// <param name="usage">Resource usage</param>
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        public static Buffer CreateBuffer<T>(this Device device, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        public static Buffer CreateBuffer<T>(this Device device, int length, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
             where T : struct
         {
-            int size = ((Marshal.SizeOf(typeof(T)) + 15) / 16) * 16;
+            int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
 
             BufferDescription description = new BufferDescription()
             {
                 Usage = usage,
-                SizeInBytes = size,
+                SizeInBytes = sizeInBytes,
                 BindFlags = binding,
                 CpuAccessFlags = access,
                 OptionFlags = ResourceOptionFlags.None,
@@ -137,14 +141,14 @@ namespace Engine.Helpers
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Length;
 
-            using (DataStream d = new DataStream(sizeInBytes, true, true))
+            using (DataStream dstr = new DataStream(sizeInBytes, true, true))
             {
-                d.WriteRange(data);
-                d.Position = 0;
+                dstr.WriteRange(data);
+                dstr.Position = 0;
 
                 return new Buffer(
                     device,
-                    d,
+                    dstr,
                     new BufferDescription()
                     {
                         Usage = usage,
@@ -198,6 +202,60 @@ namespace Engine.Helpers
                 stream.Write(data);
             }
             deviceContext.UnmapSubresource(buffer, 0);
+        }
+
+        /// <summary>
+        /// Reads an unique value from buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphics context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Offset to read</param>
+        /// <returns>Returns readed data</returns>
+        public static T ReadBuffer<T>(this DeviceContext deviceContext, Buffer buffer, long offset)
+            where T : struct
+        {
+            T data;
+
+            DataStream stream;
+            deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out stream);
+            using (stream)
+            {
+                stream.Position = offset;
+                data = stream.Read<T>();
+            }
+            deviceContext.UnmapSubresource(buffer, 0);
+
+            return data;
+        }
+        /// <summary>
+        /// Reads an array of values from buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphics context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Offset to read</param>
+        /// <param name="length">Array length</param>
+        /// <returns>Returns readed data</returns>
+        public static T[] ReadBuffer<T>(this DeviceContext deviceContext, Buffer buffer, long offset, int length)
+            where T : struct
+        {
+            T[] data = new T[length];
+
+            DataStream stream;
+            deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out stream);
+            using (stream)
+            {
+                stream.Position = offset;
+
+                for (int i = 0; i < length; i++)
+                {
+                    data[i] = stream.Read<T>();
+                }
+            }
+            deviceContext.UnmapSubresource(buffer, 0);
+
+            return data;
         }
 
         /// <summary>
@@ -365,6 +423,49 @@ namespace Engine.Helpers
                             MipLevels = -1,
                         },
                     });
+            }
+        }
+        /// <summary>
+        /// Creates a random 1D texture
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="size">Texture size</param>
+        /// <returns>Returns created texture</returns>
+        public static ShaderResourceView CreateRandomTexture(this Device device, int size)
+        {
+            Random rnd = new Random();
+
+            var randomValues = new List<Vector4>();
+            for (int i = 0; i < size; i++)
+            {
+                randomValues.Add(rnd.NextVector4(new Vector4(-1, -1, -1, -1), new Vector4(1, 1, 1, 1)));
+            }
+
+            using (DataStream str = DataStream.Create(randomValues.ToArray(), false, false))
+            {
+                using (Resource randTex = new Texture1D(
+                    device,
+                    new Texture1DDescription()
+                    {
+                        Format = Format.R32G32B32A32_Float,
+                        Width = size,
+                        ArraySize = 1,
+                        MipLevels = 1,
+                        Usage = ResourceUsage.Immutable,
+                        BindFlags = BindFlags.ShaderResource,
+                        CpuAccessFlags = CpuAccessFlags.None,
+                        OptionFlags = ResourceOptionFlags.None,
+                    },
+                    str))
+                {
+                    ShaderResourceViewDescription srvDesc = new ShaderResourceViewDescription();
+                    srvDesc.Format = Format.R32G32B32A32_Float;
+                    srvDesc.Dimension = ShaderResourceViewDimension.Texture1D;
+                    srvDesc.Texture1D.MipLevels = 1;
+                    srvDesc.Texture1D.MostDetailedMip = 0;
+
+                    return new ShaderResourceView(device, randTex, srvDesc);
+                }
             }
         }
     }

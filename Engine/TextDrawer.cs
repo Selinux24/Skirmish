@@ -43,7 +43,7 @@ namespace Engine
         /// <summary>
         /// Technique name
         /// </summary>
-        private string technique = null;
+        private EffectTechnique technique = null;
         /// <summary>
         /// Input layout
         /// </summary>
@@ -237,7 +237,7 @@ namespace Engine
             this.Font = string.Format("{0} {1}", font, size);
 
             this.effect = new EffectFont(game.Graphics.Device);
-            this.technique = this.effect.AddVertexType(VertexTypes.PositionTexture);
+            this.technique = this.effect.GetTechnique(VertexTypes.PositionTexture, DrawingStages.Drawing);
             this.inputLayout = this.effect.GetInputLayout(this.technique);
 
             this.fontMap = FontMap.MapFont(game.Graphics.Device, font, size);
@@ -289,7 +289,7 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
-                this.Game.Graphics.SetBlendTransparent();
+                //this.Game.Graphics.SetBlendTransparent();
 
                 this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                 this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
@@ -330,11 +330,9 @@ namespace Engine
 
             #endregion
 
-            EffectTechnique technique = this.effect.GetTechnique("FontDrawer");
-
-            for (int p = 0; p < technique.Description.PassCount; p++)
+            for (int p = 0; p < this.technique.Description.PassCount; p++)
             {
-                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                this.technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
                 if (this.indexBuffer != null)
                 {

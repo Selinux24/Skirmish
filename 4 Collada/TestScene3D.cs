@@ -18,6 +18,7 @@ namespace Collada
         private Terrain ground = null;
         private ModelInstanced lamps = null;
         private ModelInstanced helicopters = null;
+        private ParticleSystem rain = null;
 
         private bool chaseCamera = false;
 
@@ -42,7 +43,7 @@ namespace Collada
             TerrainDescription terrainDescription = new TerrainDescription()
             {
                 AddVegetation = true,
-                VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", },
+                VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
                 Saturation = 0.05f,
                 MinSize = Vector2.One * 2f,
                 MaxSize = Vector2.One * 4f,
@@ -52,6 +53,7 @@ namespace Collada
             this.ground = this.AddTerrain("Ground.dae", Matrix.Scaling(20, 40, 20), terrainDescription);
             this.helicopters = this.AddInstancingModel("Helicopter.dae", 15);
             this.lamps = this.AddInstancingModel("Poly.dae", 2);
+            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain("raindrop.dds"));
 
             this.InitializeCamera();
             this.InitializeEnvironment();

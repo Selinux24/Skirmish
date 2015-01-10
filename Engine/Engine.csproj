@@ -258,6 +258,7 @@
     <Compile Include="Collada\Vertices.cs" />
     <Compile Include="Collada\VisualScene.cs" />
     <Compile Include="Common\IBufferData.cs" />
+    <Compile Include="Common\VertexParticle.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalColor.cs" />
     <Compile Include="Common\VertexSkinnedPositionColor.cs" />
     <Compile Include="Common\VertexSkinnedPositionTexture.cs" />
@@ -278,9 +279,13 @@
     <Compile Include="Collada\Transforms.cs" />
     <Compile Include="Common\VertexData.cs" />
     <Compile Include="Common\Weight.cs" />
+    <Compile Include="Effects\DrawingStages.cs" />
+    <Compile Include="Effects\EffectParticles.cs" />
     <Compile Include="Effects\IDrawer.cs" />
     <Compile Include="Helpers\Helper.cs" />
     <Compile Include="Manipulator2D.cs" />
+    <Compile Include="ParticleClasses.cs" />
+    <Compile Include="ParticleSystem.cs" />
     <Compile Include="VolumeInstanced.cs" />
     <Compile Include="Volume.cs" />
     <Compile Include="Cubemap.cs" />
@@ -364,6 +369,7 @@
     <None Include="Resources\ShaderFont.fx" />
     <None Include="Resources\ShaderCubemap.fx" />
     <None Include="Resources\ShaderInstancing.fx" />
+    <None Include="Resources\ShaderParticles.fx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\IncLights.fx" />

@@ -6,6 +6,14 @@ struct VSVertexBillboard
 	float3 positionWorld : POSITION;
 	float2 sizeWorld : SIZE;
 };
+struct VSVertexParticle
+{
+	float3 positionWorld : POSITION;
+	float3 velocityWorld : VELOCITY;
+	float2 sizeWorld : SIZE;
+	float age : AGE;
+	uint type : TYPE;
+};
 struct VSVertexPosition
 {
 	float3 positionLocal : POSITION;
@@ -207,6 +215,18 @@ struct GSVertexBillboard
 	float3 centerWorld : POSITION;
 	float2 sizeWorld : SIZE;
 };
+struct GSParticleFire
+{
+	float3 positionWorld : POSITION;
+	float2 sizeWorld : SIZE;
+	float4 color : COLOR;
+	uint type : TYPE;
+};
+struct GSParticleRain
+{
+	float3 positionWorld : POSITION;
+	uint type : TYPE;
+};
 
 /*
 BASIC PS INPUTS
@@ -216,6 +236,19 @@ struct PSVertexBillboard
 	float4 positionHomogeneous : SV_POSITION;
 	float3 positionWorld : POSITION;
 	float3 normalWorld : NORMAL;
+	float2 tex : TEXCOORD;
+	uint primitiveID : SV_PrimitiveID;
+};
+struct PSParticleFire
+{
+	float4 positionHomogeneus : SV_POSITION;
+	float4 color : COLOR;
+	float2 tex : TEXCOORD;
+	uint primitiveID : SV_PrimitiveID;
+};
+struct PSParticleRain
+{
+	float4 positionHomogeneus : SV_POSITION;
 	float2 tex : TEXCOORD;
 	uint primitiveID : SV_PrimitiveID;
 };

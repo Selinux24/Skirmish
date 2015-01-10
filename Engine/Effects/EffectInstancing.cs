@@ -1,21 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
-using EffectPassDescription = SharpDX.Direct3D11.EffectPassDescription;
 using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
 using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
+using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using EffectVariable = SharpDX.Direct3D11.EffectVariable;
 using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
-using InputElement = SharpDX.Direct3D11.InputElement;
-using InputLayout = SharpDX.Direct3D11.InputLayout;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
 {
     using Engine.Common;
+    using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
@@ -83,6 +81,27 @@ namespace Engine.Effects
         }
 
         #endregion
+
+        /// <summary>
+        /// Position color drawing technique
+        /// </summary>
+        public readonly EffectTechnique PositionColor = null;
+        /// <summary>
+        /// Position normal color drawing technique
+        /// </summary>
+        public readonly EffectTechnique PositionNormalColor = null;
+        /// <summary>
+        /// Position texture technique
+        /// </summary>
+        public readonly EffectTechnique PositionTexture = null;
+        /// <summary>
+        /// Position normal texture technique
+        /// </summary>
+        public readonly EffectTechnique PositionNormalTexture = null;
+        /// <summary>
+        /// Skinned position normal texture technique
+        /// </summary>
+        public readonly EffectTechnique PositionNormalTextureSkinned = null;
 
         /// <summary>
         /// Directional lights effect variable
@@ -386,6 +405,18 @@ namespace Engine.Effects
         public EffectInstancing(Device device)
             : base(device, Resources.ShaderInstancing)
         {
+            this.PositionColor = this.Effect.GetTechniqueByName("PositionColor");
+            this.PositionNormalColor = this.Effect.GetTechniqueByName("PositionNormalColor");
+            this.PositionTexture = this.Effect.GetTechniqueByName("PositionTexture");
+            this.PositionNormalTexture = this.Effect.GetTechniqueByName("PositionNormalTexture");
+            this.PositionNormalTextureSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureSkinned");
+
+            this.AddInputLayout(this.PositionColor, VertexPositionColor.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalColor, VertexPositionNormalColor.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionTexture, VertexPositionTexture.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalTexture, VertexPositionNormalTexture.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput().Join(VertexInstancingData.GetInput()));
+
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
@@ -401,56 +432,44 @@ namespace Engine.Effects
             this.texture = this.Effect.GetVariableByName("gTexture").AsShaderResource();
         }
         /// <summary>
-        /// Finds technique and input layout for vertex type
+        /// Get technique by vertex type
         /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <returns>Returns technique name for specified vertex type</returns>
-        public override string AddVertexType(VertexTypes vertexType)
+        /// <param name="vertexType">VertexType</param>
+        /// <param name="stage">Stage</param>
+        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
+        public override EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage)
         {
-            string technique = null;
-            InputLayout layout = null;
-
-            List<InputElement> input = new List<InputElement>();
-
-            if (vertexType == VertexTypes.PositionColor)
+            if (stage == DrawingStages.Drawing)
             {
-                technique = "PositionColor";
-                input.AddRange(VertexPositionColor.GetInput());
+                if (vertexType == VertexTypes.PositionColor)
+                {
+                    return this.PositionColor;
+                }
+                else if (vertexType == VertexTypes.PositionNormalColor)
+                {
+                    return this.PositionNormalColor;
+                }
+                else if (vertexType == VertexTypes.PositionTexture)
+                {
+                    return this.PositionTexture;
+                }
+                else if (vertexType == VertexTypes.PositionNormalTexture)
+                {
+                    return this.PositionNormalTexture;
+                }
+                else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
+                {
+                    return this.PositionNormalTextureSkinned;
+                }
+                else
+                {
+                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                }
             }
-            else if (vertexType == VertexTypes.PositionNormalColor)
+            else
             {
-                technique = "PositionNormalColor";
-                input.AddRange(VertexPositionNormalColor.GetInput());
+                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
             }
-            else if (vertexType == VertexTypes.PositionNormalTexture)
-            {
-                technique = "PositionNormalTexture";
-                input.AddRange(VertexPositionNormalTexture.GetInput());
-            }
-            else if (vertexType == VertexTypes.PositionTexture)
-            {
-                technique = "PositionTexture";
-                input.AddRange(VertexPositionTexture.GetInput());
-            }
-            else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
-            {
-                technique = "PositionNormalTextureSkinned";
-                input.AddRange(VertexSkinnedPositionNormalTexture.GetInput());
-            }
-            else throw new Exception("Tipo de vértice incompatible con el Shader");
-
-            input.AddRange(VertexInstancingData.GetInput());
-
-            EffectPassDescription desc = Effect.GetTechniqueByName(technique).GetPassByIndex(0).Description;
-
-            layout = new InputLayout(
-                this.Device,
-                desc.Signature,
-                input.ToArray());
-
-            this.AddInputLayout(technique, layout);
-
-            return technique;
         }
         /// <summary>
         /// Update per frame data

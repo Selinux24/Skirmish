@@ -14,7 +14,7 @@ namespace Engine.Effects
         /// <summary>
         /// Layout dictionary
         /// </summary>
-        private Dictionary<string, InputLayout> layouts = new Dictionary<string, InputLayout>();
+        private Dictionary<EffectTechnique, InputLayout> layouts = new Dictionary<EffectTechnique, InputLayout>();
 
         /// <summary>
         /// Graphics device
@@ -47,26 +47,18 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Finds technique and input layout for vertex type
+        /// Get technique by vertex type
         /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <returns>Returns technique name for specified vertex type</returns>
-        public abstract string AddVertexType(VertexTypes vertexType);
-        /// <summary>
-        /// Gest technique by name
-        /// </summary>
-        /// <param name="technique">Technique name</param>
-        /// <returns>Returns technique description</returns>
-        public EffectTechnique GetTechnique(string technique)
-        {
-            return this.Effect.GetTechniqueByName(technique);
-        }
+        /// <param name="vertexType">VertexType</param>
+        /// <param name="stage">Stage</param>
+        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
+        public abstract EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage);
         /// <summary>
         /// Gets input layout by technique name
         /// </summary>
         /// <param name="technique">Technique name</param>
         /// <returns>Returns input layout for technique</returns>
-        public InputLayout GetInputLayout(string technique)
+        public InputLayout GetInputLayout(EffectTechnique technique)
         {
             return this.layouts[technique];
         }
@@ -74,9 +66,16 @@ namespace Engine.Effects
         /// Add input layout to dictionary
         /// </summary>
         /// <param name="technique">Technique name</param>
-        /// <param name="layout">Input layout</param>
-        public void AddInputLayout(string technique, InputLayout layout)
+        /// <param name="input">Input elements</param>
+        public void AddInputLayout(EffectTechnique technique, InputElement[] input)
         {
+            EffectPassDescription desc = technique.GetPassByIndex(0).Description;
+
+            InputLayout layout = new InputLayout(
+                this.Device,
+                desc.Signature,
+                input);
+
             if (!this.layouts.ContainsKey(technique))
             {
                 this.layouts.Add(technique, layout);

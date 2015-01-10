@@ -50,6 +50,26 @@ namespace Engine
                 return (float)this.TotalTime.TotalSeconds;
             }
         }
+        /// <summary>
+        /// Elapsed seconds since last frame
+        /// </summary>
+        public float ElapsedMilliseconds
+        {
+            get
+            {
+                return (float)this.ElapsedTime.TotalMilliseconds;
+            }
+        }
+        /// <summary>
+        /// Total seconds
+        /// </summary>
+        public float TotalMilliseconds
+        {
+            get
+            {
+                return (float)this.TotalTime.TotalMilliseconds;
+            }
+        }
 
         /// <summary>
         /// Constructor

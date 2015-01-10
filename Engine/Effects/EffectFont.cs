@@ -3,11 +3,9 @@ using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
-using EffectPassDescription = SharpDX.Direct3D11.EffectPassDescription;
 using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
+using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
-using InputElement = SharpDX.Direct3D11.InputElement;
-using InputLayout = SharpDX.Direct3D11.InputLayout;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
@@ -42,6 +40,11 @@ namespace Engine.Effects
         }
 
         #endregion
+
+        /// <summary>
+        /// Font drawing technique
+        /// </summary>
+        public readonly EffectTechnique FontDrawer = null;
 
         /// <summary>
         /// World matrix effect variable
@@ -129,41 +132,37 @@ namespace Engine.Effects
         public EffectFont(Device device)
             : base(device, Resources.ShaderFont)
         {
+            this.FontDrawer = this.Effect.GetTechniqueByName("FontDrawer");
+
+            this.AddInputLayout(this.FontDrawer, VertexPositionTexture.GetInput());
+
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.color = this.Effect.GetVariableByName("gColor").AsVector();
             this.texture = this.Effect.GetVariableByName("gTexture").AsShaderResource();
         }
         /// <summary>
-        /// Finds technique and input layout for vertex type
+        /// Get technique by vertex type
         /// </summary>
-        /// <param name="vertexType">Vertex type</param>
-        /// <returns>Returns technique name for specified vertex type</returns>
-        public override string AddVertexType(VertexTypes vertexType)
+        /// <param name="vertexType">VertexType</param>
+        /// <param name="stage">Stage</param>
+        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
+        public override EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage)
         {
-            string technique = null;
-            InputLayout layout = null;
-
-            if (vertexType == VertexTypes.PositionTexture)
+            if (stage == DrawingStages.Drawing)
             {
-                technique = "FontDrawer";
-
-                InputElement[] input = VertexPositionTexture.GetInput();
-
-                EffectPassDescription desc = Effect.GetTechniqueByName(technique).GetPassByIndex(0).Description;
-
-                layout = new InputLayout(
-                    this.Device,
-                    desc.Signature,
-                    input);
-
-                this.AddInputLayout(technique, layout);
-
-                return technique;
+                if (vertexType == VertexTypes.PositionTexture)
+                {
+                    return this.FontDrawer;
+                }
+                else
+                {
+                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                }
             }
             else
             {
-                throw new Exception("VertexType unknown");
+                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
             }
         }
         /// <summary>

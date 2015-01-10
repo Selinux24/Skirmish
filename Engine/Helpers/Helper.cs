@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System;
+using SharpDX;
 
 namespace Engine.Helpers
 {
@@ -25,6 +26,22 @@ namespace Engine.Helpers
             return array;
         }
         /// <summary>
+        /// Joins two arrays
+        /// </summary>
+        /// <typeparam name="T">Type of array</typeparam>
+        /// <param name="array1">First array</param>
+        /// <param name="array2">Second array</param>
+        /// <returns>Returns an array with both array values</returns>
+        public static T[] Join<T>(this T[] array1, T[] array2)
+        {
+            T[] newArray = new T[array1.Length + array2.Length];
+
+            array1.CopyTo(newArray, 0);
+            array2.CopyTo(newArray, array1.Length);
+
+            return newArray;
+        }
+        /// <summary>
         /// Gets angle between two vectors
         /// </summary>
         /// <param name="one">First vector</param>
@@ -40,6 +57,18 @@ namespace Engine.Helpers
 
             //Get the arc cosin of the angle, you now have your angle in radians 
             return (float)System.Math.Acos(dot);
+        }
+        /// <summary>
+        /// Dispose disposable object
+        /// </summary>
+        /// <param name="obj">Disposable object</param>
+        public static void Dispose(IDisposable obj)
+        {
+            if (obj != null)
+            {
+                obj.Dispose();
+                obj = null;
+            }
         }
     }
 }

@@ -8,11 +8,18 @@ namespace Skybox
     public class TestScene3D : Scene3D
     {
         private float globalScale = 5f;
+        private Vector3[] firePositions = new[]
+        {
+            new Vector3(5, 1, 5),
+            new Vector3(-5, 1, -5),
+        };
 
         private Terrain ruins = null;
-        private Model lamp = null;
+        private ModelInstanced lamp = null;
         private TextDrawer title = null;
         private TextDrawer fps = null;
+        private ParticleSystem rain = null;
+        private ParticleSystem fire = null;
 
         public TestScene3D(Game game)
             : base(game)
@@ -34,7 +41,9 @@ namespace Skybox
             };
 
             this.ruins = this.AddTerrain("ruinas.dae", desc);
-            this.lamp = this.AddModel("Poly.dae");
+            this.lamp = this.AddInstancingModel("Poly.dae", 3);
+            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain("raindrop.dds"));
+            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions, "flare2.png"));
 
             this.Lights.PointLightEnabled = true;
             this.Lights.PointLight.Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f);
@@ -57,7 +66,12 @@ namespace Skybox
         private void InitializeTerrain()
         {
             this.ruins.Manipulator.SetScale(globalScale);
-            this.lamp.Manipulator.SetScale(0.01f * globalScale);
+            this.lamp[0].SetScale(0.01f * globalScale);
+            this.lamp[1].SetScale(0.01f * globalScale);
+            this.lamp[2].SetScale(0.01f * globalScale);
+
+            this.lamp[1].SetPosition(firePositions[0]);
+            this.lamp[2].SetPosition(firePositions[1]);
         }
         private void InitializeCamera()
         {
@@ -89,9 +103,9 @@ namespace Skybox
             position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
 
             this.Lights.PointLight.Position = position;
-            this.lamp.Manipulator.SetPosition(position);
+            this.lamp[0].SetPosition(position);
 
-            this.fps.Text = this.Game.RuntimeText;
+            this.fps.Text = string.Format("{0} Elapsed {1:0.0000} Total {2:0}", this.Game.RuntimeText, gameTime.ElapsedSeconds, gameTime.TotalSeconds);
         }
         private void UpdateCamera()
         {

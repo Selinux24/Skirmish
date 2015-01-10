@@ -102,13 +102,6 @@ namespace Engine.Common
                 }
             }
         }
-        /// <summary>
-        /// Effect technique by mesh dictionary
-        /// </summary>
-        protected class TechniqueDictionary : Dictionary<Mesh, string>
-        {
-
-        }
 
         #endregion
 
@@ -142,10 +135,6 @@ namespace Engine.Common
         /// Meshes
         /// </summary>
         protected MeshDictionary Meshes = new MeshDictionary();
-        /// <summary>
-        /// Techniques
-        /// </summary>
-        protected TechniqueDictionary Techniques = new TechniqueDictionary();
         /// <summary>
         /// Datos de animación
         /// </summary>
@@ -472,26 +461,6 @@ namespace Engine.Common
                     hierarchy.ToArray(),
                     offsets.ToArray(),
                     animations);
-            }
-        }
-        /// <summary>
-        /// Load effect layouts for each mesh
-        /// </summary>
-        /// <param name="drawer">Drawer</param>
-        protected virtual void LoadEffectLayouts(Effects.IDrawer drawer)
-        {
-            foreach (string material in this.Meshes.Keys)
-            {
-                MeshMaterialsDictionary dictMat = this.Meshes[material];
-
-                foreach (string mesh in dictMat.Keys)
-                {
-                    Mesh m = dictMat[mesh];
-
-                    string technique = drawer.AddVertexType(m.VertextType);
-
-                    this.Techniques.Add(m, technique);
-                }
             }
         }
 
