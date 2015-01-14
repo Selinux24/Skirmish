@@ -29,8 +29,15 @@ namespace GameLogic
 
         static void Main()
         {
-            using (game = new Game("Game Logic", 800, 600, false))
+#if DEBUG
+            using (game = new Game("Game Logic", false, 800, 600))
+#else
+            using (game = new Game("Game Logic"))
+#endif
             {
+                game.VisibleMouse = true;
+                game.LockMouse = false;
+
                 GameEnvironment.Background = Color.Black;
 
                 game.AddScene(new SceneHUD(game) { Active = true, UseZBuffer = false, Order = 1 });

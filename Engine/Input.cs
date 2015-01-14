@@ -1,96 +1,156 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using SharpDX.DirectInput;
 
 namespace Engine
 {
+    using Engine.Helpers;
+
     /// <summary>
     /// Mouse and keyboard input
     /// </summary>
     public class Input : IDisposable
     {
         /// <summary>
-        /// Input
-        /// </summary>
-        private DirectInput input = null;
-        /// <summary>
-        /// Mouse
-        /// </summary>
-        private Mouse mouse = null;
-        /// <summary>
-        /// Keyboard
-        /// </summary>
-        private Keyboard keyboard = null;
-        /// <summary>
-        /// Previous mouse state
-        /// </summary>
-        private MouseState previousMouseState;
-        /// <summary>
-        /// Current mouse state
-        /// </summary>
-        private MouseState currentMouseState;
-        /// <summary>
-        /// Previous keyboard state
-        /// </summary>
-        private KeyboardState previousKeyboardState;
-        /// <summary>
-        /// Current keyboard state
-        /// </summary>
-        private KeyboardState currentKeyboardState;
-        /// <summary>
         /// Engine render form
         /// </summary>
         private EngineForm form;
+        /// <summary>
+        /// First state update flag
+        /// </summary>
+        private bool firstUpdate = true;
+        /// <summary>
+        /// Mouse over active form flag
+        /// </summary>
+        private bool mouseIn = true;
+        /// <summary>
+        /// Mouse visble flag
+        /// </summary>
+        private bool visibleMouse = true;
+
+        /// <summary>
+        /// Mouse position of last update
+        /// </summary>
+        private Point lastMousePos;
+        /// <summary>
+        /// Mouse buttons of last update
+        /// </summary>
+        private List<MouseButtons> lastMouseButtons = new List<MouseButtons>();
+        /// <summary>
+        /// Current mouse buttons
+        /// </summary>
+        private List<MouseButtons> currentMouseButtons = new List<MouseButtons>();
+        /// <summary>
+        /// Keys of last update
+        /// </summary>
+        private List<Keys> lastKeyboardKeys = new List<Keys>();
+        /// <summary>
+        /// Current keys
+        /// </summary>
+        private List<Keys> currentKeyboardKeys = new List<Keys>();
 
         /// <summary>
         /// Mouse X axis value
         /// </summary>
-        public int MouseX { get { return this.currentMouseState.X; } }
+        public int MouseXDelta { get; private set; }
         /// <summary>
         /// Mouse Y axis value
         /// </summary>
-        public int MouseY { get { return this.currentMouseState.Y; } }
+        public int MouseYDelta { get; private set; }
+        /// <summary>
+        /// Mouse wheel value
+        /// </summary>
+        public int MouseWheelDelta { get; private set; }
+        /// <summary>
+        /// Absolute Mouse X axis value
+        /// </summary>
+        public int MouseX { get; private set; }
+        /// <summary>
+        /// Absolute Mouse Y axis value
+        /// </summary>
+        public int MouseY { get; private set; }
         /// <summary>
         /// Gets if left mouse button is just released
         /// </summary>
-        public bool LeftMouseButtonJustReleased { get { return this.MouseButtonJustReleased(MouseButtons.LeftButton); } }
+        public bool LeftMouseButtonJustReleased { get; private set; }
         /// <summary>
         /// Gets if left mouse button is just pressed
         /// </summary>
-        public bool LeftMouseButtonJustPressed { get { return this.MouseButtonJustPressed(MouseButtons.LeftButton); } }
+        public bool LeftMouseButtonJustPressed { get; private set; }
         /// <summary>
         /// Gets if left mouse button is pressed now
         /// </summary>
-        public bool LeftMouseButtonPressed { get { return this.MouseButtonPressed(MouseButtons.LeftButton); } }
+        public bool LeftMouseButtonPressed { get; private set; }
         /// <summary>
         /// Gets if right mouse button is just released
         /// </summary>
-        public bool RightMouseButtonJustReleased { get { return this.MouseButtonJustReleased(MouseButtons.RightButton); } }
+        public bool RightMouseButtonJustReleased { get; private set; }
         /// <summary>
         /// Gets if right mouse button is just pressed
         /// </summary>
-        public bool RightMouseButtonJustPressed { get { return this.MouseButtonJustPressed(MouseButtons.RightButton); } }
+        public bool RightMouseButtonJustPressed { get; private set; }
         /// <summary>
         /// Gets if right mouse button is pressed now
         /// </summary>
-        public bool RightMouseButtonPressed { get { return this.MouseButtonPressed(MouseButtons.RightButton); } }
+        public bool RightMouseButtonPressed { get; private set; }
         /// <summary>
         /// Gets if middle mouse button is just released
         /// </summary>
-        public bool MiddleMouseButtonJustReleased { get { return this.MouseButtonJustReleased(MouseButtons.MiddleButton); } }
+        public bool MiddleMouseButtonJustReleased { get; private set; }
         /// <summary>
         /// Gets if middle mouse button is just pressed
         /// </summary>
-        public bool MiddleMouseButtonJustPressed { get { return this.MouseButtonJustPressed(MouseButtons.MiddleButton); } }
+        public bool MiddleMouseButtonJustPressed { get; private set; }
         /// <summary>
         /// Gets if middle mouse button is pressed now
         /// </summary>
-        public bool MiddleMouseButtonPressed { get { return this.MouseButtonPressed(MouseButtons.MiddleButton); } }
+        public bool MiddleMouseButtonPressed { get; private set; }
+        /// <summary>
+        /// Gets if X1 mouse button is just released
+        /// </summary>
+        public bool X1MouseButtonJustReleased { get; private set; }
+        /// <summary>
+        /// Gets if X1 mouse button is just pressed
+        /// </summary>
+        public bool X1MouseButtonJustPressed { get; private set; }
+        /// <summary>
+        /// Gets if X1 mouse button is pressed now
+        /// </summary>
+        public bool X1MouseButtonPressed { get; private set; }
+        /// <summary>
+        /// Gets if X2 mouse button is just released
+        /// </summary>
+        public bool X2MouseButtonJustReleased { get; private set; }
+        /// <summary>
+        /// Gets if X2 mouse button is just pressed
+        /// </summary>
+        public bool X2MouseButtonJustPressed { get; private set; }
+        /// <summary>
+        /// Gets if X2 mouse button is pressed now
+        /// </summary>
+        public bool X2MouseButtonPressed { get; private set; }
         /// <summary>
         /// Sets mouse on center after update
         /// </summary>
-        public bool LockToCenter { get; set; }
+        public bool LockMouse { get; set; }
+        /// <summary>
+        /// Sets cursor visible
+        /// </summary>
+        public bool VisibleMouse
+        {
+            get
+            {
+                return this.visibleMouse;
+            }
+            set
+            {
+                this.visibleMouse = value;
+
+                if (this.visibleMouse) this.ShowMouse();
+                else this.HideMouse();
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -98,152 +158,174 @@ namespace Engine
         public Input(EngineForm form)
         {
             this.form = form;
-
-            this.input = new DirectInput();
-
-            this.mouse = new Mouse(input);
-            this.mouse.SetCooperativeLevel(form, CooperativeLevel.NonExclusive | CooperativeLevel.Background);
-            this.mouse.Acquire();
-
-            this.keyboard = new Keyboard(input);
-            this.keyboard.SetCooperativeLevel(form, CooperativeLevel.NonExclusive | CooperativeLevel.Background);
-            this.keyboard.Acquire();
+            this.form.MouseWheel += new MouseEventHandler(OnMouseWheel);
+            this.form.MouseLeave += new EventHandler(OnMouseLeave);
+            this.form.MouseEnter += new EventHandler(OnMouseEnter);
         }
         /// <summary>
         /// Updates input state
         /// </summary>
         public void Update()
         {
-            this.previousMouseState = this.currentMouseState;
-            this.currentMouseState = this.mouse.GetCurrentState();
-
-            this.previousKeyboardState = this.currentKeyboardState;
-            this.currentKeyboardState = this.keyboard.GetCurrentState();
-
-            if (this.LockToCenter)
+            if (this.mouseIn)
             {
-                this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
-            }
-        }
-        /// <summary>
-        /// Clear state
-        /// </summary>
-        public void Clear()
-        {
-            this.previousMouseState = this.currentMouseState = new MouseState();
+                if (this.firstUpdate)
+                {
+                    this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
 
-            this.previousKeyboardState = this.currentKeyboardState = new KeyboardState();
+                    this.ClearInputData();
+
+                    this.firstUpdate = false;
+                }
+                else
+                {
+                    #region Mouse position
+
+                    {
+                        Point mousePos = this.form.PointToClient(Cursor.Position);
+
+                        this.MouseXDelta = mousePos.X - this.lastMousePos.X;
+                        this.MouseYDelta = mousePos.Y - this.lastMousePos.Y;
+
+                        this.MouseX = mousePos.X;
+                        this.MouseY = mousePos.Y;
+
+                        this.lastMousePos = mousePos;
+
+                        if (this.LockMouse)
+                        {
+                            this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
+                        }
+                    }
+
+                    #endregion
+
+                    #region Mouse buttons
+
+                    {
+                        this.lastMouseButtons.Clear();
+                        this.lastMouseButtons.AddRange(this.currentMouseButtons);
+                        this.currentMouseButtons.Clear();
+
+                        MouseButtons[] buttons = this.GetPressedButtons();
+                        if (buttons.Length > 0)
+                        {
+                            this.currentMouseButtons.AddRange(buttons);
+                        }
+
+                        bool prev = false;
+                        bool curr = false;
+
+                        prev = this.lastMouseButtons.Contains(MouseButtons.Left);
+                        curr = this.currentMouseButtons.Contains(MouseButtons.Left);
+                        this.LeftMouseButtonPressed = curr;
+                        this.LeftMouseButtonJustPressed = curr && !prev;
+                        this.LeftMouseButtonJustReleased = !curr && prev;
+
+                        prev = this.lastMouseButtons.Contains(MouseButtons.Right);
+                        curr = this.currentMouseButtons.Contains(MouseButtons.Right);
+                        this.RightMouseButtonPressed = curr;
+                        this.RightMouseButtonJustPressed = curr && !prev;
+                        this.RightMouseButtonJustReleased = !curr && prev;
+
+                        prev = this.lastMouseButtons.Contains(MouseButtons.Middle);
+                        curr = this.currentMouseButtons.Contains(MouseButtons.Middle);
+                        this.MiddleMouseButtonPressed = curr;
+                        this.MiddleMouseButtonJustPressed = curr && !prev;
+                        this.MiddleMouseButtonJustReleased = !curr && prev;
+
+                        prev = this.lastMouseButtons.Contains(MouseButtons.XButton1);
+                        curr = this.currentMouseButtons.Contains(MouseButtons.XButton1);
+                        this.X1MouseButtonPressed = curr;
+                        this.X1MouseButtonJustPressed = curr && !prev;
+                        this.X1MouseButtonJustReleased = !curr && prev;
+
+                        prev = this.lastMouseButtons.Contains(MouseButtons.XButton2);
+                        curr = this.currentMouseButtons.Contains(MouseButtons.XButton2);
+                        this.X2MouseButtonPressed = curr;
+                        this.X2MouseButtonJustPressed = curr && !prev;
+                        this.X2MouseButtonJustReleased = !curr && prev;
+                    }
+
+                    #endregion
+
+                    #region Mouse Wheel
+
+                    {
+                        this.MouseWheelDelta = 0;
+                    }
+
+                    #endregion
+
+                    #region Keyboard Keys
+
+                    {
+                        this.lastKeyboardKeys.Clear();
+                        this.lastKeyboardKeys.AddRange(this.currentKeyboardKeys);
+                        this.currentKeyboardKeys.Clear();
+
+                        Keys[] keyboard = this.GetPressedKeys();
+                        if (keyboard.Length > 0)
+                        {
+                            this.currentKeyboardKeys.AddRange(keyboard);
+                        }
+                    }
+
+                    #endregion
+                }
+            }
+            else
+            {
+                this.ClearInputData();
+            }
         }
         /// <summary>
         /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            if (this.mouse != null)
-            {
-                this.mouse.Dispose();
-                this.mouse = null;
-            }
 
-            if (this.keyboard != null)
-            {
-                this.keyboard.Dispose();
-                this.keyboard = null;
-            }
-
-            if (this.input != null)
-            {
-                this.input.Dispose();
-                this.input = null;
-            }
         }
         /// <summary>
         /// Gets if specified key is just released
         /// </summary>
         /// <param name="key">Key</param>
         /// <returns>Returns true if the specified key is just released</returns>
-        public bool KeyJustReleased(Key key)
+        public bool KeyJustReleased(Keys key)
         {
-            if (this.previousKeyboardState != null)
-            {
-                return this.previousKeyboardState.IsPressed(key) && !this.currentKeyboardState.IsPressed(key);
-            }
-
-            return false;
+            return this.lastKeyboardKeys.Contains(key) && !this.currentKeyboardKeys.Contains(key);
         }
         /// <summary>
         /// Gets if specified key is just pressed
         /// </summary>
         /// <param name="key">Key</param>
         /// <returns>Returns true if the specified key is just pressed</returns>
-        public bool KeyJustPressed(Key key)
+        public bool KeyJustPressed(Keys key)
         {
-            if (this.previousKeyboardState != null)
-            {
-                return !this.previousKeyboardState.IsPressed(key) && this.currentKeyboardState.IsPressed(key);
-            }
-
-            return false;
+            return !this.lastKeyboardKeys.Contains(key) && this.currentKeyboardKeys.Contains(key);
         }
         /// <summary>
         /// Gets if specified key is pressed now
         /// </summary>
         /// <param name="key">Key</param>
         /// <returns>Returns true if the specified key is pressed now</returns>
-        public bool KeyPressed(Key key)
+        public bool KeyPressed(Keys key)
         {
-            return this.currentKeyboardState.IsPressed(key);
-        }
-        /// <summary>
-        /// Gets if specified mouse button is just released
-        /// </summary>
-        /// <param name="button">Mouse button</param>
-        /// <returns>Returns true if the specified mouse button is just released</returns>
-        public bool MouseButtonJustReleased(MouseButtons button)
-        {
-            if (this.previousMouseState != null)
-            {
-                return this.previousMouseState.Buttons[(int)button] && !this.currentMouseState.Buttons[(int)button];
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Gets if specified mouse button is just pressed
-        /// </summary>
-        /// <param name="button">Mouse button</param>
-        /// <returns>Returns true if the specified mouse button is just pressed</returns>
-        public bool MouseButtonJustPressed(MouseButtons button)
-        {
-            if (this.previousMouseState != null)
-            {
-                return !this.previousMouseState.Buttons[(int)button] && this.currentMouseState.Buttons[(int)button];
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Gets if specified mouse button is pressed now
-        /// </summary>
-        /// <param name="button">Mouse button</param>
-        /// <returns>Returns true if the specified mouse button is pressed now</returns>
-        public bool MouseButtonPressed(MouseButtons button)
-        {
-            return this.currentMouseState.Buttons[(int)button];
+            return this.currentKeyboardKeys.Contains(key);
         }
         /// <summary>
         /// Shows mouse cursor
         /// </summary>
         public void ShowMouse()
         {
-            System.Windows.Forms.Cursor.Show();
+            Cursor.Show();
         }
         /// <summary>
         /// Hides mouse cursor
         /// </summary>
         public void HideMouse()
         {
-            System.Windows.Forms.Cursor.Hide();
+            Cursor.Hide();
         }
         /// <summary>
         /// Sets mouse position
@@ -261,6 +343,141 @@ namespace Engine
         public void SetMousePosition(Point location)
         {
             Cursor.Position = location;
+
+            this.lastMousePos = this.form.PointToClient(Cursor.Position);
+        }
+
+        /// <summary>
+        /// Clear input data variables
+        /// </summary>
+        private void ClearInputData()
+        {
+            #region Mouse position
+
+            {
+                this.MouseXDelta = 0;
+                this.MouseYDelta = 0;
+
+                this.MouseX = this.lastMousePos.X;
+                this.MouseY = this.lastMousePos.Y;
+            }
+
+            #endregion
+
+            #region Mouse buttons
+
+            {
+                this.LeftMouseButtonPressed = false;
+                this.LeftMouseButtonJustPressed = false;
+                this.LeftMouseButtonJustReleased = false;
+
+                this.RightMouseButtonPressed = false;
+                this.RightMouseButtonJustPressed = false;
+                this.RightMouseButtonJustReleased = false;
+
+                this.MiddleMouseButtonPressed = false;
+                this.MiddleMouseButtonJustPressed = false;
+                this.MiddleMouseButtonJustReleased = false;
+
+                this.X1MouseButtonPressed = false;
+                this.X1MouseButtonJustPressed = false;
+                this.X1MouseButtonJustReleased = false;
+
+                this.X2MouseButtonPressed = false;
+                this.X2MouseButtonJustPressed = false;
+                this.X2MouseButtonJustReleased = false;
+
+                this.lastMouseButtons.Clear();
+                this.currentMouseButtons.Clear();
+            }
+
+            #endregion
+
+            #region Mouse Wheel
+
+            {
+                this.MouseWheelDelta = 0;
+            }
+
+            #endregion
+
+            #region Keyboard keys
+
+            {
+                this.lastKeyboardKeys.Clear();
+                this.currentKeyboardKeys.Clear();
+            }
+
+            #endregion
+        }
+        /// <summary>
+        /// Get mouse pressed buttons
+        /// </summary>
+        /// <returns>Return pressed buttons collection</returns>
+        private MouseButtons[] GetPressedButtons()
+        {
+            List<MouseButtons> res = new List<MouseButtons>();
+
+            if ((Control.MouseButtons & MouseButtons.Left) == MouseButtons.Left) res.Add(MouseButtons.Left);
+            if ((Control.MouseButtons & MouseButtons.Right) == MouseButtons.Right) res.Add(MouseButtons.Right);
+            if ((Control.MouseButtons & MouseButtons.Middle) == MouseButtons.Middle) res.Add(MouseButtons.Middle);
+            if ((Control.MouseButtons & MouseButtons.XButton1) == MouseButtons.XButton1) res.Add(MouseButtons.XButton1);
+            if ((Control.MouseButtons & MouseButtons.XButton2) == MouseButtons.XButton2) res.Add(MouseButtons.XButton2);
+
+            return res.ToArray();
+        }
+        /// <summary>
+        /// Get keyboard pressed keys
+        /// </summary>
+        /// <returns>Return pressed keys collection</returns>
+        private Keys[] GetPressedKeys()
+        {
+            List<Keys> pressedKeys = new List<Keys>();
+
+            byte[] array = new byte[256];
+            if (WindowsAPI.GetKeyboardState(array))
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    if ((array[i] & 0x80) != 0)
+                    {
+                        //Pressed
+                        Keys key = (Keys)i;
+                        
+                        pressedKeys.Add(key);
+                    }
+                }
+            }
+
+            return pressedKeys.ToArray();
+        }
+
+        /// <summary>
+        /// When mouse enters form
+        /// </summary>
+        /// <param name="sender">Form</param>
+        /// <param name="e">Event arguments</param>
+        private void OnMouseEnter(object sender, EventArgs e)
+        {
+            this.mouseIn = true;
+        }
+        /// <summary>
+        /// When mouse leaves form
+        /// </summary>
+        /// <param name="sender">Form</param>
+        /// <param name="e">Event arguments</param>
+        private void OnMouseLeave(object sender, EventArgs e)
+        {
+            this.mouseIn = false;
+        }
+        /// <summary>
+        /// When mouse wheel moves
+        /// </summary>
+        /// <param name="sender">Form</param>
+        /// <param name="e">Event arguments</param>
+        private void OnMouseWheel(object sender, MouseEventArgs e)
+        {
+            this.MouseWheelDelta = e.Delta;
         }
     }
 }

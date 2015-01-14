@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 using SharpDX;
 using SharpDX.Windows;
 
@@ -16,10 +15,6 @@ namespace Engine
         private bool initialized = false;
 
         /// <summary>
-        /// Show mouse
-        /// </summary>
-        public bool ShowMouse { get; set; }
-        /// <summary>
         /// Render width
         /// </summary>
         public int RenderWidth { get; private set; }
@@ -35,10 +30,6 @@ namespace Engine
         /// Absolute center
         /// </summary>
         public Point AbsoluteCenter { get; private set; }
-        /// <summary>
-        /// Is form active
-        /// </summary>
-        public bool Active { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -52,7 +43,6 @@ namespace Engine
         {
             this.IsFullscreen = fullScreen;
             this.AllowUserResizing = !fullScreen;
-            this.ShowMouse = !fullScreen;
 
             if (fullScreen)
             {
@@ -63,7 +53,7 @@ namespace Engine
                 this.ClientSize = new System.Drawing.Size(screenWidth, screenHeight);
             }
 
-            this.Active = true;
+            this.UpdateSizes(fullScreen);
 
             this.initialized = true;
         }
@@ -78,40 +68,28 @@ namespace Engine
 
             if (this.initialized)
             {
-                if (this.IsFullscreen)
-                {
-                    this.RenderWidth = this.Size.Width;
-                    this.RenderHeight = this.Size.Height;
-                }
-                else
-                {
-                    this.RenderWidth = this.ClientSize.Width;
-                    this.RenderHeight = this.ClientSize.Height;
-                }
-
-                this.RelativeCenter = new Point(this.RenderWidth / 2, this.RenderHeight / 2);
-                this.AbsoluteCenter = new Point(this.Location.X + this.RelativeCenter.X, this.Location.Y + this.RelativeCenter.Y);
+                this.UpdateSizes(this.IsFullscreen);
             }
         }
         /// <summary>
-        /// Mouse enter override
+        /// Update form sizes
         /// </summary>
-        /// <param name="e">Event arguments</param>
-        protected override void OnMouseEnter(EventArgs e)
+        /// <param name="fullScreen">Indicates whether the form is windowed or full screen</param>
+        private void UpdateSizes(bool fullScreen)
         {
-            base.OnMouseEnter(e);
+            if (fullScreen)
+            {
+                this.RenderWidth = this.Size.Width;
+                this.RenderHeight = this.Size.Height;
+            }
+            else
+            {
+                this.RenderWidth = this.ClientSize.Width;
+                this.RenderHeight = this.ClientSize.Height;
+            }
 
-            this.Active = this.ShowMouse ? this.Focused : (EngineForm.ActiveForm == this);
-        }
-        /// <summary>
-        /// Mouse leave override
-        /// </summary>
-        /// <param name="e">Event arguments</param>
-        protected override void OnMouseLeave(EventArgs e)
-        {
-            base.OnMouseLeave(e);
-
-            this.Active = this.ShowMouse ? this.Focused : false;
+            this.RelativeCenter = new Point(this.RenderWidth / 2, this.RenderHeight / 2);
+            this.AbsoluteCenter = new Point(this.Location.X + this.RelativeCenter.X, this.Location.Y + this.RelativeCenter.Y);
         }
     }
 }

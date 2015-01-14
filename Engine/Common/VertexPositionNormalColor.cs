@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D11;
 
@@ -55,6 +56,32 @@ namespace Engine.Common
             {
                 return Marshal.SizeOf(typeof(VertexPositionNormalColor));
             }
+        }
+
+        /// <summary>
+        /// Gets if structure contains data for the specified channel
+        /// </summary>
+        /// <param name="channel">Data channel</param>
+        /// <returns>Returns true if structure contains data for the specified channel</returns>
+        public bool HasChannel(VertexDataChannels channel)
+        {
+            if (channel == VertexDataChannels.Position) return true;
+            else if (channel == VertexDataChannels.Normal) return true;
+            else if (channel == VertexDataChannels.Color) return true;
+            else return false;
+        }
+        /// <summary>
+        /// Gets data channel value
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="channel">Data channel</param>
+        /// <returns>Returns data for the specified channel</returns>
+        public T GetChannelValue<T>(VertexDataChannels channel) where T : struct
+        {
+            if (channel == VertexDataChannels.Position) return (T)Convert.ChangeType(this.Position, typeof(T));
+            else if (channel == VertexDataChannels.Normal) return (T)Convert.ChangeType(this.Normal, typeof(T));
+            else if (channel == VertexDataChannels.Color) return (T)Convert.ChangeType(this.Color, typeof(T));
+            else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
 
         /// <summary>

@@ -1,5 +1,5 @@
-﻿using Engine;
-using SharpDX.DirectInput;
+﻿using System.Windows.Forms;
+using Engine;
 
 namespace SpriteDrawing
 {
@@ -47,32 +47,32 @@ namespace SpriteDrawing
         {
             base.Update(gameTime);
 
-            if (this.Game.Input.KeyJustReleased(Key.Escape))
+            if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.Home))
+            if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
                 this.spriteMov.Manipulator.SetPosition(0, 0);
             }
 
-            if (this.Game.Input.KeyPressed(Key.A))
+            if (this.Game.Input.KeyPressed(Keys.A))
             {
                 this.spriteMov.Manipulator.MoveLeft(gameTime, delta);
             }
 
-            if (this.Game.Input.KeyPressed(Key.D))
+            if (this.Game.Input.KeyPressed(Keys.D))
             {
                 this.spriteMov.Manipulator.MoveRight(gameTime, delta);
             }
 
-            if (this.Game.Input.KeyPressed(Key.W))
+            if (this.Game.Input.KeyPressed(Keys.W))
             {
                 this.spriteMov.Manipulator.MoveUp(gameTime, delta);
             }
 
-            if (this.Game.Input.KeyPressed(Key.S))
+            if (this.Game.Input.KeyPressed(Keys.S))
             {
                 this.spriteMov.Manipulator.MoveDown(gameTime, delta);
             }

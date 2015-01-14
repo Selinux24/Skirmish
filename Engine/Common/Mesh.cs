@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using Buffer = SharpDX.Direct3D11.Buffer;
@@ -16,6 +18,11 @@ namespace Engine.Common
     /// </summary>
     public class Mesh : IDisposable
     {
+        /// <summary>
+        /// Dynamic or inmutable buffers
+        /// </summary>
+        private bool dynamicBuffers = false;
+
         /// <summary>
         /// Vertex buffer
         /// </summary>
@@ -73,15 +80,35 @@ namespace Engine.Common
         /// Index count
         /// </summary>
         public int IndexCount { get; protected set; }
+        /// <summary>
+        /// Gets triangle list
+        /// </summary>
+        public Triangle[] Triangles { get; protected set; }
+        /// <summary>
+        /// Gets static bounding box
+        /// </summary>
+        public BoundingBox BoundingBox { get; protected set; }
+        /// <summary>
+        /// Gets static bounding sphere
+        /// </summary>
+        public BoundingSphere BoundingSphere { get; protected set; }
+        /// <summary>
+        /// Gets static oriented bounding box
+        /// </summary>
+        public OrientedBoundingBox OrientedBoundingBox { get; protected set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="material">Material name</param>
-        /// <param name="vertexType">Vertex type</param>
         /// <param name="topology">Topology</param>
-        public Mesh(string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices)
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        public Mesh(string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool dynamic = false)
         {
+            this.dynamicBuffers = dynamic;
+
             this.Material = material;
             this.Topology = topology;
             this.Vertices = vertices;
@@ -99,7 +126,7 @@ namespace Engine.Common
         {
             if (this.Vertices != null && this.Vertices.Length > 0)
             {
-                this.VertexBuffer = VertexData.CreateVertexBuffer(device, this.Vertices);
+                this.VertexBuffer = VertexData.CreateVertexBuffer(device, this.Vertices, this.dynamicBuffers);
                 this.VertexBufferStride = this.Vertices[0].Stride;
                 this.VertexCount = this.Vertices.Length;
 
@@ -108,8 +135,55 @@ namespace Engine.Common
 
             if (this.Indices != null && this.Indices.Length > 0)
             {
-                this.IndexBuffer = device.CreateIndexBufferImmutable((uint[])this.Indices);
+                if (this.dynamicBuffers)
+                {
+                    this.IndexBuffer = device.CreateIndexBufferWrite((uint[])this.Indices);
+                }
+                else
+                {
+                    this.IndexBuffer = device.CreateIndexBufferImmutable((uint[])this.Indices);
+                }
                 this.IndexCount = this.Indices.Length;
+            }
+
+            this.ComputeVolumes(Matrix.Identity);
+        }
+        /// <summary>
+        /// Updates mesh static volumes using per vertex transform
+        /// </summary>
+        /// <param name="transform">Per vertex transform</param>
+        public virtual void ComputeVolumes(Matrix transform)
+        {
+            if (this.Vertices != null && this.Vertices.Length > 0)
+            {
+                if (this.Vertices[0].HasChannel(VertexDataChannels.Position))
+                {
+                    //Get positions
+                    List<Vector3> positions = new List<Vector3>();
+
+                    Array.ForEach(this.Vertices, v =>
+                    {
+                        Vector3 p = v.GetChannelValue<Vector3>(VertexDataChannels.Position);
+
+                        if (!transform.IsIdentity) p = Vector3.TransformCoordinate(p, transform);
+
+                        positions.Add(p);
+                    });
+
+                    //Compute static volumes
+                    this.BoundingBox = BoundingBox.FromPoints(positions.ToArray());
+                    this.BoundingSphere = BoundingSphere.FromPoints(positions.ToArray());
+                    this.OrientedBoundingBox = new OrientedBoundingBox(positions.ToArray());
+
+                    if (this.Indices != null && this.Indices.Length > 0)
+                    {
+                        this.Triangles = Triangle.ComputeTriangleList(this.Topology, positions.ToArray(), this.Indices);
+                    }
+                    else
+                    {
+                        this.Triangles = Triangle.ComputeTriangleList(this.Topology, positions.ToArray());
+                    }
+                }
             }
         }
         /// <summary>
@@ -176,11 +250,18 @@ namespace Engine.Common
         /// <param name="data">Vertex data</param>
         public virtual void WriteVertexData(DeviceContext deviceContext, IVertexData[] data)
         {
-            this.Vertices = data;
-
-            if (this.VertexBuffer != null && this.Vertices != null && this.Vertices.Length > 0)
+            if (this.dynamicBuffers)
             {
-                VertexData.WriteVertexBuffer(deviceContext, this.VertexBuffer, this.Vertices);
+                this.Vertices = data;
+
+                if (this.VertexBuffer != null && this.Vertices != null && this.Vertices.Length > 0)
+                {
+                    VertexData.WriteVertexBuffer(deviceContext, this.VertexBuffer, this.Vertices);
+                }
+            }
+            else
+            {
+                throw new Exception("Attemp to write in inmutable buffers");
             }
         }
         /// <summary>
@@ -190,12 +271,50 @@ namespace Engine.Common
         /// <param name="data">Index data</param>
         public virtual void WriteIndexData(DeviceContext deviceContext, uint[] data)
         {
-            this.Indices = data;
-
-            if (this.IndexBuffer != null && this.Indices != null && this.Indices.Length > 0)
+            if (this.dynamicBuffers)
             {
-                deviceContext.WriteBuffer(this.IndexBuffer, this.Indices);
+                this.Indices = data;
+
+                if (this.IndexBuffer != null && this.Indices != null && this.Indices.Length > 0)
+                {
+                    deviceContext.WriteBuffer(this.IndexBuffer, this.Indices);
+                }
             }
+            else
+            {
+                throw new Exception("Attemp to write in inmutable buffers");
+            }
+        }
+        /// <summary>
+        /// Gets picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <returns>Returns true if ground position found</returns>
+        public virtual bool Pick(Ray ray, out Vector3 position, out Triangle triangle)
+        {
+            position = new Vector3();
+            triangle = new Triangle();
+
+            if (this.BoundingSphere.Intersects(ref ray) || this.BoundingBox.Intersects(ref ray))
+            {
+                for (int i = 0; i < this.Triangles.Length; i++)
+                {
+                    Triangle tri = this.Triangles[i];
+
+                    Vector3 pos;
+                    if (tri.Intersects(ref ray, out pos))
+                    {
+                        position = pos;
+                        triangle = tri;
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }

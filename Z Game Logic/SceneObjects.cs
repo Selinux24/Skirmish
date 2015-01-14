@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Windows.Forms;
 using Engine;
 using SharpDX;
-using SharpDX.DirectInput;
 
 namespace GameLogic
 {
@@ -54,24 +54,24 @@ namespace GameLogic
         {
             base.Update(gameTime);
 
-            bool shift = this.Game.Input.KeyPressed(Key.LeftShift) || this.Game.Input.KeyPressed(Key.RightShift);
+            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
 
-            if (this.Game.Input.KeyPressed(Key.A))
+            if (this.Game.Input.KeyPressed(Keys.A))
             {
                 this.Camera.MoveLeft(this.Game.GameTime, shift);
             }
 
-            if (this.Game.Input.KeyPressed(Key.D))
+            if (this.Game.Input.KeyPressed(Keys.D))
             {
                 this.Camera.MoveRight(this.Game.GameTime, shift);
             }
 
-            if (this.Game.Input.KeyPressed(Key.W))
+            if (this.Game.Input.KeyPressed(Keys.W))
             {
                 this.Camera.MoveForward(this.Game.GameTime, shift);
             }
 
-            if (this.Game.Input.KeyPressed(Key.S))
+            if (this.Game.Input.KeyPressed(Keys.S))
             {
                 this.Camera.MoveBackward(this.Game.GameTime, shift);
             }

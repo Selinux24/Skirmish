@@ -6,7 +6,11 @@ namespace SceneTest
     {
         static void Main()
         {
-            using (Game cl = new Game("3 SceneTest", 800, 600, false))
+#if DEBUG
+            using (Game cl = new Game("3 SceneTest", false, 800, 600))
+#else
+            using (Game cl = new Game("3 SceneTest"))
+#endif
             {
                 cl.AddScene(new TestSceneHID(cl) { Active = true, Order = 0, UseZBuffer = false, });
                 cl.AddScene(new TestScene3D(cl) { Active = true, Order = 1, UseZBuffer = true, });

@@ -327,6 +327,21 @@ namespace Engine
 
             return newModel;
         }
+        /// <summary>
+        /// Adds a line list drawer
+        /// </summary>
+        /// <param name="lines">Line list</param>
+        /// <param name="color">Color</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new line list drawer</returns>
+        public LineListDrawer AddLineListDrawer(Line[] lines, Color color, int order = 0)
+        {
+            LineListDrawer newModel = new LineListDrawer(this.Game, this, lines, color);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
 
         /// <summary>
         /// Add component to collection
@@ -366,6 +381,28 @@ namespace Engine
                 component.Dispose();
                 component = null;
             }
+        }
+
+        /// <summary>
+        /// Gets picking ray from current mouse position
+        /// </summary>
+        /// <returns>Returns picking ray from current mouse position</returns>
+        public Ray GetPickingRay()
+        {
+            int mouseX = this.Game.Input.MouseX;
+            int mouseY = this.Game.Input.MouseY;
+            Matrix worldViewProjection = this.World * this.ViewProjectionPerspective;
+            float nDistance = this.Camera.NearPlaneDistance;
+            float fDistance = this.Camera.FarPlaneDistance;
+            ViewportF viewport = this.Game.Graphics.Viewport;
+
+            Vector3 nVector = new Vector3(mouseX, mouseY, nDistance);
+            Vector3 fVector = new Vector3(mouseX, mouseY, fDistance);
+
+            Vector3 nPoint = Vector3.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+            Vector3 fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+
+            return new Ray(nPoint, Vector3.Normalize(fPoint - nPoint));
         }
     }
 }

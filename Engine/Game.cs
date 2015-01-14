@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using SharpDX.Windows;
 using SharpDX.DXGI;
+using SharpDX.Windows;
 
 namespace Engine
 {
@@ -17,6 +17,10 @@ namespace Engine
         /// Scene list
         /// </summary>
         private List<Scene> scenes = new List<Scene>();
+        /// <summary>
+        /// Application exiting flag
+        /// </summary>
+        private bool exiting = false;
 
         /// <summary>
         /// Name
@@ -66,6 +70,54 @@ namespace Engine
                 return this.scenes.FindAll(s => s.Active == true).Count;
             }
         }
+        /// <summary>
+        /// Gets or sets if the cursor is visible
+        /// </summary>
+        public bool VisibleMouse
+        {
+            get
+            {
+                if (this.Input != null)
+                {
+                    return this.Input.VisibleMouse;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            set
+            {
+                if (this.Input != null)
+                {
+                    this.Input.VisibleMouse = value;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets or sets if the cursor is locked to the screen center
+        /// </summary>
+        public bool LockMouse
+        {
+            get
+            {
+                if (this.Input != null)
+                {
+                    return this.Input.LockMouse;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            set
+            {
+                if (this.Input != null)
+                {
+                    this.Input.LockMouse = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -76,7 +128,7 @@ namespace Engine
         /// <param name="fullScreen">Full screen window</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampleCount">Multi-sample count</param>
-        public Game(string name, int screenWidth = 0, int screenHeight = 0, bool fullScreen = true, int refreshRate = 0, int multiSampleCount = 0)
+        public Game(string name, bool fullScreen = true, int screenWidth = 0, int screenHeight = 0, int refreshRate = 0, int multiSampleCount = 0)
         {
             this.Name = name;
 
@@ -104,16 +156,6 @@ namespace Engine
 
                     this.scenes.ForEach(s => s.HandleWindowResize());
                 }
-            };
-
-            this.Form.GotFocus += (sender, eventArgs) =>
-            {
-                this.HandleFocus(true);
-            };
-
-            this.Form.LostFocus += (sender, eventArgs) =>
-            {
-                this.HandleFocus(false);
             };
 
             #endregion
@@ -176,16 +218,16 @@ namespace Engine
 
             FontMap.ClearCache();
 
-            if (this.Input != null)
-            {
-                this.Input.Dispose();
-                this.Input = null;
-            }
-
             if (this.Graphics != null)
             {
                 this.Graphics.Dispose();
                 this.Graphics = null;
+            }
+
+            if (this.Input != null)
+            {
+                this.Input.Dispose();
+                this.Input = null;
             }
 
             if (this.Form != null)
@@ -199,7 +241,7 @@ namespace Engine
         /// </summary>
         public void Exit()
         {
-            this.Form.Close();
+            this.exiting = true;
         }
 
         /// <summary>
@@ -208,15 +250,6 @@ namespace Engine
         private void Frame()
         {
             this.GameTime.Update();
-
-            if (this.Form.Active)
-            {
-                this.Input.Update();
-            }
-            else
-            {
-                this.Input.Clear();
-            }
 
             this.Graphics.Begin();
 
@@ -241,6 +274,8 @@ namespace Engine
 
             this.Graphics.End();
 
+            this.Input.Update();
+
             Counters.FrameCount++;
             Counters.FrameTime += this.GameTime.ElapsedSeconds;
 
@@ -263,33 +298,11 @@ namespace Engine
             }
 
             Counters.ClearFrame();
-        }
-        /// <summary>
-        /// Handle game form focus
-        /// </summary>
-        /// <param name="hasFocus">Indicates whether the game window has focus</param>
-        private void HandleFocus(bool hasFocus)
-        {
-            if (this.Input != null)
+
+            if (this.exiting)
             {
-                if (hasFocus)
-                {
-                    if (this.Form.ShowMouse)
-                    {
-                        this.Input.LockToCenter = false;
-                        this.Input.ShowMouse();
-                    }
-                    else
-                    {
-                        this.Input.LockToCenter = true;
-                        this.Input.HideMouse();
-                    }
-                }
-                else
-                {
-                    this.Input.LockToCenter = false;
-                    this.Input.ShowMouse();
-                }
+                //Exit form
+                this.Form.Close();
             }
         }
     }

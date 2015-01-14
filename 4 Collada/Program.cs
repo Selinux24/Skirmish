@@ -6,10 +6,19 @@ namespace Collada
     {
         static void Main()
         {
-            //using (Game cl = new Game("4 Collada", 1366, 768, true, 60))
+#if DEBUG
+            using (Game cl = new Game("4 Collada", false, 800, 600, 60))
+#else
             using (Game cl = new Game("4 Collada"))
+#endif
             {
-                cl.Form.ShowMouse = false;
+#if DEBUG
+                cl.VisibleMouse = true;
+                cl.LockMouse = false;
+#else
+                cl.VisibleMouse = false;
+                cl.LockMouse = true;
+#endif
 
                 cl.AddScene(new TestScene3D(cl) { Active = true, });
 

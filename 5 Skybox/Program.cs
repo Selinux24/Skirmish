@@ -6,8 +6,20 @@ namespace Skybox
     {
         static void Main()
         {
-            using (Game cl = new Game("5 Skybox", 800, 600, false))
+#if DEBUG
+            using (Game cl = new Game("5 Skybox", false, 800, 600))
+#else
+            using (Game cl = new Game("5 Skybox"))
+#endif
             {
+#if DEBUG
+                cl.VisibleMouse = true;
+                cl.LockMouse = false;
+#else
+                cl.VisibleMouse = false;
+                cl.LockMouse = true;
+#endif
+
                 cl.AddScene(new TestScene3D(cl) { Active = true, });
 
                 cl.Run();

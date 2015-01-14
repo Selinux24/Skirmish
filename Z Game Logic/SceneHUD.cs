@@ -1,6 +1,6 @@
-﻿using Engine;
+﻿using System.Windows.Forms;
+using Engine;
 using SharpDX;
-using SharpDX.DirectInput;
 
 namespace GameLogic
 {
@@ -52,37 +52,37 @@ namespace GameLogic
         {
             base.Update(gameTime);
 
-            if (this.Game.Input.KeyJustReleased(Key.Escape))
+            if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.N))
+            if (this.Game.Input.KeyJustReleased(Keys.N))
             {
-                Program.NextSoldier(this.Game.Input.KeyPressed(Key.LeftShift));
+                Program.NextSoldier(this.Game.Input.KeyPressed(Keys.LShiftKey));
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.P))
+            if (this.Game.Input.KeyJustReleased(Keys.P))
             {
-                Program.PrevSoldier(this.Game.Input.KeyPressed(Key.LeftShift));
+                Program.PrevSoldier(this.Game.Input.KeyPressed(Keys.LShiftKey));
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.X))
+            if (this.Game.Input.KeyJustReleased(Keys.X))
             {
                 Program.DoAction();
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.Right))
+            if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
                 Program.NextAction();
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.Left))
+            if (this.Game.Input.KeyJustReleased(Keys.Left))
             {
                 Program.PrevAction();
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.E))
+            if (this.Game.Input.KeyJustReleased(Keys.E))
             {
                 Victory v = Program.Next();
                 if (v != null)

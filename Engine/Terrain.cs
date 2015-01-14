@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine
 {
@@ -22,10 +23,6 @@ namespace Engine
         /// Skydom
         /// </summary>
         private Cubemap skydom = null;
-        /// <summary>
-        /// Position cache
-        /// </summary>
-        private Triangle[] terrainCache = null;
 
         /// <summary>
         /// Current scene
@@ -45,6 +42,18 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; private set; }
+        /// <summary>
+        /// Gets static bounding box
+        /// </summary>
+        public BoundingBox BoundingBox { get { return this.terrain.BoundingBox; } }
+        /// <summary>
+        /// Gets static bounding sphere
+        /// </summary>
+        public BoundingSphere BoundingSphere { get { return this.terrain.BoundingSphere; } }
+        /// <summary>
+        /// Gets static oriented bounding box
+        /// </summary>
+        public OrientedBoundingBox OrientedBoundingBox { get { return this.terrain.OrientedBoundingBox; } }
 
         /// <summary>
         /// Constructor
@@ -60,14 +69,14 @@ namespace Engine
             this.Manipulator = new Manipulator3D();
 
             this.terrain = new Model(game, scene, content);
-            this.terrainCache = content.ComputeTriangleList();
+            this.terrain.ComputeVolumes(Matrix.Identity);
 
             if (description != null && description.AddVegetation)
             {
                 ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
                     contentFolder,
                     description.VegetarionTextures,
-                    this.terrainCache,
+                    this.terrain.Triangles,
                     description.Saturation,
                     description.MinSize,
                     description.MaxSize,
@@ -152,35 +161,61 @@ namespace Engine
         }
 
         /// <summary>
+        /// Updates model static volumes using per vertex transform
+        /// </summary>
+        /// <param name="transform">Per vertex transform</param>
+        public void ComputeVolumes(Matrix transform)
+        {
+            this.terrain.ComputeVolumes(transform);
+        }
+        /// <summary>
+        /// Get oriented bounding boxes collection
+        /// </summary>
+        /// <returns>Returns oriented bounding boxes list</returns>
+        public BoundingBox[] GetBoundingBoxes()
+        {
+            return this.terrain.GetBoundingBoxes();
+        }
+        /// <summary>
         /// Gets ground position giving x, z coordinates
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="z">Z coordinate</param>
-        /// <returns>Returns ground position if exists</returns>
-        public Vector3? FindGroundPosition(float x, float z)
+        /// <param name="position">Ground position if exists</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindGroundPosition(float x, float z, out Vector3 position)
         {
-            Vector3? position = null;
-
+            Triangle tri;
+            return FindGroundPosition(x, z, out position, out tri);
+        }
+        /// <summary>
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindGroundPosition(float x, float z, out Vector3 position, out Triangle triangle)
+        {
             Ray ray = new Ray()
             {
                 Position = new Vector3(x, 1000f, z),
                 Direction = Vector3.Down,
             };
 
-            for (int i = 0; i < this.terrainCache.Length; i++)
-            {
-                Triangle tri = Triangle.Transform(this.terrainCache[i], this.Manipulator.LocalTransform);
-
-                Vector3 pos;
-                if (tri.Intersects(ref ray, out pos))
-                {
-                    position = pos;
-
-                    break;
-                }
-            }
-
-            return position;
+            return this.terrain.Pick(ray, out position, out triangle);
+        }
+        /// <summary>
+        /// Pick position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="position">Picked position if exists</param>
+        /// <param name="triangle">Picked triangle if exists</param>
+        /// <returns>Returns true if picked position found</returns>
+        public bool Pick(Ray ray, out Vector3 position, out Triangle triangle)
+        {
+            return this.terrain.Pick(ray, out position, out triangle);
         }
     }
 

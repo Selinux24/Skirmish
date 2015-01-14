@@ -112,6 +112,52 @@ namespace Engine.Content
         /// </summary>
         public SkinningContent SkinningInfo { get; set; }
 
+        public static ModelContent GenerateLineList(Line[] lines, Color color)
+        {
+            ModelContent modelContent = new ModelContent();
+
+            VertexData[] verts = null;
+            CreateLineList(lines, color, out verts);
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = PrimitiveTopology.LineList,
+                VertexType = VertexTypes.PositionColor,
+                Vertices = verts,
+                Material = ModelContent.NoMaterial,
+            };
+
+            modelContent.Materials.Add(ModelContent.NoMaterial, MaterialContent.Default);
+            modelContent.Geometry.Add(ModelContent.StaticMesh, ModelContent.NoMaterial, geo);
+
+            modelContent.Prepare();
+
+            return modelContent;
+        }
+        public static ModelContent GenerateTriangle(Triangle triangle, Color color)
+        {
+            ModelContent modelContent = new ModelContent();
+
+            VertexData[] verts = null;
+            uint[] indices = null;
+            CreateTriangle(triangle, color, out verts, out indices);
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = PrimitiveTopology.LineList,
+                VertexType = VertexTypes.PositionColor,
+                Vertices = verts,
+                Indices = indices,
+                Material = ModelContent.NoMaterial,
+            };
+
+            modelContent.Materials.Add(ModelContent.NoMaterial, MaterialContent.Default);
+            modelContent.Geometry.Add(ModelContent.StaticMesh, ModelContent.NoMaterial, geo);
+
+            modelContent.Prepare();
+
+            return modelContent;
+        }
         public static ModelContent GenerateSprite(string contentFolder, string texture)
         {
             return GenerateSprite(contentFolder, texture, 1, 1, 0, 0);
@@ -314,6 +360,41 @@ namespace Engine.Content
             return modelContent;
         }
 
+        public static void CreateLineList(Line[] lines, Color color, out VertexData[] v)
+        {
+            List<VertexData> data = new List<VertexData>();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                data.Add(VertexData.CreateVertexPositionColor(lines[i].Point1, color));
+                data.Add(VertexData.CreateVertexPositionColor(lines[i].Point2, color));
+            }
+
+            v = data.ToArray();
+        }
+        public static void CreateTriangle(Triangle triangle, Color color, out VertexData[] v, out uint[] i)
+        {
+            v = new VertexData[3];
+            i = new uint[6];
+
+            v[0].Position = triangle.Point1;
+            v[0].Color = color;
+
+            v[1].Position = triangle.Point2;
+            v[1].Color = color;
+
+            v[2].Position = triangle.Point3;
+            v[2].Color = color;
+
+            i[0] = 0;
+            i[1] = 1;
+
+            i[2] = 1;
+            i[3] = 2;
+
+            i[4] = 2;
+            i[5] = 0;
+        }
         public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out VertexData[] v, out uint[] i)
         {
             v = new VertexData[4];
@@ -621,6 +702,94 @@ namespace Engine.Content
             i = indexList.ToArray();
         }
 
+        public static Line[] CreateTriangleWired(Triangle triangle)
+        {
+            return CreateTriangleWired(triangle.GetCorners());
+        }
+        public static Line[] CreateTriangleWired(Vector3[] corners)
+        {
+            List<Line> lines = new List<Line>();
+
+            uint[] indexes = new uint[6];
+
+            indexes[0] = 0;
+            indexes[1] = 1;
+
+            indexes[2] = 1;
+            indexes[3] = 2;
+
+            indexes[4] = 2;
+            indexes[5] = 0;
+
+            for (int i = 0; i < indexes.Length; i += 2)
+            {
+                Line l = new Line()
+                {
+                    Point1 = corners[indexes[i + 0]],
+                    Point2 = corners[indexes[i + 1]],
+                };
+
+                lines.Add(l);
+            }
+
+            return lines.ToArray();
+        }
+        public static Line[] CreateBoxWired(BoundingBox[] bbox)
+        {
+            List<Line> lines = new List<Line>();
+
+            for (int i = 0; i < bbox.Length; i++)
+            {
+                lines.AddRange(CreateBoxWired(bbox[i]));
+            }
+
+            return lines.ToArray();
+        }
+        public static Line[] CreateBoxWired(BoundingBox bbox)
+        {
+            return CreateBoxWired(bbox.GetCorners());
+        }
+        public static Line[] CreateBoxWired(OrientedBoundingBox obbox)
+        {
+            return CreateBoxWired(obbox.GetCorners());
+        }
+        public static Line[] CreateBoxWired(Vector3[] corners)
+        {
+            List<Line> lines = new List<Line>();
+
+            uint[] indexes = new uint[24];
+
+            int index = 0;
+
+            indexes[index++] = 0; indexes[index++] = 1;
+            indexes[index++] = 0; indexes[index++] = 3;
+            indexes[index++] = 1; indexes[index++] = 2;
+            indexes[index++] = 3; indexes[index++] = 2;
+
+            indexes[index++] = 4; indexes[index++] = 5;
+            indexes[index++] = 4; indexes[index++] = 7;
+            indexes[index++] = 5; indexes[index++] = 6;
+            indexes[index++] = 7; indexes[index++] = 6;
+
+            indexes[index++] = 0; indexes[index++] = 4;
+            indexes[index++] = 1; indexes[index++] = 5;
+            indexes[index++] = 2; indexes[index++] = 6;
+            indexes[index++] = 3; indexes[index++] = 7;
+
+            for (int i = 0; i < indexes.Length; i += 2)
+            {
+                Line l = new Line()
+                {
+                    Point1 = corners[indexes[i + 0]],
+                    Point2 = corners[indexes[i + 1]],
+                };
+
+                lines.Add(l);
+            }
+
+            return lines.ToArray();
+        }
+
         private static SubMeshContent GroupMeshes(SubMeshContent[] meshArray)
         {
             if (meshArray.Length == 1)
@@ -726,48 +895,6 @@ namespace Engine.Content
             }
 
             this.Geometry = newDict;
-        }
-        public Triangle[] ComputeTriangleList()
-        {
-            List<Triangle> list = new List<Triangle>();
-
-            foreach (Dictionary<string, SubMeshContent> gDict in this.Geometry.Values)
-            {
-                foreach (SubMeshContent g in gDict.Values)
-                {
-                    list.AddRange(g.ComputeTriangleList());
-                }
-            }
-
-            return list.ToArray();
-        }
-        public BoundingSphere ComputeBoundingSphere()
-        {
-            BoundingSphere bsphere = new BoundingSphere();
-
-            foreach (Dictionary<string, SubMeshContent> gDict in this.Geometry.Values)
-            {
-                foreach (SubMeshContent g in gDict.Values)
-                {
-                    bsphere = BoundingSphere.Merge(bsphere, g.BoundingSphere);
-                }
-            }
-
-            return bsphere;
-        }
-        public BoundingBox ComputeBoundingBox()
-        {
-            BoundingBox bbox = new BoundingBox();
-
-            foreach (Dictionary<string, SubMeshContent> gDict in this.Geometry.Values)
-            {
-                foreach (SubMeshContent g in gDict.Values)
-                {
-                    bbox = BoundingBox.Merge(bbox, g.BoundingBox);
-                }
-            }
-
-            return bbox;
         }
         public ControllerContent GetControllerForMesh(string meshName)
         {

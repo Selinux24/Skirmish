@@ -1,4 +1,5 @@
-﻿using Engine;
+﻿using System.Windows.Forms;
+using Engine;
 using SharpDX;
 
 namespace SceneTest
@@ -99,7 +100,7 @@ namespace SceneTest
         {
             base.Update(gameTime);
 
-            if (this.Game.Input.KeyJustReleased(SharpDX.DirectInput.Key.Add))
+            if (this.Game.Input.KeyJustReleased(Keys.Add))
             {
                 this.currentSize++;
 
@@ -107,7 +108,7 @@ namespace SceneTest
                 this.InitializeText(this.currentSize);
             }
 
-            if (this.Game.Input.KeyJustReleased(SharpDX.DirectInput.Key.Subtract))
+            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
             {
                 this.currentSize--;
 

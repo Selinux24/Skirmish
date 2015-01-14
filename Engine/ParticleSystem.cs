@@ -133,9 +133,9 @@ namespace Engine
                 {
                     data[i] = new VertexParticle
                     {
-                        InitialPositionWorld = description.EmitterPositions[i],
-                        InitialVelocityWorld = description.Acceleration,
-                        SizeWorld = new Vector2(description.ParticleSize),
+                        Position = description.EmitterPositions[i],
+                        Velocity = description.Acceleration,
+                        Size = new Vector2(description.ParticleSize),
                         Age = 0,
                         Type = (uint)ParticleTypes.Emitter,
                     };
@@ -147,9 +147,9 @@ namespace Engine
 
                 VertexParticle p = new VertexParticle
                 {
-                    InitialPositionWorld = scene.Camera.Position,
-                    InitialVelocityWorld = description.Acceleration,
-                    SizeWorld = new Vector2(description.ParticleSize),
+                    Position = scene.Camera.Position,
+                    Velocity = description.Acceleration,
+                    Size = new Vector2(description.ParticleSize),
                     Age = 0,
                     Type = (uint)ParticleTypes.Emitter,
                 };

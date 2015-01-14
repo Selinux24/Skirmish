@@ -78,6 +78,20 @@ namespace Engine.Common
         /// Generates vertex helper from components
         /// </summary>
         /// <param name="position">Position</param>
+        /// <param name="size">Sprite size</param>
+        /// <returns>Returns helper</returns>
+        public static VertexData CreateVertexParticle(Vector3 position, Vector2 size)
+        {
+            return new VertexData
+            {
+                Position = position,
+                Size = size,
+            };
+        }
+        /// <summary>
+        /// Generates vertex helper from components
+        /// </summary>
+        /// <param name="position">Position</param>
         /// <returns>Returns helper</returns>
         public static VertexData CreateVertexPosition(Vector3 position)
         {
@@ -293,6 +307,22 @@ namespace Engine.Common
             return new VertexBillboard
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Size = v.Size.HasValue ? v.Size.Value : Vector2.One,
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexParticle CreateVertexParticle(VertexData v)
+        {
+            return new VertexParticle
+            {
+                Type = 0,
+                Age = 0,
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Velocity = Vector3.Zero,
                 Size = v.Size.HasValue ? v.Size.Value : Vector2.One,
             };
         }
@@ -564,8 +594,9 @@ namespace Engine.Common
         /// </summary>
         /// <param name="device">Device</param>
         /// <param name="vertices">Vertices</param>
-        /// <returns>Return new buffer</returns>
-        public static Buffer CreateVertexBuffer(Device device, IVertexData[] vertices)
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        /// <returns>Returns new buffer</returns>
+        public static Buffer CreateVertexBuffer(Device device, IVertexData[] vertices, bool dynamic)
         {
             Buffer buffer = null;
 
@@ -573,55 +604,59 @@ namespace Engine.Common
             {
                 if (vertices[0].VertexType == VertexTypes.Billboard)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexBillboard)v));
+                    buffer = CreateVertexBuffer<VertexBillboard>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.Particle)
+                {
+                    buffer = CreateVertexBuffer<VertexParticle>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.Position)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPosition)v));
+                    buffer = CreateVertexBuffer<VertexPosition>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionColor)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionColor)v));
+                    buffer = CreateVertexBuffer<VertexPositionColor>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalColor)v));
+                    buffer = CreateVertexBuffer<VertexPositionNormalColor>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionTexture)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionTexture)v));
+                    buffer = CreateVertexBuffer<VertexPositionTexture>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTexture)v));
+                    buffer = CreateVertexBuffer<VertexPositionNormalTexture>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTextureTangent)v));
+                    buffer = CreateVertexBuffer<VertexPositionNormalTextureTangent>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPosition)v));
+                    buffer = CreateVertexBuffer<VertexSkinnedPosition>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionColor)v));
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionColor>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalColor)v));
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalColor>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionTexture)v));
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionTexture>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalTexture>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
                 {
-                    buffer = device.CreateVertexBufferWrite(Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalTextureTangent>(device, vertices, dynamic);
                 }
                 else
                 {
@@ -630,6 +665,27 @@ namespace Engine.Common
             }
 
             return buffer;
+        }
+        /// <summary>
+        /// Creates a vertex buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Device</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns new buffer</returns>
+        public static Buffer CreateVertexBuffer<T>(Device device, IVertexData[] vertices, bool dynamic) where T : struct, IVertexData
+        {
+            T[] data = Array.ConvertAll((IVertexData[])vertices, v => (T)v);
+
+            if (dynamic)
+            {
+                return device.CreateVertexBufferWrite(data);
+            }
+            else
+            {
+                return device.CreateVertexBufferImmutable(data);
+            }
         }
         /// <summary>
         /// Writes vertex buffer data
@@ -913,5 +969,48 @@ namespace Engine.Common
 
             return text;
         }
+    }
+
+    /// <summary>
+    /// Vertex Channels
+    /// </summary>
+    public enum VertexDataChannels
+    {
+        /// <summary>
+        /// Position
+        /// </summary>
+        Position,
+        /// <summary>
+        /// Normal
+        /// </summary>
+        Normal,
+        /// <summary>
+        /// Tangent
+        /// </summary>
+        Tangent,
+        /// <summary>
+        /// Binormal
+        /// </summary>
+        BiNormal,
+        /// <summary>
+        /// Texture UV
+        /// </summary>
+        Texture,
+        /// <summary>
+        /// Color
+        /// </summary>
+        Color,
+        /// <summary>
+        /// Sprite size
+        /// </summary>
+        Size,
+        /// <summary>
+        /// Vertex weights
+        /// </summary>
+        Weights,
+        /// <summary>
+        /// Bone weights
+        /// </summary>
+        BoneIndices,
     }
 }

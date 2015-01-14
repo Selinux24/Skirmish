@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using SharpDX;
-using SharpDX.Direct3D;
+﻿using SharpDX.Direct3D;
 
 namespace Engine.Content
 {
@@ -40,9 +38,6 @@ namespace Engine.Content
             set
             {
                 this.vertices = value;
-
-                this.BoundingBox = this.ComputeBoundingBox();
-                this.BoundingSphere = this.ComputeBoundingSphere();
             }
         }
         /// <summary>
@@ -63,66 +58,6 @@ namespace Engine.Content
         /// Material
         /// </summary>
         public string Material { get; set; }
-        /// <summary>
-        /// Bounding box
-        /// </summary>
-        public BoundingBox BoundingBox { get; private set; }
-        /// <summary>
-        /// Bounding sphere
-        /// </summary>
-        public BoundingSphere BoundingSphere { get; private set; }
-
-        /// <summary>
-        /// Compute triangle list
-        /// </summary>
-        /// <returns>Returns computed triangle list</returns>
-        public Triangle[] ComputeTriangleList()
-        {
-            if (this.indices != null && this.indices.Length > 0)
-            {
-                return Triangle.ComputeTriangleList(this.Topology, this.vertices, this.indices);
-            }
-            else
-            {
-                return Triangle.ComputeTriangleList(this.Topology, this.vertices);
-            }
-        }
-        /// <summary>
-        /// Compute bounding sphere
-        /// </summary>
-        /// <returns>Returns computed bounding sphere</returns>
-        private BoundingSphere ComputeBoundingSphere()
-        {
-            List<Vector3> list = new List<Vector3>();
-
-            foreach (VertexData v in this.Vertices)
-            {
-                if (v.Position.HasValue)
-                {
-                    list.Add(v.Position.Value);
-                }
-            }
-
-            return BoundingSphere.FromPoints(list.ToArray());
-        }
-        /// <summary>
-        /// Compute bounding box
-        /// </summary>
-        /// <returns>Returns computed bounding box</returns>
-        private BoundingBox ComputeBoundingBox()
-        {
-            List<Vector3> list = new List<Vector3>();
-
-            foreach (VertexData v in this.Vertices)
-            {
-                if (v.Position.HasValue)
-                {
-                    list.Add(v.Position.Value);
-                }
-            }
-
-            return BoundingBox.FromPoints(list.ToArray());
-        }
 
         /// <summary>
         /// Gets text representation of instance

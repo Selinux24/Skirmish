@@ -100,9 +100,10 @@ namespace Engine.Common
         /// <summary>
         /// Generate a triangle list from vertices
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <returns>Return the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, VertexData[] vertices)
+        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Vector3[] vertices)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
@@ -111,9 +112,9 @@ namespace Engine.Common
                 for (int i = 0; i < vertices.Length; i += 3)
                 {
                     Triangle tri = new Triangle(
-                        vertices[i + 0].Position.Value,
-                        vertices[i + 1].Position.Value,
-                        vertices[i + 2].Position.Value);
+                        vertices[i + 0],
+                        vertices[i + 1],
+                        vertices[i + 2]);
 
                     triangleList.Add(tri);
                 }
@@ -122,20 +123,17 @@ namespace Engine.Common
             {
                 throw new NotImplementedException();
             }
-            else
-            {
-                throw new Exception("Bad topology for triangle");
-            }
 
             return triangleList.ToArray();
         }
         /// <summary>
         /// Generate a triangle list from vertices and indices
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         /// <returns>Return the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, VertexData[] vertices, uint[] indices)
+        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Vector3[] vertices, uint[] indices)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
@@ -144,9 +142,9 @@ namespace Engine.Common
                 for (int i = 0; i < indices.Length; i += 3)
                 {
                     Triangle tri = new Triangle(
-                        vertices[indices[i + 0]].Position.Value,
-                        vertices[indices[i + 1]].Position.Value,
-                        vertices[indices[i + 2]].Position.Value);
+                        vertices[indices[i + 0]],
+                        vertices[indices[i + 1]],
+                        vertices[indices[i + 2]]);
 
                     triangleList.Add(tri);
                 }
@@ -154,10 +152,6 @@ namespace Engine.Common
             else if (topology == PrimitiveTopology.TriangleStrip || topology == PrimitiveTopology.TriangleStripWithAdjacency)
             {
                 throw new NotImplementedException();
-            }
-            else
-            {
-                throw new Exception("Bad topology for triangle");
             }
 
             return triangleList.ToArray();
@@ -566,6 +560,19 @@ namespace Engine.Common
             }
 
             return false;
+        }
+        /// <summary>
+        /// Retrieves the three corners of the triangle.
+        /// </summary>
+        /// <returns>An array of points representing the three corners of the triangle.</returns>
+        public Vector3[] GetCorners()
+        {
+            return new[]
+            {
+                this.Point1,
+                this.Point2,
+                this.Point3,
+            };
         }
     }
 }

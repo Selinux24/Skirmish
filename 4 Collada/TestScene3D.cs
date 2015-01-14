@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Windows.Forms;
 using Engine;
 using SharpDX;
-using SharpDX.DirectInput;
 
 namespace Collada
 {
@@ -111,12 +111,12 @@ namespace Collada
                 float posX = (x++ * left);
                 float posZ = (z * -back);
 
-                Vector3? v = this.ground.FindGroundPosition(posX, posZ);
-                if (v.HasValue)
+                Vector3 p;
+                if (this.ground.FindGroundPosition(posX, posZ, out p))
                 {
                     this.helicopters[i].SetScale(1);
                     this.helicopters[i].SetRotation(Quaternion.Identity);
-                    this.helicopters[i].SetPosition(v.Value + (Vector3.UnitY * 15f));
+                    this.helicopters[i].SetPosition(p + (Vector3.UnitY * 15f));
                 }
             }
 
@@ -128,60 +128,105 @@ namespace Collada
         {
             base.Update(gameTime);
 
-            if (this.Game.Input.KeyJustReleased(Key.Escape))
+            if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.Home))
+            if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
                 this.InitializeHelicopters();
             }
 
-            this.UpdateCamera(gameTime);
+            this.UpdateInput(gameTime);
             this.UpdateEnvironment(gameTime);
             this.UpdateHelicopters(gameTime);
 
             this.fps.Text = this.Game.RuntimeText;
         }
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateInput(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Key.C))
+            if (this.Game.Input.KeyJustReleased(Keys.Tab))
+            {
+                this.helicopters.Next();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.C))
             {
                 this.chaseCamera = !this.chaseCamera;
             }
 
             if (!this.chaseCamera)
             {
-                bool slow = this.Game.Input.KeyPressed(Key.LeftShift);
+                bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
-                if (this.Game.Input.KeyPressed(Key.A))
+                if (this.Game.Input.KeyPressed(Keys.A))
                 {
                     this.Camera.MoveLeft(this.Game.GameTime, slow);
                 }
 
-                if (this.Game.Input.KeyPressed(Key.D))
+                if (this.Game.Input.KeyPressed(Keys.D))
                 {
                     this.Camera.MoveRight(this.Game.GameTime, slow);
                 }
 
-                if (this.Game.Input.KeyPressed(Key.W))
+                if (this.Game.Input.KeyPressed(Keys.W))
                 {
                     this.Camera.MoveForward(this.Game.GameTime, slow);
                 }
 
-                if (this.Game.Input.KeyPressed(Key.S))
+                if (this.Game.Input.KeyPressed(Keys.S))
                 {
                     this.Camera.MoveBackward(this.Game.GameTime, slow);
                 }
 
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
-                    this.Game.Input.MouseX,
-                    this.Game.Input.MouseY);
+                    this.Game.Input.MouseXDelta,
+                    this.Game.Input.MouseYDelta);
             }
             else
             {
+                if (this.Game.Input.KeyPressed(Keys.A))
+                {
+                    this.helicopters.Manipulator.MoveLeft(gameTime);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.D))
+                {
+                    this.helicopters.Manipulator.MoveRight(gameTime);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.W))
+                {
+                    this.helicopters.Manipulator.MoveForward(gameTime);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.S))
+                {
+                    this.helicopters.Manipulator.MoveBackward(gameTime);
+                }
+
+                if (this.Game.Input.MouseXDelta < 0)
+                {
+                    this.helicopters.Manipulator.YawLeft(gameTime);
+                }
+
+                if (this.Game.Input.MouseXDelta > 0)
+                {
+                    this.helicopters.Manipulator.YawRight(gameTime);
+                }
+
+                if (this.Game.Input.MouseYDelta < 0)
+                {
+                    this.helicopters.Manipulator.MoveUp(gameTime);
+                }
+
+                if (this.Game.Input.MouseYDelta > 0)
+                {
+                    this.helicopters.Manipulator.MoveDown(gameTime);
+                }
+
                 Vector3 position = this.helicopters.Manipulator.Position;
                 Vector3 interest = (position - (this.helicopters.Manipulator.Forward * 10f));
                 position += this.helicopters.Manipulator.Up * 2f;
@@ -200,17 +245,17 @@ namespace Collada
             float lampPosX = r * (float)Math.Cos(1f / r * this.Game.GameTime.TotalSeconds);
             float lampPosZ = r * (float)Math.Sin(1f / r * this.Game.GameTime.TotalSeconds);
 
-            Vector3? lampPos = this.ground.FindGroundPosition(lampPosX, lampPosZ);
-            if (lampPos.HasValue)
+            Vector3 lampPos;
+            if (this.ground.FindGroundPosition(lampPosX, lampPosZ, out lampPos))
             {
-                this.lamps[0].SetPosition(lampPos.Value + (Vector3.UnitY * 30f));
+                this.lamps[0].SetPosition(lampPos + (Vector3.UnitY * 30f));
             }
 
             this.Lights.PointLight.Position = this.lamps[0].Position;
 
             #endregion
 
-            if (this.Game.Input.KeyJustReleased(Key.NumberPad0))
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad0))
             {
                 this.Lights.DirectionalLight1Enabled = true;
                 this.Lights.DirectionalLight2Enabled = true;
@@ -219,32 +264,32 @@ namespace Collada
                 this.Lights.SpotLightEnabled = true;
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.NumberPad1))
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad1))
             {
                 this.Lights.DirectionalLight1Enabled = !this.Lights.DirectionalLight1Enabled;
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.NumberPad2))
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad2))
             {
                 this.Lights.DirectionalLight2Enabled = !this.Lights.DirectionalLight2Enabled;
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.NumberPad3))
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad3))
             {
                 this.Lights.DirectionalLight3Enabled = !this.Lights.DirectionalLight3Enabled;
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.NumberPad4))
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad4))
             {
                 this.Lights.PointLightEnabled = !this.Lights.PointLightEnabled;
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.NumberPad5))
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad5))
             {
                 this.Lights.SpotLightEnabled = !this.Lights.SpotLightEnabled;
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.NumberPad6))
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad6))
             {
                 if (this.Lights.FogRange == 0)
                 {
@@ -260,71 +305,6 @@ namespace Collada
         }
         private void UpdateHelicopters(GameTime gameTime)
         {
-            if (this.Game.Input.KeyJustReleased(Key.Tab))
-            {
-                this.helicopters.Next();
-            }
-
-            if (this.Game.Input.KeyPressed(Key.O))
-            {
-                this.helicopters.Manipulator.MoveLeft(gameTime);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.P))
-            {
-                this.helicopters.Manipulator.MoveRight(gameTime);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.Z))
-            {
-                this.helicopters.Manipulator.MoveUp(gameTime);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.X))
-            {
-                this.helicopters.Manipulator.MoveDown(gameTime);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.Up))
-            {
-                this.helicopters.Manipulator.MoveForward(gameTime);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.Down))
-            {
-                this.helicopters.Manipulator.MoveBackward(gameTime);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.Left))
-            {
-                this.helicopters.Manipulator.YawLeft(gameTime);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.Right))
-            {
-                this.helicopters.Manipulator.YawRight(gameTime);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.U))
-            {
-                this.helicopters.Manipulator.RollLeft(gameTime);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.I))
-            {
-                this.helicopters.Manipulator.RollRight(gameTime);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.Add))
-            {
-                this.helicopters.Manipulator.Scale(gameTime, 0.1f, minScaleSize, maxScaleSize);
-            }
-
-            if (this.Game.Input.KeyPressed(Key.Subtract))
-            {
-                this.helicopters.Manipulator.Scale(gameTime, -0.1f, minScaleSize, maxScaleSize);
-            }
-
             #region Second lamp
 
             Vector3 pos = (this.helicopters.Manipulator.Backward * 3f);

@@ -71,9 +71,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(SharpDXPackageBinDir)\SharpDX.D3DCompiler.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Direct2D1">
-      <HintPath>$(SharpDXPackageBinDir)\SharpDX.Direct2D1.dll</HintPath>
-    </Reference>
     <Reference Include="SharpDX.Direct3D11, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(SharpDXPackageBinDir)\SharpDX.Direct3D11.dll</HintPath>
@@ -81,10 +78,6 @@
     <Reference Include="SharpDX.Direct3D11.Effects, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(SharpDXPackageBinDir)\SharpDX.Direct3D11.Effects.dll</HintPath>
-    </Reference>
-    <Reference Include="SharpDX.DirectInput, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(SharpDXPackageBinDir)\SharpDX.DirectInput.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.DXGI, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -258,6 +251,7 @@
     <Compile Include="Collada\Vertices.cs" />
     <Compile Include="Collada\VisualScene.cs" />
     <Compile Include="Common\IBufferData.cs" />
+    <Compile Include="Common\Line.cs" />
     <Compile Include="Common\VertexParticle.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalColor.cs" />
     <Compile Include="Common\VertexSkinnedPositionColor.cs" />
@@ -283,11 +277,11 @@
     <Compile Include="Effects\EffectParticles.cs" />
     <Compile Include="Effects\IDrawer.cs" />
     <Compile Include="Helpers\Helper.cs" />
+    <Compile Include="Helpers\WindowsAPI.cs" />
     <Compile Include="Manipulator2D.cs" />
     <Compile Include="ParticleClasses.cs" />
     <Compile Include="ParticleSystem.cs" />
-    <Compile Include="VolumeInstanced.cs" />
-    <Compile Include="Volume.cs" />
+    <Compile Include="LineListDrawer.cs" />
     <Compile Include="Cubemap.cs" />
     <Compile Include="Effects\EffectBillboard.cs" />
     <Compile Include="Effects\EffectBasic.cs" />
@@ -321,7 +315,6 @@
     <Compile Include="Game.cs" />
     <Compile Include="Graphics.cs" />
     <Compile Include="Input.cs" />
-    <Compile Include="MouseButtons.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="SceneLight.cs" />
     <Compile Include="TextDrawer.cs" />

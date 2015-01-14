@@ -35,10 +35,13 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="material">Materia name</param>
-        /// <param name="vertexType">Vertex Type</param>
         /// <param name="topology">Topology</param>
-        public MeshInstanced(string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, int maxInstances)
-            : base(material, topology, vertices, indices)
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        /// <param name="maxInstances">Maximum instances</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        public MeshInstanced(string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, int maxInstances, bool dynamic = false)
+            : base(material, topology, vertices, indices, dynamic)
         {
             this.MaxInstaces = maxInstances;
         }

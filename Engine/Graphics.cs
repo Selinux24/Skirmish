@@ -122,6 +122,10 @@ namespace Engine
         /// Device description
         /// </summary>
         public readonly string DeviceDescription = null;
+        /// <summary>
+        /// Screen viewport
+        /// </summary>
+        public ViewportF Viewport { get; private set; }
 
         /// <summary>
         /// Gets desktop mode description
@@ -439,14 +443,9 @@ namespace Engine
 
             #endregion
 
-            #region Attach to Inmmediate Context
+            #region Viewport
 
-            this.DeviceContext.OutputMerger.SetDepthStencilState(this.depthStencilzBufferEnabled);
-            this.DeviceContext.OutputMerger.SetTargets(this.depthStencilView, this.renderTargetView);
-            this.DeviceContext.OutputMerger.SetBlendState(this.blendAlphaToCoverage, Color.Transparent, -1);
-
-            this.DeviceContext.Rasterizer.State = this.rasterizerDefault;
-            this.DeviceContext.Rasterizer.SetViewport(new ViewportF()
+            this.Viewport = new ViewportF()
             {
                 X = 0,
                 Y = 0,
@@ -454,7 +453,18 @@ namespace Engine
                 Height = height,
                 MinDepth = 0.0f,
                 MaxDepth = 1.0f,
-            });
+            };
+
+            #endregion
+
+            #region Attach to Inmmediate Context
+
+            this.DeviceContext.OutputMerger.SetDepthStencilState(this.depthStencilzBufferEnabled);
+            this.DeviceContext.OutputMerger.SetTargets(this.depthStencilView, this.renderTargetView);
+            this.DeviceContext.OutputMerger.SetBlendState(this.blendAlphaToCoverage, Color.Transparent, -1);
+
+            this.DeviceContext.Rasterizer.State = this.rasterizerDefault;
+            this.DeviceContext.Rasterizer.SetViewport(this.Viewport);
 
             #endregion
         }

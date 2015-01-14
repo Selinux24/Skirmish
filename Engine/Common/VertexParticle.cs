@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using SharpDX;
 using InputClassification = SharpDX.Direct3D11.InputClassification;
 using InputElement = SharpDX.Direct3D11.InputElement;
@@ -29,15 +30,15 @@ namespace Engine.Common
         /// <summary>
         /// Initial position
         /// </summary>
-        public Vector3 InitialPositionWorld;
+        public Vector3 Position;
         /// <summary>
         /// Initial velocity
         /// </summary>
-        public Vector3 InitialVelocityWorld;
+        public Vector3 Velocity;
         /// <summary>
         /// Size
         /// </summary>
-        public Vector2 SizeWorld;
+        public Vector2 Size;
         /// <summary>
         /// Particle age
         /// </summary>
@@ -65,6 +66,39 @@ namespace Engine.Common
             {
                 return Marshal.SizeOf(typeof(VertexParticle));
             }
+        }
+
+        /// <summary>
+        /// Gets if structure contains data for the specified channel
+        /// </summary>
+        /// <param name="channel">Data channel</param>
+        /// <returns>Returns true if structure contains data for the specified channel</returns>
+        public bool HasChannel(VertexDataChannels channel)
+        {
+            if (channel == VertexDataChannels.Position) return true;
+            else if (channel == VertexDataChannels.Size) return true;
+            else return false;
+        }
+        /// <summary>
+        /// Gets data channel value
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="channel">Data channel</param>
+        /// <returns>Returns data for the specified channel</returns>
+        public T GetChannelValue<T>(VertexDataChannels channel) where T : struct
+        {
+            if (channel == VertexDataChannels.Position) return (T)Convert.ChangeType(this.Position, typeof(T));
+            else if (channel == VertexDataChannels.Size) return (T)Convert.ChangeType(this.Size, typeof(T));
+            else throw new Exception(string.Format("Channel data not found: {0}", channel));
+        }
+
+        /// <summary>
+        /// Text representation of vertex
+        /// </summary>
+        /// <returns>Returns the text representation of vertex</returns>
+        public override string ToString()
+        {
+            return string.Format("Position: {0}; Size: {1}", this.Position, this.Size);
         }
     }
 }

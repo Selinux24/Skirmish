@@ -572,17 +572,10 @@ namespace Engine
         /// <param name="newPosition">New position</param>
         public void Goto(Vector3 newPosition)
         {
-            if (this.mode == CameraModes.FreeIsometric)
-            {
-                Vector3 diff = newPosition - this.Position;
+            Vector3 diff = newPosition - this.Position;
 
-                this.Interest += diff;
-                this.Position += diff;
-            }
-            else
-            {
-                this.Position = newPosition;
-            }
+            this.Interest += diff;
+            this.Position += diff;
         }
         /// <summary>
         /// Center camera in new interest
@@ -681,16 +674,11 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         private void Move(GameTime gameTime, Vector3 vector, bool slow)
         {
-            Vector3 movingVector = Vector3.Zero;
             float delta = (slow) ? this.SlowMovementDelta : this.MovementDelta;
 
-            vector *= delta;
-            movingVector += vector;
-
+            Vector3 movingVector = vector * delta * gameTime.ElapsedSeconds;
             if (movingVector != Vector3.Zero)
             {
-                movingVector *= gameTime.ElapsedSeconds;
-
                 this.Position += movingVector;
                 this.Interest += movingVector;
             }

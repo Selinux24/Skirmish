@@ -1,8 +1,8 @@
-﻿using Engine;
+﻿using System.Windows.Forms;
+using Engine;
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
-using SharpDX.DirectInput;
 
 namespace ModelDrawing
 {
@@ -171,17 +171,17 @@ namespace ModelDrawing
         {
             base.Update(gameTime);
 
-            if (this.Game.Input.KeyJustReleased(Key.Escape))
+            if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.L))
+            if (this.Game.Input.KeyJustReleased(Keys.L))
             {
                 this.moveLight = !this.moveLight;
             }
 
-            if (this.Game.Input.KeyJustReleased(Key.Tab))
+            if (this.Game.Input.KeyJustReleased(Keys.Tab))
             {
                 if (this.selected >= this.models.Length - 1)
                 {
@@ -195,12 +195,12 @@ namespace ModelDrawing
 
             Model selectedModel = this.models[this.selected];
 
-            if (this.Game.Input.KeyJustReleased(Key.Home))
+            if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
                 this.InitializePositions();
             }
 
-            if (this.Game.Input.KeyPressed(Key.A))
+            if (this.Game.Input.KeyPressed(Keys.A))
             {
                 if (this.moveLight)
                     this.Lights.DirectionalLight1.Direction += Vector3.UnitX * -0.1f;
@@ -208,7 +208,7 @@ namespace ModelDrawing
                     selectedModel.Manipulator.MoveLeft(gameTime, 0.1f);
             }
 
-            if (this.Game.Input.KeyPressed(Key.D))
+            if (this.Game.Input.KeyPressed(Keys.D))
             {
                 if (this.moveLight)
                     this.Lights.DirectionalLight1.Direction += Vector3.UnitX * 0.1f;
@@ -216,7 +216,7 @@ namespace ModelDrawing
                     selectedModel.Manipulator.MoveRight(gameTime, 0.1f);
             }
 
-            if (this.Game.Input.KeyPressed(Key.W))
+            if (this.Game.Input.KeyPressed(Keys.W))
             {
                 if (this.moveLight)
                     this.Lights.DirectionalLight1.Direction += Vector3.UnitY * 0.1f;
@@ -224,7 +224,7 @@ namespace ModelDrawing
                     selectedModel.Manipulator.MoveUp(gameTime, 0.1f);
             }
 
-            if (this.Game.Input.KeyPressed(Key.S))
+            if (this.Game.Input.KeyPressed(Keys.S))
             {
                 if (this.moveLight)
                     this.Lights.DirectionalLight1.Direction += Vector3.UnitY * -0.1f;
@@ -232,12 +232,12 @@ namespace ModelDrawing
                     selectedModel.Manipulator.MoveDown(gameTime, 0.1f);
             }
 
-            if (this.Game.Input.KeyPressed(Key.Z))
+            if (this.Game.Input.KeyPressed(Keys.Z))
             {
                 selectedModel.Manipulator.MoveForward(gameTime, 0.1f);
             }
 
-            if (this.Game.Input.KeyPressed(Key.X))
+            if (this.Game.Input.KeyPressed(Keys.X))
             {
                 selectedModel.Manipulator.MoveBackward(gameTime, 0.1f);
             }

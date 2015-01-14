@@ -139,6 +139,22 @@ namespace Engine.Common
         /// Datos de animación
         /// </summary>
         protected SkinningData SkinningData = null;
+        /// <summary>
+        /// Gets triangle list
+        /// </summary>
+        public Triangle[] Triangles { get; protected set; }
+        /// <summary>
+        /// Gets static bounding box
+        /// </summary>
+        public BoundingBox BoundingBox { get; protected set; }
+        /// <summary>
+        /// Gets static bounding sphere
+        /// </summary>
+        public BoundingSphere BoundingSphere { get; protected set; }
+        /// <summary>
+        /// Gets static oriented bounding box
+        /// </summary>
+        public OrientedBoundingBox OrientedBoundingBox { get; protected set; }
 
         #region Static Helpers
 
@@ -353,8 +369,8 @@ namespace Engine.Common
                         SubMeshContent geometry = dict[material];
 
                         IVertexData[] vertexList = VertexData.Convert(
-                            geometry.VertexType, 
-                            geometry.Vertices, 
+                            geometry.VertexType,
+                            geometry.Vertices,
                             null);
 
                         Mesh nMesh = null;
@@ -366,7 +382,8 @@ namespace Engine.Common
                                 geometry.Topology,
                                 vertexList,
                                 geometry.Indices,
-                                instances);
+                                instances,
+                                true);
                         }
                         else
                         {
@@ -374,7 +391,8 @@ namespace Engine.Common
                                 geometry.Material,
                                 geometry.Topology,
                                 vertexList,
-                                geometry.Indices);
+                                geometry.Indices,
+                                true);
                         }
 
                         this.Meshes.Add(meshName, geometry.Material, nMesh);
@@ -392,8 +410,8 @@ namespace Engine.Common
                         SubMeshContent geometry = dict[material];
 
                         IVertexData[] vertexList = VertexData.Convert(
-                            VertexData.GetSkinnedEquivalent(geometry.VertexType), 
-                            geometry.Vertices, 
+                            VertexData.GetSkinnedEquivalent(geometry.VertexType),
+                            geometry.Vertices,
                             weights);
 
                         Mesh nMesh = null;
@@ -462,6 +480,60 @@ namespace Engine.Common
                     offsets.ToArray(),
                     animations);
             }
+        }
+        /// <summary>
+        /// Updates model static volumes using per vertex transform
+        /// </summary>
+        /// <param name="transform">Per vertex transform</param>
+        public virtual void ComputeVolumes(Matrix transform)
+        {
+            List<Triangle> cache = new List<Triangle>();
+            BoundingBox bbox = new BoundingBox();
+            BoundingSphere bsph = new BoundingSphere();
+            OrientedBoundingBox obb = new OrientedBoundingBox(Vector3.Zero, Vector3.Zero);
+            obb.Transform(transform);
+
+            foreach (string meshName in this.Meshes.Keys)
+            {
+                foreach (Mesh mesh in this.Meshes[meshName].Values)
+                {
+                    mesh.ComputeVolumes(transform);
+
+                    if (mesh.Triangles != null && mesh.Triangles.Length > 0)
+                    {
+                        cache.AddRange(mesh.Triangles);
+                    }
+
+                    bbox = BoundingBox.Merge(bbox, mesh.BoundingBox);
+                    bsph = BoundingSphere.Merge(bsph, mesh.BoundingSphere);
+
+                    OrientedBoundingBox meshObb = mesh.OrientedBoundingBox;
+                    OrientedBoundingBox.Merge(ref obb, ref meshObb);
+                }
+            }
+
+            this.Triangles = cache.ToArray();
+            this.BoundingBox = bbox;
+            this.BoundingSphere = bsph;
+            this.OrientedBoundingBox = obb;
+        }
+        /// <summary>
+        /// Get oriented bounding boxes collection
+        /// </summary>
+        /// <returns>Returns oriented bounding boxes list</returns>
+        public virtual BoundingBox[] GetBoundingBoxes()
+        {
+            List<BoundingBox> bboxList = new List<BoundingBox>();
+
+            foreach (string meshName in this.Meshes.Keys)
+            {
+                foreach (Mesh mesh in this.Meshes[meshName].Values)
+                {
+                    bboxList.Add(mesh.BoundingBox);
+                }
+            }
+
+            return bboxList.ToArray();
         }
 
         /// <summary>
@@ -553,6 +625,50 @@ namespace Engine.Common
             {
                 this.SkinningData.AnimationVelocity = velocity;
             }
+        }
+        /// <summary>
+        /// Gets picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <returns>Returns true if ground position found</returns>
+        public virtual bool Pick(Ray ray, out Vector3 position, out Triangle triangle)
+        {
+            position = new Vector3();
+            triangle = new Triangle();
+
+            bool found = false;
+
+            if (this.BoundingSphere.Intersects(ref ray) || this.BoundingBox.Intersects(ref ray))
+            {
+                float distance = float.MaxValue;
+
+                foreach (string meshName in this.Meshes.Keys)
+                {
+                    foreach (Mesh mesh in this.Meshes[meshName].Values)
+                    {
+                        Vector3 p;
+                        Triangle t;
+                        if (mesh.Pick(ray, out p, out t))
+                        {
+                            found = true;
+
+                            float currentDistance = Vector3.Distance(ray.Position, p);
+
+                            if (currentDistance < distance)
+                            {
+                                position = p;
+                                triangle = t;
+
+                                distance = currentDistance;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return found;
         }
     }
 }
