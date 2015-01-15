@@ -121,22 +121,26 @@ namespace Engine
         /// Adds new model
         /// </summary>
         /// <param name="modelFilename">Model file name</param>
+        /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Model AddModel(string modelFilename, int order = 0)
+        public Model AddModel(string modelFilename, bool optimize = true, int order = 0)
         {
-            return AddModel(modelFilename, Matrix.Identity, order);
+            return AddModel(modelFilename, Matrix.Identity, optimize, order);
         }
         /// <summary>
         /// Adds new model
         /// </summary>
         /// <param name="modelFilename">Model file name</param>
         /// <param name="transform">Initial transform to apply to loaded geometry</param>
+        /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Model AddModel(string modelFilename, Matrix transform, int order = 0)
+        public Model AddModel(string modelFilename, Matrix transform, bool optimize = true, int order = 0)
         {
             ModelContent geo = LoaderCOLLADA.Load(this.ContentPath, modelFilename, transform);
+
+            if (optimize) geo.Optimize();
 
             Model newModel = new Model(this.Game, this, geo);
 
@@ -163,11 +167,12 @@ namespace Engine
         /// </summary>
         /// <param name="modelFilename">Model file name</param>
         /// <param name="instances">Number of instances for the model</param>
+        /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(string modelFilename, int instances, int order = 0)
+        public ModelInstanced AddInstancingModel(string modelFilename, int instances, bool optimize = true, int order = 0)
         {
-            return AddInstancingModel(modelFilename, Matrix.Identity, instances, order);
+            return AddInstancingModel(modelFilename, Matrix.Identity, instances, optimize, order);
         }
         /// <summary>
         /// Adds new instanced model
@@ -175,11 +180,14 @@ namespace Engine
         /// <param name="modelFilename">Model file name</param>
         /// <param name="transform">Initial transform to apply to loaded geometry</param>
         /// <param name="instances">Number of instances for the model</param>
+        /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(string modelFilename, Matrix transform, int instances, int order = 0)
+        public ModelInstanced AddInstancingModel(string modelFilename, Matrix transform, int instances, bool optimize = true, int order = 0)
         {
             ModelContent geo = LoaderCOLLADA.Load(this.ContentPath, modelFilename, transform);
+
+            if (optimize) geo.Optimize();
 
             ModelInstanced newModel = new ModelInstanced(this.Game, this, geo, instances);
 
@@ -207,11 +215,12 @@ namespace Engine
         /// </summary>
         /// <param name="modelFilename">Model file name</param>
         /// <param name="description">Terrain description</param>
+        /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Terrain AddTerrain(string modelFilename, TerrainDescription description, int order = 0)
+        public Terrain AddTerrain(string modelFilename, TerrainDescription description, bool optimize = true, int order = 0)
         {
-            return AddTerrain(modelFilename, Matrix.Identity, description, order);
+            return AddTerrain(modelFilename, Matrix.Identity, description, optimize, order);
         }
         /// <summary>
         /// Adds new terrain model
@@ -219,11 +228,14 @@ namespace Engine
         /// <param name="modelFilename">Model file name</param>
         /// <param name="transform">Initial transform to apply to loaded geometry</param>
         /// <param name="description">Terrain description</param>
+        /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Terrain AddTerrain(string modelFilename, Matrix transform, TerrainDescription description, int order = 0)
+        public Terrain AddTerrain(string modelFilename, Matrix transform, TerrainDescription description, bool optimize = true, int order = 0)
         {
             ModelContent geo = LoaderCOLLADA.Load(this.ContentPath, modelFilename, transform);
+
+            if (optimize) geo.Optimize();
 
             return AddTerrain(geo, description, order);
         }

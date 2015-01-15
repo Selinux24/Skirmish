@@ -250,6 +250,7 @@
     <Compile Include="Collada\VertexWeights.cs" />
     <Compile Include="Collada\Vertices.cs" />
     <Compile Include="Collada\VisualScene.cs" />
+    <Compile Include="Common\GeometryUtil.cs" />
     <Compile Include="Common\IBufferData.cs" />
     <Compile Include="Common\Line.cs" />
     <Compile Include="Common\VertexParticle.cs" />
@@ -273,6 +274,7 @@
     <Compile Include="Collada\Transforms.cs" />
     <Compile Include="Common\VertexData.cs" />
     <Compile Include="Common\Weight.cs" />
+    <Compile Include="TriangleListDrawer.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
     <Compile Include="Effects\EffectParticles.cs" />
     <Compile Include="Effects\IDrawer.cs" />

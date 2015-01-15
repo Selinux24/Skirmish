@@ -21,6 +21,10 @@ namespace Engine
                 return this.Meshes[ModelContent.StaticMesh][ModelContent.NoMaterial];
             }
         }
+        /// <summary>
+        /// Gets or sets whether the drawing calls use the z-buffer if available
+        /// </summary>
+        public bool UseZBuffer { get; set; }
 
         /// <summary>
         /// Constructor
@@ -40,7 +44,14 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public override void Draw(GameTime gameTime)
         {
-            this.Game.Graphics.DisableZBuffer();
+            if (this.UseZBuffer)
+            {
+                this.Game.Graphics.EnableZBuffer();
+            }
+            else
+            {
+                this.Game.Graphics.DisableZBuffer();
+            }
 
             base.Draw(gameTime);
         }

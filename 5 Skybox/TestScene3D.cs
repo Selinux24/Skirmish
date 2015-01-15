@@ -2,7 +2,6 @@
 using System.Windows.Forms;
 using Engine;
 using Engine.Common;
-using Engine.Content;
 using SharpDX;
 
 namespace Skybox
@@ -18,6 +17,11 @@ namespace Skybox
         };
         private Vector3 walkerHeight = Vector3.UnitY;
         private float walkerClimb = MathUtil.DegreesToRadians(45);
+        private Color globalColor = Color.Green;
+        private Color bboxColor = Color.GreenYellow;
+        private Color bsphColor = Color.LightYellow;
+        private int bsphSlices = 20;
+        private int bsphStacks = 10;
 
         private Terrain ruins = null;
         private ModelInstanced lamp = null;
@@ -29,6 +33,7 @@ namespace Skybox
         private LineListDrawer pickedTri = null;
         private LineListDrawer bboxGlobalDrawer = null;
         private LineListDrawer bboxMeshesDrawer = null;
+        private LineListDrawer bsphMeshesDrawer = null;
 
         public TestScene3D(Game game)
             : base(game)
@@ -49,13 +54,21 @@ namespace Skybox
             this.title = this.AddText("Tahoma", 18, Color.White);
             this.help = this.AddText("Lucida Casual", 12, Color.Yellow);
             this.fps = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.ruins = this.AddTerrain("ruinas.dae", desc);
+            this.ruins = this.AddTerrain("ruinas.dae", desc, false);
             this.lamp = this.AddInstancingModel("Poly.dae", 3);
             this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain("raindrop.dds"));
             this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions, "flare2.png"));
             this.pickedTri = this.AddLineListDrawer(new Line[3], Color.Red);
-            this.bboxGlobalDrawer = this.AddLineListDrawer(ModelContent.CreateBoxWired(this.ruins.BoundingBox), Color.Yellow);
-            this.bboxMeshesDrawer = this.AddLineListDrawer(ModelContent.CreateBoxWired(this.ruins.GetBoundingBoxes()), Color.Gray);
+            this.bboxGlobalDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.BoundingBox), this.globalColor);
+            this.bboxMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBoxes()), this.bboxColor);
+            this.bsphMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredSphere(this.ruins.GetBoundingSpheres(), this.bsphSlices, this.bsphStacks), this.bsphColor);
+
+            this.bboxGlobalDrawer.Visible = false;
+            this.bboxMeshesDrawer.Visible = false;
+            this.bsphMeshesDrawer.Visible = false;
+            this.bboxGlobalDrawer.UseZBuffer = false;
+            this.bboxMeshesDrawer.UseZBuffer = true;
+            this.bsphMeshesDrawer.UseZBuffer = true;
 
             this.Lights.PointLightEnabled = true;
             this.Lights.PointLight.Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f);
@@ -84,8 +97,9 @@ namespace Skybox
             this.ruins.Manipulator.SetScale(globalScale);
             this.ruins.ComputeVolumes(Matrix.Scaling(globalScale));
 
-            this.bboxGlobalDrawer.SetLines(ModelContent.CreateBoxWired(this.ruins.BoundingBox), Color.Yellow);
-            this.bboxMeshesDrawer.SetLines(ModelContent.CreateBoxWired(this.ruins.GetBoundingBoxes()), Color.Gray);
+            this.bboxGlobalDrawer.SetLines(GeometryUtil.CreateWiredBox(this.ruins.BoundingBox), this.globalColor);
+            this.bboxMeshesDrawer.SetLines(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBoxes()), this.bboxColor);
+            this.bsphMeshesDrawer.SetLines(GeometryUtil.CreateWiredSphere(this.ruins.GetBoundingSpheres(), this.bsphSlices, this.bsphStacks), this.bsphColor);
 
             this.lamp[0].SetScale(0.01f * globalScale);
             this.lamp[1].SetScale(0.01f * globalScale);
@@ -205,6 +219,21 @@ namespace Skybox
                 this.InitializeCamera();
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.bboxGlobalDrawer.Visible = !this.bboxGlobalDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.bboxMeshesDrawer.Visible = !this.bboxMeshesDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            {
+                this.bsphMeshesDrawer.Visible = !this.bsphMeshesDrawer.Visible;
+            }
+
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
             if (this.Game.Input.KeyPressed(Keys.A))
@@ -250,7 +279,7 @@ namespace Skybox
                 Triangle t;
                 if (this.ruins.Pick(pRay, out p, out t))
                 {
-                    this.pickedTri.SetLines(ModelContent.CreateTriangleWired(t), Color.Red);
+                    this.pickedTri.SetLines(GeometryUtil.CreateWiredTriangle(t), Color.Red);
                 }
             }
         }

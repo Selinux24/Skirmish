@@ -152,8 +152,6 @@ namespace Engine.Content
 
             #endregion
 
-            modelContent.Prepare();
-
             return modelContent;
         }
         /// <summary>

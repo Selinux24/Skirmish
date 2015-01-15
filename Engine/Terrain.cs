@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using SharpDX;
+﻿using SharpDX;
 
 namespace Engine
 {
@@ -169,12 +168,28 @@ namespace Engine
             this.terrain.ComputeVolumes(transform);
         }
         /// <summary>
-        /// Get oriented bounding boxes collection
+        /// Get bounding boxes collection
         /// </summary>
-        /// <returns>Returns oriented bounding boxes list</returns>
+        /// <returns>Returns bounding boxes list</returns>
         public BoundingBox[] GetBoundingBoxes()
         {
             return this.terrain.GetBoundingBoxes();
+        }
+        /// <summary>
+        /// Get bounding spheres collection
+        /// </summary>
+        /// <returns>Returns bounding spheres list</returns>
+        public BoundingSphere[] GetBoundingSpheres()
+        {
+            return this.terrain.GetBoundingSpheres();
+        }
+        /// <summary>
+        /// Get oriented bounding boxes collection
+        /// </summary>
+        /// <returns>Returns oriented bounding boxes list</returns>
+        public OrientedBoundingBox[] GetOrientedBoundingBoxes()
+        {
+            return this.terrain.GetOrientedBoundingBoxes();
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates

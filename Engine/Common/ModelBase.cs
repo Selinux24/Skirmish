@@ -362,7 +362,8 @@ namespace Engine.Common
             {
                 Dictionary<string, SubMeshContent> dict = modelContent.Geometry[meshName];
 
-                if (meshName == ModelContent.StaticMesh)
+                ControllerContent cInfo = modelContent.Controllers.GetControllerForMesh(meshName);
+                if (cInfo == null)
                 {
                     foreach (string material in dict.Keys)
                     {
@@ -400,8 +401,6 @@ namespace Engine.Common
                 }
                 else
                 {
-                    ControllerContent cInfo = modelContent.GetControllerForMesh(meshName);
-
                     Matrix bindShapeMatrix = cInfo.BindShapeMatrix;
                     Weight[] weights = cInfo.Weights;
 
@@ -518,9 +517,9 @@ namespace Engine.Common
             this.OrientedBoundingBox = obb;
         }
         /// <summary>
-        /// Get oriented bounding boxes collection
+        /// Get bounding boxes collection
         /// </summary>
-        /// <returns>Returns oriented bounding boxes list</returns>
+        /// <returns>Returns bounding boxes list</returns>
         public virtual BoundingBox[] GetBoundingBoxes()
         {
             List<BoundingBox> bboxList = new List<BoundingBox>();
@@ -534,6 +533,42 @@ namespace Engine.Common
             }
 
             return bboxList.ToArray();
+        }
+        /// <summary>
+        /// Get bounding spheres collection
+        /// </summary>
+        /// <returns>Returns bounding spheres list</returns>
+        public virtual BoundingSphere[] GetBoundingSpheres()
+        {
+            List<BoundingSphere> bsphList = new List<BoundingSphere>();
+
+            foreach (string meshName in this.Meshes.Keys)
+            {
+                foreach (Mesh mesh in this.Meshes[meshName].Values)
+                {
+                    bsphList.Add(mesh.BoundingSphere);
+                }
+            }
+
+            return bsphList.ToArray();
+        }
+        /// <summary>
+        /// Get oriented bounding boxes collection
+        /// </summary>
+        /// <returns>Returns oriented bounding boxes list</returns>
+        public virtual OrientedBoundingBox[] GetOrientedBoundingBoxes()
+        {
+            List<OrientedBoundingBox> obboxList = new List<OrientedBoundingBox>();
+
+            foreach (string meshName in this.Meshes.Keys)
+            {
+                foreach (Mesh mesh in this.Meshes[meshName].Values)
+                {
+                    obboxList.Add(mesh.OrientedBoundingBox);
+                }
+            }
+
+            return obboxList.ToArray();
         }
 
         /// <summary>
