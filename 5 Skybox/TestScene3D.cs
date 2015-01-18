@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Forms;
 using Engine;
 using Engine.Common;
 using SharpDX;
@@ -10,10 +9,12 @@ namespace Skybox
     {
         private const float globalScale = 1f;
 
-        private Vector3[] firePositions = new[]
+        private Vector2[] firePositions = new[]
         {
-            new Vector3(5, 1, 5),
-            new Vector3(-5, 1, -5),
+            new Vector2(+5, +5),
+            new Vector2(-5, +5),
+            new Vector2(+5, -5),
+            new Vector2(-5, -5),
         };
         private Vector3 walkerHeight = Vector3.UnitY;
         private float walkerClimb = MathUtil.DegreesToRadians(45);
@@ -23,17 +24,22 @@ namespace Skybox
         private int bsphSlices = 20;
         private int bsphStacks = 10;
 
-        private Terrain ruins = null;
-        private ModelInstanced lamp = null;
+        private Cursor cursor;
+
         private TextDrawer title = null;
         private TextDrawer help = null;
         private TextDrawer fps = null;
-        private ParticleSystem rain = null;
-        private ParticleSystem fire = null;
+
+        private Terrain ruins = null;
         private LineListDrawer pickedTri = null;
         private LineListDrawer bboxGlobalDrawer = null;
         private LineListDrawer bboxMeshesDrawer = null;
         private LineListDrawer bsphMeshesDrawer = null;
+
+        private ModelInstanced torchs = null;
+        private ParticleSystem rain = null;
+        private ParticleSystem fire = null;
+        private ParticleSystem movingfire = null;
 
         public TestScene3D(Game game)
             : base(game)
@@ -45,49 +51,87 @@ namespace Skybox
         {
             base.Initialize();
 
-            TerrainDescription desc = new TerrainDescription()
-            {
-                AddSkydom = true,
-                SkydomTexture = "sunset.dds",
-            };
+            #region Cursor
+
+            this.cursor = this.AddCursor("target.png", 16, 16);
+
+            #endregion
+
+            #region Text
 
             this.title = this.AddText("Tahoma", 18, Color.White);
             this.help = this.AddText("Lucida Casual", 12, Color.Yellow);
             this.fps = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.ruins = this.AddTerrain("ruinas.dae", desc, false);
-            this.lamp = this.AddInstancingModel("Poly.dae", 3);
-            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain("raindrop.dds"));
-            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions, "flare2.png"));
-            this.pickedTri = this.AddLineListDrawer(new Line[3], Color.Red);
-            this.bboxGlobalDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.BoundingBox), this.globalColor);
-            this.bboxMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBoxes()), this.bboxColor);
-            this.bsphMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredSphere(this.ruins.GetBoundingSpheres(), this.bsphSlices, this.bsphStacks), this.bsphColor);
-
-            this.bboxGlobalDrawer.Visible = false;
-            this.bboxMeshesDrawer.Visible = false;
-            this.bsphMeshesDrawer.Visible = false;
-            this.bboxGlobalDrawer.UseZBuffer = false;
-            this.bboxMeshesDrawer.UseZBuffer = true;
-            this.bsphMeshesDrawer.UseZBuffer = true;
-
-            this.Lights.PointLightEnabled = true;
-            this.Lights.PointLight.Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f);
-            this.Lights.PointLight.Diffuse = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
-            this.Lights.PointLight.Specular = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
-            this.Lights.PointLight.Attributes = new Vector3(1.0f, 0.0f, 0.0f);
-            this.Lights.PointLight.Range = 20.0f;
 
             this.title.Text = "Collada Scene with Skybox";
 #if DEBUG
-            this.help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Left Mouse: Drag view | Middle Mouse: Pick";
+            this.help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
 #else
-            this.help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Left Mouse: View | Middle Mouse: Pick";
+            this.help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
 #endif
             this.fps.Text = null;
 
             this.title.Position = Vector2.Zero;
             this.help.Position = new Vector2(0, 24);
             this.fps.Position = new Vector2(0, 40);
+
+            #endregion
+
+            #region Terrain
+
+            TerrainDescription desc = new TerrainDescription()
+            {
+                AddSkydom = true,
+                SkydomTexture = "sunset.dds",
+            };
+            this.ruins = this.AddTerrain("ruinas.dae", desc, false);
+
+            this.pickedTri = this.AddLineListDrawer(new Line[3], Color.Red);
+            this.pickedTri.UseZBuffer = false;
+
+            this.bboxGlobalDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.BoundingBox), this.globalColor);
+            this.bboxMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBoxes()), this.bboxColor);
+            this.bsphMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredSphere(this.ruins.GetBoundingSpheres(), this.bsphSlices, this.bsphStacks), this.bsphColor);
+            this.bboxGlobalDrawer.UseZBuffer = false;
+            this.bboxMeshesDrawer.UseZBuffer = true;
+            this.bsphMeshesDrawer.UseZBuffer = true;
+
+            #endregion
+
+            #region Lights
+
+            Vector3[] filePositions3D = new Vector3[this.firePositions.Length];
+
+            this.torchs = this.AddInstancingModel("torch.dae", this.firePositions.Length);
+            for (int i = 0; i < this.firePositions.Length; i++)
+			{
+                this.torchs.Manipulators[i].SetScale(0.20f * globalScale);
+                this.torchs.ComputeVolumes(Matrix.Scaling(0.20f * globalScale));
+
+                this.ruins.FindGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out filePositions3D[i]);
+
+                this.torchs.Manipulators[i].SetPosition(filePositions3D[i]);
+
+                filePositions3D[i].Y += (this.torchs.BoundingBox.Maximum.Y - this.torchs.BoundingBox.Minimum.Y) * 0.9f;
+            }
+
+            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(filePositions3D, 0.5f, "flare0.dds"));
+
+            #endregion
+
+            #region Particles
+
+            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, "raindrop.dds"));
+            this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { Vector3.Zero }, 0.5f, "flare2.png"));
+
+            #endregion
+
+            this.Lights.PointLightEnabled = true;
+            this.Lights.PointLight.Ambient = new Color4(1f, 0.1f, 0.1f, 1.0f);
+            this.Lights.PointLight.Diffuse = new Color4(1f, 0.2f, 0.2f, 1.0f);
+            this.Lights.PointLight.Specular = new Color4(1f, 0.2f, 0.2f, 1.0f);
+            this.Lights.PointLight.Attributes = new Vector3(1.0f, 0.0f, 0.0f);
+            this.Lights.PointLight.Range = 20.0f;
 
             this.InitializeCamera();
             this.InitializeTerrain();
@@ -100,13 +144,9 @@ namespace Skybox
             this.bboxGlobalDrawer.SetLines(GeometryUtil.CreateWiredBox(this.ruins.BoundingBox), this.globalColor);
             this.bboxMeshesDrawer.SetLines(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBoxes()), this.bboxColor);
             this.bsphMeshesDrawer.SetLines(GeometryUtil.CreateWiredSphere(this.ruins.GetBoundingSpheres(), this.bsphSlices, this.bsphStacks), this.bsphColor);
-
-            this.lamp[0].SetScale(0.01f * globalScale);
-            this.lamp[1].SetScale(0.01f * globalScale);
-            this.lamp[2].SetScale(0.01f * globalScale);
-
-            this.lamp[1].SetPosition(firePositions[0]);
-            this.lamp[2].SetPosition(firePositions[1]);
+            this.bboxGlobalDrawer.Visible = false;
+            this.bboxMeshesDrawer.Visible = false;
+            this.bsphMeshesDrawer.Visible = false;
         }
         private void InitializeCamera()
         {
@@ -124,18 +164,6 @@ namespace Skybox
 
             this.UpdateInput();
 
-#if DEBUG
-            this.fps.Text = string.Format(
-                "Mouse (X:{0}; Y:{1}, Wheel: {2}) Absolute (X:{3}; Y:{4})",
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta,
-                this.Game.Input.MouseWheelDelta,
-                this.Game.Input.MouseX,
-                this.Game.Input.MouseY);
-#else
-            this.fps.Text = this.Game.RuntimeText;
-#endif
-
             base.Update(gameTime);
 
             Vector3 currentPosition = this.Camera.Position;
@@ -150,7 +178,7 @@ namespace Skybox
             position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
 
             this.Lights.PointLight.Position = position;
-            this.lamp[0].SetPosition(position);
+            this.movingfire.Manipulator.SetPosition(position);
 
             #endregion
 
@@ -257,7 +285,7 @@ namespace Skybox
             }
 
 #if DEBUG
-            if (this.Game.Input.LeftMouseButtonPressed)
+            if (this.Game.Input.RightMouseButtonPressed)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
@@ -271,7 +299,7 @@ namespace Skybox
                 this.Game.Input.MouseYDelta);
 #endif
 
-            if (this.Game.Input.MiddleMouseButtonPressed)
+            if (this.Game.Input.LeftMouseButtonPressed)
             {
                 Ray pRay = this.GetPickingRay();
 
@@ -282,6 +310,20 @@ namespace Skybox
                     this.pickedTri.SetLines(GeometryUtil.CreateWiredTriangle(t), Color.Red);
                 }
             }
+
+
+#if DEBUG
+            this.fps.Text = string.Format(
+                "Mouse (X:{0}; Y:{1}, Wheel: {2}) Absolute (X:{3}; Y:{4}) Cursor ({5})",
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta,
+                this.Game.Input.MouseWheelDelta,
+                this.Game.Input.MouseX,
+                this.Game.Input.MouseY,
+                this.cursor.CursorPosition);
+#else
+            this.fps.Text = this.Game.RuntimeText;
+#endif
         }
     }
 }

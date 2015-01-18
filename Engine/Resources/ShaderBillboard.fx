@@ -32,14 +32,14 @@ cbuffer cbFixed : register (b2)
 
 Texture2DArray gTextureArray;
 
-GSVertexBillboard VSBillboard(VSVertexBillboard vin)
+GSVertexBillboard VSBillboard(VSVertexBillboard input)
 {
-	GSVertexBillboard vout;
+	GSVertexBillboard output;
 
-	vout.centerWorld = vin.positionWorld;
-	vout.sizeWorld = vin.sizeWorld;
+	output.centerWorld = input.positionWorld;
+	output.sizeWorld = input.sizeWorld;
 
-	return vout;
+	return output;
 }
 
 [maxvertexcount(4)]

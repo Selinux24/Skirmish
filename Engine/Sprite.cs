@@ -94,6 +94,8 @@ namespace Engine
         {
             if (this.Meshes != null)
             {
+                this.Game.Graphics.EnableZBuffer();
+
                 #region Per frame update
 
                 Matrix world = this.Scene.World * this.Manipulator.LocalTransform;

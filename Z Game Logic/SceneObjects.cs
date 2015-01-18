@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Windows.Forms;
 using Engine;
 using SharpDX;
 
@@ -34,7 +33,7 @@ namespace GameLogic
                 int soldierIndex = 0;
                 foreach (Soldier soldier in team.Soldiers)
                 {
-                    Manipulator3D man = model[soldierIndex++];
+                    Manipulator3D man = model.Manipulators[soldierIndex++];
 
                     man.SetPosition(soldierIndex * delta, 0, teamIndex * delta);
 

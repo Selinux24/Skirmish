@@ -56,10 +56,6 @@ namespace Engine
         /// </summary>
         public int Order { get; set; }
         /// <summary>
-        /// Indicates whether the current scene uses the Z buffer if available
-        /// </summary>
-        public bool UseZBuffer { get; set; }
-        /// <summary>
         /// Content path for scene resources
         /// </summary>
         /// <remarks>Default folder defined by constant DefaultContentPath</remarks>
@@ -114,7 +110,6 @@ namespace Engine
         {
             this.Game = game;
 
-            this.UseZBuffer = true;
             this.ContentPath = DefaultContentPath;
             this.World = Matrix.Identity;
             this.Lights = new SceneLight();

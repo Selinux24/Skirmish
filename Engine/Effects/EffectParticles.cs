@@ -33,6 +33,7 @@ namespace Engine.Effects
             public float TimeStep;
             public Vector3 AccelerationWorld;
             public Vector3 EyePositionWorld;
+            public Matrix World;
             public Matrix WorldViewProjection;
             public uint TextureCount;
 
@@ -76,6 +77,10 @@ namespace Engine.Effects
         /// Time step effect variable
         /// </summary>
         private EffectScalarVariable elapsedTime = null;
+        /// <summary>
+        /// World effect variable
+        /// </summary>
+        private EffectMatrixVariable world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
@@ -198,6 +203,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// World
+        /// </summary>
+        protected Matrix World
+        {
+            get
+            {
+                return this.world.GetMatrix();
+            }
+            set
+            {
+                this.world.SetMatrix(value);
+            }
+        }
+        /// <summary>
         /// World view projection matrix
         /// </summary>
         protected Matrix WorldViewProjection
@@ -282,6 +301,7 @@ namespace Engine.Effects
             this.elapsedTime = this.Effect.GetVariableByName("gElapsedTime").AsScalar();
             this.accelerationWorld = this.Effect.GetVariableByName("gAccelerationWorld").AsVector();
             this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
+            this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
 
@@ -350,6 +370,7 @@ namespace Engine.Effects
             this.ElapsedTime = this.FrameBuffer.TimeStep;
             this.AccelerationWorld = this.FrameBuffer.AccelerationWorld;
             this.EyePositionWorld = this.FrameBuffer.EyePositionWorld;
+            this.World = this.FrameBuffer.World;
             this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
             this.TextureCount = this.FrameBuffer.TextureCount;
 

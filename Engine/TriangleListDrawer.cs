@@ -35,16 +35,6 @@ namespace Engine
 
         }
         /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
-        {
-            this.Game.Graphics.DisableZBuffer();
-
-            base.Draw(gameTime);
-        }
-        /// <summary>
         /// Set triangle list
         /// </summary>
         /// <param name="triangles">Triangle list</param>

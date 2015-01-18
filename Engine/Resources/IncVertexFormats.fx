@@ -241,20 +241,20 @@ struct PSVertexBillboard
 };
 struct PSParticleFire
 {
-	float4 positionHomogeneus : SV_POSITION;
+	float4 positionHomogeneous : SV_POSITION;
 	float4 color : COLOR;
 	float2 tex : TEXCOORD;
 	uint primitiveID : SV_PrimitiveID;
 };
 struct PSParticleRain
 {
-	float4 positionHomogeneus : SV_POSITION;
+	float4 positionHomogeneous : SV_POSITION;
 	float2 tex : TEXCOORD;
 	uint primitiveID : SV_PrimitiveID;
 };
 struct PSVertexPosition
 {
-	float4 positionHomogeneus : SV_POSITION;
+	float4 positionHomogeneous : SV_POSITION;
     float3 positionLocal : POSITION;
 };
 struct PSVertexPositionColor

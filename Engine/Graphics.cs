@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Forms;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
@@ -228,7 +227,7 @@ namespace Engine
 
             form.KeyUp += (sender, eventArgs) =>
             {
-                if (eventArgs.Alt && eventArgs.KeyCode == Keys.Enter)
+                if (eventArgs.Alt && (int)eventArgs.KeyCode == (int)Keys.Enter)
                 {
                     swapChain.IsFullScreen = !swapChain.IsFullScreen;
                 }

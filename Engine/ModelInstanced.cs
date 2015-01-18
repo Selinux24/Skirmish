@@ -23,30 +23,20 @@ namespace Engine
         /// Manipulator list per instance
         /// </summary>
         private Manipulator3D[] instances = null;
+
         /// <summary>
-        /// Selected instance index
+        /// Indicates whether the draw call uses z-buffer if available
         /// </summary>
-        private int currentInstance = 0;
+        public bool UseZBuffer { get; set; }
         /// <summary>
-        /// Gets manipulator instance per instance index
+        /// Gets manipulator instance list
         /// </summary>
-        /// <param name="index">Instance index</param>
-        /// <returns>Returns instance manipulator</returns>
-        public Manipulator3D this[int index]
+        /// <returns>Returns manipulator instance list</returns>
+        public Manipulator3D[] Manipulators
         {
             get
             {
-                return this.instances[index];
-            }
-        }
-        /// <summary>
-        /// Gets selected instance manipulator
-        /// </summary>
-        public Manipulator3D Manipulator
-        {
-            get
-            {
-                return this.instances[currentInstance];
+                return this.instances;
             }
         }
         /// <summary>
@@ -70,6 +60,8 @@ namespace Engine
         public ModelInstanced(Game game, Scene3D scene, ModelContent content, int instances)
             : base(game, scene, content, true, instances)
         {
+            this.UseZBuffer = true;
+
             this.effect = new EffectInstancing(game.Graphics.Device);
 
             this.instancingData = new VertexInstancingData[instances];
@@ -121,6 +113,15 @@ namespace Engine
         {
             if (this.Meshes != null)
             {
+                if (this.UseZBuffer)
+                {
+                    this.Game.Graphics.EnableZBuffer();
+                }
+                else
+                {
+                    this.Game.Graphics.DisableZBuffer();
+                }
+
                 #region Per frame update
 
                 this.effect.FrameBuffer.World = this.Scene.World;
@@ -176,30 +177,6 @@ namespace Engine
                         }
                     }
                 }
-            }
-        }
-        /// <summary>
-        /// Select next instance from current
-        /// </summary>
-        public void Next()
-        {
-            this.currentInstance++;
-
-            if (this.currentInstance >= this.instances.Length)
-            {
-                this.currentInstance = 0;
-            }
-        }
-        /// <summary>
-        /// Select previous instance from current
-        /// </summary>
-        public void Previous()
-        {
-            this.currentInstance--;
-
-            if (this.currentInstance < 0)
-            {
-                this.currentInstance = this.instances.Length - 1;
             }
         }
     }

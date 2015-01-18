@@ -251,6 +251,8 @@ namespace Engine
         {
             this.GameTime.Update();
 
+            this.Input.Update();
+
             this.Graphics.Begin();
 
             for (int i = 0; i < this.scenes.Count; i++)
@@ -259,22 +261,11 @@ namespace Engine
                 {
                     this.scenes[i].Update(this.GameTime);
 
-                    if (this.scenes[i].UseZBuffer)
-                    {
-                        this.Graphics.EnableZBuffer();
-                    }
-                    else
-                    {
-                        this.Graphics.DisableZBuffer();
-                    }
-
                     this.scenes[i].Draw(this.GameTime);
                 }
             }
 
             this.Graphics.End();
-
-            this.Input.Update();
 
             Counters.FrameCount++;
             Counters.FrameTime += this.GameTime.ElapsedSeconds;

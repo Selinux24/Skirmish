@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms;
-using Engine;
+﻿using Engine;
 
 namespace SpriteDrawing
 {

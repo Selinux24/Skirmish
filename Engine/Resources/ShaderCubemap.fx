@@ -21,7 +21,7 @@ PSVertexPosition VSCubic(VSVertexPosition input)
 {
 	PSVertexPosition output;
 	
-	output.positionHomogeneus = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection).xyww;
+	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection).xyww;
 	output.positionLocal = input.positionLocal;
 	
 	return output;

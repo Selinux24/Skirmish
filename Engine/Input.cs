@@ -147,8 +147,14 @@ namespace Engine
             {
                 this.visibleMouse = value;
 
-                if (this.visibleMouse) this.ShowMouse();
-                else this.HideMouse();
+                if (this.visibleMouse)
+                {
+                    Cursor.Show();
+                }
+                else
+                {
+                    Cursor.Hide();
+                }
             }
         }
 
@@ -182,7 +188,7 @@ namespace Engine
                     #region Mouse position
 
                     {
-                        Point mousePos = this.form.PointToClient(Cursor.Position);
+                        Point mousePos = this.form.PointToClient(Cursor.ScreenPosition);
 
                         this.MouseXDelta = mousePos.X - this.lastMousePos.X;
                         this.MouseYDelta = mousePos.Y - this.lastMousePos.Y;
@@ -314,20 +320,6 @@ namespace Engine
             return this.currentKeyboardKeys.Contains(key);
         }
         /// <summary>
-        /// Shows mouse cursor
-        /// </summary>
-        public void ShowMouse()
-        {
-            Cursor.Show();
-        }
-        /// <summary>
-        /// Hides mouse cursor
-        /// </summary>
-        public void HideMouse()
-        {
-            Cursor.Hide();
-        }
-        /// <summary>
         /// Sets mouse position
         /// </summary>
         /// <param name="x">X component</param>
@@ -342,9 +334,9 @@ namespace Engine
         /// <param name="location">Position</param>
         public void SetMousePosition(Point location)
         {
-            Cursor.Position = location;
+            Cursor.ScreenPosition = location;
 
-            this.lastMousePos = this.form.PointToClient(Cursor.Position);
+            this.lastMousePos = this.form.PointToClient(Cursor.ScreenPosition);
         }
 
         /// <summary>
@@ -418,11 +410,11 @@ namespace Engine
         {
             List<MouseButtons> res = new List<MouseButtons>();
 
-            if ((Control.MouseButtons & MouseButtons.Left) == MouseButtons.Left) res.Add(MouseButtons.Left);
-            if ((Control.MouseButtons & MouseButtons.Right) == MouseButtons.Right) res.Add(MouseButtons.Right);
-            if ((Control.MouseButtons & MouseButtons.Middle) == MouseButtons.Middle) res.Add(MouseButtons.Middle);
-            if ((Control.MouseButtons & MouseButtons.XButton1) == MouseButtons.XButton1) res.Add(MouseButtons.XButton1);
-            if ((Control.MouseButtons & MouseButtons.XButton2) == MouseButtons.XButton2) res.Add(MouseButtons.XButton2);
+            if (((int)Control.MouseButtons & (int)MouseButtons.Left) == (int)MouseButtons.Left) res.Add(MouseButtons.Left);
+            if (((int)Control.MouseButtons & (int)MouseButtons.Right) == (int)MouseButtons.Right) res.Add(MouseButtons.Right);
+            if (((int)Control.MouseButtons & (int)MouseButtons.Middle) == (int)MouseButtons.Middle) res.Add(MouseButtons.Middle);
+            if (((int)Control.MouseButtons & (int)MouseButtons.XButton1) == (int)MouseButtons.XButton1) res.Add(MouseButtons.XButton1);
+            if (((int)Control.MouseButtons & (int)MouseButtons.XButton2) == (int)MouseButtons.XButton2) res.Add(MouseButtons.XButton2);
 
             return res.ToArray();
         }

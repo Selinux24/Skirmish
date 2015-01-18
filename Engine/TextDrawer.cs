@@ -289,7 +289,7 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
-                //this.Game.Graphics.SetBlendTransparent();
+                this.Game.Graphics.EnableZBuffer();
 
                 this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                 this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;

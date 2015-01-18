@@ -293,6 +293,27 @@ namespace Engine
             return newModel;
         }
         /// <summary>
+        /// Adds new game cursor
+        /// </summary>
+        /// <param name="texture">Cursor image</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new model</returns>
+        public Cursor AddCursor(string texture, int width, int height, int order = 0)
+        {
+            Cursor newModel = new Cursor(
+                this.Game,
+                this,
+                texture,
+                width,
+                height);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
         /// Adds text
         /// </summary>
         /// <param name="font">Font</param>

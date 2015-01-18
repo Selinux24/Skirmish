@@ -12,9 +12,9 @@ namespace SceneTest
             using (Game cl = new Game("3 SceneTest"))
 #endif
             {
-                cl.AddScene(new TestSceneHID(cl) { Active = true, Order = 0, UseZBuffer = false, });
-                cl.AddScene(new TestScene3D(cl) { Active = true, Order = 1, UseZBuffer = true, });
-                cl.AddScene(new TestSceneBackground(cl) { Active = true, Order = 2, UseZBuffer = false, });
+                cl.AddScene(new TestSceneHID(cl) { Active = true, Order = 0, });
+                cl.AddScene(new TestScene3D(cl) { Active = true, Order = 1, });
+                cl.AddScene(new TestSceneBackground(cl) { Active = true, Order = 2, });
 
                 cl.Run();
             }

@@ -18,6 +18,10 @@ namespace Engine
         private EffectBasic effect;
 
         /// <summary>
+        /// Indicates whether the draw call uses z-buffer if available
+        /// </summary>
+        public bool UseZBuffer { get; set; }
+        /// <summary>
         /// Model manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; private set; }
@@ -31,6 +35,8 @@ namespace Engine
         public Model(Game game, Scene3D scene, ModelContent content)
             : base(game, scene, content)
         {
+            this.UseZBuffer = true;
+
             this.effect = new EffectBasic(game.Graphics.Device);
 
             this.Manipulator = new Manipulator3D();
@@ -66,6 +72,15 @@ namespace Engine
         {
             if (this.Meshes != null)
             {
+                if (this.UseZBuffer)
+                {
+                    this.Game.Graphics.EnableZBuffer();
+                }
+                else
+                {
+                    this.Game.Graphics.DisableZBuffer();
+                }
+
                 #region Per frame update
 
                 Matrix local = this.Manipulator.LocalTransform;

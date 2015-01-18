@@ -108,6 +108,11 @@ namespace Engine
         private ShaderResourceView textureRandom;
 
         /// <summary>
+        /// Manipulator
+        /// </summary>
+        public Manipulator3D Manipulator { get; set; }
+
+        /// <summary>
         /// Contructor
         /// </summary>
         /// <param name="game">Game</param>
@@ -173,6 +178,8 @@ namespace Engine
 
             this.textureArray = game.Graphics.Device.LoadTextureArray(ContentManager.FindContent(scene.ContentPath, description.Textures));
             this.textureRandom = game.Graphics.Device.CreateRandomTexture(1024);
+
+            this.Manipulator = new Manipulator3D();
         }
         /// <summary>
         /// Dispose resources
@@ -192,7 +199,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
-            
+            this.Manipulator.Update(gameTime);
         }
         /// <summary>
         /// Drawing
@@ -210,6 +217,7 @@ namespace Engine
 
             #region Per frame update
 
+            Matrix world = this.Scene.World * this.Manipulator.LocalTransform;
             Matrix worldViewProjection = this.Scene.World * this.Scene.ViewProjectionPerspective;
 
             this.effect.FrameBuffer.MaxAge = this.maximumAge;
@@ -217,6 +225,7 @@ namespace Engine
             this.effect.FrameBuffer.GameTime = gameTime.TotalSeconds;
             this.effect.FrameBuffer.TimeStep = gameTime.ElapsedSeconds;
             this.effect.FrameBuffer.AccelerationWorld = this.particleAcceleration;
+            this.effect.FrameBuffer.World = world;
             this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;
             this.effect.FrameBuffer.EyePositionWorld = this.Scene.Camera.Position;
             this.effect.FrameBuffer.TextureCount = (uint)this.textureArray.Description.Texture2DArray.ArraySize;
@@ -349,9 +358,10 @@ namespace Engine
         /// Creates a fire particle system
         /// </summary>
         /// <param name="positions">Position list</param>
+        /// <param name="particleSize">Particle size</param>
         /// <param name="textures">Texture list</param>
         /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Fire(Vector3[] positions, params string[] textures)
+        public static ParticleSystemDescription Fire(Vector3[] positions, float particleSize, params string[] textures)
         {
             return new ParticleSystemDescription()
             {
@@ -359,8 +369,8 @@ namespace Engine
                 MaximumParticles = 500,
                 MaximumAge = 1.0f,
                 EmitterAge = 0.005f,
-                ParticleSize = 2f,
-                Acceleration = new Vector3(0.0f, 7.8f, 0.0f),
+                ParticleSize = particleSize,
+                Acceleration = new Vector3(0.0f, 7.8f, 0.0f) * particleSize,
                 EmitterType = EmitterTypes.FixedPosition,
                 EmitterPositions = positions,
                 Textures = textures,
@@ -369,9 +379,10 @@ namespace Engine
         /// <summary>
         /// Creates a rain particle system
         /// </summary>
+        /// <param name="particleSize">Particle size</param>
         /// <param name="textures">Texture list</param>
         /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Rain(params string[] textures)
+        public static ParticleSystemDescription Rain(float particleSize, params string[] textures)
         {
             return new ParticleSystemDescription()
             {
@@ -379,8 +390,8 @@ namespace Engine
                 MaximumParticles = 10000,
                 MaximumAge = 3.0f,
                 EmitterAge = 0.002f,
-                ParticleSize = 0.5f,
-                Acceleration = GameEnvironment.Gravity + Vector3.UnitX,
+                ParticleSize = particleSize,
+                Acceleration = (GameEnvironment.Gravity + Vector3.UnitX),
                 EmitterType = EmitterTypes.FromCamera,
                 Textures = textures,
             };

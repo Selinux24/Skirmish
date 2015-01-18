@@ -40,7 +40,7 @@ namespace GameLogic
 
                 GameEnvironment.Background = Color.Black;
 
-                game.AddScene(new SceneHUD(game) { Active = true, UseZBuffer = false, Order = 1 });
+                game.AddScene(new SceneHUD(game) { Active = true, Order = 1 });
 
                 game.Run();
             }

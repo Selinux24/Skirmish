@@ -274,6 +274,9 @@
     <Compile Include="Collada\Transforms.cs" />
     <Compile Include="Common\VertexData.cs" />
     <Compile Include="Common\Weight.cs" />
+    <Compile Include="Cursor.cs" />
+    <Compile Include="Keys.cs" />
+    <Compile Include="MouseButtons.cs" />
     <Compile Include="TriangleListDrawer.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
     <Compile Include="Effects\EffectParticles.cs" />

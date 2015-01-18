@@ -13,7 +13,7 @@ namespace Collada
 #endif
             {
 #if DEBUG
-                cl.VisibleMouse = true;
+                cl.VisibleMouse = false;
                 cl.LockMouse = false;
 #else
                 cl.VisibleMouse = false;

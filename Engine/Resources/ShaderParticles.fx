@@ -15,6 +15,7 @@ cbuffer cbPerFrame : register (b0)
 	float gElapsedTime;
 	float3 gAccelerationWorld;
 	float3 gEyePositionWorld;
+	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
 	uint gTextureCount;
 };
@@ -41,55 +42,55 @@ float3 RandomVector3(float offset)
 	return gTextureRandom.SampleLevel(SamplerLinear, u, 0).xyz;
 }
 
-VSVertexParticle VSStreamOut(VSVertexParticle vin)
+VSVertexParticle VSStreamOut(VSVertexParticle input)
 {
-	return vin;
+    return input;
 }
 
 [maxvertexcount(2)]
-void GSStreamOutFire(point VSVertexParticle gin[1], inout PointStream<VSVertexParticle> ptStream)
+void GSStreamOutFire(point VSVertexParticle input[1], inout PointStream<VSVertexParticle> ptStream)
 {
-	gin[0].age += gElapsedTime;
+	input[0].age += gElapsedTime;
 	
-	if(gin[0].type == PT_EMITTER)
+	if(input[0].type == PT_EMITTER)
 	{
-		if(gin[0].age > gEmitterAge)
+		if(input[0].age > gEmitterAge)
 		{
 			float3 vRandom = normalize(RandomVector3(0.0f));
 			vRandom.x *= 0.33f;
 			vRandom.z *= 0.33f;
 
 			VSVertexParticle p;
-			p.positionWorld = gin[0].positionWorld;
-			p.velocityWorld = vRandom * 1.5f * gin[0].sizeWorld.x;
-			p.sizeWorld = gin[0].sizeWorld;
+			p.positionWorld = input[0].positionWorld;
+			p.velocityWorld = vRandom * 1.5f * input[0].sizeWorld.x;
+			p.sizeWorld = input[0].sizeWorld;
 			p.age = 0.0f;
 			p.type = PT_FLARE;
 
 			ptStream.Append(p);
 			
-			gin[0].age = 0.0f;
+			input[0].age = 0.0f;
 		}
 		
-		ptStream.Append(gin[0]);
+		ptStream.Append(input[0]);
 	}
 	else
 	{
-		if(gin[0].age <= gMaximumAge)
+		if(input[0].age <= gMaximumAge)
 		{
-			ptStream.Append(gin[0]);
+			ptStream.Append(input[0]);
 		}
 	}
 }
 
 [maxvertexcount(6)]
-void GSStreamOutRain(point VSVertexParticle gin[1], inout PointStream<VSVertexParticle> ptStream)
+void GSStreamOutRain(point VSVertexParticle input[1], inout PointStream<VSVertexParticle> ptStream)
 {
-	gin[0].age += gElapsedTime;
+	input[0].age += gElapsedTime;
 	
-	if(gin[0].type == PT_EMITTER)
+	if(input[0].type == PT_EMITTER)
 	{
-		if(gin[0].age > gEmitterAge)
+		if(input[0].age > gEmitterAge)
 		{
 			for(int i = 0; i < 5; ++i)
 			{
@@ -99,116 +100,122 @@ void GSStreamOutRain(point VSVertexParticle gin[1], inout PointStream<VSVertexPa
 				VSVertexParticle p;
 				p.positionWorld = gEyePositionWorld.xyz + vRandom;
 				p.velocityWorld = gAccelerationWorld;
-				p.sizeWorld = gin[0].sizeWorld;
+				p.sizeWorld = input[0].sizeWorld;
 				p.age = 0.0f;
 				p.type = PT_FLARE;
 
 				ptStream.Append(p);
 			}
 
-			gin[0].age = 0.0f;
+			input[0].age = 0.0f;
 		}
 
-		ptStream.Append(gin[0]);
+		ptStream.Append(input[0]);
 	}
 	else
 	{
-		if(gin[0].age <= gMaximumAge)
+		if(input[0].age <= gMaximumAge)
 		{
-			ptStream.Append(gin[0]);
+			ptStream.Append(input[0]);
 		}
 	}
 }
 
-GSParticleFire VSDrawFire(VSVertexParticle vin)
+GSParticleFire VSDrawFire(VSVertexParticle input)
 {
-	float t = vin.age;
+	float t = input.age;
 	float opacity = 1.0f - smoothstep(0.0f, 1.0f, t / 1.0f);
 	
-	GSParticleFire vout;
-	vout.positionWorld = 0.5f * t * t * gAccelerationWorld + t * vin.velocityWorld + vin.positionWorld;
-	vout.color = float4(1.0f, 1.0f, 1.0f, opacity);
-	vout.sizeWorld = vin.sizeWorld;
-	vout.type  = vin.type;
+	float3 pos = 0.5f * t * t * gAccelerationWorld + t * input.velocityWorld + input.positionWorld;
+
+	GSParticleFire output;
+	output.positionWorld = mul(float4(pos, 1), gWorld).xyz;
+	output.color = float4(1.0f, 1.0f, 1.0f, opacity);
+	output.sizeWorld = input.sizeWorld;
+	output.type  = input.type;
 	
-	return vout;
+	return output;
 }
 
-GSParticleRain VSDrawRain(VSVertexParticle vin)
+GSParticleRain VSDrawRain(VSVertexParticle input)
 {
-	float t = vin.age;
+	float t = input.age;
 
-	GSParticleRain vout;
-	vout.positionWorld = 0.5f * t * t * gAccelerationWorld + t * vin.velocityWorld + vin.positionWorld;
-	vout.type  = vin.type;
+	float3 pos = 0.5f * t * t * gAccelerationWorld + t * input.velocityWorld + input.positionWorld;
+
+	GSParticleRain output;
+	output.positionWorld = mul(float4(pos, 1), gWorld).xyz;
+	output.type  = input.type;
 	
-	return vout;
+	return output;
 }
 
 [maxvertexcount(4)]
-void GSDrawFire(point GSParticleFire gin[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSParticleFire> triStream)
+void GSDrawFire(point GSParticleFire input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSParticleFire> triStream)
 {
-	if(gin[0].type != PT_EMITTER)
+	if(input[0].type != PT_EMITTER)
 	{
-		float3 look  = normalize(gEyePositionWorld.xyz - gin[0].positionWorld);
+		float3 look  = normalize(gEyePositionWorld.xyz - input[0].positionWorld);
 		float3 right = normalize(cross(float3(0, 1, 0), look));
 		float3 up    = cross(look, right);
 
-		float halfWidth  = 0.5f * gin[0].sizeWorld.x;
-		float halfHeight = 0.5f * gin[0].sizeWorld.y;
+		float halfWidth  = 0.5f * input[0].sizeWorld.x;
+		float halfHeight = 0.5f * input[0].sizeWorld.y;
 	
 		float4 v[4];
-		v[0] = float4(gin[0].positionWorld + halfWidth * right - halfHeight * up, 1.0f);
-		v[1] = float4(gin[0].positionWorld + halfWidth * right + halfHeight * up, 1.0f);
-		v[2] = float4(gin[0].positionWorld - halfWidth * right - halfHeight * up, 1.0f);
-		v[3] = float4(gin[0].positionWorld - halfWidth * right + halfHeight * up, 1.0f);
+		v[0] = float4(input[0].positionWorld + halfWidth * right - halfHeight * up, 1.0f);
+		v[1] = float4(input[0].positionWorld + halfWidth * right + halfHeight * up, 1.0f);
+		v[2] = float4(input[0].positionWorld - halfWidth * right - halfHeight * up, 1.0f);
+		v[3] = float4(input[0].positionWorld - halfWidth * right + halfHeight * up, 1.0f);
 		
-		PSParticleFire gout;
+		PSParticleFire output;
 		[unroll]
 		for(int i = 0; i < 4; ++i)
 		{
-			gout.positionHomogeneus = mul(v[i], gWorldViewProjection);
-			gout.tex = gQuadTexC[i];
-			gout.color = gin[0].color;
-			gout.primitiveID = primID;
+			v[i].y += halfHeight;
+
+			output.positionHomogeneous = mul(v[i], gWorldViewProjection);
+			output.tex = gQuadTexC[i];
+			output.color = input[0].color;
+			output.primitiveID = primID;
 			
-			triStream.Append(gout);
+			triStream.Append(output);
 		}
 	}
 }
 
 [maxvertexcount(2)]
-void GSDrawRain(point GSParticleRain gin[1], uint primID : SV_PrimitiveID, inout LineStream<PSParticleRain> lineStream)
+void GSDrawRain(point GSParticleRain input[1], uint primID : SV_PrimitiveID, inout LineStream<PSParticleRain> lineStream)
 {
-	if( gin[0].type != PT_EMITTER )
+	if( input[0].type != PT_EMITTER )
 	{
-		float3 p0 = gin[0].positionWorld;
-		float3 p1 = gin[0].positionWorld + 0.07f * gAccelerationWorld;
+		float3 p0 = input[0].positionWorld;
+		float3 p1 = input[0].positionWorld + 0.07f * gAccelerationWorld;
 		
 		PSParticleRain v0;
-		v0.positionHomogeneus = mul(float4(p0, 1.0f), gWorldViewProjection);
+		v0.positionHomogeneous = mul(float4(p0, 1.0f), gWorldViewProjection);
 		v0.tex = float2(0.0f, 0.0f);
 		v0.primitiveID = primID;
 		lineStream.Append(v0);
 		
 		PSParticleRain v1;
-		v1.positionHomogeneus = mul(float4(p1, 1.0f), gWorldViewProjection);
+		v1.positionHomogeneous = mul(float4(p1, 1.0f), gWorldViewProjection);
 		v1.tex  = float2(1.0f, 1.0f);
 		v1.primitiveID = primID;
 		lineStream.Append(v1);
 	}
 }
 
-float4 PSDrawFire(PSParticleFire pin) : SV_TARGET
+float4 PSDrawFire(PSParticleFire input) : SV_TARGET
 {
-	float3 uvw = float3(pin.tex, pin.primitiveID % gTextureCount);
+	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
-	return gTextureArray.Sample(SamplerLinear, uvw) * pin.color;
+	return gTextureArray.Sample(SamplerLinear, uvw) * input.color;
 }
 
-float4 PSDrawRain(PSParticleRain pin) : SV_TARGET
+float4 PSDrawRain(PSParticleRain input) : SV_TARGET
 {
-	float3 uvw = float3(pin.tex, pin.primitiveID % gTextureCount);
+	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
 	return gTextureArray.Sample(SamplerLinear, uvw);
 }
