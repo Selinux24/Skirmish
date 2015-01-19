@@ -38,7 +38,7 @@ namespace GameLogic
                 game.VisibleMouse = true;
                 game.LockMouse = false;
 
-                GameEnvironment.Background = Color.Black;
+                GameEnvironment.Background = Color.LightGray;
 
                 game.AddScene(new SceneHUD(game) { Active = true, Order = 1 });
 

@@ -34,6 +34,14 @@ namespace Engine
         /// </summary>
         private Point lastMousePos;
         /// <summary>
+        /// Mouse wheel delta of current update
+        /// </summary>
+        private int mouseWheel;
+        /// <summary>
+        /// Mouse wheel delta of last update
+        /// </summary>
+        private int lastMouseWheel;
+        /// <summary>
         /// Mouse buttons of last update
         /// </summary>
         private List<MouseButtons> lastMouseButtons = new List<MouseButtons>();
@@ -61,7 +69,7 @@ namespace Engine
         /// <summary>
         /// Mouse wheel value
         /// </summary>
-        public int MouseWheelDelta { get; private set; }
+        public int MouseWheelDelta { get { return this.lastMouseWheel; } }
         /// <summary>
         /// Absolute Mouse X axis value
         /// </summary>
@@ -258,7 +266,8 @@ namespace Engine
                     #region Mouse Wheel
 
                     {
-                        this.MouseWheelDelta = 0;
+                        this.lastMouseWheel = this.mouseWheel;
+                        this.mouseWheel = 0;
                     }
 
                     #endregion
@@ -388,7 +397,8 @@ namespace Engine
             #region Mouse Wheel
 
             {
-                this.MouseWheelDelta = 0;
+                this.lastMouseWheel = 0;
+                this.mouseWheel = 0;
             }
 
             #endregion
@@ -435,7 +445,7 @@ namespace Engine
                     {
                         //Pressed
                         Keys key = (Keys)i;
-                        
+
                         pressedKeys.Add(key);
                     }
                 }
@@ -469,7 +479,7 @@ namespace Engine
         /// <param name="e">Event arguments</param>
         private void OnMouseWheel(object sender, MouseEventArgs e)
         {
-            this.MouseWheelDelta = e.Delta;
+            this.mouseWheel = e.Delta;
         }
     }
 }

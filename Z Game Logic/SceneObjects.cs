@@ -24,7 +24,7 @@ namespace GameLogic
             int teamIndex = 0;
             foreach (Team team in Program.SkirmishGame.Teams)
             {
-                ModelInstanced model = this.AddInstancingModel("Poly.dae", team.Soldiers.Length);
+                ModelInstanced model = this.AddInstancingModel("soldier.dae", team.Soldiers.Length);
 
                 this.teams.Add(team, model);
 
@@ -36,6 +36,12 @@ namespace GameLogic
                     Manipulator3D man = model.Manipulators[soldierIndex++];
 
                     man.SetPosition(soldierIndex * delta, 0, teamIndex * delta);
+                    man.SetScale(3);
+
+                    if (teamIndex > 0)
+                    {
+                        man.SetRotation(MathUtil.DegreesToRadians(180), 0, 0);
+                    }
 
                     this.soldiers.Add(soldier, man);
                 }
@@ -73,6 +79,16 @@ namespace GameLogic
             if (this.Game.Input.KeyPressed(Keys.S))
             {
                 this.Camera.MoveBackward(this.Game.GameTime, shift);
+            }
+
+            if (this.Game.Input.MouseWheelDelta > 0)
+            {
+                this.Camera.ZoomIn(this.Game.GameTime, shift);
+            }
+
+            if (this.Game.Input.MouseWheelDelta < 0)
+            {
+                this.Camera.ZoomOut(this.Game.GameTime, shift);
             }
         }
     }
