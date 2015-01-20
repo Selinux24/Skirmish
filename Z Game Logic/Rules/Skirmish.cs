@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace GameLogic.Rules
@@ -74,13 +74,27 @@ namespace GameLogic.Rules
                 return Array.FindAll(this.CurrentTeam.Soldiers, s => s.IdleForPhase(this.currentPhase));
             }
         }
+        public Soldier[] AllSoldiers
+        {
+            get
+            {
+                List<Soldier> soldiers = new List<Soldier>();
+
+                foreach (Team team in this.Teams)
+                {
+                    soldiers.AddRange(team.Soldiers);
+                }
+
+                return soldiers.ToArray();
+            }
+        }
 
         public Skirmish()
         {
 
         }
 
-        public void AddTeam(string name, string faction, TeamRole role, int soldiers)
+        public void AddTeam(string name, string faction, TeamRole role, int soldiers, int heavy, int docs, bool addLeader = true)
         {
             Team team = new Team(name)
             {
@@ -88,16 +102,25 @@ namespace GameLogic.Rules
                 Role = role,
             };
 
-            team.AddSoldier(string.Format("Hannibal Smith of {0}", name), SoldierClasses.Line);
-
-            for (int i = 1; i < soldiers - 2; i++)
+            if (addLeader)
             {
-                team.AddSoldier(string.Format("John Smith {0:00} of {1}", i, name), SoldierClasses.Line);
+                team.AddSoldier(string.Format("Hannibal Smith of {0}", name), SoldierClasses.Line);
             }
 
-            team.AddSoldier(string.Format("Puro Smith of {0}", name), SoldierClasses.Heavy);
+            for (int i = 0; i < soldiers; i++)
+            {
+                team.AddSoldier(string.Format("John Smith {0:00} of {1}", i + 1, name), SoldierClasses.Line);
+            }
 
-            team.AddSoldier(string.Format("Doc Smith of {0}", name), SoldierClasses.Medic);
+            for (int i = 0; i < heavy; i++)
+            {
+                team.AddSoldier(string.Format("Puro Smith {0:00} of {1}", i + 1, name), SoldierClasses.Heavy);
+            }
+
+            for (int i = 0; i < docs; i++)
+            {
+                team.AddSoldier(string.Format("Doc Smith {0:00} of {1}", i + 1, name), SoldierClasses.Medic);
+            }
 
             this.teams.Add(team);
         }
@@ -311,7 +334,7 @@ namespace GameLogic.Rules
                             melee.Disolve();
                         }
                     }
-                    
+
                     this.melees.RemoveAll(m => m.Done == true);
                 }
 
@@ -351,8 +374,8 @@ namespace GameLogic.Rules
             return string.Format(
                 "Battle -> {0} teams. Turn {1} | Phase {2}. Melees {3}",
                 this.teams.Count,
-                this.currentTurn, 
-                this.currentPhase, 
+                this.currentTurn,
+                this.currentPhase,
                 this.melees.Count);
         }
     }

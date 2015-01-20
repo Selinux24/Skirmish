@@ -595,6 +595,47 @@ namespace Engine
                 this.Interest = newInterest;
             }
         }
+        /// <summary>
+        /// Performs fine translation to target
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="newInterest">New interest</param>
+        /// <param name="radius">Radius to decelerate</param>
+        /// <param name="slow">Slow</param>
+        /// <remarks>For isometric camera only</remarks>
+        public void FineTranslation(GameTime gameTime, Vector3 newInterest, float radius, bool slow)
+        {
+            if (this.mode == CameraModes.FreeIsometric)
+            {
+                Vector3 diff = newInterest - this.Interest;
+                Vector3 pos = this.Position + diff;
+                Vector3 dir = pos - this.Position;
+
+                float delta = (slow) ? this.SlowMovementDelta : this.MovementDelta;
+                float distanceToTarget = dir.Length();
+                float distanceThisMove = delta * gameTime.ElapsedSeconds;
+
+                Vector3 movingVector = Vector3.Zero;
+                if (distanceThisMove >= distanceToTarget)
+                {
+                    movingVector = Vector3.Normalize(dir) * distanceToTarget * 0.1f;
+                }
+                else if (distanceToTarget < radius)
+                {
+                    movingVector = Vector3.Normalize(dir) * distanceThisMove * (distanceToTarget / radius);
+                }
+                else
+                {
+                    movingVector = Vector3.Normalize(dir) * distanceThisMove;
+                }
+
+                if (movingVector != Vector3.Zero)
+                {
+                    this.Position += movingVector;
+                    this.Interest += movingVector;
+                }
+            }
+        }
 
         /// <summary>
         /// Sets camera to free mode

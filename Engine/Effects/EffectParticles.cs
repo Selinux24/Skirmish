@@ -57,13 +57,17 @@ namespace Engine.Effects
         /// </summary>
         public readonly EffectTechnique RainStreamOut = null;
         /// <summary>
-        /// Fire drawing technique
+        /// Smoke stream out technique
         /// </summary>
-        public readonly EffectTechnique FireDraw = null;
+        public readonly EffectTechnique SmokeStreamOut = null;
         /// <summary>
-        /// Rain drawing technique
+        /// Solid drawing technique
         /// </summary>
-        public readonly EffectTechnique RainDraw = null;
+        public readonly EffectTechnique SolidDraw = null;
+        /// <summary>
+        /// Line drawing technique
+        /// </summary>
+        public readonly EffectTechnique LineDraw = null;
 
         /// <summary>
         /// Eye position effect variable
@@ -287,13 +291,15 @@ namespace Engine.Effects
         {
             this.FireStreamOut = this.Effect.GetTechniqueByName("FireStreamOut");
             this.RainStreamOut = this.Effect.GetTechniqueByName("RainStreamOut");
-            this.FireDraw = this.Effect.GetTechniqueByName("FireDraw");
-            this.RainDraw = this.Effect.GetTechniqueByName("RainDraw");
+            this.SmokeStreamOut = this.Effect.GetTechniqueByName("SmokeStreamOut");
+            this.SolidDraw = this.Effect.GetTechniqueByName("SolidDraw");
+            this.LineDraw = this.Effect.GetTechniqueByName("LineDraw");
 
             this.AddInputLayout(this.FireStreamOut, VertexParticle.GetInput());
             this.AddInputLayout(this.RainStreamOut, VertexParticle.GetInput());
-            this.AddInputLayout(this.FireDraw, VertexParticle.GetInput());
-            this.AddInputLayout(this.RainDraw, VertexParticle.GetInput());
+            this.AddInputLayout(this.SmokeStreamOut, VertexParticle.GetInput());
+            this.AddInputLayout(this.SolidDraw, VertexParticle.GetInput());
+            this.AddInputLayout(this.LineDraw, VertexParticle.GetInput());
 
             this.emitterAge = this.Effect.GetVariableByName("gEmitterAge").AsScalar();
             this.maximumAge = this.Effect.GetVariableByName("gMaximumAge").AsScalar();
@@ -332,6 +338,7 @@ namespace Engine.Effects
                 if (vertexType == VertexTypes.Particle)
                 {
                     if (particleClass == ParticleClasses.Fire) return this.FireStreamOut;
+                    else if (particleClass == ParticleClasses.Smoke) return this.SmokeStreamOut;
                     else if (particleClass == ParticleClasses.Rain) return this.RainStreamOut;
                     else throw new Exception(string.Format("Bad particle class: {0}", particleClass));
                 }
@@ -344,8 +351,9 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Particle)
                 {
-                    if (particleClass == ParticleClasses.Fire) return this.FireDraw;
-                    else if (particleClass == ParticleClasses.Rain) return this.RainDraw;
+                    if (particleClass == ParticleClasses.Fire) return this.SolidDraw;
+                    else if (particleClass == ParticleClasses.Smoke) return this.SolidDraw;
+                    else if (particleClass == ParticleClasses.Rain) return this.LineDraw;
                     else throw new Exception(string.Format("Bad particle class: {0}", particleClass));
                 }
                 else

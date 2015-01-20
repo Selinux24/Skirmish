@@ -257,11 +257,11 @@ namespace Engine.Content
 
             return modelContent;
         }
-        public static ModelContent GenerateSprite(string contentFolder, string texture)
+        public static ModelContent GenerateSprite(string contentFolder, string[] textures)
         {
-            return GenerateSprite(contentFolder, texture, 1, 1, 0, 0);
+            return GenerateSprite(contentFolder, textures, 1, 1, 0, 0);
         }
-        public static ModelContent GenerateSprite(string contentFolder, string texture, float width, float height, float formWidth, float formHeight)
+        public static ModelContent GenerateSprite(string contentFolder, string[] textures, float width, float height, float formWidth, float formHeight)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -269,10 +269,7 @@ namespace Engine.Content
             string materialName = "spriteMaterial";
             string geoName = "spriteGeometry";
 
-            ImageContent image = new ImageContent()
-            {
-                Path = ContentManager.FindContent(contentFolder, texture),
-            };
+            ImageContent image = ImageContent.Array(ContentManager.FindContent(contentFolder, textures));
 
             MaterialContent material = MaterialContent.Default;
             material.DiffuseTexture = imageName;
@@ -448,19 +445,15 @@ namespace Engine.Content
             float bottom = top - height;
 
             v[0].Position = new Vector3(left, top, 0.0f);
-            v[0].Normal = Vector3.UnitZ;
             v[0].Texture = Vector2.Zero;
 
             v[1].Position = new Vector3(right, bottom, 0.0f);
-            v[1].Normal = Vector3.UnitZ;
             v[1].Texture = Vector2.One;
 
             v[2].Position = new Vector3(left, bottom, 0.0f);
-            v[2].Normal = Vector3.UnitZ;
             v[2].Texture = Vector2.UnitY;
 
             v[3].Position = new Vector3(right, top, 0.0f);
-            v[3].Normal = Vector3.UnitZ;
             v[3].Texture = Vector2.UnitX;
 
             i[0] = 0;

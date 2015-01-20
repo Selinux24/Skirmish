@@ -73,12 +73,12 @@ namespace Engine
             if (this.Centered)
             {
                 left = (this.Game.Input.MouseX - (this.Width * 0.5f));
-                top = -(this.Game.Input.MouseY - (this.Height * 0.5f));
+                top = (this.Game.Input.MouseY - (this.Height * 0.5f));
             }
             else
             {
                 left = (this.Game.Input.MouseX);
-                top = -(this.Game.Input.MouseY);
+                top = (this.Game.Input.MouseY);
             }
 
             this.CursorPosition = new Vector2((int)left, (int)top);

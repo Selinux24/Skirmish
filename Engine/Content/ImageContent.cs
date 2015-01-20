@@ -63,6 +63,30 @@ namespace Engine.Content
         /// </summary>
         public int CubicFaceSize { get; set; }
 
+        public static ImageContent Texture(string texture)
+        {
+            return new ImageContent()
+            {
+                Path = texture,
+            };
+        }
+        public static ImageContent Array(string[] textures)
+        {
+            return new ImageContent()
+            {
+                Paths = textures,
+            };
+        }
+        public static ImageContent Cubic(string texture, int faceSize)
+        {
+            return new ImageContent()
+            {
+                Path = texture,
+                IsCubic = true,
+                CubicFaceSize = faceSize,
+            };
+        }
+
         /// <summary>
         /// Gets text representation of instance
         /// </summary>

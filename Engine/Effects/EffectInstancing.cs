@@ -154,7 +154,7 @@ namespace Engine.Effects
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private EffectShaderResourceVariable texture = null;
+        private EffectShaderResourceVariable textures = null;
 
         /// <summary>
         /// Directional lights
@@ -373,15 +373,15 @@ namespace Engine.Effects
         /// <summary>
         /// Texture
         /// </summary>
-        protected ShaderResourceView Texture
+        protected ShaderResourceView Textures
         {
             get
             {
-                return this.texture.GetResource();
+                return this.textures.GetResource();
             }
             set
             {
-                this.texture.SetResource(value);
+                this.textures.SetResource(value);
             }
         }
 
@@ -429,7 +429,7 @@ namespace Engine.Effects
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
-            this.texture = this.Effect.GetVariableByName("gTexture").AsShaderResource();
+            this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -499,7 +499,7 @@ namespace Engine.Effects
         public void UpdatePerObject(ShaderResourceView texture)
         {
             this.Material = this.ObjectBuffer.Material;
-            this.Texture = texture;
+            this.Textures = texture;
         }
         /// <summary>
         /// Update per model skin data

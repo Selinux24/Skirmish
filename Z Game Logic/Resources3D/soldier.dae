@@ -102,24 +102,21 @@
     </light>
   </library_lights>
   <library_images>
-    <image id="Soldier_D_1024_alt_jpg" name="Soldier_D_1024_alt_jpg">
-      <init_from>Soldier_D_1024_alt.jpg</init_from>
-    </image>
-    <image id="Soldier_D_1024_alt_jpg_001" name="Soldier_D_1024_alt_jpg_001">
-      <init_from>Soldier_D_1024_alt.jpg.001.jpg</init_from>
+    <image id="Soldier" name="Soldier">
+      <init_from>Soldier.jpg</init_from>
     </image>
   </library_images>
   <library_effects>
     <effect id="Casual_Male_Lod_0_002-effect">
       <profile_COMMON>
-        <newparam sid="Soldier_D_1024_alt_jpg_001-surface">
+        <newparam sid="Soldier-surface">
           <surface type="2D">
-            <init_from>Soldier_D_1024_alt_jpg_001</init_from>
+            <init_from>Soldier</init_from>
           </surface>
         </newparam>
-        <newparam sid="Soldier_D_1024_alt_jpg_001-sampler">
+        <newparam sid="Soldier-sampler">
           <sampler2D>
-            <source>Soldier_D_1024_alt_jpg_001-surface</source>
+            <source>Soldier-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -131,7 +128,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="Soldier_D_1024_alt_jpg_001-sampler" texcoord="UVMap"/>
+              <texture texture="Soldier-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0 0 0 1</color>

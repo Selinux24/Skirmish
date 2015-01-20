@@ -258,7 +258,7 @@ namespace Engine
 
             this.TextColor = textColor;
             this.ShadowColor = shadowColor;
-            this.ShadowRelative = Vector2.One;
+            this.ShadowRelative = Vector2.One * 1f;
 
             this.MapText();
         }
@@ -296,14 +296,14 @@ namespace Engine
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
                 this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
 
+                //Draw text
+                this.DrawText(this.Position, this.TextColor);
+
                 if (this.ShadowColor != Color.Transparent)
                 {
                     //Draw shadow
                     this.DrawText(this.Position + this.ShadowRelative, this.ShadowColor);
                 }
-
-                //Draw text
-                this.DrawText(this.Position, this.TextColor);
             }
         }
         /// <summary>
@@ -594,7 +594,7 @@ namespace Engine
             }
             else
             {
-                text += string.Empty.PadRight(MAXTEXTLENGTH - text.Length);
+                //text += string.Empty.PadRight(MAXTEXTLENGTH - text.Length);
             }
 
             int height = 0;

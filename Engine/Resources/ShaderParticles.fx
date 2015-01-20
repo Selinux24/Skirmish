@@ -83,6 +83,45 @@ void GSStreamOutFire(point VSVertexParticle input[1], inout PointStream<VSVertex
 	}
 }
 
+[maxvertexcount(50)]
+void GSStreamOutSmoke(point VSVertexParticle input[1], inout PointStream<VSVertexParticle> ptStream)
+{
+	input[0].age += gElapsedTime;
+	
+	if(input[0].type == PT_EMITTER)
+	{
+		if(input[0].age > gEmitterAge)
+		{
+			for(int i = 0; i < 49; ++i)
+			{
+				float3 vRandom = normalize(RandomVector3((float)i / 49.0f));
+				vRandom.x *= 0.5f;
+				vRandom.z *= 0.5f;
+
+				VSVertexParticle p;
+				p.positionWorld = input[0].positionWorld;
+				p.velocityWorld = vRandom * input[0].sizeWorld.x * 0.5f;
+				p.sizeWorld = input[0].sizeWorld;
+				p.age = 0.0f;
+				p.type = PT_FLARE;
+
+				ptStream.Append(p);
+			}
+			
+			input[0].age = 0.0f;
+		}
+		
+		ptStream.Append(input[0]);
+	}
+	else
+	{
+		if(input[0].age <= gMaximumAge)
+		{
+			ptStream.Append(input[0]);
+		}
+	}
+}
+
 [maxvertexcount(6)]
 void GSStreamOutRain(point VSVertexParticle input[1], inout PointStream<VSVertexParticle> ptStream)
 {
@@ -121,14 +160,14 @@ void GSStreamOutRain(point VSVertexParticle input[1], inout PointStream<VSVertex
 	}
 }
 
-GSParticleFire VSDrawFire(VSVertexParticle input)
+GSParticleSolid VSDrawSolid(VSVertexParticle input)
 {
 	float t = input.age;
 	float opacity = 1.0f - smoothstep(0.0f, 1.0f, t / 1.0f);
 	
 	float3 pos = 0.5f * t * t * gAccelerationWorld + t * input.velocityWorld + input.positionWorld;
 
-	GSParticleFire output;
+	GSParticleSolid output;
 	output.positionWorld = mul(float4(pos, 1), gWorld).xyz;
 	output.color = float4(1.0f, 1.0f, 1.0f, opacity);
 	output.sizeWorld = input.sizeWorld;
@@ -137,13 +176,13 @@ GSParticleFire VSDrawFire(VSVertexParticle input)
 	return output;
 }
 
-GSParticleRain VSDrawRain(VSVertexParticle input)
+GSParticleLine VSDrawLine(VSVertexParticle input)
 {
 	float t = input.age;
 
 	float3 pos = 0.5f * t * t * gAccelerationWorld + t * input.velocityWorld + input.positionWorld;
 
-	GSParticleRain output;
+	GSParticleLine output;
 	output.positionWorld = mul(float4(pos, 1), gWorld).xyz;
 	output.type  = input.type;
 	
@@ -151,7 +190,7 @@ GSParticleRain VSDrawRain(VSVertexParticle input)
 }
 
 [maxvertexcount(4)]
-void GSDrawFire(point GSParticleFire input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSParticleFire> triStream)
+void GSDrawSolid(point GSParticleSolid input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSParticleSolid> triStream)
 {
 	if(input[0].type != PT_EMITTER)
 	{
@@ -168,7 +207,7 @@ void GSDrawFire(point GSParticleFire input[1], uint primID : SV_PrimitiveID, ino
 		v[2] = float4(input[0].positionWorld - halfWidth * right - halfHeight * up, 1.0f);
 		v[3] = float4(input[0].positionWorld - halfWidth * right + halfHeight * up, 1.0f);
 		
-		PSParticleFire output;
+		PSParticleSolid output;
 		[unroll]
 		for(int i = 0; i < 4; ++i)
 		{
@@ -185,20 +224,20 @@ void GSDrawFire(point GSParticleFire input[1], uint primID : SV_PrimitiveID, ino
 }
 
 [maxvertexcount(2)]
-void GSDrawRain(point GSParticleRain input[1], uint primID : SV_PrimitiveID, inout LineStream<PSParticleRain> lineStream)
+void GSDrawLine(point GSParticleLine input[1], uint primID : SV_PrimitiveID, inout LineStream<PSParticleLine> lineStream)
 {
 	if( input[0].type != PT_EMITTER )
 	{
 		float3 p0 = input[0].positionWorld;
 		float3 p1 = input[0].positionWorld + 0.07f * gAccelerationWorld;
 		
-		PSParticleRain v0;
+		PSParticleLine v0;
 		v0.positionHomogeneous = mul(float4(p0, 1.0f), gWorldViewProjection);
 		v0.tex = float2(0.0f, 0.0f);
 		v0.primitiveID = primID;
 		lineStream.Append(v0);
 		
-		PSParticleRain v1;
+		PSParticleLine v1;
 		v1.positionHomogeneous = mul(float4(p1, 1.0f), gWorldViewProjection);
 		v1.tex  = float2(1.0f, 1.0f);
 		v1.primitiveID = primID;
@@ -206,14 +245,14 @@ void GSDrawRain(point GSParticleRain input[1], uint primID : SV_PrimitiveID, ino
 	}
 }
 
-float4 PSDrawFire(PSParticleFire input) : SV_TARGET
+float4 PSDrawSolid(PSParticleSolid input) : SV_TARGET
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
 	return gTextureArray.Sample(SamplerLinear, uvw) * input.color;
 }
 
-float4 PSDrawRain(PSParticleRain input) : SV_TARGET
+float4 PSDrawLine(PSParticleLine input) : SV_TARGET
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
@@ -233,6 +272,19 @@ technique11 FireStreamOut
     }
 }
 
+GeometryShader gsStreamOutSmoke = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutSmoke()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
+
+technique11 SmokeStreamOut
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSStreamOut()));
+        SetGeometryShader(gsStreamOutSmoke);
+        SetPixelShader(NULL);
+        SetDepthStencilState(StencilDisableDepth, 0);
+    }
+}
+
 GeometryShader gsStreamOutRain = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutRain()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
 
 technique11 RainStreamOut
@@ -246,26 +298,26 @@ technique11 RainStreamOut
     }
 }
 
-technique11 FireDraw
+technique11 SolidDraw
 {
     pass P0
     {
-        SetVertexShader(CompileShader(vs_5_0, VSDrawFire()));
-        SetGeometryShader(CompileShader(gs_5_0, GSDrawFire()));
-        SetPixelShader(CompileShader(ps_5_0, PSDrawFire()));
+        SetVertexShader(CompileShader(vs_5_0, VSDrawSolid()));
+        SetGeometryShader(CompileShader(gs_5_0, GSDrawSolid()));
+        SetPixelShader(CompileShader(ps_5_0, PSDrawSolid()));
 
         SetBlendState(BlendAdditive, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xffffffff);
         SetDepthStencilState(StencilNoDepthWrites, 0);
     }
 }
 
-technique11 RainDraw
+technique11 LineDraw
 {
     pass P0
     {
-        SetVertexShader(CompileShader(vs_5_0, VSDrawRain()));
-        SetGeometryShader(CompileShader(gs_5_0, GSDrawRain()));
-        SetPixelShader(CompileShader(ps_5_0, PSDrawRain()));
+        SetVertexShader(CompileShader(vs_5_0, VSDrawLine()));
+        SetGeometryShader(CompileShader(gs_5_0, GSDrawLine()));
+        SetPixelShader(CompileShader(ps_5_0, PSDrawLine()));
 
         SetDepthStencilState(StencilNoDepthWrites, 0);
     }

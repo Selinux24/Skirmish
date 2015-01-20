@@ -104,6 +104,7 @@ struct VSVertexPositionI
 {
 	float3 positionLocal : POSITION;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 struct VSVertexPositionColorI
@@ -111,6 +112,7 @@ struct VSVertexPositionColorI
     float3 positionLocal : POSITION;
     float4 color : COLOR0;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 struct VSVertexPositionNormalColorI
@@ -119,6 +121,7 @@ struct VSVertexPositionNormalColorI
     float3 normalLocal : NORMAL;
     float4 color : COLOR0;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 struct VSVertexPositionTextureI
@@ -126,6 +129,7 @@ struct VSVertexPositionTextureI
     float3 positionLocal : POSITION;
     float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 struct VSVertexPositionNormalTextureI
@@ -134,6 +138,7 @@ struct VSVertexPositionNormalTextureI
     float3 normalLocal : NORMAL;
     float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 struct VSVertexPositionNormalTextureTangentI
@@ -143,6 +148,7 @@ struct VSVertexPositionNormalTextureTangentI
 	float4 tangentLocal : TANGENT;
     float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 
@@ -155,6 +161,7 @@ struct VSVertexPositionSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 struct VSVertexPositionColorSkinnedI
@@ -164,6 +171,7 @@ struct VSVertexPositionColorSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 struct VSVertexPositionNormalColorSkinnedI
@@ -174,6 +182,7 @@ struct VSVertexPositionNormalColorSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 struct VSVertexPositionTextureSkinnedI
@@ -183,6 +192,7 @@ struct VSVertexPositionTextureSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 struct VSVertexPositionNormalTextureSkinnedI
@@ -193,6 +203,7 @@ struct VSVertexPositionNormalTextureSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 struct VSVertexPositionNormalTextureTangentSkinnedI
@@ -204,6 +215,7 @@ struct VSVertexPositionNormalTextureTangentSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
 
@@ -215,14 +227,14 @@ struct GSVertexBillboard
 	float3 centerWorld : POSITION;
 	float2 sizeWorld : SIZE;
 };
-struct GSParticleFire
+struct GSParticleSolid
 {
 	float3 positionWorld : POSITION;
 	float2 sizeWorld : SIZE;
 	float4 color : COLOR;
 	uint type : TYPE;
 };
-struct GSParticleRain
+struct GSParticleLine
 {
 	float3 positionWorld : POSITION;
 	uint type : TYPE;
@@ -239,14 +251,14 @@ struct PSVertexBillboard
 	float2 tex : TEXCOORD;
 	uint primitiveID : SV_PrimitiveID;
 };
-struct PSParticleFire
+struct PSParticleSolid
 {
 	float4 positionHomogeneous : SV_POSITION;
 	float4 color : COLOR;
 	float2 tex : TEXCOORD;
 	uint primitiveID : SV_PrimitiveID;
 };
-struct PSParticleRain
+struct PSParticleLine
 {
 	float4 positionHomogeneous : SV_POSITION;
 	float2 tex : TEXCOORD;
@@ -275,6 +287,7 @@ struct PSVertexPositionTexture
     float4 positionHomogeneous : SV_POSITION;
 	float3 positionWorld : POSITION;
     float2 tex : TEXCOORD0;
+	float textureIndex : textureIndex;
 };
 struct PSVertexPositionNormalTexture
 {
@@ -282,6 +295,7 @@ struct PSVertexPositionNormalTexture
 	float3 positionWorld : POSITION;
     float3 normalWorld : NORMAL;
     float2 tex : TEXCOORD0;
+	float textureIndex : textureIndex;
 };
 struct PSVertexPositionNormalTextureTangent
 {
@@ -290,4 +304,5 @@ struct PSVertexPositionNormalTextureTangent
     float3 normalWorld : NORMAL;
     float4 tangentWorld : TANGENT;
     float2 tex : TEXCOORD0;
+	float textureIndex : textureIndex;
 };

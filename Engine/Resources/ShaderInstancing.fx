@@ -25,7 +25,7 @@ cbuffer cbSkinned : register (b2)
 	float4x4 gBoneTransforms[96];
 };
 
-Texture2D gTexture;
+Texture2DArray gTextureArray;
 
 PSVertexPositionColor VSPositionColor(VSVertexPositionColorI input)
 {
@@ -109,13 +109,14 @@ PSVertexPositionTexture VSPositionTexture(VSVertexPositionTextureI input)
     output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
     output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.tex = input.tex;
+	output.textureIndex = input.textureIndex;
     
     return output;
 }
 
 float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 litColor = gTexture.Sample(SamplerAnisotropic, input.tex);
+	float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
 	if(gFogRange > 0)
 	{
@@ -140,6 +141,7 @@ PSVertexPositionNormalTexture VSPositionNormalTexture(VSVertexPositionNormalText
     output.positionWorld = mul(instancePosition, gWorld).xyz;
     output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.tex = input.tex;
+	output.textureIndex = input.textureIndex;
     
     return output;
 }
@@ -161,7 +163,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 
 	LightOutput lOutput = ComputeLights(lInput);
 
-	float4 textureColor = gTexture.Sample(SamplerAnisotropic, input.tex);
+	float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
 	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
 
@@ -200,6 +202,7 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNor
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL, (float3x3)gWorldInverse));
 	output.tex = input.tex;
+	output.textureIndex = input.textureIndex;
 
 	return output;
 }
@@ -221,7 +224,7 @@ float4 PSPositionNormalTextureSkinned(PSVertexPositionNormalTexture input) : SV_
 
 	LightOutput lOutput = ComputeLights(lInput);
 
-	float4 textureColor = gTexture.Sample(SamplerAnisotropic, input.tex);
+	float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
 	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
 

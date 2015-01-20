@@ -377,6 +377,28 @@ namespace Engine
             };
         }
         /// <summary>
+        /// Creates a smoke particle system
+        /// </summary>
+        /// <param name="positions">Position list</param>
+        /// <param name="particleSize">Particle size</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public static ParticleSystemDescription Smoke(Vector3[] positions, float particleSize, params string[] textures)
+        {
+            return new ParticleSystemDescription()
+            {
+                ParticleClass = ParticleClasses.Smoke,
+                MaximumParticles = 500,
+                MaximumAge = 1.0f,
+                EmitterAge = 0.33f,
+                ParticleSize = particleSize,
+                Acceleration = new Vector3(0.0f, 2f, 0.0f) * particleSize,
+                EmitterType = EmitterTypes.FixedPosition,
+                EmitterPositions = positions,
+                Textures = textures,
+            };
+        }
+        /// <summary>
         /// Creates a rain particle system
         /// </summary>
         /// <param name="particleSize">Particle size</param>

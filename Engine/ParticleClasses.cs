@@ -18,5 +18,9 @@ namespace Engine
         /// Rain
         /// </summary>
         Rain = 2,
+        /// <summary>
+        /// Smoke
+        /// </summary>
+        Smoke = 3,
     }
 }

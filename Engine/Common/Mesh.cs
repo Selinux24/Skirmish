@@ -165,7 +165,10 @@ namespace Engine.Common
                     {
                         Vector3 p = v.GetChannelValue<Vector3>(VertexDataChannels.Position);
 
-                        if (!transform.IsIdentity) p = Vector3.TransformCoordinate(p, transform);
+                        if (!transform.IsIdentity)
+                        {
+                            p = Vector3.TransformCoordinate(p, transform);
+                        }
 
                         positions.Add(p);
                     });

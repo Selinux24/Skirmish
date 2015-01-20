@@ -52,6 +52,7 @@ namespace Engine.Effects
         [StructLayout(LayoutKind.Sequential)]
         public struct PerObjectBuffer
         {
+            public float TextureIndex;
             public BufferMaterials Material;
 
             public static int Size
@@ -143,6 +144,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
+        /// Texture index effect variable
+        /// </summary>
+        private EffectScalarVariable textureIndex = null;
+        /// <summary>
         /// Material effect variable
         /// </summary>
         private EffectVariable material = null;
@@ -153,7 +158,7 @@ namespace Engine.Effects
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private EffectShaderResourceVariable texture = null;
+        private EffectShaderResourceVariable textures = null;
 
         /// <summary>
         /// Directional lights
@@ -330,6 +335,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Texture index
+        /// </summary>
+        protected int TextureIndex
+        {
+            get
+            {
+                return (int)this.textureIndex.GetFloat();
+            }
+            set
+            {
+                this.textureIndex.Set((float)value);
+            }
+        }
+        /// <summary>
         /// Material
         /// </summary>
         protected BufferMaterials Material
@@ -372,15 +391,15 @@ namespace Engine.Effects
         /// <summary>
         /// Texture
         /// </summary>
-        protected ShaderResourceView Texture
+        protected ShaderResourceView Textures
         {
             get
             {
-                return this.texture.GetResource();
+                return this.textures.GetResource();
             }
             set
             {
-                this.texture.SetResource(value);
+                this.textures.SetResource(value);
             }
         }
 
@@ -419,6 +438,7 @@ namespace Engine.Effects
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
             this.material = this.Effect.GetVariableByName("gMaterial");
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
             this.pointLight = this.Effect.GetVariableByName("gPointLight");
@@ -428,7 +448,7 @@ namespace Engine.Effects
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
-            this.texture = this.Effect.GetVariableByName("gTexture").AsShaderResource();
+            this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -495,10 +515,12 @@ namespace Engine.Effects
         /// Update per model object data
         /// </summary>
         /// <param name="texture">Texture</param>
-        public void UpdatePerObject(ShaderResourceView texture)
+        /// <param name="textureIndex">Texture index</param>
+        public void UpdatePerObject(ShaderResourceView texture, int textureIndex = 0)
         {
             this.Material = this.ObjectBuffer.Material;
-            this.Texture = texture;
+            this.TextureIndex = textureIndex;
+            this.Textures = texture;
         }
         /// <summary>
         /// Update per model skin data

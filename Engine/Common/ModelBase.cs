@@ -503,11 +503,33 @@ namespace Engine.Common
                         cache.AddRange(mesh.Triangles);
                     }
 
-                    bbox = BoundingBox.Merge(bbox, mesh.BoundingBox);
-                    bsph = BoundingSphere.Merge(bsph, mesh.BoundingSphere);
+                    if (bbox == new BoundingBox())
+                    {
+                        bbox = mesh.BoundingBox;
+                    }
+                    else
+                    {
+                        bbox = BoundingBox.Merge(bbox, mesh.BoundingBox);
+                    }
 
-                    OrientedBoundingBox meshObb = mesh.OrientedBoundingBox;
-                    OrientedBoundingBox.Merge(ref obb, ref meshObb);
+                    if (bsph == new BoundingSphere())
+                    {
+                        bsph = mesh.BoundingSphere;
+                    }
+                    else
+                    {
+                        bsph = BoundingSphere.Merge(bsph, mesh.BoundingSphere);
+                    }
+
+                    if (obb == new OrientedBoundingBox())
+                    {
+                        obb = mesh.OrientedBoundingBox;
+                    }
+                    else
+                    {
+                        OrientedBoundingBox meshObb = mesh.OrientedBoundingBox;
+                        OrientedBoundingBox.Merge(ref obb, ref meshObb);
+                    }
                 }
             }
 

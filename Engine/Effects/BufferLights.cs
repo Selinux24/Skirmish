@@ -62,7 +62,24 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
-        /// <param name="lights"></param>
+        public BufferLights(Vector3 eyePosition)
+        {
+            this.EyePositionWorld = eyePosition;
+
+            this.DirectionalLight1 = new BufferDirectionalLight();
+            this.DirectionalLight2 = new BufferDirectionalLight();
+            this.DirectionalLight3 = new BufferDirectionalLight();
+            this.PointLight = new BufferPointLight();
+            this.SpotLight = new BufferSpotLight();
+            this.FogColor = Color.White;
+            this.FogStart = 0;
+            this.FogRange = 0;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="eyePosition">Eye position</param>
+        /// <param name="lights">Lights configuration</param>
         public BufferLights(Vector3 eyePosition, SceneLight lights)
         {
             this.EyePositionWorld = eyePosition;

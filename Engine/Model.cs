@@ -119,12 +119,12 @@ namespace Engine
                         if (mat != null)
                         {
                             this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
-                            this.effect.UpdatePerObject(mat.DiffuseTexture);
+                            this.effect.UpdatePerObject(mat.DiffuseTexture, 0);
                         }
                         else
                         {
                             this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-                            this.effect.UpdatePerObject(null);
+                            this.effect.UpdatePerObject(null, 0);
                         }
 
                         #endregion

@@ -115,7 +115,7 @@ namespace Skybox
                 filePositions3D[i].Y += (this.torchs.BoundingBox.Maximum.Y - this.torchs.BoundingBox.Minimum.Y) * 0.9f;
             }
 
-            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(filePositions3D, 0.5f, "flare0.dds"));
+            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(filePositions3D, 0.5f, "flare1.png"));
 
             #endregion
 

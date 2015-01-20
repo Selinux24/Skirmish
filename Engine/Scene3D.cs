@@ -16,6 +16,8 @@ namespace Engine
         /// </summary>
         private List<Drawable> components = new List<Drawable>();
 
+        private IControl capturedControl = null;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -62,13 +64,41 @@ namespace Engine
         {
             base.Update(gameTime);
 
-            for (int i = 0; i < this.components.Count; i++)
+            //Update active components
+            List<Drawable> activeComponents = this.components.FindAll(c => c.Active);
+            for (int i = 0; i < activeComponents.Count; i++)
             {
-                if (this.components[i].Active)
-                {
-                    this.components[i].Update(gameTime);
-                }
+                activeComponents[i].Update(gameTime);
             }
+
+            //Process 2D controls
+            List<Drawable> ctrls = this.components.FindAll(c => c.Active && c is IControl);
+            for (int i = 0; i < ctrls.Count; i++)
+            {
+                IControl ctrl = (IControl)ctrls[i];
+
+                ctrl.MouseOver = ctrl.Rectangle.Contains(this.Game.Input.MouseX, this.Game.Input.MouseY);
+
+                if (this.Game.Input.LeftMouseButtonJustPressed)
+                {
+                    if (ctrl.MouseOver)
+                    {
+                        this.capturedControl = ctrl;
+                    }
+                }
+
+                if (this.Game.Input.LeftMouseButtonJustReleased)
+                {
+                    if (this.capturedControl == ctrl && ctrl.MouseOver)
+                    {
+                        ctrl.FireOnClickEvent();
+                    }
+                }
+
+                ctrl.Pressed = this.Game.Input.LeftMouseButtonPressed && this.capturedControl == ctrl;
+            }
+
+            if (!this.Game.Input.LeftMouseButtonPressed) this.capturedControl = null;
         }
         /// <summary>
         /// Game objects drawing
@@ -78,15 +108,14 @@ namespace Engine
         {
             base.Draw(gameTime);
 
-            for (int i = 0; i < this.components.Count; i++)
+            //Draw visible components
+            List<Drawable> visibleComponents = this.components.FindAll(c => c.Visible);
+            for (int i = 0; i < visibleComponents.Count; i++)
             {
-                if (this.components[i].Visible)
-                {
-                    this.Game.Graphics.SetDefaultRasterizer();
-                    this.Game.Graphics.SetBlendAlphaToCoverage();
+                this.Game.Graphics.SetDefaultRasterizer();
+                this.Game.Graphics.SetBlendAlphaToCoverage();
 
-                    this.components[i].Draw(gameTime);
-                }
+                visibleComponents[i].Draw(gameTime);
             }
         }
         /// <summary>
@@ -274,7 +303,7 @@ namespace Engine
         /// <summary>
         /// Adds new sprite
         /// </summary>
-        /// <param name="texture">Srpite texture</param>
+        /// <param name="texture">Sprite texture</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="order">Processing order</param>
@@ -287,6 +316,26 @@ namespace Engine
                 texture,
                 width,
                 height);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
+        /// Adds new sprite button
+        /// </summary>
+        /// <param name="description">Sprite button description</param>
+        /// <param name="textureOff">Texture when button off</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new model</returns>
+        public SpriteButton AddSpriteButton(SpriteButtonDescription description, int order = 0)
+        {
+            SpriteButton newModel = new SpriteButton(
+                this.Game,
+                this,
+                description);
 
             this.AddComponent(newModel, order);
 

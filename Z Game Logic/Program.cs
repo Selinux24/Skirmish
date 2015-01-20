@@ -11,6 +11,9 @@ namespace GameLogic
         private static Game game = null;
         private static int actionIndex = 0;
 
+        private static SceneHUD hudScene = null;
+        private static SceneObjects objectsScene = null;
+
         public static Actions[] CurrentActions = null;
         public static Skirmish SkirmishGame = null;
         public static bool GameFinished = false;
@@ -32,15 +35,17 @@ namespace GameLogic
 #if DEBUG
             using (game = new Game("Game Logic", false, 800, 600))
 #else
-            using (game = new Game("Game Logic"))
+            using (game = new Game("Game Logic", false, 800, 600))
 #endif
             {
                 game.VisibleMouse = true;
                 game.LockMouse = false;
 
-                GameEnvironment.Background = Color.LightGray;
+                GameEnvironment.Background = Color.CornflowerBlue;
 
-                game.AddScene(new SceneHUD(game) { Active = true, Order = 1 });
+                hudScene = new SceneHUD(game) { Active = true, Order = 1 };
+
+                game.AddScene(hudScene);
 
                 game.Run();
             }
@@ -49,25 +54,31 @@ namespace GameLogic
         public static void NewGame()
         {
             Program.SkirmishGame = new Skirmish();
-            Program.SkirmishGame.AddTeam("Team1", "Reds", TeamRole.Defense, 5);
-            Program.SkirmishGame.AddTeam("Team2", "Blues", TeamRole.Assault, 5);
-            //this.skGame.AddTeam("Team3", "Gray", TeamRole.Neutral, 2);
+            Program.SkirmishGame.AddTeam("Team1", "Reds", TeamRole.Defense, 5, 1, 1);
+            Program.SkirmishGame.AddTeam("Team2", "Blues", TeamRole.Assault, 5, 1, 1);
+            Program.SkirmishGame.AddTeam("Team3", "Gray", TeamRole.Neutral, 2, 0, 0, false);
             Program.SkirmishGame.Start();
             Program.CurrentActions = Program.SkirmishGame.GetActions();
 
-            game.AddScene(new SceneObjects(game) { Active = true, Order = game.SceneCount });
+            objectsScene = new SceneObjects(game) { Active = true, Order = game.SceneCount };
+
+            game.AddScene(objectsScene);
         }
         public static void NextSoldier(bool selectIdle)
         {
             Program.SkirmishGame.NextSoldier(selectIdle);
 
             Program.CurrentActions = Program.SkirmishGame.GetActions();
+
+            Program.objectsScene.GoToSoldier(Program.SkirmishGame.CurrentSoldier);
         }
         public static void PrevSoldier(bool selectIdle)
         {
             Program.SkirmishGame.PrevSoldier(selectIdle);
 
             Program.CurrentActions = Program.SkirmishGame.GetActions();
+
+            Program.objectsScene.GoToSoldier(Program.SkirmishGame.CurrentSoldier);
         }
         public static void DoAction()
         {

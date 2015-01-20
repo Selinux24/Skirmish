@@ -23,7 +23,7 @@ namespace Engine
         {
             get
             {
-                return this.position;
+                return new Vector2(this.position.X, -this.position.Y);
             }
         }
         /// <summary>
@@ -60,7 +60,7 @@ namespace Engine
             this.localTransform =
                 Matrix.Scaling(width, height, 1f) *
                 Matrix.Translation(-relativeCenter.X, +relativeCenter.Y, 0f) *
-                Matrix.Translation(this.Position.X, this.Position.Y, 0f);
+                Matrix.Translation(this.position.X, this.position.Y, 0f);
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Engine
         /// <param name="y">Y component of position</param>
         public void SetPosition(float x, float y)
         {
-            this.SetPosition(new Vector2(x, y));
+            this.position = new Vector2(x, -y);
         }
         /// <summary>
         /// Sets position
@@ -120,7 +120,7 @@ namespace Engine
         /// <param name="position">Position component</param>
         public void SetPosition(Vector2 position)
         {
-            this.position = position;
+            this.position = new Vector2(position.X, -position.Y);
         }
     }
 }

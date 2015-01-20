@@ -285,6 +285,7 @@
     <Compile Include="Collada\VisualScene.cs" />
     <Compile Include="Common\GeometryUtil.cs" />
     <Compile Include="Common\IBufferData.cs" />
+    <Compile Include="Common\IControl.cs" />
     <Compile Include="Common\Line.cs" />
     <Compile Include="Common\VertexParticle.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalColor.cs" />
@@ -310,6 +311,7 @@
     <Compile Include="Cursor.cs" />
     <Compile Include="Keys.cs" />
     <Compile Include="MouseButtons.cs" />
+    <Compile Include="SpriteButton.cs" />
     <Compile Include="TriangleListDrawer.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
     <Compile Include="Effects\EffectParticles.cs" />

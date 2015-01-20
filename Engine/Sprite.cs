@@ -30,6 +30,34 @@ namespace Engine
         /// </summary>
         public bool FitScreen { get; set; }
         /// <summary>
+        /// Gets or sets text left position in 2D screen
+        /// </summary>
+        public int Left
+        {
+            get
+            {
+                return (int)this.Manipulator.Position.X;
+            }
+            set
+            {
+                this.Manipulator.SetPosition(new Vector2(value, this.Manipulator.Position.Y));
+            }
+        }
+        /// <summary>
+        /// Gets or sets text top position in 2D screen
+        /// </summary>
+        public int Top
+        {
+            get
+            {
+                return (int)this.Manipulator.Position.Y;
+            }
+            set
+            {
+                this.Manipulator.SetPosition(new Vector2(this.Manipulator.Position.X, value));
+            }
+        }
+        /// <summary>
         /// Width
         /// </summary>
         public float Width { get; set; }
@@ -41,6 +69,24 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator2D Manipulator { get; private set; }
+        /// <summary>
+        /// Gets or sets the texture index to render
+        /// </summary>
+        public int TextureIndex { get; set; }
+        /// <summary>
+        /// Sprite rectangle
+        /// </summary>
+        public Rectangle Rectangle
+        {
+            get
+            {
+                return new Rectangle(
+                    (int)this.Manipulator.Position.X,
+                    (int)this.Manipulator.Position.Y,
+                    (int)this.Width,
+                    (int)this.Height);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -51,17 +97,30 @@ namespace Engine
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         public Sprite(Game game, Scene3D scene, string texture, float width, float height)
-            : base(game, scene, ModelContent.GenerateSprite(scene.ContentPath, texture))
+            : this(game, scene, new[] { texture }, width, height)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="textures">Texture array</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        public Sprite(Game game, Scene3D scene, string[] textures, float width, float height)
+            : base(game, scene, ModelContent.GenerateSprite(scene.ContentPath, textures))
         {
             this.effect = new EffectBasic(game.Graphics.Device);
-
-            this.Width = width;
-            this.Height = height;
 
             this.sourceWidth = width / game.Form.RenderWidth;
             this.sourceHeight = height / game.Form.RenderHeight;
 
+            this.Width = width;
+            this.Height = height;
             this.Manipulator = new Manipulator2D();
+            this.TextureIndex = 0;
         }
         /// <summary>
         /// Resource disposing
@@ -105,7 +164,7 @@ namespace Engine
                 this.effect.FrameBuffer.World = world;
                 this.effect.FrameBuffer.WorldInverse = worldInverse;
                 this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;
-                this.effect.FrameBuffer.Lights = new BufferLights(this.Scene.Camera.Position, this.Scene.Lights);
+                this.effect.FrameBuffer.Lights = new BufferLights(this.Scene.Camera.Position);
                 this.effect.UpdatePerFrame();
 
                 #endregion
@@ -133,12 +192,12 @@ namespace Engine
                         if (mat != null)
                         {
                             this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
-                            this.effect.UpdatePerObject(mat.DiffuseTexture);
+                            this.effect.UpdatePerObject(mat.DiffuseTexture, this.TextureIndex);
                         }
                         else
                         {
                             this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-                            this.effect.UpdatePerObject(null);
+                            this.effect.UpdatePerObject(null, this.TextureIndex);
                         }
 
                         #endregion
