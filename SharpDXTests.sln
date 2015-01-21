@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Z Game Logic", "Z Game Logic\Z Game Logic.csproj", "{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "6 Terrain", "6 Terrain\6 Terrain.csproj", "{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -139,6 +141,20 @@ Global
 		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Release|x64.Build.0 = Release|x64
 		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Release|x86.ActiveCfg = Release|x86
 		{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}.Release|x86.Build.0 = Release|x86
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Debug|x64.ActiveCfg = Debug|x64
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Debug|x64.Build.0 = Debug|x64
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Debug|x86.ActiveCfg = Debug|x86
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Debug|x86.Build.0 = Debug|x86
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Release|Any CPU.ActiveCfg = Release|x86
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Release|Mixed Platforms.Build.0 = Release|x86
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Release|x64.ActiveCfg = Release|x86
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Release|x86.ActiveCfg = Release|x86
+		{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

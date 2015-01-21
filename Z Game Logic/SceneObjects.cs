@@ -1,25 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Engine;
+using Engine.Common;
 using SharpDX;
 
 namespace GameLogic
 {
     using GameLogic.Rules;
-    using Engine.Common;
 
     public class SceneObjects : Scene3D
     {
-        private Vector3? cameraPoint = null;
-
         private ModelInstanced model = null;
+        private Terrain terrain = null;
 
         private Color bsphColor = Color.LightYellow;
         private int bsphSlices = 20;
         private int bsphStacks = 10;
         private LineListDrawer bsphMeshesDrawer = null;
+        private ModelInstance current
+        {
+            get
+            {
+                return this.soldiers[Program.SkirmishGame.CurrentSoldier];
+            }
+        }
 
-        public Dictionary<Team, ModelInstanced> Teams = new Dictionary<Team, ModelInstanced>();
-        public Dictionary<Soldier, int> Soldiers = new Dictionary<Soldier, int>();
+        private Dictionary<Soldier, ModelInstance> soldiers = new Dictionary<Soldier, ModelInstance>();
 
         public SceneObjects(Game game)
             : base(game)
@@ -31,41 +37,55 @@ namespace GameLogic
         {
             base.Initialize();
 
+            this.Camera.FarPlaneDistance = 1000f;
             this.Camera.Mode = CameraModes.FreeIsometric;
+
+            this.terrain = this.AddTerrain("terrain.dae", new TerrainDescription() { });
+            this.terrain.Manipulator.SetScale(2);
+            this.terrain.Update(new GameTime());
+            this.terrain.ComputeVolumes(this.terrain.Manipulator.LocalTransform);
 
             this.model = this.AddInstancingModel("soldier.dae", Program.SkirmishGame.AllSoldiers.Length);
 
+            float delta = 10f;
             int instanceIndex = 0;
-
             int teamIndex = 0;
             foreach (Team team in Program.SkirmishGame.Teams)
             {
-                this.Teams.Add(team, this.model);
-
-                float delta = 10;
-
                 int soldierIndex = 0;
                 foreach (Soldier soldier in team.Soldiers)
                 {
-                    this.model.Manipulators[instanceIndex].SetPosition(soldierIndex * delta, 0, teamIndex * delta);
-                    this.model.Manipulators[instanceIndex].SetScale(3);
+                    ModelInstance instance = this.model.Instances[instanceIndex++];
+
+                    instance.TextureIndex = teamIndex;
+
+                    Vector3 position;
+                    if (this.terrain.FindGroundPosition(soldierIndex * delta, teamIndex * delta, out position))
+                    {
+                        instance.Manipulator.SetPosition(position);
+                    }
+                    else
+                    {
+                        throw new Exception("Bad position");
+                    }
+                    
+                    instance.Manipulator.SetScale(3);
 
                     if (teamIndex > 0)
                     {
-                        this.model.Manipulators[instanceIndex].SetRotation(MathUtil.DegreesToRadians(180), 0, 0);
+                        instance.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0);
                     }
 
-                    this.Soldiers.Add(soldier, instanceIndex++);
+                    this.soldiers.Add(soldier, instance);
 
                     soldierIndex++;
                 }
 
                 teamIndex++;
             }
+            this.model.Update(new GameTime());
 
             this.bsphMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredSphere(this.model.BoundingSphere, this.bsphSlices, this.bsphStacks), this.bsphColor);
-
-            this.model.Update(new GameTime());
 
             this.GoToSoldier(Program.SkirmishGame.CurrentSoldier);
         }
@@ -73,82 +93,59 @@ namespace GameLogic
         {
             base.Update(gameTime);
 
-            this.UpdateInput(gameTime);
-
-            this.UpdateCamera(gameTime);
-        }
-        private void UpdateInput(GameTime gameTime)
-        {
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
 
-            if (this.Game.Input.KeyPressed(Keys.C))
+            if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
                 this.GoToSoldier(Program.SkirmishGame.CurrentSoldier);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.PageDown))
+            {
+                this.Camera.NextIsometricAxis();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.PageUp))
+            {
+                this.Camera.PreviousIsometricAxis();
             }
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
                 this.Camera.MoveLeft(gameTime, shift);
-
-                this.cameraPoint = null;
             }
 
             if (this.Game.Input.KeyPressed(Keys.D))
             {
                 this.Camera.MoveRight(gameTime, shift);
-
-                this.cameraPoint = null;
             }
 
             if (this.Game.Input.KeyPressed(Keys.W))
             {
                 this.Camera.MoveForward(gameTime, shift);
-
-                this.cameraPoint = null;
             }
 
             if (this.Game.Input.KeyPressed(Keys.S))
             {
                 this.Camera.MoveBackward(gameTime, shift);
-
-                this.cameraPoint = null;
             }
 
             if (this.Game.Input.MouseWheelDelta > 0)
             {
                 this.Camera.ZoomIn(gameTime, shift);
-
-                this.cameraPoint = null;
             }
 
             if (this.Game.Input.MouseWheelDelta < 0)
             {
                 this.Camera.ZoomOut(gameTime, shift);
+            }
+        }
 
-                this.cameraPoint = null;
-            }
-        }
-        private void UpdateCamera(GameTime gameTime)
-        {
-            if (this.cameraPoint.HasValue)
-            {
-                if (!Vector3.NearEqual(this.Camera.Interest, this.cameraPoint.Value, new Vector3(0.1f, 0.1f, 0.1f)))
-                {
-                    this.Camera.FineTranslation(gameTime, this.cameraPoint.Value, 10f, false);
-                }
-                else
-                {
-                    this.cameraPoint = null;
-                }
-            }
-        }
         public void GoToSoldier(Soldier soldier)
         {
-            Manipulator3D manipulator = this.model.Manipulators[this.Soldiers[soldier]];
+            this.model.ComputeVolumes(this.current.Manipulator.LocalTransform);
 
-            this.model.ComputeVolumes(manipulator.LocalTransform);
-
-            this.cameraPoint = this.model.BoundingSphere.Center;
+            this.Camera.LookTo(this.model.BoundingSphere.Center, true);
             this.bsphMeshesDrawer.SetLines(GeometryUtil.CreateWiredSphere(this.model.BoundingSphere, this.bsphSlices, this.bsphStacks), this.bsphColor);
         }
     }

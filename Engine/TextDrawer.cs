@@ -27,7 +27,6 @@ using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Content;
     using Engine.Effects;
     using Engine.Helpers;
 
@@ -344,6 +343,7 @@ namespace Engine
                 }
 
                 Counters.DrawCallsPerFrame++;
+                Counters.InstancesPerFrame++;
             }
         }
         /// <summary>
@@ -592,10 +592,6 @@ namespace Engine
             {
                 text = text.Substring(0, MAXTEXTLENGTH);
             }
-            else
-            {
-                //text += string.Empty.PadRight(MAXTEXTLENGTH - text.Length);
-            }
 
             int height = 0;
 
@@ -607,7 +603,7 @@ namespace Engine
 
                     VertexData[] cv;
                     uint[] ci;
-                    ModelContent.CreateSprite(
+                    VertexData.CreateSprite(
                         pos,
                         chr.Width,
                         chr.Height,

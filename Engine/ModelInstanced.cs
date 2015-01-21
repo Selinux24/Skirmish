@@ -1,10 +1,12 @@
-﻿using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+﻿using System;
+using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
+    using Engine.Helpers;
 
     /// <summary>
     /// Instaced model
@@ -22,17 +24,17 @@ namespace Engine
         /// <summary>
         /// Manipulator list per instance
         /// </summary>
-        private Manipulator3D[] instances = null;
+        private ModelInstance[] instances = null;
 
         /// <summary>
         /// Indicates whether the draw call uses z-buffer if available
         /// </summary>
         public bool UseZBuffer { get; set; }
         /// <summary>
-        /// Gets manipulator instance list
+        /// Gets manipulator per instance list
         /// </summary>
-        /// <returns>Returns manipulator instance list</returns>
-        public Manipulator3D[] Manipulators
+        /// <returns>Gets manipulator per instance list</returns>
+        public ModelInstance[] Instances
         {
             get
             {
@@ -47,6 +49,16 @@ namespace Engine
             get
             {
                 return this.instances.Length;
+            }
+        }
+        /// <summary>
+        /// Gets visible instance count
+        /// </summary>
+        public int VisibleCount
+        {
+            get
+            {
+                return Array.FindAll(this.instances, i => i.Visible == true).Length;
             }
         }
 
@@ -66,12 +78,9 @@ namespace Engine
 
             this.instancingData = new VertexInstancingData[instances];
 
-            this.instances = new Manipulator3D[instances];
-            for (int i = 0; i < instances; i++)
-            {
-                this.instances[i] = new Manipulator3D();
-            }
+            this.instances = Helper.CreateArray(instances, () => new ModelInstance());
         }
+
         /// <summary>
         /// Resource disposing
         /// </summary>
@@ -97,11 +106,10 @@ namespace Engine
             {
                 for (int i = 0; i < this.instances.Length; i++)
                 {
-                    Manipulator3D man = this.instances[i];
-
-                    man.Update(gameTime);
-
-                    this.instancingData[i].Local = man.LocalTransform;
+                    if (this.instances[i].Active)
+                    {
+                        this.instances[i].Manipulator.Update(gameTime);
+                    }
                 }
             }
         }
@@ -111,7 +119,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public override void Draw(GameTime gameTime)
         {
-            if (this.Meshes != null)
+            if (this.Meshes != null && this.VisibleCount > 0)
             {
                 if (this.UseZBuffer)
                 {
@@ -120,6 +128,21 @@ namespace Engine
                 else
                 {
                     this.Game.Graphics.DisableZBuffer();
+                }
+
+                if (this.instances != null && this.instances.Length > 0)
+                {
+                    int instanceIndex = 0;
+                    for (int i = 0; i < this.instances.Length; i++)
+                    {
+                        if (this.instances[i].Visible)
+                        {
+                            this.instancingData[instanceIndex].Local = this.instances[i].Manipulator.LocalTransform;
+                            this.instancingData[instanceIndex].TextureIndex = this.instances[i].TextureIndex;
+
+                            instanceIndex++;
+                        }
+                    }
                 }
 
                 #region Per frame update
@@ -173,11 +196,34 @@ namespace Engine
                         {
                             technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
-                            mesh.Draw(gameTime, this.DeviceContext);
+                            mesh.Draw(gameTime, this.DeviceContext, this.VisibleCount);
                         }
                     }
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Model instance
+    /// </summary>
+    public class ModelInstance
+    {
+        /// <summary>
+        /// Manipulator
+        /// </summary>
+        public Manipulator3D Manipulator = new Manipulator3D();
+        /// <summary>
+        /// Texture index
+        /// </summary>
+        public int TextureIndex = 0;
+        /// <summary>
+        /// Active
+        /// </summary>
+        public bool Active = true;
+        /// <summary>
+        /// Visible
+        /// </summary>
+        public bool Visible = true;
     }
 }

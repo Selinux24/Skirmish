@@ -100,6 +100,35 @@ namespace Engine.Common
             }
 
             Counters.DrawCallsPerFrame++;
+            Counters.InstancesPerFrame += this.InstanceCount;
+        }
+        /// <summary>
+        /// Draw mesh geometry
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="deviceContext">Immediate context</param>
+        /// <param name="count">Instances to draw</param>
+        public virtual void Draw(GameTime gameTime, DeviceContext deviceContext, int count)
+        {
+            int instanceCount = count == 0 ? this.InstanceCount : count;
+
+            if (this.Indexed)
+            {
+                deviceContext.DrawIndexedInstanced(
+                    this.IndexCount,
+                    instanceCount,
+                    0, 0, 0);
+            }
+            else
+            {
+                deviceContext.DrawInstanced(
+                    this.VertexCount,
+                    instanceCount,
+                    0, 0);
+            }
+
+            Counters.DrawCallsPerFrame++;
+            Counters.InstancesPerFrame += instanceCount;
         }
         /// <summary>
         /// Writes instancing data

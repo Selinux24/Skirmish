@@ -258,6 +258,7 @@ namespace Engine
                     }
 
                     Counters.DrawCallsPerFrame++;
+                    Counters.InstancesPerFrame++;
                 }
 
                 this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(null);
@@ -281,6 +282,7 @@ namespace Engine
                     this.Game.Graphics.DeviceContext.DrawAuto();
 
                     Counters.DrawCallsPerFrame++;
+                    Counters.InstancesPerFrame++;
                 }
             }
 

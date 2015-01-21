@@ -19,6 +19,10 @@ namespace Engine.Common
         /// </summary>
         public static int DrawCallsPerFrame = 0;
         /// <summary>
+        /// Sum of single draw calls and instance draw calls * instance count of this call
+        /// </summary>
+        public static int InstancesPerFrame = 0;
+        /// <summary>
         /// Updates per frame
         /// </summary>
         public static int UpdatesPerFrame = 0;
@@ -42,6 +46,7 @@ namespace Engine.Common
         {
             FrameCount = 0;
             DrawCallsPerFrame = 0;
+            InstancesPerFrame = 0;
             UpdatesPerFrame = 0;
             UpdatesPerObject = 0;
             UpdatesPerInstance = 0;
@@ -53,6 +58,7 @@ namespace Engine.Common
         public static void ClearFrame()
         {
             DrawCallsPerFrame = 0;
+            InstancesPerFrame = 0;
             UpdatesPerFrame = 0;
             UpdatesPerObject = 0;
             UpdatesPerInstance = 0;

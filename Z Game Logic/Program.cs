@@ -56,7 +56,7 @@ namespace GameLogic
             Program.SkirmishGame = new Skirmish();
             Program.SkirmishGame.AddTeam("Team1", "Reds", TeamRole.Defense, 5, 1, 1);
             Program.SkirmishGame.AddTeam("Team2", "Blues", TeamRole.Assault, 5, 1, 1);
-            Program.SkirmishGame.AddTeam("Team3", "Gray", TeamRole.Neutral, 2, 0, 0, false);
+            //Program.SkirmishGame.AddTeam("Team3", "Gray", TeamRole.Neutral, 2, 0, 0, false);
             Program.SkirmishGame.Start();
             Program.CurrentActions = Program.SkirmishGame.GetActions();
 

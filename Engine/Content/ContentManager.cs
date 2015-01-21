@@ -12,8 +12,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="resourcePath">Resource path</param>
-        /// <returns>Returns resource path</returns>
-        public static string FindContent(string contentFolder, string resourcePath)
+        /// <returns>Returns resource paths found</returns>
+        /// <remarks>If not unique file found, searchs pattern "[filename]*[extension]" and returns result array</remarks>
+        public static string[] FindContent(string contentFolder, string resourcePath)
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
@@ -21,18 +22,28 @@ namespace Engine.Content
             }
             else if (File.Exists(resourcePath))
             {
-                return resourcePath;
+                return new[] { resourcePath };
             }
             else
             {
                 resourcePath = Path.Combine(contentFolder, resourcePath);
                 if (File.Exists(resourcePath))
                 {
-                    return resourcePath;
+                    return new[] { resourcePath };
                 }
                 else
                 {
-                    throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePath);
+                    string[] files = Directory.GetFiles(
+                        contentFolder,
+                        Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
+                    if (files != null && files.Length > 0)
+                    {
+                        return files;
+                    }
+                    else
+                    {
+                        throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePath);
+                    }
                 }
             }
         }

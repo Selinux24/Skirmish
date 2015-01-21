@@ -2,6 +2,8 @@
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// 2D manipulator
     /// </summary>
@@ -61,6 +63,8 @@ namespace Engine
                 Matrix.Scaling(width, height, 1f) *
                 Matrix.Translation(-relativeCenter.X, +relativeCenter.Y, 0f) *
                 Matrix.Translation(this.position.X, this.position.Y, 0f);
+
+            Counters.UpdatesPerFrame++;
         }
 
         /// <summary>

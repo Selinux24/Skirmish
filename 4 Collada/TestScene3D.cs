@@ -100,13 +100,17 @@ namespace Collada
             int x = 0;
             int z = 0;
 
-            this.lamps.Manipulators[0].SetScale(0.1f);
-            this.lamps.Manipulators[1].SetScale(0.1f);
+            this.lamps.Instances[0].Manipulator.SetScale(0.1f);
+            this.lamps.Instances[1].Manipulator.SetScale(0.1f);
+
+            Random rnd = new Random();
 
             for (int i = 0; i < this.helicopters.Count; i++)
             {
-                this.helicopters.Manipulators[i].LinearVelocity = 10f;
-                this.helicopters.Manipulators[i].AngularVelocity = 45f;
+                this.helicopters.Instances[i].TextureIndex = rnd.Next(0, 2);
+
+                this.helicopters.Instances[i].Manipulator.LinearVelocity = 10f;
+                this.helicopters.Instances[i].Manipulator.AngularVelocity = 45f;
 
                 if (x >= rows) x = 0;
                 z = i / rows;
@@ -117,14 +121,14 @@ namespace Collada
                 Vector3 p;
                 if (this.ground.FindGroundPosition(posX, posZ, out p))
                 {
-                    this.helicopters.Manipulators[i].SetScale(1);
-                    this.helicopters.Manipulators[i].SetRotation(Quaternion.Identity);
-                    this.helicopters.Manipulators[i].SetPosition(p + (Vector3.UnitY * 15f));
+                    this.helicopters.Instances[i].Manipulator.SetScale(1);
+                    this.helicopters.Instances[i].Manipulator.SetRotation(Quaternion.Identity);
+                    this.helicopters.Instances[i].Manipulator.SetPosition(p + (Vector3.UnitY * 15f));
                 }
             }
 
-            this.Camera.Goto(this.helicopters.Manipulators[this.selectedHelicopter].Position + (Vector3.One * 10f));
-            this.Camera.LookTo(this.helicopters.Manipulators[this.selectedHelicopter].Position + (Vector3.UnitY * 2.5f));
+            this.Camera.Goto(this.helicopters.Instances[this.selectedHelicopter].Manipulator.Position + (Vector3.One * 10f));
+            this.Camera.LookTo(this.helicopters.Instances[this.selectedHelicopter].Manipulator.Position + (Vector3.UnitY * 2.5f));
         }
 
         public override void Update(GameTime gameTime)
@@ -183,60 +187,70 @@ namespace Collada
                     this.Camera.MoveBackward(this.Game.GameTime, slow);
                 }
 
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+#if DEBUG
+                if (this.Game.Input.RightMouseButtonPressed)
+#endif
+                {
+                    this.Camera.RotateMouse(
+                        this.Game.GameTime,
+                        this.Game.Input.MouseXDelta,
+                        this.Game.Input.MouseYDelta);
+                }
             }
             else
             {
                 if (this.Game.Input.KeyPressed(Keys.A))
                 {
-                    this.helicopters.Manipulators[this.selectedHelicopter].MoveLeft(gameTime);
+                    this.helicopters.Instances[this.selectedHelicopter].Manipulator.MoveLeft(gameTime);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.D))
                 {
-                    this.helicopters.Manipulators[this.selectedHelicopter].MoveRight(gameTime);
+                    this.helicopters.Instances[this.selectedHelicopter].Manipulator.MoveRight(gameTime);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.W))
                 {
-                    this.helicopters.Manipulators[this.selectedHelicopter].MoveForward(gameTime);
+                    this.helicopters.Instances[this.selectedHelicopter].Manipulator.MoveForward(gameTime);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.S))
                 {
-                    this.helicopters.Manipulators[this.selectedHelicopter].MoveBackward(gameTime);
+                    this.helicopters.Instances[this.selectedHelicopter].Manipulator.MoveBackward(gameTime);
                 }
 
-                if (this.Game.Input.MouseXDelta < 0)
+#if DEBUG
+                if (this.Game.Input.RightMouseButtonPressed)
+#endif
                 {
-                    this.helicopters.Manipulators[this.selectedHelicopter].YawLeft(gameTime);
+                    if (this.Game.Input.MouseXDelta < 0)
+                    {
+                        this.helicopters.Instances[this.selectedHelicopter].Manipulator.YawLeft(gameTime);
+                    }
+
+                    if (this.Game.Input.MouseXDelta > 0)
+                    {
+                        this.helicopters.Instances[this.selectedHelicopter].Manipulator.YawRight(gameTime);
+                    }
+
+                    if (this.Game.Input.MouseYDelta < 0)
+                    {
+                        this.helicopters.Instances[this.selectedHelicopter].Manipulator.MoveUp(gameTime);
+                    }
+
+                    if (this.Game.Input.MouseYDelta > 0)
+                    {
+                        this.helicopters.Instances[this.selectedHelicopter].Manipulator.MoveDown(gameTime);
+                    }
                 }
 
-                if (this.Game.Input.MouseXDelta > 0)
-                {
-                    this.helicopters.Manipulators[this.selectedHelicopter].YawRight(gameTime);
-                }
+                Vector3 position = this.helicopters.Instances[this.selectedHelicopter].Manipulator.Position;
+                Vector3 interest = (position - (this.helicopters.Instances[this.selectedHelicopter].Manipulator.Forward * 10f));
+                position += this.helicopters.Instances[this.selectedHelicopter].Manipulator.Up * 2f;
+                position += this.helicopters.Instances[this.selectedHelicopter].Manipulator.Forward * -2f;
 
-                if (this.Game.Input.MouseYDelta < 0)
-                {
-                    this.helicopters.Manipulators[this.selectedHelicopter].MoveUp(gameTime);
-                }
-
-                if (this.Game.Input.MouseYDelta > 0)
-                {
-                    this.helicopters.Manipulators[this.selectedHelicopter].MoveDown(gameTime);
-                }
-
-                Vector3 position = this.helicopters.Manipulators[this.selectedHelicopter].Position;
-                Vector3 interest = (position - (this.helicopters.Manipulators[this.selectedHelicopter].Forward * 10f));
-                position += this.helicopters.Manipulators[this.selectedHelicopter].Up * 2f;
-                position += this.helicopters.Manipulators[this.selectedHelicopter].Forward * -2f;
-
-                this.Camera.Goto(position);
-                this.Camera.LookTo(interest);
+                this.Camera.Goto(Vector3.Lerp(this.Camera.Position, position, 0.8f));
+                this.Camera.LookTo(Vector3.Lerp(this.Camera.Interest, interest, 0.1f));
             }
         }
         private void UpdateEnvironment(GameTime gameTime)
@@ -251,10 +265,10 @@ namespace Collada
             Vector3 lampPos;
             if (this.ground.FindGroundPosition(lampPosX, lampPosZ, out lampPos))
             {
-                this.lamps.Manipulators[0].SetPosition(lampPos + (Vector3.UnitY * 30f));
+                this.lamps.Instances[0].Manipulator.SetPosition(lampPos + (Vector3.UnitY * 30f));
             }
 
-            this.Lights.PointLight.Position = this.lamps.Manipulators[0].Position;
+            this.Lights.PointLight.Position = this.lamps.Instances[0].Manipulator.Position;
 
             #endregion
 
@@ -310,14 +324,14 @@ namespace Collada
         {
             #region Second lamp
 
-            Vector3 pos = (this.helicopters.Manipulators[this.selectedHelicopter].Backward * 3f);
-            Quaternion rot = Quaternion.RotationAxis(this.helicopters.Manipulators[this.selectedHelicopter].Left, MathUtil.DegreesToRadians(45f));
+            Vector3 pos = (this.helicopters.Instances[this.selectedHelicopter].Manipulator.Backward * 3f);
+            Quaternion rot = Quaternion.RotationAxis(this.helicopters.Instances[this.selectedHelicopter].Manipulator.Left, MathUtil.DegreesToRadians(45f));
 
-            this.lamps.Manipulators[1].SetPosition(pos + this.helicopters.Manipulators[this.selectedHelicopter].Position);
-            this.lamps.Manipulators[1].SetRotation(rot * this.helicopters.Manipulators[this.selectedHelicopter].Rotation);
+            this.lamps.Instances[1].Manipulator.SetPosition(pos + this.helicopters.Instances[this.selectedHelicopter].Manipulator.Position);
+            this.lamps.Instances[1].Manipulator.SetRotation(rot * this.helicopters.Instances[this.selectedHelicopter].Manipulator.Rotation);
 
-            this.Lights.SpotLight.Position = this.lamps.Manipulators[1].Position;
-            this.Lights.SpotLight.Direction = this.lamps.Manipulators[1].Down;
+            this.Lights.SpotLight.Position = this.lamps.Instances[1].Manipulator.Position;
+            this.Lights.SpotLight.Direction = this.lamps.Instances[1].Manipulator.Down;
 
             #endregion
         }

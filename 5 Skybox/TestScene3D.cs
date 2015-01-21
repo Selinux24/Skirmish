@@ -105,12 +105,12 @@ namespace Skybox
             this.torchs = this.AddInstancingModel("torch.dae", this.firePositions.Length);
             for (int i = 0; i < this.firePositions.Length; i++)
 			{
-                this.torchs.Manipulators[i].SetScale(0.20f * globalScale);
+                this.torchs.Instances[i].Manipulator.SetScale(0.20f * globalScale);
                 this.torchs.ComputeVolumes(Matrix.Scaling(0.20f * globalScale));
 
                 this.ruins.FindGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out filePositions3D[i]);
 
-                this.torchs.Manipulators[i].SetPosition(filePositions3D[i]);
+                this.torchs.Instances[i].Manipulator.SetPosition(filePositions3D[i]);
 
                 filePositions3D[i].Y += (this.torchs.BoundingBox.Maximum.Y - this.torchs.BoundingBox.Minimum.Y) * 0.9f;
             }

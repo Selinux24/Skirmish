@@ -233,6 +233,7 @@ namespace Engine.Common
             }
 
             Counters.DrawCallsPerFrame++;
+            Counters.InstancesPerFrame++;
         }
         /// <summary>
         /// Sets input layout to assembler

@@ -14,13 +14,30 @@ namespace Engine.Helpers
         /// <param name="length">Length</param>
         /// <param name="defaultValue">Default value</param>
         /// <returns>Returns array</returns>
-        public static T[] CreateArray<T>(int length, T defaultValue)
+        public static T[] CreateArray<T>(int length, T defaultValue) where T : struct
         {
             T[] array = new T[length];
 
             for (int i = 0; i < length; i++)
             {
                 array[i] = defaultValue;
+            }
+
+            return array;
+        }
+        /// <summary>
+        /// Generate an array initialized to function result
+        /// </summary>
+        /// <param name="length">Length</param>
+        /// <param name="func">Function</param>
+        /// <returns>Returns array</returns>
+        public static T[] CreateArray<T>(int length, Func<T> func)
+        {
+            T[] array = new T[length];
+
+            for (int i = 0; i < length; i++)
+            {
+                array[i] = func.Invoke();
             }
 
             return array;

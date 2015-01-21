@@ -134,7 +134,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Update(GameTime gameTime)
         {
-            this.Camera.Update();
+            this.Camera.Update(gameTime);
 
             this.ViewProjectionPerspective = this.Camera.PerspectiveView * this.Camera.PerspectiveProjection;
             this.ViewProjectionOrthogonal = this.Camera.OrthoView * this.Camera.OrthoProjection;

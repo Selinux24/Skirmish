@@ -1,4 +1,5 @@
-﻿using SharpDX.Direct3D;
+﻿using System.Collections.Generic;
+using SharpDX.Direct3D;
 
 namespace Engine.Content
 {
@@ -58,6 +59,78 @@ namespace Engine.Content
         /// Material
         /// </summary>
         public string Material { get; set; }
+
+        /// <summary>
+        /// Submesh grouping optimization
+        /// </summary>
+        /// <param name="meshArray">Mesh array</param>
+        /// <param name="optimizedMesh">Optimized mesh result</param>
+        /// <returns>Returns true if the mesh array was optimized</returns>
+        public static bool OptimizeMeshes(SubMeshContent[] meshArray, out SubMeshContent optimizedMesh)
+        {
+            if (meshArray == null || meshArray.Length == 0)
+            {
+                optimizedMesh = null;
+
+                return true;
+            }
+            else if (meshArray.Length == 1)
+            {
+                optimizedMesh = meshArray[0];
+
+                return true;
+            }
+            else
+            {
+                string material = meshArray[0].Material;
+                PrimitiveTopology topology = meshArray[0].Topology;
+                VertexTypes vertexType = meshArray[0].VertexType;
+
+                List<VertexData> vertices = new List<VertexData>();
+                List<uint> indices = new List<uint>();
+
+                uint indexOffset = 0;
+
+                foreach (SubMeshContent mesh in meshArray)
+                {
+                    if (mesh.VertexType != vertexType || mesh.Topology != topology)
+                    {
+                        optimizedMesh = null;
+
+                        return false;
+                    }
+
+                    if (mesh.Vertices != null && mesh.Vertices.Length > 0)
+                    {
+                        foreach (VertexData v in mesh.Vertices)
+                        {
+                            vertices.Add(v);
+                        }
+                    }
+
+                    if (mesh.Indices != null && mesh.Indices.Length > 0)
+                    {
+                        foreach (uint i in mesh.Indices)
+                        {
+                            indices.Add(indexOffset + i);
+                        }
+                    }
+
+                    indexOffset = (uint)vertices.Count;
+                }
+
+                optimizedMesh = new SubMeshContent()
+                {
+                    Material = material,
+                    Topology = topology,
+                    VertexType = vertexType,
+                    Indices = indices.ToArray(),
+                    Vertices = vertices.ToArray(),
+                };
+
+                return true;
+            }
+        }
 
         /// <summary>
         /// Gets text representation of instance

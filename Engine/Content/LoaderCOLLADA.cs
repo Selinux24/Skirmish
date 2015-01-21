@@ -37,122 +37,130 @@ namespace Engine.Content
         /// <returns>Returns de content loaded</returns>
         public static ModelContent Load(string contentFolder, string fileName, Matrix transform, EnumAxis upAxis = EnumAxis.YUp)
         {
-            COLLADA dae = COLLADA.Load(ContentManager.FindContent(contentFolder, fileName));
-
-            EnumAxisConversion conversion = GetAxisConversion(dae.Asset.UpAxis, upAxis);
-
-            ModelContent modelContent = new ModelContent();
-
-            #region Scene Objects
-
-            ProcessLibraryImages(dae, modelContent, contentFolder);
-            ProcessLibraryMaterial(dae, modelContent);
-
-            ProcessLibraryGeometries(dae, modelContent, conversion, transform);
-            ProcessLibraryControllers(dae, modelContent, conversion, transform);
-            ProcessLibraryAnimations(dae, modelContent, conversion, transform);
-
-            #endregion
-
-            #region Scene Relations
-
-            Joint skeleton = null;
-
-            if (dae.Scene.InstanceVisualScene != null)
+            string[] modelList = ContentManager.FindContent(contentFolder, fileName);
+            if (modelList != null && modelList.Length == 1)
             {
-                string sceneUrl = dae.Scene.InstanceVisualScene.Url;
+                COLLADA dae = COLLADA.Load(modelList[0]);
 
-                VisualScene vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl));
-                if (vScene != null)
+                EnumAxisConversion conversion = GetAxisConversion(dae.Asset.UpAxis, upAxis);
+
+                ModelContent modelContent = new ModelContent();
+
+                #region Scene Objects
+
+                ProcessLibraryImages(dae, modelContent, contentFolder);
+                ProcessLibraryMaterial(dae, modelContent);
+
+                ProcessLibraryGeometries(dae, modelContent, conversion, transform);
+                ProcessLibraryControllers(dae, modelContent, conversion, transform);
+                ProcessLibraryAnimations(dae, modelContent, conversion, transform);
+
+                #endregion
+
+                #region Scene Relations
+
+                Joint skeleton = null;
+
+                if (dae.Scene.InstanceVisualScene != null)
                 {
-                    if (vScene.Nodes != null && vScene.Nodes.Length > 0)
+                    string sceneUrl = dae.Scene.InstanceVisualScene.Url;
+
+                    VisualScene vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl));
+                    if (vScene != null)
                     {
-                        foreach (Node node in vScene.Nodes)
+                        if (vScene.Nodes != null && vScene.Nodes.Length > 0)
                         {
-                            #region Armatures (Skeletons)
-
-                            if (node.IsArmature)
+                            foreach (Node node in vScene.Nodes)
                             {
-                                if (skeleton != null)
+                                #region Armatures (Skeletons)
+
+                                if (node.IsArmature)
                                 {
-                                    throw new Exception("Only one armature definition per file!");
-                                }
+                                    if (skeleton != null)
+                                    {
+                                        throw new Exception("Only one armature definition per file!");
+                                    }
 
-                                //TODO: Where to apply this transform?
-                                Transforms trn = node.ReadTransforms();
-
-                                if (node.Nodes != null && node.Nodes.Length > 0)
-                                {
-                                    skeleton = ProcessJoints(null, node.Nodes[0], conversion);
-                                }
-                            }
-
-                            #endregion
-
-                            #region Geometry nodes
-
-                            if (node.HasGeometry)
-                            {
-                                Transforms trn = node.ReadTransforms();
-
-                                MeshContent info = new MeshContent()
-                                {
                                     //TODO: Where to apply this transform?
-                                    Transform = trn.Matrix.ChangeAxis(conversion),
-                                };
+                                    Transforms trn = node.ReadTransforms();
 
-                                if (node.InstanceGeometry != null && node.InstanceGeometry.Length > 0)
-                                {
-                                    List<string> meshList = new List<string>();
-
-                                    foreach (InstanceGeometry ig in node.InstanceGeometry)
+                                    if (node.Nodes != null && node.Nodes.Length > 0)
                                     {
-                                        meshList.Add(ig.Url.Replace("#", ""));
+                                        skeleton = ProcessJoints(null, node.Nodes[0], conversion);
                                     }
-
-                                    info.SubMeshes = meshList.ToArray();
-                                }
-                            }
-
-                            #endregion
-
-                            #region Controllers
-
-                            if (node.HasController)
-                            {
-                                if (modelContent.SkinningInfo != null)
-                                {
-                                    throw new Exception("Only one skin controller definition per file!");
                                 }
 
-                                Transforms trn = node.ReadTransforms();
+                                #endregion
 
-                                if (node.InstanceController != null && node.InstanceController.Length > 0)
+                                #region Geometry nodes
+
+                                if (node.HasGeometry)
                                 {
-                                    foreach (InstanceController ic in node.InstanceController)
+                                    Transforms trn = node.ReadTransforms();
+
+                                    MeshContent info = new MeshContent()
                                     {
-                                        string controllerName = ic.Url.Replace("#", "");
+                                        //TODO: Where to apply this transform?
+                                        Transform = trn.Matrix.ChangeAxis(conversion),
+                                    };
 
-                                        modelContent.SkinningInfo = new SkinningContent()
+                                    if (node.InstanceGeometry != null && node.InstanceGeometry.Length > 0)
+                                    {
+                                        List<string> meshList = new List<string>();
+
+                                        foreach (InstanceGeometry ig in node.InstanceGeometry)
                                         {
-                                            //TODO: Where to apply this transform?
-                                            Transform = trn.Matrix.ChangeAxis(conversion),
-                                            Controller = controllerName,
-                                            Skeleton = skeleton,
-                                        };
+                                            meshList.Add(ig.Url.Replace("#", ""));
+                                        }
+
+                                        info.SubMeshes = meshList.ToArray();
                                     }
                                 }
-                            }
 
-                            #endregion
+                                #endregion
+
+                                #region Controllers
+
+                                if (node.HasController)
+                                {
+                                    if (modelContent.SkinningInfo != null)
+                                    {
+                                        throw new Exception("Only one skin controller definition per file!");
+                                    }
+
+                                    Transforms trn = node.ReadTransforms();
+
+                                    if (node.InstanceController != null && node.InstanceController.Length > 0)
+                                    {
+                                        foreach (InstanceController ic in node.InstanceController)
+                                        {
+                                            string controllerName = ic.Url.Replace("#", "");
+
+                                            modelContent.SkinningInfo = new SkinningContent()
+                                            {
+                                                //TODO: Where to apply this transform?
+                                                Transform = trn.Matrix.ChangeAxis(conversion),
+                                                Controller = controllerName,
+                                                Skeleton = skeleton,
+                                            };
+                                        }
+                                    }
+                                }
+
+                                #endregion
+                            }
                         }
                     }
                 }
+
+                #endregion
+
+                return modelContent;
             }
-
-            #endregion
-
-            return modelContent;
+            else
+            {
+                throw new Exception(string.Format("Model not found: {0}", fileName));
+            }
         }
         /// <summary>
         /// Axis conversion selection
@@ -214,7 +222,7 @@ namespace Engine.Content
                     }
                     else if (!string.IsNullOrEmpty(image.InitFrom))
                     {
-                        info.Path = ContentManager.FindContent(contentFolder, Uri.UnescapeDataString(image.InitFrom));
+                        info.Paths = ContentManager.FindContent(contentFolder, Uri.UnescapeDataString(image.InitFrom));
                     }
 
                     modelContent.Images[image.Id] = info;

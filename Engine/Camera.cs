@@ -167,6 +167,12 @@ namespace Engine
 
         #endregion
 
+        #region Traslations
+
+        private Vector3? fineTranslationInterest = null;
+
+        #endregion
+
         /// <summary>
         /// Gets or sets camera mode
         /// </summary>
@@ -232,6 +238,14 @@ namespace Engine
         /// Minimum zoom value
         /// </summary>
         public float ZoomMin = 15f;
+        /// <summary>
+        /// Zoom delta
+        /// </summary>
+        public float ZoomDelta = 100f;
+        /// <summary>
+        /// Zoom movement delta
+        /// </summary>
+        public float SlowZoomDelta = 25f;
         /// <summary>
         /// Gets or sets field of view value
         /// </summary>
@@ -363,8 +377,21 @@ namespace Engine
         /// <summary>
         /// Updates camera state
         /// </summary>
-        public void Update()
+        public void Update(GameTime gameTime)
         {
+            //Fine translation
+            if (this.fineTranslationInterest.HasValue)
+            {
+                if (!Vector3.NearEqual(this.Interest, this.fineTranslationInterest.Value, new Vector3(0.1f, 0.1f, 0.1f)))
+                {
+                    this.FineTranslation(gameTime, this.fineTranslationInterest.Value, 10f, false);
+                }
+                else
+                {
+                    this.fineTranslationInterest = null;
+                }
+            }
+
             this.PerspectiveView = Matrix.LookAtLH(
                 this.Position,
                 this.Interest,
@@ -570,69 +597,46 @@ namespace Engine
         /// Move camera to position
         /// </summary>
         /// <param name="newPosition">New position</param>
-        public void Goto(Vector3 newPosition)
+        public void Goto(Vector3 newPosition, bool fineTranslation = false)
         {
+            this.StopTranslations();
+
             Vector3 diff = newPosition - this.Position;
 
-            this.Interest += diff;
-            this.Position += diff;
+            if (fineTranslation)
+            {
+                this.fineTranslationInterest = this.Interest + diff;
+            }
+            else
+            {
+                this.Interest += diff;
+                this.Position += diff;
+            }
         }
         /// <summary>
         /// Center camera in new interest
         /// </summary>
         /// <param name="newInterest">New interest point</param>
-        public void LookTo(Vector3 newInterest)
+        public void LookTo(Vector3 newInterest, bool fineTranslation = false)
         {
-            if (this.mode == CameraModes.FreeIsometric)
-            {
-                Vector3 diff = newInterest - this.Interest;
+            this.StopTranslations();
 
-                this.Interest += diff;
-                this.Position += diff;
+            if (fineTranslation)
+            {
+                this.fineTranslationInterest = newInterest;
             }
             else
             {
-                this.Interest = newInterest;
-            }
-        }
-        /// <summary>
-        /// Performs fine translation to target
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="newInterest">New interest</param>
-        /// <param name="radius">Radius to decelerate</param>
-        /// <param name="slow">Slow</param>
-        /// <remarks>For isometric camera only</remarks>
-        public void FineTranslation(GameTime gameTime, Vector3 newInterest, float radius, bool slow)
-        {
-            if (this.mode == CameraModes.FreeIsometric)
-            {
-                Vector3 diff = newInterest - this.Interest;
-                Vector3 pos = this.Position + diff;
-                Vector3 dir = pos - this.Position;
-
-                float delta = (slow) ? this.SlowMovementDelta : this.MovementDelta;
-                float distanceToTarget = dir.Length();
-                float distanceThisMove = delta * gameTime.ElapsedSeconds;
-
-                Vector3 movingVector = Vector3.Zero;
-                if (distanceThisMove >= distanceToTarget)
+                if (this.mode == CameraModes.FreeIsometric)
                 {
-                    movingVector = Vector3.Normalize(dir) * distanceToTarget * 0.1f;
-                }
-                else if (distanceToTarget < radius)
-                {
-                    movingVector = Vector3.Normalize(dir) * distanceThisMove * (distanceToTarget / radius);
+                    Vector3 diff = newInterest - this.Interest;
+
+                    this.Interest += diff;
+                    this.Position += diff;
                 }
                 else
                 {
-                    movingVector = Vector3.Normalize(dir) * distanceThisMove;
-                }
-
-                if (movingVector != Vector3.Zero)
-                {
-                    this.Position += movingVector;
-                    this.Interest += movingVector;
+                    this.Interest = newInterest;
                 }
             }
         }
@@ -644,6 +648,8 @@ namespace Engine
         /// <param name="distance">Distance to interest point from viewer point</param>
         private void SetFree(Vector3 interest, float distance)
         {
+            this.StopTranslations();
+
             Vector3 diff = interest - this.Interest;
             this.Interest += diff;
             this.Position += diff;
@@ -659,6 +665,8 @@ namespace Engine
         /// <param name="distance">Distance to interest point from viewer point</param>
         private void SetIsometric(IsometricAxis axis, Vector3 interest, float distance)
         {
+            this.StopTranslations();
+
             this.mode = CameraModes.FreeIsometric;
             this.isometricAxis = axis;
             this.Interest = interest;
@@ -715,9 +723,48 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         private void Move(GameTime gameTime, Vector3 vector, bool slow)
         {
+            this.StopTranslations();
+
             float delta = (slow) ? this.SlowMovementDelta : this.MovementDelta;
 
             Vector3 movingVector = vector * delta * gameTime.ElapsedSeconds;
+            if (movingVector != Vector3.Zero)
+            {
+                this.Position += movingVector;
+                this.Interest += movingVector;
+            }
+        }
+        /// <summary>
+        /// Performs fine translation to target
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="newInterest">New interest</param>
+        /// <param name="radius">Radius to decelerate</param>
+        /// <param name="slow">Slow</param>
+        private void FineTranslation(GameTime gameTime, Vector3 newInterest, float radius, bool slow)
+        {
+            Vector3 diff = newInterest - this.Interest;
+            Vector3 pos = this.Position + diff;
+            Vector3 dir = pos - this.Position;
+
+            float delta = (slow) ? this.SlowMovementDelta : this.MovementDelta;
+            float distanceToTarget = dir.Length();
+            float distanceThisMove = delta * gameTime.ElapsedSeconds;
+
+            Vector3 movingVector = Vector3.Zero;
+            if (distanceThisMove >= distanceToTarget)
+            {
+                movingVector = Vector3.Normalize(dir) * distanceToTarget * 0.1f;
+            }
+            else if (distanceToTarget < radius)
+            {
+                movingVector = Vector3.Normalize(dir) * distanceThisMove * (distanceToTarget / radius);
+            }
+            else
+            {
+                movingVector = Vector3.Normalize(dir) * distanceThisMove;
+            }
+
             if (movingVector != Vector3.Zero)
             {
                 this.Position += movingVector;
@@ -743,6 +790,8 @@ namespace Engine
         /// <param name="degrees">Degrees</param>
         private void Rotate(Vector3 axis, float degrees)
         {
+            this.StopTranslations();
+
             Quaternion r = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
 
             Vector3 fw = Vector3.Transform(this.freeForward, r);
@@ -757,7 +806,9 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         private void Zoom(GameTime gameTime, bool zoomIn, bool slow)
         {
-            float delta = delta = (slow) ? this.SlowMovementDelta : this.MovementDelta;
+            this.StopTranslations();
+
+            float delta = delta = (slow) ? this.SlowZoomDelta : this.ZoomDelta;
             float zooming = (zoomIn) ? -delta : +delta;
 
             if (zooming != 0f)
@@ -789,6 +840,13 @@ namespace Engine
                 this.viewportHeight,
                 this.nearPlaneDistance,
                 this.farPlaneDistance);
+        }
+        /// <summary>
+        /// Stops all current automatic translations
+        /// </summary>
+        private void StopTranslations()
+        {
+            this.fineTranslationInterest = null;
         }
     }
 }

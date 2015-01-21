@@ -125,17 +125,23 @@ namespace Engine
         {
             this.Manipulator.Update(gameTime);
 
+            this.terrain.Manipulator.SetScale(this.Manipulator.Scaling);
+            this.terrain.Manipulator.SetRotation(this.Manipulator.Rotation);
             this.terrain.Manipulator.SetPosition(this.Manipulator.Position);
             this.terrain.Update(gameTime);
 
             if (this.vegetation != null)
             {
+                this.vegetation.Manipulator.SetScale(this.Manipulator.Scaling);
+                this.vegetation.Manipulator.SetRotation(this.Manipulator.Rotation);
                 this.vegetation.Manipulator.SetPosition(this.Manipulator.Position);
                 this.vegetation.Update(gameTime);
             }
 
             if (this.skydom != null)
             {
+                this.skydom.Manipulator.SetScale(this.Manipulator.Scaling);
+                this.skydom.Manipulator.SetRotation(this.Manipulator.Rotation);
                 this.skydom.Manipulator.SetPosition(this.Scene.Camera.Position);
                 this.skydom.Update(gameTime);
             }

@@ -2,6 +2,8 @@
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// 3D manipulator
     /// </summary>
@@ -129,6 +131,8 @@ namespace Engine
             this.Right = rot.Right;
             this.Up = rot.Up;
             this.Down = rot.Down;
+
+            Counters.UpdatesPerFrame++;
         }
 
         /// <summary>

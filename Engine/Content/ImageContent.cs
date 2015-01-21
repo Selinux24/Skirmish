@@ -63,6 +63,11 @@ namespace Engine.Content
         /// </summary>
         public int CubicFaceSize { get; set; }
 
+        /// <summary>
+        /// Creates a unique texture image
+        /// </summary>
+        /// <param name="texture">Path to texture</param>
+        /// <returns>Returns content</returns>
         public static ImageContent Texture(string texture)
         {
             return new ImageContent()
@@ -70,6 +75,11 @@ namespace Engine.Content
                 Path = texture,
             };
         }
+        /// <summary>
+        /// Creates a texture array image
+        /// </summary>
+        /// <param name="textures">Paths to textures</param>
+        /// <returns>Returns content</returns>
         public static ImageContent Array(string[] textures)
         {
             return new ImageContent()
@@ -77,6 +87,12 @@ namespace Engine.Content
                 Paths = textures,
             };
         }
+        /// <summary>
+        /// Creates a cubic texture image
+        /// </summary>
+        /// <param name="texture">Path to texture</param>
+        /// <param name="faceSize">Face size</param>
+        /// <returns>Returns content</returns>
         public static ImageContent Cubic(string texture, int faceSize)
         {
             return new ImageContent()

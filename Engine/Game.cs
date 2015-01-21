@@ -273,11 +273,13 @@ namespace Engine
             if (Counters.FrameTime >= 1.0f)
             {
                 this.RuntimeText = string.Format(
-                    "{0} - {1} - FPS: {2:000} Draw Calls: {3:00} Frame Time: {4:0.0000} (secs) Total Time: {5:0000} (secs) CPU: {6:0.00}%",
+                    "{0} - {1} - FPS: {2:000} Draw Calls: {3:00}/{4:00} Updates: {5:00} Frame Time: {6:0.0000} (secs) Total Time: {7:0000} (secs) CPU: {8:0.00}%",
                     this.Graphics.DeviceDescription,
                     this.Name,
                     Counters.FrameCount,
                     Counters.DrawCallsPerFrame,
+                    Counters.InstancesPerFrame,
+                    Counters.UpdatesPerFrame,
                     this.GameTime.ElapsedSeconds,
                     this.GameTime.TotalSeconds,
                     this.CPUStats.NextValue());
