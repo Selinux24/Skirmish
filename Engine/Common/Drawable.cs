@@ -71,11 +71,12 @@ namespace Engine.Common
         public abstract void Dispose();
 
         /// <summary>
-        /// Handle viewport resize
+        /// Performs frustum culling test
         /// </summary>
-        public virtual void HandleWindowResize()
+        /// <returns>Returns true if component passes frustum culling test</returns>
+        public virtual void FrustumCulling()
         {
-
+            
         }
 
         /// <summary>

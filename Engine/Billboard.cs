@@ -19,7 +19,7 @@ namespace Engine
         /// <summary>
         /// Manipulator
         /// </summary>
-        public Manipulator3D Manipulator { get; private set; }
+        public Manipulator3D Manipulator { get; set; }
 
         /// <summary>
         /// Constructor

@@ -15,8 +15,16 @@ namespace Engine
         /// Scene component list
         /// </summary>
         private List<Drawable> components = new List<Drawable>();
-
+        /// <summary>
+        /// Control captured with mouse
+        /// </summary>
+        /// <remarks>When mouse was pressed, the control beneath him was stored here. When mouse is released, if it is above this control, an click event occurs</remarks>
         private IControl capturedControl = null;
+
+        /// <summary>
+        /// Gets or sets if scene has to perform frustum culling with objects
+        /// </summary>
+        public bool PerformFrustumCulling { get; set; }
 
         /// <summary>
         /// Constructor
@@ -25,7 +33,7 @@ namespace Engine
         public Scene3D(Game game)
             : base(game)
         {
-
+            this.PerformFrustumCulling = true;
         }
         /// <summary>
         /// Scene objects initialization
@@ -115,19 +123,9 @@ namespace Engine
                 this.Game.Graphics.SetDefaultRasterizer();
                 this.Game.Graphics.SetBlendAlphaToCoverage();
 
-                visibleComponents[i].Draw(gameTime);
-            }
-        }
-        /// <summary>
-        /// Window resize handling
-        /// </summary>
-        public override void HandleWindowResize()
-        {
-            base.HandleWindowResize();
+                visibleComponents[i].FrustumCulling();
 
-            for (int i = 0; i < this.components.Count; i++)
-            {
-                this.components[i].HandleWindowResize();
+                visibleComponents[i].Draw(gameTime);
             }
         }
         /// <summary>
@@ -301,21 +299,43 @@ namespace Engine
             return newModel;
         }
         /// <summary>
+        /// Adds new background sprite
+        /// </summary>
+        /// <param name="texture">Texture</param>
+        /// <param name="order">Order</param>
+        /// <returns>Return new model</returns>
+        public Sprite AddBackgroud(string texture, int order = 0)
+        {
+            Sprite newModel = new Sprite(
+                this.Game,
+                this,
+                texture,
+                0,
+                0,
+                true);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
         /// Adds new sprite
         /// </summary>
         /// <param name="texture">Sprite texture</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
+        /// <param name="fitScreen">Fit screen</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Sprite AddSprite(string texture, int width, int height, int order = 0)
+        public Sprite AddSprite(string texture, int width = 0, int height = 0, bool fitScreen = false, int order = 0)
         {
             Sprite newModel = new Sprite(
                 this.Game,
                 this,
                 texture,
                 width,
-                height);
+                height,
+                fitScreen);
 
             this.AddComponent(newModel, order);
 
@@ -370,7 +390,7 @@ namespace Engine
         /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new text</returns>
-        public TextDrawer AddText(string font, int fontSize, Color color, int order = 0)
+        public TextDrawer AddText(string font, int fontSize, Color4 color, int order = 0)
         {
             TextDrawer newModel = new TextDrawer(this.Game, this, font, fontSize, color);
 
@@ -387,7 +407,7 @@ namespace Engine
         /// <param name="shadowColor">Shadow color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new text</returns>
-        public TextDrawer AddText(string font, int fontSize, Color color, Color shadowColor, int order = 0)
+        public TextDrawer AddText(string font, int fontSize, Color4 color, Color4 shadowColor, int order = 0)
         {
             TextDrawer newModel = new TextDrawer(this.Game, this, font, fontSize, color, shadowColor);
 
@@ -416,9 +436,23 @@ namespace Engine
         /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(Line[] lines, Color color, int order = 0)
+        public LineListDrawer AddLineListDrawer(Line[] lines, Color4 color, int order = 0)
         {
             LineListDrawer newModel = new LineListDrawer(this.Game, this, lines, color);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
+        /// Adds a line list drawer
+        /// </summary>
+        /// <param name="count">Line count</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new line list drawer</returns>
+        public LineListDrawer AddLineListDrawer(int count, int order = 0)
+        {
+            LineListDrawer newModel = new LineListDrawer(this.Game, this, count);
 
             this.AddComponent(newModel, order);
 

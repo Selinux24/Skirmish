@@ -41,6 +41,7 @@ namespace SceneTest
                 "smiley.jpg",
                 128,
                 128,
+                true,
                 1);
 
             this.InitializeText(this.currentSize);

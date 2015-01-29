@@ -1,7 +1,7 @@
 ﻿using System;
 using SharpDX;
 
-namespace Engine.Helpers
+namespace Engine
 {
     /// <summary>
     /// Helper functions
@@ -74,6 +74,43 @@ namespace Engine.Helpers
 
             //Get the arc cosin of the angle, you now have your angle in radians 
             return (float)System.Math.Acos(dot);
+        }
+        /// <summary>
+        /// Look at target
+        /// </summary>
+        /// <param name="eyePosition">Eye position</param>
+        /// <param name="target">Target</param>
+        /// <param name="yAxisOnly">Restricts the rotation axis to Y only</param>
+        /// <returns>Returns rotation quaternion</returns>
+        public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, bool yAxisOnly = true)
+        {
+            Vector3 forwardVector = Vector3.Normalize(eyePosition - target);
+
+            float dot = Vector3.Dot(Vector3.ForwardLH, forwardVector);
+
+            if (Math.Abs(dot - (-1.0f)) < 0.000001f)
+            {
+                return new Quaternion(Vector3.Up, MathUtil.Pi);
+            }
+            else if (Math.Abs(dot - (1.0f)) < 0.000001f)
+            {
+                return Quaternion.Identity;
+            }
+            else
+            {
+                Vector3 rotAxis = Vector3.Normalize(Vector3.Cross(Vector3.ForwardLH, forwardVector));
+                float rotAngle = Angle(Vector3.ForwardLH, forwardVector);
+
+                Quaternion q = Quaternion.RotationAxis(rotAxis, rotAngle);
+
+                if (yAxisOnly)
+                {
+                    q.X = 0;
+                    q.Z = 0;
+                }
+
+                return q;
+            }
         }
         /// <summary>
         /// Dispose disposable object

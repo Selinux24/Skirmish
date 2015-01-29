@@ -4,6 +4,7 @@ namespace GameLogic.Rules
 {
     public abstract class ActionsMovement : Actions
     {
+        public Vector3 Destination { get; set; }
         public int WastedPoints { get; set; }
 
         public static ActionsMovement[] List

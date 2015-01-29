@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System;
+using SharpDX;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
@@ -16,6 +17,14 @@ namespace Engine
         /// Effect
         /// </summary>
         private EffectBasic effect = null;
+        /// <summary>
+        /// Source render width
+        /// </summary>
+        private float previousRenderWidth;
+        /// <summary>
+        /// Source render height
+        /// </summary>
+        private float previousRenderHeight;
         /// <summary>
         /// Source width
         /// </summary>
@@ -96,8 +105,9 @@ namespace Engine
         /// <param name="texture">Texture</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
-        public Sprite(Game game, Scene3D scene, string texture, float width, float height)
-            : this(game, scene, new[] { texture }, width, height)
+        /// <param name="fitScreen">Fit screen</param>
+        public Sprite(Game game, Scene3D scene, string texture, float width, float height, bool fitScreen = false)
+            : this(game, scene, new[] { texture }, width, height, fitScreen)
         {
 
         }
@@ -109,18 +119,27 @@ namespace Engine
         /// <param name="textures">Texture array</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
-        public Sprite(Game game, Scene3D scene, string[] textures, float width, float height)
+        /// <param name="fitScreen">Fit screen</param>
+        public Sprite(Game game, Scene3D scene, string[] textures, float width, float height, bool fitScreen = false)
             : base(game, scene, ModelContent.GenerateSprite(scene.ContentPath, textures))
         {
             this.effect = new EffectBasic(game.Graphics.Device);
 
-            this.sourceWidth = width / game.Form.RenderWidth;
-            this.sourceHeight = height / game.Form.RenderHeight;
+            int renderWidth = game.Form.RenderWidth;
+            int renderHeight = game.Form.RenderHeight;
 
-            this.Width = width;
-            this.Height = height;
-            this.Manipulator = new Manipulator2D();
+            this.Width = width <= 0 ? renderWidth : width;
+            this.Height = height <= 0 ? renderHeight : height;
+            this.FitScreen = fitScreen;
+
+            this.previousRenderWidth = renderWidth;
+            this.previousRenderHeight = renderHeight;
+            this.sourceWidth = this.Width / renderWidth;
+            this.sourceHeight = this.Height / renderHeight;
+
             this.TextureIndex = 0;
+
+            this.Manipulator = new Manipulator2D();
         }
         /// <summary>
         /// Resource disposing
@@ -142,6 +161,24 @@ namespace Engine
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            if (this.FitScreen)
+            {
+                if (this.previousRenderWidth != this.Game.Form.RenderWidth ||
+                    this.previousRenderHeight != this.Game.Form.RenderHeight)
+                {
+                    float leftRelative = (float)this.Left / (float)this.previousRenderWidth;
+                    float topRelative = (float)this.Top / (float)this.previousRenderHeight;
+                    this.Left = (int)Math.Round(leftRelative * this.Game.Form.RenderWidth, 0);
+                    this.Top = (int)Math.Round(topRelative * this.Game.Form.RenderHeight, 0);
+                    
+                    this.Width = this.sourceWidth * this.Game.Form.RenderWidth;
+                    this.Height = this.sourceHeight * this.Game.Form.RenderHeight;
+
+                    this.previousRenderWidth = this.Game.Form.RenderWidth;
+                    this.previousRenderHeight = this.Game.Form.RenderHeight;
+                }
+            }
 
             this.Manipulator.Update(gameTime, this.Game.Form.RelativeCenter, this.Width, this.Height);
         }
@@ -212,19 +249,6 @@ namespace Engine
                         }
                     }
                 }
-            }
-        }
-        /// <summary>
-        /// Resize handling
-        /// </summary>
-        public override void HandleWindowResize()
-        {
-            base.HandleWindowResize();
-
-            if (this.FitScreen)
-            {
-                this.Width = this.sourceWidth * this.Game.Form.RenderWidth;
-                this.Height = this.sourceHeight * this.Game.Form.RenderHeight;
             }
         }
     }

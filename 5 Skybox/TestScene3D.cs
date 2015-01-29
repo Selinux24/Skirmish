@@ -21,8 +21,8 @@ namespace Skybox
         private Color globalColor = Color.Green;
         private Color bboxColor = Color.GreenYellow;
         private Color bsphColor = Color.LightYellow;
-        private int bsphSlices = 20;
-        private int bsphStacks = 10;
+        //private int bsphSlices = 20;
+        //private int bsphStacks = 10;
 
         private Cursor cursor;
 
@@ -33,8 +33,8 @@ namespace Skybox
         private Terrain ruins = null;
         private LineListDrawer pickedTri = null;
         private LineListDrawer bboxGlobalDrawer = null;
-        private LineListDrawer bboxMeshesDrawer = null;
-        private LineListDrawer bsphMeshesDrawer = null;
+        //private LineListDrawer bboxMeshesDrawer = null;
+        //private LineListDrawer bsphMeshesDrawer = null;
 
         private ModelInstanced torchs = null;
         private ParticleSystem rain = null;
@@ -84,38 +84,39 @@ namespace Skybox
                 AddSkydom = true,
                 SkydomTexture = "sunset.dds",
             };
-            this.ruins = this.AddTerrain("ruinas.dae", desc, false);
+            this.ruins = this.AddTerrain("ruins.dae", desc, false);
+            this.ruins.Manipulator.SetScale(globalScale, true);
+
+            this.bboxGlobalDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
+            //this.bboxMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.StaticBoundingBoxes), this.bboxColor);
+            //this.bsphMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredSphere(this.ruins.StaticBoundingSpheres, this.bsphSlices, this.bsphStacks), this.bsphColor);
+            this.bboxGlobalDrawer.UseZBuffer = false;
+            //this.bboxMeshesDrawer.UseZBuffer = true;
+            //this.bsphMeshesDrawer.UseZBuffer = true;
 
             this.pickedTri = this.AddLineListDrawer(new Line[3], Color.Red);
             this.pickedTri.UseZBuffer = false;
-
-            this.bboxGlobalDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.BoundingBox), this.globalColor);
-            this.bboxMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBoxes()), this.bboxColor);
-            this.bsphMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredSphere(this.ruins.GetBoundingSpheres(), this.bsphSlices, this.bsphStacks), this.bsphColor);
-            this.bboxGlobalDrawer.UseZBuffer = false;
-            this.bboxMeshesDrawer.UseZBuffer = true;
-            this.bsphMeshesDrawer.UseZBuffer = true;
 
             #endregion
 
             #region Lights
 
-            Vector3[] filePositions3D = new Vector3[this.firePositions.Length];
+            Vector3[] firePositions3D = new Vector3[this.firePositions.Length];
 
             this.torchs = this.AddInstancingModel("torch.dae", this.firePositions.Length);
             for (int i = 0; i < this.firePositions.Length; i++)
 			{
-                this.torchs.Instances[i].Manipulator.SetScale(0.20f * globalScale);
-                this.torchs.ComputeVolumes(Matrix.Scaling(0.20f * globalScale));
+                this.ruins.FindGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i]);
 
-                this.ruins.FindGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out filePositions3D[i]);
+                this.torchs.Instances[i].Manipulator.SetScale(0.20f * globalScale, true);
+                this.torchs.Instances[i].Manipulator.SetPosition(firePositions3D[i], true);
 
-                this.torchs.Instances[i].Manipulator.SetPosition(filePositions3D[i]);
+                BoundingBox bbox = this.torchs.Instances[i].GetBoundingBox();
 
-                filePositions3D[i].Y += (this.torchs.BoundingBox.Maximum.Y - this.torchs.BoundingBox.Minimum.Y) * 0.9f;
+                firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.9f;
             }
 
-            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(filePositions3D, 0.5f, "flare1.png"));
+            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions3D, 0.5f, "flare1.png"));
 
             #endregion
 
@@ -134,19 +135,6 @@ namespace Skybox
             this.Lights.PointLight.Range = 20.0f;
 
             this.InitializeCamera();
-            this.InitializeTerrain();
-        }
-        private void InitializeTerrain()
-        {
-            this.ruins.Manipulator.SetScale(globalScale);
-            this.ruins.ComputeVolumes(Matrix.Scaling(globalScale));
-
-            this.bboxGlobalDrawer.SetLines(GeometryUtil.CreateWiredBox(this.ruins.BoundingBox), this.globalColor);
-            this.bboxMeshesDrawer.SetLines(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBoxes()), this.bboxColor);
-            this.bsphMeshesDrawer.SetLines(GeometryUtil.CreateWiredSphere(this.ruins.GetBoundingSpheres(), this.bsphSlices, this.bsphStacks), this.bsphColor);
-            this.bboxGlobalDrawer.Visible = false;
-            this.bboxMeshesDrawer.Visible = false;
-            this.bsphMeshesDrawer.Visible = false;
         }
         private void InitializeCamera()
         {
@@ -254,12 +242,12 @@ namespace Skybox
 
             if (this.Game.Input.KeyJustReleased(Keys.F2))
             {
-                this.bboxMeshesDrawer.Visible = !this.bboxMeshesDrawer.Visible;
+                //this.bboxMeshesDrawer.Visible = !this.bboxMeshesDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F3))
             {
-                this.bsphMeshesDrawer.Visible = !this.bsphMeshesDrawer.Visible;
+                //this.bsphMeshesDrawer.Visible = !this.bsphMeshesDrawer.Visible;
             }
 
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
@@ -307,7 +295,7 @@ namespace Skybox
                 Triangle t;
                 if (this.ruins.Pick(pRay, out p, out t))
                 {
-                    this.pickedTri.SetLines(GeometryUtil.CreateWiredTriangle(t), Color.Red);
+                    this.pickedTri.SetLines(Color.Red, GeometryUtil.CreateWiredTriangle(t));
                 }
             }
 

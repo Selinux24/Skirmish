@@ -18,13 +18,7 @@ namespace SceneTest
 
             this.ContentPath = "ResourcesHID";
 
-            this.background = this.AddSprite(
-                "background.jpg",
-                this.Game.Form.RenderWidth,
-                this.Game.Form.RenderHeight,
-                0);
-
-            this.background.FitScreen = true;
+            this.background = this.AddBackgroud("background.jpg");
         }
     }
 }

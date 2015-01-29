@@ -147,6 +147,52 @@ namespace Engine.Common
 
             return CreateFromVertices(vertList.ToArray(), indexList.ToArray());
         }
+        public static Line[] CreateWiredFrustum(BoundingFrustum frustum)
+        {
+            return CreateWiredBox(frustum.GetCorners());
+        }
+        public static Line[] CreatePath(Vector3[] path)
+        {
+            List<Line> lines = new List<Line>();
+
+            for (int i = 0; i < path.Length - 1; i++)
+            {
+                lines.Add(new Line(path[i], path[i + 1]));
+            }
+
+            return lines.ToArray();
+        }
+        public static Line[] CreateAxis(Matrix transform, float size)
+        {
+            List<Line> lines = new List<Line>();
+
+            Vector3 up = transform.TranslationVector + (transform.Up * size);
+            Vector3 forward = transform.TranslationVector + (transform.Forward * size);
+            Vector3 left = transform.TranslationVector + (transform.Left * size);
+
+            lines.Add(new Line(transform.TranslationVector, up));
+            lines.Add(new Line(transform.TranslationVector, forward));
+            lines.Add(new Line(transform.TranslationVector, left));
+
+            return lines.ToArray();
+        }
+        public static Line[] CreateCrossList(Vector3[] points, float size)
+        {
+            List<Line> lines = new List<Line>();
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                Vector3 p = points[i];
+
+                float h = size * 0.5f;
+                lines.Add(new Line(p + new Vector3(h, h, h), p - new Vector3(h, h, h)));
+                lines.Add(new Line(p + new Vector3(h, h, -h), p - new Vector3(h, h, -h)));
+                lines.Add(new Line(p + new Vector3(-h, h, h), p - new Vector3(-h, h, h)));
+                lines.Add(new Line(p + new Vector3(-h, h, -h), p - new Vector3(-h, h, -h)));
+            }
+
+            return lines.ToArray();
+        }
 
         private static Line[] CreateFromVertices(Vector3[] vertices, int[] indices)
         {

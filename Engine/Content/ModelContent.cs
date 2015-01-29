@@ -32,7 +32,7 @@ namespace Engine.Content
         /// </summary>
         public class MaterialDictionary : Dictionary<string, MaterialContent>
         {
-
+            
         }
         /// <summary>
         /// Geometry dictionary by mesh name
@@ -53,7 +53,7 @@ namespace Engine.Content
                     this.Add(meshName, new Dictionary<string, SubMeshContent>());
                 }
 
-                this[meshName].Add(materialName, meshContent);
+                this[meshName].Add(string.IsNullOrEmpty(materialName) ? ModelContent.NoMaterial : materialName, meshContent);
             }
             /// <summary>
             /// Gets all meshes with the specified material
@@ -155,7 +155,7 @@ namespace Engine.Content
         /// <param name="lines">Lines</param>
         /// <param name="color">Color</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateLineList(Line[] lines, Color color)
+        public static ModelContent GenerateLineList(Line[] lines, Color4 color)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -170,7 +170,6 @@ namespace Engine.Content
                 Material = ModelContent.NoMaterial,
             };
 
-            modelContent.Materials.Add(ModelContent.NoMaterial, MaterialContent.Default);
             modelContent.Geometry.Add(ModelContent.StaticMesh, ModelContent.NoMaterial, geo);
             modelContent.Optimize();
 
@@ -182,7 +181,7 @@ namespace Engine.Content
         /// <param name="triangles">Triangles</param>
         /// <param name="color">Color</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateTriangleList(Triangle[] triangles, Color color)
+        public static ModelContent GenerateTriangleList(Triangle[] triangles, Color4 color)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -197,7 +196,6 @@ namespace Engine.Content
                 Material = ModelContent.NoMaterial,
             };
 
-            modelContent.Materials.Add(ModelContent.NoMaterial, MaterialContent.Default);
             modelContent.Geometry.Add(ModelContent.StaticMesh, ModelContent.NoMaterial, geo);
             modelContent.Optimize();
 
@@ -267,7 +265,7 @@ namespace Engine.Content
         /// <param name="maxSize">Billboard max size</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateVegetationBillboard(string contentFolder, string[] textures, Triangle[] triList, float saturation, Vector2 minSize, Vector2 maxSize, int seed = 0)
+        public static ModelContent GenerateVegetationBillboard(string contentFolder, Triangle[] triList, string[] textures, float saturation, Vector2 minSize, Vector2 maxSize, int seed = 0)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -393,7 +391,7 @@ namespace Engine.Content
         /// </summary>
         public ModelContent()
         {
-
+            this.Materials.Add(NoMaterial, MaterialContent.Default);
         }
 
         /// <summary>

@@ -288,7 +288,8 @@
     <Compile Include="Common\GeometryUtil.cs" />
     <Compile Include="Common\IBufferData.cs" />
     <Compile Include="Common\IControl.cs" />
-    <Compile Include="Common\Line.cs" />
+    <Compile Include="Curve.cs" />
+    <Compile Include="Line.cs" />
     <Compile Include="Common\VertexParticle.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalColor.cs" />
     <Compile Include="Common\VertexSkinnedPositionColor.cs" />
@@ -318,7 +319,7 @@
     <Compile Include="Effects\DrawingStages.cs" />
     <Compile Include="Effects\EffectParticles.cs" />
     <Compile Include="Effects\IDrawer.cs" />
-    <Compile Include="Helpers\Helper.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="Helpers\WindowsAPI.cs" />
     <Compile Include="Manipulator2D.cs" />
     <Compile Include="ParticleClasses.cs" />
@@ -366,7 +367,7 @@
     <Compile Include="Common\ModelBase.cs" />
     <Compile Include="Common\SkinningData.cs" />
     <Compile Include="Common\VertexPosition.cs" />
-    <Compile Include="Common\Triangle.cs" />
+    <Compile Include="Triangle.cs" />
     <Compile Include="Helpers\BackBufferFormats.cs" />
     <Compile Include="Manipulator3D.cs" />
     <Compile Include="Common\VertexBillboard.cs" />

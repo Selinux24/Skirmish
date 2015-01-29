@@ -29,7 +29,7 @@ namespace Engine
         /// <param name="scene">Scene</param>
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
-        public TriangleListDrawer(Game game, Scene3D scene, Triangle[] triangles, Color color)
+        public TriangleListDrawer(Game game, Scene3D scene, Triangle[] triangles, Color4 color)
             : base(game, scene, ModelContent.GenerateTriangleList(triangles, color))
         {
 
@@ -39,7 +39,7 @@ namespace Engine
         /// </summary>
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
-        public void SetTriangles(Triangle[] triangles, Color color)
+        public void SetTriangles(Triangle[] triangles, Color4 color)
         {
             List<IVertexData> data = new List<IVertexData>();
 

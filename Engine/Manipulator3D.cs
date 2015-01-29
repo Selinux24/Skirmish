@@ -1,4 +1,6 @@
-﻿using SharpDX;
+﻿using System;
+using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine
 {
@@ -10,26 +12,35 @@ namespace Engine
     public class Manipulator3D
     {
         /// <summary>
+        /// State updated event
+        /// </summary>
+        public event EventHandler Updated;
+
+        /// <summary>
         /// One radian
         /// </summary>
         private const float RADIAN = 0.0174532924f;
 
         /// <summary>
+        /// Transform update needed flag
+        /// </summary>
+        protected bool transformUpdateNeeded = false;
+        /// <summary>
         /// Final transform for the controller
         /// </summary>
-        private Matrix localTransform = Matrix.Identity;
+        protected Matrix localTransform = Matrix.Identity;
         /// <summary>
         /// Rotation component
         /// </summary>
-        private Quaternion rotation = Quaternion.Identity;
+        protected Quaternion rotation = Quaternion.Identity;
         /// <summary>
         /// Scaling component
         /// </summary>
-        private Vector3 scaling = Vector3.Zero;
+        protected Vector3 scaling = Vector3.Zero;
         /// <summary>
         /// Position component
         /// </summary>
-        private Vector3 position = Vector3.Zero;
+        protected Vector3 position = Vector3.Zero;
 
         /// <summary>
         /// Gets Position component
@@ -119,20 +130,45 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            Matrix sca = Matrix.Scaling(this.scaling);
-            Matrix rot = Matrix.RotationQuaternion(this.rotation);
-            Matrix tra = Matrix.Translation(this.position);
+            this.Update();
+        }
+        /// <summary>
+        /// Update internal state
+        /// </summary>
+        protected virtual void Update()
+        {
+            if (this.transformUpdateNeeded)
+            {
+                Matrix sca = Matrix.Scaling(this.scaling);
+                Matrix rot = Matrix.RotationQuaternion(this.rotation);
+                Matrix tra = Matrix.Translation(this.position);
 
-            this.localTransform = sca * rot * tra;
+                this.localTransform = sca * rot * tra;
 
-            this.Forward = rot.Forward;
-            this.Backward = rot.Backward;
-            this.Left = rot.Left;
-            this.Right = rot.Right;
-            this.Up = rot.Up;
-            this.Down = rot.Down;
+                this.Forward = rot.Forward;
+                this.Backward = rot.Backward;
+                this.Left = rot.Left;
+                this.Right = rot.Right;
+                this.Up = rot.Up;
+                this.Down = rot.Down;
 
-            Counters.UpdatesPerFrame++;
+                this.transformUpdateNeeded = false;
+
+                if (this.Updated != null)
+                {
+                    this.Updated(this, new EventArgs());
+                }
+
+                Counters.UpdatesPerFrame++;
+            }
+        }
+        /// <summary>
+        /// Sets if transform update needed
+        /// </summary>
+        /// <param name="needed">Needed</param>
+        protected virtual void SetUpdateNeeded(bool needed)
+        {
+            this.transformUpdateNeeded = needed;
         }
 
         /// <summary>
@@ -142,6 +178,8 @@ namespace Engine
         private void Move(Vector3 d)
         {
             this.position += d;
+
+            this.SetUpdateNeeded(true);
         }
         /// <summary>
         /// Increments rotation component by axis
@@ -152,6 +190,8 @@ namespace Engine
         private void Rotate(float yaw, float pitch, float roll)
         {
             this.rotation *= Quaternion.RotationYawPitchRoll(yaw, pitch, roll);
+
+            this.SetUpdateNeeded(true);
         }
 
         /// <summary>
@@ -160,7 +200,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveForward(GameTime gameTime, float d = 1f)
         {
-            this.position += this.Forward * -d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            this.Move(this.Forward * -d * this.LinearVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along backward vector
@@ -168,7 +208,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveBackward(GameTime gameTime, float d = 1f)
         {
-            this.position += this.Backward * -d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            this.Move(this.Backward * -d * this.LinearVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along left vector
@@ -176,7 +216,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveLeft(GameTime gameTime, float d = 1f)
         {
-            this.position += this.Left * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            this.Move(this.Left * d * this.LinearVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along right vector
@@ -184,7 +224,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveRight(GameTime gameTime, float d = 1f)
         {
-            this.position += this.Right * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            this.Move(this.Right * d * this.LinearVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along up vector
@@ -192,7 +232,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveUp(GameTime gameTime, float d = 1f)
         {
-            this.position += this.Up * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            this.Move(this.Up * d * this.LinearVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along down vector
@@ -200,7 +240,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveDown(GameTime gameTime, float d = 1f)
         {
-            this.position += this.Down * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            this.Move(this.Down * d * this.LinearVelocity * gameTime.ElapsedSeconds);
         }
 
         /// <summary>
@@ -303,17 +343,23 @@ namespace Engine
         /// <param name="x">X component of position</param>
         /// <param name="y">Y component of position</param>
         /// <param name="z">Z component of position</param>
-        public void SetPosition(float x, float y, float z)
+        /// <param name="updateState">Update internal state</param>
+        public void SetPosition(float x, float y, float z, bool updateState = false)
         {
-            this.SetPosition(new Vector3(x, y, z));
+            this.SetPosition(new Vector3(x, y, z), updateState);
         }
         /// <summary>
         /// Sets position
         /// </summary>
         /// <param name="position">Position component</param>
-        public void SetPosition(Vector3 position)
+        /// <param name="updateState">Update internal state</param>
+        public void SetPosition(Vector3 position, bool updateState = false)
         {
             this.position = position;
+
+            this.SetUpdateNeeded(true);
+
+            if (updateState) this.Update();
         }
         /// <summary>
         /// Sets rotation
@@ -321,25 +367,32 @@ namespace Engine
         /// <param name="yaw">Yaw (Y)</param>
         /// <param name="pitch">Pitch (X)</param>
         /// <param name="roll">Roll (Z)</param>
-        public void SetRotation(float yaw, float pitch, float roll)
+        /// <param name="updateState">Update internal state</param>
+        public void SetRotation(float yaw, float pitch, float roll, bool updateState = false)
         {
-            this.SetRotation(Quaternion.RotationYawPitchRoll(yaw, pitch, roll));
+            this.SetRotation(Quaternion.RotationYawPitchRoll(yaw, pitch, roll), updateState);
         }
         /// <summary>
         /// Sets rotation
         /// </summary>
         /// <param name="rotation">Rotation component</param>
-        public void SetRotation(Quaternion rotation)
+        /// <param name="updateState">Update internal state</param>
+        public void SetRotation(Quaternion rotation, bool updateState = false)
         {
             this.rotation = rotation;
+
+            this.SetUpdateNeeded(true);
+
+            if (updateState) this.Update();
         }
         /// <summary>
         /// Sets scale
         /// </summary>
         /// <param name="scale">Scale amount (0 to x)</param>
-        public void SetScale(float scale)
+        /// <param name="updateState">Update internal state</param>
+        public void SetScale(float scale, bool updateState = false)
         {
-            this.SetScale(new Vector3(scale));
+            this.SetScale(new Vector3(scale), updateState);
         }
         /// <summary>
         /// Sets scale
@@ -347,17 +400,44 @@ namespace Engine
         /// <param name="scaleX">Scale along X axis</param>
         /// <param name="scaleY">Scale along Y axis</param>
         /// <param name="scaleZ">Scale along Z axis</param>
-        public void SetScale(float scaleX, float scaleY, float scaleZ)
+        /// <param name="updateState">Update internal state</param>
+        public void SetScale(float scaleX, float scaleY, float scaleZ, bool updateState = false)
         {
-            this.SetScale(new Vector3(scaleX, scaleY, scaleZ));
+            this.SetScale(new Vector3(scaleX, scaleY, scaleZ), updateState);
         }
         /// <summary>
         /// Sets scale
         /// </summary>
         /// <param name="scale">Scale vector</param>
-        public void SetScale(Vector3 scale)
+        /// <param name="updateState">Update internal state</param>
+        public void SetScale(Vector3 scale, bool updateState = false)
         {
             this.scaling = scale;
+
+            this.SetUpdateNeeded(true);
+
+            if (updateState) this.Update();
+        }
+        /// <summary>
+        /// Look at target
+        /// </summary>
+        /// <param name="target">Target</param>
+        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
+        public void LookAt(Vector3 target, float interpolationAmount = 0)
+        {
+            if (!Vector3.NearEqual(this.position, target, new Vector3(MathUtil.ZeroTolerance)))
+            {
+                if (interpolationAmount == 0)
+                {
+                    this.rotation = Helper.LookAt(this.position, target);
+                }
+                else
+                {
+                    this.rotation = Quaternion.Slerp(this.rotation, Helper.LookAt(this.position, target), interpolationAmount);
+                }
+
+                this.SetUpdateNeeded(true);
+            }
         }
     }
 }

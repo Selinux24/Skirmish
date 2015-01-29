@@ -153,8 +153,6 @@ namespace Engine
                 if (this.Graphics != null)
                 {
                     this.Graphics.PrepareDevice(this.Form.RenderWidth, this.Form.RenderHeight, true);
-
-                    this.scenes.ForEach(s => s.HandleWindowResize());
                 }
             };
 

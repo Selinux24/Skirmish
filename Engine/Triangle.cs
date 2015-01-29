@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using SharpDX;
 using SharpDX.Direct3D;
 
-namespace Engine.Common
+namespace Engine
 {
     /// <summary>
     /// Triangle
@@ -93,7 +93,7 @@ namespace Engine.Common
         {
             get
             {
-                return Helpers.Helper.Angle(this.Normal, Vector3.Up);
+                return Helper.Angle(this.Normal, Vector3.Up);
             }
         }
 
@@ -168,6 +168,23 @@ namespace Engine.Common
                 Vector3.TransformCoordinate(triangle.Point1, transform),
                 Vector3.TransformCoordinate(triangle.Point2, transform),
                 Vector3.TransformCoordinate(triangle.Point3, transform));
+        }
+        /// <summary>
+        /// Transform triangle list coordinates
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="transform">Transformation</param>
+        /// <returns>Returns new triangle list</returns>
+        public static Triangle[] Transform(Triangle[] triangles, Matrix transform)
+        {
+            Triangle[] trnTriangles = new Triangle[triangles.Length];
+
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                trnTriangles[i] = Transform(triangles[i], transform);
+            }
+
+            return trnTriangles;
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using Engine;
+using Engine.Common;
 using SharpDX;
 
 namespace Collada
@@ -53,7 +54,7 @@ namespace Collada
                 Seed = 1024,
             };
 
-            this.ground = this.AddTerrain("Ground.dae", Matrix.Scaling(20, 40, 20), terrainDescription);
+            this.ground = this.AddTerrain("Ground.dae", Matrix.Scaling(20, 20, 20), terrainDescription);
             this.helicopters = this.AddInstancingModel("Helicopter.dae", 15);
             this.lamps = this.AddInstancingModel("Poly.dae", 2);
             this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, "raindrop.dds"));
@@ -65,7 +66,7 @@ namespace Collada
         private void InitializeCamera()
         {
             this.Camera.NearPlaneDistance = 0.5f;
-            this.Camera.FarPlaneDistance = 250;
+            this.Camera.FarPlaneDistance = 500;
             this.Camera.Mode = CameraModes.Free;
         }
         private void InitializeEnvironment()

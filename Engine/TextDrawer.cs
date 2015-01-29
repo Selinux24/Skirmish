@@ -216,7 +216,7 @@ namespace Engine
         /// <param name="font">Font name</param>
         /// <param name="size">Font size</param>
         /// <param name="textColor">Fore color</param>
-        public TextDrawer(Game game, Scene3D scene, string font, int size, Color textColor)
+        public TextDrawer(Game game, Scene3D scene, string font, int size, Color4 textColor)
             : this(game, scene, font, size, textColor, Color.Transparent)
         {
 
@@ -230,7 +230,7 @@ namespace Engine
         /// <param name="size">Font size</param>
         /// <param name="textColor">Fore color</param>
         /// <param name="shadowColor">Shadow color</param>
-        public TextDrawer(Game game, Scene3D scene, string font, int size, Color textColor, Color shadowColor)
+        public TextDrawer(Game game, Scene3D scene, string font, int size, Color4 textColor, Color4 shadowColor)
             : base(game, scene)
         {
             this.Font = string.Format("{0} {1}", font, size);

@@ -38,7 +38,7 @@ namespace Engine.Common
                     this.Add(meshName, new MeshMaterialsDictionary());
                 }
 
-                this[meshName].Add(materialName, mesh);
+                this[meshName].Add(string.IsNullOrEmpty(materialName) ? ModelContent.NoMaterial : materialName, mesh);
             }
         }
         /// <summary>
@@ -119,6 +119,7 @@ namespace Engine.Common
                 base.Scene = value;
             }
         }
+
         /// <summary>
         /// Materials dictionary
         /// </summary>
@@ -139,22 +140,6 @@ namespace Engine.Common
         /// Datos de animación
         /// </summary>
         protected SkinningData SkinningData = null;
-        /// <summary>
-        /// Gets triangle list
-        /// </summary>
-        public Triangle[] Triangles { get; protected set; }
-        /// <summary>
-        /// Gets static bounding box
-        /// </summary>
-        public BoundingBox BoundingBox { get; protected set; }
-        /// <summary>
-        /// Gets static bounding sphere
-        /// </summary>
-        public BoundingSphere BoundingSphere { get; protected set; }
-        /// <summary>
-        /// Gets static oriented bounding box
-        /// </summary>
-        public OrientedBoundingBox OrientedBoundingBox { get; protected set; }
 
         #region Static Helpers
 
@@ -263,13 +248,8 @@ namespace Engine.Common
             //Animation
             this.InitializeSkinnedData(modelContent);
 
-            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
-            {
-                foreach (Mesh mesh in dictionary.Values)
-                {
-                    mesh.Initialize(this.Device);
-                }
-            }
+            //Update meshes into device
+            this.InitializeMeshes();
         }
         /// <summary>
         /// Initialize textures
@@ -481,116 +461,17 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Updates model static volumes using per vertex transform
+        /// Initialize mesh buffers in the graphics device
         /// </summary>
-        /// <param name="transform">Per vertex transform</param>
-        public virtual void ComputeVolumes(Matrix transform)
+        protected virtual void InitializeMeshes()
         {
-            List<Triangle> cache = new List<Triangle>();
-            BoundingBox bbox = new BoundingBox();
-            BoundingSphere bsph = new BoundingSphere();
-            OrientedBoundingBox obb = new OrientedBoundingBox(Vector3.Zero, Vector3.Zero);
-            obb.Transform(transform);
-
-            foreach (string meshName in this.Meshes.Keys)
+            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
             {
-                foreach (Mesh mesh in this.Meshes[meshName].Values)
+                foreach (Mesh mesh in dictionary.Values)
                 {
-                    mesh.ComputeVolumes(transform);
-
-                    if (mesh.Triangles != null && mesh.Triangles.Length > 0)
-                    {
-                        cache.AddRange(mesh.Triangles);
-                    }
-
-                    if (bbox == new BoundingBox())
-                    {
-                        bbox = mesh.BoundingBox;
-                    }
-                    else
-                    {
-                        bbox = BoundingBox.Merge(bbox, mesh.BoundingBox);
-                    }
-
-                    if (bsph == new BoundingSphere())
-                    {
-                        bsph = mesh.BoundingSphere;
-                    }
-                    else
-                    {
-                        bsph = BoundingSphere.Merge(bsph, mesh.BoundingSphere);
-                    }
-
-                    if (obb == new OrientedBoundingBox())
-                    {
-                        obb = mesh.OrientedBoundingBox;
-                    }
-                    else
-                    {
-                        OrientedBoundingBox meshObb = mesh.OrientedBoundingBox;
-                        OrientedBoundingBox.Merge(ref obb, ref meshObb);
-                    }
+                    mesh.Initialize(this.Device);
                 }
             }
-
-            this.Triangles = cache.ToArray();
-            this.BoundingBox = bbox;
-            this.BoundingSphere = bsph;
-            this.OrientedBoundingBox = obb;
-        }
-        /// <summary>
-        /// Get bounding boxes collection
-        /// </summary>
-        /// <returns>Returns bounding boxes list</returns>
-        public virtual BoundingBox[] GetBoundingBoxes()
-        {
-            List<BoundingBox> bboxList = new List<BoundingBox>();
-
-            foreach (string meshName in this.Meshes.Keys)
-            {
-                foreach (Mesh mesh in this.Meshes[meshName].Values)
-                {
-                    bboxList.Add(mesh.BoundingBox);
-                }
-            }
-
-            return bboxList.ToArray();
-        }
-        /// <summary>
-        /// Get bounding spheres collection
-        /// </summary>
-        /// <returns>Returns bounding spheres list</returns>
-        public virtual BoundingSphere[] GetBoundingSpheres()
-        {
-            List<BoundingSphere> bsphList = new List<BoundingSphere>();
-
-            foreach (string meshName in this.Meshes.Keys)
-            {
-                foreach (Mesh mesh in this.Meshes[meshName].Values)
-                {
-                    bsphList.Add(mesh.BoundingSphere);
-                }
-            }
-
-            return bsphList.ToArray();
-        }
-        /// <summary>
-        /// Get oriented bounding boxes collection
-        /// </summary>
-        /// <returns>Returns oriented bounding boxes list</returns>
-        public virtual OrientedBoundingBox[] GetOrientedBoundingBoxes()
-        {
-            List<OrientedBoundingBox> obboxList = new List<OrientedBoundingBox>();
-
-            foreach (string meshName in this.Meshes.Keys)
-            {
-                foreach (Mesh mesh in this.Meshes[meshName].Values)
-                {
-                    obboxList.Add(mesh.OrientedBoundingBox);
-                }
-            }
-
-            return obboxList.ToArray();
         }
 
         /// <summary>
@@ -683,49 +564,47 @@ namespace Engine.Common
                 this.SkinningData.AnimationVelocity = velocity;
             }
         }
-        /// <summary>
-        /// Gets picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <returns>Returns true if ground position found</returns>
-        public virtual bool Pick(Ray ray, out Vector3 position, out Triangle triangle)
+
+
+        public virtual Vector3[] GetPoints(Matrix transform)
         {
-            position = new Vector3();
-            triangle = new Triangle();
+            List<Vector3> points = new List<Vector3>();
 
-            bool found = false;
-
-            if (this.BoundingSphere.Intersects(ref ray) || this.BoundingBox.Intersects(ref ray))
+            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
             {
-                float distance = float.MaxValue;
-
-                foreach (string meshName in this.Meshes.Keys)
+                foreach (Mesh mesh in dictionary.Values)
                 {
-                    foreach (Mesh mesh in this.Meshes[meshName].Values)
+                    Vector3[] meshPoints = mesh.GetPoints();
+                    if (meshPoints != null && meshPoints.Length > 0)
                     {
-                        Vector3 p;
-                        Triangle t;
-                        if (mesh.Pick(ray, out p, out t))
-                        {
-                            found = true;
-
-                            float currentDistance = Vector3.Distance(ray.Position, p);
-
-                            if (currentDistance < distance)
-                            {
-                                position = p;
-                                triangle = t;
-
-                                distance = currentDistance;
-                            }
-                        }
+                        points.AddRange(meshPoints);
                     }
                 }
             }
 
-            return found;
+            Vector3[] trnPoints = new Vector3[points.Count];
+            Vector3.TransformCoordinate(points.ToArray(), ref transform, trnPoints);
+
+            return trnPoints;
+        }
+
+        public virtual Triangle[] GetTriangles(Matrix transform)
+        {
+            List<Triangle> triangles = new List<Triangle>();
+
+            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+            {
+                foreach (Mesh mesh in dictionary.Values)
+                {
+                    Triangle[] meshTriangles = mesh.GetTriangles();
+                    if (meshTriangles != null && meshTriangles.Length > 0)
+                    {
+                        triangles.AddRange(meshTriangles);
+                    }
+                }
+            }
+
+            return Triangle.Transform(triangles.ToArray(), transform);
         }
     }
 }

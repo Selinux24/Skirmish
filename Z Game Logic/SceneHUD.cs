@@ -1,4 +1,5 @@
-﻿using Engine;
+﻿using System;
+using Engine;
 using SharpDX;
 
 namespace GameLogic
@@ -16,12 +17,12 @@ namespace GameLogic
 
         private Sprite sprHUD = null;
         private SpriteButton butClose = null;
-        private SpriteButton butNextSoldier = null;
-        private SpriteButton butPrevSoldier = null;
-        private SpriteButton butNextAction = null;
-        private SpriteButton butPrevAction = null;
-        private SpriteButton butDoAction = null;
         private SpriteButton butNext = null;
+        private SpriteButton butPrevSoldier = null;
+        private SpriteButton butNextSoldier = null;
+        private SpriteButton butPrevAction = null;
+        private SpriteButton butNextAction = null;
+        private SpriteButton butDoAction = null;
 
         public SceneHUD(Game game)
             : base(game)
@@ -42,21 +43,12 @@ namespace GameLogic
             this.txtActionList = this.AddText("Lucida Casual", 12, Color.Yellow);
             this.txtAction = this.AddText("Lucida Casual", 12, Color.Yellow);
 
-            this.txtTitle.Position = Vector2.Zero;
-            this.txtGame.Top = this.txtTitle.Top + this.txtTitle.Height + 1;
-            this.txtTeam.Top = this.txtGame.Top + this.txtGame.Height + 1;
-            this.txtSoldier.Top = 540;
-            this.txtActionList.Top = this.txtSoldier.Top + this.txtSoldier.Height + 1;
-            this.txtAction.Top = this.txtActionList.Top + this.txtActionList.Height + 1;
-
-            this.sprHUD = this.AddSprite("HUD.png", 800, 600, 99);
+            this.sprHUD = this.AddBackgroud("HUD.png", 99);
 
             this.butClose = this.AddSpriteButton(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Left = 800 - 60 - 10,
-                Top = 10,
                 Width = 60,
                 Height = 20,
                 Font = "Lucida Casual",
@@ -65,14 +57,11 @@ namespace GameLogic
                 TextShadowColor = Color.Orange,
                 Text = "EXIT",
             });
-            this.butClose.Click += (sender, eventArgs) => { this.Game.Exit(); };
 
             this.butNext = this.AddSpriteButton(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Left = 10,
-                Top = 510,
                 Width = 60,
                 Height = 20,
                 Font = "Lucida Casual",
@@ -80,29 +69,11 @@ namespace GameLogic
                 TextColor = Color.Yellow,
                 Text = "Next",
             });
-            this.butNext.Click += (sender, eventArgs) => { this.Next(); };
-
-            this.butNextSoldier = this.AddSpriteButton(new SpriteButtonDescription()
-            {
-                TextureReleased = "button_on.png",
-                TexturePressed = "button_off.png",
-                Left = this.butNext.Left + this.butNext.Width + 10,
-                Top = 510,
-                Width = 90,
-                Height = 20,
-                Font = "Lucida Casual",
-                FontSize = 10,
-                TextColor = Color.Yellow,
-                Text = "Next Soldier",
-            });
-            this.butNextSoldier.Click += (sender, eventArgs) => { this.NextSoldier(); };
 
             this.butPrevSoldier = this.AddSpriteButton(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Left = this.butNextSoldier.Left + this.butNextSoldier.Width + 10,
-                Top = 510,
                 Width = 90,
                 Height = 20,
                 Font = "Lucida Casual",
@@ -110,29 +81,23 @@ namespace GameLogic
                 TextColor = Color.Yellow,
                 Text = "Prev.Soldier",
             });
-            this.butPrevSoldier.Click += (sender, eventArgs) => { this.PrevSoldier(); };
 
-            this.butNextAction = this.AddSpriteButton(new SpriteButtonDescription()
+            this.butNextSoldier = this.AddSpriteButton(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Left = this.butPrevSoldier.Left + this.butPrevSoldier.Width + 10,
-                Top = 510,
                 Width = 90,
                 Height = 20,
                 Font = "Lucida Casual",
                 FontSize = 10,
                 TextColor = Color.Yellow,
-                Text = "Next Action",
+                Text = "Next Soldier",
             });
-            this.butNextAction.Click += (sender, eventArgs) => { this.NextAction(); };
 
             this.butPrevAction = this.AddSpriteButton(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Left = this.butNextAction.Left + this.butNextAction.Width + 10,
-                Top = 510,
                 Width = 90,
                 Height = 20,
                 Font = "Lucida Casual",
@@ -140,14 +105,23 @@ namespace GameLogic
                 TextColor = Color.Yellow,
                 Text = "Prev.Action",
             });
-            this.butPrevAction.Click += (sender, eventArgs) => { this.PrevAction(); };
+
+            this.butNextAction = this.AddSpriteButton(new SpriteButtonDescription()
+            {
+                TextureReleased = "button_on.png",
+                TexturePressed = "button_off.png",
+                Width = 90,
+                Height = 20,
+                Font = "Lucida Casual",
+                FontSize = 10,
+                TextColor = Color.Yellow,
+                Text = "Next Action",
+            });
 
             this.butDoAction = this.AddSpriteButton(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
-                Left = this.butPrevAction.Left + this.butPrevAction.Width + 10,
-                Top = 510,
                 Width = 90,
                 Height = 20,
                 Font = "Lucida Casual",
@@ -155,11 +129,19 @@ namespace GameLogic
                 TextColor = Color.Yellow,
                 Text = "Do Action",
             });
+
+            this.butClose.Click += (sender, eventArgs) => { this.Game.Exit(); };
+            this.butNext.Click += (sender, eventArgs) => { this.Next(); };
+            this.butPrevSoldier.Click += (sender, eventArgs) => { this.PrevSoldier(); };
+            this.butNextSoldier.Click += (sender, eventArgs) => { this.NextSoldier(); };
+            this.butPrevAction.Click += (sender, eventArgs) => { this.PrevAction(); };
+            this.butNextAction.Click += (sender, eventArgs) => { this.NextAction(); };
             this.butDoAction.Click += (sender, eventArgs) => { this.DoAction(); };
 
             this.txtTitle.Text = "Game Logic";
-        }
 
+            this.UpdateLayout();
+        }
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -223,11 +205,11 @@ namespace GameLogic
         }
         private void NextSoldier()
         {
-            Program.NextSoldier(this.Game.Input.KeyPressed(Keys.LShiftKey));
+            Program.NextSoldier(true);
         }
         private void PrevSoldier()
         {
-            Program.PrevSoldier(this.Game.Input.KeyPressed(Keys.LShiftKey));
+            Program.PrevSoldier(true);
         }
         private void NextAction()
         {
@@ -240,6 +222,44 @@ namespace GameLogic
         private void DoAction()
         {
             Program.DoAction();
+        }
+
+        protected override void Resized(object sender, EventArgs e)
+        {
+            this.UpdateLayout();
+        }
+
+        private void UpdateLayout()
+        {
+            this.txtTitle.Top = 0;
+            this.txtTitle.Left = 5;
+            this.txtGame.Top = this.txtTitle.Top + this.txtTitle.Height + 1;
+            this.txtGame.Left = 10;
+            this.txtTeam.Top = this.txtGame.Top + this.txtGame.Height + 1;
+            this.txtTeam.Left = this.txtGame.Left;
+
+            this.butClose.Top = 1;
+            this.butClose.Left = this.Game.Form.RenderWidth - 60 - 1;
+
+            this.butNext.Top = (int)((float)this.Game.Form.RenderHeight * 0.85f);
+            this.butNext.Left = 10;
+            this.butPrevSoldier.Top = this.butNext.Top;
+            this.butPrevSoldier.Left = this.butNext.Left + this.butNext.Width + 25;
+            this.butNextSoldier.Top = this.butNext.Top;
+            this.butNextSoldier.Left = this.butPrevSoldier.Left + this.butPrevSoldier.Width + 10;
+            this.butPrevAction.Top = this.butNext.Top;
+            this.butPrevAction.Left = this.butNextSoldier.Left + this.butNextSoldier.Width + 25;
+            this.butNextAction.Top = this.butNext.Top;
+            this.butNextAction.Left = this.butPrevAction.Left + this.butPrevAction.Width + 10;
+            this.butDoAction.Top = this.butNext.Top;
+            this.butDoAction.Left = this.butNextAction.Left + this.butNextAction.Width + 25;
+
+            this.txtSoldier.Top = this.butNext.Top + this.butNext.Height + 1;
+            this.txtSoldier.Left = 10;
+            this.txtActionList.Top = this.txtSoldier.Top + this.txtSoldier.Height + 1;
+            this.txtActionList.Left = this.txtSoldier.Left;
+            this.txtAction.Top = this.txtActionList.Top + this.txtActionList.Height + 1;
+            this.txtAction.Left = this.txtSoldier.Left;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using SharpDX;
 
-namespace Engine.Common
+namespace Engine
 {
     /// <summary>
     /// Line
@@ -58,6 +58,14 @@ namespace Engine.Common
         {
             this.Point1 = ray.Position;
             this.Point2 = ray.Position + ray.Direction;
+        }
+
+        /// <summary>
+        /// Text representation
+        /// </summary>
+        public override string ToString()
+        {
+            return string.Format("Vertex 1 {0}; Vertex 2 {1};", this.Point1, this.Point2);
         }
     }
 }

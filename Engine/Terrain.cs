@@ -40,19 +40,7 @@ namespace Engine
         /// <summary>
         /// Manipulator
         /// </summary>
-        public Manipulator3D Manipulator { get; private set; }
-        /// <summary>
-        /// Gets static bounding box
-        /// </summary>
-        public BoundingBox BoundingBox { get { return this.terrain.BoundingBox; } }
-        /// <summary>
-        /// Gets static bounding sphere
-        /// </summary>
-        public BoundingSphere BoundingSphere { get { return this.terrain.BoundingSphere; } }
-        /// <summary>
-        /// Gets static oriented bounding box
-        /// </summary>
-        public OrientedBoundingBox OrientedBoundingBox { get { return this.terrain.OrientedBoundingBox; } }
+        public Manipulator3D Manipulator { get { return this.terrain.Manipulator; } }
 
         /// <summary>
         /// Constructor
@@ -65,23 +53,23 @@ namespace Engine
         public Terrain(Game game, Scene3D scene, ModelContent content, string contentFolder, TerrainDescription description)
             : base(game, scene)
         {
-            this.Manipulator = new Manipulator3D();
-
             this.terrain = new Model(game, scene, content);
-            this.terrain.ComputeVolumes(Matrix.Identity);
 
             if (description != null && description.AddVegetation)
             {
+                Triangle[] triangles = this.terrain.GetTriangles();
+
                 ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
                     contentFolder,
+                    triangles,
                     description.VegetarionTextures,
-                    this.terrain.Triangles,
                     description.Saturation,
                     description.MinSize,
                     description.MaxSize,
                     description.Seed);
 
                 this.vegetation = new Billboard(game, scene, vegetationContent);
+                this.vegetation.Manipulator = this.Manipulator;
             }
 
             if (description != null && description.AddSkydom)
@@ -92,6 +80,7 @@ namespace Engine
                     1000f);
 
                 this.skydom = new Cubemap(game, scene, skydomContent);
+                this.skydom.Manipulator = this.Manipulator;
             }
         }
         /// <summary>
@@ -125,26 +114,11 @@ namespace Engine
         {
             this.Manipulator.Update(gameTime);
 
-            this.terrain.Manipulator.SetScale(this.Manipulator.Scaling);
-            this.terrain.Manipulator.SetRotation(this.Manipulator.Rotation);
-            this.terrain.Manipulator.SetPosition(this.Manipulator.Position);
             this.terrain.Update(gameTime);
 
-            if (this.vegetation != null)
-            {
-                this.vegetation.Manipulator.SetScale(this.Manipulator.Scaling);
-                this.vegetation.Manipulator.SetRotation(this.Manipulator.Rotation);
-                this.vegetation.Manipulator.SetPosition(this.Manipulator.Position);
-                this.vegetation.Update(gameTime);
-            }
+            if (this.vegetation != null) this.vegetation.Update(gameTime);
 
-            if (this.skydom != null)
-            {
-                this.skydom.Manipulator.SetScale(this.Manipulator.Scaling);
-                this.skydom.Manipulator.SetRotation(this.Manipulator.Rotation);
-                this.skydom.Manipulator.SetPosition(this.Scene.Camera.Position);
-                this.skydom.Update(gameTime);
-            }
+            if (this.skydom != null) this.skydom.Update(gameTime);
         }
         /// <summary>
         /// Objects drawing
@@ -166,36 +140,25 @@ namespace Engine
         }
 
         /// <summary>
-        /// Updates model static volumes using per vertex transform
+        /// Gets ground position giving x, z coordinates
         /// </summary>
-        /// <param name="transform">Per vertex transform</param>
-        public void ComputeVolumes(Matrix transform)
+        /// <param name="point">Plane position</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindGroundPosition(Vector2 point, out Vector3 position)
         {
-            this.terrain.ComputeVolumes(transform);
+            return FindGroundPosition(point.X, point.Y, out position);
         }
         /// <summary>
-        /// Get bounding boxes collection
+        /// Gets ground position giving x, z coordinates
         /// </summary>
-        /// <returns>Returns bounding boxes list</returns>
-        public BoundingBox[] GetBoundingBoxes()
+        /// <param name="point">Plane position</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindGroundPosition(Vector2 point, out Vector3 position, out Triangle triangle)
         {
-            return this.terrain.GetBoundingBoxes();
-        }
-        /// <summary>
-        /// Get bounding spheres collection
-        /// </summary>
-        /// <returns>Returns bounding spheres list</returns>
-        public BoundingSphere[] GetBoundingSpheres()
-        {
-            return this.terrain.GetBoundingSpheres();
-        }
-        /// <summary>
-        /// Get oriented bounding boxes collection
-        /// </summary>
-        /// <returns>Returns oriented bounding boxes list</returns>
-        public OrientedBoundingBox[] GetOrientedBoundingBoxes()
-        {
-            return this.terrain.GetOrientedBoundingBoxes();
+            return FindGroundPosition(point.X, point.Y, out position, out triangle);
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -227,6 +190,24 @@ namespace Engine
 
             return this.terrain.Pick(ray, out position, out triangle);
         }
+
+        /// <summary>
+        /// Gets bounding sphere
+        /// </summary>
+        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
+        public BoundingSphere GetBoundingSphere()
+        {
+            return this.terrain.GetBoundingSphere();
+        }
+        /// <summary>
+        /// Gets bounding box
+        /// </summary>
+        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
+        public BoundingBox GetBoundingBox()
+        {
+            return this.terrain.GetBoundingBox();
+        }
+        
         /// <summary>
         /// Pick position
         /// </summary>

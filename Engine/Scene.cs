@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System;
+using SharpDX;
 using SharpDX.Direct3D11;
 
 namespace Engine
@@ -113,6 +114,8 @@ namespace Engine
             this.ContentPath = DefaultContentPath;
             this.World = Matrix.Identity;
             this.Lights = new SceneLight();
+
+            this.Game.Graphics.Resized += new EventHandler(Resized);
         }
 
         /// <summary>
@@ -158,14 +161,15 @@ namespace Engine
                 this.Camera = null;
             }
         }
+
         /// <summary>
-        /// Handle window resize
+        /// Fires when render window resized
         /// </summary>
-        public virtual void HandleWindowResize()
+        /// <param name="sender">Graphis device</param>
+        /// <param name="e">Event arguments</param>
+        protected virtual void Resized(object sender, EventArgs e)
         {
-            this.Camera.SetLens(
-                this.Game.Form.RenderWidth,
-                this.Game.Form.RenderHeight);
+            
         }
     }
 }

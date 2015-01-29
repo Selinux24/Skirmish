@@ -43,6 +43,11 @@ namespace Engine
     public class Graphics : IDisposable
     {
         /// <summary>
+        /// On resized event
+        /// </summary>
+        public event EventHandler Resized;
+
+        /// <summary>
         /// Vertical sync enabled
         /// </summary>
         private bool vsyncEnabled = false;
@@ -132,9 +137,9 @@ namespace Engine
         /// <returns>Returns current desktop mode description</returns>
         public static OutputDescription GetDesktopMode()
         {
-            using (Factory factory = new Factory())
+            using (Factory1 factory = new Factory1())
             {
-                using (Adapter adapter = factory.GetAdapter(0))
+                using (Adapter1 adapter = factory.GetAdapter1(0))
                 {
                     using (Output adapterOutput = adapter.GetOutput(0))
                     {
@@ -186,14 +191,14 @@ namespace Engine
                     adapter,
                     creationFlags,
                     new[] 
-                {
-                    FeatureLevel.Level_11_0,
-                    FeatureLevel.Level_10_1,
-                    FeatureLevel.Level_10_0,
-                    FeatureLevel.Level_9_3,
-                    FeatureLevel.Level_9_2, 
-                    FeatureLevel.Level_9_1, 
-                },
+                    {
+                        FeatureLevel.Level_11_0,
+                        FeatureLevel.Level_10_1,
+                        FeatureLevel.Level_10_0,
+                        FeatureLevel.Level_9_3,
+                        FeatureLevel.Level_9_2, 
+                        FeatureLevel.Level_9_1, 
+                    },
                     new SwapChainDescription()
                     {
                         BufferCount = 1,
@@ -211,16 +216,16 @@ namespace Engine
                 this.Device = device;
                 this.DeviceContext = device.ImmediateContext;
                 this.DeviceDescription = string.Format(
-                    "{0} {1}GB",
+                    "{0} {1}MB",
                     adapter.Description1.Description,
-                    Math.Round((float)adapter.Description1.DedicatedVideoMemory / (float)(1024 * 1024 * 1024)));
+                    adapter.Description1.DedicatedVideoMemory >> 10 >> 10);
             }
 
             this.PrepareDevice(displayMode.Width, displayMode.Height, false);
 
             #region Alt + Enter
 
-            using (Factory factory = swapChain.GetParent<Factory>())
+            using (Factory factory = this.swapChain.GetParent<Factory>())
             {
                 factory.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAltEnter);
             }
@@ -229,7 +234,7 @@ namespace Engine
             {
                 if (eventArgs.Alt && (int)eventArgs.KeyCode == (int)Keys.Enter)
                 {
-                    swapChain.IsFullScreen = !swapChain.IsFullScreen;
+                    this.swapChain.IsFullScreen = !this.swapChain.IsFullScreen;
                 }
             };
 
@@ -466,6 +471,14 @@ namespace Engine
             this.DeviceContext.Rasterizer.SetViewport(this.Viewport);
 
             #endregion
+
+            if (resizing)
+            {
+                if (this.Resized != null)
+                {
+                    this.Resized(this, new EventArgs());
+                }
+            }
         }
         /// <summary>
         /// Begin frame
@@ -552,7 +565,7 @@ namespace Engine
         {
             if (this.swapChain != null)
             {
-                this.swapChain.SetFullscreenState(false, null);
+                if (this.swapChain.IsFullScreen) this.swapChain.IsFullScreen = false;
                 this.swapChain.Dispose();
                 this.swapChain = null;
             }

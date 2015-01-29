@@ -22,6 +22,14 @@ namespace Engine.Common
         /// Dynamic or inmutable buffers
         /// </summary>
         private bool dynamicBuffers = false;
+        /// <summary>
+        /// Position list cache
+        /// </summary>
+        private Vector3[] positionCache = null;
+        /// <summary>
+        /// Triangle list cache
+        /// </summary>
+        private Triangle[] triangleCache = null;
 
         /// <summary>
         /// Vertex buffer
@@ -80,22 +88,6 @@ namespace Engine.Common
         /// Index count
         /// </summary>
         public int IndexCount { get; protected set; }
-        /// <summary>
-        /// Gets triangle list
-        /// </summary>
-        public Triangle[] Triangles { get; protected set; }
-        /// <summary>
-        /// Gets static bounding box
-        /// </summary>
-        public BoundingBox BoundingBox { get; protected set; }
-        /// <summary>
-        /// Gets static bounding sphere
-        /// </summary>
-        public BoundingSphere BoundingSphere { get; protected set; }
-        /// <summary>
-        /// Gets static oriented bounding box
-        /// </summary>
-        public OrientedBoundingBox OrientedBoundingBox { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -144,49 +136,6 @@ namespace Engine.Common
                     this.IndexBuffer = device.CreateIndexBufferImmutable((uint[])this.Indices);
                 }
                 this.IndexCount = this.Indices.Length;
-            }
-
-            this.ComputeVolumes(Matrix.Identity);
-        }
-        /// <summary>
-        /// Updates mesh static volumes using per vertex transform
-        /// </summary>
-        /// <param name="transform">Per vertex transform</param>
-        public virtual void ComputeVolumes(Matrix transform)
-        {
-            if (this.Vertices != null && this.Vertices.Length > 0)
-            {
-                if (this.Vertices[0].HasChannel(VertexDataChannels.Position))
-                {
-                    //Get positions
-                    List<Vector3> positions = new List<Vector3>();
-
-                    Array.ForEach(this.Vertices, v =>
-                    {
-                        Vector3 p = v.GetChannelValue<Vector3>(VertexDataChannels.Position);
-
-                        if (!transform.IsIdentity)
-                        {
-                            p = Vector3.TransformCoordinate(p, transform);
-                        }
-
-                        positions.Add(p);
-                    });
-
-                    //Compute static volumes
-                    this.BoundingBox = BoundingBox.FromPoints(positions.ToArray());
-                    this.BoundingSphere = BoundingSphere.FromPoints(positions.ToArray());
-                    this.OrientedBoundingBox = new OrientedBoundingBox(positions.ToArray());
-
-                    if (this.Indices != null && this.Indices.Length > 0)
-                    {
-                        this.Triangles = Triangle.ComputeTriangleList(this.Topology, positions.ToArray(), this.Indices);
-                    }
-                    else
-                    {
-                        this.Triangles = Triangle.ComputeTriangleList(this.Topology, positions.ToArray());
-                    }
-                }
             }
         }
         /// <summary>
@@ -289,36 +238,56 @@ namespace Engine.Common
                 throw new Exception("Attemp to write in inmutable buffers");
             }
         }
+
         /// <summary>
-        /// Gets picking position of giving ray
+        /// Gets point list of mesh if the vertex type has position channel
         /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <returns>Returns true if ground position found</returns>
-        public virtual bool Pick(Ray ray, out Vector3 position, out Triangle triangle)
+        /// <returns>Returns null or position list</returns>
+        public Vector3[] GetPoints()
         {
-            position = new Vector3();
-            triangle = new Triangle();
-
-            if (this.BoundingSphere.Intersects(ref ray) || this.BoundingBox.Intersects(ref ray))
+            if (this.positionCache == null)
             {
-                for (int i = 0; i < this.Triangles.Length; i++)
+                List<Vector3> positionList = new List<Vector3>();
+
+                if (this.Vertices != null && this.Vertices.Length > 0)
                 {
-                    Triangle tri = this.Triangles[i];
-
-                    Vector3 pos;
-                    if (tri.Intersects(ref ray, out pos))
+                    if (this.Vertices[0].HasChannel(VertexDataChannels.Position))
                     {
-                        position = pos;
-                        triangle = tri;
+                        Array.ForEach(this.Vertices, v =>
+                        {
+                            positionList.Add(v.GetChannelValue<Vector3>(VertexDataChannels.Position));
+                        });
+                    }
+                }
 
-                        return true;
+                this.positionCache = positionList.ToArray();
+            }
+
+            return this.positionCache;
+        }
+        /// <summary>
+        /// Gets triangle list of mesh if the vertex type has position channel
+        /// </summary>
+        /// <returns>Returns null or triangle list</returns>
+        public Triangle[] GetTriangles()
+        {
+            if (this.triangleCache == null)
+            {
+                Vector3[] positions = this.GetPoints();
+                if (positions != null && positions.Length > 0)
+                {
+                    if (this.Indices != null && this.Indices.Length > 0)
+                    {
+                        this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
+                    }
+                    else
+                    {
+                        this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions);
                     }
                 }
             }
 
-            return false;
+            return this.triangleCache;
         }
     }
 }

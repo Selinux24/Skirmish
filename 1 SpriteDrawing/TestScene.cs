@@ -24,21 +24,17 @@ namespace SpriteDrawing
                 "smiley.jpg",
                 128,
                 128,
+                true,
                 1);
 
             this.spriteFixed = this.AddSprite(
                 "seafloor.dds",
                 256,
                 256,
+                true,
                 2);
 
-            this.background = this.AddSprite(
-                "background.jpg",
-                this.Game.Form.ClientSize.Width,
-                this.Game.Form.ClientSize.Height,
-                99);
-
-            this.background.FitScreen = true;
+            this.background = this.AddBackgroud("background.jpg", 99);
 
             this.spriteMov.Manipulator.SetPosition(256, 0);
         }

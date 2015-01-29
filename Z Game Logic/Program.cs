@@ -33,9 +33,9 @@ namespace GameLogic
         static void Main()
         {
 #if DEBUG
-            using (game = new Game("Game Logic", false, 800, 600))
+            using (game = new Game("Game Logic", false, 1024, 768))
 #else
-            using (game = new Game("Game Logic", false, 800, 600))
+            using (game = new Game("Game Logic"))
 #endif
             {
                 game.VisibleMouse = true;
@@ -105,14 +105,21 @@ namespace GameLogic
                 Program.SkirmishGame.DoAction(action);
 
                 Program.CurrentActions = Program.SkirmishGame.GetActions();
+
+                Program.objectsScene.UpdateSoldierStates();
             }
         }
         public static Victory Next()
         {
             Program.SkirmishGame.Next();
+            Program.SkirmishGame.NextSoldier(true);
+
+            Program.objectsScene.UpdateSoldierStates();
 
             Program.CurrentActions = Program.SkirmishGame.GetActions();
             Program.actionIndex = 0;
+
+            Program.objectsScene.GoToSoldier(Program.SkirmishGame.CurrentSoldier);
 
             Victory v = Program.SkirmishGame.IsFinished();
             if (v != null)
@@ -129,7 +136,10 @@ namespace GameLogic
             {
                 //Point to point
                 action.Active = Program.SkirmishGame.CurrentSoldier;
+                action.Destination = Vector3.Zero; //TODO: How to point
                 action.WastedPoints = Program.SkirmishGame.CurrentSoldier.CurrentMovingCapacity;
+
+                Program.objectsScene.Move(action.Active, action.Destination);
             }
             else if (action is Assault)
             {
@@ -139,6 +149,8 @@ namespace GameLogic
                 action.WastedPoints = Program.SkirmishGame.CurrentSoldier.CurrentMovingCapacity;
 
                 Program.SkirmishGame.JoinMelee(action.Active, action.Passive);
+
+                Program.objectsScene.Melee(action.Passive, action.Active);
             }
             else if (action is CoveringFire)
             {
