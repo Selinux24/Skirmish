@@ -87,7 +87,7 @@ namespace Engine
         /// <param name="scene">Scene</param>
         /// <param name="content">Content</param>
         public Model(Game game, Scene3D scene, ModelContent content)
-            : base(game, scene, content)
+            : base(game, scene, content, false, 0, true)
         {
             this.UseZBuffer = true;
 
@@ -233,6 +233,10 @@ namespace Engine
             this.updatePoints = true;
 
             this.updateTriangles = true;
+
+            this.boundingSphere = new BoundingSphere();
+            this.boundingBox = new BoundingBox();
+            this.orientedBoundingBox = new OrientedBoundingBox();
         }
 
         /// <summary>

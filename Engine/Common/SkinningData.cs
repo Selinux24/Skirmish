@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SharpDX;
 
 namespace Engine.Common
@@ -116,7 +117,7 @@ namespace Engine.Common
                 clipNames.Add(key);
             }
 
-            return new SkinningData
+            return new SkinningData()
             {
                 animations = animations,
                 boneOffsets = boneOffsets,
@@ -216,6 +217,33 @@ namespace Engine.Common
         public void SetClip(string clipName)
         {
             this.ClipName = clipName;
+        }
+
+        /// <summary>
+        /// Gets text representation of skinning data instance
+        /// </summary>
+        /// <returns>Returns text representation of skinning data instance</returns>
+        public override string ToString()
+        {
+            string desc = "";
+
+            Array.ForEach(boneHierarchy, (b) => { desc += string.Format("Index: {0}", b) + Environment.NewLine; });
+            desc += Environment.NewLine;
+            Array.ForEach(boneOffsets, (b) => { desc += string.Format("Offset: {0}", b.GetDescription()) + Environment.NewLine; });
+            desc += Environment.NewLine;
+
+            foreach (string key in this.animations.Keys)
+            {
+                AnimationClip clip = this.animations[key];
+
+                Array.ForEach(clip.BoneAnimations, (b) =>
+                {
+                    Array.ForEach(b.Keyframes, (k) => { desc += string.Format("Key: {0}; Transform: {1}", key, k.Transform.GetDescription()) + Environment.NewLine; });
+                    desc += Environment.NewLine;
+                });
+            }
+
+            return desc;
         }
     }
 }

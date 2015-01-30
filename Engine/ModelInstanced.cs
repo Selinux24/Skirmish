@@ -74,7 +74,7 @@ namespace Engine
         /// <param name="content">Content</param>
         /// <param name="instances">Number of instances</param>
         public ModelInstanced(Game game, Scene3D scene, ModelContent content, int instances)
-            : base(game, scene, content, true, instances)
+            : base(game, scene, content, true, instances, true)
         {
             this.UseZBuffer = true;
 
@@ -323,6 +323,10 @@ namespace Engine
             this.updatePoints = true;
 
             this.updateTriangles = true;
+
+            this.boundingSphere = new BoundingSphere();
+            this.boundingBox = new BoundingBox();
+            this.orientedBoundingBox = new OrientedBoundingBox();
         }
 
         /// <summary>

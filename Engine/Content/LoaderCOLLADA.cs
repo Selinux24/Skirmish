@@ -82,11 +82,11 @@ namespace Engine.Content
                                     }
 
                                     //TODO: Where to apply this transform?
-                                    Transforms trn = node.ReadTransforms();
+                                    //Transforms trn = node.ReadTransforms();
 
                                     if (node.Nodes != null && node.Nodes.Length > 0)
                                     {
-                                        skeleton = ProcessJoints(null, node.Nodes[0], conversion);
+                                        skeleton = ProcessJoints(null, node.Nodes[0], conversion, transform);
                                     }
                                 }
 
@@ -101,7 +101,7 @@ namespace Engine.Content
                                     MeshContent info = new MeshContent()
                                     {
                                         //TODO: Where to apply this transform?
-                                        Transform = trn.Matrix.ChangeAxis(conversion),
+                                        //Transform = trn.Matrix.ChangeAxis(conversion),
                                     };
 
                                     if (node.InstanceGeometry != null && node.InstanceGeometry.Length > 0)
@@ -139,7 +139,7 @@ namespace Engine.Content
                                             modelContent.SkinningInfo = new SkinningContent()
                                             {
                                                 //TODO: Where to apply this transform?
-                                                Transform = trn.Matrix.ChangeAxis(conversion),
+                                                //Transform = trn.Matrix.ChangeAxis(conversion),
                                                 Controller = controllerName,
                                                 Skeleton = skeleton,
                                             };
@@ -325,9 +325,11 @@ namespace Engine.Content
         {
             if (dae.LibraryAnimations != null && dae.LibraryAnimations.Length > 0)
             {
-                foreach (Animation animation in dae.LibraryAnimations)
+                for (int i = 0; i < dae.LibraryAnimations.Length; i++)
                 {
-                    AnimationContent[] info = ProcessAnimation(animation, conversion);
+                    Animation animation = dae.LibraryAnimations[i];
+
+                    AnimationContent[] info = ProcessAnimation(animation, conversion, i == 0 ? transform : Matrix.Identity);
                     if (info != null && info.Length > 0)
                     {
                         modelContent.Animations[animation.Id] = info;
@@ -686,7 +688,6 @@ namespace Engine.Content
         /// </summary>
         /// <param name="skin">Skin information</param>
         /// <param name="conversion">Axis conversion</param>
-        /// <param name="transform">Initial transformation</param>
         /// <param name="inverseBindMatrixList">Inverse bind matrix list result</param>
         /// <param name="weightList">Weight list result</param>
         private static void ProcessVertexWeights(Skin skin, EnumAxisConversion conversion, Matrix transform, out Matrix[] inverseBindMatrixList, out Weight[] weightList)
@@ -781,7 +782,7 @@ namespace Engine.Content
         /// <param name="animation">Animation information</param>
         /// <param name="conversion">Axis conversion</param>
         /// <returns>Retuns animation content list</returns>
-        private static AnimationContent[] ProcessAnimation(Animation animation, EnumAxisConversion conversion)
+        private static AnimationContent[] ProcessAnimation(Animation animation, EnumAxisConversion conversion, Matrix transform)
         {
             List<AnimationContent> res = new List<AnimationContent>();
 
@@ -862,7 +863,7 @@ namespace Engine.Content
         /// <param name="node">Armature node</param>
         /// <param name="conversion">Axis conversion</param>
         /// <returns>Return skeleton joint hierarchy</returns>
-        private static Joint ProcessJoints(Joint parent, Node node, EnumAxisConversion conversion)
+        private static Joint ProcessJoints(Joint parent, Node node, EnumAxisConversion conversion, Matrix transform)
         {
             Matrix parentMatrix = (parent != null ? parent.Local : Matrix.Identity);
             Matrix nodeMatrix = Matrix.Transpose(node.ReadMatrix().ChangeAxis(conversion));
@@ -881,7 +882,7 @@ namespace Engine.Content
 
                 foreach (Node child in node.Nodes)
                 {
-                    childs.Add(ProcessJoints(jt, child, conversion));
+                    childs.Add(ProcessJoints(jt, child, conversion, Matrix.Identity));
                 }
 
                 jt.Childs = childs.ToArray();

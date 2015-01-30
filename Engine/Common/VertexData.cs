@@ -1050,10 +1050,19 @@ namespace Engine.Common
         /// <param name="vertexType">Vertex type</param>
         /// <param name="vertices">Helpers</param>
         /// <param name="weights">Weight information</param>
+        /// <param name="transform">Transfor to apply to all vertices</param>
         /// <returns>Returns generated vertices</returns>
-        public static IVertexData[] Convert(VertexTypes vertexType, VertexData[] vertices, Weight[] weights)
+        public static IVertexData[] Convert(VertexTypes vertexType, VertexData[] vertices, Weight[] weights, Matrix transform)
         {
             List<IVertexData> vertexList = new List<IVertexData>();
+
+            if (!transform.IsIdentity)
+            {
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    vertices[i].Transform(transform);
+                }
+            }
 
             if (vertexType == VertexTypes.Billboard)
             {

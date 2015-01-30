@@ -173,7 +173,10 @@ namespace Engine.Common
             AnimationContent[] c = FindJointKeyframes(joint.Name, animations);
 
             //Set bones
-            Array.ForEach(c, (a) => bones.Add(new BoneAnimation() { Keyframes = a.Keyframes }));
+            Array.ForEach(c, (a) =>
+            {
+                bones.Add(new BoneAnimation() { Keyframes = a.Keyframes });
+            });
 
             if (joint.Childs != null && joint.Childs.Length > 0)
             {
@@ -222,10 +225,11 @@ namespace Engine.Common
         /// <param name="content">Model content</param>
         /// <param name="instanced">Is instanced</param>
         /// <param name="instances">Instance count</param>
-        public ModelBase(Game game, Scene3D scene, ModelContent content, bool instanced = false, int instances = 0)
+        /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
+        public ModelBase(Game game, Scene3D scene, ModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true)
             : base(game, scene)
         {
-            this.Initialize(content, instanced, instances);
+            this.Initialize(content, instanced, instances, loadAnimation);
         }
 
         /// <summary>
@@ -234,7 +238,8 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         /// <param name="instanced">Is instanced</param>
         /// <param name="instances">Instance count</param>
-        protected virtual void Initialize(ModelContent modelContent, bool instanced, int instances)
+        /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
+        protected virtual void Initialize(ModelContent modelContent, bool instanced, int instances, bool loadAnimation = true)
         {
             //Images
             this.InitializeTextures(modelContent);
@@ -243,10 +248,10 @@ namespace Engine.Common
             this.InitializeMaterials(modelContent);
 
             //Skins & Meshes
-            this.InitializeGeometry(modelContent, instanced, instances);
+            this.InitializeGeometry(modelContent, loadAnimation, instanced, instances);
 
             //Animation
-            this.InitializeSkinnedData(modelContent);
+            if (loadAnimation) this.InitializeSkinnedData(modelContent);
 
             //Update meshes into device
             this.InitializeMeshes();
@@ -336,85 +341,55 @@ namespace Engine.Common
         /// <param name="instances">Instance count</param>
         /// <param name="meshes">Mesh dictionary created</param>
         /// <param name="skinList">Skins readed</param>
-        protected virtual void InitializeGeometry(ModelContent modelContent, bool instanced, int instances)
+        protected virtual void InitializeGeometry(ModelContent modelContent, bool loadAnimation, bool instanced, int instances)
         {
             foreach (string meshName in modelContent.Geometry.Keys)
             {
                 Dictionary<string, SubMeshContent> dict = modelContent.Geometry[meshName];
 
                 ControllerContent cInfo = modelContent.Controllers.GetControllerForMesh(meshName);
-                if (cInfo == null)
+
+                //Apply shape matrix if controller exists but we are not loading animation info
+                Matrix bindShapeMatrix = cInfo != null && !loadAnimation ? cInfo.BindShapeMatrix : Matrix.Identity;
+                Weight[] weights = cInfo != null ? cInfo.Weights : null;
+
+                foreach (string material in dict.Keys)
                 {
-                    foreach (string material in dict.Keys)
+                    SubMeshContent geometry = dict[material];
+
+                    VertexTypes vertexType = loadAnimation && cInfo != null ?
+                        VertexData.GetSkinnedEquivalent(geometry.VertexType) :
+                        geometry.VertexType;
+
+                    IVertexData[] vertexList = VertexData.Convert(
+                        vertexType,
+                        geometry.Vertices,
+                        weights,
+                        bindShapeMatrix);
+
+                    Mesh nMesh = null;
+
+                    if (instanced)
                     {
-                        SubMeshContent geometry = dict[material];
-
-                        IVertexData[] vertexList = VertexData.Convert(
-                            geometry.VertexType,
-                            geometry.Vertices,
-                            null);
-
-                        Mesh nMesh = null;
-
-                        if (instanced)
-                        {
-                            nMesh = new MeshInstanced(
-                                geometry.Material,
-                                geometry.Topology,
-                                vertexList,
-                                geometry.Indices,
-                                instances,
-                                true);
-                        }
-                        else
-                        {
-                            nMesh = new Mesh(
-                                geometry.Material,
-                                geometry.Topology,
-                                vertexList,
-                                geometry.Indices,
-                                true);
-                        }
-
-                        this.Meshes.Add(meshName, geometry.Material, nMesh);
+                        nMesh = new MeshInstanced(
+                            geometry.Material,
+                            geometry.Topology,
+                            vertexList,
+                            geometry.Indices,
+                            instances,
+                            true);
                     }
-                }
-                else
-                {
-                    Matrix bindShapeMatrix = cInfo.BindShapeMatrix;
-                    Weight[] weights = cInfo.Weights;
-
-                    foreach (string material in dict.Keys)
+                    else
                     {
-                        SubMeshContent geometry = dict[material];
-
-                        IVertexData[] vertexList = VertexData.Convert(
-                            VertexData.GetSkinnedEquivalent(geometry.VertexType),
-                            geometry.Vertices,
-                            weights);
-
-                        Mesh nMesh = null;
-
-                        if (instanced)
-                        {
-                            nMesh = new MeshInstanced(
-                                geometry.Material,
-                                geometry.Topology,
-                                vertexList,
-                                geometry.Indices,
-                                instances);
-                        }
-                        else
-                        {
-                            nMesh = new Mesh(
-                                geometry.Material,
-                                geometry.Topology,
-                                vertexList,
-                                geometry.Indices);
-                        }
-
-                        this.Meshes.Add(meshName, geometry.Material, nMesh);
+                        nMesh = new Mesh(
+                            geometry.Material,
+                            geometry.Topology,
+                            vertexList,
+                            geometry.Indices,
+                            true);
                     }
+
+                    this.Meshes.Add(meshName, geometry.Material, nMesh);
                 }
             }
         }
@@ -431,32 +406,32 @@ namespace Engine.Common
 
                 ControllerContent controller = modelContent.Controllers[modelContent.SkinningInfo.Controller];
 
-                List<int> hierarchy = new List<int>();
-                List<Matrix> offsets = new List<Matrix>();
-                List<BoneAnimation> bones = new List<BoneAnimation>();
+                List<int> boneHierarchy = new List<int>();
+                List<Matrix> boneOffsets = new List<Matrix>();
+                List<BoneAnimation> boneAnimations = new List<BoneAnimation>();
 
                 FlattenTransforms(
                     controller,
                     modelContent.SkinningInfo.Skeleton,
                     -1,
                     modelContent.Animations,
-                    hierarchy,
-                    offsets,
-                    bones);
-
-                AnimationClip clip = new AnimationClip
-                {
-                    BoneAnimations = bones.ToArray()
-                };
+                    boneHierarchy,
+                    boneOffsets,
+                    boneAnimations);
 
                 Dictionary<string, AnimationClip> animations = new Dictionary<string, AnimationClip>();
 
-                animations.Add(SkinningData.DefaultClip, clip);
+                animations.Add(
+                    SkinningData.DefaultClip,
+                    new AnimationClip
+                    {
+                        BoneAnimations = boneAnimations.ToArray()
+                    });
 
                 this.SkinningData = SkinningData.Create(
                     skins,
-                    hierarchy.ToArray(),
-                    offsets.ToArray(),
+                    boneHierarchy.ToArray(),
+                    boneOffsets.ToArray(),
                     animations);
             }
         }
@@ -565,7 +540,11 @@ namespace Engine.Common
             }
         }
 
-
+        /// <summary>
+        /// Gets the transformed points
+        /// </summary>
+        /// <param name="transform">Transform to apply</param>
+        /// <returns>Returns the transformed points</returns>
         public virtual Vector3[] GetPoints(Matrix transform)
         {
             List<Vector3> points = new List<Vector3>();
@@ -587,7 +566,11 @@ namespace Engine.Common
 
             return trnPoints;
         }
-
+        /// <summary>
+        /// Gets the transformed triangles
+        /// </summary>
+        /// <param name="transform">Transform to apply</param>
+        /// <returns>Returns the transformed triangles</returns>
         public virtual Triangle[] GetTriangles(Matrix transform)
         {
             List<Triangle> triangles = new List<Triangle>();

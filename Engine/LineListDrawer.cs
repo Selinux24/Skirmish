@@ -69,6 +69,14 @@ namespace Engine
 
             base.Draw(gameTime);
         }
+        /// <summary>
+        /// Performs frustum culling test
+        /// </summary>
+        /// <remarks>Culling disabled for this class</remarks>
+        public override void FrustumCulling()
+        {
+            this.Cull = false;
+        }
 
         /// <summary>
         /// Set line list
@@ -103,7 +111,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Add line to list
+        /// Add lines to list
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Line list</param>
@@ -115,6 +123,28 @@ namespace Engine
             }
 
             this.lineDictionary[color].AddRange(lines);
+
+            this.dictionaryChanged = true;
+        }
+        /// <summary>
+        /// Remove by color
+        /// </summary>
+        /// <param name="color">Color</param>
+        public void ClearLines(Color4 color)
+        {
+            if (this.lineDictionary.ContainsKey(color))
+            {
+                this.lineDictionary.Remove(color);
+            }
+
+            this.dictionaryChanged = true;
+        }
+        /// <summary>
+        /// Remove all
+        /// </summary>
+        public void ClearLines()
+        {
+            this.lineDictionary.Clear();
 
             this.dictionaryChanged = true;
         }

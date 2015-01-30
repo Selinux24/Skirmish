@@ -20,6 +20,7 @@ namespace Terrain
         private float v = 10f;
         private Curve curve = null;
         private float curveTime = 0;
+        private LineListDrawer helicopterLineDrawer = null;
 
         private Color4 curvesColor = Color.Red;
         private Color4 pointsColor = Color.Blue;
@@ -49,13 +50,6 @@ namespace Terrain
             this.terrainLineDrawer.UseZBuffer = true;
             this.terrainLineDrawer.Visible = false;
 
-            this.helicopter = this.AddModel("helicopter.dae");
-            this.helicopter.TextureIndex = 1;
-            this.curveLineDrawer = this.AddLineListDrawer(10000);
-            this.curveLineDrawer.UseZBuffer = false;
-            this.curveLineDrawer.Visible = false;
-            this.curveLineDrawer.SetLines(this.wAxisColor, GeometryUtil.CreateAxis(Matrix.Identity, 20f));
-
             BoundingBox bbox = this.terrain.GetBoundingBox();
 
             float sep = 2f;
@@ -84,10 +78,17 @@ namespace Terrain
                 this.terrainLineDrawer.AddLines(Color.Red, this.errs.ToArray());
             }
 
-            this.GeneratePath(Vector3.Zero, CurveInterpolations.CatmullRom);
+            this.helicopter = this.AddModel("helicopter.dae");
+            this.helicopter.TextureIndex = 1;
+            this.helicopterLineDrawer = this.AddLineListDrawer(1000);
+            this.helicopterLineDrawer.Visible = false;
 
-            this.Camera.Goto(new Vector3(20, 20, 20));
-            this.Camera.LookTo(Vector3.Zero);
+            this.curveLineDrawer = this.AddLineListDrawer(10000);
+            this.curveLineDrawer.UseZBuffer = false;
+            this.curveLineDrawer.Visible = false;
+            this.curveLineDrawer.SetLines(this.wAxisColor, GeometryUtil.CreateAxis(Matrix.Identity, 20f));
+
+            this.GeneratePath(Vector3.Zero, CurveInterpolations.CatmullRom);
         }
 
         public override void Update(GameTime gameTime)
@@ -109,6 +110,16 @@ namespace Terrain
             if (this.Game.Input.KeyJustReleased(Keys.F2))
             {
                 this.curveLineDrawer.Visible = !this.curveLineDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            {
+                this.helicopterLineDrawer.Visible = !this.helicopterLineDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                this.curveTime = 0f;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.G))
@@ -147,6 +158,12 @@ namespace Terrain
             }
 
             float time = gameTime.ElapsedSeconds * this.v;
+
+            if (this.Game.Input.KeyPressed(Keys.LShiftKey))
+            {
+                time *= 0.01f;
+            }
+
             Vector3 p0 = Vector3.Zero;
             Vector3 p1 = Vector3.Zero;
 
@@ -177,6 +194,13 @@ namespace Terrain
             {
                 this.GeneratePath(this.helicopter.Manipulator.Position, CurveInterpolations.CatmullRom);
             }
+
+            BoundingSphere sph = this.helicopter.GetBoundingSphere();
+
+            this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Left * 15f));
+            this.Camera.LookTo(sph.Center);
+
+            this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.20f), GeometryUtil.CreateWiredSphere(sph, 50, 20));
         }
 
         private void GeneratePath(Vector3 position, CurveInterpolations interpolation)

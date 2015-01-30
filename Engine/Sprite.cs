@@ -121,7 +121,7 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="fitScreen">Fit screen</param>
         public Sprite(Game game, Scene3D scene, string[] textures, float width, float height, bool fitScreen = false)
-            : base(game, scene, ModelContent.GenerateSprite(scene.ContentPath, textures))
+            : base(game, scene, ModelContent.GenerateSprite(scene.ContentPath, textures), false, 0, false)
         {
             this.effect = new EffectBasic(game.Graphics.Device);
 
@@ -171,7 +171,7 @@ namespace Engine
                     float topRelative = (float)this.Top / (float)this.previousRenderHeight;
                     this.Left = (int)Math.Round(leftRelative * this.Game.Form.RenderWidth, 0);
                     this.Top = (int)Math.Round(topRelative * this.Game.Form.RenderHeight, 0);
-                    
+
                     this.Width = this.sourceWidth * this.Game.Form.RenderWidth;
                     this.Height = this.sourceHeight * this.Game.Form.RenderHeight;
 
