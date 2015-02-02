@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine.Content
 {
@@ -10,26 +11,52 @@ namespace Engine.Content
     public class SkinningContent
     {
         /// <summary>
-        /// Initial transformation
+        /// Controller collection
         /// </summary>
-        public Matrix Transform { get; set; }
+        private List<string> controllers = new List<string>();
+
         /// <summary>
         /// Controller name
         /// </summary>
-        public string Controller { get; set; }
+        public string[] Controller
+        {
+            get
+            {
+                return this.controllers.ToArray();
+            }
+            set
+            {
+                this.controllers.Clear();
+
+                if (value != null && value.Length > 0)
+                {
+                    this.controllers.AddRange(value);
+                }
+            }
+        }
         /// <summary>
         /// Skeleton information
         /// </summary>
-        public Joint Skeleton { get; set; }
+        public Skeleton Skeleton { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         public SkinningContent()
         {
-            this.Transform = Matrix.Identity;
-        }
 
+        }
+        /// <summary>
+        /// Adds a controller reference to skinning content
+        /// </summary>
+        /// <param name="controller">Controller name</param>
+        public void Add(string controller)
+        {
+            if (!this.controllers.Contains(controller))
+            {
+                this.controllers.Add(controller);
+            }
+        }
         /// <summary>
         /// Gets text representation of instance
         /// </summary>

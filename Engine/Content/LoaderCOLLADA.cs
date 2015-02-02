@@ -59,10 +59,11 @@ namespace Engine.Content
 
                 #region Scene Relations
 
-                Joint skeleton = null;
-
                 if (dae.Scene.InstanceVisualScene != null)
                 {
+                    Skeleton skeleton = null;
+                    List<string> controllers = new List<string>();
+
                     string sceneUrl = dae.Scene.InstanceVisualScene.Url;
 
                     VisualScene vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl));
@@ -86,7 +87,9 @@ namespace Engine.Content
 
                                     if (node.Nodes != null && node.Nodes.Length > 0)
                                     {
-                                        skeleton = ProcessJoints(null, node.Nodes[0], conversion, transform);
+                                        Joint root = ProcessJoints(null, node.Nodes[0], conversion, transform);
+
+                                        skeleton = new Skeleton(root);
                                     }
                                 }
 
@@ -123,12 +126,8 @@ namespace Engine.Content
 
                                 if (node.HasController)
                                 {
-                                    if (modelContent.SkinningInfo != null)
-                                    {
-                                        throw new Exception("Only one skin controller definition per file!");
-                                    }
-
-                                    Transforms trn = node.ReadTransforms();
+                                    //TODO: Where to apply this transform?
+                                    //Transforms trn = node.ReadTransforms();
 
                                     if (node.InstanceController != null && node.InstanceController.Length > 0)
                                     {
@@ -136,13 +135,7 @@ namespace Engine.Content
                                         {
                                             string controllerName = ic.Url.Replace("#", "");
 
-                                            modelContent.SkinningInfo = new SkinningContent()
-                                            {
-                                                //TODO: Where to apply this transform?
-                                                //Transform = trn.Matrix.ChangeAxis(conversion),
-                                                Controller = controllerName,
-                                                Skeleton = skeleton,
-                                            };
+                                            controllers.Add(controllerName);
                                         }
                                     }
                                 }
@@ -150,6 +143,15 @@ namespace Engine.Content
                                 #endregion
                             }
                         }
+                    }
+
+                    if (skeleton != null && controllers.Count > 0)
+                    {
+                        modelContent.SkinningInfo = new SkinningContent()
+                        {
+                            Controller = controllers.ToArray(),
+                            Skeleton = skeleton,
+                        };
                     }
                 }
 
@@ -661,7 +663,7 @@ namespace Engine.Content
 
             if (skin.VertexWeights != null)
             {
-                Matrix[] ibmList;
+                Dictionary<string, Matrix> ibmList;
                 Weight[] wgList;
                 ProcessVertexWeights(skin, conversion, transform, out ibmList, out wgList);
 
@@ -690,9 +692,9 @@ namespace Engine.Content
         /// <param name="conversion">Axis conversion</param>
         /// <param name="inverseBindMatrixList">Inverse bind matrix list result</param>
         /// <param name="weightList">Weight list result</param>
-        private static void ProcessVertexWeights(Skin skin, EnumAxisConversion conversion, Matrix transform, out Matrix[] inverseBindMatrixList, out Weight[] weightList)
+        private static void ProcessVertexWeights(Skin skin, EnumAxisConversion conversion, Matrix transform, out Dictionary<string, Matrix> inverseBindMatrixList, out Weight[] weightList)
         {
-            List<Matrix> ibmList = new List<Matrix>();
+            Dictionary<string, Matrix> ibmList = new Dictionary<string, Matrix>();
             List<Weight> wgList = new List<Weight>();
 
             int jointsOffset = -1;
@@ -747,8 +749,11 @@ namespace Engine.Content
                         VertexIndex = i,
                     };
 
-                    if (jointsOffset >= 0) wg.BoneIndex = skin.VertexWeights.V[index + jointsOffset];
-                    if (jointsOffset >= 0) wg.Joint = joints[skin.VertexWeights.V[index + jointsOffset]];
+                    if (jointsOffset >= 0)
+                    {
+                        wg.Joint = joints[skin.VertexWeights.V[index + jointsOffset]];
+                    }
+
                     if (weightsOffset >= 0) wg.WeightValue = weights[skin.VertexWeights.V[index + weightsOffset]];
 
                     if (wg.WeightValue != 0.0f)
@@ -762,13 +767,13 @@ namespace Engine.Content
 
             if (weightsOffset >= 0)
             {
-                for (int i = 0; i < mats.Length; i++)
+                for (int i = 0; i < joints.Length; i++)
                 {
-                    ibmList.Add(Matrix.Transpose(mats[i].ChangeAxis(conversion)));
+                    ibmList.Add(joints[i], Matrix.Transpose(mats[i].ChangeAxis(conversion)));
                 }
             }
 
-            inverseBindMatrixList = ibmList.ToArray();
+            inverseBindMatrixList = ibmList;
             weightList = wgList.ToArray();
         }
 

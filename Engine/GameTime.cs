@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using SharpDX;
 
 namespace Engine
 {
@@ -11,16 +11,18 @@ namespace Engine
         /// <summary>
         /// Stop watch
         /// </summary>
-        private Stopwatch watch = new Stopwatch();
-        /// <summary>
-        /// Previous elapsed time for per frame calculations
-        /// </summary>
-        private TimeSpan previousElapsedTime;
+        private TimerTick watch = new TimerTick();
 
         /// <summary>
         /// Elapsed time since last frame
         /// </summary>
-        public TimeSpan ElapsedTime { get; private set; }
+        public TimeSpan ElapsedTime
+        {
+            get
+            {
+                return this.watch.ElapsedAdjustedTime;
+            }
+        }
         /// <summary>
         /// Total time
         /// </summary>
@@ -28,7 +30,7 @@ namespace Engine
         {
             get
             {
-                return this.watch.Elapsed;
+                return this.watch.TotalTime;
             }
         }
         /// <summary>
@@ -36,7 +38,8 @@ namespace Engine
         /// </summary>
         public float ElapsedSeconds
         {
-            get{
+            get
+            {
                 return (float)this.ElapsedTime.TotalSeconds;
             }
         }
@@ -76,46 +79,43 @@ namespace Engine
         /// </summary>
         public GameTime()
         {
-            this.Start();
-        }
-
-        /// <summary>
-        /// Resets the stop watch
-        /// </summary>
-        public void Reset()
-        {
-            this.previousElapsedTime = this.ElapsedTime = TimeSpan.Zero;
-
             this.watch.Reset();
         }
+
         /// <summary>
         /// Starts the stop watch
         /// </summary>
         public void Start()
         {
-            this.previousElapsedTime = this.ElapsedTime = TimeSpan.Zero;
-
-            this.watch.Start();
+            this.watch.Reset();
         }
         /// <summary>
-        /// Stops the stop watch
+        /// Resets the stop watch
         /// </summary>
-        public void Stop()
+        public void Reset()
         {
-            this.watch.Stop();
-
-            this.Update();
+            this.watch.Reset();
+        }
+        /// <summary>
+        /// Pauses the stop watch
+        /// </summary>
+        public void Pause()
+        {
+            this.watch.Pause();
+        }
+        /// <summary>
+        /// Resumes the stop watch
+        /// </summary>
+        public void Resume()
+        {
+            this.watch.Resume();
         }
         /// <summary>
         /// Updates the stop watch counters
         /// </summary>
         public void Update()
         {
-            TimeSpan elapsedTime = this.watch.Elapsed;
-
-            this.ElapsedTime = elapsedTime - this.previousElapsedTime;
-
-            this.previousElapsedTime = elapsedTime;
+            this.watch.Tick();
         }
     }
 }

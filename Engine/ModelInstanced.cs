@@ -168,18 +168,20 @@ namespace Engine
 
                 #endregion
 
-                #region Per skinning update
-
-                if (this.SkinningData != null)
+                foreach (string meshName in this.Meshes.Keys)
                 {
-                    this.effect.SkinningBuffer.FinalTransforms = this.SkinningData.FinalTransforms;
-                    this.effect.UpdatePerSkinning();
-                }
+                    MeshMaterialsDictionary dictionary = this.Meshes[meshName];
 
-                #endregion
+                    #region Per skinning update
 
-                foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
-                {
+                    if (this.SkinningData != null)
+                    {
+                        this.effect.SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
+                        this.effect.UpdatePerSkinning();
+                    }
+
+                    #endregion
+
                     foreach (string material in dictionary.Keys)
                     {
                         MeshInstanced mesh = (MeshInstanced)dictionary[material];

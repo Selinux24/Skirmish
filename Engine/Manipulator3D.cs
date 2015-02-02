@@ -200,7 +200,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveForward(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Forward * -d * this.LinearVelocity * gameTime.ElapsedSeconds);
+            this.Move(this.Forward * d * this.LinearVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along backward vector
@@ -208,7 +208,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveBackward(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Backward * -d * this.LinearVelocity * gameTime.ElapsedSeconds);
+            this.Move(this.Backward * d * this.LinearVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along left vector
@@ -216,7 +216,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveLeft(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Left * d * this.LinearVelocity * gameTime.ElapsedSeconds);
+            this.Move(this.Left * -d * this.LinearVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along right vector
@@ -224,7 +224,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveRight(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Right * d * this.LinearVelocity * gameTime.ElapsedSeconds);
+            this.Move(this.Right * -d * this.LinearVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along up vector

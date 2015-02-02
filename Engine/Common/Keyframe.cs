@@ -84,7 +84,7 @@ namespace Engine.Common
         /// <returns>Return text representation</returns>
         public override string ToString()
         {
-            return string.Format("Time: {0}", this.Time);
+            return string.Format("Time: {0}; {1}", this.Time, this.Transform.GetDescription());
         }
     }
 }

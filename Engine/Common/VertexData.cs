@@ -414,7 +414,7 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPosition CreateVertexSkinnedPosition(VertexData v, Weight[] vw)
+        public static VertexSkinnedPosition CreateVertexSkinnedPosition(VertexData v, Weight[] vw, string[] skinBoneNames)
         {
             return new VertexSkinnedPosition
             {
@@ -422,10 +422,10 @@ namespace Engine.Common
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -434,7 +434,7 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPositionColor CreateVertexSkinnedPositionColor(VertexData v, Weight[] vw)
+        public static VertexSkinnedPositionColor CreateVertexSkinnedPositionColor(VertexData v, Weight[] vw, string[] skinBoneNames)
         {
             return new VertexSkinnedPositionColor
             {
@@ -443,10 +443,10 @@ namespace Engine.Common
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -455,7 +455,7 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPositionNormalColor CreateVertexSkinnedPositionNormalColor(VertexData v, Weight[] vw)
+        public static VertexSkinnedPositionNormalColor CreateVertexSkinnedPositionNormalColor(VertexData v, Weight[] vw, string[] skinBoneNames)
         {
             return new VertexSkinnedPositionNormalColor
             {
@@ -465,10 +465,10 @@ namespace Engine.Common
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -477,7 +477,7 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPositionNormalTexture CreateVertexSkinnedPositionNormalTexture(VertexData v, Weight[] vw)
+        public static VertexSkinnedPositionNormalTexture CreateVertexSkinnedPositionNormalTexture(VertexData v, Weight[] vw, string[] skinBoneNames)
         {
             return new VertexSkinnedPositionNormalTexture
             {
@@ -487,10 +487,10 @@ namespace Engine.Common
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -499,7 +499,7 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPositionNormalTextureTangent CreateVertexSkinnedPositionNormalTextureTangent(VertexData v, Weight[] vw)
+        public static VertexSkinnedPositionNormalTextureTangent CreateVertexSkinnedPositionNormalTextureTangent(VertexData v, Weight[] vw, string[] skinBoneNames)
         {
             return new VertexSkinnedPositionNormalTextureTangent
             {
@@ -511,10 +511,10 @@ namespace Engine.Common
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -523,7 +523,7 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPositionTexture CreateVertexSkinnedPositionTexture(VertexData v, Weight[] vw)
+        public static VertexSkinnedPositionTexture CreateVertexSkinnedPositionTexture(VertexData v, Weight[] vw, string[] skinBoneNames)
         {
             return new VertexSkinnedPositionTexture
             {
@@ -532,10 +532,10 @@ namespace Engine.Common
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)vw[0].BoneIndex) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)vw[1].BoneIndex) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)vw[2].BoneIndex) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)vw[3].BoneIndex) : ((byte)0)
+                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
 
@@ -1052,7 +1052,7 @@ namespace Engine.Common
         /// <param name="weights">Weight information</param>
         /// <param name="transform">Transfor to apply to all vertices</param>
         /// <returns>Returns generated vertices</returns>
-        public static IVertexData[] Convert(VertexTypes vertexType, VertexData[] vertices, Weight[] weights, Matrix transform)
+        public static IVertexData[] Convert(VertexTypes vertexType, VertexData[] vertices, Weight[] weights, string[] skinBoneNames, Matrix transform)
         {
             List<IVertexData> vertexList = new List<IVertexData>();
 
@@ -1099,7 +1099,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPosition(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPosition(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.PositionColorSkinned)
@@ -1108,7 +1108,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPositionColor(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPositionColor(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.PositionNormalColorSkinned)
@@ -1117,7 +1117,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalColor(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalColor(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.PositionTextureSkinned)
@@ -1126,7 +1126,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPositionTexture(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPositionTexture(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
@@ -1135,7 +1135,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalTexture(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalTexture(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.PositionNormalTextureTangentSkinned)
@@ -1144,7 +1144,7 @@ namespace Engine.Common
                 {
                     Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalTextureTangent(v, vw));
+                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalTextureTangent(v, vw, skinBoneNames));
                 });
             }
 

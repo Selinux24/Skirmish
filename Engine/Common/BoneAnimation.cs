@@ -68,5 +68,14 @@ namespace Engine.Common
 
             return Matrix.Identity;
         }
+
+        /// <summary>
+        /// Gets text representation
+        /// </summary>
+        /// <returns>Returns text representation</returns>
+        public override string ToString()
+        {
+            return string.Format("Start: {0}; End: {1}; Keyframes: {2}", this.StartTime, this.EndTime, this.Keyframes.Length);
+        }
     }
 }

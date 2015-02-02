@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine.Content
 {
@@ -22,11 +23,11 @@ namespace Engine.Content
         /// </summary>
         public Matrix BindShapeMatrix { get; set; }
         /// <summary>
-        /// Inverse bind matrix list
+        /// Inverse bind matrix list by joint name
         /// </summary>
-        public Matrix[] InverseBindMatrix { get; set; }
+        public Dictionary<string, Matrix> InverseBindMatrix { get; set; }
         /// <summary>
-        /// Weight information
+        /// Weight information by joint name
         /// </summary>
         public Weight[] Weights { get; set; }
 
@@ -36,7 +37,8 @@ namespace Engine.Content
         public ControllerContent()
         {
             this.BindShapeMatrix = Matrix.Identity;
-            this.InverseBindMatrix = new Matrix[] { };
+            this.InverseBindMatrix = new Dictionary<string, Matrix>();
+            this.Weights = new Weight[] { };
         }
 
         /// <summary>
@@ -48,6 +50,7 @@ namespace Engine.Content
             string text = null;
 
             if (this.Skin != null) text += string.Format("Skin: {0}; ", this.Skin);
+            if (this.InverseBindMatrix != null) text += string.Format("InverseBindMatrix: {0}; ", this.InverseBindMatrix.Count);
             if (this.Weights != null) text += string.Format("Weights: {0}; ", this.Weights.Length);
             if (this.BindShapeMatrix != null) text += string.Format("BindShapeMatrix: {0}; ", this.BindShapeMatrix);
 

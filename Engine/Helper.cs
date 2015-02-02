@@ -141,7 +141,6 @@ namespace Engine
                     rotation.X = (float)Math.Round(rotation.X, 0);
                     rotation.Y = (float)Math.Round(rotation.Y, 0);
                     rotation.Z = (float)Math.Round(rotation.Z, 0);
-                    //rotation.W = (float)Math.Round(rotation.W, 0);
 
                     translation.X = (float)Math.Round(translation.X, 0);
                     translation.Y = (float)Math.Round(translation.Y, 0);
@@ -151,7 +150,7 @@ namespace Engine
                     if (!rotation.IsIdentity && rotation.Angle != 0f) text += string.Format("Axis: {0}; Angle: {1}; ", rotation.Axis, MathUtil.RadiansToDegrees(rotation.Angle));
                     if (translation != Vector3.Zero) text += string.Format("Translation: {0}; ", translation);
 
-                    return text;
+                    return text == "" ? "Near Identity" : text;
                 }
                 else
                 {

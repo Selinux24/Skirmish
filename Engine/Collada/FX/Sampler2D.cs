@@ -18,7 +18,7 @@ namespace Engine.Collada.FX
         public EnumSamplerFilter MagFilter { get; set; }
         [XmlElement("mipfilter")]
         public EnumSamplerFilter MipFilter { get; set; }
-        //TODO: Color no definido
+        //TODO: To complete -> Color
         [XmlElement("border_color")]
         public string BorderColor { get; set; }
         [XmlElement("mipmap_maxlevel")]

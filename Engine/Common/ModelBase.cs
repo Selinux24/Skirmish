@@ -144,57 +144,6 @@ namespace Engine.Common
         #region Static Helpers
 
         /// <summary>
-        /// Perform transform flatten for skinning
-        /// </summary>
-        /// <param name="controller">Animation controller</param>
-        /// <param name="joint">Joint to process</param>
-        /// <param name="parentIndex">Parent index</param>
-        /// <param name="animations">Animation dictionary</param>
-        /// <param name="hierarchy">Hierarchy of bones</param>
-        /// <param name="offsets">Transform offsets</param>
-        /// <param name="bones">Bone list flattened</param>
-        private static void FlattenTransforms(
-            ControllerContent controller,
-            Joint joint,
-            int parentIndex,
-            Dictionary<string, AnimationContent[]> animations,
-            List<int> hierarchy,
-            List<Matrix> offsets,
-            List<BoneAnimation> bones)
-        {
-            hierarchy.Add(parentIndex);
-
-            int index = offsets.Count;
-
-            //Bind shape Matrix * Inverse shape Matrix -> Rest Position
-            offsets.Add(controller.BindShapeMatrix * controller.InverseBindMatrix[index]);
-
-            //Find keyframes for current bone
-            AnimationContent[] c = FindJointKeyframes(joint.Name, animations);
-
-            //Set bones
-            Array.ForEach(c, (a) =>
-            {
-                bones.Add(new BoneAnimation() { Keyframes = a.Keyframes });
-            });
-
-            if (joint.Childs != null && joint.Childs.Length > 0)
-            {
-                //Continue with childs
-                for (int i = 0; i < joint.Childs.Length; i++)
-                {
-                    FlattenTransforms(
-                        controller,
-                        joint.Childs[i],
-                        index,
-                        animations,
-                        hierarchy,
-                        offsets,
-                        bones);
-                }
-            }
-        }
-        /// <summary>
         /// Find keyframes of a joint
         /// </summary>
         /// <param name="jointName">Joint name</param>
@@ -352,6 +301,7 @@ namespace Engine.Common
                 //Apply shape matrix if controller exists but we are not loading animation info
                 Matrix bindShapeMatrix = cInfo != null && !loadAnimation ? cInfo.BindShapeMatrix : Matrix.Identity;
                 Weight[] weights = cInfo != null ? cInfo.Weights : null;
+                string[] jointNames = modelContent.SkinningInfo != null ? modelContent.SkinningInfo.Skeleton.JointNames : null;
 
                 foreach (string material in dict.Keys)
                 {
@@ -365,6 +315,7 @@ namespace Engine.Common
                         vertexType,
                         geometry.Vertices,
                         weights,
+                        jointNames,
                         bindShapeMatrix);
 
                     Mesh nMesh = null;
@@ -402,25 +353,22 @@ namespace Engine.Common
         {
             if (modelContent.SkinningInfo != null)
             {
-                string[] skins = modelContent.Controllers.Skins;
-
-                ControllerContent controller = modelContent.Controllers[modelContent.SkinningInfo.Controller];
-
-                List<int> boneHierarchy = new List<int>();
-                List<Matrix> boneOffsets = new List<Matrix>();
                 List<BoneAnimation> boneAnimations = new List<BoneAnimation>();
 
-                FlattenTransforms(
-                    controller,
-                    modelContent.SkinningInfo.Skeleton,
-                    -1,
-                    modelContent.Animations,
-                    boneHierarchy,
-                    boneOffsets,
-                    boneAnimations);
+                foreach (string jointName in modelContent.SkinningInfo.Skeleton.JointNames)
+                {
+                    //Find keyframes for current bone
+                    AnimationContent[] c = FindJointKeyframes(jointName, modelContent.Animations);
 
+                    //Set bones
+                    Array.ForEach(c, (a) =>
+                    {
+                        boneAnimations.Add(new BoneAnimation() { Keyframes = a.Keyframes });
+                    });
+                }
+
+                //TODO: Animation dictionary is only for one animation
                 Dictionary<string, AnimationClip> animations = new Dictionary<string, AnimationClip>();
-
                 animations.Add(
                     SkinningData.DefaultClip,
                     new AnimationClip
@@ -428,11 +376,34 @@ namespace Engine.Common
                         BoneAnimations = boneAnimations.ToArray()
                     });
 
+                Dictionary<string, SkinInfo> skinInfo = new Dictionary<string, SkinInfo>();
+
+                foreach (string controllerName in modelContent.SkinningInfo.Controller)
+                {
+                    ControllerContent controller = modelContent.Controllers[controllerName];
+
+                    List<Matrix> boneOffsets = new List<Matrix>();
+
+                    foreach (string jointName in modelContent.SkinningInfo.Skeleton.JointNames)
+                    {
+                        Matrix ibm = Matrix.Identity;
+
+                        if (controller.InverseBindMatrix.ContainsKey(jointName))
+                        {
+                            ibm = controller.InverseBindMatrix[jointName];
+                        }
+
+                        //Bind shape Matrix * Inverse shape Matrix -> Rest Position
+                        boneOffsets.Add(controller.BindShapeMatrix * ibm);
+                    }
+
+                    skinInfo.Add(controller.Skin, new SkinInfo(boneOffsets.ToArray()));
+                }
+
                 this.SkinningData = SkinningData.Create(
-                    skins,
-                    boneHierarchy.ToArray(),
-                    boneOffsets.ToArray(),
-                    animations);
+                    modelContent.SkinningInfo.Skeleton.JointIndices,
+                    animations,
+                    skinInfo);
             }
         }
         /// <summary>
@@ -588,6 +559,23 @@ namespace Engine.Common
             }
 
             return Triangle.Transform(triangles.ToArray(), transform);
+        }
+
+        /// <summary>
+        /// Gets animation state in specified time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <returns>Returns animation state</returns>
+        public virtual string GetState(float time)
+        {
+            if (this.SkinningData != null)
+            {
+                return this.SkinningData.GetState(time);
+            }
+            else
+            {
+                return "Static";
+            }
         }
     }
 }

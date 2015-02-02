@@ -11,7 +11,7 @@ namespace Engine.Collada.FX
         [XmlElement("annotate", typeof(Annotate))]
         public Annotate[] Annotates { get; set; }
 
-        //TODO: Pass to complete
+        //TODO: To complete -> Pass
 
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }

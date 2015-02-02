@@ -5,6 +5,6 @@ namespace Engine.Collada
     [Serializable]
     public class SetParam
     {
-        //TODO: SetParam
+        //TODO: To complete -> SetParam
     }
 }

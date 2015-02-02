@@ -11,10 +11,6 @@ namespace Engine.Common
         /// </summary>
         public int VertexIndex;
         /// <summary>
-        /// Bone index of this weight
-        /// </summary>
-        public int BoneIndex;
-        /// <summary>
         /// Joint name
         /// </summary>
         public string Joint;
@@ -32,7 +28,6 @@ namespace Engine.Common
             string text = null;
 
             text += string.Format("VertexIndex: {0}; ", this.VertexIndex);
-            text += string.Format("BoneIndex: {0}; ", this.BoneIndex);
             text += string.Format("Joint: {0}; ", this.Joint);
             text += string.Format("Weight: {0}; ", this.WeightValue);
 

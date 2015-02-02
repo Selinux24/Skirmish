@@ -288,6 +288,7 @@
     <Compile Include="Common\GeometryUtil.cs" />
     <Compile Include="Common\IBufferData.cs" />
     <Compile Include="Common\IControl.cs" />
+    <Compile Include="Common\Skeleton.cs" />
     <Compile Include="Curve.cs" />
     <Compile Include="Line.cs" />
     <Compile Include="Common\VertexParticle.cs" />
