@@ -99,6 +99,10 @@ namespace Engine.Effects
         /// </summary>
         public readonly EffectTechnique PositionNormalTexture = null;
         /// <summary>
+        /// Position normal texture with normal mapping technique
+        /// </summary>
+        public readonly EffectTechnique PositionNormalTextureTangent = null;
+        /// <summary>
         /// Skinned position normal texture technique
         /// </summary>
         public readonly EffectTechnique PositionNormalTextureSkinned = null;
@@ -159,6 +163,10 @@ namespace Engine.Effects
         /// Texture effect variable
         /// </summary>
         private EffectShaderResourceVariable textures = null;
+        /// <summary>
+        /// Normal map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable normalMap = null;
 
         /// <summary>
         /// Directional lights
@@ -402,6 +410,20 @@ namespace Engine.Effects
                 this.textures.SetResource(value);
             }
         }
+        /// <summary>
+        /// Normal map
+        /// </summary>
+        protected ShaderResourceView NormalMap
+        {
+            get
+            {
+                return this.normalMap.GetResource();
+            }
+            set
+            {
+                this.normalMap.SetResource(value);
+            }
+        }
 
         /// <summary>
         /// Per frame buffer structure
@@ -427,12 +449,14 @@ namespace Engine.Effects
             this.PositionNormalColor = this.Effect.GetTechniqueByName("PositionNormalColor");
             this.PositionTexture = this.Effect.GetTechniqueByName("PositionTexture");
             this.PositionNormalTexture = this.Effect.GetTechniqueByName("PositionNormalTexture");
+            this.PositionNormalTextureTangent = this.Effect.GetTechniqueByName("PositionNormalTextureTangent");
             this.PositionNormalTextureSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureSkinned");
 
             this.AddInputLayout(this.PositionColor, VertexPositionColor.GetInput());
             this.AddInputLayout(this.PositionNormalColor, VertexPositionNormalColor.GetInput());
             this.AddInputLayout(this.PositionTexture, VertexPositionTexture.GetInput());
             this.AddInputLayout(this.PositionNormalTexture, VertexPositionNormalTexture.GetInput());
+            this.AddInputLayout(this.PositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput());
             this.AddInputLayout(this.PositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput());
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
@@ -449,6 +473,7 @@ namespace Engine.Effects
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
+            this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -475,6 +500,10 @@ namespace Engine.Effects
                 else if (vertexType == VertexTypes.PositionNormalTexture)
                 {
                     return this.PositionNormalTexture;
+                }
+                else if (vertexType == VertexTypes.PositionNormalTextureTangent)
+                {
+                    return this.PositionNormalTextureTangent;
                 }
                 else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
                 {
@@ -516,11 +545,12 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="texture">Texture</param>
         /// <param name="textureIndex">Texture index</param>
-        public void UpdatePerObject(ShaderResourceView texture, int textureIndex = 0)
+        public void UpdatePerObject(ShaderResourceView texture, ShaderResourceView normalMap, int textureIndex = 0)
         {
             this.Material = this.ObjectBuffer.Material;
             this.TextureIndex = textureIndex;
             this.Textures = texture;
+            this.NormalMap = normalMap;
         }
         /// <summary>
         /// Update per model skin data

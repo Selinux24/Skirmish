@@ -98,6 +98,11 @@ namespace Engine.Content
         public Color4 Transparent { get; set; }
 
         /// <summary>
+        /// Normal map texture
+        /// </summary>
+        public string NormalMapTexture { get; set; }
+
+        /// <summary>
         /// Gets text representation of instance
         /// </summary>
         /// <returns>Returns text representation of instance</returns>

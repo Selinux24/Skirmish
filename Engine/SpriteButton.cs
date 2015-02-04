@@ -124,7 +124,17 @@ namespace Engine
         public SpriteButton(Game game, Scene3D scene, SpriteButtonDescription description)
             : base(game, scene)
         {
-            this.button = new Sprite(game, scene, new[] { description.TextureReleased, description.TexturePressed }, description.Width, description.Height, false);
+            this.button = new Sprite(
+                game,
+                scene,
+                new SpriteDescription()
+                {
+                    Textures = new[] { description.TextureReleased, description.TexturePressed },
+                    Width = description.Width,
+                    Height = description.Height,
+                    FitScreen = false,
+                });
+
             if (!string.IsNullOrEmpty(description.Font))
             {
                 this.text = new TextDrawer(game, scene, description.Font, description.FontSize, description.TextColor, description.TextShadowColor);

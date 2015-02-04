@@ -102,35 +102,18 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="scene">Scene</param>
-        /// <param name="texture">Texture</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="fitScreen">Fit screen</param>
-        public Sprite(Game game, Scene3D scene, string texture, float width, float height, bool fitScreen = false)
-            : this(game, scene, new[] { texture }, width, height, fitScreen)
-        {
-
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="textures">Texture array</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="fitScreen">Fit screen</param>
-        public Sprite(Game game, Scene3D scene, string[] textures, float width, float height, bool fitScreen = false)
-            : base(game, scene, ModelContent.GenerateSprite(scene.ContentPath, textures), false, 0, false)
+        /// <param name="description">Description</param>
+        public Sprite(Game game, Scene3D scene, SpriteDescription description)
+            : base(game, scene, ModelContent.GenerateSprite(scene.ContentPath, description.Textures), false, 0, false, false)
         {
             this.effect = new EffectBasic(game.Graphics.Device);
 
             int renderWidth = game.Form.RenderWidth;
             int renderHeight = game.Form.RenderHeight;
 
-            this.Width = width <= 0 ? renderWidth : width;
-            this.Height = height <= 0 ? renderHeight : height;
-            this.FitScreen = fitScreen;
+            this.Width = description.Width <= 0 ? renderWidth : description.Width;
+            this.Height = description.Height <= 0 ? renderHeight : description.Height;
+            this.FitScreen = description.FitScreen;
 
             this.previousRenderWidth = renderWidth;
             this.previousRenderHeight = renderHeight;
@@ -231,12 +214,12 @@ namespace Engine
                         if (mat != null)
                         {
                             this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
-                            this.effect.UpdatePerObject(mat.DiffuseTexture, this.TextureIndex);
+                            this.effect.UpdatePerObject(mat.DiffuseTexture, mat.NormalMap, this.TextureIndex);
                         }
                         else
                         {
                             this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-                            this.effect.UpdatePerObject(null, this.TextureIndex);
+                            this.effect.UpdatePerObject(null, null, this.TextureIndex);
                         }
 
                         #endregion
@@ -253,5 +236,28 @@ namespace Engine
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Sprite description
+    /// </summary>
+    public class SpriteDescription
+    {
+        /// <summary>
+        /// Sprite textures
+        /// </summary>
+        public string[] Textures;
+        /// <summary>
+        /// Width
+        /// </summary>
+        public float Width;
+        /// <summary>
+        /// Height
+        /// </summary>
+        public float Height;
+        /// <summary>
+        /// Fit screen
+        /// </summary>
+        public bool FitScreen;
     }
 }

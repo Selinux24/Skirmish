@@ -37,12 +37,14 @@ namespace SceneTest
             this.title.Text = "3D scene & HID scene";
             this.title.Position = Vector2.Zero;
 
-            this.sprite = this.AddSprite(
-                "smiley.jpg",
-                128,
-                128,
-                true,
-                1);
+            SpriteDescription spriteDesc = new SpriteDescription()
+            {
+                Textures = new[] { "smiley.jpg" },
+                Width = 128,
+                Height = 128,
+                FitScreen = true,
+            };
+            this.sprite = this.AddSprite(spriteDesc, 1);
 
             this.InitializeText(this.currentSize);
         }

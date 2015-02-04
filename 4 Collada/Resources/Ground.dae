@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.72.0 commit date:2014-10-21, commit time:11:38, hash:9e963ae</authoring_tool>
     </contributor>
-    <created>2015-01-23T23:38:19</created>
-    <modified>2015-01-23T23:38:19</modified>
+    <created>2015-02-04T22:36:08</created>
+    <modified>2015-02-04T22:36:08</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -464,6 +464,9 @@
     <image id="Ground_png" name="Ground_png">
       <init_from>Ground.png</init_from>
     </image>
+    <image id="ground_nmap_png" name="ground_nmap_png">
+      <init_from>ground_nmap.png</init_from>
+    </image>
   </library_images>
   <library_effects>
     <effect id="Ground-effect">
@@ -476,6 +479,16 @@
         <newparam sid="Ground_png-sampler">
           <sampler2D>
             <source>Ground_png-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="ground_nmap_png-surface">
+          <surface type="2D">
+            <init_from>ground_nmap_png</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="ground_nmap_png-sampler">
+          <sampler2D>
+            <source>ground_nmap_png-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -499,6 +512,13 @@
               <float sid="index_of_refraction">1</float>
             </index_of_refraction>
           </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="ground_nmap_png-sampler" texcoord="Cube-mesh-map"/>
+              </bump>
+            </technique>
+          </extra>
         </technique>
       </profile_COMMON>
     </effect>

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using Point = System.Drawing.Point;
 
 namespace Engine
 {
@@ -10,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Mouse screen position
         /// </summary>
-        public static System.Drawing.Point ScreenPosition
+        public static Point ScreenPosition
         {
             get
             {
@@ -51,12 +52,10 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="scene">Scene</param>
-        /// <param name="texture">Texture</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
+        /// <param name="description">Sprite description</param>
         /// <param name="centered">Cursor positioned on center of the image</param>
-        public Cursor(Game game, Scene3D scene, string texture, float width, float height, bool centered = true)
-            : base(game, scene, texture, width, height)
+        public Cursor(Game game, Scene3D scene, SpriteDescription description, bool centered = true)
+            : base(game, scene, description)
         {
             this.Centered = centered;
         }
@@ -83,7 +82,14 @@ namespace Engine
 
             this.CursorPosition = new Vector2((int)left, (int)top);
 
-            this.Manipulator.SetPosition(this.CursorPosition);
+            if (this.Centered && this.Game.Form.IsFullscreen)
+            {
+                this.Manipulator.SetPosition(this.Game.Form.RelativeCenter);
+            }
+            else
+            {
+                this.Manipulator.SetPosition(this.CursorPosition);
+            }
 
             base.Update(gameTime);
         }

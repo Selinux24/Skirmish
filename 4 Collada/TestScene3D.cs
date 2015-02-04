@@ -35,7 +35,13 @@ namespace Collada
         {
             base.Initialize();
 
-            this.cursor = this.AddCursor("target.png", 16, 16);
+            SpriteDescription cursorDesc = new SpriteDescription()
+            {
+                Textures = new[] { "target.png" },
+                Width = 16,
+                Height = 16,
+            };
+            this.cursor = this.AddCursor(cursorDesc);
 
             this.title = this.AddText("Tahoma", 18, Color.White);
             this.title.Text = "Collada Scene with billboards and animation";
@@ -363,7 +369,6 @@ namespace Collada
 
             #endregion
         }
-     
         private void NextHelicopter()
         {
             this.selectedHelicopter++;

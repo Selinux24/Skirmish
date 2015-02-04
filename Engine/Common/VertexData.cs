@@ -391,8 +391,7 @@ namespace Engine.Common
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
                 Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
-                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.Zero,
-                BiNormal = v.BiNormal.HasValue ? v.BiNormal.Value : Vector3.Zero,
+                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
             };
         }
         /// <summary>
@@ -506,8 +505,7 @@ namespace Engine.Common
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
                 Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
-                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.Zero,
-                BiNormal = v.BiNormal.HasValue ? v.BiNormal.Value : Vector3.Zero,
+                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
@@ -847,6 +845,17 @@ namespace Engine.Common
                 vertexTypes == VertexTypes.PositionNormalTextureTangentSkinned;
         }
         /// <summary>
+        /// Gets whether specified vertex type has tangent channel or not
+        /// </summary>
+        /// <param name="vertexTypes">Vertex type</param>
+        /// <returns>Returns true if the vertex type has tangent channel info</returns>
+        public static bool IsTangent(VertexTypes vertexTypes)
+        {
+            return
+                vertexTypes == VertexTypes.PositionNormalTextureTangent ||
+                vertexTypes == VertexTypes.PositionNormalTextureTangentSkinned;
+        }
+        /// <summary>
         /// Gets whether specified vertex type is textured or not
         /// </summary>
         /// <param name="vertexTypes">Vertex type</param>
@@ -877,6 +886,18 @@ namespace Engine.Common
             if (vertexType == VertexTypes.PositionTexture) return VertexTypes.PositionTextureSkinned;
             if (vertexType == VertexTypes.PositionNormalTexture) return VertexTypes.PositionNormalTextureSkinned;
             if (vertexType == VertexTypes.PositionNormalTextureTangent) return VertexTypes.PositionNormalTextureTangentSkinned;
+
+            return VertexTypes.Unknown;
+        }
+        /// <summary>
+        /// Gets tangent equivalent for specified non tangent type
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <returns>Returns tangent equivalent for specified non tangent type</returns>
+        public static VertexTypes GetTangentEquivalent(VertexTypes vertexType)
+        {
+            if (vertexType == VertexTypes.PositionNormalTexture) return VertexTypes.PositionNormalTextureTangent;
+            if (vertexType == VertexTypes.PositionNormalTextureSkinned) return VertexTypes.PositionNormalTextureTangentSkinned;
 
             return VertexTypes.Unknown;
         }

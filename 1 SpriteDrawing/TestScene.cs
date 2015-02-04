@@ -20,19 +20,23 @@ namespace SpriteDrawing
         {
             base.Initialize();
 
-            this.spriteMov = this.AddSprite(
-                "smiley.jpg",
-                128,
-                128,
-                true,
-                1);
+            SpriteDescription spriteMovDesc = new SpriteDescription()
+            {
+                Textures = new[] { "smiley.jpg" },
+                Width = 128,
+                Height = 128,
+                FitScreen = true,
+            };
+            this.spriteMov = this.AddSprite(spriteMovDesc, 1);
 
-            this.spriteFixed = this.AddSprite(
-                "seafloor.dds",
-                256,
-                256,
-                true,
-                2);
+            SpriteDescription spriteFixedDesc = new SpriteDescription()
+            {
+                Textures = new[] { "seafloor.jpg" },
+                Width = 256,
+                Height = 256,
+                FitScreen = true,
+            };
+            this.spriteFixed = this.AddSprite(spriteFixedDesc, 2);
 
             this.background = this.AddBackgroud("background.jpg", 99);
 

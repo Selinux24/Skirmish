@@ -22,7 +22,7 @@ namespace Engine.Common
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
                 new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, 0, InputClassification.PerVertexData, 0),
                 new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, 0, InputClassification.PerVertexData, 0),
-                new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 32, 0, InputClassification.PerVertexData, 0),
+                new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32_Float, 32, 0, InputClassification.PerVertexData, 0),
             };
         }
 
@@ -42,10 +42,6 @@ namespace Engine.Common
         /// Tangent
         /// </summary>
         public Vector3 Tangent;
-        /// <summary>
-        /// Binormal
-        /// </summary>
-        public Vector3 BiNormal;
         /// <summary>
         /// Vertex type
         /// </summary>
@@ -78,7 +74,6 @@ namespace Engine.Common
             else if (channel == VertexDataChannels.Normal) return true;
             else if (channel == VertexDataChannels.Texture) return true;
             else if (channel == VertexDataChannels.Tangent) return true;
-            else if (channel == VertexDataChannels.BiNormal) return true;
             else return false;
         }
         /// <summary>
@@ -93,7 +88,6 @@ namespace Engine.Common
             else if (channel == VertexDataChannels.Normal) return (T)Convert.ChangeType(this.Normal, typeof(T));
             else if (channel == VertexDataChannels.Texture) return (T)Convert.ChangeType(this.Texture, typeof(T));
             else if (channel == VertexDataChannels.Tangent) return (T)Convert.ChangeType(this.Tangent, typeof(T));
-            else if (channel == VertexDataChannels.BiNormal) return (T)Convert.ChangeType(this.BiNormal, typeof(T));
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
 

@@ -4,6 +4,7 @@ using SharpDX.Direct3D;
 namespace Engine.Content
 {
     using Engine.Common;
+    using SharpDX;
 
     /// <summary>
     /// Sub mesh content
@@ -129,6 +130,51 @@ namespace Engine.Content
                 };
 
                 return true;
+            }
+        }
+        /// <summary>
+        /// Compute UV tangen space
+        /// </summary>
+        public void ComputeTangents()
+        {
+            if (this.vertices != null && this.vertices.Length > 0)
+            {
+                if (this.indices != null && this.indices.Length > 0)
+                {
+                    for (int i = 0; i < this.indices.Length; i += 3)
+                    {
+                        Vector3 tangent;
+                        Vector3 binormal;
+                        Vector3 normal;
+                        VertexData.CalculateNormals(
+                            this.vertices[this.indices[i + 0]],
+                            this.vertices[this.indices[i + 1]],
+                            this.vertices[this.indices[i + 2]], 
+                            out tangent, out binormal, out normal);
+
+                        this.vertices[this.indices[i + 0]].Tangent = tangent;
+                        this.vertices[this.indices[i + 1]].Tangent = tangent;
+                        this.vertices[this.indices[i + 2]].Tangent = tangent;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < this.vertices.Length; i += 3)
+                    {
+                        Vector3 tangent;
+                        Vector3 binormal;
+                        Vector3 normal;
+                        VertexData.CalculateNormals(
+                            this.vertices[i + 0],
+                            this.vertices[i + 1],
+                            this.vertices[i + 2], 
+                            out tangent, out binormal, out normal);
+
+                        this.vertices[i + 0].Tangent = tangent;
+                        this.vertices[i + 1].Tangent = tangent;
+                        this.vertices[i + 2].Tangent = tangent;
+                    }
+                }
             }
         }
 

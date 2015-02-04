@@ -41,6 +41,8 @@ namespace Skybox
         private ParticleSystem fire = null;
         private ParticleSystem movingfire = null;
 
+        private Model normalMapModel = null;
+
         public TestScene3D(Game game)
             : base(game)
         {
@@ -51,9 +53,19 @@ namespace Skybox
         {
             base.Initialize();
 
+            this.normalMapModel = this.AddModel("normalMap.dae");
+            this.normalMapModel.Manipulator.SetPosition(0, 0.5f, 0);
+
             #region Cursor
 
-            this.cursor = this.AddCursor("target.png", 16, 16);
+            SpriteDescription cursorDesc = new SpriteDescription()
+            {
+                Textures = new[] { "target.png" },
+                Width = 16,
+                Height = 16,
+            };
+
+            this.cursor = this.AddCursor(cursorDesc);
 
             #endregion
 
@@ -105,7 +117,7 @@ namespace Skybox
 
             this.torchs = this.AddInstancingModel("torch.dae", this.firePositions.Length);
             for (int i = 0; i < this.firePositions.Length; i++)
-			{
+            {
                 this.ruins.FindGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i]);
 
                 this.torchs.Instances[i].Manipulator.SetScale(0.20f * globalScale, true);

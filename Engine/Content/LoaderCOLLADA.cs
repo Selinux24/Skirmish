@@ -1041,6 +1041,9 @@ namespace Engine.Content
                 transparentColor = transparent.Opaque == EnumOpaque.AlphaOne ? new Color4(0.0f, 0.0f, 0.0f, 1.0f) : new Color4(0.0f, 0.0f, 0.0f, 0.0f);
             }
 
+            //Look for bump mappings
+            string normalMapTexture = FindBumpMap(profile, technique);
+
             return new MaterialContent()
             {
                 Algorithm = algorithmName,
@@ -1062,6 +1065,8 @@ namespace Engine.Content
                 IndexOfRefraction = indexOfRefractionValue,
 
                 Transparent = transparentColor,
+
+                NormalMapTexture = normalMapTexture,
             };
         }
         /// <summary>
@@ -1103,6 +1108,34 @@ namespace Engine.Content
                         else if (surface.InitVolume != null)
                         {
                             throw new NotImplementedException();
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Finds bump map texture
+        /// </summary>
+        /// <param name="profile">Profile</param>
+        /// <param name="technique">Technique information</param>
+        /// <returns>Returns texture name</returns>
+        private static string FindBumpMap(ProfileCOMMON profile, TechniqueCOMMON technique)
+        {
+            if (technique.Extras != null && technique.Extras.Length > 0)
+            {
+                for (int i = 0; i < technique.Extras.Length; i++)
+                {
+                    Technique[] techniques = technique.Extras[i].Techniques;
+                    if (techniques != null && techniques.Length > 0)
+                    {
+                        for (int t = 0; t < techniques.Length; t++)
+                        {
+                            if (techniques[t].BumpMaps != null && techniques[t].BumpMaps.Length > 0)
+                            {
+                                return FindTexture(profile, techniques[t].BumpMaps[0].Texture);
+                            }
                         }
                     }
                 }

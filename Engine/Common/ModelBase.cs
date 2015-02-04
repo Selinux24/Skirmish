@@ -129,10 +129,6 @@ namespace Engine.Common
         /// </summary>
         protected TextureDictionary Textures = new TextureDictionary();
         /// <summary>
-        /// Normal maps
-        /// </summary>
-        protected TextureDictionary NormalMaps = new TextureDictionary();
-        /// <summary>
         /// Meshes
         /// </summary>
         protected MeshDictionary Meshes = new MeshDictionary();
@@ -175,10 +171,11 @@ namespace Engine.Common
         /// <param name="instanced">Is instanced</param>
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
-        public ModelBase(Game game, Scene3D scene, ModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true)
+        /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
+        public ModelBase(Game game, Scene3D scene, ModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true)
             : base(game, scene)
         {
-            this.Initialize(content, instanced, instances, loadAnimation);
+            this.Initialize(content, instanced, instances, loadAnimation, loadNormalMaps);
         }
 
         /// <summary>
@@ -188,7 +185,8 @@ namespace Engine.Common
         /// <param name="instanced">Is instanced</param>
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
-        protected virtual void Initialize(ModelContent modelContent, bool instanced, int instances, bool loadAnimation = true)
+        /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
+        protected virtual void Initialize(ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps)
         {
             //Images
             this.InitializeTextures(modelContent);
@@ -197,7 +195,7 @@ namespace Engine.Common
             this.InitializeMaterials(modelContent);
 
             //Skins & Meshes
-            this.InitializeGeometry(modelContent, loadAnimation, instanced, instances);
+            this.InitializeGeometry(modelContent, instanced, instances, loadAnimation, loadNormalMaps);
 
             //Animation
             if (loadAnimation) this.InitializeSkinnedData(modelContent);
@@ -276,6 +274,7 @@ namespace Engine.Common
                         DiffuseTexture = this.Textures[effectInfo.DiffuseTexture],
                         SpecularTexture = this.Textures[effectInfo.SpecularTexture],
                         ReflectiveTexture = this.Textures[effectInfo.ReflectiveTexture],
+                        NormalMap = this.Textures[effectInfo.NormalMapTexture],
                     };
 
                     this.Materials.Add(mat, meshMaterial);
@@ -288,28 +287,60 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         /// <param name="instanced">Instaced</param>
         /// <param name="instances">Instance count</param>
-        /// <param name="meshes">Mesh dictionary created</param>
-        /// <param name="skinList">Skins readed</param>
-        protected virtual void InitializeGeometry(ModelContent modelContent, bool loadAnimation, bool instanced, int instances)
+        /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
+        /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
+        protected virtual void InitializeGeometry(ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps)
         {
             foreach (string meshName in modelContent.Geometry.Keys)
             {
-                Dictionary<string, SubMeshContent> dict = modelContent.Geometry[meshName];
+                Dictionary<string, SubMeshContent> dictGeometry = modelContent.Geometry[meshName];
 
-                ControllerContent cInfo = modelContent.Controllers.GetControllerForMesh(meshName);
-
-                //Apply shape matrix if controller exists but we are not loading animation info
-                Matrix bindShapeMatrix = cInfo != null && !loadAnimation ? cInfo.BindShapeMatrix : Matrix.Identity;
-                Weight[] weights = cInfo != null ? cInfo.Weights : null;
-                string[] jointNames = modelContent.SkinningInfo != null ? modelContent.SkinningInfo.Skeleton.JointNames : null;
-
-                foreach (string material in dict.Keys)
+                bool isSkinned = false;
+                ControllerContent cInfo = null;
+                Matrix bindShapeMatrix = Matrix.Identity;
+                Weight[] weights = null;
+                string[] jointNames = null;
+                if (loadAnimation && modelContent.Controllers != null && modelContent.SkinningInfo != null)
                 {
-                    SubMeshContent geometry = dict[material];
+                    cInfo = modelContent.Controllers.GetControllerForMesh(meshName);
+                    if (cInfo != null)
+                    {
+                        //Apply shape matrix if controller exists but we are not loading animation info
+                        bindShapeMatrix = cInfo.BindShapeMatrix;
+                        weights = cInfo.Weights;
+                        jointNames = modelContent.SkinningInfo.Skeleton.JointNames;
 
-                    VertexTypes vertexType = loadAnimation && cInfo != null ?
-                        VertexData.GetSkinnedEquivalent(geometry.VertexType) :
-                        geometry.VertexType;
+                        isSkinned = true;
+                    }
+                }
+
+                foreach (string material in dictGeometry.Keys)
+                {
+                    SubMeshContent geometry = dictGeometry[material];
+
+                    VertexTypes vertexType = geometry.VertexType;
+
+                    if (isSkinned)
+                    {
+                        //Get skinned equivalent
+                        vertexType = VertexData.GetSkinnedEquivalent(vertexType);
+                    }
+
+                    if (loadNormalMaps)
+                    {
+                        if (!VertexData.IsTangent(vertexType))
+                        {
+                            MeshMaterial meshMaterial = this.Materials[material];
+                            if (meshMaterial.NormalMap != null)
+                            {
+                                //Get tangent equivalent
+                                vertexType = VertexData.GetTangentEquivalent(vertexType);
+
+                                //Compute tangents
+                                geometry.ComputeTangents();
+                            }
+                        }
+                    }
 
                     IVertexData[] vertexList = VertexData.Convert(
                         vertexType,
@@ -473,19 +504,6 @@ namespace Engine.Common
                 }
                 this.Textures.Clear();
                 this.Textures = null;
-            }
-
-            if (this.NormalMaps != null)
-            {
-                foreach (ShaderResourceView view in this.NormalMaps.Values)
-                {
-                    if (view != null)
-                    {
-                        view.Dispose();
-                    }
-                }
-                this.NormalMaps.Clear();
-                this.NormalMaps = null;
             }
         }
         /// <summary>

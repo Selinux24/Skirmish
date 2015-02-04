@@ -44,7 +44,7 @@ struct VSVertexPositionNormalTextureTangent
 {
     float3 positionLocal : POSITION;
     float3 normalLocal : NORMAL;
-    float4 tangentLocal : TANGENT;
+    float3 tangentLocal : TANGENT;
     float2 tex : TEXCOORD0;
 };
 
@@ -302,7 +302,7 @@ struct PSVertexPositionNormalTextureTangent
     float4 positionHomogeneous : SV_POSITION;
 	float3 positionWorld : POSITION;
     float3 normalWorld : NORMAL;
-    float4 tangentWorld : TANGENT;
+    float3 tangentWorld : TANGENT;
     float2 tex : TEXCOORD0;
 	float textureIndex : textureIndex;
 };

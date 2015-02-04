@@ -87,7 +87,7 @@ namespace Engine
         /// <param name="scene">Scene</param>
         /// <param name="content">Content</param>
         public Model(Game game, Scene3D scene, ModelContent content)
-            : base(game, scene, content, false, 0, true)
+            : base(game, scene, content, false, 0, true, true)
         {
             this.UseZBuffer = true;
 
@@ -187,12 +187,12 @@ namespace Engine
                             if (mat != null)
                             {
                                 this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
-                                this.effect.UpdatePerObject(mat.DiffuseTexture, this.TextureIndex);
+                                this.effect.UpdatePerObject(mat.DiffuseTexture, mat.NormalMap, this.TextureIndex);
                             }
                             else
                             {
                                 this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-                                this.effect.UpdatePerObject(null, 0);
+                                this.effect.UpdatePerObject(null, null, 0);
                             }
 
                             #endregion

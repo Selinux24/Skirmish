@@ -28,7 +28,7 @@ namespace Engine
         /// <param name="scene">Scene</param>
         /// <param name="content">Content</param>
         public Billboard(Game game, Scene3D scene, ModelContent content)
-            : base(game, scene, content, false, 0, false)
+            : base(game, scene, content, false, 0, false, false)
         {
             this.effect = new EffectBillboard(game.Graphics.Device);
 

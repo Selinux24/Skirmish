@@ -27,6 +27,7 @@ cbuffer cbSkinned : register (b2)
 };
 
 Texture2DArray gTextureArray;
+Texture2D gNormalMap;
 
 PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
 {
@@ -170,6 +171,54 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	return litColor;
 }
 
+PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangent(VSVertexPositionNormalTextureTangent input)
+{
+    PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
+
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
+    output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
+    output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
+	output.tangentWorld = normalize(mul(input.tangentLocal, (float3x3)gWorld));
+	output.tex = input.tex;
+	output.textureIndex = gTextureIndex;
+    
+    return output;
+}
+
+float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input) : SV_TARGET
+{
+	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+	float distToEye = length(toEyeWorld);
+	toEyeWorld /= distToEye;
+
+	float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
+	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
+
+	LightInput lInput = (LightInput)0;
+	lInput.toEyeWorld = toEyeWorld;
+	lInput.positionWorld = input.positionWorld;
+	lInput.normalWorld = bumpedNormalW;
+	lInput.material = gMaterial;
+	lInput.dirLights = gDirLights;
+	lInput.pointLight = gPointLight;
+	lInput.spotLight = gSpotLight;
+
+	LightOutput lOutput = ComputeLights(lInput);
+
+    float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+
+	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
+
+	if(gFogRange > 0)
+	{
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+	}
+
+	litColor.a = gMaterial.Diffuse.a * textureColor.a;
+
+	return litColor;
+}
+
 PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNormalTextureSkinned input)
 {
 	PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture)0;
@@ -270,6 +319,17 @@ technique11 PositionNormalTexture
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTexture()));
+	}
+}
+
+technique11 PositionNormalTextureTangent
+{
+	pass P0
+	{
+		SetRasterizerState(RasterizerSolid);
+		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureTangent()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTextureTangent()));
 	}
 }
 

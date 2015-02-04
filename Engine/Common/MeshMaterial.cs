@@ -32,6 +32,10 @@ namespace Engine.Common
         /// Reflective texture
         /// </summary>
         public ShaderResourceView ReflectiveTexture { get; set; }
+        /// <summary>
+        /// Normal map
+        /// </summary>
+        public ShaderResourceView NormalMap { get; set; }
 
         /// <summary>
         /// Resource disposing

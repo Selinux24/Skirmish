@@ -309,10 +309,13 @@ namespace Engine
             Sprite newModel = new Sprite(
                 this.Game,
                 this,
-                texture,
-                0,
-                0,
-                true);
+                new SpriteDescription()
+                {
+                    Textures = new[] { texture },
+                    Width = 0,
+                    Height = 0,
+                    FitScreen = true,
+                });
 
             this.AddComponent(newModel, order);
 
@@ -321,21 +324,15 @@ namespace Engine
         /// <summary>
         /// Adds new sprite
         /// </summary>
-        /// <param name="texture">Sprite texture</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="fitScreen">Fit screen</param>
+        /// <param name="description">Sprite description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Sprite AddSprite(string texture, int width = 0, int height = 0, bool fitScreen = false, int order = 0)
+        public Sprite AddSprite(SpriteDescription description, int order = 0)
         {
             Sprite newModel = new Sprite(
                 this.Game,
                 this,
-                texture,
-                width,
-                height,
-                fitScreen);
+                description);
 
             this.AddComponent(newModel, order);
 
@@ -364,19 +361,15 @@ namespace Engine
         /// <summary>
         /// Adds new game cursor
         /// </summary>
-        /// <param name="texture">Cursor image</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
+        /// <param name="description">Sprite description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Cursor AddCursor(string texture, int width, int height, int order = 0)
+        public Cursor AddCursor(SpriteDescription description, int order = 0)
         {
             Cursor newModel = new Cursor(
                 this.Game,
                 this,
-                texture,
-                width,
-                height);
+                description);
 
             this.AddComponent(newModel, order);
 

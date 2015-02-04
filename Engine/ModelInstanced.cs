@@ -74,7 +74,7 @@ namespace Engine
         /// <param name="content">Content</param>
         /// <param name="instances">Number of instances</param>
         public ModelInstanced(Game game, Scene3D scene, ModelContent content, int instances)
-            : base(game, scene, content, true, instances, true)
+            : base(game, scene, content, true, instances, true, true)
         {
             this.UseZBuffer = true;
 
