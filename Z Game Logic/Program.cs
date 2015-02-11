@@ -33,7 +33,7 @@ namespace GameLogic
         static void Main()
         {
 #if DEBUG
-            using (game = new Game("Game Logic", false, 1024, 768))
+            using (game = new Game("Game Logic", false, 800, 600))
 #else
             using (game = new Game("Game Logic"))
 #endif
@@ -134,23 +134,11 @@ namespace GameLogic
         {
             if (action is Move || action is Run || action is Crawl)
             {
-                //Point to point
-                action.Active = Program.SkirmishGame.CurrentSoldier;
-                action.Destination = Vector3.Zero; //TODO: How to point
-                action.WastedPoints = Program.SkirmishGame.CurrentSoldier.CurrentMovingCapacity;
-
-                Program.objectsScene.Move(action.Active, action.Destination);
+               
             }
             else if (action is Assault)
             {
-                //Point to enemy
-                action.Active = Program.SkirmishGame.CurrentSoldier;
-                action.Passive = Program.GetRandomEnemy();
-                action.WastedPoints = Program.SkirmishGame.CurrentSoldier.CurrentMovingCapacity;
-
                 Program.SkirmishGame.JoinMelee(action.Active, action.Passive);
-
-                Program.objectsScene.Melee(action.Passive, action.Active);
             }
             else if (action is CoveringFire)
             {
@@ -174,6 +162,8 @@ namespace GameLogic
                 //Point to point
                 action.Active = Program.SkirmishGame.CurrentSoldier;
             }
+
+            action.Execute();
         }
         private static void ShootingActions(ActionsShooting action)
         {

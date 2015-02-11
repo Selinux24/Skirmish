@@ -509,6 +509,18 @@ namespace Engine
                 this.swapChain.Present(0, PresentFlags.None);
             }
         }
+
+        public void SetDefaultRenderTarget()
+        {
+            this.DeviceContext.OutputMerger.SetTargets(this.depthStencilView, this.renderTargetView);
+            this.DeviceContext.Rasterizer.SetViewport(this.Viewport);
+        }
+
+        public void SetRenderTarget(RenderTargetView renderTarget, Viewport viewport)
+        {
+            this.DeviceContext.OutputMerger.SetTargets((DepthStencilView)null, renderTarget);
+            this.DeviceContext.Rasterizer.SetViewport(viewport);
+        }
         /// <summary>
         /// Enables z-buffer
         /// </summary>

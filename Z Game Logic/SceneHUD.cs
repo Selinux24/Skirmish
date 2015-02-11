@@ -22,7 +22,6 @@ namespace GameLogic
         private SpriteButton butNextSoldier = null;
         private SpriteButton butPrevAction = null;
         private SpriteButton butNextAction = null;
-        private SpriteButton butDoAction = null;
 
         public SceneHUD(Game game)
             : base(game)
@@ -118,25 +117,12 @@ namespace GameLogic
                 Text = "Next Action",
             });
 
-            this.butDoAction = this.AddSpriteButton(new SpriteButtonDescription()
-            {
-                TextureReleased = "button_on.png",
-                TexturePressed = "button_off.png",
-                Width = 90,
-                Height = 20,
-                Font = "Lucida Casual",
-                FontSize = 10,
-                TextColor = Color.Yellow,
-                Text = "Do Action",
-            });
-
             this.butClose.Click += (sender, eventArgs) => { this.Game.Exit(); };
             this.butNext.Click += (sender, eventArgs) => { this.Next(); };
             this.butPrevSoldier.Click += (sender, eventArgs) => { this.PrevSoldier(); };
             this.butNextSoldier.Click += (sender, eventArgs) => { this.NextSoldier(); };
             this.butPrevAction.Click += (sender, eventArgs) => { this.PrevAction(); };
             this.butNextAction.Click += (sender, eventArgs) => { this.NextAction(); };
-            this.butDoAction.Click += (sender, eventArgs) => { this.DoAction(); };
 
             this.txtTitle.Text = "Game Logic";
 
@@ -159,11 +145,6 @@ namespace GameLogic
             if (this.Game.Input.KeyJustReleased(Keys.P))
             {
                 this.PrevSoldier();
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.X))
-            {
-                this.DoAction();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Right))
@@ -219,10 +200,6 @@ namespace GameLogic
         {
             Program.PrevAction();
         }
-        private void DoAction()
-        {
-            Program.DoAction();
-        }
 
         protected override void Resized(object sender, EventArgs e)
         {
@@ -251,8 +228,6 @@ namespace GameLogic
             this.butPrevAction.Left = this.butNextSoldier.Left + this.butNextSoldier.Width + 25;
             this.butNextAction.Top = this.butNext.Top;
             this.butNextAction.Left = this.butPrevAction.Left + this.butPrevAction.Width + 10;
-            this.butDoAction.Top = this.butNext.Top;
-            this.butDoAction.Left = this.butNextAction.Left + this.butNextAction.Width + 25;
 
             this.txtSoldier.Top = this.butNext.Top + this.butNext.Height + 1;
             this.txtSoldier.Left = 10;

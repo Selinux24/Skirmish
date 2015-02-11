@@ -5,25 +5,29 @@ namespace GameLogic.Rules
     {
         public int WastedPoints { get; set; }
 
-        public static ActionsShooting[] List
+        public static ActionsShooting[] GetList(Skirmish game)
         {
-            get
+            return new ActionsShooting[]
             {
-                return new ActionsShooting[]
-                {
-                    new Shoot(),
-                    new SupressingFire(),
-                    new Support(),
-                    new UseShootingItem(),
-                    new FirstAid(),
-                };
-            }
+                new Shoot(game),
+                new SupressingFire(game),
+                new Support(game),
+                new UseShootingItem(game),
+                new FirstAid(game),
+            };
+        }
+
+        public ActionsShooting(Skirmish game)
+            : base(game)
+        {
+
         }
     }
 
     public class Shoot : ActionsShooting
     {
-        public Shoot()
+        public Shoot(Skirmish game)
+            : base(game)
         {
             this.Name = "Shoot";
         }
@@ -41,7 +45,8 @@ namespace GameLogic.Rules
 
     public class SupressingFire : ActionsShooting
     {
-        public SupressingFire()
+        public SupressingFire(Skirmish game)
+            : base(game)
         {
             this.Name = "Supressing Fire";
         }
@@ -56,7 +61,8 @@ namespace GameLogic.Rules
 
     public class Support : ActionsShooting
     {
-        public Support()
+        public Support(Skirmish game)
+            : base(game)
         {
             this.Name = "Support";
             this.NeedsCommunicator = true;
@@ -72,7 +78,8 @@ namespace GameLogic.Rules
 
     public class UseShootingItem : ActionsShooting
     {
-        public UseShootingItem()
+        public UseShootingItem(Skirmish game)
+            : base(game)
         {
             this.Name = "Use Item";
             this.ItemAction = true;
@@ -88,7 +95,8 @@ namespace GameLogic.Rules
 
     public class FirstAid : ActionsShooting
     {
-        public FirstAid()
+        public FirstAid(Skirmish game)
+            : base(game)
         {
             this.Name = "First Aid";
             this.Classes = SoldierClasses.Medic;

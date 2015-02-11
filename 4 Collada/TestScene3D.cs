@@ -25,6 +25,8 @@ namespace Collada
         private Helicopter[] helicopters = null;
         private bool chaseCamera = false;
 
+        private LineListDrawer bboxesDrawer = null;
+
         public TestScene3D(Game game)
             : base(game)
         {
@@ -65,6 +67,11 @@ namespace Collada
             this.helicoptersModel = this.AddInstancingModel("Helicopter.dae", 15);
             this.lampsModel = this.AddInstancingModel("Poly.dae", 2);
             this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, "raindrop.dds"));
+
+            BoundingBox[] bboxes = this.ground.pickingQuadtree.GetBoundingBoxes(5);
+            Line[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
+
+            this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
 
             this.InitializeCamera();
             this.InitializeEnvironment();
@@ -215,12 +222,21 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.Tab))
             {
-                this.NextHelicopter();
+                this.NextHelicopter(gameTime);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.C))
             {
                 this.chaseCamera = !this.chaseCamera;
+
+                if (this.chaseCamera)
+                {
+                    this.SitDown(gameTime);
+                }
+                else
+                {
+                    this.StandUp(gameTime);
+                }
             }
 
             #endregion
@@ -295,35 +311,40 @@ namespace Collada
             if (this.Game.Input.KeyPressed(Keys.F5))
             {
                 helicopter.SetPilot();
+
+                this.SitDown(gameTime);
             }
             if (this.Game.Input.KeyPressed(Keys.F6))
             {
                 helicopter.SetCopilot();
+
+                this.SitDown(gameTime);
             }
             if (this.Game.Input.KeyPressed(Keys.F7))
             {
                 helicopter.SetLeftMachineGun();
+
+                this.SitDown(gameTime);
             }
             if (this.Game.Input.KeyPressed(Keys.F8))
             {
                 helicopter.SetRightMachineGun();
+
+                this.SitDown(gameTime);
             }
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
                 manipulator.MoveLeft(gameTime);
             }
-
             if (this.Game.Input.KeyPressed(Keys.D))
             {
                 manipulator.MoveRight(gameTime);
             }
-
             if (this.Game.Input.KeyPressed(Keys.W))
             {
                 manipulator.MoveForward(gameTime);
             }
-
             if (this.Game.Input.KeyPressed(Keys.S))
             {
                 manipulator.MoveBackward(gameTime);
@@ -337,24 +358,19 @@ namespace Collada
                 {
                     manipulator.YawLeft(gameTime);
                 }
-
                 if (this.Game.Input.MouseXDelta > 0)
                 {
                     manipulator.YawRight(gameTime);
                 }
-
                 if (this.Game.Input.MouseYDelta < 0)
                 {
                     manipulator.MoveUp(gameTime);
                 }
-
                 if (this.Game.Input.MouseYDelta > 0)
                 {
                     manipulator.MoveDown(gameTime);
                 }
             }
-
-            this.SitDown();
 
             #region Second lamp
 
@@ -369,7 +385,7 @@ namespace Collada
 
             #endregion
         }
-        private void NextHelicopter()
+        private void NextHelicopter(GameTime gameTime)
         {
             this.selectedHelicopter++;
             if (this.selectedHelicopter >= this.helicoptersModel.Count)
@@ -379,10 +395,10 @@ namespace Collada
 
             if (this.chaseCamera)
             {
-                this.SitDown();
+                this.SitDown(gameTime);
             }
         }
-        private void PrevHelicopter()
+        private void PrevHelicopter(GameTime gameTime)
         {
             this.selectedHelicopter--;
             if (this.selectedHelicopter < 0)
@@ -392,25 +408,24 @@ namespace Collada
 
             if (this.chaseCamera)
             {
-                this.SitDown();
+                this.SitDown(gameTime);
             }
         }
-        private void SitDown()
+        private void SitDown(GameTime gameTime)
         {
             Vector3 offset = this.helicopters[this.selectedHelicopter].Offset;
-            Vector3 view = this.helicopters[this.selectedHelicopter].View;
             Manipulator3D manipulator = this.helicopters[this.selectedHelicopter].Manipulator;
 
-            view = Vector3.Transform(view, manipulator.Rotation);
+            this.Camera.Following = new FollowingManipulator(manipulator, offset);
+        }
+        private void StandUp(GameTime gameTime)
+        {
+            Vector3 position = this.Camera.Position;
+            Vector3 interest = this.Camera.Interest;
 
-            Vector3 position = manipulator.Position;
-            position += manipulator.Left * offset.X;
-            position += manipulator.Up * offset.Y;
-            position += manipulator.Forward * offset.Z;
-            Vector3 interest = position + view;
-
-            this.Camera.Goto(Vector3.Lerp(this.Camera.Position, position, 0.8f));
-            this.Camera.LookTo(Vector3.Lerp(this.Camera.Interest, interest, 0.8f));
+            this.Camera.Following = null;
+            this.Camera.Position = position;
+            this.Camera.Interest = interest;
         }
     }
 }

@@ -288,6 +288,7 @@
     <Compile Include="Common\GeometryUtil.cs" />
     <Compile Include="Common\IBufferData.cs" />
     <Compile Include="Common\IControl.cs" />
+    <Compile Include="Common\QuadTree.cs" />
     <Compile Include="Common\Skeleton.cs" />
     <Compile Include="Curve.cs" />
     <Compile Include="Line.cs" />
@@ -314,6 +315,7 @@
     <Compile Include="Common\Weight.cs" />
     <Compile Include="Cursor.cs" />
     <Compile Include="Keys.cs" />
+    <Compile Include="Minimap.cs" />
     <Compile Include="MouseButtons.cs" />
     <Compile Include="SpriteButton.cs" />
     <Compile Include="TriangleListDrawer.cs" />

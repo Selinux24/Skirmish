@@ -7,8 +7,6 @@ namespace Skybox
 {
     public class TestScene3D : Scene3D
     {
-        private const float globalScale = 1f;
-
         private Vector2[] firePositions = new[]
         {
             new Vector2(+5, +5),
@@ -41,8 +39,6 @@ namespace Skybox
         private ParticleSystem fire = null;
         private ParticleSystem movingfire = null;
 
-        private Model normalMapModel = null;
-
         public TestScene3D(Game game)
             : base(game)
         {
@@ -52,9 +48,6 @@ namespace Skybox
         public override void Initialize()
         {
             base.Initialize();
-
-            this.normalMapModel = this.AddModel("normalMap.dae");
-            this.normalMapModel.Manipulator.SetPosition(0, 0.5f, 0);
 
             #region Cursor
 
@@ -97,7 +90,6 @@ namespace Skybox
                 SkydomTexture = "sunset.dds",
             };
             this.ruins = this.AddTerrain("ruins.dae", desc, false);
-            this.ruins.Manipulator.SetScale(globalScale, true);
 
             this.bboxGlobalDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
             //this.bboxMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.StaticBoundingBoxes), this.bboxColor);
@@ -120,7 +112,7 @@ namespace Skybox
             {
                 this.ruins.FindGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i]);
 
-                this.torchs.Instances[i].Manipulator.SetScale(0.20f * globalScale, true);
+                this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
                 this.torchs.Instances[i].Manipulator.SetPosition(firePositions3D[i], true);
 
                 BoundingBox bbox = this.torchs.Instances[i].GetBoundingBox();
@@ -151,9 +143,9 @@ namespace Skybox
         private void InitializeCamera()
         {
             this.Camera.NearPlaneDistance = 0.5f;
-            this.Camera.FarPlaneDistance = 50.0f * globalScale;
+            this.Camera.FarPlaneDistance = 50.0f;
             this.Camera.Goto(this.walkerHeight);
-            this.Camera.LookTo(Vector3.UnitY + Vector3.UnitZ + this.ruins.Manipulator.Position * globalScale);
+            this.Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
             this.Camera.MovementDelta = 8f;
             this.Camera.SlowMovementDelta = 4f;
         }
@@ -170,11 +162,11 @@ namespace Skybox
 
             #region Light
 
-            float d = globalScale * 0.5f;
+            float d = 0.5f;
 
             Vector3 position = Vector3.Zero;
             position.X = 3.0f * d * (float)Math.Cos(0.4f * this.Game.GameTime.TotalSeconds);
-            position.Y = globalScale;
+            position.Y = 1f;
             position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
 
             this.Lights.PointLight.Position = position;

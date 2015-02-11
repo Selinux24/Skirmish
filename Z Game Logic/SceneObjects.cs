@@ -10,15 +10,18 @@ namespace GameLogic
 
     public class SceneObjects : Scene3D
     {
+        private Model cursor3D = null;
+
         private Terrain terrain = null;
+        private Minimap minimap = null;
 
         private ModelInstanced model = null;
-        private Dictionary<Soldier, ModelInstance> soldiers = new Dictionary<Soldier, ModelInstance>();
+        private Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
         private ModelInstance current
         {
             get
             {
-                return this.soldiers[Program.SkirmishGame.CurrentSoldier];
+                return this.soldierModels[Program.SkirmishGame.CurrentSoldier];
             }
         }
 
@@ -41,8 +44,18 @@ namespace GameLogic
             this.Camera.FarPlaneDistance = 1000f;
             this.Camera.Mode = CameraModes.FreeIsometric;
 
+            this.cursor3D = this.AddModel("cursor.dae");
+
             this.terrain = this.AddTerrain("terrain.dae", new TerrainDescription() { });
-            this.terrain.Manipulator.SetScale(2, true);
+
+            this.minimap = this.AddMinimap(new MinimapDescription()
+            {
+                Width = 100,
+                Height = 100,
+                Left = 0,
+                Top = 0,
+                Terrain = this.terrain,
+            });
 
             BoundingBox bbox = this.terrain.GetBoundingBox();
 
@@ -87,7 +100,7 @@ namespace GameLogic
                         instance.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
                     }
 
-                    this.soldiers.Add(soldier, instance);
+                    this.soldierModels.Add(soldier, instance);
 
                     soldierIndex++;
                 }
@@ -106,10 +119,17 @@ namespace GameLogic
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
 
-            if (this.Game.Input.KeyJustReleased(Keys.Home))
+            Ray cursorRay = this.GetPickingRay();
+            Vector3 position;
+            Triangle triangle;
+            bool picked = this.terrain.Pick(cursorRay, out position, out triangle);
+
+            if (picked)
             {
-                this.GoToSoldier(Program.SkirmishGame.CurrentSoldier);
+                this.cursor3D.Manipulator.SetPosition(position);
             }
+
+            #region DEBUG
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
@@ -120,6 +140,10 @@ namespace GameLogic
             {
                 this.lineDrawer.Visible = !this.lineDrawer.Visible;
             }
+
+            #endregion
+
+            #region Camera
 
             if (this.Game.Input.KeyJustReleased(Keys.PageDown))
             {
@@ -151,6 +175,14 @@ namespace GameLogic
                 this.Camera.MoveBackward(gameTime, shift);
             }
 
+            if (this.Game.Input.RightMouseButtonPressed)
+            {
+                if (picked)
+                {
+                    this.Camera.LookTo(position, CameraTranslations.UseDelta);
+                }
+            }
+
             if (this.Game.Input.MouseWheelDelta > 0)
             {
                 this.Camera.ZoomIn(gameTime, shift);
@@ -160,52 +192,136 @@ namespace GameLogic
             {
                 this.Camera.ZoomOut(gameTime, shift);
             }
+
+            #endregion
+
+            #region Navigation
+
+            if (this.Game.Input.KeyJustReleased(Keys.Home))
+            {
+                this.GoToSoldier(Program.SkirmishGame.CurrentSoldier);
+            }
+
+            #endregion
+
+            #region Actions
+
+            if (Program.CurrentAction is Move)
+            {
+                if (this.Game.Input.LeftMouseButtonJustReleased)
+                {
+                    this.Move(Program.SkirmishGame.CurrentSoldier, position);
+                }
+            }
+            else if (Program.CurrentAction is Assault)
+            {
+                if (this.Game.Input.LeftMouseButtonJustReleased)
+                {
+                    Soldier active = Program.SkirmishGame.CurrentSoldier;
+                    Soldier passive = null;
+                    Vector3 pos = this.current.Manipulator.Position;
+                    float d = float.MaxValue;
+
+                    foreach (Team team in Program.SkirmishGame.EnemyOf(Program.SkirmishGame.CurrentTeam))
+                    {
+                        foreach (Soldier soldier in team.Soldiers)
+                        {
+                            Vector3 soldierPosition;
+                            Triangle trianglePosition;
+                            if (this.soldierModels[soldier].Pick(cursorRay, out soldierPosition, out trianglePosition))
+                            {
+                                float nd = Vector3.DistanceSquared(pos, this.soldierModels[soldier].Manipulator.Position);
+
+                                if (nd < d)
+                                {
+                                    //Select nearest picked passive
+                                    passive = soldier;
+                                    d = nd;
+                                }
+                            }
+                        }
+                    }
+
+                    if (passive != null)
+                    {
+                        this.Assault(passive, active);
+                    }
+                }
+            }
+
+            #endregion
         }
 
         public void GoToSoldier(Soldier soldier)
         {
-            BoundingSphere bsph = this.soldiers[soldier].GetBoundingSphere();
+            BoundingSphere bsph = this.soldierModels[soldier].GetBoundingSphere();
 
             this.Camera.LookTo(bsph.Center, CameraTranslations.Quick);
             this.lineDrawer.SetLines(this.bsphColor, GeometryUtil.CreateWiredSphere(bsph, this.bsphSlices, this.bsphStacks));
         }
         public void UpdateSoldierStates()
         {
-            foreach (Soldier soldier in this.soldiers.Keys)
+            foreach (Soldier soldier in this.soldierModels.Keys)
             {
                 if (soldier.CurrentHealth == HealthStates.Disabled)
                 {
-                    this.soldiers[soldier].Active = false;
-                    this.soldiers[soldier].Visible = false;
+                    this.soldierModels[soldier].Active = false;
+                    this.soldierModels[soldier].Visible = false;
                 }
                 else
                 {
-                    this.soldiers[soldier].Active = true;
-                    this.soldiers[soldier].Visible = true;
+                    this.soldierModels[soldier].Active = true;
+                    this.soldierModels[soldier].Visible = true;
                 }
             }
         }
 
-        public void Move(Soldier soldier, Vector3 destination)
+        public void Move(Soldier active, Vector3 destination)
         {
-            this.soldiers[soldier].Manipulator.SetPosition(destination, true);
+            Move action = new Move(Program.SkirmishGame)
+            {
+                Active = active,
+                WastedPoints = active.CurrentMovingCapacity,
+                Destination = destination,
+            };
+
+            if (action.Execute())
+            {
+                this.soldierModels[active].Manipulator.SetPosition(destination, true);
+
+                this.GoToSoldier(active);
+            }
         }
-        public void Melee(Soldier passive, Soldier active)
+        public void Assault(Soldier passive, Soldier active)
         {
-            Manipulator3D passiveMan = this.soldiers[passive].Manipulator;
-            Manipulator3D activeMan = this.soldiers[active].Manipulator;
+            //TODO: This test must be repeated many times
+            if (passive.CurrentHealth != HealthStates.Disabled)
+            {
+                Assault action = new Assault(Program.SkirmishGame)
+                {
+                    Active = active,
+                    WastedPoints = active.CurrentMovingCapacity,
+                    Passive = passive,
+                };
 
-            Vector3 dir = Vector3.Normalize(activeMan.Position - passiveMan.Position);
+                if (action.Execute())
+                {
+                    Manipulator3D passiveMan = this.soldierModels[passive].Manipulator;
+                    Manipulator3D activeMan = this.soldierModels[active].Manipulator;
 
-            activeMan.SetPosition(passiveMan.Position + (dir * 3f), true);
-            activeMan.LookAt(passiveMan.Position);
+                    Vector3 dir = Vector3.Normalize(activeMan.Position - passiveMan.Position);
 
-            this.GoToSoldier(active);
+                    activeMan.SetPosition(passiveMan.Position + (dir * 3f), true);
+                    activeMan.LookAt(passiveMan.Position);
+
+                    this.GoToSoldier(active);
+                }
+            }
         }
 
         private void SetFrustum()
         {
-            this.lineDrawer.SetLines(this.frstColor, GeometryUtil.CreateWiredFrustum(this.Camera.Frustum));
+            this.lineDrawer.SetLines(this.frstColor, GeometryUtil.CreateWiredPyramid(this.Camera.Frustum));
 
             this.Camera.Mode = CameraModes.Free;
         }

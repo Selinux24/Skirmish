@@ -146,7 +146,7 @@ namespace Engine.Content
                         Vector3 tangent;
                         Vector3 binormal;
                         Vector3 normal;
-                        VertexData.CalculateNormals(
+                        VertexData.ComputeNormals(
                             this.vertices[this.indices[i + 0]],
                             this.vertices[this.indices[i + 1]],
                             this.vertices[this.indices[i + 2]], 
@@ -164,7 +164,7 @@ namespace Engine.Content
                         Vector3 tangent;
                         Vector3 binormal;
                         Vector3 normal;
-                        VertexData.CalculateNormals(
+                        VertexData.ComputeNormals(
                             this.vertices[i + 0],
                             this.vertices[i + 1],
                             this.vertices[i + 2], 

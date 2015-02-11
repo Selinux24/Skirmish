@@ -281,6 +281,15 @@ namespace Engine
 
             return newModel;
         }
+
+        public Minimap AddMinimap(MinimapDescription description, int order = 0)
+        {
+            Minimap newModel = new Minimap(this.Game, this, description);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
         /// <summary>
         /// Adds new skydom
         /// </summary>

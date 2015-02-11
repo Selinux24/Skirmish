@@ -34,12 +34,20 @@ namespace Engine
             Camera cam = new Camera();
 
             cam.mode = CameraModes.Free;
-            cam.Position = position;
-            cam.Interest = interest;
+            cam.position = position;
+            cam.interest = interest;
 
             return cam;
         }
 
+        /// <summary>
+        /// Position
+        /// </summary>
+        private Vector3 position;
+        /// <summary>
+        /// Interest
+        /// </summary>
+        private Vector3 interest;
         /// <summary>
         /// Field of view angle
         /// </summary>
@@ -218,11 +226,35 @@ namespace Engine
         /// <summary>
         /// Camera viewer position
         /// </summary>
-        public Vector3 Position { get; private set; }
+        public Vector3 Position
+        {
+            get
+            {
+                return this.Following != null ? this.Following.Position : this.position;
+            }
+            set
+            {
+                this.position = value;
+
+                if (this.Following != null) this.Following = null;
+            }
+        }
         /// <summary>
         /// Camera interest
         /// </summary>
-        public Vector3 Interest { get; private set; }
+        public Vector3 Interest
+        {
+            get
+            {
+                return this.Following != null ? this.Following.Interest : this.interest;
+            }
+            set
+            {
+                this.interest = value;
+
+                if (this.Following != null) this.Following = null;
+            }
+        }
         /// <summary>
         /// Camera direction
         /// </summary>
@@ -349,18 +381,22 @@ namespace Engine
         /// Camera frustum
         /// </summary>
         public BoundingFrustum Frustum { get; private set; }
+        /// <summary>
+        /// Following object
+        /// </summary>
+        public FollowingObject Following { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         protected Camera()
         {
-            this.Position = Vector3.One;
-            this.Interest = Vector3.Zero;
+            this.position = Vector3.One;
+            this.interest = Vector3.Zero;
 
             this.PerspectiveView = Matrix.LookAtLH(
-                this.Position,
-                this.Interest,
+                this.position,
+                this.interest,
                 Vector3.UnitY);
 
             this.PerspectiveProjection = Matrix.Identity;
@@ -601,66 +637,17 @@ namespace Engine
         {
             this.Zoom(gameTime, false, slow);
         }
-        /// <summary>
-        /// Move camera to position
-        /// </summary>
-        /// <param name="newPosition">New position</param>
-        /// <param name="translation">Translation mode</param>
-        public void Goto(Vector3 newPosition, CameraTranslations translation = CameraTranslations.None)
-        {
-            Vector3 diff = newPosition - this.Position;
-
-            if (translation != CameraTranslations.None)
-            {
-                this.StartTranslations(translation, this.Interest + diff);
-            }
-            else
-            {
-                this.StopTranslations();
-
-                this.Interest += diff;
-                this.Position += diff;
-            }
-        }
-        /// <summary>
-        /// Center camera in new interest
-        /// </summary>
-        /// <param name="newInterest">New interest point</param>
-        /// <param name="translation">Translation mode</param>
-        public void LookTo(Vector3 newInterest, CameraTranslations translation = CameraTranslations.None)
-        {
-            if (translation != CameraTranslations.None)
-            {
-                this.StartTranslations(translation, newInterest);
-            }
-            else
-            {
-                this.StopTranslations();
-
-                if (this.mode == CameraModes.FreeIsometric)
-                {
-                    Vector3 diff = newInterest - this.Interest;
-
-                    this.Interest += diff;
-                    this.Position += diff;
-                }
-                else
-                {
-                    this.Interest = newInterest;
-                }
-            }
-        }
 
         /// <summary>
         /// Sets camera to free mode
         /// </summary>
-        /// <param name="interest">Interest point</param>
+        /// <param name="newInterest">Interest point</param>
         /// <param name="distance">Distance to interest point from viewer point</param>
-        private void SetFree(Vector3 interest, float distance)
+        private void SetFree(Vector3 newInterest, float distance)
         {
             this.StopTranslations();
 
-            Vector3 diff = interest - this.Interest;
+            Vector3 diff = newInterest - this.Interest;
             this.Interest += diff;
             this.Position += diff;
             this.Position = Vector3.Normalize(this.Position) * distance;
@@ -671,18 +658,13 @@ namespace Engine
         /// Sets camera to isometric mode
         /// </summary>
         /// <param name="axis">Isometrix axis</param>
-        /// <param name="interest">Interest point</param>
+        /// <param name="newInterest">Interest point</param>
         /// <param name="distance">Distance to interest point from viewer point</param>
-        private void SetIsometric(IsometricAxis axis, Vector3 interest, float distance)
+        private void SetIsometric(IsometricAxis axis, Vector3 newInterest, float distance)
         {
             this.StopTranslations();
 
-            this.mode = CameraModes.FreeIsometric;
-            this.isometricAxis = axis;
-            this.Interest = interest;
-
             Vector3 tmpPosition = Vector3.Zero;
-            Vector3 tmpInterest = Vector3.Zero;
 
             if (axis == IsometricAxis.NW)
             {
@@ -716,10 +698,80 @@ namespace Engine
                 this.isoMetricLeft = new Vector3(-1f, 0f, 1f);
                 this.isoMetricRight = new Vector3(1f, 0f, -1f);
             }
-            
-            Vector3 diff = this.Interest - tmpInterest;
+
+            this.mode = CameraModes.FreeIsometric;
+            this.isometricAxis = axis;
+
             this.Position = Vector3.Normalize(tmpPosition) * distance;
-            this.Position += diff;
+            this.Position += newInterest;
+            this.Interest = newInterest;
+        }
+        /// <summary>
+        /// Update projections
+        /// </summary>
+        private void UpdateLens()
+        {
+            this.PerspectiveProjection = Matrix.PerspectiveFovLH(
+                this.fieldOfView,
+                this.aspectRelation,
+                this.nearPlaneDistance,
+                this.farPlaneDistance);
+
+            this.OrthoProjection = Matrix.OrthoLH(
+                this.viewportWidth,
+                this.viewportHeight,
+                this.nearPlaneDistance,
+                this.farPlaneDistance);
+        }
+
+        /// <summary>
+        /// Move camera to position
+        /// </summary>
+        /// <param name="newPosition">New position</param>
+        /// <param name="translation">Translation mode</param>
+        public void Goto(Vector3 newPosition, CameraTranslations translation = CameraTranslations.None)
+        {
+            Vector3 diff = newPosition - this.Position;
+
+            if (translation != CameraTranslations.None)
+            {
+                this.StartTranslations(translation, this.Interest + diff);
+            }
+            else
+            {
+                this.StopTranslations();
+
+                this.Position += diff;
+                this.Interest += diff;
+            }
+        }
+        /// <summary>
+        /// Center camera in new interest
+        /// </summary>
+        /// <param name="newInterest">New interest point</param>
+        /// <param name="translation">Translation mode</param>
+        public void LookTo(Vector3 newInterest, CameraTranslations translation = CameraTranslations.None)
+        {
+            if (translation != CameraTranslations.None)
+            {
+                this.StartTranslations(translation, newInterest);
+            }
+            else
+            {
+                this.StopTranslations();
+
+                if (this.mode == CameraModes.FreeIsometric)
+                {
+                    Vector3 diff = newInterest - this.Interest;
+
+                    this.Position += diff;
+                    this.Interest += diff;
+                }
+                else
+                {
+                    this.Interest = newInterest;
+                }
+            }
         }
         /// <summary>
         /// Movement
@@ -765,7 +817,7 @@ namespace Engine
 
             Vector3 fw = Vector3.Transform(this.freeForward, r);
 
-            this.Interest = this.Position + fw;
+            this.Interest = this.position + fw;
         }
         /// <summary>
         /// Zoom
@@ -792,23 +844,6 @@ namespace Engine
                     this.Position = newPosition;
                 }
             }
-        }
-        /// <summary>
-        /// Update projections
-        /// </summary>
-        private void UpdateLens()
-        {
-            this.PerspectiveProjection = Matrix.PerspectiveFovLH(
-                this.fieldOfView,
-                this.aspectRelation,
-                this.nearPlaneDistance,
-                this.farPlaneDistance);
-
-            this.OrthoProjection = Matrix.OrthoLH(
-                this.viewportWidth,
-                this.viewportHeight,
-                this.nearPlaneDistance,
-                this.farPlaneDistance);
         }
 
         /// <summary>
@@ -912,5 +947,46 @@ namespace Engine
         /// Quick
         /// </summary>
         Quick,
+    }
+
+    public interface FollowingObject
+    {
+        Vector3 Position { get; }
+
+        Vector3 Interest { get; }
+    }
+
+    public class FollowingManipulator : FollowingObject
+    {
+        private Manipulator3D manipulator;
+
+        private Vector3 positionOffset = Vector3.Zero;
+
+        public Vector3 Position
+        {
+            get
+            {
+                return Vector3.TransformCoordinate(this.positionOffset, this.manipulator.LocalTransform);
+            }
+        }
+
+        public Vector3 Interest
+        {
+            get
+            {
+                return this.Position + this.manipulator.Forward;
+            }
+        }
+
+        public FollowingManipulator(Manipulator3D manipulator)
+        {
+            this.manipulator = manipulator;
+        }
+
+        public FollowingManipulator(Manipulator3D manipulator, Vector3 offset)
+        {
+            this.manipulator = manipulator;
+            this.positionOffset = offset;
+        }
     }
 }

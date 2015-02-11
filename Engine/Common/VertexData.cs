@@ -713,7 +713,6 @@ namespace Engine.Common
             // not a unique point on the texture map to assign to the pole when mapping
             // a rectangular texture onto a sphere.
 
-            //TODO: Tangents and Binormals
             vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
                 new Vector3(0.0f, +radius, 0.0f),
                 new Vector3(0.0f, +1.0f, 0.0f),
@@ -1176,9 +1175,8 @@ namespace Engine.Common
 
             return vertexList.ToArray();
         }
-
         /// <summary>
-        /// Calculate tangent, normal and binormals of vertices
+        /// Calculate tangent, normal and binormals of triangle vertices
         /// </summary>
         /// <param name="vertex1">Vertex 1</param>
         /// <param name="vertex2">Vertex 2</param>
@@ -1186,7 +1184,7 @@ namespace Engine.Common
         /// <param name="tangent">Tangen result</param>
         /// <param name="binormal">Binormal result</param>
         /// <param name="normal">Normal result</param>
-        public static void CalculateNormals(VertexData vertex1, VertexData vertex2, VertexData vertex3, out Vector3 tangent, out Vector3 binormal, out Vector3 normal)
+        public static void ComputeNormals(VertexData vertex1, VertexData vertex2, VertexData vertex3, out Vector3 tangent, out Vector3 binormal, out Vector3 normal)
         {
             // Calculate the two vectors for the face.
             Vector3 vector1 = vertex2.Position.Value - vertex1.Position.Value;
@@ -1220,7 +1218,6 @@ namespace Engine.Common
 
             normal.Normalize();
         }
-
         /// <summary>
         /// Transforms helper by given matrix
         /// </summary>

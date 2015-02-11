@@ -56,7 +56,7 @@ namespace GameLogic.Rules
                 soldier.NextTurn();
             }
         }
-        public Actions[] GetActions(Phase phase, Soldier soldier, bool onMelee, ActionTypes actionType = ActionTypes.All)
+        public Actions[] GetActions(Skirmish game, Phase phase, Soldier soldier, bool onMelee, ActionTypes actionType = ActionTypes.All)
         {
             return new Actions[] { };
         }

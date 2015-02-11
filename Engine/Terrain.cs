@@ -22,6 +22,10 @@ namespace Engine
         /// Skydom
         /// </summary>
         private Cubemap skydom = null;
+        /// <summary>
+        /// Quadtree used for picking
+        /// </summary>
+        public QuadTree pickingQuadtree = null;
 
         /// <summary>
         /// Current scene
@@ -37,10 +41,6 @@ namespace Engine
                 base.Scene = value;
             }
         }
-        /// <summary>
-        /// Manipulator
-        /// </summary>
-        public Manipulator3D Manipulator { get { return this.terrain.Manipulator; } }
 
         /// <summary>
         /// Constructor
@@ -55,10 +55,10 @@ namespace Engine
         {
             this.terrain = new Model(game, scene, content);
 
+            Triangle[] triangles = this.terrain.GetTriangles();
+
             if (description != null && description.AddVegetation)
             {
-                Triangle[] triangles = this.terrain.GetTriangles();
-
                 ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
                     contentFolder,
                     triangles,
@@ -69,7 +69,6 @@ namespace Engine
                     description.Seed);
 
                 this.vegetation = new Billboard(game, scene, vegetationContent);
-                this.vegetation.Manipulator = this.Manipulator;
             }
 
             if (description != null && description.AddSkydom)
@@ -80,7 +79,11 @@ namespace Engine
                     1000f);
 
                 this.skydom = new Cubemap(game, scene, skydomContent);
-                this.skydom.Manipulator = this.Manipulator;
+            }
+
+            if (description != null && description.UseQuadtree)
+            {
+                this.pickingQuadtree = QuadTree.Build(triangles);
             }
         }
         /// <summary>
@@ -112,8 +115,6 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
-            this.Manipulator.Update(gameTime);
-
             this.terrain.Update(gameTime);
 
             if (this.vegetation != null) this.vegetation.Update(gameTime);
@@ -188,7 +189,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            return this.terrain.Pick(ray, out position, out triangle);
+            return this.Pick(ray, out position, out triangle);
         }
 
         /// <summary>
@@ -207,6 +208,14 @@ namespace Engine
         {
             return this.terrain.GetBoundingBox();
         }
+        /// <summary>
+        /// Gets triangle list
+        /// </summary>
+        /// <returns>Returns triangle list. Empty if the vertex type hasn't position channel</returns>
+        public Triangle[] GetTriangles()
+        {
+            return this.terrain.GetTriangles();
+        }
         
         /// <summary>
         /// Pick position
@@ -217,7 +226,14 @@ namespace Engine
         /// <returns>Returns true if picked position found</returns>
         public bool Pick(Ray ray, out Vector3 position, out Triangle triangle)
         {
-            return this.terrain.Pick(ray, out position, out triangle);
+            if (this.pickingQuadtree != null)
+            {
+                return this.pickingQuadtree.Pick(ray, out position, out triangle);
+            }
+            else
+            {
+                return this.terrain.Pick(ray, out position, out triangle);
+            }
         }
     }
 
@@ -259,5 +275,10 @@ namespace Engine
         /// Skydom cube texture
         /// </summary>
         public string SkydomTexture = null;
+
+        /// <summary>
+        /// Use quadtree for picking
+        /// </summary>
+        public bool UseQuadtree = true;
     }
 }

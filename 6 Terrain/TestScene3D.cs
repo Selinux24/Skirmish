@@ -45,10 +45,15 @@ namespace Terrain
 
             this.segmentsColor.Alpha = 0.8f;
 
+            #region Models
+
             this.terrain = this.AddTerrain("terrain.dae", new TerrainDescription() { });
-            this.terrainLineDrawer = this.AddLineListDrawer(10000);
-            this.terrainLineDrawer.UseZBuffer = true;
-            this.terrainLineDrawer.Visible = false;
+            this.helicopter = this.AddModel("helicopter.dae");
+            this.helicopter.TextureIndex = 1;
+
+            #endregion
+
+            #region Ground position test
 
             BoundingBox bbox = this.terrain.GetBoundingBox();
 
@@ -69,6 +74,10 @@ namespace Terrain
                 }
             }
 
+            this.terrainLineDrawer = this.AddLineListDrawer(oks.Count + errs.Count);
+            this.terrainLineDrawer.UseZBuffer = true;
+            this.terrainLineDrawer.Visible = false;
+
             if (this.oks.Count > 0)
             {
                 this.terrainLineDrawer.AddLines(Color.Green, this.oks.ToArray());
@@ -78,15 +87,23 @@ namespace Terrain
                 this.terrainLineDrawer.AddLines(Color.Red, this.errs.ToArray());
             }
 
-            this.helicopter = this.AddModel("helicopter.dae");
-            this.helicopter.TextureIndex = 1;
+            #endregion
+
+            #region Helicopter
+
             this.helicopterLineDrawer = this.AddLineListDrawer(1000);
             this.helicopterLineDrawer.Visible = false;
 
-            this.curveLineDrawer = this.AddLineListDrawer(10000);
+            #endregion
+
+            #region Trajectory
+
+            this.curveLineDrawer = this.AddLineListDrawer(20000);
             this.curveLineDrawer.UseZBuffer = false;
             this.curveLineDrawer.Visible = false;
             this.curveLineDrawer.SetLines(this.wAxisColor, GeometryUtil.CreateAxis(Matrix.Identity, 20f));
+
+            #endregion
 
             this.GeneratePath(Vector3.Zero, CurveInterpolations.CatmullRom);
         }
@@ -197,7 +214,7 @@ namespace Terrain
 
             BoundingSphere sph = this.helicopter.GetBoundingSphere();
 
-            this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Left * 15f));
+            this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Left * 15f) + (Vector3.UnitY * 5f));
             this.Camera.LookTo(sph.Center);
 
             this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.20f), GeometryUtil.CreateWiredSphere(sph, 50, 20));

@@ -7,77 +7,105 @@ namespace GameLogic.Rules
         public Vector3 Destination { get; set; }
         public int WastedPoints { get; set; }
 
-        public static ActionsMovement[] List
+        public static ActionsMovement[] GetList(Skirmish game)
         {
-            get
+            return new ActionsMovement[]
             {
-                return new ActionsMovement[]
-                {
-                    new Move(),
-                    new Run(),
-                    new Crawl(),
-                    new Assault(),
-                    new CoveringFire(),
-                    new Reload(),
-                    new Repair(),
-                    new Inventory(),
-                    new UseMovementItem(),
-                    new Communications(),
-                    new FindCover(),
-                    new RunAway(),
-                };
-            }
+                new Move(game),
+                new Run(game),
+                new Crawl(game),
+                new Assault(game),
+                new CoveringFire(game),
+                new Reload(game),
+                new Repair(game),
+                new Inventory(game),
+                new UseMovementItem(game),
+                new Communications(game),
+                new FindCover(game),
+                new RunAway(game),
+            };
+        }
+
+        public ActionsMovement(Skirmish game)
+            : base(game)
+        {
+
         }
     }
 
     public class Move : ActionsMovement
     {
-        public Move()
+        public Move(Skirmish game)
+            : base(game)
         {
             this.Name = "Move";
         }
 
         public override bool Execute()
         {
-            this.Active.Move(this.WastedPoints);
+            if (this.Active.IdleForMovement)
+            {
+                this.Active.Move(this.WastedPoints);
 
-            return true;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
     public class Run : ActionsMovement
     {
-        public Run()
+        public Run(Skirmish game)
+            : base(game)
         {
             this.Name = "Run";
         }
 
         public override bool Execute()
         {
-            this.Active.Run(this.WastedPoints);
+            if (this.Active.IdleForMovement)
+            {
+                this.Active.Run(this.WastedPoints);
 
-            return true;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
     public class Crawl : ActionsMovement
     {
-        public Crawl()
+        public Crawl(Skirmish game)
+            : base(game)
         {
             this.Name = "Crawl";
         }
 
         public override bool Execute()
         {
-            this.Active.Move(this.WastedPoints);
+            if (this.Active.IdleForMovement)
+            {
+                this.Active.Crawl(this.WastedPoints);
 
-            return true;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
     public class Assault : ActionsMovement
     {
-        public Assault()
+        public Assault(Skirmish game)
+            : base(game)
         {
             this.Name = "Assault";
         }
@@ -93,7 +121,8 @@ namespace GameLogic.Rules
 
     public class CoveringFire : ActionsMovement
     {
-        public CoveringFire()
+        public CoveringFire(Skirmish game)
+            : base(game)
         {
             this.Name = "Covering Fire";
         }
@@ -108,7 +137,8 @@ namespace GameLogic.Rules
 
     public class Reload : ActionsMovement
     {
-        public Reload()
+        public Reload(Skirmish game)
+            : base(game)
         {
             this.Name = "Reload";
         }
@@ -123,7 +153,8 @@ namespace GameLogic.Rules
 
     public class Repair : ActionsMovement
     {
-        public Repair()
+        public Repair(Skirmish game)
+            : base(game)
         {
             this.Name = "Repair";
         }
@@ -138,7 +169,8 @@ namespace GameLogic.Rules
 
     public class Inventory : ActionsMovement
     {
-        public Inventory()
+        public Inventory(Skirmish game)
+            : base(game)
         {
             this.Name = "Inventory";
         }
@@ -153,7 +185,8 @@ namespace GameLogic.Rules
 
     public class UseMovementItem : ActionsMovement
     {
-        public UseMovementItem()
+        public UseMovementItem(Skirmish game)
+            : base(game)
         {
             this.Name = "Use Item";
             this.ItemAction = true;
@@ -169,7 +202,8 @@ namespace GameLogic.Rules
 
     public class Communications : ActionsMovement
     {
-        public Communications()
+        public Communications(Skirmish game)
+            : base(game)
         {
             this.Name = "Communications";
             this.LeadersOnly = true;
@@ -185,7 +219,8 @@ namespace GameLogic.Rules
 
     public class FindCover : ActionsMovement
     {
-        public FindCover()
+        public FindCover(Skirmish game)
+            : base(game)
         {
             this.Name = "Find Cover";
             this.Automatic = true;
@@ -201,7 +236,8 @@ namespace GameLogic.Rules
 
     public class RunAway : ActionsMovement
     {
-        public RunAway()
+        public RunAway(Skirmish game)
+            : base(game)
         {
             this.Name = "Run Away";
             this.Automatic = true;

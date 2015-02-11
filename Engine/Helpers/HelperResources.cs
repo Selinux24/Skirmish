@@ -468,5 +468,30 @@ namespace Engine.Helpers
                 }
             }
         }
+        /// <summary>
+        /// Creates a texture for render target use
+        /// </summary>
+        /// <param name="device">Device</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <returns>Returns new texture</returns>
+        public static Texture2D CreateRenderTargetTexture(this Device device, int width, int height)
+        {
+            Texture2DDescription description = new Texture2DDescription()
+            {
+                Format = Format.R8G8B8A8_UNorm,
+                Usage = ResourceUsage.Default,
+                BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                CpuAccessFlags = CpuAccessFlags.None,
+                OptionFlags = ResourceOptionFlags.None,
+                Width = width,
+                Height = height,
+                MipLevels = 1,
+                SampleDescription = new SampleDescription(1, 0),
+                ArraySize = 1,
+            };
+
+            return new Texture2D(device, description);
+        }
     }
 }

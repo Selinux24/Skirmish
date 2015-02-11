@@ -283,13 +283,13 @@ namespace GameLogic.Rules
                 this.turnActionPoints = this.onMelee ? this.BaseMovingCapacity : 0;
             }
         }
-        public Actions[] GetActions(Phase phase, bool onMelee, ActionTypes actionType = ActionTypes.All)
+        public Actions[] GetActions(Skirmish game, Phase phase, bool onMelee, ActionTypes actionType = ActionTypes.All)
         {
             Actions[] actions = new Actions[] { };
 
             if (phase == Phase.Movement && this.IdleForMovement)
             {
-                actions = Array.FindAll(ActionsMovement.List, a => !a.ItemAction || a.ItemAction && this.HasItemsForMovingPhase);
+                actions = Array.FindAll(ActionsMovement.GetList(game), a => !a.ItemAction || a.ItemAction && this.HasItemsForMovingPhase);
                 if (actions.Length > 0)
                 {
                     Array.ForEach(actions, a => a.Active = this);
@@ -297,7 +297,7 @@ namespace GameLogic.Rules
             }
             else if (phase == Phase.Shooting && this.IdleForShooting)
             {
-                actions = Array.FindAll(ActionsShooting.List, a => !a.ItemAction || a.ItemAction && this.HasItemsForShootingPhase);
+                actions = Array.FindAll(ActionsShooting.GetList(game), a => !a.ItemAction || a.ItemAction && this.HasItemsForShootingPhase);
                 if (actions.Length > 0)
                 {
                     Array.ForEach(actions, a => a.Active = this);
@@ -305,7 +305,7 @@ namespace GameLogic.Rules
             }
             else if (phase == Phase.Melee && this.IdleForMelee)
             {
-                actions = Array.FindAll(ActionsMelee.List, a => !a.ItemAction || a.ItemAction && this.HasItemsForMeleePhase);
+                actions = Array.FindAll(ActionsMelee.GetList(game), a => !a.ItemAction || a.ItemAction && this.HasItemsForMeleePhase);
                 if (actions.Length > 0)
                 {
                     Array.ForEach(actions, a => a.Active = this);
@@ -313,7 +313,7 @@ namespace GameLogic.Rules
             }
             else if (phase == Phase.Morale)
             {
-                actions = Array.FindAll(ActionsMorale.List, a => !a.ItemAction || a.ItemAction && this.HasItemsForMoralePhase);
+                actions = Array.FindAll(ActionsMorale.GetList(game), a => !a.ItemAction || a.ItemAction && this.HasItemsForMoralePhase);
                 if (actions.Length > 0)
                 {
                     Array.ForEach(actions, a => a.Active = this);
@@ -348,6 +348,14 @@ namespace GameLogic.Rules
 
             this.canMove = false;
             this.canShoot = false;
+            this.canFight = false;
+        }
+        public void Crawl(int points)
+        {
+            this.ConsumeMovingCapacity(points);
+
+            this.canMove = false;
+            this.canShoot = true;
             this.canFight = false;
         }
         public void Assault(int points)

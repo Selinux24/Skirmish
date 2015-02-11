@@ -243,6 +243,7 @@ namespace GameLogic.Rules
             Melee melee = this.GetMelee(this.CurrentSoldier);
 
             return Actions.GetActions(
+                this,
                 this.currentPhase,
                 this.CurrentTeam,
                 this.CurrentSoldier,
@@ -346,7 +347,7 @@ namespace GameLogic.Rules
                 {
                     Melee melee = this.GetMelee(soldier);
 
-                    Actions[] actions = soldier.GetActions(this.currentPhase, melee != null, ActionTypes.Automatic);
+                    Actions[] actions = soldier.GetActions(this, this.currentPhase, melee != null, ActionTypes.Automatic);
                     if (actions.Length > 0)
                     {
                         foreach (Actions ac in actions)

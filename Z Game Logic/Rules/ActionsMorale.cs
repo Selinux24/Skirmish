@@ -3,22 +3,26 @@ namespace GameLogic.Rules
 {
     public abstract class ActionsMorale : Actions
     {
-        public static ActionsMorale[] List
+        public static ActionsMorale[] GetList(Skirmish game)
         {
-            get
+            return new ActionsMorale[]
             {
-                return new ActionsMorale[]
-                {
-                    new TakeControl(),
-                    new UseMoraleItem(),
-                };
-            }
+                new TakeControl(game),
+                new UseMoraleItem(game),
+            };
+        }
+
+        public ActionsMorale(Skirmish game)
+            : base(game)
+        {
+
         }
     }
 
     public class TakeControl : ActionsMorale
     {
-        public TakeControl()
+        public TakeControl(Skirmish game)
+            : base(game)
         {
             this.Name = "Take Control";
             this.Automatic = true;
@@ -34,7 +38,8 @@ namespace GameLogic.Rules
 
     public class UseMoraleItem : ActionsMorale
     {
-        public UseMoraleItem()
+        public UseMoraleItem(Skirmish game)
+            : base(game)
         {
             this.Name = "Use Item";
         }

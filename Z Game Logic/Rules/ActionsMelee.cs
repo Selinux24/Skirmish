@@ -5,22 +5,26 @@ namespace GameLogic.Rules
     {
         public Melee Melee { get; set; }
 
-        public static ActionsMelee[] List
+        public static ActionsMelee[] GetList(Skirmish game)
         {
-            get
+            return new ActionsMelee[]
             {
-                return new ActionsMelee[]
-                {
-                    new Leave(),
-                    new UseMeleeItem(),
-                };
-            }
+                new Leave(game),
+                new UseMeleeItem(game),
+            };
+        }
+
+        public ActionsMelee(Skirmish game)
+            : base(game)
+        {
+
         }
     }
 
     public class Leave : ActionsMelee
     {
-        public Leave()
+        public Leave(Skirmish game)
+            : base(game)
         {
             this.Name = "Leave Combat";
         }
@@ -38,7 +42,8 @@ namespace GameLogic.Rules
 
     public class UseMeleeItem : ActionsMelee
     {
-        public UseMeleeItem()
+        public UseMeleeItem(Skirmish game)
+            : base(game)
         {
             this.Name = "Use Item";
             this.ItemAction = true;

@@ -70,8 +70,6 @@ namespace Engine.Common
         }
         public static Line[] CreateWiredBox(Vector3[] corners)
         {
-            List<Line> lines = new List<Line>();
-
             int[] indexes = new int[24];
 
             int index = 0;
@@ -151,6 +149,35 @@ namespace Engine.Common
         {
             return CreateWiredBox(frustum.GetCorners());
         }
+        public static Line[] CreateWiredPyramid(BoundingFrustum frustum)
+        {
+            FrustumCameraParams prms = frustum.GetCameraParams();
+            Vector3[] corners = frustum.GetCorners();
+
+            Vector3[] vertices = new Vector3[5];
+
+            vertices[0] = prms.Position;
+            vertices[1] = corners[4];
+            vertices[2] = corners[5];
+            vertices[3] = corners[6];
+            vertices[4] = corners[7];
+
+            int[] indexes = new int[16];
+
+            int index = 0;
+
+            indexes[index++] = 0; indexes[index++] = 1;
+            indexes[index++] = 0; indexes[index++] = 2;
+            indexes[index++] = 0; indexes[index++] = 3;
+            indexes[index++] = 0; indexes[index++] = 4;
+
+            indexes[index++] = 1; indexes[index++] = 2;
+            indexes[index++] = 2; indexes[index++] = 3;
+            indexes[index++] = 3; indexes[index++] = 4;
+            indexes[index++] = 4; indexes[index++] = 1;
+
+            return CreateFromVertices(vertices, indexes);
+        }
         public static Line[] CreatePath(Vector3[] path)
         {
             List<Line> lines = new List<Line>();
@@ -166,13 +193,22 @@ namespace Engine.Common
         {
             List<Line> lines = new List<Line>();
 
-            Vector3 up = transform.TranslationVector + (transform.Up * size);
-            Vector3 forward = transform.TranslationVector + (transform.Forward * size);
-            Vector3 left = transform.TranslationVector + (transform.Left * size);
+            Vector3 p = transform.TranslationVector;
 
-            lines.Add(new Line(transform.TranslationVector, up));
-            lines.Add(new Line(transform.TranslationVector, forward));
-            lines.Add(new Line(transform.TranslationVector, left));
+            Vector3 up = p + (transform.Up * size);
+            Vector3 forward = p + (transform.Forward * size);
+            Vector3 left = p + (transform.Left * size);
+            Vector3 right = p + (transform.Right * size);
+
+            Vector3 c1 = (forward * 0.8f) + (left * 0.2f);
+            Vector3 c2 = (forward * 0.8f) + (right * 0.2f);
+
+            lines.Add(new Line(p, up));
+            lines.Add(new Line(p, forward));
+            lines.Add(new Line(p, left));
+
+            lines.Add(new Line(forward, c1));
+            lines.Add(new Line(forward, c2));
 
             return lines.ToArray();
         }

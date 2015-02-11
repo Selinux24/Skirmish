@@ -5,10 +5,10 @@ namespace Collada
 {
     public class Helicopter
     {
-        private Vector3 pilotPosition = new Vector3(-0.15f, 1.15f, 1.7f);
-        private Vector3 copilotPosition = new Vector3(0.15f, 1.15f, 1.7f);
-        private Vector3 leftMachineGunPosition = new Vector3(-0.15f, 1f, -2f);
-        private Vector3 rightMachineGunPosition = new Vector3(0.15f, 1f, -2f);
+        private Vector3 pilotPosition = new Vector3(-0.15f, 1.15f, -1.7f);
+        private Vector3 copilotPosition = new Vector3(0.15f, 1.15f, -1.7f);
+        private Vector3 leftMachineGunPosition = new Vector3(-0.15f, 1f, 2f);
+        private Vector3 rightMachineGunPosition = new Vector3(0.15f, 1f, 2f);
 
         private Vector3 pilotView = new Vector3(0, 0, -1);
         private Vector3 copilotView = new Vector3(0, 0, -1);
