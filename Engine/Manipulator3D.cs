@@ -265,7 +265,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void PitchUp(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, -a * this.AngularVelocity * gameTime.ElapsedSeconds, 0);
+            this.Rotate(0, a * this.AngularVelocity * gameTime.ElapsedSeconds, 0);
         }
         /// <summary>
         /// Increments rotation pitch (X) down
@@ -273,7 +273,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void PitchDown(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, a * this.AngularVelocity * gameTime.ElapsedSeconds, 0);
+            this.Rotate(0, -a * this.AngularVelocity * gameTime.ElapsedSeconds, 0);
         }
         /// <summary>
         /// Increments rotation roll (Z) left

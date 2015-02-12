@@ -181,13 +181,10 @@ namespace Terrain
                 time *= 0.01f;
             }
 
-            Vector3 p0 = Vector3.Zero;
-            Vector3 p1 = Vector3.Zero;
-
             if (this.curveTime + time <= this.curve.Length)
             {
-                p0 = this.curve.GetPosition(this.curveTime, CurveInterpolations.CatmullRom);
-                p1 = this.curve.GetPosition(this.curveTime + time, CurveInterpolations.CatmullRom);
+                Vector3 p0 = this.curve.GetPosition(this.curveTime, CurveInterpolations.CatmullRom);
+                Vector3 p1 = this.curve.GetPosition(this.curveTime + time, CurveInterpolations.CatmullRom);
 
                 Vector3 p0t;
                 Vector3 p1t;
@@ -197,8 +194,11 @@ namespace Terrain
                 p0 += h;
                 p1 += h;
 
+                float d = Vector3.DistanceSquared(p0, p1);
+
                 this.helicopter.Manipulator.SetPosition(p0);
-                this.helicopter.Manipulator.LookAt(p1, 0.1f);
+                this.helicopter.Manipulator.LookAt(p1, 0.05f);
+                this.helicopter.Manipulator.PitchDown(gameTime, MathUtil.Clamp(d * 40f, 0f, MathUtil.PiOverFour));
 
                 this.curveTime += time;
 
@@ -214,10 +214,13 @@ namespace Terrain
 
             BoundingSphere sph = this.helicopter.GetBoundingSphere();
 
-            this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Left * 15f) + (Vector3.UnitY * 5f));
-            this.Camera.LookTo(sph.Center);
-
             this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.20f), GeometryUtil.CreateWiredSphere(sph, 50, 20));
+
+            if (this.Game.Input.KeyPressed(Keys.Space))
+            {
+                this.Camera.LookTo(sph.Center);
+                this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Left * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
+            }
         }
 
         private void GeneratePath(Vector3 position, CurveInterpolations interpolation)
@@ -230,7 +233,7 @@ namespace Terrain
 
             for (int i = 0; i < 10; i++)
             {
-                Vector3 v = rnd.NextVector3(bbox.Minimum, bbox.Maximum);
+                Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
 
                 Vector3 pos;
                 if (this.terrain.FindGroundPosition(v.X, v.Z, out pos))
