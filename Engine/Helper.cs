@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Helper functions
     /// </summary>
-    static class Helper
+    public static class Helper
     {
         /// <summary>
         /// Generate an array initialized to defaultValue
@@ -74,6 +74,22 @@ namespace Engine
 
             //Get the arc cosin of the angle, you now have your angle in radians 
             return (float)System.Math.Acos(dot);
+        }
+
+        public static float Angle2(Vector3 one, Vector3 two, Vector3 pn)
+        {
+            Plane p = new Plane(pn, 0);
+
+            float angle = (float)System.Math.Acos(Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two)));
+
+            Vector3 cross = Vector3.Cross(one, two);
+
+            if (Vector3.Dot(p.Normal, cross) > 0)
+            {
+                angle = -angle;
+            }
+
+            return angle;
         }
         /// <summary>
         /// Look at target

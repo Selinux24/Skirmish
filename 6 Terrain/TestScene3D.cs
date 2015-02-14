@@ -10,6 +10,11 @@ namespace Terrain
     {
         private Random rnd = new Random();
 
+        private bool follow = false;
+
+        private TextDrawer title = null;
+        private TextDrawer help = null;
+
         private Engine.Terrain terrain = null;
         private List<Line> oks = new List<Line>();
         private List<Line> errs = new List<Line>();
@@ -44,6 +49,19 @@ namespace Terrain
             this.Camera.FarPlaneDistance = 5000f;
 
             this.segmentsColor.Alpha = 0.8f;
+
+            #region Text
+
+            this.title = this.AddText("Tahoma", 18, Color.White);
+            this.help = this.AddText("Lucida Casual", 12, Color.Yellow);
+
+            this.title.Text = "Terrain collision and trajectories test";
+            this.help.Text = "";
+
+            this.title.Position = Vector2.Zero;
+            this.help.Position = new Vector2(0, 24);
+
+            #endregion
 
             #region Models
 
@@ -115,6 +133,11 @@ namespace Terrain
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                this.follow = !this.follow;
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
@@ -190,15 +213,24 @@ namespace Terrain
                 Vector3 p1t;
                 if (this.terrain.FindGroundPosition(p0.X, p0.Z, out p0t)) { p0 = p0t; }
                 if (this.terrain.FindGroundPosition(p1.X, p1.Z, out p1t)) { p1 = p1t; }
-
                 p0 += h;
                 p1 += h;
 
-                float d = Vector3.DistanceSquared(p0, p1);
+                Vector3 cfw = this.helicopter.Manipulator.Forward;
+                Vector3 nfw = Vector3.Normalize(p1 - p0);
+                cfw.Y = 0f;
+                nfw.Y = 0f;
+
+                //Calc helicopter pitch and roll amount
+                float a = Helper.Angle2(Vector3.Normalize(nfw), Vector3.Normalize(cfw), Vector3.Up) * 5f;
+                float d = MathUtil.Clamp(Vector3.DistanceSquared(p0, p1) * 10f, 0f, MathUtil.PiOverTwo);
+
+                this.help.Text = string.Format("Pitch {0}; Roll {1};", MathUtil.RadiansToDegrees(d).ToString(), MathUtil.RadiansToDegrees(a).ToString());
 
                 this.helicopter.Manipulator.SetPosition(p0);
                 this.helicopter.Manipulator.LookAt(p1, 0.05f);
-                this.helicopter.Manipulator.PitchDown(gameTime, MathUtil.Clamp(d * 40f, 0f, MathUtil.PiOverFour));
+                if (!float.IsNaN(d)) this.helicopter.Manipulator.PitchDown(gameTime, d);
+                if (!float.IsNaN(a)) this.helicopter.Manipulator.RollRight(gameTime, a);
 
                 this.curveTime += time;
 
@@ -216,10 +248,10 @@ namespace Terrain
 
             this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.20f), GeometryUtil.CreateWiredSphere(sph, 50, 20));
 
-            if (this.Game.Input.KeyPressed(Keys.Space))
+            if (this.follow)
             {
                 this.Camera.LookTo(sph.Center);
-                this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Left * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
+                this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
             }
         }
 

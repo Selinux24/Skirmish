@@ -281,7 +281,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void RollLeft(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, 0, a * this.AngularVelocity * gameTime.ElapsedSeconds);
+            this.Rotate(0, 0, -a * this.AngularVelocity * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments rotation roll (Z) right
@@ -289,7 +289,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void RollRight(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, 0, -a * this.AngularVelocity * gameTime.ElapsedSeconds);
+            this.Rotate(0, 0, a * this.AngularVelocity * gameTime.ElapsedSeconds);
         }
 
         /// <summary>
