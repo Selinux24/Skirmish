@@ -116,6 +116,15 @@ namespace Engine
         public float AngularVelocity = 1f;
 
         /// <summary>
+        /// Following curve
+        /// </summary>
+        private Curve following = null;
+        /// <summary>
+        /// Curve time
+        /// </summary>
+        private float followingTime = 0f;
+
+        /// <summary>
         /// Contructor
         /// </summary>
         public Manipulator3D()
@@ -130,12 +139,35 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            this.Update();
+            if (this.following != null)
+            {
+                if (this.followingTime <= this.following.Length)
+                {
+                    Vector3 newPosition = this.following.GetPosition(this.followingTime, CurveInterpolations.Linear);
+
+                    if (this.followingTime != 0f)
+                    {
+                        Vector3 view = Vector3.Normalize(this.position - newPosition);
+
+                        this.position = newPosition;
+                        this.LookAt(newPosition + view);
+                    }
+
+                    this.followingTime += gameTime.ElapsedMilliseconds * 0.01f;
+                }
+                else
+                {
+                    this.following = null;
+                    this.followingTime = 0f;
+                }
+            }
+
+            this.UpdateLocalTransform();
         }
         /// <summary>
         /// Update internal state
         /// </summary>
-        protected virtual void Update()
+        protected virtual void UpdateLocalTransform()
         {
             if (this.transformUpdateNeeded)
             {
@@ -359,7 +391,7 @@ namespace Engine
 
             this.SetUpdateNeeded(true);
 
-            if (updateState) this.Update();
+            if (updateState) this.UpdateLocalTransform();
         }
         /// <summary>
         /// Sets rotation
@@ -383,7 +415,7 @@ namespace Engine
 
             this.SetUpdateNeeded(true);
 
-            if (updateState) this.Update();
+            if (updateState) this.UpdateLocalTransform();
         }
         /// <summary>
         /// Sets scale
@@ -416,7 +448,7 @@ namespace Engine
 
             this.SetUpdateNeeded(true);
 
-            if (updateState) this.Update();
+            if (updateState) this.UpdateLocalTransform();
         }
         /// <summary>
         /// Look at target
@@ -438,6 +470,16 @@ namespace Engine
 
                 this.SetUpdateNeeded(true);
             }
+        }
+
+        /// <summary>
+        /// Follow specified curve
+        /// </summary>
+        /// <param name="curve">Curve</param>
+        public void Follow(Curve curve)
+        {
+            this.following = curve;
+            this.followingTime = 0f;
         }
     }
 }

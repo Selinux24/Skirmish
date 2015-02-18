@@ -186,6 +186,105 @@ namespace Engine
 
             return trnTriangles;
         }
+        /// <summary>
+        /// Performs intersection test with ray and triangle list
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="position">Result picked position</param>
+        /// <param name="triangle">Result picked triangle</param>
+        /// <returns>Returns first intersection if exists</returns>
+        public static bool IntersectFirst(ref Ray ray, Triangle[] triangles, out Vector3 position, out Triangle triangle)
+        {
+            position = Vector3.Zero;
+            triangle = new Triangle();
+
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                Triangle tri = triangles[i];
+
+                Vector3 pos;
+                if (tri.Intersects(ref ray, out pos))
+                {
+                    position = pos;
+                    triangle = tri;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Performs intersection test with ray and triangle list
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="position">Result picked position</param>
+        /// <param name="triangle">Result picked triangle</param>
+        /// <returns>Returns nearest intersection if exists</returns>
+        public static bool IntersectNearest(ref Ray ray, Triangle[] triangles, out Vector3 position, out Triangle triangle)
+        {
+            position = Vector3.Zero;
+            triangle = new Triangle();
+
+            Vector3[] pickedPositions;
+            Triangle[] pickedTriangles;
+            if (IntersectAll(ref ray, triangles, out pickedPositions, out pickedTriangles))
+            {
+                float distanceMin = float.MaxValue;
+
+                for (int i = 0; i < pickedPositions.Length; i++)
+                {
+                    float dist = Vector3.DistanceSquared(pickedPositions[i], ray.Position);
+                    if (dist < distanceMin)
+                    {
+                        distanceMin = dist;
+                        position = pickedPositions[i];
+                        triangle = pickedTriangles[i];
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Performs intersection test with ray and triangle list
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="pickedPositions">Picked position list</param>
+        /// <param name="pickedTriangles">Picked triangle list</param>
+        /// <returns>Returns all intersections if exists</returns>
+        public static bool IntersectAll(ref Ray ray, Triangle[] triangles, out Vector3[] pickedPositions, out Triangle[] pickedTriangles)
+        {
+            List<Vector3> pickedPositionList = new List<Vector3>();
+            List<Triangle> pickedTriangleList = new List<Triangle>();
+
+            //For use into Array.ForEach
+            Ray r = ray;
+
+            Array.ForEach(triangles, (t) => 
+            {
+                Vector3 pos;
+                if (t.Intersects(ref r, out pos))
+                {
+                    //Avoid duplicate picked positions
+                    if (!pickedPositionList.Contains(pos))
+                    {
+                        pickedPositionList.Add(pos);
+                        pickedTriangleList.Add(t);
+                    }
+                }
+            });
+
+            pickedPositions = pickedPositionList.ToArray();
+            pickedTriangles = pickedTriangleList.ToArray();
+
+            return pickedPositionList.Count > 0;
+        }
 
         /// <summary>
         /// Constructor

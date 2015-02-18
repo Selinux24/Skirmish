@@ -2,6 +2,7 @@
 using Engine;
 using Engine.Common;
 using SharpDX;
+using System.Collections.Generic;
 
 namespace Collada
 {
@@ -26,6 +27,7 @@ namespace Collada
         private bool chaseCamera = false;
 
         private LineListDrawer bboxesDrawer = null;
+        private LineListDrawer terrainGridDrawer = null;
 
         public TestScene3D(Game game)
             : base(game)
@@ -61,6 +63,8 @@ namespace Collada
                 MinSize = Vector2.One * 2f,
                 MaxSize = Vector2.One * 4f,
                 Seed = 1024,
+                UsePathFinding = true,
+                PathNodeSize = 20f,
             };
 
             this.ground = this.AddTerrain("Ground.dae", Matrix.Scaling(20, 20, 20), terrainDescription);
@@ -72,6 +76,17 @@ namespace Collada
             Line[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
 
             this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
+
+            List<Line> squares = new List<Line>();
+
+            for (int i = 0; i < this.ground.grid.Nodes.Length; i++)
+            {
+                squares.AddRange(GeometryUtil.CreateWiredSquare(this.ground.grid.Nodes[i].GetCorners()));
+            }
+
+            this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));
+            this.terrainGridDrawer.UseZBuffer = false;
+            this.terrainGridDrawer.EnableAlphaBlending = true;
 
             this.InitializeCamera();
             this.InitializeEnvironment();

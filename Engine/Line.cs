@@ -27,6 +27,36 @@ namespace Engine
         }
 
         /// <summary>
+        /// Transform line coordinates
+        /// </summary>
+        /// <param name="line">Line</param>
+        /// <param name="transform">Transformation</param>
+        /// <returns>Returns new line</returns>
+        public static Line Transform(Line line, Matrix transform)
+        {
+            return new Line(
+                Vector3.TransformCoordinate(line.Point1, transform),
+                Vector3.TransformCoordinate(line.Point2, transform));
+        }
+        /// <summary>
+        /// Transform line list coordinates
+        /// </summary>
+        /// <param name="lines">Line list</param>
+        /// <param name="transform">Transformation</param>
+        /// <returns>Returns new line list</returns>
+        public static Line[] Transform(Line[] lines, Matrix transform)
+        {
+            Line[] trnLines = new Line[lines.Length];
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                trnLines[i] = Transform(lines[i], transform);
+            }
+
+            return trnLines;
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="x1">X coordinate of start point</param>

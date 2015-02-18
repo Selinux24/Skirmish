@@ -38,6 +38,26 @@ namespace Engine.Common
 
             return CreateFromVertices(corners, indexes);
         }
+        public static Line[] CreateWiredSquare(Vector3[] corners)
+        {
+            List<Line> lines = new List<Line>();
+
+            int[] indexes = new int[8];
+
+            indexes[0] = 0;
+            indexes[1] = 1;
+
+            indexes[2] = 1;
+            indexes[3] = 2;
+
+            indexes[4] = 2;
+            indexes[5] = 3;
+
+            indexes[6] = 3;
+            indexes[7] = 0;
+
+            return CreateFromVertices(corners, indexes);
+        }
         public static Line[] CreateWiredBox(BoundingBox[] bboxList)
         {
             List<Line> lines = new List<Line>();

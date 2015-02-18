@@ -4,6 +4,7 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
+    using Engine.PathFinding;
 
     /// <summary>
     /// Terrain model
@@ -26,6 +27,10 @@ namespace Engine
         /// Quadtree used for picking
         /// </summary>
         public QuadTree pickingQuadtree = null;
+        /// <summary>
+        /// Grid used for pathfinding
+        /// </summary>
+        public Grid grid = null;
 
         /// <summary>
         /// Current scene
@@ -55,6 +60,7 @@ namespace Engine
         {
             this.terrain = new Model(game, scene, content);
 
+            BoundingBox bbox = this.terrain.GetBoundingBox();
             Triangle[] triangles = this.terrain.GetTriangles();
 
             if (description != null && description.AddVegetation)
@@ -84,6 +90,11 @@ namespace Engine
             if (description != null && description.UseQuadtree)
             {
                 this.pickingQuadtree = QuadTree.Build(triangles);
+            }
+
+            if (description != null && description.UsePathFinding)
+            {
+                this.grid = Grid.Build(ref bbox, triangles, description.PathNodeSize);
             }
         }
         /// <summary>
@@ -189,7 +200,44 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            return this.Pick(ray, out position, out triangle);
+            return this.Pick(ref ray, out position, out triangle);
+        }
+        /// <summary>
+        /// Pick position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="position">Picked position if exists</param>
+        /// <param name="triangle">Picked triangle if exists</param>
+        /// <returns>Returns true if picked position found</returns>
+        public bool Pick(ref Ray ray, out Vector3 position, out Triangle triangle)
+        {
+            if (this.pickingQuadtree != null)
+            {
+                return this.pickingQuadtree.Pick(ref ray, out position, out triangle);
+            }
+            else
+            {
+                return this.terrain.Pick(ref ray, out position, out triangle);
+            }
+        }
+        /// <summary>
+        /// Find path from point to point
+        /// </summary>
+        /// <param name="from">Start point</param>
+        /// <param name="to">End point</param>
+        /// <returns>Return path if exists</returns>
+        public Path FindPath(Vector3 from, Vector3 to)
+        {
+            GridNode startNode = this.grid.FindNode(from);
+            GridNode endNode = this.grid.FindNode(to);
+            if (startNode != null && endNode != null)
+            {
+                return PathFinding.PathFinder.FindPath(startNode, endNode);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -215,25 +263,6 @@ namespace Engine
         public Triangle[] GetTriangles()
         {
             return this.terrain.GetTriangles();
-        }
-        
-        /// <summary>
-        /// Pick position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="position">Picked position if exists</param>
-        /// <param name="triangle">Picked triangle if exists</param>
-        /// <returns>Returns true if picked position found</returns>
-        public bool Pick(Ray ray, out Vector3 position, out Triangle triangle)
-        {
-            if (this.pickingQuadtree != null)
-            {
-                return this.pickingQuadtree.Pick(ray, out position, out triangle);
-            }
-            else
-            {
-                return this.terrain.Pick(ray, out position, out triangle);
-            }
         }
     }
 
@@ -280,5 +309,14 @@ namespace Engine
         /// Use quadtree for picking
         /// </summary>
         public bool UseQuadtree = true;
+
+        /// <summary>
+        /// Generate grid for path finding
+        /// </summary>
+        public bool UsePathFinding = false;
+        /// <summary>
+        /// Path node side size
+        /// </summary>
+        public float PathNodeSize = 10f;
     }
 }

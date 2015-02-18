@@ -73,14 +73,23 @@ namespace Engine
             dot = dot / (one.Length() * two.Length());
 
             //Get the arc cosin of the angle, you now have your angle in radians 
-            return (float)System.Math.Acos(dot);
+            return (float)Math.Acos(dot);
         }
-
-        public static float Angle2(Vector3 one, Vector3 two, Vector3 pn)
+        /// <summary>
+        /// Gets angle between two vectors in the same plane
+        /// </summary>
+        /// <param name="one">First vector</param>
+        /// <param name="two">Second vector</param>
+        /// <param name="pn">Plane normal</param>
+        /// <returns>Returns angle value</returns>
+        /// <remarks>Result signed</remarks>
+        public static float Angle(Vector3 one, Vector3 two, Vector3 pn)
         {
             Plane p = new Plane(pn, 0);
 
-            float angle = (float)System.Math.Acos(Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two)));
+            float dot = MathUtil.Clamp(Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two)), 0, 1);
+
+            float angle = (float)Math.Acos(dot);
 
             Vector3 cross = Vector3.Cross(one, two);
 
@@ -100,35 +109,17 @@ namespace Engine
         /// <returns>Returns rotation quaternion</returns>
         public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, bool yAxisOnly = true)
         {
-            Vector3 forwardVector = Vector3.Normalize(eyePosition - target);
+            Quaternion q = Quaternion.Invert(Quaternion.LookAtLH(target, eyePosition, Vector3.Up));
 
-            float dot = Vector3.Dot(Vector3.ForwardLH, forwardVector);
-
-            if (Math.Abs(dot - (-1.0f)) < 0.000001f)
+            if (yAxisOnly)
             {
-                return new Quaternion(Vector3.Up, MathUtil.Pi);
+                q.X = 0;
+                q.Z = 0;
+
+                q.Normalize();
             }
-            else if (Math.Abs(dot - (1.0f)) < 0.000001f)
-            {
-                return Quaternion.Identity;
-            }
-            else
-            {
-                Vector3 rotAxis = Vector3.Normalize(Vector3.Cross(Vector3.ForwardLH, forwardVector));
-                float rotAngle = Angle(Vector3.ForwardLH, forwardVector);
 
-                Quaternion q = Quaternion.RotationAxis(rotAxis, rotAngle);
-
-                if (yAxisOnly)
-                {
-                    q.X = 0;
-                    q.Z = 0;
-
-                    q.Normalize();
-                }
-
-                return q;
-            }
+            return q;
         }
         /// <summary>
         /// Gets matrix description

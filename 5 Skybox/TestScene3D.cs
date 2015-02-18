@@ -297,7 +297,7 @@ namespace Skybox
 
                 Vector3 p;
                 Triangle t;
-                if (this.ruins.Pick(pRay, out p, out t))
+                if (this.ruins.Pick(ref pRay, out p, out t))
                 {
                     this.pickedTri.SetLines(Color.Red, GeometryUtil.CreateWiredTriangle(t));
                 }

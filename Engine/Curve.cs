@@ -4,15 +4,66 @@ using SharpDX;
 
 namespace Engine
 {
+    /// <summary>
+    /// 3D curve
+    /// </summary>
     public class Curve
     {
-        private List<Vector3> controlPoints = new List<Vector3>();
+        /// <summary>
+        /// Control points
+        /// </summary>
+        private List<Tuple<float, Vector3>> controlPoints = new List<Tuple<float, Vector3>>();
+        /// <summary>
+        /// Start point
+        /// </summary>
+        private Vector3 startPoint
+        {
+            get
+            {
+                if (this.controlPoints.Count >= 2)
+                {
+                    Vector3 v = this.controlPoints[0].Item2 - this.controlPoints[1].Item2;
 
+                    return this.controlPoints[0].Item2 + v;
+                }
+
+                return Vector3.Zero;
+            }
+        }
+        /// <summary>
+        /// End point
+        /// </summary>
+        private Vector3 endPoint
+        {
+            get
+            {
+                if (this.controlPoints.Count >= 2)
+                {
+                    Vector3 v = this.controlPoints[this.controlPoints.Count - 1].Item2 - this.controlPoints[this.controlPoints.Count - 2].Item2;
+
+                    return this.controlPoints[this.controlPoints.Count - 1].Item2 + v;
+                }
+
+                return Vector3.Zero;
+            }
+        }
+
+        /// <summary>
+        /// Point list
+        /// </summary>
         public Vector3[] Points
         {
             get
             {
-                return this.controlPoints.ToArray();
+                List<Vector3> points = new List<Vector3>();
+
+                if (this.controlPoints.Count > 0)
+                {
+                    this.controlPoints.ForEach((c) => { points.Add(c.Item2); });
+
+                }
+
+                return points.ToArray();
             }
             set
             {
@@ -20,68 +71,107 @@ namespace Engine
 
                 if (value != null && value.Length > 0)
                 {
-                    this.controlPoints.AddRange(value);
+                    for (int i = 0; i < value.Length; i++)
+                    {
+                        this.AddPosition(value[i]);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Total length
+        /// </summary>
+        public float Length { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Curve()
+        {
+            this.Length = 0;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="points">Point list</param>
+        public Curve(Vector3[] points)
+        {
+            if (points != null && points.Length > 0)
+            {
+                for (int i = 0; i < points.Length - 1; i++)
+                {
+                    this.AddPosition(points[i]);
                 }
             }
         }
 
-        private Vector3 startPoint
+        /// <summary>
+        /// Add control point
+        /// </summary>
+        /// <param name="point">Point</param>
+        public void AddPosition(Vector3 point)
         {
-            get
+            if (this.controlPoints.Count > 0)
             {
-                Vector3 v = this.controlPoints[0] - this.controlPoints[1];
+                Tuple<float, Vector3> p = this.controlPoints[this.controlPoints.Count - 1];
 
-                return this.controlPoints[0] + v;
+                //TODO: For Catmull-Rom, distance and time is not the same
+                float d = Vector3.Distance(p.Item2, point);
+
+                this.controlPoints.Add(new Tuple<float, Vector3>(p.Item1 + d, point));
+
+                this.Length += d;
+            }
+            else
+            {
+                this.controlPoints.Add(new Tuple<float, Vector3>(0, point));
             }
         }
-        private Vector3 endPoint
+        /// <summary>
+        /// Add control point with specified time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="point">Point</param>
+        public void AddPosition(float time, Vector3 point)
         {
-            get
+            if (this.controlPoints.Count > 0)
             {
-                Vector3 v = this.controlPoints[this.controlPoints.Count - 1] - this.controlPoints[this.controlPoints.Count - 2];
+                Tuple<float, Vector3> p = this.controlPoints[this.controlPoints.Count - 1];
 
-                return this.controlPoints[this.controlPoints.Count - 1] + v;
+                this.controlPoints.Add(new Tuple<float, Vector3>(p.Item1 + time, point));
+
+                this.Length += time;
+            }
+            else
+            {
+                this.controlPoints.Add(new Tuple<float, Vector3>(0, point));
             }
         }
-
-        public float Length { get; set; }
-
-        public Curve(Vector3[] points)
+        /// <summary>
+        /// Get curve position in time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="interpolation">Interpolation type</param>
+        /// <returns>Returns position in time</returns>
+        public Vector3 GetPosition(float time, CurveInterpolations interpolation = CurveInterpolations.CatmullRom)
         {
-            this.Points = points;
-
-            for (int i = 0; i < points.Length - 1; i++)
-            {
-                this.Length += Vector3.Distance(points[i + 0], points[i + 1]);
-            }
-        }
-
-        public Curve(Vector3[] points, float length)
-        {
-            this.Points = points;
-            this.Length = length;
-        }
-
-        public Vector3 GetPosition(float distance, CurveInterpolations interpolation)
-        {
-            //Segment length
-            float segLen = this.Length / (this.controlPoints.Count - 1);
-
-            //Segment index
-            int segmentNum = (int)(distance / segLen);
-
-            //Relative position in segment
-            float pos = (distance - (segmentNum * segLen)) / segLen;
+            int segmentNum;
+            float pos;
+            this.FindSegment(time, out segmentNum, out pos);
 
             Vector3[] p = new Vector3[4];
-            p[0] = segmentNum == 0 ? this.startPoint : this.controlPoints[segmentNum - 1];
-            p[1] = this.controlPoints[segmentNum + 0];
-            p[2] = this.controlPoints[segmentNum + 1];
-            p[3] = segmentNum >= this.controlPoints.Count - 2 ? this.endPoint : this.controlPoints[segmentNum + 2];
+            p[0] = segmentNum == 0 ? this.startPoint : this.controlPoints[segmentNum - 1].Item2;
+            p[1] = this.controlPoints[segmentNum + 0].Item2;
+            p[2] = this.controlPoints[segmentNum + 1].Item2;
+            p[3] = segmentNum >= this.controlPoints.Count - 2 ? this.endPoint : this.controlPoints[segmentNum + 2].Item2;
 
             if (interpolation == CurveInterpolations.Linear)
             {
                 return Vector3.Lerp(p[1], p[2], pos);
+            }
+            else if (interpolation == CurveInterpolations.SmoothStep)
+            {
+                return Vector3.SmoothStep(p[1], p[2], pos);
             }
             else if (interpolation == CurveInterpolations.CatmullRom)
             {
@@ -92,11 +182,57 @@ namespace Engine
                 throw new Exception(string.Format("Bad interpolation mode: {0}", interpolation));
             }
         }
+        /// <summary>
+        /// Find segment and relative segment time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="segment">Segment</param>
+        /// <param name="segmentDistance">Relative segment time</param>
+        public void FindSegment(float time, out int segment, out float segmentDistance)
+        {
+            segment = -1;
+            segmentDistance = 0;
+
+            if (time == 0)
+            {
+                segment = 0;
+                segmentDistance = 0;
+            }
+            else
+            {
+                for (int i = 0; i < this.controlPoints.Count; i++)
+                {
+                    if (time <= this.controlPoints[i].Item1)
+                    {
+                        segment = i - 1;
+
+                        float d = this.controlPoints[i].Item1 - this.controlPoints[i - 1].Item1;
+
+                        segmentDistance = (time - this.controlPoints[i - 1].Item1) / d;
+
+                        break;
+                    }
+                }
+            }
+        }
     }
 
+    /// <summary>
+    /// Interpolation modes
+    /// </summary>
     public enum CurveInterpolations
     {
+        /// <summary>
+        /// Linear
+        /// </summary>
         Linear,
+        /// <summary>
+        /// Smooth step
+        /// </summary>
+        SmoothStep,
+        /// <summary>
+        /// Catmull-Rom
+        /// </summary>
         CatmullRom,
     }
 }

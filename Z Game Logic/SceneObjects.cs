@@ -7,6 +7,7 @@ using SharpDX;
 namespace GameLogic
 {
     using GameLogic.Rules;
+    using Engine.PathFinding;
 
     public class SceneObjects : Scene3D
     {
@@ -46,7 +47,7 @@ namespace GameLogic
 
             this.cursor3D = this.AddModel("cursor.dae");
 
-            this.terrain = this.AddTerrain("terrain.dae", new TerrainDescription() { });
+            this.terrain = this.AddTerrain("terrain.dae", new TerrainDescription() { UsePathFinding = true, PathNodeSize = 5f, });
 
             this.minimap = this.AddMinimap(new MinimapDescription()
             {
@@ -122,7 +123,7 @@ namespace GameLogic
             Ray cursorRay = this.GetPickingRay();
             Vector3 position;
             Triangle triangle;
-            bool picked = this.terrain.Pick(cursorRay, out position, out triangle);
+            bool picked = this.terrain.Pick(ref cursorRay, out position, out triangle);
 
             if (picked)
             {
@@ -287,9 +288,13 @@ namespace GameLogic
 
             if (action.Execute())
             {
-                this.soldierModels[active].Manipulator.SetPosition(destination, true);
+                Path path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                if (path != null)
+                {
+                    this.soldierModels[active].Manipulator.Follow(path.GenerateCurve());
 
-                this.GoToSoldier(active);
+                    this.GoToSoldier(active);
+                }
             }
         }
         public void Assault(Soldier passive, Soldier active)
