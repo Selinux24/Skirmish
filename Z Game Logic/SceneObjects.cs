@@ -80,12 +80,11 @@ namespace GameLogic
 
                     instance.TextureIndex = teamIndex;
 
-                    Vector2 point = new Vector2(
-                        (soldierIndex * soldierSeparation) - (teamWidth * 0.5f),
-                        (teamIndex * teamSeparation) - (gameWidth * 0.5f));
+                    float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
+                    float z = (teamIndex * teamSeparation) - (gameWidth * 0.5f);
 
                     Vector3 position;
-                    if (this.terrain.FindGroundPosition(point, out position))
+                    if (this.terrain.FindTopGroundPosition(x, z, out position))
                     {
                         instance.Manipulator.SetPosition(position, true);
                     }
@@ -123,7 +122,7 @@ namespace GameLogic
             Ray cursorRay = this.GetPickingRay();
             Vector3 position;
             Triangle triangle;
-            bool picked = this.terrain.Pick(ref cursorRay, out position, out triangle);
+            bool picked = this.terrain.PickNearest(ref cursorRay, out position, out triangle);
 
             if (picked)
             {

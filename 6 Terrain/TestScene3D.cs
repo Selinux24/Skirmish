@@ -117,7 +117,7 @@ namespace Terrain
                 for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
                 {
                     Vector3 pos;
-                    if (this.terrain.FindGroundPosition(x, z, out pos))
+                    if (this.terrain.FindTopGroundPosition(x, z, out pos))
                     {
                         this.oks.Add(new Line(pos, pos + Vector3.Up));
                     }
@@ -149,7 +149,7 @@ namespace Terrain
             this.helicopterLineDrawer.Visible = false;
 
             Vector3 gPos;
-            if (this.terrain.FindGroundPosition(new Vector2(10, 10), out gPos))
+            if (this.terrain.FindTopGroundPosition(10, 10, out gPos))
             {
                 this.helicopter.Manipulator.SetPosition(gPos);
             }
@@ -378,7 +378,7 @@ namespace Terrain
                 Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
 
                 Vector3 p;
-                if (terrain.FindGroundPosition(v.X, v.Z, out p))
+                if (terrain.FindTopGroundPosition(v.X, v.Z, out p))
                 {
                     return p + offset;
                 }

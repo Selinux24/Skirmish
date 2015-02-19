@@ -10,21 +10,43 @@ namespace Engine.Common
     public class GridNode
     {
         /// <summary>
+        /// Connected nodes dictionary
+        /// </summary>
+        private Dictionary<Headings, GridNode> ConnectedNodes = new Dictionary<Headings, GridNode>();
+
+        /// <summary>
         /// North West point
         /// </summary>
-        public Vector3 NorthWest;
+        public readonly Vector3 NorthWest;
         /// <summary>
         /// North East point
         /// </summary>
-        public Vector3 NorthEast;
+        public readonly Vector3 NorthEast;
         /// <summary>
         /// South West point
         /// </summary>
-        public Vector3 SouthWest;
+        public readonly Vector3 SouthWest;
         /// <summary>
         /// South East point
         /// </summary>
-        public Vector3 SouthEast;
+        public readonly Vector3 SouthEast;
+        /// <summary>
+        /// Gets connected node of specified heading
+        /// </summary>
+        /// <param name="heading">Heading</param>
+        /// <returns>Returns connected node of specified heading if exists</returns>
+        public GridNode this[Headings heading]
+        {
+            get
+            {
+                if (this.ConnectedNodes.ContainsKey(heading))
+                {
+                    return this.ConnectedNodes[heading];
+                }
+
+                return null;
+            }
+        }
         /// <summary>
         /// Node state
         /// </summary>
@@ -33,10 +55,6 @@ namespace Engine.Common
         /// Node passing cost
         /// </summary>
         public float Cost;
-        /// <summary>
-        /// Connected nodes
-        /// </summary>
-        public Dictionary<Headings, GridNode> ConnectedNodes = new Dictionary<Headings, GridNode>();
         /// <summary>
         /// Center position
         /// </summary>
@@ -71,18 +89,12 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        public GridNode()
-        {
-
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
         /// <param name="p0">Vertex 0</param>
         /// <param name="p1">Vertex 1</param>
         /// <param name="p2">Vertex 2</param>
         /// <param name="p3">Vertex 3</param>
-        public GridNode(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        /// <param name="cost">Cost</param>
+        public GridNode(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float cost)
         {
             //Buscar mayor y menor X y Z
             float maxX = float.MinValue;
@@ -130,7 +142,7 @@ namespace Engine.Common
             else if (p2.X == maxX && p2.Z == minZ) this.SouthEast = p2;
             else if (p3.X == maxX && p3.Z == minZ) this.SouthEast = p3;
 
-            this.Cost = 1f;
+            this.Cost = cost;
         }
 
         /// <summary>
@@ -209,6 +221,17 @@ namespace Engine.Common
             }
         }
         /// <summary>
+        /// Gets whether this node contains specified point
+        /// </summary>
+        /// <param name="point">Point to test</param>
+        /// <returns>Returns whether this node contains specified point</returns>
+        public bool Contains(Vector3 point)
+        {
+            BoundingBox bbox = BoundingBox.FromPoints(this.GetCorners());
+
+            return bbox.Contains(point) != ContainmentType.Disjoint;
+        }
+        /// <summary>
         /// Get four node corners
         /// </summary>
         /// <returns>Returns four node corners</returns>
@@ -223,23 +246,12 @@ namespace Engine.Common
             };
         }
         /// <summary>
-        /// Gets whether this node contains specified point
-        /// </summary>
-        /// <param name="point">Point to test</param>
-        /// <returns>Returns whether this node contains specified point</returns>
-        public bool Contains(Vector3 point)
-        {
-            BoundingBox bbox = BoundingBox.FromPoints(this.GetCorners());
-
-            return bbox.Contains(point) != ContainmentType.Disjoint;
-        }
-        /// <summary>
         /// Gets text representation of instance
         /// </summary>
         /// <returns>Returns text representation</returns>
         public override string ToString()
         {
-            return string.Format("State {0}; Cost {1:0.00}; Connections {3}; Center: {4}", this.State, this.Cost, this.ConnectedNodes.Count, this.Center);
+            return string.Format("State {0}; Cost {1:0.00}; Connections {2}; Center: {3}", this.State, this.Cost, this.ConnectedNodes.Count, this.Center);
         }
     }
 }

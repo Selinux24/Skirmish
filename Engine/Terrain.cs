@@ -94,7 +94,7 @@ namespace Engine
 
             if (description != null && description.UsePathFinding)
             {
-                this.grid = Grid.Build(ref bbox, triangles, description.PathNodeSize);
+                this.grid = Grid.Build(this, description.PathNodeSize);
             }
         }
         /// <summary>
@@ -154,35 +154,14 @@ namespace Engine
         /// <summary>
         /// Gets ground position giving x, z coordinates
         /// </summary>
-        /// <param name="point">Plane position</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindGroundPosition(Vector2 point, out Vector3 position)
-        {
-            return FindGroundPosition(point.X, point.Y, out position);
-        }
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="point">Plane position</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindGroundPosition(Vector2 point, out Vector3 position, out Triangle triangle)
-        {
-            return FindGroundPosition(point.X, point.Y, out position, out triangle);
-        }
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="z">Z coordinate</param>
         /// <param name="position">Ground position if exists</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindGroundPosition(float x, float z, out Vector3 position)
+        public bool FindTopGroundPosition(float x, float z, out Vector3 position)
         {
             Triangle tri;
-            return FindGroundPosition(x, z, out position, out tri);
+            return FindTopGroundPosition(x, z, out position, out tri);
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -192,7 +171,7 @@ namespace Engine
         /// <param name="position">Ground position if exists</param>
         /// <param name="triangle">Triangle found</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindGroundPosition(float x, float z, out Vector3 position, out Triangle triangle)
+        public bool FindTopGroundPosition(float x, float z, out Vector3 position, out Triangle triangle)
         {
             Ray ray = new Ray()
             {
@@ -200,24 +179,122 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            return this.Pick(ref ray, out position, out triangle);
+            return this.PickNearest(ref ray, out position, out triangle);
         }
         /// <summary>
-        /// Pick position
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindFirstGroundPosition(float x, float z, out Vector3 position)
+        {
+            Triangle tri;
+            return FindFirstGroundPosition(x, z, out position, out tri);
+        }
+        /// <summary>
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindFirstGroundPosition(float x, float z, out Vector3 position, out Triangle triangle)
+        {
+            Ray ray = new Ray()
+            {
+                Position = new Vector3(x, 1000f, z),
+                Direction = Vector3.Down,
+            };
+
+            return this.PickFirst(ref ray, out position, out triangle);
+        }
+        /// <summary>
+        /// Gets ground positions giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="positions">Ground positions if exists</param>
+        /// <returns>Returns true if ground positions found</returns>
+        public bool FindAllGroundPosition(float x, float z, out Vector3[] positions)
+        {
+            Triangle[] triangles;
+            return FindAllGroundPosition(x, z, out positions, out triangles);
+        }
+        /// <summary>
+        /// Gets all ground positions giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="positions">Ground positions if exists</param>
+        /// <param name="triangles">Triangles found</param>
+        /// <returns>Returns true if ground positions found</returns>
+        public bool FindAllGroundPosition(float x, float z, out Vector3[] positions, out Triangle[] triangles)
+        {
+            BoundingBox bbox = this.GetBoundingBox();
+
+            Ray ray = new Ray()
+            {
+                Position = new Vector3(x, bbox.Maximum.Y + 0.01f, z),
+                Direction = Vector3.Down,
+            };
+
+            return this.PickAll(ref ray, out positions, out triangles);
+        }
+        /// <summary>
+        /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool Pick(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
         {
             if (this.pickingQuadtree != null)
             {
-                return this.pickingQuadtree.Pick(ref ray, out position, out triangle);
+                return this.pickingQuadtree.PickNearest(ref ray, out position, out triangle);
             }
             else
             {
-                return this.terrain.Pick(ref ray, out position, out triangle);
+                return this.terrain.PickNearest(ref ray, out position, out triangle);
+            }
+        }
+        /// <summary>
+        /// Pick first position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="position">Picked position if exists</param>
+        /// <param name="triangle">Picked triangle if exists</param>
+        /// <returns>Returns true if picked position found</returns>
+        public bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
+        {
+            if (this.pickingQuadtree != null)
+            {
+                return this.pickingQuadtree.PickFirst(ref ray, out position, out triangle);
+            }
+            else
+            {
+                return this.terrain.PickFirst(ref ray, out position, out triangle);
+            }
+        }
+        /// <summary>
+        /// Pick all positions
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="positions">Picked positions if exists</param>
+        /// <param name="triangles">Picked triangles if exists</param>
+        /// <returns>Returns true if picked positions found</returns>
+        public bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
+        {
+            if (this.pickingQuadtree != null)
+            {
+                return this.pickingQuadtree.PickAll(ref ray, out positions, out triangles);
+            }
+            else
+            {
+                return this.terrain.PickAll(ref ray, out positions, out triangles);
             }
         }
         /// <summary>
@@ -228,16 +305,7 @@ namespace Engine
         /// <returns>Return path if exists</returns>
         public Path FindPath(Vector3 from, Vector3 to)
         {
-            GridNode startNode = this.grid.FindNode(from);
-            GridNode endNode = this.grid.FindNode(to);
-            if (startNode != null && endNode != null)
-            {
-                return PathFinding.PathFinder.FindPath(startNode, endNode);
-            }
-            else
-            {
-                return null;
-            }
+            return PathFinding.PathFinder.FindPath(this.grid, from, to);
         }
 
         /// <summary>

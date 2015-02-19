@@ -16,78 +16,82 @@ namespace Engine.PathFinding
         /// Cached paths
         /// </summary>
         private static List<PathCache> Cache = new List<PathCache>(10);
-        /// <summary>
-        /// Paths to validate
-        /// </summary>
-        private static PriorityQueue<GridNode, float> OpenPathsQueue = new PriorityQueue<GridNode, float>();
-
-        /// <summary>
-        /// Heuristic estimate value
-        /// </summary>
-        public static int HeuristicEstimateValue = 8;
-        /// <summary>
-        /// Calc method
-        /// </summary>
-        public static HeuristicMethods HeuristicMethod = HeuristicMethods.Manhattan;
 
         /// <summary>
         /// Gets the path from start to end
         /// </summary>
-        /// <param name="start">Start point</param>
-        /// <param name="end">End point</param>
+        /// <param name="grid">Grid</param>
+        /// <param name="startPosition">Start point</param>
+        /// <param name="endPosition">End point</param>
+        /// <param name="heuristicMethod">Heuristic metod (Manhattan by default)</param>
+        /// <param name="heuristicEstimateValue">Heuristic estimate value (8 by default)</param>
         /// <returns>Returns the path from start to end</returns>
-        public static Path FindPath(GridNode start, GridNode end)
+        public static Path FindPath(Grid grid, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.Manhattan, int heuristicEstimateValue = 8)
         {
-            PathCache cachedPath = Cache.Find(p => p.Start == start && p.End == end);
-            if (cachedPath != null)
+            GridNode start = grid.FindNode(startPosition);
+            GridNode end = grid.FindNode(endPosition);
+            if (start != null && end != null)
             {
-                return cachedPath.Path;
-            }
-            else
-            {
-                Path path = CalcReturnPath(start, end);
-
-                if (Cache.Count >= 10)
+                PathCache cachedPath = Cache.Find(p => p.Start == start && p.End == end);
+                if (cachedPath != null)
                 {
-                    Cache.RemoveAt(0);
+                    //Return path
+                    return new Path(startPosition, endPosition, cachedPath.Path.ReturnPath.ToArray());
                 }
-
-                Cache.Add(new PathCache()
+                else
                 {
-                    Path = path,
-                    Start = start,
-                    End = end,
-                });
+                    //Calculate return path
+                    GridNode[] solvedList = CalcReturnPath(start, end, heuristicMethod, heuristicEstimateValue);
+                    if (solvedList != null && solvedList.Length > 0)
+                    {
+                        //Generate path
+                        Path path = new Path(startPosition, endPosition, solvedList);
 
-                return path;
+                        //Update queue
+                        if (Cache.Count >= 10) Cache.RemoveAt(0);
+
+                        //Add path to caché
+                        Cache.Add(new PathCache()
+                        {
+                            Path = path,
+                            Start = start,
+                            End = end,
+                        });
+
+                        return path;
+                    }
+                }
             }
+
+            return null;
         }
         /// <summary>
         /// Gets the path from start to end
         /// </summary>
-        /// <param name="start">Start point</param>
-        /// <param name="end">End point</param>
+        /// <param name="start">Start node</param>
+        /// <param name="end">End node</param>
+        /// <param name="heuristicMethod">Heuristic metod</param>
+        /// <param name="heuristicEstimateValue">Heuristic estimate value</param>
         /// <returns>Returns the path from start to end</returns>
-        private static Path CalcReturnPath(GridNode start, GridNode end)
+        private static GridNode[] CalcReturnPath(GridNode start, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
         {
-            //Set dictionary
-            Dictionary<GridNode, PathFinderData> nodes = new Dictionary<GridNode, PathFinderData>();
-
-            //Clear queue
-            OpenPathsQueue.Clear();
+            //New queue
+            PriorityQueue<GridNode, float> openPathsQueue = new PriorityQueue<GridNode, float>();
+            //Data dictionary
+            Dictionary<GridNode, PathFinderData> nodesData = new Dictionary<GridNode, PathFinderData>();
 
             //Add first node
-            OpenPathsQueue.Enqueue(start, 1);
-            nodes.Add(start, new PathFinderData());
+            openPathsQueue.Enqueue(start, 1);
+            nodesData.Add(start, new PathFinderData());
 
             bool nodeFound = false;
-            while (OpenPathsQueue.Count > 0)
+            while (openPathsQueue.Count > 0)
             {
                 //Dequeue the node with lower priority
-                PriorityQueueItem<GridNode, float> item = OpenPathsQueue.Dequeue();
+                PriorityQueueItem<GridNode, float> item = openPathsQueue.Dequeue();
 
                 GridNode currentNode = item.Value;
-                PathFinderData currentNodeData = nodes[currentNode];
+                PathFinderData currentNodeData = nodesData[currentNode];
 
                 //If the node is not closed to continue the process
                 if (currentNodeData.State != GridNodeStates.Closed)
@@ -108,18 +112,15 @@ namespace Engine.PathFinding
                         //Search every possible direction from the current node
                         for (int i = 1; i < 9; i++)
                         {
-                            Headings heading = (Headings)i;
-
-                            if (currentNode.ConnectedNodes.ContainsKey(heading))
+                            GridNode nextNode = currentNode[(Headings)i];
+                            if (nextNode != null)
                             {
-                                GridNode nextNode = currentNode.ConnectedNodes[heading];
-
-                                if (!nodes.ContainsKey(nextNode))
+                                if (!nodesData.ContainsKey(nextNode))
                                 {
-                                    nodes.Add(nextNode, new PathFinderData());
+                                    nodesData.Add(nextNode, new PathFinderData());
                                 }
 
-                                PathFinderData nextNodeData = nodes[nextNode];
+                                PathFinderData nextNodeData = nodesData[nextNode];
 
                                 if (nextNode.State == GridNodeStates.Closed)
                                 {
@@ -147,14 +148,14 @@ namespace Engine.PathFinding
                                 nextNodeData.Cost = newGone;
                                 nextNodeData.State = GridNodeStates.Clear;
 
-                                //Calculate priority
+                                //Calculate priority from next to end
                                 float heuristicValue = CalcHeuristic(
-                                    HeuristicMethod,
-                                    HeuristicEstimateValue,
                                     nextNode.Center,
-                                    end.Center);
+                                    end.Center,
+                                    heuristicMethod,
+                                    heuristicEstimateValue);
 
-                                OpenPathsQueue.Enqueue(nextNode, newGone + heuristicValue);
+                                openPathsQueue.Enqueue(nextNode, newGone + heuristicValue);
                             }
                         }
                     }
@@ -171,10 +172,10 @@ namespace Engine.PathFinding
                 {
                     solvedList.Insert(0, node);
 
-                    node = nodes[node].NextNode;
+                    node = nodesData[node].NextNode;
                 }
 
-                return new Path(solvedList.ToArray());
+                return solvedList.ToArray();
             }
             else
             {
@@ -185,31 +186,31 @@ namespace Engine.PathFinding
         /// <summary>
         /// Calculate the heuristic value as the start and end positions
         /// </summary>
-        /// <param name="method">Calculation method</param>
-        /// <param name="heuristicEstimateValue">Estimated value</param>
         /// <param name="start">Start position</param>
         /// <param name="end">End position</param>
+        /// <param name="heuristicMethod">Calculation method</param>
+        /// <param name="heuristicEstimateValue">Estimated value</param>
         /// <returns>Returns the heuristic value according to the start and end positions</returns>
-        private static float CalcHeuristic(HeuristicMethods method, float heuristicEstimateValue, Vector3 start, Vector3 end)
+        private static float CalcHeuristic(Vector3 start, Vector3 end, HeuristicMethods heuristicMethod, float heuristicEstimateValue)
         {
-            if (method == HeuristicMethods.Euclidean)
+            if (heuristicMethod == HeuristicMethods.Euclidean)
             {
                 //Euclidean
                 return heuristicEstimateValue * (float)(Math.Sqrt(Math.Pow((start.X - end.X), 2) + Math.Pow((start.Y - end.Y), 2) + Math.Pow((start.Z - end.Z), 2)));
             }
-            else if (method == HeuristicMethods.Manhattan)
+            else if (heuristicMethod == HeuristicMethods.Manhattan)
             {
                 //Manhattan
                 return heuristicEstimateValue * (Math.Abs(end.X - start.X) + Math.Abs(end.Y - start.Y) + Math.Abs(end.Z - start.Z));
             }
-            else if (method == HeuristicMethods.DiagonalDistance)
+            else if (heuristicMethod == HeuristicMethods.DiagonalDistance)
             {
                 //Diagonal distance
                 return heuristicEstimateValue * (Math.Max(Math.Abs(start.X - end.X), Math.Abs(start.X - end.Z)));
             }
             else
             {
-                throw new ArgumentException(string.Format("Calculation method {0} not valid.", method));
+                throw new ArgumentException(string.Format("Calculation method {0} not valid.", heuristicMethod));
             }
         }
 

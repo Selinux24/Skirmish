@@ -160,15 +160,37 @@ namespace Engine.Common
         public QuadTreeNode Root;
 
         /// <summary>
-        /// Pick position
+        /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="position">Hit position</param>
         /// <param name="triangle">Hit triangle</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool Pick(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
         {
-            return this.Root.Pick(ref ray, out position, out triangle);
+            return this.Root.PickNearest(ref ray, out position, out triangle);
+        }
+        /// <summary>
+        /// Pick first position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="position">Hit position</param>
+        /// <param name="triangle">Hit triangle</param>
+        /// <returns>Returns true if picked position found</returns>
+        public bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
+        {
+            return this.Root.PickFirst(ref ray, out position, out triangle);
+        }
+        /// <summary>
+        /// Pick all positions
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="positions">Hit positions</param>
+        /// <param name="triangles">Hit triangles</param>
+        /// <returns>Returns true if picked positions found</returns>
+        public bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
+        {
+            return this.Root.PickAll(ref ray, out positions, out triangles);
         }
         /// <summary>
         /// Gets bounding boxes of specified depth

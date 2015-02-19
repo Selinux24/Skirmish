@@ -263,22 +263,21 @@ namespace Engine
             List<Vector3> pickedPositionList = new List<Vector3>();
             List<Triangle> pickedTriangleList = new List<Triangle>();
 
-            //For use into Array.ForEach
-            Ray r = ray;
+            Vector3 epsilon = new Vector3(1);
 
-            Array.ForEach(triangles, (t) => 
+            foreach (Triangle t in triangles)
             {
                 Vector3 pos;
-                if (t.Intersects(ref r, out pos))
+                if (t.Intersects(ref ray, out pos))
                 {
                     //Avoid duplicate picked positions
-                    if (!pickedPositionList.Contains(pos))
+                    if (!pickedPositionList.Exists(tr => Vector3.NearEqual(tr, pos, epsilon)))
                     {
                         pickedPositionList.Add(pos);
                         pickedTriangleList.Add(t);
                     }
                 }
-            });
+            }
 
             pickedPositions = pickedPositionList.ToArray();
             pickedTriangles = pickedTriangleList.ToArray();

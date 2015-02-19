@@ -155,7 +155,7 @@ namespace Collada
                 float posZ = (z * -back);
 
                 Vector3 p;
-                if (this.ground.FindGroundPosition(posX, posZ, out p))
+                if (this.ground.FindTopGroundPosition(posX, posZ, out p))
                 {
                     manipulator.SetScale(1);
                     manipulator.SetRotation(Quaternion.Identity);
@@ -264,7 +264,7 @@ namespace Collada
             float lampPosZ = r * (float)Math.Sin(1f / r * this.Game.GameTime.TotalSeconds);
 
             Vector3 lampPos;
-            if (this.ground.FindGroundPosition(lampPosX, lampPosZ, out lampPos))
+            if (this.ground.FindTopGroundPosition(lampPosX, lampPosZ, out lampPos))
             {
                 this.lampsModel.Instances[0].Manipulator.SetPosition(lampPos + (Vector3.UnitY * 30f));
             }

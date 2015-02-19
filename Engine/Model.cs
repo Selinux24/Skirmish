@@ -325,13 +325,13 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets picking position of giving ray
+        /// Gets nearest picking position of giving ray
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="position">Ground position if exists</param>
         /// <param name="triangle">Triangle found</param>
         /// <returns>Returns true if ground position found</returns>
-        public virtual bool Pick(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public virtual bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
         {
             position = new Vector3();
             triangle = new Triangle();
@@ -347,6 +347,66 @@ namespace Engine
                 {
                     position = pos;
                     triangle = tri;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Gets first picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <returns>Returns true if ground position found</returns>
+        public virtual bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
+        {
+            position = new Vector3();
+            triangle = new Triangle();
+
+            BoundingSphere bsph = this.GetBoundingSphere();
+            if (bsph.Intersects(ref ray))
+            {
+                Triangle[] triangles = this.GetTriangles();
+
+                Vector3 pos;
+                Triangle tri;
+                if (Triangle.IntersectFirst(ref ray, triangles, out pos, out tri))
+                {
+                    position = pos;
+                    triangle = tri;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Gets all picking position of giving ray
+        /// </summary>
+        /// <param name="ray"></param>
+        /// <param name="positions"></param>
+        /// <param name="triangles"></param>
+        /// <returns></returns>
+        public virtual bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
+        {
+            positions = null;
+            triangles = null;
+
+            BoundingSphere bsph = this.GetBoundingSphere();
+            if (bsph.Intersects(ref ray))
+            {
+                Triangle[] tris = this.GetTriangles();
+
+                Vector3[] pos;
+                Triangle[] tri;
+                if (Triangle.IntersectAll(ref ray, tris, out pos, out tri))
+                {
+                    positions = pos;
+                    triangles = tri;
 
                     return true;
                 }

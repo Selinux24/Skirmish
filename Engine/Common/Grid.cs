@@ -23,45 +23,42 @@ namespace Engine.Common
         /// <param name="triangles">Triangles</param>
         /// <param name="size">Node size</param>
         /// <returns>Returns generated grid node list</returns>
-        public static Grid Build(ref BoundingBox bbox, Triangle[] triangles, float size)
+        public static Grid Build(Terrain terrain, float size)
         {
             List<GridNode> result = new List<GridNode>();
 
             float half = size * 0.5f;
 
-            Vector3 dP0 = new Vector3(-half, bbox.Maximum.Y, -half);
-            Vector3 dP1 = new Vector3(+half, bbox.Maximum.Y, -half);
-            Vector3 dP2 = new Vector3(-half, bbox.Maximum.Y, +half);
-            Vector3 dP3 = new Vector3(+half, bbox.Maximum.Y, +half);
+            BoundingBox bbox = terrain.GetBoundingBox();
 
             for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += size)
             {
                 for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += size)
                 {
-                    Ray ray = new Ray(new Vector3(x, bbox.Maximum.Y + 1f, z), Vector3.Down);
                     Vector3[] points;
-                    if (TestPoint(ref ray, triangles, out points))
+                    Triangle[] triangles;
+                    if (TestPoint(x, z, terrain, out points, out triangles))
                     {
+                        //Each point is a node
                         for (int i = 0; i < points.Length; i++)
                         {
                             Vector3 point = points[i];
 
-                            //Each point is a node
-                            Ray ray0 = new Ray(point + dP0, Vector3.Down);
                             Vector3[] p0;
-                            if (!TestPoint(ref ray0, triangles, out p0)) continue;
+                            Triangle[] t0;
+                            if (!TestPoint(point.X + -half, point.Z + -half, terrain, out p0, out t0)) continue;
 
-                            Ray ray1 = new Ray(point + dP1, Vector3.Down);
                             Vector3[] p1;
-                            if (!TestPoint(ref ray1, triangles, out p1)) continue;
+                            Triangle[] t1;
+                            if (!TestPoint(point.X + +half, point.Z + -half, terrain, out p1, out t1)) continue;
 
-                            Ray ray2 = new Ray(point + dP2, Vector3.Down);
                             Vector3[] p2;
-                            if (!TestPoint(ref ray2, triangles, out p2)) continue;
+                            Triangle[] t2;
+                            if (!TestPoint(point.X + -half, point.Z + +half, terrain, out p2, out t2)) continue;
 
-                            Ray ray3 = new Ray(point + dP3, Vector3.Down);
                             Vector3[] p3;
-                            if (!TestPoint(ref ray3, triangles, out p3)) continue;
+                            Triangle[] t3;
+                            if (!TestPoint(point.X + +half, point.Z + +half, terrain, out p3, out t3)) continue;
 
                             if (p0.Length == p1.Length &&
                                 p0.Length == p2.Length &&
@@ -69,7 +66,9 @@ namespace Engine.Common
                             {
                                 for (int n = 0; n < p0.Length; n++)
                                 {
-                                    GridNode newNode = new GridNode(p0[n], p1[n], p2[n], p3[n]);
+                                    Vector3 va = (t0[n].Normal + t1[n].Normal + t2[n].Normal + t3[n].Normal) * 0.25f;
+
+                                    GridNode newNode = new GridNode(p0[n], p1[n], p2[n], p3[n], Helper.Angle(Vector3.Up, va));
 
                                     result.Add(newNode);
                                 }
@@ -77,8 +76,14 @@ namespace Engine.Common
                             else
                             {
                                 //TODO: Process shared nodes. May exists?
+                                throw new System.NotImplementedException();
                             }
                         }
+                    }
+                    else
+                    {
+                        //TODO: May be?
+                        throw new System.NotImplementedException();
                     }
                 }
             }
@@ -103,17 +108,19 @@ namespace Engine.Common
         /// </summary>
         /// <param name="triangles">Triangle list</param>
         /// <param name="ray">Ray</param>
-        /// <param name="p">Result point list</param>
+        /// <param name="points">Result point list</param>
         /// <returns>Returns true if point is valid.</returns>
-        private static bool TestPoint(ref Ray ray, Triangle[] triangles, out Vector3[] p)
+        private static bool TestPoint(float x, float z, Terrain terrain, out Vector3[] points, out Triangle[] tris)
         {
-            p = null;
+            points = null;
+            tris = null;
 
-            List<Vector3> points = new List<Vector3>();
+            List<Vector3> pointList = new List<Vector3>();
+            List<Triangle> triangleList = new List<Triangle>();
 
             Vector3[] pickedPositions;
             Triangle[] pickedTriangles;
-            if (Triangle.IntersectAll(ref ray, triangles, out pickedPositions, out pickedTriangles))
+            if (terrain.FindAllGroundPosition(x, z, out pickedPositions, out pickedTriangles))
             {
                 for (int i = 0; i < pickedPositions.Length; i++)
                 {
@@ -121,14 +128,23 @@ namespace Engine.Common
 
                     if (a <= MathUtil.PiOverFour)
                     {
-                        points.Add(pickedPositions[i]);
+                        pointList.Add(pickedPositions[i]);
+                        triangleList.Add(pickedTriangles[i]);
                     }
                 }
             }
 
-            p = points.ToArray();
+            if (pointList.Count > 0)
+            {
+                points = pointList.ToArray();
+                tris = triangleList.ToArray();
 
-            return points.Count > 0;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>

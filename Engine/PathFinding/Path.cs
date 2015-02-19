@@ -20,6 +20,14 @@ namespace Engine.PathFinding
         /// </summary>
         public readonly List<GridNode> ReturnPath = new List<GridNode>();
         /// <summary>
+        /// Start position
+        /// </summary>
+        public Vector3 StartPosition;
+        /// <summary>
+        /// End position
+        /// </summary>
+        public Vector3 EndPosition;
+        /// <summary>
         /// Total distance
         /// </summary>
         public float Distance
@@ -41,8 +49,11 @@ namespace Engine.PathFinding
         /// Constructor
         /// </summary>
         /// <param name="returnPath">Node list</param>
-        public Path(GridNode[] returnPath)
+        public Path(Vector3 startPosition, Vector3 endPosition, GridNode[] returnPath)
         {
+            this.StartPosition = startPosition;
+            this.EndPosition = endPosition;
+
             if (returnPath != null && returnPath.Length > 0)
             {
                 this.ReturnPath.AddRange(returnPath);
@@ -56,9 +67,11 @@ namespace Engine.PathFinding
         {
             Curve curve = new Curve();
 
+            curve.AddPosition(this.StartPosition);
+
             float distanceAcum = 0;
 
-            for (int i = 0; i < this.ReturnPath.Count; i++)
+            for (int i = 1; i < this.ReturnPath.Count - 1; i++)
             {
                 Vector3 position = this.ReturnPath[i].Center;
 
@@ -71,6 +84,10 @@ namespace Engine.PathFinding
 
                 curve.AddPosition(this.ReturnPath[i].Center);
             }
+
+            distanceAcum += Vector3.Distance(this.EndPosition, curve.Points[curve.Points.Length - 1]);
+
+            curve.AddPosition(this.EndPosition);
 
             return curve;
         }

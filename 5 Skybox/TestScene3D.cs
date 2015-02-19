@@ -110,7 +110,7 @@ namespace Skybox
             this.torchs = this.AddInstancingModel("torch.dae", this.firePositions.Length);
             for (int i = 0; i < this.firePositions.Length; i++)
             {
-                this.ruins.FindGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i]);
+                this.ruins.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i]);
 
                 this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
                 this.torchs.Instances[i].Manipulator.SetPosition(firePositions3D[i], true);
@@ -193,7 +193,7 @@ namespace Skybox
 
                 Vector3 p;
                 Triangle tri;
-                if (this.ruins.FindGroundPosition(v.X, v.Z, out p, out tri))
+                if (this.ruins.FindTopGroundPosition(v.X, v.Z, out p, out tri))
                 {
                     if (tri.Inclination > walkerClimb)
                     {
@@ -202,7 +202,7 @@ namespace Skybox
                     else
                     {
                         //Position test
-                        if (this.ruins.FindGroundPosition(currentPosition.X, currentPosition.Z, out p, out tri))
+                        if (this.ruins.FindTopGroundPosition(currentPosition.X, currentPosition.Z, out p, out tri))
                         {
                             if (tri.Inclination > walkerClimb)
                             {
@@ -297,7 +297,7 @@ namespace Skybox
 
                 Vector3 p;
                 Triangle t;
-                if (this.ruins.Pick(ref pRay, out p, out t))
+                if (this.ruins.PickNearest(ref pRay, out p, out t))
                 {
                     this.pickedTri.SetLines(Color.Red, GeometryUtil.CreateWiredTriangle(t));
                 }
