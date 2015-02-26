@@ -70,11 +70,10 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        /// <param name="scene">Scene</param>
         /// <param name="content">Content</param>
         /// <param name="instances">Number of instances</param>
-        public ModelInstanced(Game game, Scene3D scene, ModelContent content, int instances)
-            : base(game, scene, content, true, instances, true, true)
+        public ModelInstanced(Game game, ModelContent content, int instances)
+            : base(game, content, true, instances, true, true)
         {
             this.UseZBuffer = true;
 
@@ -102,9 +101,10 @@ namespace Engine
         /// Update
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
-            base.Update(gameTime);
+            base.Update(gameTime, context);
 
             if (this.instances != null && this.instances.Length > 0)
             {
@@ -121,7 +121,8 @@ namespace Engine
         /// Draw
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
             if (this.Meshes != null && this.VisibleCount > 0)
             {
@@ -160,10 +161,10 @@ namespace Engine
 
                 #region Per frame update
 
-                this.effect.FrameBuffer.World = this.Scene.World;
-                this.effect.FrameBuffer.WorldInverse = this.Scene.WorldInverse;
-                this.effect.FrameBuffer.WorldViewProjection = this.Scene.World * this.Scene.ViewProjectionPerspective;
-                this.effect.FrameBuffer.Lights = new BufferLights(this.Scene.Camera.Position, this.Scene.Lights);
+                this.effect.FrameBuffer.World = context.World;
+                this.effect.FrameBuffer.WorldInverse = Matrix.Invert(context.World);
+                this.effect.FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
+                this.effect.FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
                 this.effect.UpdatePerFrame();
 
                 #endregion
@@ -220,15 +221,14 @@ namespace Engine
         /// <summary>
         /// Frustum culling test
         /// </summary>
-        public override void FrustumCulling()
+        /// <param name="frustum">Frustum</param>
+        public override void FrustumCulling(BoundingFrustum frustum)
         {
-            BoundingFrustum frustum = this.Scene.Camera.Frustum;
-
             for (int i = 0; i < this.Instances.Length; i++)
             {
                 if (this.Instances[i].Visible)
                 {
-                    this.Instances[i].FrustumCulling(this.Scene.Camera.Frustum);
+                    this.Instances[i].FrustumCulling(frustum);
                 }
             }
         }

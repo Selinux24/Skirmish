@@ -6,7 +6,7 @@ namespace GameLogic
 {
     using GameLogic.Rules;
 
-    public class SceneHUD : Scene3D
+    public class SceneHUD : Scene2D
     {
         private TextDrawer txtTitle = null;
         private TextDrawer txtGame = null;
@@ -26,12 +26,19 @@ namespace GameLogic
         public SceneHUD(Game game)
             : base(game)
         {
-            this.ContentPath = "Resources";
+
         }
 
         public override void Initialize()
         {
             base.Initialize();
+
+            this.Camera = Camera2D.Create(
+                Vector3.UnitY*50f,
+                Vector3.Zero,
+                Vector3.UnitZ,
+                this.Game.Form.RenderWidth,
+                this.Game.Form.RenderHeight);
 
             Program.NewGame();
 
@@ -42,7 +49,12 @@ namespace GameLogic
             this.txtActionList = this.AddText("Lucida Casual", 12, Color.Yellow);
             this.txtAction = this.AddText("Lucida Casual", 12, Color.Yellow);
 
-            this.sprHUD = this.AddBackgroud("HUD.png", 99);
+            BackgroundDescription bkDesc = new BackgroundDescription()
+            {
+                ContentPath = "Resources",
+                Textures = new[] { "HUD.png" },
+            };
+            this.sprHUD = this.AddBackgroud(bkDesc, 99);
 
             this.butClose = this.AddSpriteButton(new SpriteButtonDescription()
             {

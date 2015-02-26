@@ -174,15 +174,24 @@ namespace Engine.Common
         {
             if (this.Indexed)
             {
-                deviceContext.DrawIndexed(this.IndexCount, 0, 0);
+                if (this.IndexCount > 0)
+                {
+                    deviceContext.DrawIndexed(this.IndexCount, 0, 0);
+
+                    Counters.DrawCallsPerFrame++;
+                    Counters.InstancesPerFrame++;
+                }
             }
             else
             {
-                deviceContext.Draw(this.VertexCount, 0);
-            }
+                if (this.VertexCount > 0)
+                {
+                    deviceContext.Draw(this.VertexCount, 0);
 
-            Counters.DrawCallsPerFrame++;
-            Counters.InstancesPerFrame++;
+                    Counters.DrawCallsPerFrame++;
+                    Counters.InstancesPerFrame++;
+                }
+            }
         }
         /// <summary>
         /// Sets input layout to assembler
@@ -207,9 +216,18 @@ namespace Engine.Common
             {
                 this.Vertices = data;
 
-                if (this.VertexBuffer != null && this.Vertices != null && this.Vertices.Length > 0)
+                if (this.Vertices != null && this.Vertices.Length > 0)
                 {
-                    VertexData.WriteVertexBuffer(deviceContext, this.VertexBuffer, this.Vertices);
+                    this.VertexCount = this.Vertices.Length;
+
+                    if (this.VertexBuffer != null)
+                    {
+                        VertexData.WriteVertexBuffer(deviceContext, this.VertexBuffer, this.Vertices);
+                    }
+                }
+                else
+                {
+                    this.VertexCount = 0;
                 }
             }
             else
@@ -228,9 +246,18 @@ namespace Engine.Common
             {
                 this.Indices = data;
 
-                if (this.IndexBuffer != null && this.Indices != null && this.Indices.Length > 0)
+                if (this.Indices != null && this.Indices.Length > 0)
                 {
-                    deviceContext.WriteBuffer(this.IndexBuffer, this.Indices);
+                    this.IndexCount = this.Indices.Length;
+
+                    if (this.IndexBuffer != null)
+                    {
+                        deviceContext.WriteBuffer(this.IndexBuffer, this.Indices);
+                    }
+                }
+                else
+                {
+                    this.IndexCount = 0;
                 }
             }
             else

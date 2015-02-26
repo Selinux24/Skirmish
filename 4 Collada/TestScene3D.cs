@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using Engine;
 using Engine.Common;
 using SharpDX;
-using System.Collections.Generic;
 
 namespace Collada
 {
-    public class TestScene3D : Scene3D
+    public class TestScene3D : Scene
     {
         private const float fogStartRel = 0.25f;
         private const float fogRangeRel = 0.75f;
@@ -57,6 +57,8 @@ namespace Collada
 
             TerrainDescription terrainDescription = new TerrainDescription()
             {
+                ContentPath = "Resources",
+                ModelFileName = "Ground.dae",
                 AddVegetation = true,
                 VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
                 Saturation = 0.05f,
@@ -67,9 +69,9 @@ namespace Collada
                 PathNodeSize = 20f,
             };
 
-            this.ground = this.AddTerrain("Ground.dae", Matrix.Scaling(20, 20, 20), terrainDescription);
-            this.helicoptersModel = this.AddInstancingModel("Helicopter.dae", 15);
-            this.lampsModel = this.AddInstancingModel("Poly.dae", 2);
+            this.ground = this.AddTerrain(Matrix.Scaling(20, 20, 20), terrainDescription);
+            this.helicoptersModel = this.AddInstancingModel("Resources", "Helicopter.dae", 15);
+            this.lampsModel = this.AddInstancingModel("Resources", "Poly.dae", 2);
             this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, "raindrop.dds"));
 
             BoundingBox[] bboxes = this.ground.pickingQuadtree.GetBoundingBoxes(5);

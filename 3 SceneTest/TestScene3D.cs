@@ -1,10 +1,9 @@
 ﻿using Engine;
-using Engine.Common;
 using SharpDX;
 
 namespace SceneTest
 {
-    public class TestScene3D : Scene3D
+    public class TestScene3D : Scene
     {
         private Model model = null;
 
@@ -18,9 +17,7 @@ namespace SceneTest
         {
             base.Initialize();
 
-            this.ContentPath = "Resources3D";
-
-            this.model = this.AddModel("poly.dae");
+            this.model = this.AddModel("Resources3D", "poly.dae");
         }
 
         public override void Update(GameTime gameTime)

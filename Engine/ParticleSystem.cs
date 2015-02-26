@@ -116,10 +116,9 @@ namespace Engine
         /// Contructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
         /// <param name="description">Particle system description</param>
-        public ParticleSystem(Game game, Scene3D scene, ParticleSystemDescription description)
-            : base(game, scene)
+        public ParticleSystem(Game game, ParticleSystemDescription description)
+            : base(game)
         {
             this.maximumParticles = description.MaximumParticles;
             this.maximumAge = description.MaximumAge;
@@ -152,7 +151,8 @@ namespace Engine
 
                 VertexParticle p = new VertexParticle
                 {
-                    Position = scene.Camera.Position,
+                    //REVISION: it was camera position
+                    Position = Vector3.Zero,
                     Velocity = description.Acceleration,
                     Size = new Vector2(description.ParticleSize),
                     Age = 0,
@@ -176,7 +176,7 @@ namespace Engine
             this.streamOutBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(this.maximumParticles, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
             this.inputStride = default(VertexParticle).Stride;
 
-            this.textureArray = game.Graphics.Device.LoadTextureArray(ContentManager.FindContent(scene.ContentPath, description.Textures));
+            this.textureArray = game.Graphics.Device.LoadTextureArray(ContentManager.FindContent(description.ContentPath, description.Textures));
             this.textureRandom = game.Graphics.Device.CreateRandomTexture(1024);
 
             this.Manipulator = new Manipulator3D();
@@ -197,7 +197,8 @@ namespace Engine
         /// Updating
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
             this.Manipulator.Update(gameTime);
         }
@@ -205,7 +206,8 @@ namespace Engine
         /// Drawing
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
             this.Game.Graphics.DeviceContext.OutputMerger.BlendState = null;
             this.Game.Graphics.DeviceContext.OutputMerger.BlendFactor = Color.Zero;
@@ -217,8 +219,8 @@ namespace Engine
 
             #region Per frame update
 
-            Matrix world = this.Scene.World * this.Manipulator.LocalTransform;
-            Matrix worldViewProjection = this.Scene.World * this.Scene.ViewProjectionPerspective;
+            Matrix world = context.World * this.Manipulator.LocalTransform;
+            Matrix worldViewProjection = context.World * context.ViewProjection;
 
             this.effect.FrameBuffer.MaxAge = this.maximumAge;
             this.effect.FrameBuffer.EmitAge = this.emitterAge;
@@ -227,7 +229,7 @@ namespace Engine
             this.effect.FrameBuffer.AccelerationWorld = this.particleAcceleration;
             this.effect.FrameBuffer.World = world;
             this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;
-            this.effect.FrameBuffer.EyePositionWorld = this.Scene.Camera.Position;
+            this.effect.FrameBuffer.EyePositionWorld = context.EyePosition;
             this.effect.FrameBuffer.TextureCount = (uint)this.textureArray.Description.Texture2DArray.ArraySize;
             this.effect.UpdatePerFrame(this.textureArray, this.textureRandom);
 
@@ -355,6 +357,10 @@ namespace Engine
         /// Texture list
         /// </summary>
         public string[] Textures = null;
+        /// <summary>
+        /// Content path
+        /// </summary>
+        public string ContentPath = "Resources";
 
         /// <summary>
         /// Creates a fire particle system

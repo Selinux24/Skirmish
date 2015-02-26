@@ -119,14 +119,12 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
         /// <param name="description">Button description</param>
-        public SpriteButton(Game game, Scene3D scene, SpriteButtonDescription description)
-            : base(game, scene)
+        public SpriteButton(Game game, SpriteButtonDescription description)
+            : base(game)
         {
             this.button = new Sprite(
                 game,
-                scene,
                 new SpriteDescription()
                 {
                     Textures = new[] { description.TextureReleased, description.TexturePressed },
@@ -137,7 +135,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(description.Font))
             {
-                this.text = new TextDrawer(game, scene, description.Font, description.FontSize, description.TextColor, description.TextShadowColor);
+                this.text = new TextDrawer(game, description.Font, description.FontSize, description.TextColor, description.TextShadowColor);
             }
 
             this.Left = description.Left;
@@ -165,7 +163,8 @@ namespace Engine
         /// Updates state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
             this.button.Left = this.Left;
             this.button.Top = this.Top;
@@ -179,23 +178,24 @@ namespace Engine
                 this.text.Left = this.Left + (int)leftmove;
                 this.text.Top = this.Top + (int)topmove;
 
-                this.text.Update(gameTime);
+                this.text.Update(gameTime, context);
             }
 
-            this.button.Update(gameTime);
+            this.button.Update(gameTime, context);
         }
         /// <summary>
         /// Draws button
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
             if (!string.IsNullOrEmpty(this.Text))
             {
-                this.text.Draw(gameTime);
+                this.text.Draw(gameTime, context);
             }
 
-            this.button.Draw(gameTime);
+            this.button.Draw(gameTime, context);
         }
         /// <summary>
         /// Fires on-click event

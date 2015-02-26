@@ -109,7 +109,7 @@ namespace Engine
         /// <returns>Returns rotation quaternion</returns>
         public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, bool yAxisOnly = true)
         {
-            Quaternion q = Quaternion.Invert(Quaternion.LookAtLH(target, eyePosition, Vector3.Up));
+            Quaternion q = Quaternion.Invert(Quaternion.LookAtLH(eyePosition, target, Vector3.Up));
 
             if (yAxisOnly)
             {
@@ -176,6 +176,54 @@ namespace Engine
                 obj.Dispose();
                 obj = null;
             }
+        }
+        /// <summary>
+        /// Gets the maximum value of the collection 
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="array">Array of parameters</param>
+        /// <returns>Return the maximum value of the collection</returns>
+        public static T Max<T>(params T[] array) where T : IComparable<T>
+        {
+            T res = default(T);
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (i == 0)
+                {
+                    res = array[i];
+                }
+                else if (res.CompareTo(array[i]) < 0)
+                {
+                    res = array[i];
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets the minimum value of the collection 
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="array">Array of parameters</param>
+        /// <returns>Return the minimum value of the collection</returns>
+        public static T Min<T>(params T[] array) where T : IComparable<T>
+        {
+            T res = default(T);
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (i == 0)
+                {
+                    res = array[i];
+                }
+                else if (res.CompareTo(array[i]) > 0)
+                {
+                    res = array[i];
+                }
+            }
+
+            return res;
         }
     }
 }

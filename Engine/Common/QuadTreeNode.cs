@@ -248,8 +248,14 @@ namespace Engine.Common
                         Triangle[] thisTris;
                         if (node.PickAll(ref ray, out thisHits, out thisTris))
                         {
-                            hits.AddRange(thisHits);
-                            tris.AddRange(thisTris);
+                            for (int i = 0; i < thisHits.Length; i++)
+                            {
+                                if (!hits.Contains(thisHits[i]))
+                                {
+                                    hits.Add(thisHits[i]);
+                                    tris.Add(thisTris[i]);
+                                }
+                            }
 
                             intersect = true;
                         }

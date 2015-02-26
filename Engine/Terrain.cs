@@ -33,40 +33,26 @@ namespace Engine
         public Grid grid = null;
 
         /// <summary>
-        /// Current scene
-        /// </summary>
-        public new Scene3D Scene
-        {
-            get
-            {
-                return base.Scene as Scene3D;
-            }
-            set
-            {
-                base.Scene = value;
-            }
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        /// <param name="scene">Scene</param>
         /// <param name="content">Geometry content</param>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="description">Terrain description</param>
-        public Terrain(Game game, Scene3D scene, ModelContent content, string contentFolder, TerrainDescription description)
-            : base(game, scene)
+        public Terrain(Game game, ModelContent content, string contentFolder, TerrainDescription description)
+            : base(game)
         {
-            this.terrain = new Model(game, scene, content);
+            this.terrain = new Model(game, content);
 
             BoundingBox bbox = this.terrain.GetBoundingBox();
+            BoundingSphere bsph = this.terrain.GetBoundingSphere();
             Triangle[] triangles = this.terrain.GetTriangles();
 
             if (description != null && description.AddVegetation)
             {
                 ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
                     contentFolder,
+                    bbox,
                     triangles,
                     description.VegetarionTextures,
                     description.Saturation,
@@ -74,7 +60,7 @@ namespace Engine
                     description.MaxSize,
                     description.Seed);
 
-                this.vegetation = new Billboard(game, scene, vegetationContent);
+                this.vegetation = new Billboard(game, vegetationContent);
             }
 
             if (description != null && description.AddSkydom)
@@ -82,9 +68,9 @@ namespace Engine
                 ModelContent skydomContent = ModelContent.GenerateSkydom(
                     contentFolder,
                     description.SkydomTexture,
-                    1000f);
+                    bsph.Radius * 10f);
 
-                this.skydom = new Cubemap(game, scene, skydomContent);
+                this.skydom = new Cubemap(game, skydomContent);
             }
 
             if (description != null && description.UseQuadtree)
@@ -94,7 +80,7 @@ namespace Engine
 
             if (description != null && description.UsePathFinding)
             {
-                this.grid = Grid.Build(this, description.PathNodeSize);
+                this.grid = Grid.Build(this, description.PathNodeSize, description.PathNodeInclination);
             }
         }
         /// <summary>
@@ -124,30 +110,32 @@ namespace Engine
         /// Objects updating
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
-            this.terrain.Update(gameTime);
+            this.terrain.Update(gameTime, context);
 
-            if (this.vegetation != null) this.vegetation.Update(gameTime);
+            if (this.vegetation != null) this.vegetation.Update(gameTime, context);
 
-            if (this.skydom != null) this.skydom.Update(gameTime);
+            if (this.skydom != null) this.skydom.Update(gameTime, context);
         }
         /// <summary>
         /// Objects drawing
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
-            this.terrain.Draw(gameTime);
+            this.terrain.Draw(gameTime, context);
 
             if (this.vegetation != null)
             {
-                this.vegetation.Draw(gameTime);
+                this.vegetation.Draw(gameTime, context);
             }
 
             if (this.skydom != null)
             {
-                this.skydom.Draw(gameTime);
+                this.skydom.Draw(gameTime, context);
             }
         }
 
@@ -173,9 +161,11 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool FindTopGroundPosition(float x, float z, out Vector3 position, out Triangle triangle)
         {
+            BoundingBox bbox = this.GetBoundingBox();
+
             Ray ray = new Ray()
             {
-                Position = new Vector3(x, 1000f, z),
+                Position = new Vector3(x, bbox.Maximum.Y + 0.1f, z),
                 Direction = Vector3.Down,
             };
 
@@ -203,9 +193,11 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool FindFirstGroundPosition(float x, float z, out Vector3 position, out Triangle triangle)
         {
+            BoundingBox bbox = this.GetBoundingBox();
+
             Ray ray = new Ray()
             {
-                Position = new Vector3(x, 1000f, z),
+                Position = new Vector3(x, bbox.Maximum.Y + 0.1f, z),
                 Direction = Vector3.Down,
             };
 
@@ -340,6 +332,15 @@ namespace Engine
     public class TerrainDescription
     {
         /// <summary>
+        /// Content path
+        /// </summary>
+        public string ContentPath = "Resources";
+        /// <summary>
+        /// Model file name
+        /// </summary>
+        public string ModelFileName = null;
+
+        /// <summary>
         /// Indicates whether the new terrain has vegetation
         /// </summary>
         public bool AddVegetation = false;
@@ -386,5 +387,9 @@ namespace Engine
         /// Path node side size
         /// </summary>
         public float PathNodeSize = 10f;
+        /// <summary>
+        /// Path node maximum inclination
+        /// </summary>
+        public float PathNodeInclination = MathUtil.PiOverFour;
     }
 }

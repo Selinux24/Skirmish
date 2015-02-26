@@ -5,7 +5,7 @@ using SharpDX;
 
 namespace Skybox
 {
-    public class TestScene3D : Scene3D
+    public class TestScene3D : Scene
     {
         private Vector2[] firePositions = new[]
         {
@@ -86,10 +86,12 @@ namespace Skybox
 
             TerrainDescription desc = new TerrainDescription()
             {
+                ContentPath = "Resources",
+                ModelFileName = "ruins.dae",
                 AddSkydom = true,
                 SkydomTexture = "sunset.dds",
             };
-            this.ruins = this.AddTerrain("ruins.dae", desc, false);
+            this.ruins = this.AddTerrain(desc, false);
 
             this.bboxGlobalDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
             //this.bboxMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.StaticBoundingBoxes), this.bboxColor);
@@ -107,7 +109,7 @@ namespace Skybox
 
             Vector3[] firePositions3D = new Vector3[this.firePositions.Length];
 
-            this.torchs = this.AddInstancingModel("torch.dae", this.firePositions.Length);
+            this.torchs = this.AddInstancingModel("Resources", "torch.dae", this.firePositions.Length);
             for (int i = 0; i < this.firePositions.Length; i++)
             {
                 this.ruins.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i]);

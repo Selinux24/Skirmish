@@ -25,10 +25,9 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        /// <param name="scene">Scene</param>
         /// <param name="content">Content</param>
-        public Billboard(Game game, Scene3D scene, ModelContent content)
-            : base(game, scene, content, false, 0, false, false)
+        public Billboard(Game game, ModelContent content)
+            : base(game, content, false, 0, false, false)
         {
             this.effect = new EffectBillboard(game.Graphics.Device);
 
@@ -51,9 +50,10 @@ namespace Engine
         /// Update
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
-            base.Update(gameTime);
+            base.Update(gameTime, context);
 
             this.Manipulator.Update(gameTime);
         }
@@ -61,7 +61,8 @@ namespace Engine
         /// Draw
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
             if (this.Meshes != null)
             {
@@ -69,8 +70,8 @@ namespace Engine
 
                 #region Per frame update
 
-                this.effect.FrameBuffer.WorldViewProjection = this.Scene.World * this.Manipulator.LocalTransform * this.Scene.ViewProjectionPerspective;
-                this.effect.FrameBuffer.Lights = new BufferLights(this.Scene.Camera.Position - this.Manipulator.Position, this.Scene.Lights);
+                this.effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
+                this.effect.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
                 this.effect.UpdatePerFrame();
 
                 #endregion

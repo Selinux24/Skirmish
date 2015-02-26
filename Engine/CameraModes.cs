@@ -26,5 +26,9 @@ namespace Engine
         /// Fixed
         /// </summary>
         Fixed,
+        /// <summary>
+        /// Ortho camera
+        /// </summary>
+        Ortho,
     }
 }

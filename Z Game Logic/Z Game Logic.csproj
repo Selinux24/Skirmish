@@ -140,7 +140,6 @@
     <Compile Include="Rules\TeamRole.cs" />
     <Compile Include="Rules\Victory.cs" />
     <Compile Include="Rules\Weapon.cs" />
-    <Compile Include="SceneHUD.cs" />
     <Compile Include="SceneObjects.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -1,5 +1,6 @@
 ﻿using System;
 using SharpDX.Direct3D11;
+using SharpDX;
 
 namespace Engine.Common
 {
@@ -12,10 +13,6 @@ namespace Engine.Common
         /// Game class
         /// </summary>
         public virtual Game Game { get; private set; }
-        /// <summary>
-        /// Scene
-        /// </summary>
-        public virtual Scene Scene { get; protected set; }
         /// <summary>
         /// Graphics device
         /// </summary>
@@ -45,11 +42,9 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
-        public Drawable(Game game, Scene scene)
+        public Drawable(Game game)
         {
             this.Game = game;
-            this.Scene = scene;
             this.Active = true;
             this.Visible = true;
             this.Order = 0;
@@ -59,12 +54,14 @@ namespace Engine.Common
         /// Update state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public abstract void Update(GameTime gameTime);
+        /// <param name="context">Context</param>
+        public abstract void Update(GameTime gameTime, Context context);
         /// <summary>
         /// Draw
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public abstract void Draw(GameTime gameTime);
+        /// <param name="context">Context</param>
+        public abstract void Draw(GameTime gameTime, Context context);
         /// <summary>
         /// Dispose resources
         /// </summary>
@@ -73,8 +70,9 @@ namespace Engine.Common
         /// <summary>
         /// Performs frustum culling test
         /// </summary>
+        /// <param name="frustum">Frustum</param>
         /// <returns>Returns true if component passes frustum culling test</returns>
-        public virtual void FrustumCulling()
+        public virtual void FrustumCulling(BoundingFrustum frustum)
         {
             
         }
@@ -87,5 +85,28 @@ namespace Engine.Common
         {
             return string.Format("Type: {0}; Name: {1}; Order: {2}", this.GetType(), this.Name, this.Order);
         }
+    }
+
+    /// <summary>
+    /// Drawable context
+    /// </summary>
+    public class Context
+    {
+        /// <summary>
+        /// World matrix
+        /// </summary>
+        public Matrix World;
+        /// <summary>
+        /// View * projection matrix
+        /// </summary>
+        public Matrix ViewProjection;
+        /// <summary>
+        /// Eye position
+        /// </summary>
+        public Vector3 EyePosition;
+        /// <summary>
+        /// Lights
+        /// </summary>
+        public SceneLight Lights;
     }
 }

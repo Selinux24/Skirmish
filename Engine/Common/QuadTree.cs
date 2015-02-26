@@ -105,10 +105,9 @@ namespace Engine.Common
             {
                 node.Triangles = Array.FindAll(triangles, t =>
                 {
-                    return
-                        Collision.BoxContainsPoint(ref bbox, ref t.Point1) != ContainmentType.Disjoint ||
-                        Collision.BoxContainsPoint(ref bbox, ref t.Point2) != ContainmentType.Disjoint ||
-                        Collision.BoxContainsPoint(ref bbox, ref t.Point3) != ContainmentType.Disjoint;
+                    BoundingBox tbox = BoundingBox.FromPoints(t.GetCorners());
+
+                    return Collision.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
                 });
             }
 

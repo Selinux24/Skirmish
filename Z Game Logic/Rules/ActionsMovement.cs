@@ -112,10 +112,20 @@ namespace GameLogic.Rules
 
         public override bool Execute()
         {
-            this.Active.Assault(this.WastedPoints);
-            this.Passive.Assault(0);
+            //TODO: This test must be repeated many times
+            if (this.Passive.CurrentHealth != HealthStates.Disabled)
+            {
+                this.Game.JoinMelee(this.Active, this.Passive);
 
-            return true;
+                this.Active.Assault(this.WastedPoints);
+                this.Passive.Assault(0);
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 

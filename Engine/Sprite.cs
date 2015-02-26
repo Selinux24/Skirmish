@@ -33,6 +33,14 @@ namespace Engine
         /// Source height
         /// </summary>
         private readonly float sourceHeight;
+        /// <summary>
+        /// View * projection matrix
+        /// </summary>
+        private Matrix viewProjection;
+        /// <summary>
+        /// Eye position
+        /// </summary>
+        private Vector3 eyePosition;
 
         /// <summary>
         /// Indicates whether the sprite has to maintain proportion with window size
@@ -101,15 +109,29 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Sprite(Game game, Scene3D scene, SpriteDescription description)
-            : base(game, scene, ModelContent.GenerateSprite(scene.ContentPath, description.Textures), false, 0, false, false)
+        public Sprite(Game game, SpriteDescription description)
+            : base(game, ModelContent.GenerateSprite(description.ContentPath, description.Textures), false, 0, false, false)
         {
             this.effect = new EffectBasic(game.Graphics.Device);
 
             int renderWidth = game.Form.RenderWidth;
             int renderHeight = game.Form.RenderHeight;
+
+            this.eyePosition = Vector3.UnitZ * -1f;
+
+            Matrix view = Matrix.LookAtLH(
+                this.eyePosition,
+                Vector3.Zero,
+                Vector3.Up);
+
+            Matrix proj = Matrix.OrthoLH(
+                renderWidth,
+                renderHeight,
+                0.1f,
+                100f);
+
+            this.viewProjection = view * proj;
 
             this.Width = description.Width <= 0 ? renderWidth : description.Width;
             this.Height = description.Height <= 0 ? renderHeight : description.Height;
@@ -141,9 +163,10 @@ namespace Engine
         /// Update
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
-            base.Update(gameTime);
+            base.Update(gameTime, context);
 
             if (this.FitScreen)
             {
@@ -169,7 +192,8 @@ namespace Engine
         /// Draw
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
             if (this.Meshes != null)
             {
@@ -177,14 +201,14 @@ namespace Engine
 
                 #region Per frame update
 
-                Matrix world = this.Scene.World * this.Manipulator.LocalTransform;
+                Matrix world = this.Manipulator.LocalTransform;
                 Matrix worldInverse = Matrix.Invert(world);
-                Matrix worldViewProjection = world * this.Scene.ViewProjectionOrthogonal;
+                Matrix worldViewProjection = world * this.viewProjection;
 
                 this.effect.FrameBuffer.World = world;
                 this.effect.FrameBuffer.WorldInverse = worldInverse;
                 this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;
-                this.effect.FrameBuffer.Lights = new BufferLights(this.Scene.Camera.Position);
+                this.effect.FrameBuffer.Lights = new BufferLights(this.eyePosition);
                 this.effect.UpdatePerFrame();
 
                 #endregion
@@ -248,6 +272,10 @@ namespace Engine
         /// </summary>
         public string[] Textures;
         /// <summary>
+        /// Content path
+        /// </summary>
+        public string ContentPath = "Resources";
+        /// <summary>
         /// Width
         /// </summary>
         public float Width;
@@ -259,5 +287,23 @@ namespace Engine
         /// Fit screen
         /// </summary>
         public bool FitScreen;
+    }
+
+    /// <summary>
+    /// Background description
+    /// </summary>
+    public class BackgroundDescription : SpriteDescription
+    {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Tetxure</param>
+        public BackgroundDescription()
+        {
+            this.Width = 0;
+            this.Height = 0;
+            this.FitScreen = true;
+        }
     }
 }

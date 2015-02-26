@@ -597,15 +597,19 @@ namespace Engine.Common
             float bottom = top - height;
 
             v[0].Position = new Vector3(left, top, 0.0f);
+            v[0].Normal = new Vector3(0, 0, -1);
             v[0].Texture = Vector2.Zero;
 
             v[1].Position = new Vector3(right, bottom, 0.0f);
+            v[1].Normal = new Vector3(0, 0, -1);
             v[1].Texture = Vector2.One;
 
             v[2].Position = new Vector3(left, bottom, 0.0f);
+            v[2].Normal = new Vector3(0, 0, -1);
             v[2].Texture = Vector2.UnitY;
 
             v[3].Position = new Vector3(right, top, 0.0f);
+            v[3].Normal = new Vector3(0, 0, -1);
             v[3].Texture = Vector2.UnitX;
 
             i[0] = 0;

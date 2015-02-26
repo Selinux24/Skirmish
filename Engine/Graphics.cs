@@ -510,17 +510,59 @@ namespace Engine
             }
         }
 
-        public void SetDefaultRenderTarget()
+        public void SetDefaultRenderTarget(bool clear)
         {
-            this.DeviceContext.OutputMerger.SetTargets(this.depthStencilView, this.renderTargetView);
-            this.DeviceContext.Rasterizer.SetViewport(this.Viewport);
+            this.SetRenderTarget(this.Viewport, this.depthStencilView, this.renderTargetView, clear);
         }
 
-        public void SetRenderTarget(RenderTargetView renderTarget, Viewport viewport)
+        public void SetRenderTarget(Viewport viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear)
         {
-            this.DeviceContext.OutputMerger.SetTargets((DepthStencilView)null, renderTarget);
             this.DeviceContext.Rasterizer.SetViewport(viewport);
+            this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTarget);
+
+            if (clear)
+            {
+                if (renderTarget != null)
+                {
+                    this.DeviceContext.ClearRenderTargetView(
+                        renderTarget,
+                        GameEnvironment.Background);
+                }
+
+                if (depthMap != null)
+                {
+                    this.DeviceContext.ClearDepthStencilView(
+                        depthMap,
+                        DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
+                        1.0f, 0);
+                }
+            }
         }
+
+        public void SetRenderTarget(ViewportF viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear)
+        {
+            this.DeviceContext.Rasterizer.SetViewport(viewport);
+            this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTarget);
+
+            if (clear)
+            {
+                if (renderTarget != null)
+                {
+                    this.DeviceContext.ClearRenderTargetView(
+                        renderTarget,
+                        GameEnvironment.Background);
+                }
+
+                if (depthMap != null)
+                {
+                    this.DeviceContext.ClearDepthStencilView(
+                        depthMap,
+                        DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
+                        1.0f, 0);
+                }
+            }
+        }
+
         /// <summary>
         /// Enables z-buffer
         /// </summary>

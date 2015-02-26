@@ -98,6 +98,7 @@
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="SharpDX, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(SharpDXPackageBinDir)\SharpDX.dll</HintPath>
@@ -328,6 +329,7 @@
     <Compile Include="PathFinding\Path.cs" />
     <Compile Include="PathFinding\PathFinder.cs" />
     <Compile Include="PathFinding\PathFinderData.cs" />
+    <Compile Include="ShadowMap.cs" />
     <Compile Include="SpriteButton.cs" />
     <Compile Include="TriangleListDrawer.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
@@ -366,7 +368,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Scene3D.cs" />
     <Compile Include="GameEnvironment.cs" />
     <Compile Include="IsometricAxis.cs" />
     <Compile Include="Game.cs" />
@@ -411,6 +412,7 @@
     <None Include="app.config" />
     <None Include="Diagrams\3DClasses.cd" />
     <None Include="Diagrams\ColladaClasses.cd" />
+    <None Include="Diagrams\Drawables.cd" />
     <None Include="packages.config" />
     <None Include="Resources\IncVertexFormats.fx" />
     <None Include="Resources\ShaderBasic.fx" />

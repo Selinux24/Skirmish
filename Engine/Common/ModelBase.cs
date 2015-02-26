@@ -106,21 +106,6 @@ namespace Engine.Common
         #endregion
 
         /// <summary>
-        /// Scene
-        /// </summary>
-        public new Scene3D Scene
-        {
-            get
-            {
-                return base.Scene as Scene3D;
-            }
-            set
-            {
-                base.Scene = value;
-            }
-        }
-
-        /// <summary>
         /// Materials dictionary
         /// </summary>
         protected MaterialDictionary Materials = new MaterialDictionary();
@@ -166,14 +151,13 @@ namespace Engine.Common
         /// Base model
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
         /// <param name="content">Model content</param>
         /// <param name="instanced">Is instanced</param>
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
-        public ModelBase(Game game, Scene3D scene, ModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true)
-            : base(game, scene)
+        public ModelBase(Game game, ModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true)
+            : base(game)
         {
             this.Initialize(content, instanced, instances, loadAnimation, loadNormalMaps);
         }
@@ -455,7 +439,8 @@ namespace Engine.Common
         /// Update model
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
             if (this.SkinningData != null)
             {

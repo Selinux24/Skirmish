@@ -3,6 +3,8 @@ using Point = System.Drawing.Point;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Game cursor
     /// </summary>
@@ -51,11 +53,10 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
         /// <param name="description">Sprite description</param>
         /// <param name="centered">Cursor positioned on center of the image</param>
-        public Cursor(Game game, Scene3D scene, SpriteDescription description, bool centered = true)
-            : base(game, scene, description)
+        public Cursor(Game game, SpriteDescription description, bool centered = true)
+            : base(game, description)
         {
             this.Centered = centered;
         }
@@ -64,7 +65,8 @@ namespace Engine
         /// Update cursor state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
             float left = 0f;
             float top = 0f;
@@ -91,7 +93,7 @@ namespace Engine
                 this.Manipulator.SetPosition(this.CursorPosition);
             }
 
-            base.Update(gameTime);
+            base.Update(gameTime, context);
         }
     }
 }

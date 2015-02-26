@@ -250,10 +250,6 @@ namespace GameLogic.Rules
                 melee != null,
                 ActionTypes.Manual);
         }
-        public bool DoAction(Actions action)
-        {
-            return action.Execute();
-        }
         public Melee GetMelee(Soldier soldier)
         {
             return this.melees.Find(m => m.ContainsSoldier(soldier));

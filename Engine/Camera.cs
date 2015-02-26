@@ -1,12 +1,11 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
 
 namespace Engine
 {
     /// <summary>
-    /// Camera
+    /// Camera 3D
     /// </summary>
-    public class Camera : IDisposable
+    public class Camera
     {
         /// <summary>
         /// Creates an isometric camera
@@ -38,6 +37,27 @@ namespace Engine
             cam.interest = interest;
 
             return cam;
+        }
+        /// <summary>
+        /// Creates 2D camera
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="interest">Interest</param>
+        /// <param name="up">Up vector</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <returns>Returns new 2D camera</returns>
+        public static Camera CreateOrtho(Vector3 position, Vector3 interest, Vector3 up, int width, int height)
+        {
+            Camera camera = new Camera();
+
+            camera.Position = position;
+            camera.Interest = interest;
+            camera.Up = up;
+
+            camera.SetLens(width, height);
+
+            return camera;
         }
 
         /// <summary>
@@ -221,6 +241,10 @@ namespace Engine
                 {
                     this.SetFree(Vector3.Zero, this.ZoomMin * 2f);
                 }
+                else if (this.mode == CameraModes.Ortho)
+                {
+                    this.SetOrtho();
+                }
             }
         }
         /// <summary>
@@ -255,6 +279,10 @@ namespace Engine
                 if (this.Following != null) this.Following = null;
             }
         }
+        /// <summary>
+        /// Up vector
+        /// </summary>
+        public Vector3 Up { get; set; }
         /// <summary>
         /// Camera direction
         /// </summary>
@@ -364,19 +392,11 @@ namespace Engine
         /// <summary>
         /// Perspective view matrix
         /// </summary>
-        public Matrix PerspectiveView { get; private set; }
+        public Matrix View { get; private set; }
         /// <summary>
         /// Perspective projection matrix
         /// </summary>
-        public Matrix PerspectiveProjection { get; private set; }
-        /// <summary>
-        /// Orthogonal view matrix
-        /// </summary>
-        public Matrix OrthoView { get; private set; }
-        /// <summary>
-        /// Orthogonal projection matrix
-        /// </summary>
-        public Matrix OrthoProjection { get; private set; }
+        public Matrix Projection { get; private set; }
         /// <summary>
         /// Camera frustum
         /// </summary>
@@ -393,20 +413,14 @@ namespace Engine
         {
             this.position = Vector3.One;
             this.interest = Vector3.Zero;
+            this.Up = Vector3.Up;
 
-            this.PerspectiveView = Matrix.LookAtLH(
+            this.View = Matrix.LookAtLH(
                 this.position,
                 this.interest,
                 Vector3.UnitY);
 
-            this.PerspectiveProjection = Matrix.Identity;
-
-            this.OrthoView = Matrix.LookAtLH(
-                Vector3.BackwardLH,
-                Vector3.Zero,
-                Vector3.UnitY);
-
-            this.OrthoProjection = Matrix.Identity;
+            this.Projection = Matrix.Identity;
         }
         /// <summary>
         /// Sets dimensions of viewport
@@ -436,19 +450,12 @@ namespace Engine
         {
             this.UpdateTranslations(gameTime);
 
-            this.PerspectiveView = Matrix.LookAtLH(
+            this.View = Matrix.LookAtLH(
                 this.Position,
                 this.Interest,
-                Vector3.UnitY);
+                this.Up);
 
-            this.Frustum = BoundingFrustum.FromCamera(
-                this.Position,
-                this.Direction,
-                Vector3.UnitY,
-                this.fieldOfView,
-                this.nearPlaneDistance,
-                this.farPlaneDistance,
-                this.aspectRelation);
+            this.Frustum = new BoundingFrustum(this.View * this.Projection);
         }
         /// <summary>
         /// Sets previous isometrix axis
@@ -707,21 +714,39 @@ namespace Engine
             this.Interest = newInterest;
         }
         /// <summary>
+        /// Sets camero to ortho mode
+        /// </summary>
+        private void SetOrtho()
+        {
+            this.StopTranslations();
+
+            this.Position = Vector3.Up;
+            this.Interest = Vector3.Zero;
+            this.Up = Vector3.UnitZ;
+
+            this.mode = CameraModes.Ortho;
+        }
+        /// <summary>
         /// Update projections
         /// </summary>
         private void UpdateLens()
         {
-            this.PerspectiveProjection = Matrix.PerspectiveFovLH(
-                this.fieldOfView,
-                this.aspectRelation,
-                this.nearPlaneDistance,
-                this.farPlaneDistance);
-
-            this.OrthoProjection = Matrix.OrthoLH(
-                this.viewportWidth,
-                this.viewportHeight,
-                this.nearPlaneDistance,
-                this.farPlaneDistance);
+            if (this.mode == CameraModes.Ortho)
+            {
+                this.Projection = Matrix.OrthoLH(
+                    this.viewportWidth,
+                    this.viewportHeight,
+                    this.nearPlaneDistance,
+                    this.farPlaneDistance);
+            }
+            else
+            {
+                this.Projection = Matrix.PerspectiveFovLH(
+                    this.fieldOfView,
+                    this.aspectRelation,
+                    this.nearPlaneDistance,
+                    this.farPlaneDistance);
+            }
         }
 
         /// <summary>

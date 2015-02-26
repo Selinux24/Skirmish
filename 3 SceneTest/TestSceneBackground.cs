@@ -2,7 +2,7 @@
 
 namespace SceneTest
 {
-    public class TestSceneBackground : Scene3D
+    public class TestSceneBackground : Scene
     {
         private Sprite background = null;
 
@@ -16,9 +16,13 @@ namespace SceneTest
         {
             base.Initialize();
 
-            this.ContentPath = "ResourcesHID";
+            BackgroundDescription bkDesc = new BackgroundDescription()
+            {
+                ContentPath = "ResourcesHID",
+                Textures = new[] { "background.jpg" },
+            };
 
-            this.background = this.AddBackgroud("background.jpg");
+            this.background = this.AddBackgroud(bkDesc);
         }
     }
 }

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using Engine;
 using Engine.Common;
+using Engine.PathFinding;
 using SharpDX;
 
-namespace Terrain
+namespace TerrainTest
 {
-    public class TestScene3D : Scene3D
+    public class TestScene3D : Scene
     {
         private Random rnd = new Random();
 
@@ -16,11 +17,15 @@ namespace Terrain
         private TextDrawer load = null;
         private TextDrawer help = null;
 
-        private Engine.Terrain terrain = null;
+        private Model cursor3D = null;
+        private Model tank = null;
+
+        private Terrain terrain = null;
         private List<Line> oks = new List<Line>();
         private List<Line> errs = new List<Line>();
         private LineListDrawer terrainLineDrawer = null;
         private LineListDrawer terrainGridDrawer = null;
+        private LineListDrawer terrainPointDrawer = null;
 
         private Model helicopter = null;
         private float v = 10f;
@@ -74,36 +79,68 @@ namespace Terrain
 
             string loadingText = null;
 
+            this.cursor3D = this.AddModel("Resources", "cursor.dae");
+            this.tank = this.AddModel("Resources", "tank.dae");
+
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 
             sw.Start();
-            this.terrain = this.AddTerrain("terrain.dae", new TerrainDescription() { UsePathFinding = true, PathNodeSize = 2f, });
+
+            TerrainDescription terrDesc = new TerrainDescription()
+            {
+                ModelFileName = "two_levels.dae",
+                //ModelFileName = "terrain.dae",
+                UseQuadtree = true,
+                UsePathFinding = true,
+                PathNodeSize = 2f,
+                PathNodeInclination = MathUtil.DegreesToRadians(35)
+            };
+            this.terrain = this.AddTerrain(terrDesc);
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
             sw.Restart();
-            this.helicopter = this.AddModel("helicopter.dae");
+            this.helicopter = this.AddModel("Resources", "helicopter.dae");
             this.helicopter.TextureIndex = 1;
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
             this.load.Text = loadingText;
 
+            Vector3 tankPosition;
+            if (this.terrain.FindTopGroundPosition(0, 0, out tankPosition))
+            {
+                this.tank.Manipulator.SetPosition(tankPosition, true);
+            }
+
             #endregion
 
             #region Path finding Grid
 
-            List<Line> squares = new List<Line>();
-
-            for (int i = 0; i < this.terrain.grid.Nodes.Length; i++)
+            if (this.terrain.grid != null && this.terrain.grid.Nodes.Length > 0)
             {
-                squares.AddRange(GeometryUtil.CreateWiredSquare(this.terrain.grid.Nodes[i].GetCorners()));
-            }
+                this.terrainGridDrawer = this.AddLineListDrawer(this.terrain.grid.Nodes.Length * 4);
+                this.terrainGridDrawer.UseZBuffer = true;
+                this.terrainGridDrawer.EnableAlphaBlending = true;
+                this.terrainGridDrawer.Visible = false;
 
-            this.terrainGridDrawer = this.AddLineListDrawer(Line.Transform(squares.ToArray(), Matrix.Translation(0, 0.1f, 0)), this.gridColor);
-            this.terrainGridDrawer.UseZBuffer = true;
-            this.terrainGridDrawer.EnableAlphaBlending = true;
-            this.terrainGridDrawer.Visible = false;
+                Matrix m = Matrix.Translation(Vector3.Up * 0.5f);
+
+                for (int i = 0; i < this.terrain.grid.Nodes.Length; i++)
+                {
+                    float c = (this.terrain.grid.Nodes[i].Cost / MathUtil.PiOverFour);
+
+                    Color4 color = Color.Transparent;
+
+                    if (c > 0.66f) { color = new Color4(Color.Red.ToColor3(), 0.5f); }
+                    else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 0.5f); }
+                    else { color = new Color4(Color.Green.ToColor3(), 0.5f); }
+
+                    Vector3[] corners = this.terrain.grid.Nodes[i].GetCorners();
+
+                    this.terrainGridDrawer.AddLines(color, Line.Transform(GeometryUtil.CreateWiredSquare(corners), m));
+                }
+            }
 
             #endregion
 
@@ -111,7 +148,7 @@ namespace Terrain
 
             BoundingBox bbox = this.terrain.GetBoundingBox();
 
-            float sep = 2f;
+            float sep = 2.1f;
             for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
             {
                 for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
@@ -143,6 +180,14 @@ namespace Terrain
 
             #endregion
 
+            #region Picking test
+
+            this.terrainPointDrawer = this.AddLineListDrawer(1000);
+            this.terrainPointDrawer.Visible = true;
+            this.terrainPointDrawer.UseZBuffer = false;
+
+            #endregion
+
             #region Helicopter
 
             this.helicopterLineDrawer = this.AddLineListDrawer(1000);
@@ -171,7 +216,7 @@ namespace Terrain
             Vector3 v1 = this.GetRandomPoint(Vector3.Zero);
             Vector3 v2 = this.GetRandomPoint(Vector3.Zero);
 
-            Engine.PathFinding.Path path = this.terrain.FindPath(v1, v2);
+            Path path = this.terrain.FindPath(v1, v2);
             if (path != null)
             {
                 this.curve = path.GenerateCurve();
@@ -187,6 +232,15 @@ namespace Terrain
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
+            }
+
+            Ray cursorRay = this.GetPickingRay();
+            Vector3 position;
+            Triangle triangle;
+            bool picked = this.terrain.PickNearest(ref cursorRay, out position, out triangle);
+            if (picked)
+            {
+                this.cursor3D.Manipulator.SetPosition(position);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
@@ -260,6 +314,33 @@ namespace Terrain
                 this.Camera.MoveBackward(gameTime, shift);
             }
 
+            if (this.Game.Input.LeftMouseButtonPressed)
+            {
+                this.terrainPointDrawer.ClearLines();
+
+                if (picked)
+                {
+                    Vector3[] positions;
+                    Triangle[] triangles;
+                    if (this.terrain.FindAllGroundPosition(position.X, position.Z, out positions, out triangles))
+                    {
+                        this.terrainPointDrawer.SetLines(Color.Magenta, GeometryUtil.CreateCrossList(positions, 1f));
+                        this.terrainPointDrawer.SetLines(Color.DarkCyan, GeometryUtil.CreateWiredTriangle(triangles));
+                        if (positions.Length > 1)
+                        {
+                            this.terrainPointDrawer.SetLines(Color.Cyan, new Line(positions[0], positions[positions.Length - 1]));
+                        }
+                    }
+
+
+                    Path p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
+                    if (p != null)
+                    {
+                        this.tank.Manipulator.Follow(p.GenerateCurve());
+                    }
+                }
+            }
+
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
 #endif
@@ -308,10 +389,10 @@ namespace Terrain
                     roll *= pitch / MathUtil.PiOverFour;
 
                     Quaternion r =
-                        Helper.LookAt(p0, p1) *
+                        Helper.LookAt(p1, p0) *
                         Quaternion.RotationYawPitchRoll(0, -pitch, roll);
 
-                    r = Quaternion.Slerp(this.helicopter.Manipulator.Rotation, r, 0.33f);
+                    r = Quaternion.Slerp(this.helicopter.Manipulator.Rotation, r, 0.1f);
 
                     this.helicopter.Manipulator.SetPosition(p0);
                     this.helicopter.Manipulator.SetRotation(r);

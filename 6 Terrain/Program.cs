@@ -1,6 +1,6 @@
 ﻿using Engine;
 
-namespace Terrain
+namespace TerrainTest
 {
     static class Program
     {

@@ -34,11 +34,10 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
-        public TriangleListDrawer(Game game, Scene3D scene, Triangle[] triangles, Color4 color)
-            : base(game, scene, ModelContent.GenerateTriangleList(triangles, color))
+        public TriangleListDrawer(Game game, Triangle[] triangles, Color4 color)
+            : base(game, ModelContent.GenerateTriangleList(triangles, color))
         {
             this.EnableAlphaBlending = true;
 
@@ -50,10 +49,9 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
         /// <param name="count">Maximum triangle count</param>
-        public TriangleListDrawer(Game game, Scene3D scene, int count)
-            : base(game, scene, ModelContent.GenerateTriangleList(new Triangle[count], Color.Transparent))
+        public TriangleListDrawer(Game game, int count)
+            : base(game, ModelContent.GenerateTriangleList(new Triangle[count], Color.Transparent))
         {
             this.EnableAlphaBlending = true;
 
@@ -63,17 +61,19 @@ namespace Engine
         /// Draw content
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
             this.WriteDataInBuffer();
 
-            base.Draw(gameTime);
+            base.Draw(gameTime, context);
         }
         /// <summary>
         /// Performs frustum culling test
         /// </summary>
+        /// <param name="frustum">Frustum</param>
         /// <remarks>Culling disabled for this class</remarks>
-        public override void FrustumCulling()
+        public override void FrustumCulling(BoundingFrustum frustum)
         {
             this.Cull = false;
         }

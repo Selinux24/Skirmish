@@ -111,24 +111,35 @@ namespace Engine.Common
         public virtual void Draw(GameTime gameTime, DeviceContext deviceContext, int count)
         {
             int instanceCount = count == 0 ? this.InstanceCount : count;
-
-            if (this.Indexed)
+            if (instanceCount > 0)
             {
-                deviceContext.DrawIndexedInstanced(
-                    this.IndexCount,
-                    instanceCount,
-                    0, 0, 0);
-            }
-            else
-            {
-                deviceContext.DrawInstanced(
-                    this.VertexCount,
-                    instanceCount,
-                    0, 0);
-            }
+                if (this.Indexed)
+                {
+                    if (this.IndexCount > 0)
+                    {
+                        deviceContext.DrawIndexedInstanced(
+                            this.IndexCount,
+                            instanceCount,
+                            0, 0, 0);
 
-            Counters.DrawCallsPerFrame++;
-            Counters.InstancesPerFrame += instanceCount;
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame += instanceCount;
+                    }
+                }
+                else
+                {
+                    if (this.VertexCount > 0)
+                    {
+                        deviceContext.DrawInstanced(
+                            this.VertexCount,
+                            instanceCount,
+                            0, 0);
+
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame += instanceCount;
+                    }
+                }
+            }
         }
         /// <summary>
         /// Writes instancing data
@@ -137,9 +148,18 @@ namespace Engine.Common
         /// <param name="data">Instancig data</param>
         public virtual void WriteInstancingData(DeviceContext deviceContext, VertexInstancingData[] data)
         {
-            if (this.InstancingBuffer != null && data != null && data.Length > 0)
+            if (data != null && data.Length > 0)
             {
-                deviceContext.WriteBuffer(this.InstancingBuffer, data);
+                this.InstanceCount = data.Length;
+
+                if (this.InstancingBuffer != null)
+                {
+                    deviceContext.WriteBuffer(this.InstancingBuffer, data);
+                }
+            }
+            else
+            {
+                this.InstanceCount = 0;
             }
         }
     }

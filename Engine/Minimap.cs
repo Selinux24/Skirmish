@@ -1,4 +1,6 @@
-﻿using SharpDX;
+﻿using System;
+using System.Collections.Generic;
+using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using Buffer = SharpDX.Direct3D11.Buffer;
@@ -12,121 +14,228 @@ namespace Engine
     using Engine.Effects;
     using Engine.Helpers;
 
+    /// <summary>
+    /// Minimap
+    /// </summary>
     public class Minimap : Drawable
     {
-        /// <summary>
-        /// Viewport to match the minimap texture size
-        /// </summary>
-        private readonly Viewport viewport;
         /// <summary>
         /// Reference to the terrain that we render in the minimap
         /// </summary>
         private readonly Terrain terrain;
         /// <summary>
-        /// array of planes defining the "box" that surrounds the terrain
+        /// Viewport to match the minimap texture size
         /// </summary>
-        private readonly Plane[] edgePlanes;
+        private readonly Viewport viewport;
         /// <summary>
         /// Minimap render target
         /// </summary>
         private RenderTargetView renderTarget;
-
-        private Buffer vertexBuffer;
-
-        private Buffer indexBuffer;
-
-        private Matrix viewProjection;
-
-        private EffectBasic effect;
-
-        private LineListDrawer lineDrawer;
-
         /// <summary>
         /// Minimap texture
         /// </summary>
-        public ShaderResourceView Texture { get; private set; }
+        private ShaderResourceView renderTexture;
         /// <summary>
-        /// Gets or sets the screen position
+        /// Minimap vertex buffer
         /// </summary>
-        public Vector2 Position { get; set; }
+        private Buffer vertexBuffer;
         /// <summary>
-        /// Gets or sets the minimap size
+        /// Minimap index buffer
         /// </summary>
-        public Vector2 Size { get; set; }
+        private Buffer indexBuffer;
+        /// <summary>
+        /// Effect to draw
+        /// </summary>
+        private EffectBasic effect;
+        /// <summary>
+        /// Line drawer for viewer frustum
+        /// </summary>
+        private LineListDrawer lineDrawer;
+        /// <summary>
+        /// Context to draw terrain
+        /// </summary>
+        private Context terrainDrawContext;
+        /// <summary>
+        /// Context to draw minimap
+        /// </summary>
+        private Context minimapDrawContext;
 
         /// <summary>
         /// Contructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
         /// <param name="description">Minimap description</param>
-        public Minimap(Game game, Scene3D scene, MinimapDescription description)
-            : base(game, scene)
+        public Minimap(Game game, MinimapDescription description)
+            : base(game)
         {
             this.terrain = description.Terrain;
-            BoundingBox bbox = this.terrain.GetBoundingBox();
 
             this.viewport = new Viewport(0, 0, description.Width, description.Height);
 
-            using (var texture = this.Device.CreateRenderTargetTexture((int)description.Width, (int)description.Height))
+            using (var texture = this.Device.CreateRenderTargetTexture(description.Width, description.Height))
             {
                 this.renderTarget = new RenderTargetView(this.Device, texture);
-                this.Texture = new ShaderResourceView(this.Device, texture);
+                this.renderTexture = new ShaderResourceView(this.Device, texture);
             }
 
-            this.Position = new Vector2(description.Left, description.Top);
-            this.Size = new Vector2(description.Width, description.Height);
+            VertexData[] cv;
+            uint[] ci;
+            VertexData.CreateSprite(
+                Vector2.Zero,
+                1, 1,
+                0, 0,
+                out cv,
+                out ci);
 
-            VertexPositionNormalTexture[] vertices = new VertexPositionNormalTexture[]
-            {
-                new VertexPositionNormalTexture(){ Position = new Vector3(-1, -1, 0), Normal = new Vector3(0, 0, 1), Texture = new Vector2(0, 1) },
-                new VertexPositionNormalTexture(){ Position = new Vector3(-1,  1, 0), Normal = new Vector3(0, 0, 1), Texture = new Vector2(0, 0) },
-                new VertexPositionNormalTexture(){ Position = new Vector3( 1,  1, 0), Normal = new Vector3(0, 0, 1), Texture = new Vector2(1, 0) },
-                new VertexPositionNormalTexture(){ Position = new Vector3( 1, -1, 0), Normal = new Vector3(0, 0, 1), Texture = new Vector2(1, 1) },
-            };
-            this.vertexBuffer = this.Device.CreateVertexBufferImmutable(vertices);
-            this.indexBuffer = this.Device.CreateIndexBufferImmutable(new[] { 0, 1, 2, 0, 2, 3 });
+            List<VertexPositionNormalTexture> vertList = new List<VertexPositionNormalTexture>();
 
-            this.edgePlanes = new[]
-            {
-                new Plane(1, 0, 0, bbox.Minimum.X),
-                new Plane(-1, 0, 0, bbox.Maximum.X),
-                new Plane(0, 1, 0, bbox.Minimum.Z),
-                new Plane(0, -1, 0, bbox.Maximum.Z),
-            };
+            Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPositionNormalTexture(v)); });
 
-            float width = bbox.Maximum.X - bbox.Minimum.X;
-            float depth = bbox.Maximum.Z - bbox.Minimum.Z;
-
-            Matrix projection = Matrix.OrthoLH(width, depth, 0.1f, 2000);
-            Matrix view = Matrix.LookAtLH(new Vector3(0, depth, 0), Vector3.Zero, Vector3.UnitZ);
-
-            this.viewProjection = view * projection;
-
-            this.lineDrawer = new LineListDrawer(game, scene, 5);
+            this.vertexBuffer = this.Device.CreateVertexBufferImmutable(vertList.ToArray());
+            this.indexBuffer = this.Device.CreateIndexBufferImmutable(ci);
 
             this.effect = new EffectBasic(this.Device);
+
+            this.lineDrawer = new LineListDrawer(game, 12);
+            this.lineDrawer.UseZBuffer = false;
+
+            this.InitializeTerrainContext();
+            this.InitializeMinimapContext(description.Left, description.Top, description.Width, description.Height);
         }
-
-        public override void Update(GameTime gameTime)
+        /// <summary>
+        /// Initialize terrain context
+        /// </summary>
+        private void InitializeTerrainContext()
         {
+            BoundingBox bbox = this.terrain.GetBoundingBox();
 
+            float x = bbox.Maximum.X - bbox.Minimum.X;
+            float y = bbox.Maximum.Y - bbox.Minimum.Y;
+            float z = bbox.Maximum.Z - bbox.Minimum.Z;
+
+            Vector3 eyePos = new Vector3(0, y + 5f, 0);
+            Vector3 target = Vector3.Zero;
+            Vector3 dir = Vector3.Normalize(target - eyePos);
+
+            Matrix view = Matrix.LookAtLH(
+                eyePos,
+                target,
+                Vector3.UnitZ);
+
+            Matrix proj = Matrix.OrthoLH(
+                x,
+                z,
+                0.1f,
+                2000f);
+
+            this.terrainDrawContext = new Context()
+            {
+                EyePosition = eyePos,
+                World = Matrix.Identity,
+                ViewProjection = view * proj,
+                Lights = new SceneLight()
+                {
+                    DirectionalLight1 = new SceneLightDirectional()
+                    {
+                        Ambient = new Color4(0.4f, 0.4f, 0.4f, 1.0f),
+                        Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                        Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                        Direction = dir,
+                    },
+                    DirectionalLight1Enabled = true,
+                },
+            };
         }
-
-        public override void Draw(GameTime gameTime)
+        /// <summary>
+        /// Initialize minimap context
+        /// </summary>
+        /// <param name="left">Left</param>
+        /// <param name="top">Top</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        private void InitializeMinimapContext(int left, int top, int width, int height)
         {
-            this.Game.Graphics.DisableZBuffer();
+            Vector3 eyePos = new Vector3(0, 0, -1);
+            Vector3 target = Vector3.Zero;
+            Vector3 dir = Vector3.Normalize(target - eyePos);
 
-            this.Game.Graphics.SetRenderTarget(this.renderTarget, this.viewport);
+            Manipulator2D man = new Manipulator2D();
+            man.SetPosition(left, top);
+            man.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
 
-            this.DeviceContext.ClearRenderTargetView(this.renderTarget, Color.White);
+            Matrix world = man.LocalTransform;
 
-            //TODO: Draw terrain for minimap, using internal camera
-            this.terrain.Draw(gameTime);
+            Matrix view = Matrix.LookAtLH(
+                eyePos,
+                target,
+                Vector3.Up);
 
-            //TODO: Draw frustum lines for minimap, using internal camera
-            this.lineDrawer.Draw(gameTime);
+            Matrix proj = Matrix.OrthoLH(
+                this.Game.Form.RenderWidth,
+                this.Game.Form.RenderHeight,
+                0.1f,
+                100f);
 
+            this.minimapDrawContext = new Context()
+            {
+                EyePosition = eyePos,
+                World = world,
+                ViewProjection = view * proj,
+                Lights = new SceneLight()
+                {
+                    DirectionalLight1 = new SceneLightDirectional()
+                    {
+                        Ambient = new Color4(0.4f, 0.4f, 0.4f, 1.0f),
+                        Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                        Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                        Direction = dir,
+                    },
+                    DirectionalLight1Enabled = true,
+                },
+            };
+        }
+        /// <summary>
+        /// Update state
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
+        {
+            this.lineDrawer.SetLines(Color.Red, GeometryUtil.CreateWiredFrustum(new BoundingFrustum(context.ViewProjection)));
+        }
+        /// <summary>
+        /// Draw objects
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
+        {
+            this.DrawTerrain(gameTime, context);
+
+            this.DrawMinimap(gameTime, context);
+        }
+        /// <summary>
+        /// Draw terrain
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Context</param>
+        private void DrawTerrain(GameTime gameTime, Context context)
+        {
+            this.Game.Graphics.SetRenderTarget(this.viewport, null, this.renderTarget, true);
+
+            this.terrain.Draw(gameTime, this.terrainDrawContext);
+
+            this.lineDrawer.Draw(gameTime, this.terrainDrawContext);
+
+            this.Game.Graphics.SetDefaultRenderTarget(false);
+        }
+        /// <summary>
+        /// Draw minimap
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Context</param>
+        private void DrawMinimap(GameTime gameTime, Context context)
+        {
             #region Effect update
 
             this.DeviceContext.InputAssembler.InputLayout = this.effect.GetInputLayout(this.effect.PositionNormalTexture);
@@ -134,15 +243,14 @@ namespace Engine
             this.DeviceContext.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(this.vertexBuffer, new VertexPositionNormalTexture().Stride, 0));
             this.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
 
-            Matrix world = Matrix.Scaling(100, 100, 1);
-
-            this.effect.FrameBuffer.World = world;
-            this.effect.FrameBuffer.WorldInverse = Matrix.Invert(world);
-            this.effect.FrameBuffer.WorldViewProjection = world * this.Scene.ViewProjectionOrthogonal;
+            this.effect.FrameBuffer.World = this.minimapDrawContext.World;
+            this.effect.FrameBuffer.WorldInverse = Matrix.Invert(this.minimapDrawContext.World);
+            this.effect.FrameBuffer.WorldViewProjection = this.minimapDrawContext.World * this.minimapDrawContext.ViewProjection;
+            this.effect.FrameBuffer.Lights = new BufferLights(this.minimapDrawContext.EyePosition, this.minimapDrawContext.Lights);
             this.effect.UpdatePerFrame();
 
             this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-            this.effect.UpdatePerObject(this.Texture, null, 0);
+            this.effect.UpdatePerObject(this.renderTexture, null, 0);
 
             this.effect.SkinningBuffer.FinalTransforms = null;
             this.effect.UpdatePerSkinning();
@@ -155,10 +263,10 @@ namespace Engine
 
                 this.DeviceContext.DrawIndexed(6, 0, 0);
             }
-
-            this.Game.Graphics.SetDefaultRenderTarget();
         }
-
+        /// <summary>
+        /// Dispose objects
+        /// </summary>
         public override void Dispose()
         {
             if (this.renderTarget != null)
@@ -167,10 +275,10 @@ namespace Engine
                 this.renderTarget = null;
             }
 
-            if (this.Texture != null)
+            if (this.renderTexture != null)
             {
-                this.Texture.Dispose();
-                this.Texture = null;
+                this.renderTexture.Dispose();
+                this.renderTexture = null;
             }
 
             if (this.lineDrawer != null)
@@ -199,12 +307,30 @@ namespace Engine
         }
     }
 
+    /// <summary>
+    /// Minimap description
+    /// </summary>
     public class MinimapDescription
     {
+        /// <summary>
+        /// Top position
+        /// </summary>
         public int Top;
+        /// <summary>
+        /// Left position
+        /// </summary>
         public int Left;
+        /// <summary>
+        /// Width
+        /// </summary>
         public int Width;
+        /// <summary>
+        /// Height
+        /// </summary>
         public int Height;
+        /// <summary>
+        /// Terrain to draw
+        /// </summary>
         public Terrain Terrain;
     }
 }

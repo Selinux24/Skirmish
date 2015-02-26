@@ -84,10 +84,9 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        /// <param name="scene">Scene</param>
         /// <param name="content">Content</param>
-        public Model(Game game, Scene3D scene, ModelContent content)
-            : base(game, scene, content, false, 0, true, true)
+        public Model(Game game, ModelContent content)
+            : base(game, content, false, 0, true, true)
         {
             this.UseZBuffer = true;
 
@@ -113,9 +112,10 @@ namespace Engine
         /// Update
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
-            base.Update(gameTime);
+            base.Update(gameTime, context);
 
             this.Manipulator.Update(gameTime);
         }
@@ -123,7 +123,8 @@ namespace Engine
         /// Draw
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
             if (!this.Cull)
             {
@@ -150,14 +151,14 @@ namespace Engine
                     #region Per frame update
 
                     Matrix local = this.Manipulator.LocalTransform;
-                    Matrix world = this.Scene.World * local;
+                    Matrix world = context.World * local;
                     Matrix worldInverse = Matrix.Invert(world);
-                    Matrix worldViewProjection = world * this.Scene.ViewProjectionPerspective;
+                    Matrix worldViewProjection = world * context.ViewProjection;
 
                     this.effect.FrameBuffer.World = world;
                     this.effect.FrameBuffer.WorldInverse = worldInverse;
                     this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;
-                    this.effect.FrameBuffer.Lights = new BufferLights(this.Scene.Camera.Position, this.Scene.Lights);
+                    this.effect.FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
                     this.effect.UpdatePerFrame();
 
                     #endregion
@@ -213,11 +214,12 @@ namespace Engine
         /// <summary>
         /// Frustum culling
         /// </summary>
-        public override void FrustumCulling()
+        /// <param name="frustum">Frustum</param>
+        public override void FrustumCulling(BoundingFrustum frustum)
         {
             if (this.hasVolumes)
             {
-                this.Cull = this.Scene.Camera.Frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
+                this.Cull = frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
             }
             else
             {

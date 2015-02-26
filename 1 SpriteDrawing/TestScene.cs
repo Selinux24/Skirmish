@@ -2,7 +2,7 @@
 
 namespace SpriteDrawing
 {
-    public class TestScene : Scene3D
+    public class TestScene : Scene
     {
         private const float delta = 25f;
 
@@ -22,6 +22,7 @@ namespace SpriteDrawing
 
             SpriteDescription spriteMovDesc = new SpriteDescription()
             {
+                ContentPath = "Resources",
                 Textures = new[] { "smiley.jpg" },
                 Width = 128,
                 Height = 128,
@@ -31,14 +32,20 @@ namespace SpriteDrawing
 
             SpriteDescription spriteFixedDesc = new SpriteDescription()
             {
-                Textures = new[] { "seafloor.jpg" },
+                ContentPath = "Resources",
+                Textures = new[] { "seafloor.dds" },
                 Width = 256,
                 Height = 256,
                 FitScreen = true,
             };
             this.spriteFixed = this.AddSprite(spriteFixedDesc, 2);
 
-            this.background = this.AddBackgroud("background.jpg", 99);
+            BackgroundDescription bkDescription = new BackgroundDescription()
+            {
+                ContentPath = "Resources",
+                Textures = new[] { "background.jpg" },
+            };
+            this.background = this.AddBackgroud(bkDescription, 99);
 
             this.spriteMov.Manipulator.SetPosition(256, 0);
         }

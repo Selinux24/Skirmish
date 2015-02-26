@@ -48,6 +48,16 @@ namespace Engine.Common
             }
         }
         /// <summary>
+        /// Gets whether the node is connected in all headings
+        /// </summary>
+        public bool FullConnected
+        {
+            get
+            {
+                return this.ConnectedNodes.Count == 8;
+            }
+        }
+        /// <summary>
         /// Node state
         /// </summary>
         public GridNodeStates State = GridNodeStates.Clear;
@@ -225,11 +235,19 @@ namespace Engine.Common
         /// </summary>
         /// <param name="point">Point to test</param>
         /// <returns>Returns whether this node contains specified point</returns>
-        public bool Contains(Vector3 point)
+        public bool Contains(Vector3 point, out float distance)
         {
-            BoundingBox bbox = BoundingBox.FromPoints(this.GetCorners());
+            distance = float.MaxValue;
 
-            return bbox.Contains(point) != ContainmentType.Disjoint;
+            if (point.X >= this.SouthWest.X && point.Z >= this.SouthWest.Z &&
+                point.X <= this.NorthEast.X && point.Z <= this.NorthEast.Z)
+            {
+                distance = Vector3.DistanceSquared(point, this.Center);
+
+                return true;
+            }
+
+            return false;
         }
         /// <summary>
         /// Get four node corners

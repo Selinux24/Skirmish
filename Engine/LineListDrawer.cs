@@ -34,11 +34,10 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
         /// <param name="lines">Line list</param>
         /// <param name="color">Color</param>
-        public LineListDrawer(Game game, Scene3D scene, Line[] lines, Color4 color)
-            : base(game, scene, ModelContent.GenerateLineList(lines, color))
+        public LineListDrawer(Game game, Line[] lines, Color4 color)
+            : base(game, ModelContent.GenerateLineList(lines, color))
         {
             this.EnableAlphaBlending = true;
 
@@ -50,10 +49,9 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="scene">Scene</param>
         /// <param name="count">Maximum line count</param>
-        public LineListDrawer(Game game, Scene3D scene, int count)
-            : base(game, scene, ModelContent.GenerateLineList(new Line[count], Color.Transparent))
+        public LineListDrawer(Game game, int count)
+            : base(game, ModelContent.GenerateLineList(new Line[count], Color.Transparent))
         {
             this.EnableAlphaBlending = true;
 
@@ -63,21 +61,32 @@ namespace Engine
         /// Draw content
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
             this.WriteDataInBuffer();
 
-            base.Draw(gameTime);
+            base.Draw(gameTime, context);
         }
         /// <summary>
         /// Performs frustum culling test
         /// </summary>
+        /// <param name="frustum">Frustum</param>
         /// <remarks>Culling disabled for this class</remarks>
-        public override void FrustumCulling()
+        public override void FrustumCulling(BoundingFrustum frustum)
         {
             this.Cull = false;
         }
 
+        /// <summary>
+        /// Set line
+        /// </summary>
+        /// <param name="color">Color</param>
+        /// <param name="line">Line</param>
+        public void SetLines(Color4 color, Line line)
+        {
+            SetLines(color, new[] { line });
+        }
         /// <summary>
         /// Set line list
         /// </summary>
@@ -109,6 +118,15 @@ namespace Engine
                     this.dictionaryChanged = true;
                 }
             }
+        }
+        /// <summary>
+        /// Add line to list
+        /// </summary>
+        /// <param name="color">Color</param>
+        /// <param name="line">Line</param>
+        public void AddLines(Color4 color, Line line)
+        {
+            AddLines(color, new[] { line });
         }
         /// <summary>
         /// Add lines to list

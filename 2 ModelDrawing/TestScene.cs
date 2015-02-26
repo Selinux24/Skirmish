@@ -5,7 +5,7 @@ using SharpDX;
 
 namespace ModelDrawing
 {
-    public class TestScene : Scene3D
+    public class TestScene : Scene
     {
         private Model colorModel = null;
         private Model textureModel = null;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SharpDX;
 
 namespace Engine.Common
@@ -8,6 +9,30 @@ namespace Engine.Common
     /// </summary>
     public class Grid
     {
+        /// <summary>
+        /// Collision info helper
+        /// </summary>
+        class GridCollisionInfo
+        {
+            /// <summary>
+            /// Collision point
+            /// </summary>
+            public Vector3 Point;
+            /// <summary>
+            /// Collision triangle
+            /// </summary>
+            public Triangle Triangle;
+
+            /// <summary>
+            /// Gets text representarion of collision
+            /// </summary>
+            /// <returns>Returns text representarion of collision</returns>
+            public override string ToString()
+            {
+                return string.Format("{0}", this.Point);
+            }
+        }
+
         /// <summary>
         /// Node side
         /// </summary>
@@ -22,68 +47,132 @@ namespace Engine.Common
         /// </summary>
         /// <param name="triangles">Triangles</param>
         /// <param name="size">Node size</param>
+        /// <param name="angle">Maximum angle of node</param>
         /// <returns>Returns generated grid node list</returns>
-        public static Grid Build(Terrain terrain, float size)
+        public static Grid Build(Terrain terrain, float size, float angle = MathUtil.PiOverFour)
         {
             List<GridNode> result = new List<GridNode>();
 
-            float half = size * 0.5f;
+            Dictionary<Vector2, GridCollisionInfo[]> dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
 
             BoundingBox bbox = terrain.GetBoundingBox();
 
-            for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += size)
+            float fxSize = (bbox.Maximum.X - bbox.Minimum.X) / size;
+            float fzSize = (bbox.Maximum.Z - bbox.Minimum.Z) / size;
+
+            int xSize = fxSize > (int)fxSize ? (int)fxSize + 1 : (int)fxSize;
+            int zSize = fzSize > (int)fzSize ? (int)fzSize + 1 : (int)fzSize;
+
+            for (float x = bbox.Minimum.X; x < bbox.Maximum.X; x += size)
             {
-                for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += size)
+                for (float z = bbox.Minimum.Z; z < bbox.Maximum.Z; z += size)
                 {
+                    GridCollisionInfo[] info = null;
+
                     Vector3[] points;
                     Triangle[] triangles;
-                    if (TestPoint(x, z, terrain, out points, out triangles))
+                    if (TestPoint(x, z, terrain, angle, out points, out triangles))
                     {
-                        //Each point is a node
+                        info = new GridCollisionInfo[points.Length];
+
                         for (int i = 0; i < points.Length; i++)
                         {
-                            Vector3 point = points[i];
-
-                            Vector3[] p0;
-                            Triangle[] t0;
-                            if (!TestPoint(point.X + -half, point.Z + -half, terrain, out p0, out t0)) continue;
-
-                            Vector3[] p1;
-                            Triangle[] t1;
-                            if (!TestPoint(point.X + +half, point.Z + -half, terrain, out p1, out t1)) continue;
-
-                            Vector3[] p2;
-                            Triangle[] t2;
-                            if (!TestPoint(point.X + -half, point.Z + +half, terrain, out p2, out t2)) continue;
-
-                            Vector3[] p3;
-                            Triangle[] t3;
-                            if (!TestPoint(point.X + +half, point.Z + +half, terrain, out p3, out t3)) continue;
-
-                            if (p0.Length == p1.Length &&
-                                p0.Length == p2.Length &&
-                                p0.Length == p3.Length)
-                            {
-                                for (int n = 0; n < p0.Length; n++)
-                                {
-                                    Vector3 va = (t0[n].Normal + t1[n].Normal + t2[n].Normal + t3[n].Normal) * 0.25f;
-
-                                    GridNode newNode = new GridNode(p0[n], p1[n], p2[n], p3[n], Helper.Angle(Vector3.Up, va));
-
-                                    result.Add(newNode);
-                                }
-                            }
-                            else
-                            {
-                                //TODO: Process shared nodes. May exists?
-                                throw new System.NotImplementedException();
-                            }
+                            info[i] = new GridCollisionInfo() { Point = points[i], Triangle = triangles[i], };
                         }
                     }
                     else
                     {
-                        //TODO: May be?
-                        throw new System.NotImplementedException();
+                        info = new GridCollisionInfo[] { };
+                    }
+
+                    dictionary.Add(new Vector2(x, z), info);
+                }
+            }
+
+            int gridNodeCount = (xSize - 1) * (zSize - 1);
+
+            GridCollisionInfo[][] collisionValues = new GridCollisionInfo[dictionary.Count][];
+            dictionary.Values.CopyTo(collisionValues, 0);
+
+            //Generate grid nodes
+            for (int n = 0; n < gridNodeCount; n++)
+            {
+                int x = n / xSize;
+                int z = n - (x * xSize);
+
+                if (x == zSize - 1) continue;
+                if (z == xSize - 1) continue;
+
+                //Find node corners
+                int i0 = ((x + 0) * zSize) + (z + 0);
+                int i1 = ((x + 0) * zSize) + (z + 1);
+                int i2 = ((x + 1) * zSize) + (z + 0);
+                int i3 = ((x + 1) * zSize) + (z + 1);
+
+                GridCollisionInfo[] coor0 = collisionValues[i0];
+                GridCollisionInfo[] coor1 = collisionValues[i1];
+                GridCollisionInfo[] coor2 = collisionValues[i2];
+                GridCollisionInfo[] coor3 = collisionValues[i3];
+
+                int min = Helper.Min(coor0.Length, coor1.Length, coor2.Length, coor3.Length);
+                int max = Helper.Max(coor0.Length, coor1.Length, coor2.Length, coor3.Length);
+
+                if (min == 0)
+                {
+                    //None
+                }
+                else if (max == 1 && min == 1)
+                {
+                    //Unique collision node
+                    for (int i = 0; i < max; i++)
+                    {
+                        Vector3 va = (
+                            coor0[i].Triangle.Normal +
+                            coor1[i].Triangle.Normal +
+                            coor2[i].Triangle.Normal +
+                            coor3[i].Triangle.Normal) * 0.25f;
+
+                        GridNode newNode = new GridNode(
+                            coor0[i].Point,
+                            coor1[i].Point,
+                            coor2[i].Point,
+                            coor3[i].Point,
+                            Helper.Angle(Vector3.Up, va));
+
+                        result.Add(newNode);
+                    }
+                }
+                else
+                {
+                    //Process multiple point nodes
+                    for (int i = 0; i < max; i++)
+                    {
+                        GridCollisionInfo c0 = i < coor0.Length ? coor0[i] : coor0[coor0.Length - 1];
+                        GridCollisionInfo c1 = i < coor1.Length ? coor1[i] : coor1[coor1.Length - 1];
+                        GridCollisionInfo c2 = i < coor2.Length ? coor2[i] : coor2[coor2.Length - 1];
+                        GridCollisionInfo c3 = i < coor3.Length ? coor3[i] : coor3[coor3.Length - 1];
+
+                        float fmin = Helper.Min(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
+                        float fmax = Helper.Max(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
+                        float diff = Math.Abs(fmax - fmin);
+
+                        if (diff <= size)
+                        {
+                            Vector3 va = (
+                                c0.Triangle.Normal +
+                                c1.Triangle.Normal +
+                                c2.Triangle.Normal +
+                                c3.Triangle.Normal) * 0.25f;
+
+                            GridNode newNode = new GridNode(
+                                c0.Point,
+                                c1.Point,
+                                c2.Point,
+                                c3.Point,
+                                Helper.Angle(Vector3.Up, va));
+
+                            result.Add(newNode);
+                        }
                     }
                 }
             }
@@ -91,9 +180,15 @@ namespace Engine.Common
             //Fill connections
             for (int i = 0; i < result.Count; i++)
             {
-                for (int n = i + 1; n < result.Count; n++)
+                if (!result[i].FullConnected)
                 {
-                    result[i].TryConnect(result[n]);
+                    for (int n = i + 1; n < result.Count; n++)
+                    {
+                        if (!result[n].FullConnected)
+                        {
+                            result[i].TryConnect(result[n]);
+                        }
+                    }
                 }
             }
 
@@ -106,11 +201,14 @@ namespace Engine.Common
         /// <summary>
         /// Performs validation test for specified point
         /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <param name="ray">Ray</param>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="terrain">Terrain class</param>
+        /// <param name="angle">Maximum angle of node</param>
         /// <param name="points">Result point list</param>
+        /// <param name="tris">Result triangle list</param>
         /// <returns>Returns true if point is valid.</returns>
-        private static bool TestPoint(float x, float z, Terrain terrain, out Vector3[] points, out Triangle[] tris)
+        private static bool TestPoint(float x, float z, Terrain terrain, float angle, out Vector3[] points, out Triangle[] tris)
         {
             points = null;
             tris = null;
@@ -125,8 +223,7 @@ namespace Engine.Common
                 for (int i = 0; i < pickedPositions.Length; i++)
                 {
                     float a = Helper.Angle(Vector3.Up, pickedTriangles[i].Normal);
-
-                    if (a <= MathUtil.PiOverFour)
+                    if (a <= angle)
                     {
                         pointList.Add(pickedPositions[i]);
                         triangleList.Add(pickedTriangles[i]);
@@ -146,6 +243,31 @@ namespace Engine.Common
                 return false;
             }
         }
+        /// <summary>
+        /// Gets node wich contains specified point
+        /// </summary>
+        /// <param name="point">Point</param>
+        /// <returns>Returns the node wich contains the specified point if exists</returns>
+        public GridNode FindNode(Vector3 point)
+        {
+            float minDistance = float.MaxValue;
+            GridNode bestNode = null;
+
+            for (int i = 0; i < this.Nodes.Length; i++)
+            {
+                float distance;
+                if (this.Nodes[i].Contains(point, out distance))
+                {
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        bestNode = this.Nodes[i];
+                    }
+                }
+            }
+
+            return bestNode;
+        }
 
         /// <summary>
         /// Gets text representation of instance
@@ -154,23 +276,6 @@ namespace Engine.Common
         public override string ToString()
         {
             return string.Format("Nodes {0}; Side {1:0.00};", this.Nodes.Length, this.NodeSide);
-        }
-        /// <summary>
-        /// Gets node wich contains specified point
-        /// </summary>
-        /// <param name="point">Point</param>
-        /// <returns>Returns the node wich contains the specified point if exists</returns>
-        public GridNode FindNode(Vector3 point)
-        {
-            for (int i = 0; i < this.Nodes.Length; i++)
-            {
-                if (this.Nodes[i].Contains(point))
-                {
-                    return this.Nodes[i];
-                }
-            }
-
-            return null;
         }
     }
 }

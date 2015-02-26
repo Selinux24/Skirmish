@@ -7,7 +7,7 @@ namespace Engine
     using Engine.Effects;
 
     /// <summary>
-    /// Cubemap drawer
+    /// Cube-map drawer
     /// </summary>
     public class Cubemap : ModelBase
     {
@@ -25,10 +25,9 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        /// <param name="scene">Scene</param>
         /// <param name="content">Content</param>
-        public Cubemap(Game game, Scene3D scene, ModelContent content)
-            : base(game, scene, content, false, 0, false, false)
+        public Cubemap(Game game, ModelContent content)
+            : base(game, content, false, 0, false, false)
         {
             this.effect = new EffectCubemap(game.Graphics.Device);
 
@@ -51,9 +50,10 @@ namespace Engine
         /// Update
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
-            base.Update(gameTime);
+            base.Update(gameTime, context);
 
             this.Manipulator.Update(gameTime);
         }
@@ -61,13 +61,14 @@ namespace Engine
         /// Draw
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
             if (this.Meshes != null)
             {
                 #region Per frame update
 
-                this.effect.FrameBuffer.WorldViewProjection = this.Scene.World * this.Manipulator.LocalTransform * this.Scene.ViewProjectionPerspective;
+                this.effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
                 this.effect.UpdatePerFrame();
 
                 #endregion
@@ -98,5 +99,24 @@ namespace Engine
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Cube-map description
+    /// </summary>
+    public class CubemapDescription
+    {
+        /// <summary>
+        /// Content path
+        /// </summary>
+        public string ContentPath;
+        /// <summary>
+        /// Texture
+        /// </summary>
+        public string Texture;
+        /// <summary>
+        /// Radius
+        /// </summary>
+        public float Radius;
     }
 }

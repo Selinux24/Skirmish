@@ -32,7 +32,7 @@ namespace Engine.Content
         /// </summary>
         public class MaterialDictionary : Dictionary<string, MaterialContent>
         {
-            
+
         }
         /// <summary>
         /// Geometry dictionary by mesh name
@@ -259,13 +259,14 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="textures">Texture list</param>
+        /// <param name="bbox">Bounding box</param>
         /// <param name="triList">Triangle list to populate</param>
         /// <param name="saturation">Per triangle saturation</param>
         /// <param name="minSize">Billboard min size</param>
         /// <param name="maxSize">Billboard max size</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateVegetationBillboard(string contentFolder, Triangle[] triList, string[] textures, float saturation, Vector2 minSize, Vector2 maxSize, int seed = 0)
+        public static ModelContent GenerateVegetationBillboard(string contentFolder, BoundingBox bbox, Triangle[] triList, string[] textures, float saturation, Vector2 minSize, Vector2 maxSize, int seed = 0)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -296,7 +297,7 @@ namespace Engine.Content
                 {
                     //Buscar un punto en el triángulo
                     Vector3 v = rnd.NextVector3(tri.Min, tri.Max);
-                    Ray ray = new Ray(new Vector3(v.X, 1000f, v.Z), Vector3.Down);
+                    Ray ray = new Ray(new Vector3(v.X, bbox.Maximum.Y + 0.1f, v.Z), Vector3.Down);
                     Vector3 iPoint;
                     if (tri.Intersects(ref ray, out iPoint))
                     {

@@ -78,6 +78,10 @@ namespace Engine
         private int indexCount = 0;
 
         /// <summary>
+        /// View * projection matrix
+        /// </summary>
+        private Matrix viewProjection;
+        /// <summary>
         /// Font map
         /// </summary>
         private FontMap fontMap = null;
@@ -90,20 +94,6 @@ namespace Engine
         /// </summary>
         private string text = null;
 
-        /// <summary>
-        /// Scene
-        /// </summary>
-        public new Scene3D Scene
-        {
-            get
-            {
-                return base.Scene as Scene3D;
-            }
-            set
-            {
-                base.Scene = value;
-            }
-        }
         /// <summary>
         /// Font name
         /// </summary>
@@ -212,12 +202,11 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        /// <param name="scene">Scene</param>
         /// <param name="font">Font name</param>
         /// <param name="size">Font size</param>
         /// <param name="textColor">Fore color</param>
-        public TextDrawer(Game game, Scene3D scene, string font, int size, Color4 textColor)
-            : this(game, scene, font, size, textColor, Color.Transparent)
+        public TextDrawer(Game game, string font, int size, Color4 textColor)
+            : this(game, font, size, textColor, Color.Transparent)
         {
 
         }
@@ -225,19 +214,31 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        /// <param name="scene">Scene</param>
         /// <param name="font">Font name</param>
         /// <param name="size">Font size</param>
         /// <param name="textColor">Fore color</param>
         /// <param name="shadowColor">Shadow color</param>
-        public TextDrawer(Game game, Scene3D scene, string font, int size, Color4 textColor, Color4 shadowColor)
-            : base(game, scene)
+        public TextDrawer(Game game, string font, int size, Color4 textColor, Color4 shadowColor)
+            : base(game)
         {
             this.Font = string.Format("{0} {1}", font, size);
 
             this.effect = new EffectFont(game.Graphics.Device);
             this.technique = this.effect.GetTechnique(VertexTypes.PositionTexture, DrawingStages.Drawing);
             this.inputLayout = this.effect.GetInputLayout(this.technique);
+
+            Matrix view = Matrix.LookAtLH(
+                Vector3.UnitZ * -1f,
+                Vector3.Zero,
+                Vector3.Up);
+
+            Matrix proj = Matrix.OrthoLH(
+                this.Game.Form.RenderWidth,
+                this.Game.Form.RenderHeight,
+                0.1f,
+                100f);
+
+            this.viewProjection = view * proj;
 
             this.fontMap = FontMap.MapFont(game.Graphics.Device, font, size);
 
@@ -276,7 +277,8 @@ namespace Engine
         /// Update component state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(GameTime gameTime, Context context)
         {
 
         }
@@ -284,7 +286,8 @@ namespace Engine
         /// Draw text
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public override void Draw(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Draw(GameTime gameTime, Context context)
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
@@ -296,21 +299,22 @@ namespace Engine
                 this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
 
                 //Draw text
-                this.DrawText(this.Position, this.TextColor);
+                this.DrawText(context, this.Position, this.TextColor);
 
                 if (this.ShadowColor != Color.Transparent)
                 {
                     //Draw shadow
-                    this.DrawText(this.Position + this.ShadowRelative, this.ShadowColor);
+                    this.DrawText(context, this.Position + this.ShadowRelative, this.ShadowColor);
                 }
             }
         }
         /// <summary>
         /// Draw text
         /// </summary>
+        /// <param name="context">Context</param>
         /// <param name="position">Position</param>
         /// <param name="color">Color</param>
-        private void DrawText(Vector2 position, Color4 color)
+        private void DrawText(Context context, Vector2 position, Color4 color)
         {
             #region Per frame update
 
@@ -319,8 +323,8 @@ namespace Engine
                 -position.Y + this.Game.Form.RelativeCenter.Y,
                 0f);
 
-            Matrix world = this.Scene.World * Matrix.Translation(pos);
-            Matrix worldViewProjection = world * this.Scene.ViewProjectionOrthogonal;
+            Matrix world = Matrix.Translation(pos);
+            Matrix worldViewProjection = world * this.viewProjection;
 
             this.effect.FrameBuffer.World = world;
             this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;

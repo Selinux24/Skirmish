@@ -3,7 +3,7 @@ using SharpDX;
 
 namespace SceneTest
 {
-    public class TestSceneHID : Scene3D
+    public class TestSceneHID : Scene
     {
         private Sprite sprite = null;
 
@@ -31,14 +31,13 @@ namespace SceneTest
         {
             base.Initialize();
 
-            this.ContentPath = "ResourcesHID";
-
             this.title = this.AddText("Tahoma", 18, Color.BlueViolet, 0);
             this.title.Text = "3D scene & HID scene";
             this.title.Position = Vector2.Zero;
 
             SpriteDescription spriteDesc = new SpriteDescription()
             {
+                ContentPath = "ResourcesHID",
                 Textures = new[] { "smiley.jpg" },
                 Width = 128,
                 Height = 128,

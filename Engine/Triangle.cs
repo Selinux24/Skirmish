@@ -260,10 +260,8 @@ namespace Engine
         /// <returns>Returns all intersections if exists</returns>
         public static bool IntersectAll(ref Ray ray, Triangle[] triangles, out Vector3[] pickedPositions, out Triangle[] pickedTriangles)
         {
-            List<Vector3> pickedPositionList = new List<Vector3>();
-            List<Triangle> pickedTriangleList = new List<Triangle>();
-
-            Vector3 epsilon = new Vector3(1);
+            SortedDictionary<float, Vector3> pickedPositionList = new SortedDictionary<float, Vector3>();
+            SortedDictionary<float, Triangle> pickedTriangleList = new SortedDictionary<float, Triangle>();
 
             foreach (Triangle t in triangles)
             {
@@ -271,18 +269,38 @@ namespace Engine
                 if (t.Intersects(ref ray, out pos))
                 {
                     //Avoid duplicate picked positions
-                    if (!pickedPositionList.Exists(tr => Vector3.NearEqual(tr, pos, epsilon)))
+                    if (!pickedPositionList.ContainsValue(pos))
                     {
-                        pickedPositionList.Add(pos);
-                        pickedTriangleList.Add(t);
+                        float d = Vector3.DistanceSquared(ray.Position, pos);
+                        while (pickedPositionList.ContainsKey(d))
+                        {
+                            //Avoid duplicate distance keys
+                            d += 0.001f;
+                        }
+
+                        pickedPositionList.Add(d, pos);
+                        pickedTriangleList.Add(d, t);
                     }
                 }
             }
 
-            pickedPositions = pickedPositionList.ToArray();
-            pickedTriangles = pickedTriangleList.ToArray();
+            if (pickedPositionList.Values.Count > 0)
+            {
+                pickedPositions = new Vector3[pickedPositionList.Values.Count];
+                pickedTriangles = new Triangle[pickedTriangleList.Values.Count];
 
-            return pickedPositionList.Count > 0;
+                pickedPositionList.Values.CopyTo(pickedPositions, 0);
+                pickedTriangleList.Values.CopyTo(pickedTriangles, 0);
+
+                return true;
+            }
+            else
+            {
+                pickedPositions = null;
+                pickedTriangles = null;
+
+                return false;
+            }
         }
 
         /// <summary>
