@@ -1,7 +1,7 @@
 ﻿
-namespace GameLogic.Rules
+namespace GameLogic.Rules.Enum
 {
-    public enum SoldierClasses : int
+    public enum SoldierClassEnum : int
     {
         None = 0,
         Line = 1,

@@ -173,9 +173,9 @@ namespace Engine.Effects
         /// </summary>
         public float Range;
         /// <summary>
-        /// Attributes
+        /// Attenuation
         /// </summary>
-        public Vector3 Attributes;
+        public Vector3 Attenuation;
         /// <summary>
         /// Padding
         /// </summary>
@@ -202,7 +202,7 @@ namespace Engine.Effects
             this.Specular = light.Specular;
             this.Position = light.Position;
             this.Range = light.Range;
-            this.Attributes = light.Attributes;
+            this.Attenuation = light.Attenuation;
             this.Padding = light.Enabled ? 1f : 0f;
         }
     }
@@ -242,9 +242,9 @@ namespace Engine.Effects
         /// </summary>
         public float Spot;
         /// <summary>
-        /// Attributes
+        /// Attenuation
         /// </summary>
-        public Vector3 Attributes;
+        public Vector3 Attenuation;
         /// <summary>
         /// Padding
         /// </summary>
@@ -273,7 +273,7 @@ namespace Engine.Effects
             this.Range = light.Range;
             this.Direction = light.Direction;
             this.Spot = light.Spot;
-            this.Attributes = light.Attributes;
+            this.Attenuation = light.Attenuation;
             this.Padding = light.Enabled ? 1f : 0f;
         }
     }

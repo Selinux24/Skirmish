@@ -8,8 +8,6 @@ using DepthStencilView = SharpDX.Direct3D11.DepthStencilView;
 using DepthStencilViewDescription = SharpDX.Direct3D11.DepthStencilViewDescription;
 using DepthStencilViewDimension = SharpDX.Direct3D11.DepthStencilViewDimension;
 using DepthStencilViewFlags = SharpDX.Direct3D11.DepthStencilViewFlags;
-using Device = SharpDX.Direct3D11.Device;
-using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 using ResourceOptionFlags = SharpDX.Direct3D11.ResourceOptionFlags;
 using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
@@ -98,6 +96,5 @@ namespace Engine
                 this.DepthMapSRV = null;
             }
         }
-
     }
 }

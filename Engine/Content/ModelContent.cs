@@ -17,6 +17,10 @@ namespace Engine.Content
         /// Unspecified material name
         /// </summary>
         public const string NoMaterial = "_base_material_unspecified_";
+        /// <summary>
+        /// Default material name
+        /// </summary>
+        public const string DefaultMaterial = "_base_material_default_";
 
         #region Classes
 
@@ -25,7 +29,69 @@ namespace Engine.Content
         /// </summary>
         public class ImageDictionary : Dictionary<string, ImageContent>
         {
+            /// <summary>
+            /// Gets next image name
+            /// </summary>
+            private string NextImageName
+            {
+                get
+                {
+                    return string.Format("_image_{0}_", this.Count + 1);
+                }
+            }
 
+            /// <summary>
+            /// Imports material texture data to image dictionary
+            /// </summary>
+            /// <param name="material">Material content</param>
+            /// <remarks>Replaces texture path with assigned name</remarks>
+            public void Import(ref MaterialContent material)
+            {
+                if (!string.IsNullOrEmpty(material.AmbientTexture))
+                {
+                    string imageName = this.NextImageName;
+
+                    this.Add(imageName, ImageContent.Texture(material.AmbientTexture));
+
+                    material.AmbientTexture = imageName;
+                }
+
+                if (!string.IsNullOrEmpty(material.DiffuseTexture))
+                {
+                    string imageName = this.NextImageName;
+
+                    this.Add(imageName, ImageContent.Texture(material.DiffuseTexture));
+
+                    material.DiffuseTexture = imageName;
+                }
+
+                if (!string.IsNullOrEmpty(material.EmissionTexture))
+                {
+                    string imageName = this.NextImageName;
+
+                    this.Add(imageName, ImageContent.Texture(material.EmissionTexture));
+
+                    material.EmissionTexture = imageName;
+                }
+
+                if (!string.IsNullOrEmpty(material.NormalMapTexture))
+                {
+                    string imageName = this.NextImageName;
+
+                    this.Add(imageName, ImageContent.Texture(material.NormalMapTexture));
+
+                    material.NormalMapTexture = imageName;
+                }
+
+                if (!string.IsNullOrEmpty(material.SpecularTexture))
+                {
+                    string imageName = this.NextImageName;
+
+                    this.Add(imageName, ImageContent.Texture(material.SpecularTexture));
+
+                    material.SpecularTexture = imageName;
+                }
+            }
         }
         /// <summary>
         /// Materials dictionary by material name
@@ -149,6 +215,49 @@ namespace Engine.Content
         /// </summary>
         public SkinningContent SkinningInfo { get; set; }
 
+        /// <summary>
+        /// Generate model content from scratch
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="vertices">Vertex list</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns new model content</returns>
+        public static ModelContent Generate(PrimitiveTopology topology, VertexTypes vertexType, VertexData[] vertices, MaterialContent material)
+        {
+            return Generate(topology, vertexType, vertices, null, material);
+        }
+        /// <summary>
+        /// Generate model content from scratch
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="vertices">Vertex list</param>
+        /// <param name="indices">Index list</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns new model content</returns>
+        public static ModelContent Generate(PrimitiveTopology topology, VertexTypes vertexType, VertexData[] vertices, uint[] indices, MaterialContent material)
+        {
+            ModelContent modelContent = new ModelContent();
+
+            modelContent.Images.Import(ref material);
+
+            modelContent.Materials.Add(ModelContent.DefaultMaterial, material);
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = topology,
+                VertexType = vertexType,
+                Vertices = vertices,
+                Indices = indices,
+                Material = ModelContent.DefaultMaterial,
+            };
+
+            modelContent.Geometry.Add(ModelContent.StaticMesh, ModelContent.DefaultMaterial, geo);
+            modelContent.Optimize();
+
+            return modelContent;
+        }
         /// <summary>
         /// Generate model content for line list
         /// </summary>

@@ -123,6 +123,10 @@ namespace Engine
         /// Curve time
         /// </summary>
         private float followingTime = 0f;
+        /// <summary>
+        /// Following time delta
+        /// </summary>
+        private float followinfTimeDelta = 1f;
 
         /// <summary>
         /// Contructor
@@ -153,7 +157,7 @@ namespace Engine
                         this.LookAt(newPosition + view);
                     }
 
-                    this.followingTime += gameTime.ElapsedMilliseconds * 0.01f;
+                    this.followingTime += gameTime.ElapsedMilliseconds * 0.01f * this.followinfTimeDelta;
                 }
                 else
                 {
@@ -476,10 +480,12 @@ namespace Engine
         /// Follow specified curve
         /// </summary>
         /// <param name="curve">Curve</param>
-        public void Follow(Curve curve)
+        /// <param name="delta">Delta to apply to time increment</param>
+        public void Follow(Curve curve, float delta = 1f)
         {
             this.following = curve;
             this.followingTime = 0f;
+            this.followinfTimeDelta = delta;
         }
     }
 }

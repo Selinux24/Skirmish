@@ -73,7 +73,7 @@ struct PointLight
 	float4 Specular;
 	float3 Position;
 	float Range;
-	float3 Att;
+	float3 Attenuation;
 	float Padding;
 };
 struct SpotLight
@@ -85,7 +85,7 @@ struct SpotLight
 	float Range;
 	float3 Direction;
 	float Spot;
-	float3 Att;
+	float3 Attenuation;
 	float Padding;
 };
 
@@ -202,9 +202,9 @@ void ComputePointLight(
 	}
 
 	//Attenuate
-	float att = 1.0f / dot(L.Att, float3(1.0f, d, d*d));
-	diffuse *= att;
-	spec *= att;
+	float attenuation = 1.0f / dot(L.Attenuation, float3(1.0f, d, d*d));
+	diffuse *= attenuation;
+	spec *= attenuation;
 }
 
 void ComputeSpotLight(
@@ -251,14 +251,14 @@ void ComputeSpotLight(
 		spec = specFactor * mat.Specular * L.Specular;
 	}
 
-	//Scale by spotlight factor and attenuate.
+	//Scale by spotlight factor.
 	float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);
 
-	//Scale by spotlight factor and attenuate.
-	float att = spot / dot(L.Att, float3(1.0f, d, d*d));
+	//Attenuate.
+	float attenuation = spot / dot(L.Attenuation, float3(1.0f, d, d*d));
 	ambient *= spot;
-	diffuse *= att;
-	spec *= att;
+	diffuse *= attenuation;
+	spec *= attenuation;
 }
 
 LightOutput ComputeLights(LightInput input)

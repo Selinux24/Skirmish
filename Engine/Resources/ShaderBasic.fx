@@ -86,15 +86,15 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 
 	LightOutput lOutput = ComputeLights(lInput);
 
-	float4 litColor = lOutput.ambient + lOutput.diffuse + lOutput.specular;
-	
+	float4 litColor = input.color * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
+
 	if(gFogRange > 0)
 	{
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 
-	litColor.a = gMaterial.Diffuse.a;
-	
+	litColor.a = gMaterial.Diffuse.a * input.color.a;
+
 	return litColor;
 }
 

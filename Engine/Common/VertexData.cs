@@ -348,7 +348,7 @@ namespace Engine.Common
             return new VertexPositionColor
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.Black,
+                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
             };
         }
         /// <summary>
@@ -362,7 +362,7 @@ namespace Engine.Common
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.Black,
+                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
             };
         }
         /// <summary>
@@ -438,7 +438,7 @@ namespace Engine.Common
             return new VertexSkinnedPositionColor
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.Black,
+                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
@@ -460,7 +460,7 @@ namespace Engine.Common
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.Black,
+                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,

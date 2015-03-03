@@ -2,13 +2,15 @@
 
 namespace GameLogic.Rules
 {
+    using GameLogic.Rules.Enum;
+
     public class Team
     {
         private List<Soldier> soldiers = new List<Soldier>();
 
         public string Name { get; set; }
         public string Faction { get; set; }
-        public TeamRole Role { get; set; }
+        public TeamRoleEnum Role { get; set; }
         public Soldier Leader
         {
             get
@@ -56,12 +58,8 @@ namespace GameLogic.Rules
                 soldier.NextTurn();
             }
         }
-        public Actions[] GetActions(Skirmish game, Phase phase, Soldier soldier, bool onMelee, ActionTypes actionType = ActionTypes.All)
-        {
-            return new Actions[] { };
-        }
 
-        public void AddSoldier(string name, SoldierClasses soldierClass)
+        public void AddSoldier(string name, SoldierClassEnum soldierClass)
         {
             this.soldiers.Add(new Soldier(name, soldierClass, this));
         }

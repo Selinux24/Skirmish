@@ -1,7 +1,7 @@
 ﻿
-namespace GameLogic.Rules
+namespace GameLogic.Rules.Enum
 {
-    public enum ActionTypes
+    public enum ActionTypeEnum
     {
         Manual,
         Automatic,

@@ -11,5 +11,15 @@ namespace GameLogic.Rules
         {
             this.Name = name;
         }
+
+        public void Reload()
+        {
+            //TODO: Reload
+        }
+
+        public void Repair()
+        {
+            //TODO: Repair
+        }
     }
 }

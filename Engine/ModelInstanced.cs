@@ -421,7 +421,7 @@ namespace Engine
         /// <param name="position">Ground position if exists</param>
         /// <param name="triangle">Triangle found</param>
         /// <returns>Returns true if ground position found</returns>
-        public virtual bool Pick(Ray ray, out Vector3 position, out Triangle triangle)
+        public virtual bool Pick(ref Ray ray, out Vector3 position, out Triangle triangle)
         {
             position = new Vector3();
             triangle = new Triangle();

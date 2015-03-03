@@ -59,6 +59,10 @@ namespace Engine
         /// Draw context
         /// </summary>
         protected Context DrawContext = new Context();
+        /// <summary>
+        /// Gets or sets whether the scene was handling control captures
+        /// </summary>
+        protected bool CapturedControl { get; private set; }
 
         /// <summary>
         /// Indicates whether the current scene is active
@@ -101,7 +105,7 @@ namespace Engine
 
             this.Lights = new SceneLight();
 
-            this.Lights.DirectionalLight1.Ambient = new Color4(0.4f, 0.4f, 0.4f, 1.0f);
+            this.Lights.DirectionalLight1.Ambient = new Color4(0.8f, 0.8f, 0.8f, 1.0f);
             this.Lights.DirectionalLight1.Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
             this.Lights.DirectionalLight1.Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f);
             this.Lights.DirectionalLight1.Direction = Vector3.Normalize(new Vector3(0.57735f, -0.57735f, 0.57735f));
@@ -152,6 +156,8 @@ namespace Engine
             {
                 activeComponents[i].Update(gameTime, this.DrawContext);
             }
+
+            this.CapturedControl = this.capturedControl != null;
 
             //Process 2D controls
             List<Drawable> ctrls = this.components.FindAll(c => c.Active && c is IControl);

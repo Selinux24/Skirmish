@@ -127,6 +127,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BezierPath.cs" />
     <Compile Include="Billboard.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="CameraModes.cs" />

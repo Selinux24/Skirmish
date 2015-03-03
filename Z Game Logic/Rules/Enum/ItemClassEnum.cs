@@ -1,7 +1,7 @@
 ﻿
-namespace GameLogic.Rules
+namespace GameLogic.Rules.Enum
 {
-    public enum ItemClasses
+    public enum ItemClassEnum
     {
         Movement,
         Shooting,

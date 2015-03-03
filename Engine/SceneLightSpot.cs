@@ -32,16 +32,34 @@ namespace Engine
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
         /// <summary>
-        /// Spot radious
+        /// Spot exponent used in the spotlight calculation to control the cone
         /// </summary>
         public float Spot = 0.0f;
         /// <summary>
-        /// Light attributes
+        /// Stores the three attenuation constants in the format (a0, a1, a2) that control how light intensity falls off with distance
         /// </summary>
-        public Vector3 Attributes = Vector3.Zero;
+        /// <remarks>
+        /// Constant weaken (1,0,0)
+        /// Inverse distance weaken (0,1,0)
+        /// Inverse square law (0,0,1)
+        /// </remarks>
+        public Vector3 Attenuation = Vector3.Zero;
         /// <summary>
         /// Enables or disables the light
         /// </summary>
         public bool Enabled = false;
+
+        /// <summary>
+        /// Sets default light configuration
+        /// </summary>
+        public void SetDefault()
+        {
+            this.Ambient = Color.Yellow;
+            this.Diffuse = Color.White;
+            this.Specular = Color.LightBlue;
+            this.Range = 10f;
+            this.Spot = 5;
+            this.Attenuation = new Vector3(1f, 0f, 0f);
+        }
     }
 }

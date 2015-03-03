@@ -28,9 +28,14 @@ namespace Engine
         /// </summary>
         public float Range = 0.0f;
         /// <summary>
-        /// Light attributes
+        /// Stores the three attenuation constants in the format (a0, a1, a2) that control how light intensity falls off with distance
         /// </summary>
-        public Vector3 Attributes = Vector3.Zero;
+        /// <remarks>
+        /// Constant weaken (1,0,0)
+        /// Inverse distance weaken (0,1,0)
+        /// Inverse square law (0,0,1)
+        /// </remarks>
+        public Vector3 Attenuation = Vector3.Zero;
         /// <summary>
         /// Enables or disables the light
         /// </summary>

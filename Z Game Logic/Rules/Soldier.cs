@@ -2,10 +2,12 @@
 
 namespace GameLogic.Rules
 {
+    using GameLogic.Rules.Enum;
+
     public class Soldier
     {
         public string Name { get; set; }
-        public SoldierClasses SoldierClass { get; set; }
+        public SoldierClassEnum SoldierClass { get; set; }
         public Team Team { get; set; }
 
         public readonly int BaseMovingCapacity = 100;
@@ -18,6 +20,7 @@ namespace GameLogic.Rules
         public readonly int BaseEndurance = 10;
         public readonly int BaseHealth = 100;
         public readonly int BaseInitiative = 1;
+        public readonly int BaseHability = 5;
 
         private bool canMove = true;
         private int turnMovingCapacity = 0;
@@ -83,15 +86,15 @@ namespace GameLogic.Rules
                 return this.BaseEndurance - this.GetModifiersEndurance();
             }
         }
-        public HealthStates CurrentHealth
+        public HealthStateEnum CurrentHealth
         {
             get
             {
                 int health = this.BaseHealth - this.GetModifiersHealth();
 
-                if (health >= 50) return HealthStates.Healthy;
-                else if (health >= 0) return HealthStates.Wounded;
-                else return HealthStates.Disabled;
+                if (health >= 50) return HealthStateEnum.Healthy;
+                else if (health >= 0) return HealthStateEnum.Wounded;
+                else return HealthStateEnum.Disabled;
             }
         }
         public int CurrentInitiative
@@ -101,7 +104,14 @@ namespace GameLogic.Rules
                 return this.BaseInitiative - this.GetModifiersInitiative();
             }
         }
-        public MoraleStates CurrentMorale { get; private set; }
+        public MoraleStateEnum CurrentMorale { get; private set; }
+        public int CurrentFirstAidHability
+        {
+            get
+            {
+                return this.BaseHability - this.GetModifiersHability();
+            }
+        }
 
         public Weapon CurrentShootingWeapon { get; set; }
         public Weapon CurrentMeleeWeapon { get; set; }
@@ -120,7 +130,7 @@ namespace GameLogic.Rules
             {
                 if (this.CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClasses.Movement;
+                    return this.CurrentItem.Class == ItemClassEnum.Movement;
                 }
 
                 return false;
@@ -132,7 +142,7 @@ namespace GameLogic.Rules
             {
                 if (this.CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClasses.Shooting;
+                    return this.CurrentItem.Class == ItemClassEnum.Shooting;
                 }
 
                 return false;
@@ -144,7 +154,7 @@ namespace GameLogic.Rules
             {
                 if (this.CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClasses.Melee;
+                    return this.CurrentItem.Class == ItemClassEnum.Melee;
                 }
 
                 return false;
@@ -156,7 +166,7 @@ namespace GameLogic.Rules
             {
                 if (this.CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClasses.Morale;
+                    return this.CurrentItem.Class == ItemClassEnum.Morale;
                 }
 
                 return false;
@@ -167,7 +177,7 @@ namespace GameLogic.Rules
             get
             {
                 return 
-                    this.CurrentHealth != HealthStates.Disabled &&
+                    this.CurrentHealth != HealthStateEnum.Disabled &&
                     this.canMove && 
                     !this.onMelee &&
                     this.CurrentMovingCapacity > 0;
@@ -178,7 +188,7 @@ namespace GameLogic.Rules
             get
             {
                 return
-                    this.CurrentHealth != HealthStates.Disabled &&
+                    this.CurrentHealth != HealthStateEnum.Disabled &&
                     this.canShoot && 
                     !this.onMelee && 
                     this.CurrentActionPoints > 0;
@@ -189,12 +199,12 @@ namespace GameLogic.Rules
             get
             {
                 return
-                    this.CurrentHealth != HealthStates.Disabled &&
+                    this.CurrentHealth != HealthStateEnum.Disabled &&
                     this.canFight && this.onMelee;
             }
         }
 
-        public Soldier(string name, SoldierClasses soldierClass, Team team)
+        public Soldier(string name, SoldierClassEnum soldierClass, Team team)
         {
             this.Name = name;
             this.SoldierClass = soldierClass;
@@ -244,6 +254,10 @@ namespace GameLogic.Rules
         {
             return 0;
         }
+        private int GetModifiersHability()
+        {
+            return 0;
+        }
 
         public bool IdleForPhase(Phase phase)
         {
@@ -255,7 +269,7 @@ namespace GameLogic.Rules
         }
         public void NextTurn()
         {
-            if (this.CurrentHealth == HealthStates.Disabled || this.CurrentMorale == MoraleStates.Demoralized)
+            if (this.CurrentHealth == HealthStateEnum.Disabled || this.CurrentMorale == MoraleStateEnum.Demoralized)
             {
                 this.canMove = false;
                 this.canShoot = false;
@@ -264,7 +278,7 @@ namespace GameLogic.Rules
                 this.turnMovingCapacity = this.BaseMovingCapacity;
                 this.turnActionPoints = this.BaseMovingCapacity;
             }
-            else if (this.CurrentMorale == MoraleStates.Cowed)
+            else if (this.CurrentMorale == MoraleStateEnum.Cowed)
             {
                 this.canMove = !this.onMelee;
                 this.canShoot = false;
@@ -281,56 +295,6 @@ namespace GameLogic.Rules
 
                 this.turnMovingCapacity = this.onMelee ? this.BaseMovingCapacity : 0;
                 this.turnActionPoints = this.onMelee ? this.BaseMovingCapacity : 0;
-            }
-        }
-        public Actions[] GetActions(Skirmish game, Phase phase, bool onMelee, ActionTypes actionType = ActionTypes.All)
-        {
-            Actions[] actions = new Actions[] { };
-
-            if (phase == Phase.Movement && this.IdleForMovement)
-            {
-                actions = Array.FindAll(ActionsMovement.GetList(game), a => !a.ItemAction || a.ItemAction && this.HasItemsForMovingPhase);
-                if (actions.Length > 0)
-                {
-                    Array.ForEach(actions, a => a.Active = this);
-                }
-            }
-            else if (phase == Phase.Shooting && this.IdleForShooting)
-            {
-                actions = Array.FindAll(ActionsShooting.GetList(game), a => !a.ItemAction || a.ItemAction && this.HasItemsForShootingPhase);
-                if (actions.Length > 0)
-                {
-                    Array.ForEach(actions, a => a.Active = this);
-                }
-            }
-            else if (phase == Phase.Melee && this.IdleForMelee)
-            {
-                actions = Array.FindAll(ActionsMelee.GetList(game), a => !a.ItemAction || a.ItemAction && this.HasItemsForMeleePhase);
-                if (actions.Length > 0)
-                {
-                    Array.ForEach(actions, a => a.Active = this);
-                }
-            }
-            else if (phase == Phase.Morale)
-            {
-                actions = Array.FindAll(ActionsMorale.GetList(game), a => !a.ItemAction || a.ItemAction && this.HasItemsForMoralePhase);
-                if (actions.Length > 0)
-                {
-                    Array.ForEach(actions, a => a.Active = this);
-                }
-            }
-
-            actions = Array.FindAll(actions, a => !a.LeadersOnly || (a.LeadersOnly && this.IsLeader));
-
-            actions = Array.FindAll(actions, a => ((a.Classes & this.SoldierClass) == this.SoldierClass));
-
-            if (actionType == ActionTypes.All)
-            {
-                return actions;
-            }
-            else
-            {
-                return Array.FindAll(actions, a => a.Automatic == (actionType == ActionTypes.Automatic));
             }
         }
 
@@ -368,21 +332,25 @@ namespace GameLogic.Rules
             this.canShoot = false;
             this.canFight = true;
         }
-        public void ReloadTest(int points)
+        public void ReloadTest(Weapon weapon, int points)
         {
             this.ConsumeMovingCapacity(points);
 
             this.canMove = false;
             this.canShoot = true;
             this.canFight = false;
+
+            weapon.Reload();
         }
-        public void RepairTest(int points)
+        public void RepairTest(Weapon weapon, int points)
         {
             this.ConsumeMovingCapacity(points);
 
             this.canMove = false;
             this.canShoot = true;
             this.canFight = false;
+
+            weapon.Repair();
         }
         public void Inventory(int points)
         {
@@ -417,7 +385,7 @@ namespace GameLogic.Rules
             this.canFight = false;
         }
 
-        public bool ShootingTest(int points)
+        public bool ShootingTest(Weapon weapon, float distance, int points)
         {
             this.ConsumeActionPoints(points);
 
@@ -471,34 +439,34 @@ namespace GameLogic.Rules
             }
         }
 
-        public void SetState(SoldierStates soldierStates, Area area)
+        public void SetState(SoldierStateEnum soldierStates, Weapon weapon, Area area)
         {
-            if (soldierStates != SoldierStates.None)
+            if (soldierStates != SoldierStateEnum.None)
             {
                 this.turnMovingCapacity = 0;
                 this.turnActionPoints = 0;
             }
         }
 
-        public void UseItemForMovementPhase(int points)
+        public void UseItemForMovementPhase(Item item, int points)
         {
+            item.Use();
+
             this.ConsumeMovingCapacity(points);
-
-            this.CurrentItem.Use();
         }
-        public void UseItemForShootingPhase(int points)
+        public void UseItemForShootingPhase(Item item, int points)
         {
+            item.Use();
+
             this.ConsumeActionPoints(points);
-
-            this.CurrentItem.Use();
         }
-        public void UseItemForMeleePhase()
+        public void UseItemForMeleePhase(Item item)
         {
-            this.CurrentItem.Use();
+            item.Use();
         }
-        public void UseItemForMoralePhase()
+        public void UseItemForMoralePhase(Item item)
         {
-            this.CurrentItem.Use();
+            item.Use();
         }
 
         public void HitTest(Weapon weapon)

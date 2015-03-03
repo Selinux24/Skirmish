@@ -134,10 +134,10 @@ namespace Skybox
             #endregion
 
             this.Lights.PointLightEnabled = true;
-            this.Lights.PointLight.Ambient = new Color4(1f, 0.1f, 0.1f, 1.0f);
-            this.Lights.PointLight.Diffuse = new Color4(1f, 0.2f, 0.2f, 1.0f);
-            this.Lights.PointLight.Specular = new Color4(1f, 0.2f, 0.2f, 1.0f);
-            this.Lights.PointLight.Attributes = new Vector3(1.0f, 0.0f, 0.0f);
+            this.Lights.PointLight.Ambient = new Color4(1f, 0.5f, 0.5f, 1.0f);
+            this.Lights.PointLight.Diffuse = new Color4(1f, 0.8f, 0.8f, 1.0f);
+            this.Lights.PointLight.Specular = new Color4(1f, 0.8f, 0.8f, 1.0f);
+            this.Lights.PointLight.Attenuation = new Vector3(1.0f, 0.0f, 0.0f);
             this.Lights.PointLight.Range = 20.0f;
 
             this.InitializeCamera();

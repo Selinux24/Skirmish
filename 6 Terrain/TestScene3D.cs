@@ -33,6 +33,7 @@ namespace TerrainTest
         private float curveTime = 0;
         private LineListDrawer helicopterLineDrawer = null;
         private Vector3 heightOffset = (Vector3.Up * 5f);
+        private CurveInterpolations helicopterPathInterpolation = CurveInterpolations.SmoothStep;
 
         private Color4 gridColor = Color.LightSeaGreen;
         private Color4 curvesColor = Color.Red;
@@ -212,17 +213,6 @@ namespace TerrainTest
 
             this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
             this.Camera.LookTo(this.helicopter.Manipulator.Position);
-
-            Vector3 v1 = this.GetRandomPoint(Vector3.Zero);
-            Vector3 v2 = this.GetRandomPoint(Vector3.Zero);
-
-            Path path = this.terrain.FindPath(v1, v2);
-            if (path != null)
-            {
-                this.curve = path.GenerateCurve();
-
-                this.ComputePath(CurveInterpolations.CatmullRom);
-            }
         }
 
         public override void Update(GameTime gameTime)
@@ -264,7 +254,7 @@ namespace TerrainTest
                 this.curve.AddPosition(this.GetRandomPoint(this.heightOffset));
                 this.curve.AddPosition(this.GetRandomPoint(this.heightOffset));
 
-                this.ComputePath(CurveInterpolations.CatmullRom);
+                this.ComputePath();
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
@@ -336,7 +326,7 @@ namespace TerrainTest
                     Path p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
                     if (p != null)
                     {
-                        this.tank.Manipulator.Follow(p.GenerateCurve());
+                        this.tank.Manipulator.Follow(p.GenerateCurve(), 0.2f);
                     }
                 }
             }
@@ -372,8 +362,8 @@ namespace TerrainTest
 
                     float segmentDelta = segmentDistance2 - segmentDistance;
 
-                    Vector3 p0 = this.curve.GetPosition(this.curveTime, CurveInterpolations.CatmullRom);
-                    Vector3 p1 = this.curve.GetPosition(this.curveTime + time, CurveInterpolations.CatmullRom);
+                    Vector3 p0 = this.curve.GetPosition(this.curveTime, this.helicopterPathInterpolation);
+                    Vector3 p1 = this.curve.GetPosition(this.curveTime + time, this.helicopterPathInterpolation);
 
                     Vector3 cfw = this.helicopter.Manipulator.Forward;
                     Vector3 nfw = Vector3.Normalize(p1 - p0);
@@ -414,7 +404,7 @@ namespace TerrainTest
                 {
                     this.curve.AddPosition(this.GetRandomPoint(this.heightOffset));
 
-                    this.ComputePath(CurveInterpolations.CatmullRom);
+                    this.ComputePath();
                 }
             }
 
@@ -432,7 +422,7 @@ namespace TerrainTest
             }
         }
 
-        private void ComputePath(CurveInterpolations interpolation)
+        private void ComputePath()
         {
             List<Vector3> path = new List<Vector3>();
 
@@ -440,7 +430,7 @@ namespace TerrainTest
 
             for (float i = 0; i <= this.curve.Length; i += pass)
             {
-                Vector3 pos = this.curve.GetPosition(i, interpolation);
+                Vector3 pos = this.curve.GetPosition(i, this.helicopterPathInterpolation);
 
                 path.Add(pos);
             }

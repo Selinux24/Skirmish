@@ -3,6 +3,8 @@ using System;
 
 namespace GameLogic.Rules
 {
+    using GameLogic.Rules.Enum;
+
     public class Melee
     {
         private List<Soldier> soldiers = new List<Soldier>();
@@ -84,10 +86,10 @@ namespace GameLogic.Rules
 
             this.soldiers.ForEach((s) => 
             {
-                if (s.CurrentHealth == HealthStates.Disabled) s.MeleeDisolved();
+                if (s.CurrentHealth == HealthStateEnum.Disabled) s.MeleeDisolved();
             });
 
-            this.soldiers.RemoveAll(s => s.CurrentHealth == HealthStates.Disabled);
+            this.soldiers.RemoveAll(s => s.CurrentHealth == HealthStateEnum.Disabled);
         }
         public void Disolve()
         {

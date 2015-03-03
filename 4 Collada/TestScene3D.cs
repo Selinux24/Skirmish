@@ -112,7 +112,7 @@ namespace Collada
             this.Lights.PointLight.Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f);
             this.Lights.PointLight.Diffuse = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
             this.Lights.PointLight.Specular = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
-            this.Lights.PointLight.Attributes = new Vector3(0.1f, 0.0f, 0.0f);
+            this.Lights.PointLight.Attenuation = new Vector3(0.1f, 0.0f, 0.0f);
             this.Lights.PointLight.Range = 80.0f;
 
             this.Lights.SpotLightEnabled = true;
@@ -120,7 +120,7 @@ namespace Collada
             this.Lights.SpotLight.Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
             this.Lights.SpotLight.Diffuse = new Color4(1.0f, 1.0f, 0.0f, 1.0f);
             this.Lights.SpotLight.Specular = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
-            this.Lights.SpotLight.Attributes = new Vector3(0.15f, 0.0f, 0.0f);
+            this.Lights.SpotLight.Attenuation = new Vector3(0.15f, 0.0f, 0.0f);
             this.Lights.SpotLight.Spot = 16f;
             this.Lights.SpotLight.Range = 100.0f;
         }

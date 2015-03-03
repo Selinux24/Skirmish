@@ -177,6 +177,10 @@ namespace Engine
             {
                 return Vector3.CatmullRom(p[0], p[1], p[2], p[3], pos);
             }
+            else if (interpolation == CurveInterpolations.Bezier)
+            {
+                return CalculateBezierPoint(p[0], p[1], p[2], p[3], pos);
+            }
             else
             {
                 throw new Exception(string.Format("Bad interpolation mode: {0}", interpolation));
@@ -215,6 +219,22 @@ namespace Engine
                 }
             }
         }
+
+        public Vector3 CalculateBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
+        {
+            float u = 1 - t;
+            float tt = t * t;
+            float uu = u * u;
+            float uuu = uu * u;
+            float ttt = tt * t;
+
+            Vector3 p = uuu * p0; //first term
+            p += 3 * uu * t * p1; //second term
+            p += 3 * u * tt * p2; //third term
+            p += ttt * p3; //fourth term
+
+            return p;
+        }
     }
 
     /// <summary>
@@ -234,5 +254,7 @@ namespace Engine
         /// Catmull-Rom
         /// </summary>
         CatmullRom,
+
+        Bezier,
     }
 }
