@@ -116,7 +116,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions.cs" />
     <Compile Include="Rules\Enum\ActionsEnum.cs" />
     <Compile Include="Rules\ActionsManager.cs" />
     <Compile Include="Rules\Enum\ActionTypeEnum.cs" />

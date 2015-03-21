@@ -509,13 +509,22 @@ namespace Engine
                 this.swapChain.Present(0, PresentFlags.None);
             }
         }
-
+        /// <summary>
+        /// Sets default render target
+        /// </summary>
+        /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
         public void SetDefaultRenderTarget(bool clear)
         {
-            this.SetRenderTarget(this.Viewport, this.depthStencilView, this.renderTargetView, clear);
+            this.SetRenderTarget(this.Viewport, this.depthStencilView, this.renderTargetView, clear, GameEnvironment.Background);
         }
-
-        public void SetRenderTarget(Viewport viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear)
+        /// <summary>
+        /// Set render target
+        /// </summary>
+        /// <param name="viewport">Viewport</param>
+        /// <param name="depthMap">Depth map</param>
+        /// <param name="renderTarget">Render target</param>
+        /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
+        public void SetRenderTarget(Viewport viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear, Color4 clearColor)
         {
             this.DeviceContext.Rasterizer.SetViewport(viewport);
             this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTarget);
@@ -526,7 +535,7 @@ namespace Engine
                 {
                     this.DeviceContext.ClearRenderTargetView(
                         renderTarget,
-                        GameEnvironment.Background);
+                        clearColor);
                 }
 
                 if (depthMap != null)
@@ -538,8 +547,14 @@ namespace Engine
                 }
             }
         }
-
-        public void SetRenderTarget(ViewportF viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear)
+        /// <summary>
+        /// Set render target
+        /// </summary>
+        /// <param name="viewport">Viewport</param>
+        /// <param name="depthMap">Depth map</param>
+        /// <param name="renderTarget">Render target</param>
+        /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
+        public void SetRenderTarget(ViewportF viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear, Color4 clearColor)
         {
             this.DeviceContext.Rasterizer.SetViewport(viewport);
             this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTarget);
@@ -550,7 +565,7 @@ namespace Engine
                 {
                     this.DeviceContext.ClearRenderTargetView(
                         renderTarget,
-                        GameEnvironment.Background);
+                        clearColor);
                 }
 
                 if (depthMap != null)

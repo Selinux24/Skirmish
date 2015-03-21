@@ -105,7 +105,11 @@ namespace GameLogic
 
             this.NewGame();
 
-            this.cursor3D = this.AddModel("Resources3D", "cursor.dae");
+            this.cursor3D = this.AddModel(new ModelDescription()
+            {
+                ContentPath = "Resources3D",
+                ModelFileName = "cursor.dae",
+            });
             this.terrain = this.AddTerrain(new TerrainDescription()
             {
                 ModelFileName = "terrain.dae",
@@ -113,7 +117,12 @@ namespace GameLogic
                 UsePathFinding = true,
                 PathNodeSize = 5f,
             });
-            this.model = this.AddInstancingModel("Resources3D", "soldier.dae", this.skirmishGame.AllSoldiers.Length);
+            this.model = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = "Resources3D",
+                ModelFileName = "soldier.dae",
+                Instances = this.skirmishGame.AllSoldiers.Length
+            });
 
             #region HUD
 
@@ -464,7 +473,7 @@ namespace GameLogic
                     this.txtGame.Text = string.Format("{0}", this.skirmishGame);
                     this.txtTeam.Text = string.Format("{0}", this.skirmishGame.CurrentTeam);
                     this.txtSoldier.Text = string.Format("{0}", this.skirmishGame.CurrentSoldier);
-                    this.txtActionList.Text = string.Format("{0}", this.currentActions.ToStringList());
+                    this.txtActionList.Text = string.Format("{0}", this.currentActions.Join(" | "));
                     this.txtAction.Text = string.Format("{0}", this.currentAction);
                 }
             }

@@ -109,7 +109,12 @@ namespace Skybox
 
             Vector3[] firePositions3D = new Vector3[this.firePositions.Length];
 
-            this.torchs = this.AddInstancingModel("Resources", "torch.dae", this.firePositions.Length);
+            this.torchs = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = "Resources",
+                ModelFileName = "torch.dae",
+                Instances = this.firePositions.Length
+            });
             for (int i = 0; i < this.firePositions.Length; i++)
             {
                 this.ruins.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i]);

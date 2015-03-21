@@ -7,7 +7,7 @@ namespace SceneTest
         static void Main()
         {
 #if DEBUG
-            using (Game cl = new Game("3 SceneTest", false, 800, 600))
+            using (Game cl = new Game("3 SceneTest", false, 800, 450))
 #else
             using (Game cl = new Game("3 SceneTest"))
 #endif

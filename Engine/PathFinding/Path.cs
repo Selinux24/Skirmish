@@ -130,5 +130,35 @@ namespace Engine.PathFinding
 
             return curve;
         }
+        /// <summary>
+        /// Generates a bezier path that goes through the nodes of the way
+        /// </summary>
+        /// <returns>Returns the bezier path generated</returns>
+        public BezierPath GenerateBezierPath()
+        {
+            BezierPath curve = new BezierPath();
+
+            List<Vector3> positions = new List<Vector3>();
+
+            positions.Add(this.StartPosition);
+
+            for (int i = 1; i < this.ReturnPath.Count - 1; i++)
+            {
+                Vector3 position = this.ReturnPath[i].Center;
+
+                if (i > 0)
+                {
+                    Vector3 previousPosition = this.ReturnPath[i - 1].Center;
+                }
+
+                positions.Add(this.ReturnPath[i].Center);
+            }
+
+            positions.Add(this.EndPosition);
+
+            curve.SetControlPoints(positions.ToArray(), 0.25f);
+
+            return curve;
+        }
     }
 }

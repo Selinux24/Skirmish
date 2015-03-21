@@ -986,6 +986,7 @@ namespace Engine
         private Manipulator3D manipulator;
 
         private Vector3 positionOffset = Vector3.Zero;
+        private Vector3 viewOffset = Vector3.ForwardLH;
 
         public Vector3 Position
         {
@@ -999,7 +1000,7 @@ namespace Engine
         {
             get
             {
-                return this.Position + this.manipulator.Forward;
+                return this.Position + Vector3.TransformNormal(this.viewOffset, this.manipulator.LocalTransform);
             }
         }
 
@@ -1008,10 +1009,11 @@ namespace Engine
             this.manipulator = manipulator;
         }
 
-        public FollowingManipulator(Manipulator3D manipulator, Vector3 offset)
+        public FollowingManipulator(Manipulator3D manipulator, Vector3 position, Vector3 view)
         {
             this.manipulator = manipulator;
-            this.positionOffset = offset;
+            this.positionOffset = position;
+            this.viewOffset = view;
         }
     }
 }

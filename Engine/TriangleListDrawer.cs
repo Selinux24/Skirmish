@@ -68,15 +68,6 @@ namespace Engine
 
             base.Draw(gameTime, context);
         }
-        /// <summary>
-        /// Performs frustum culling test
-        /// </summary>
-        /// <param name="frustum">Frustum</param>
-        /// <remarks>Culling disabled for this class</remarks>
-        public override void FrustumCulling(BoundingFrustum frustum)
-        {
-            this.Cull = false;
-        }
 
         /// <summary>
         /// Set triangle list

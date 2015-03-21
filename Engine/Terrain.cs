@@ -43,6 +43,7 @@ namespace Engine
             : base(game)
         {
             this.terrain = new Model(game, content);
+            this.terrain.DropShadow = this.DropShadow = description.DropShadow;
 
             BoundingBox bbox = this.terrain.GetBoundingBox();
             BoundingSphere bsph = this.terrain.GetBoundingSphere();
@@ -373,6 +374,10 @@ namespace Engine
         /// Skydom cube texture
         /// </summary>
         public string SkydomTexture = null;
+        /// <summary>
+        /// Drops shadow
+        /// </summary>
+        public bool DropShadow = false;
 
         /// <summary>
         /// Use quadtree for picking

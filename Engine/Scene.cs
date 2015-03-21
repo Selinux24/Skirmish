@@ -30,6 +30,10 @@ namespace Engine
         /// </summary>
         /// <remarks>When mouse was pressed, the control beneath him was stored here. When mouse is released, if it is above this control, an click event occurs</remarks>
         private IControl capturedControl = null;
+        /// <summary>
+        /// Shadow mapper
+        /// </summary>
+        private ShadowMap shadowMap = null;
 
         /// <summary>
         /// Game class
@@ -63,6 +67,25 @@ namespace Engine
         /// Gets or sets whether the scene was handling control captures
         /// </summary>
         protected bool CapturedControl { get; private set; }
+        /// <summary>
+        /// Shadow map
+        /// </summary>
+        protected ShadowMap ShadowMap
+        {
+            get
+            {
+                if (this.shadowMap == null)
+                {
+                    this.shadowMap = new ShadowMap(this.Game, 2048, 2048);
+                }
+
+                return this.shadowMap;
+            }
+        }
+        /// <summary>
+        /// Context for shadow map drawing
+        /// </summary>
+        protected Context DrawShadowsContext = new Context();
 
         /// <summary>
         /// Indicates whether the current scene is active
@@ -80,6 +103,14 @@ namespace Engine
         /// Scene lights
         /// </summary>
         public SceneLight Lights { get; private set; }
+        /// <summary>
+        /// Scene volume
+        /// </summary>
+        public BoundingSphere SceneVolume { get; protected set; }
+        /// <summary>
+        /// Gets or sets whether the scene has shadows activated
+        /// </summary>
+        public bool EnableShadows { get; set; }
         /// <summary>
         /// Gets or sets if scene has to perform frustum culling with objects
         /// </summary>
@@ -127,6 +158,9 @@ namespace Engine
 
             this.Lights.SpotLightEnabled = false;
 
+            this.SceneVolume = new BoundingSphere(Vector3.Zero, 1000);
+            this.EnableShadows = false;
+
             this.PerformFrustumCulling = true;
         }
 
@@ -145,10 +179,22 @@ namespace Engine
         {
             this.Camera.Update(gameTime);
 
+            if (this.EnableShadows)
+            {
+                this.ShadowMap.Update(this.Lights.DirectionalLight1.Direction, this.SceneVolume);
+
+                this.DrawShadowsContext.DrawerMode = DrawerModesEnum.ShadowMap;
+                this.DrawShadowsContext.World = Matrix.Identity;
+                this.DrawShadowsContext.ViewProjection = this.ShadowMap.View * this.ShadowMap.Projection;
+                this.DrawShadowsContext.ShadowMap = null;
+            }
+
+            this.DrawContext.DrawerMode = DrawerModesEnum.Default;
             this.DrawContext.World = this.world;
             this.DrawContext.ViewProjection = this.Camera.View * this.Camera.Projection;
             this.DrawContext.EyePosition = this.Camera.Position;
             this.DrawContext.Lights = this.Lights;
+            this.DrawContext.ShadowMap = null;
 
             //Update active components
             List<Drawable> activeComponents = this.components.FindAll(c => c.Active);
@@ -196,14 +242,58 @@ namespace Engine
         {
             //Draw visible components
             List<Drawable> visibleComponents = this.components.FindAll(c => c.Visible);
-            for (int i = 0; i < visibleComponents.Count; i++)
+            if (visibleComponents.Count > 0)
             {
-                this.Game.Graphics.SetDefaultRasterizer();
-                this.Game.Graphics.SetBlendAlphaToCoverage();
+                if (this.EnableShadows)
+                {
+                    this.DrawContext.ShadowMap = null;
 
-                visibleComponents[i].FrustumCulling(this.Camera.Frustum);
+                    List<Drawable> shadowComponents = visibleComponents.FindAll(c => c.DropShadow);
+                    if (shadowComponents.Count > 0)
+                    {
+                        this.Game.Graphics.SetRenderTarget(this.ShadowMap.Viewport, this.ShadowMap.DepthMap, null, true, Color.Silver);
+                        this.DrawComponents(gameTime, this.DrawShadowsContext, shadowComponents.ToArray());
+                        this.Game.Graphics.SetDefaultRenderTarget(false);
 
-                visibleComponents[i].Draw(gameTime, this.DrawContext);
+                        this.DrawContext.ShadowMap = this.ShadowMap.ShadowMapTexture;
+                    }
+                }
+
+                this.DrawComponents(gameTime, this.DrawContext, visibleComponents.ToArray());
+            }
+        }
+        /// <summary>
+        /// Drawing of scene components
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Drawing context</param>
+        /// <param name="components">Components</param>
+        protected virtual void DrawComponents(GameTime gameTime, Context context, Drawable[] components)
+        {
+            if (this.PerformFrustumCulling)
+            {
+                for (int i = 0; i < components.Length; i++)
+                {
+                    components[i].FrustumCulling(this.Camera.Frustum);
+
+                    if (!components[i].Cull)
+                    {
+                        this.Game.Graphics.SetDefaultRasterizer();
+                        this.Game.Graphics.SetBlendAlphaToCoverage();
+
+                        components[i].Draw(gameTime, context);
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < components.Length; i++)
+                {
+                    this.Game.Graphics.SetDefaultRasterizer();
+                    this.Game.Graphics.SetBlendAlphaToCoverage();
+
+                    components[i].Draw(gameTime, context);
+                }
             }
         }
         /// <summary>
@@ -238,31 +328,32 @@ namespace Engine
         /// <summary>
         /// Adds new model
         /// </summary>
-        /// <param name="contentPath">Content path</param>
-        /// <param name="modelFilename">Model file name</param>
+        /// <param name="description">Model description</param>
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Model AddModel(string contentPath, string modelFilename, bool optimize = true, int order = 0)
+        public Model AddModel(ModelDescription description, bool optimize = true, int order = 0)
         {
-            return AddModel(contentPath, modelFilename, Matrix.Identity, optimize, order);
+            return AddModel(description, Matrix.Identity, optimize, order);
         }
         /// <summary>
         /// Adds new model
         /// </summary>
-        /// <param name="contentPath">Content path</param>
-        /// <param name="modelFilename">Model file name</param>
+        /// <param name="description">Model description</param>
         /// <param name="transform">Initial transform to apply to loaded geometry</param>
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Model AddModel(string contentPath, string modelFilename, Matrix transform, bool optimize = true, int order = 0)
+        public Model AddModel(ModelDescription description, Matrix transform, bool optimize = true, int order = 0)
         {
-            ModelContent geo = LoaderCOLLADA.Load(contentPath, modelFilename, transform);
+            ModelContent geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
 
             if (optimize) geo.Optimize();
 
             Model newModel = new Model(this.Game, geo);
+
+            newModel.DropShadow = description.DropShadow;
+            newModel.TextureIndex = description.TextureIndex;
 
             this.AddComponent(newModel, order);
 
@@ -285,33 +376,33 @@ namespace Engine
         /// <summary>
         /// Adds new instanced model
         /// </summary>
-        /// <param name="contentPath">Content path</param>
-        /// <param name="modelFilename">Model file name</param>
+        /// <param name="description">Model description</param>
         /// <param name="instances">Number of instances for the model</param>
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(string contentPath, string modelFilename, int instances, bool optimize = true, int order = 0)
+        public ModelInstanced AddInstancingModel(ModelInstancedDescription description, bool optimize = true, int order = 0)
         {
-            return AddInstancingModel(contentPath, modelFilename, Matrix.Identity, instances, optimize, order);
+            return AddInstancingModel(description, Matrix.Identity, optimize, order);
         }
         /// <summary>
         /// Adds new instanced model
         /// </summary>
-        /// <param name="contentPath">Content path</param>
-        /// <param name="modelFilename">Model file name</param>
+        /// <param name="description">Model description</param>
         /// <param name="transform">Initial transform to apply to loaded geometry</param>
         /// <param name="instances">Number of instances for the model</param>
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(string contentPath, string modelFilename, Matrix transform, int instances, bool optimize = true, int order = 0)
+        public ModelInstanced AddInstancingModel(ModelInstancedDescription description, Matrix transform, bool optimize = true, int order = 0)
         {
-            ModelContent geo = LoaderCOLLADA.Load(contentPath, modelFilename, transform);
+            ModelContent geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
 
             if (optimize) geo.Optimize();
 
-            ModelInstanced newModel = new ModelInstanced(this.Game, geo, instances);
+            ModelInstanced newModel = new ModelInstanced(this.Game, geo, description.Instances);
+
+            newModel.DropShadow = description.DropShadow;
 
             this.AddComponent(newModel, order);
 
@@ -341,7 +432,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Terrain AddTerrain(TerrainDescription description, bool optimize = true, int order = 0)
         {
-            return AddTerrain(Matrix.Identity, description, optimize, order);
+            return AddTerrain(description, Matrix.Identity, optimize, order);
         }
         /// <summary>
         /// Adds new terrain model
@@ -351,7 +442,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Terrain AddTerrain(Matrix transform, TerrainDescription description, bool optimize = true, int order = 0)
+        public Terrain AddTerrain(TerrainDescription description, Matrix transform, bool optimize = true, int order = 0)
         {
             ModelContent geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
 
@@ -427,6 +518,22 @@ namespace Engine
         public Sprite AddSprite(SpriteDescription description, int order = 0)
         {
             Sprite newModel = new Sprite(
+                this.Game,
+                description);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
+        /// Adds new sprite texture
+        /// </summary>
+        /// <param name="description">Sprite texture description</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new model</returns>
+        public SpriteTexture AddSpriteTexture(SpriteTextureDescription description, int order = 0)
+        {
+            SpriteTexture newModel = new SpriteTexture(
                 this.Game,
                 description);
 

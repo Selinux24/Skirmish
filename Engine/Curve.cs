@@ -4,10 +4,12 @@ using SharpDX;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// 3D curve
     /// </summary>
-    public class Curve
+    public class Curve : IPath
     {
         /// <summary>
         /// Control points
@@ -151,9 +153,18 @@ namespace Engine
         /// Get curve position in time
         /// </summary>
         /// <param name="time">Time</param>
+        /// <returns>Returns position in time</returns>
+        public Vector3 GetPosition(float time)
+        {
+            return this.GetPosition(time, CurveInterpolations.Linear);
+        }
+        /// <summary>
+        /// Get curve position in time
+        /// </summary>
+        /// <param name="time">Time</param>
         /// <param name="interpolation">Interpolation type</param>
         /// <returns>Returns position in time</returns>
-        public Vector3 GetPosition(float time, CurveInterpolations interpolation = CurveInterpolations.CatmullRom)
+        public Vector3 GetPosition(float time, CurveInterpolations interpolation)
         {
             int segmentNum;
             float pos;
@@ -176,10 +187,6 @@ namespace Engine
             else if (interpolation == CurveInterpolations.CatmullRom)
             {
                 return Vector3.CatmullRom(p[0], p[1], p[2], p[3], pos);
-            }
-            else if (interpolation == CurveInterpolations.Bezier)
-            {
-                return CalculateBezierPoint(p[0], p[1], p[2], p[3], pos);
             }
             else
             {
@@ -219,22 +226,6 @@ namespace Engine
                 }
             }
         }
-
-        public Vector3 CalculateBezierPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
-        {
-            float u = 1 - t;
-            float tt = t * t;
-            float uu = u * u;
-            float uuu = uu * u;
-            float ttt = tt * t;
-
-            Vector3 p = uuu * p0; //first term
-            p += 3 * uu * t * p1; //second term
-            p += 3 * u * tt * p2; //third term
-            p += ttt * p3; //fourth term
-
-            return p;
-        }
     }
 
     /// <summary>
@@ -254,7 +245,5 @@ namespace Engine
         /// Catmull-Rom
         /// </summary>
         CatmullRom,
-
-        Bezier,
     }
 }

@@ -12,11 +12,6 @@ namespace Engine
     public class Billboard : ModelBase
     {
         /// <summary>
-        /// Effect
-        /// </summary>
-        private EffectBillboard effect;
-
-        /// <summary>
         /// Manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; set; }
@@ -29,23 +24,9 @@ namespace Engine
         public Billboard(Game game, ModelContent content)
             : base(game, content, false, 0, false, false)
         {
-            this.effect = new EffectBillboard(game.Graphics.Device);
-
             this.Manipulator = new Manipulator3D();
         }
-        /// <summary>
-        /// Resource disposing
-        /// </summary>
-        public override void Dispose()
-        {
-            base.Dispose();
 
-            if (this.effect != null)
-            {
-                this.effect.Dispose();
-                this.effect = null;
-            }
-        }
         /// <summary>
         /// Update
         /// </summary>
@@ -70,9 +51,9 @@ namespace Engine
 
                 #region Per frame update
 
-                this.effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
-                this.effect.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
-                this.effect.UpdatePerFrame();
+                DrawerPool.EffectBillboard.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
+                DrawerPool.EffectBillboard.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
+                DrawerPool.EffectBillboard.UpdatePerFrame();
 
                 #endregion
 
@@ -82,26 +63,26 @@ namespace Engine
                     {
                         Mesh mesh = dictionary[material];
                         MeshMaterial mat = this.Materials[material];
-                        EffectTechnique technique = this.effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
+                        EffectTechnique technique = DrawerPool.EffectBillboard.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
                         #region Per object update
 
                         if (mat != null)
                         {
-                            this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
-                            this.effect.ObjectBuffer.TextureCount = (uint)mat.DiffuseTexture.Description.Texture2DArray.ArraySize;
-                            this.effect.UpdatePerObject(mat.DiffuseTexture);
+                            DrawerPool.EffectBillboard.ObjectBuffer.Material.SetMaterial(mat.Material);
+                            DrawerPool.EffectBillboard.ObjectBuffer.TextureCount = (uint)mat.DiffuseTexture.Description.Texture2DArray.ArraySize;
+                            DrawerPool.EffectBillboard.UpdatePerObject(mat.DiffuseTexture);
                         }
                         else
                         {
-                            this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-                            this.effect.ObjectBuffer.TextureCount = (uint)this.Textures.Count;
-                            this.effect.UpdatePerObject(null);
+                            DrawerPool.EffectBillboard.ObjectBuffer.Material.SetMaterial(Material.Default);
+                            DrawerPool.EffectBillboard.ObjectBuffer.TextureCount = (uint)this.Textures.Count;
+                            DrawerPool.EffectBillboard.UpdatePerObject(null);
                         }
 
                         #endregion
 
-                        mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(technique));
+                        mesh.SetInputAssembler(this.DeviceContext, DrawerPool.EffectBillboard.GetInputLayout(technique));
 
                         for (int p = 0; p < technique.Description.PassCount; p++)
                         {

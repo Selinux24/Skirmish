@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using SharpDX;
 
 namespace Engine
@@ -8,6 +10,15 @@ namespace Engine
     /// </summary>
     public static class Helper
     {
+        /// <summary>
+        /// Transform NDC space [-1,+1]^2 to texture space [0,1]^2
+        /// </summary>
+        private static readonly Matrix ndcTransform = new Matrix(
+            0.5f, 0.0f, 0.0f, 0.0f,
+            0.0f, -0.5f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.5f, 0.5f, 0.0f, 1.0f);
+
         /// <summary>
         /// Generate an array initialized to defaultValue
         /// </summary>
@@ -101,6 +112,28 @@ namespace Engine
             return angle;
         }
         /// <summary>
+        /// Gets total distance between point list
+        /// </summary>
+        /// <param name="points">Point list</param>
+        /// <returns>Returns total distance between point list</returns>
+        public static float Distance(params Vector3[] points)
+        {
+            float length = 0;
+
+            Vector3 p0 = points[0];
+
+            for (int i = 1; i < points.Length; i++)
+            {
+                Vector3 p1 = points[i];
+
+                length += Vector3.Distance(p0, p1);
+
+                p0 = p1;
+            }
+
+            return length;
+        }
+        /// <summary>
         /// Look at target
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
@@ -120,6 +153,15 @@ namespace Engine
             }
 
             return q;
+        }
+        /// <summary>
+        /// Set transform to normal device coordinates
+        /// </summary>
+        /// <param name="matrix">Transform matrix</param>
+        /// <returns>Returns NDC matrix</returns>
+        public static Matrix NormalDeviceCoordinatesTransform(Matrix matrix)
+        {
+            return matrix * ndcTransform;
         }
         /// <summary>
         /// Gets matrix description
@@ -224,6 +266,45 @@ namespace Engine
             }
 
             return res;
+        }
+        /// <summary>
+        /// Concatenates the members of a collection of type T, using the specified separator between each member.
+        /// </summary>
+        /// <typeparam name="T">Collection type</typeparam>
+        /// <param name="list">Collection</param>
+        /// <param name="separator">The string to use as a separator</param>
+        /// <returns>A string that consists of the members of values delimited by the separator string</returns>
+        public static string Join<T>(this ICollection<T> list, string separator = "")
+        {
+            List<string> res = new List<string>();
+
+            list.ToList().ForEach(a => res.Add(a.ToString()));
+
+            return string.Join(separator, res);
+        }
+        /// <summary>
+        /// Performs distinc selection over the result of the provided function
+        /// </summary>
+        /// <typeparam name="TSource">Source type</typeparam>
+        /// <typeparam name="TKey">Function result type</typeparam>
+        /// <param name="source">Source collection</param>
+        /// <param name="getKey">Selection function</param>
+        /// <returns>Returns a collection of distinct function results</returns>
+        public static IEnumerable<TKey> Distinct<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> getKey)
+        {
+            Dictionary<TKey, TSource> dictionary = new Dictionary<TKey, TSource>();
+
+            foreach (TSource item in source)
+            {
+                TKey key = getKey(item);
+
+                if (!dictionary.ContainsKey(key))
+                {
+                    dictionary.Add(key, item);
+                }
+            }
+
+            return dictionary.Select(item => item.Key);
         }
     }
 }

@@ -14,10 +14,6 @@ namespace Engine
     public class ModelInstanced : ModelBase
     {
         /// <summary>
-        /// Effect to draw
-        /// </summary>
-        private EffectInstancing effect;
-        /// <summary>
         /// Instancing data per instance
         /// </summary>
         private VertexInstancingData[] instancingData = null;
@@ -77,25 +73,9 @@ namespace Engine
         {
             this.UseZBuffer = true;
 
-            this.effect = new EffectInstancing(game.Graphics.Device);
-
             this.instancingData = new VertexInstancingData[instances];
 
             this.instances = Helper.CreateArray(instances, () => new ModelInstance(this));
-        }
-
-        /// <summary>
-        /// Resource disposing
-        /// </summary>
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            if (this.effect != null)
-            {
-                this.effect.Dispose();
-                this.effect = null;
-            }
         }
         /// <summary>
         /// Update
@@ -126,93 +106,115 @@ namespace Engine
         {
             if (this.Meshes != null && this.VisibleCount > 0)
             {
-                if (this.UseZBuffer)
-                {
-                    this.Game.Graphics.EnableZBuffer();
-                }
-                else
-                {
-                    this.Game.Graphics.DisableZBuffer();
-                }
+                Drawer effect = null;
+                if (context.DrawerMode == DrawerModesEnum.Default) effect = DrawerPool.EffectInstancing;
+                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
 
-                if (this.EnableAlphaBlending)
+                if (effect != null)
                 {
-                    this.Game.Graphics.SetBlendTransparent();
-                }
-                else
-                {
-                    this.Game.Graphics.SetBlendAlphaToCoverage();
-                }
-
-                if (this.instances != null && this.instances.Length > 0)
-                {
-                    int instanceIndex = 0;
-                    for (int i = 0; i < this.instances.Length; i++)
+                    if (this.UseZBuffer)
                     {
-                        if (this.instances[i].Visible && !this.instances[i].Cull)
-                        {
-                            this.instancingData[instanceIndex].Local = this.instances[i].Manipulator.LocalTransform;
-                            this.instancingData[instanceIndex].TextureIndex = this.instances[i].TextureIndex;
+                        this.Game.Graphics.EnableZBuffer();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.DisableZBuffer();
+                    }
 
-                            instanceIndex++;
+                    if (this.EnableAlphaBlending)
+                    {
+                        this.Game.Graphics.SetBlendTransparent();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetBlendAlphaToCoverage();
+                    }
+
+                    if (this.instances != null && this.instances.Length > 0)
+                    {
+                        int instanceIndex = 0;
+                        for (int i = 0; i < this.instances.Length; i++)
+                        {
+                            if (this.instances[i].Visible && !this.instances[i].Cull)
+                            {
+                                this.instancingData[instanceIndex].Local = this.instances[i].Manipulator.LocalTransform;
+                                this.instancingData[instanceIndex].TextureIndex = this.instances[i].TextureIndex;
+
+                                instanceIndex++;
+                            }
                         }
                     }
-                }
 
-                #region Per frame update
+                    #region Per frame update
 
-                this.effect.FrameBuffer.World = context.World;
-                this.effect.FrameBuffer.WorldInverse = Matrix.Invert(context.World);
-                this.effect.FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
-                this.effect.FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
-                this.effect.UpdatePerFrame();
-
-                #endregion
-
-                foreach (string meshName in this.Meshes.Keys)
-                {
-                    MeshMaterialsDictionary dictionary = this.Meshes[meshName];
-
-                    #region Per skinning update
-
-                    if (this.SkinningData != null)
+                    if (context.DrawerMode == DrawerModesEnum.Default)
                     {
-                        this.effect.SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                        this.effect.UpdatePerSkinning();
+                        ((EffectInstancing)effect).FrameBuffer.World = context.World;
+                        ((EffectInstancing)effect).FrameBuffer.WorldInverse = Matrix.Invert(context.World);
+                        ((EffectInstancing)effect).FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
+                        ((EffectInstancing)effect).FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
+                        ((EffectInstancing)effect).UpdatePerFrame();
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    {
+                        ((EffectShadow)effect).FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
+                        ((EffectShadow)effect).UpdatePerFrame();
                     }
 
                     #endregion
 
-                    foreach (string material in dictionary.Keys)
+                    foreach (string meshName in this.Meshes.Keys)
                     {
-                        MeshInstanced mesh = (MeshInstanced)dictionary[material];
-                        MeshMaterial mat = this.Materials[material];
-                        EffectTechnique technique = this.effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
+                        #region Per skinning update
 
-                        #region Per object update
-
-                        if (mat != null)
+                        if (this.SkinningData != null)
                         {
-                            this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
-                            this.effect.UpdatePerObject(mat.DiffuseTexture);
-                        }
-                        else
-                        {
-                            this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-                            this.effect.UpdatePerObject(null);
+                            if (context.DrawerMode == DrawerModesEnum.Default)
+                            {
+                                ((EffectInstancing)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
+                                ((EffectInstancing)effect).UpdatePerSkinning();
+                            }
                         }
 
                         #endregion
 
-                        mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(technique));
+                        MeshMaterialsDictionary dictionary = this.Meshes[meshName];
 
-                        mesh.WriteInstancingData(this.DeviceContext, this.instancingData);
-
-                        for (int p = 0; p < technique.Description.PassCount; p++)
+                        foreach (string material in dictionary.Keys)
                         {
-                            technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+                            MeshInstanced mesh = (MeshInstanced)dictionary[material];
+                            MeshMaterial mat = this.Materials[material];
 
-                            mesh.Draw(gameTime, this.DeviceContext, this.VisibleCount);
+                            #region Per object update
+
+                            if (context.DrawerMode == DrawerModesEnum.Default)
+                            {
+                                if (mat != null)
+                                {
+                                    ((EffectInstancing)effect).ObjectBuffer.Material.SetMaterial(mat.Material);
+                                    ((EffectInstancing)effect).UpdatePerObject(mat.DiffuseTexture);
+                                }
+                                else
+                                {
+                                    ((EffectInstancing)effect).ObjectBuffer.Material.SetMaterial(Material.Default);
+                                    ((EffectInstancing)effect).UpdatePerObject(null);
+                                }
+                            }
+
+                            #endregion
+
+                            EffectTechnique technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
+
+                            mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
+
+                            mesh.WriteInstancingData(this.DeviceContext, this.instancingData);
+
+                            for (int p = 0; p < technique.Description.PassCount; p++)
+                            {
+                                technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+
+                                mesh.Draw(gameTime, this.DeviceContext, this.VisibleCount);
+                            }
                         }
                     }
                 }
@@ -224,6 +226,9 @@ namespace Engine
         /// <param name="frustum">Frustum</param>
         public override void FrustumCulling(BoundingFrustum frustum)
         {
+            //Cull was made per instance
+            this.Cull = false;
+
             for (int i = 0; i < this.Instances.Length; i++)
             {
                 if (this.Instances[i].Visible)
@@ -232,6 +237,29 @@ namespace Engine
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Instanced model description
+    /// </summary>
+    public class ModelInstancedDescription
+    {
+        /// <summary>
+        /// Content path
+        /// </summary>
+        public string ContentPath = "Resources";
+        /// <summary>
+        /// Model file name
+        /// </summary>
+        public string ModelFileName = null;
+        /// <summary>
+        /// Instances
+        /// </summary>
+        public int Instances = 1;
+        /// <summary>
+        /// Drops shadow
+        /// </summary>
+        public bool DropShadow = false;
     }
 
     /// <summary>

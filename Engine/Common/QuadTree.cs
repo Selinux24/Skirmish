@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using SharpDX;
 
 namespace Engine.Common
@@ -167,7 +168,20 @@ namespace Engine.Common
         /// <returns>Returns true if picked position found</returns>
         public bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
         {
-            return this.Root.PickNearest(ref ray, out position, out triangle);
+            Stopwatch w = Stopwatch.StartNew();
+            try
+            {
+                return this.Root.PickNearest(ref ray, out position, out triangle);
+            }
+            finally
+            {
+                w.Stop();
+
+                float time = ((Counters.PicksPerFrame * Counters.PickingAverageTime) + (float)w.Elapsed.TotalSeconds);
+
+                Counters.PicksPerFrame++;
+                Counters.PickingAverageTime = time / Counters.PicksPerFrame;
+            }
         }
         /// <summary>
         /// Pick first position
@@ -178,7 +192,20 @@ namespace Engine.Common
         /// <returns>Returns true if picked position found</returns>
         public bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
         {
-            return this.Root.PickFirst(ref ray, out position, out triangle);
+            Stopwatch w = Stopwatch.StartNew();
+            try
+            {
+                return this.Root.PickFirst(ref ray, out position, out triangle);
+            }
+            finally
+            {
+                w.Stop();
+
+                float time = ((Counters.PicksPerFrame * Counters.PickingAverageTime) + (float)w.Elapsed.TotalSeconds);
+
+                Counters.PicksPerFrame++;
+                Counters.PickingAverageTime = time / Counters.PicksPerFrame;
+            }
         }
         /// <summary>
         /// Pick all positions
@@ -189,7 +216,20 @@ namespace Engine.Common
         /// <returns>Returns true if picked positions found</returns>
         public bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
         {
-            return this.Root.PickAll(ref ray, out positions, out triangles);
+            Stopwatch w = Stopwatch.StartNew();
+            try
+            {
+                return this.Root.PickAll(ref ray, out positions, out triangles);
+            }
+            finally
+            {
+                w.Stop();
+
+                float time = ((Counters.PicksPerFrame * Counters.PickingAverageTime) + (float)w.Elapsed.TotalSeconds);
+
+                Counters.PicksPerFrame++;
+                Counters.PickingAverageTime = time / Counters.PicksPerFrame;
+            }
         }
         /// <summary>
         /// Gets bounding boxes of specified depth

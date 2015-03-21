@@ -14,10 +14,6 @@ namespace Engine
     public class Sprite : ModelBase
     {
         /// <summary>
-        /// Effect
-        /// </summary>
-        private EffectBasic effect = null;
-        /// <summary>
         /// Source render width
         /// </summary>
         private float previousRenderWidth;
@@ -113,8 +109,6 @@ namespace Engine
         public Sprite(Game game, SpriteDescription description)
             : base(game, ModelContent.GenerateSprite(description.ContentPath, description.Textures), false, 0, false, false)
         {
-            this.effect = new EffectBasic(game.Graphics.Device);
-
             int renderWidth = game.Form.RenderWidth;
             int renderHeight = game.Form.RenderHeight;
 
@@ -145,19 +139,6 @@ namespace Engine
             this.TextureIndex = 0;
 
             this.Manipulator = new Manipulator2D();
-        }
-        /// <summary>
-        /// Resource disposing
-        /// </summary>
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            if (this.effect != null)
-            {
-                this.effect.Dispose();
-                this.effect = null;
-            }
         }
         /// <summary>
         /// Update
@@ -205,11 +186,11 @@ namespace Engine
                 Matrix worldInverse = Matrix.Invert(world);
                 Matrix worldViewProjection = world * this.viewProjection;
 
-                this.effect.FrameBuffer.World = world;
-                this.effect.FrameBuffer.WorldInverse = worldInverse;
-                this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;
-                this.effect.FrameBuffer.Lights = new BufferLights(this.eyePosition);
-                this.effect.UpdatePerFrame();
+                DrawerPool.EffectBasic.FrameBuffer.World = world;
+                DrawerPool.EffectBasic.FrameBuffer.WorldInverse = worldInverse;
+                DrawerPool.EffectBasic.FrameBuffer.WorldViewProjection = worldViewProjection;
+                DrawerPool.EffectBasic.FrameBuffer.Lights = new BufferLights(this.eyePosition);
+                DrawerPool.EffectBasic.UpdatePerFrame();
 
                 #endregion
 
@@ -221,8 +202,8 @@ namespace Engine
 
                     if (this.SkinningData != null)
                     {
-                        this.effect.SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                        this.effect.UpdatePerSkinning();
+                        DrawerPool.EffectBasic.SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
+                        DrawerPool.EffectBasic.UpdatePerSkinning();
                     }
 
                     #endregion
@@ -231,24 +212,24 @@ namespace Engine
                     {
                         Mesh mesh = dictionary[material];
                         MeshMaterial mat = this.Materials[material];
-                        EffectTechnique technique = this.effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
+                        EffectTechnique technique = DrawerPool.EffectBasic.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
                         #region Per object update
 
                         if (mat != null)
                         {
-                            this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
-                            this.effect.UpdatePerObject(mat.DiffuseTexture, mat.NormalMap, this.TextureIndex);
+                            DrawerPool.EffectBasic.ObjectBuffer.Material.SetMaterial(mat.Material);
+                            DrawerPool.EffectBasic.UpdatePerObject(mat.DiffuseTexture, mat.NormalMap, this.TextureIndex);
                         }
                         else
                         {
-                            this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-                            this.effect.UpdatePerObject(null, null, this.TextureIndex);
+                            DrawerPool.EffectBasic.ObjectBuffer.Material.SetMaterial(Material.Default);
+                            DrawerPool.EffectBasic.UpdatePerObject(null, null, this.TextureIndex);
                         }
 
                         #endregion
 
-                        mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(technique));
+                        mesh.SetInputAssembler(this.DeviceContext, DrawerPool.EffectBasic.GetInputLayout(technique));
 
                         for (int p = 0; p < technique.Description.PassCount; p++)
                         {

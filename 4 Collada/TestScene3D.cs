@@ -14,9 +14,12 @@ namespace Collada
         private readonly Vector3 minScaleSize = new Vector3(0.5f);
         private readonly Vector3 maxScaleSize = new Vector3(2f);
 
+        private Random rnd = new Random();
+
         private Cursor cursor = null;
         private TextDrawer title = null;
         private TextDrawer fps = null;
+        private TextDrawer picks = null;
         private Terrain ground = null;
         private ModelInstanced lampsModel = null;
         private ModelInstanced helicoptersModel = null;
@@ -55,6 +58,10 @@ namespace Collada
             this.fps.Text = null;
             this.fps.Position = new Vector2(0, 24);
 
+            this.picks = this.AddText("Lucida Casual", 12, Color.Yellow);
+            this.picks.Text = null;
+            this.picks.Position = new Vector2(0, 36);
+
             TerrainDescription terrainDescription = new TerrainDescription()
             {
                 ContentPath = "Resources",
@@ -69,15 +76,26 @@ namespace Collada
                 PathNodeSize = 20f,
             };
 
-            this.ground = this.AddTerrain(Matrix.Scaling(20, 20, 20), terrainDescription);
-            this.helicoptersModel = this.AddInstancingModel("Resources", "Helicopter.dae", 15);
-            this.lampsModel = this.AddInstancingModel("Resources", "Poly.dae", 2);
+            this.ground = this.AddTerrain(terrainDescription, Matrix.Scaling(20, 20, 20));
+            this.helicoptersModel = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = "Resources",
+                ModelFileName = "Helicopter.dae",
+                Instances = 15,
+            });
+            this.lampsModel = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = "Resources",
+                ModelFileName = "Poly.dae",
+                Instances = 2
+            });
             this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, "raindrop.dds"));
 
             BoundingBox[] bboxes = this.ground.pickingQuadtree.GetBoundingBoxes(5);
             Line[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
 
             this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
+            this.bboxesDrawer.Visible = false;
 
             List<Line> squares = new List<Line>();
 
@@ -87,6 +105,7 @@ namespace Collada
             }
 
             this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));
+            this.terrainGridDrawer.Visible = false;
             this.terrainGridDrawer.UseZBuffer = false;
             this.terrainGridDrawer.EnableAlphaBlending = true;
 
@@ -163,6 +182,12 @@ namespace Collada
                     manipulator.SetRotation(Quaternion.Identity);
                     manipulator.SetPosition(p + (Vector3.UnitY * 15f));
                 }
+
+                Vector3[] points = this.GetRandomPoints(Vector3.UnitY * 15f, 11);
+
+                points[0] = manipulator.Position;
+
+                this.helicopters[i].SetPath(this.ground, points, 10f, 15f);
             }
 
             this.Camera.Goto(this.helicopters[this.selectedHelicopter].Manipulator.Position + (Vector3.One * 10f));
@@ -230,6 +255,20 @@ namespace Collada
 
             #endregion
 
+            #region DEBUG
+
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.bboxesDrawer.Visible = !this.bboxesDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.terrainGridDrawer.Visible = !this.terrainGridDrawer.Visible;
+            }
+
+            #endregion
+
             #region Helicopters
 
             if (this.Game.Input.KeyJustReleased(Keys.Home))
@@ -284,7 +323,26 @@ namespace Collada
                 this.UpdateHelicopters(gameTime);
             }
 
+            for (int i = 0; i < this.helicopters.Length; i++)
+            {
+                this.helicopters[i].Update(gameTime);
+            }
+
+            #region Second lamp
+
+            Vector3 lampPosition = (this.helicopters[this.selectedHelicopter].Manipulator.Forward * 3f);
+            Quaternion lampRotation = Quaternion.RotationAxis(this.helicopters[this.selectedHelicopter].Manipulator.Right, MathUtil.DegreesToRadians(45f));
+
+            this.lampsModel.Instances[1].Manipulator.SetPosition(lampPosition + this.helicopters[this.selectedHelicopter].Manipulator.Position);
+            this.lampsModel.Instances[1].Manipulator.SetRotation(lampRotation * this.helicopters[this.selectedHelicopter].Manipulator.Rotation);
+
+            this.Lights.SpotLight.Position = this.lampsModel.Instances[1].Manipulator.Position;
+            this.Lights.SpotLight.Direction = this.lampsModel.Instances[1].Manipulator.Down;
+
+            #endregion
+
             this.fps.Text = this.Game.RuntimeText;
+            this.picks.Text = string.Format("PicksPerFrame: {0}; PickingAverageTime: {1:0.00000000};", Counters.PicksPerFrame, Counters.PickingAverageTime);
         }
         private void UpdateCamera(GameTime gameTime)
         {
@@ -388,19 +446,6 @@ namespace Collada
                     manipulator.MoveDown(gameTime);
                 }
             }
-
-            #region Second lamp
-
-            Vector3 lampPosition = (manipulator.Forward * 3f);
-            Quaternion lampRotation = Quaternion.RotationAxis(manipulator.Right, MathUtil.DegreesToRadians(45f));
-
-            this.lampsModel.Instances[1].Manipulator.SetPosition(lampPosition + manipulator.Position);
-            this.lampsModel.Instances[1].Manipulator.SetRotation(lampRotation * manipulator.Rotation);
-
-            this.Lights.SpotLight.Position = this.lampsModel.Instances[1].Manipulator.Position;
-            this.Lights.SpotLight.Direction = this.lampsModel.Instances[1].Manipulator.Down;
-
-            #endregion
         }
         private void NextHelicopter(GameTime gameTime)
         {
@@ -430,10 +475,11 @@ namespace Collada
         }
         private void SitDown(GameTime gameTime)
         {
-            Vector3 offset = this.helicopters[this.selectedHelicopter].Offset;
+            Vector3 offset = this.helicopters[this.selectedHelicopter].Position;
+            Vector3 view = this.helicopters[this.selectedHelicopter].View;
             Manipulator3D manipulator = this.helicopters[this.selectedHelicopter].Manipulator;
 
-            this.Camera.Following = new FollowingManipulator(manipulator, offset);
+            this.Camera.Following = new FollowingManipulator(manipulator, offset, view);
         }
         private void StandUp(GameTime gameTime)
         {
@@ -443,6 +489,33 @@ namespace Collada
             this.Camera.Following = null;
             this.Camera.Position = position;
             this.Camera.Interest = interest;
+        }
+
+        private Vector3[] GetRandomPoints(Vector3 offset, int count)
+        {
+            Vector3[] points = new Vector3[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                points[i] = this.GetRandomPoint(offset);
+            }
+
+            return points;
+        }
+        private Vector3 GetRandomPoint(Vector3 offset)
+        {
+            BoundingBox bbox = this.ground.GetBoundingBox();
+
+            while (true)
+            {
+                Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
+
+                Vector3 p;
+                if (this.ground.FindTopGroundPosition(v.X, v.Z, out p))
+                {
+                    return p + offset;
+                }
+            }
         }
     }
 }

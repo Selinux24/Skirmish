@@ -249,6 +249,23 @@ namespace Engine.Common
 
             return lines.ToArray();
         }
+        public static Line[] CreateLineList(Vector3[] points)
+        {
+            List<Line> lines = new List<Line>();
+
+            Vector3 p0 = points[0];
+
+            for (int i = 1; i < points.Length; i++)
+            {
+                Vector3 p1 = points[i];
+
+                lines.Add(new Line(p0, p1));
+
+                p0 = p1;
+            }
+
+            return lines.ToArray();
+        }
 
         private static Line[] CreateFromVertices(Vector3[] vertices, int[] indices)
         {

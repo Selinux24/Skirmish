@@ -87,25 +87,53 @@ namespace Engine.Effects
         /// </summary>
         public readonly EffectTechnique PositionColor = null;
         /// <summary>
+        /// Position color skinned drawing technique
+        /// </summary>
+        public readonly EffectTechnique PositionColorSkinned = null;
+        /// <summary>
         /// Position normal color drawing technique
         /// </summary>
         public readonly EffectTechnique PositionNormalColor = null;
+        /// <summary>
+        /// Position normal color skinned drawing technique
+        /// </summary>
+        public readonly EffectTechnique PositionNormalColorSkinned = null;
         /// <summary>
         /// Position texture technique
         /// </summary>
         public readonly EffectTechnique PositionTexture = null;
         /// <summary>
+        /// Position texture using red channer as gray-scale technique
+        /// </summary>
+        public readonly EffectTechnique PositionTextureRED = null;
+        /// <summary>
+        /// Position texture using green channer as gray-scale technique
+        /// </summary>
+        public readonly EffectTechnique PositionTextureGREEN = null;
+        /// <summary>
+        /// Position texture using blue channer as gray-scale technique
+        /// </summary>
+        public readonly EffectTechnique PositionTextureBLUE = null;
+        /// <summary>
+        /// Position texture skinned technique
+        /// </summary>
+        public readonly EffectTechnique PositionTextureSkinned = null;
+        /// <summary>
         /// Position normal texture technique
         /// </summary>
         public readonly EffectTechnique PositionNormalTexture = null;
+        /// <summary>
+        /// Position normal texture skinned technique
+        /// </summary>
+        public readonly EffectTechnique PositionNormalTextureSkinned = null;
         /// <summary>
         /// Position normal texture with normal mapping technique
         /// </summary>
         public readonly EffectTechnique PositionNormalTextureTangent = null;
         /// <summary>
-        /// Skinned position normal texture technique
+        /// Position normal texture skinned with normal mapping technique
         /// </summary>
-        public readonly EffectTechnique PositionNormalTextureSkinned = null;
+        public readonly EffectTechnique PositionNormalTextureTangentSkinned = null;
 
         /// <summary>
         /// Directional lights effect variable
@@ -446,18 +474,32 @@ namespace Engine.Effects
             : base(device, Resources.ShaderBasic)
         {
             this.PositionColor = this.Effect.GetTechniqueByName("PositionColor");
+            this.PositionColorSkinned = this.Effect.GetTechniqueByName("PositionColorSkinned");
             this.PositionNormalColor = this.Effect.GetTechniqueByName("PositionNormalColor");
+            this.PositionNormalColorSkinned = this.Effect.GetTechniqueByName("PositionNormalColorSkinned");
             this.PositionTexture = this.Effect.GetTechniqueByName("PositionTexture");
+            this.PositionTextureRED = this.Effect.GetTechniqueByName("PositionTextureRED");
+            this.PositionTextureGREEN = this.Effect.GetTechniqueByName("PositionTextureGREEN");
+            this.PositionTextureBLUE = this.Effect.GetTechniqueByName("PositionTextureBLUE");
+            this.PositionTextureSkinned = this.Effect.GetTechniqueByName("PositionTextureSkinned");
             this.PositionNormalTexture = this.Effect.GetTechniqueByName("PositionNormalTexture");
-            this.PositionNormalTextureTangent = this.Effect.GetTechniqueByName("PositionNormalTextureTangent");
             this.PositionNormalTextureSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureSkinned");
+            this.PositionNormalTextureTangent = this.Effect.GetTechniqueByName("PositionNormalTextureTangent");
+            this.PositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureTangentSkinned");
 
             this.AddInputLayout(this.PositionColor, VertexPositionColor.GetInput());
+            this.AddInputLayout(this.PositionColorSkinned, VertexSkinnedPositionColor.GetInput());
             this.AddInputLayout(this.PositionNormalColor, VertexPositionNormalColor.GetInput());
+            this.AddInputLayout(this.PositionNormalColorSkinned, VertexSkinnedPositionNormalColor.GetInput());
             this.AddInputLayout(this.PositionTexture, VertexPositionTexture.GetInput());
+            this.AddInputLayout(this.PositionTextureRED, VertexPositionTexture.GetInput());
+            this.AddInputLayout(this.PositionTextureGREEN, VertexPositionTexture.GetInput());
+            this.AddInputLayout(this.PositionTextureBLUE, VertexPositionTexture.GetInput());
+            this.AddInputLayout(this.PositionTextureSkinned, VertexSkinnedPositionTexture.GetInput());
             this.AddInputLayout(this.PositionNormalTexture, VertexPositionNormalTexture.GetInput());
-            this.AddInputLayout(this.PositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput());
             this.AddInputLayout(this.PositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput());
+            this.AddInputLayout(this.PositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput());
+            this.AddInputLayout(this.PositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput());
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
@@ -489,25 +531,41 @@ namespace Engine.Effects
                 {
                     return this.PositionColor;
                 }
+                else if (vertexType == VertexTypes.PositionColorSkinned)
+                {
+                    return this.PositionColorSkinned;
+                }
                 else if (vertexType == VertexTypes.PositionNormalColor)
                 {
                     return this.PositionNormalColor;
+                }
+                else if (vertexType == VertexTypes.PositionNormalColorSkinned)
+                {
+                    return this.PositionNormalColorSkinned;
                 }
                 else if (vertexType == VertexTypes.PositionTexture)
                 {
                     return this.PositionTexture;
                 }
+                else if (vertexType == VertexTypes.PositionTextureSkinned)
+                {
+                    return this.PositionTextureSkinned;
+                }
                 else if (vertexType == VertexTypes.PositionNormalTexture)
                 {
                     return this.PositionNormalTexture;
+                }
+                else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
+                {
+                    return this.PositionNormalTextureSkinned;
                 }
                 else if (vertexType == VertexTypes.PositionNormalTextureTangent)
                 {
                     return this.PositionNormalTextureTangent;
                 }
-                else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
+                else if (vertexType == VertexTypes.PositionNormalTextureTangentSkinned)
                 {
-                    return this.PositionNormalTextureSkinned;
+                    return this.PositionNormalTextureTangentSkinned;
                 }
                 else
                 {

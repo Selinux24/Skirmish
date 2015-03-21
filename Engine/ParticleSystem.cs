@@ -66,10 +66,6 @@ namespace Engine
         private Vector3 particleAcceleration;
 
         /// <summary>
-        /// Effect
-        /// </summary>
-        private EffectParticles effect = null;
-        /// <summary>
         /// Selected stream out technique
         /// </summary>
         private EffectTechnique techniqueForStreamOut = null;
@@ -166,10 +162,9 @@ namespace Engine
                 throw new Exception(string.Format("Bad emitter type: {0}", description.EmitterType));
             }
 
-            this.effect = new EffectParticles(game.Graphics.Device);
-            this.techniqueForStreamOut = this.effect.GetTechnique(VertexTypes.Particle, DrawingStages.StreamOut, description.ParticleClass);
-            this.techniqueForDrawing = this.effect.GetTechnique(VertexTypes.Particle, DrawingStages.Drawing, description.ParticleClass);
-            this.inputLayout = this.effect.GetInputLayout(this.techniqueForStreamOut);
+            this.techniqueForStreamOut = DrawerPool.EffectParticles.GetTechnique(VertexTypes.Particle, DrawingStages.StreamOut, description.ParticleClass);
+            this.techniqueForDrawing = DrawerPool.EffectParticles.GetTechnique(VertexTypes.Particle, DrawingStages.Drawing, description.ParticleClass);
+            this.inputLayout = DrawerPool.EffectParticles.GetInputLayout(this.techniqueForStreamOut);
 
             this.emittersBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
             this.drawingBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(this.maximumParticles, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
@@ -186,7 +181,6 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.effect);
             Helper.Dispose(this.emittersBuffer);
             Helper.Dispose(this.drawingBuffer);
             Helper.Dispose(this.streamOutBuffer);
@@ -222,16 +216,16 @@ namespace Engine
             Matrix world = context.World * this.Manipulator.LocalTransform;
             Matrix worldViewProjection = context.World * context.ViewProjection;
 
-            this.effect.FrameBuffer.MaxAge = this.maximumAge;
-            this.effect.FrameBuffer.EmitAge = this.emitterAge;
-            this.effect.FrameBuffer.GameTime = gameTime.TotalSeconds;
-            this.effect.FrameBuffer.TimeStep = gameTime.ElapsedSeconds;
-            this.effect.FrameBuffer.AccelerationWorld = this.particleAcceleration;
-            this.effect.FrameBuffer.World = world;
-            this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;
-            this.effect.FrameBuffer.EyePositionWorld = context.EyePosition;
-            this.effect.FrameBuffer.TextureCount = (uint)this.textureArray.Description.Texture2DArray.ArraySize;
-            this.effect.UpdatePerFrame(this.textureArray, this.textureRandom);
+            DrawerPool.EffectParticles.FrameBuffer.MaxAge = this.maximumAge;
+            DrawerPool.EffectParticles.FrameBuffer.EmitAge = this.emitterAge;
+            DrawerPool.EffectParticles.FrameBuffer.GameTime = gameTime.TotalSeconds;
+            DrawerPool.EffectParticles.FrameBuffer.TimeStep = gameTime.ElapsedSeconds;
+            DrawerPool.EffectParticles.FrameBuffer.AccelerationWorld = this.particleAcceleration;
+            DrawerPool.EffectParticles.FrameBuffer.World = world;
+            DrawerPool.EffectParticles.FrameBuffer.WorldViewProjection = worldViewProjection;
+            DrawerPool.EffectParticles.FrameBuffer.EyePositionWorld = context.EyePosition;
+            DrawerPool.EffectParticles.FrameBuffer.TextureCount = (uint)this.textureArray.Description.Texture2DArray.ArraySize;
+            DrawerPool.EffectParticles.UpdatePerFrame(this.textureArray, this.textureRandom);
 
             #endregion
 

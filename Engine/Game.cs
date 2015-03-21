@@ -7,6 +7,7 @@ using SharpDX.Windows;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Effects;
 
     /// <summary>
     /// Game class
@@ -161,6 +162,8 @@ namespace Engine
             this.Input = new Input(this.Form);
 
             this.Graphics = new Graphics(this.Form, refreshRate, multiSampleCount);
+
+            DrawerPool.Initialize(this.Graphics.Device);
         }
         /// <summary>
         /// Begins render loop
@@ -213,6 +216,8 @@ namespace Engine
                 this.scenes.Clear();
                 this.scenes = null;
             }
+
+            DrawerPool.Dispose();
 
             FontMap.ClearCache();
 

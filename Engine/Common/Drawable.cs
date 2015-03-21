@@ -1,6 +1,6 @@
 ﻿using System;
-using SharpDX.Direct3D11;
 using SharpDX;
+using SharpDX.Direct3D11;
 
 namespace Engine.Common
 {
@@ -26,6 +26,10 @@ namespace Engine.Common
         /// </summary>
         public string Name { get; set; }
         /// <summary>
+        /// Processing order
+        /// </summary>
+        public int Order { get; set; }
+        /// <summary>
         /// Visible
         /// </summary>
         public bool Visible { get; set; }
@@ -34,9 +38,14 @@ namespace Engine.Common
         /// </summary>
         public bool Active { get; set; }
         /// <summary>
-        /// Processing order
+        /// Culling test flag
         /// </summary>
-        public int Order { get; set; }
+        /// <remarks>True if passes culling test</remarks>
+        public bool Cull { get; set; }
+        /// <summary>
+        /// Gets or sets whether the object drops shadow
+        /// </summary>
+        public bool DropShadow { get; set; }
         
         /// <summary>
         /// Constructor
@@ -74,7 +83,7 @@ namespace Engine.Common
         /// <returns>Returns true if component passes frustum culling test</returns>
         public virtual void FrustumCulling(BoundingFrustum frustum)
         {
-            
+            this.Cull = false;
         }
 
         /// <summary>
@@ -93,6 +102,10 @@ namespace Engine.Common
     public class Context
     {
         /// <summary>
+        /// Drawer mode
+        /// </summary>
+        public DrawerModesEnum DrawerMode = DrawerModesEnum.Default;
+        /// <summary>
         /// World matrix
         /// </summary>
         public Matrix World;
@@ -108,5 +121,28 @@ namespace Engine.Common
         /// Lights
         /// </summary>
         public SceneLight Lights;
+        /// <summary>
+        /// Shadow map
+        /// </summary>
+        public ShaderResourceView ShadowMap;
+    }
+
+    /// <summary>
+    /// Drawer modes
+    /// </summary>
+    public enum DrawerModesEnum
+    {
+        /// <summary>
+        /// Default
+        /// </summary>
+        Default,
+        /// <summary>
+        /// Shadow map
+        /// </summary>
+        ShadowMap,
+        /// <summary>
+        /// Deferred rendering
+        /// </summary>
+        Deferred,
     }
 }

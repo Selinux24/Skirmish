@@ -293,12 +293,16 @@
     <Compile Include="Common\GridNodeStates.cs" />
     <Compile Include="Common\IBufferData.cs" />
     <Compile Include="Common\IControl.cs" />
+    <Compile Include="Common\IPath.cs" />
     <Compile Include="Common\PriorityQueue.cs" />
     <Compile Include="Common\PriorityQueueItem.cs" />
     <Compile Include="Common\QuadTree.cs" />
     <Compile Include="Common\QuadTreeNode.cs" />
     <Compile Include="Common\Skeleton.cs" />
+    <Compile Include="SpriteTexture.cs" />
     <Compile Include="Curve.cs" />
+    <Compile Include="Effects\DrawerPool.cs" />
+    <Compile Include="Effects\EffectShadow.cs" />
     <Compile Include="Headings.cs" />
     <Compile Include="Line.cs" />
     <Compile Include="Common\VertexParticle.cs" />
@@ -415,6 +419,7 @@
     <None Include="Diagrams\ColladaClasses.cd" />
     <None Include="Diagrams\Drawables.cd" />
     <None Include="packages.config" />
+    <None Include="Resources\ShaderShadow.fx" />
     <None Include="Resources\IncVertexFormats.fx" />
     <None Include="Resources\ShaderBasic.fx" />
     <None Include="Resources\ShaderBillboard.fx" />
@@ -444,6 +449,20 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>cd $(ProjectDir)Resources
+"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderBasic.fxo ShaderBasic.fx
+"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderBillboard.fxo ShaderBillboard.fx
+"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderCubemap.fxo ShaderCubemap.fx
+"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderFont.fxo ShaderFont.fx
+"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderInstancing.fxo ShaderInstancing.fx
+"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderParticles.fxo ShaderParticles.fx
+"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadow.fxo ShaderShadow.fx</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -13,7 +13,7 @@ namespace Engine.Common
         /// <summary>
         /// Frame time
         /// </summary>
-        public static float FrameTime = 0;
+        public static float FrameTime = 0f;
         /// <summary>
         /// Draw calls per frame
         /// </summary>
@@ -39,6 +39,10 @@ namespace Engine.Common
         /// </summary>
         public static int TextureUpdates = 0;
 
+        public static int PicksPerFrame = 0;
+
+        public static float PickingAverageTime = 0f;
+
         /// <summary>
         /// Clear counters
         /// </summary>
@@ -51,6 +55,8 @@ namespace Engine.Common
             UpdatesPerObject = 0;
             UpdatesPerInstance = 0;
             TextureUpdates = 0;
+            PicksPerFrame = 0;
+            PickingAverageTime = 0f;
         }
         /// <summary>
         /// Clear per frame counters
@@ -63,6 +69,8 @@ namespace Engine.Common
             UpdatesPerObject = 0;
             UpdatesPerInstance = 0;
             TextureUpdates = 0;
+            PicksPerFrame = 0;
+            PickingAverageTime = 0f;
         }
     }
 }

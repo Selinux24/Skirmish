@@ -44,10 +44,6 @@ namespace Engine
         /// </summary>
         private Buffer indexBuffer;
         /// <summary>
-        /// Effect to draw
-        /// </summary>
-        private EffectBasic effect;
-        /// <summary>
         /// Line drawer for viewer frustum
         /// </summary>
         private LineListDrawer lineDrawer;
@@ -93,8 +89,6 @@ namespace Engine
 
             this.vertexBuffer = this.Device.CreateVertexBufferImmutable(vertList.ToArray());
             this.indexBuffer = this.Device.CreateIndexBufferImmutable(ci);
-
-            this.effect = new EffectBasic(this.Device);
 
             this.lineDrawer = new LineListDrawer(game, 12);
             this.lineDrawer.UseZBuffer = false;
@@ -221,7 +215,7 @@ namespace Engine
         /// <param name="context">Context</param>
         private void DrawTerrain(GameTime gameTime, Context context)
         {
-            this.Game.Graphics.SetRenderTarget(this.viewport, null, this.renderTarget, true);
+            this.Game.Graphics.SetRenderTarget(this.viewport, null, this.renderTarget, true, Color.Silver);
 
             this.terrain.Draw(gameTime, this.terrainDrawContext);
 
@@ -238,28 +232,28 @@ namespace Engine
         {
             #region Effect update
 
-            this.DeviceContext.InputAssembler.InputLayout = this.effect.GetInputLayout(this.effect.PositionNormalTexture);
+            this.DeviceContext.InputAssembler.InputLayout = DrawerPool.EffectBasic.GetInputLayout(DrawerPool.EffectBasic.PositionNormalTexture);
             this.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
             this.DeviceContext.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(this.vertexBuffer, new VertexPositionNormalTexture().Stride, 0));
             this.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
 
-            this.effect.FrameBuffer.World = this.minimapDrawContext.World;
-            this.effect.FrameBuffer.WorldInverse = Matrix.Invert(this.minimapDrawContext.World);
-            this.effect.FrameBuffer.WorldViewProjection = this.minimapDrawContext.World * this.minimapDrawContext.ViewProjection;
-            this.effect.FrameBuffer.Lights = new BufferLights(this.minimapDrawContext.EyePosition, this.minimapDrawContext.Lights);
-            this.effect.UpdatePerFrame();
+            DrawerPool.EffectBasic.FrameBuffer.World = this.minimapDrawContext.World;
+            DrawerPool.EffectBasic.FrameBuffer.WorldInverse = Matrix.Invert(this.minimapDrawContext.World);
+            DrawerPool.EffectBasic.FrameBuffer.WorldViewProjection = this.minimapDrawContext.World * this.minimapDrawContext.ViewProjection;
+            DrawerPool.EffectBasic.FrameBuffer.Lights = new BufferLights(this.minimapDrawContext.EyePosition, this.minimapDrawContext.Lights);
+            DrawerPool.EffectBasic.UpdatePerFrame();
 
-            this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-            this.effect.UpdatePerObject(this.renderTexture, null, 0);
+            DrawerPool.EffectBasic.ObjectBuffer.Material.SetMaterial(Material.Default);
+            DrawerPool.EffectBasic.UpdatePerObject(this.renderTexture, null, 0);
 
-            this.effect.SkinningBuffer.FinalTransforms = null;
-            this.effect.UpdatePerSkinning();
+            DrawerPool.EffectBasic.SkinningBuffer.FinalTransforms = null;
+            DrawerPool.EffectBasic.UpdatePerSkinning();
 
             #endregion
 
-            for (int p = 0; p < this.effect.PositionNormalTexture.Description.PassCount; p++)
+            for (int p = 0; p < DrawerPool.EffectBasic.PositionNormalTexture.Description.PassCount; p++)
             {
-                this.effect.PositionNormalTexture.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+                DrawerPool.EffectBasic.PositionNormalTexture.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
                 this.DeviceContext.DrawIndexed(6, 0, 0);
             }
@@ -285,12 +279,6 @@ namespace Engine
             {
                 this.lineDrawer.Dispose();
                 this.lineDrawer = null;
-            }
-
-            if (this.effect != null)
-            {
-                this.effect.Dispose();
-                this.effect = null;
             }
 
             if (this.vertexBuffer != null)

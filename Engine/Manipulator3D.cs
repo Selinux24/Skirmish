@@ -24,7 +24,7 @@ namespace Engine
         /// <summary>
         /// Transform update needed flag
         /// </summary>
-        protected bool transformUpdateNeeded = false;
+        protected bool transformUpdateNeeded = true;
         /// <summary>
         /// Final transform for the controller
         /// </summary>
@@ -116,11 +116,11 @@ namespace Engine
         public float AngularVelocity = 1f;
 
         /// <summary>
-        /// Following curve
+        /// Following path
         /// </summary>
-        private Curve following = null;
+        private IPath following = null;
         /// <summary>
-        /// Curve time
+        /// Path time
         /// </summary>
         private float followingTime = 0f;
         /// <summary>
@@ -136,6 +136,8 @@ namespace Engine
             this.position = Vector3.Zero;
             this.rotation = Quaternion.Identity;
             this.scaling = new Vector3(1);
+
+            this.UpdateLocalTransform();
         }
         /// <summary>
         /// Update internal state
@@ -147,7 +149,7 @@ namespace Engine
             {
                 if (this.followingTime <= this.following.Length)
                 {
-                    Vector3 newPosition = this.following.GetPosition(this.followingTime, CurveInterpolations.Linear);
+                    Vector3 newPosition = this.following.GetPosition(this.followingTime);
 
                     if (this.followingTime != 0f)
                     {
@@ -477,15 +479,24 @@ namespace Engine
         }
 
         /// <summary>
-        /// Follow specified curve
+        /// Follow specified path
         /// </summary>
-        /// <param name="curve">Curve</param>
+        /// <param name="path">Path</param>
         /// <param name="delta">Delta to apply to time increment</param>
-        public void Follow(Curve curve, float delta = 1f)
+        public void Follow(IPath path, float delta = 1f)
         {
-            this.following = curve;
+            this.following = path;
             this.followingTime = 0f;
             this.followinfTimeDelta = delta;
+        }
+
+        /// <summary>
+        /// Gets manipulator text representation
+        /// </summary>
+        /// <returns>Returns manipulator text description</returns>
+        public override string ToString()
+        {
+            return string.Format("{0}", this.localTransform.GetDescription());
         }
     }
 }

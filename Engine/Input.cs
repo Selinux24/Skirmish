@@ -139,6 +139,26 @@ namespace Engine
         /// </summary>
         public bool X2MouseButtonPressed { get; private set; }
         /// <summary>
+        /// Gets if left or right shift key were pressed now
+        /// </summary>
+        public bool ShiftPressed
+        {
+            get
+            {
+                return this.KeyPressed(Keys.LShiftKey) || this.KeyPressed(Keys.RShiftKey);
+            }
+        }
+        /// <summary>
+        /// Gets if left or right control key were pressed now
+        /// </summary>
+        public bool ControlPressed
+        {
+            get
+            {
+                return this.KeyPressed(Keys.LControlKey) || this.KeyPressed(Keys.RControlKey);
+            }
+        }
+        /// <summary>
         /// Sets mouse on center after update
         /// </summary>
         public bool LockMouse { get; set; }

@@ -12,11 +12,6 @@ namespace Engine
     public class Cubemap : ModelBase
     {
         /// <summary>
-        /// Effect
-        /// </summary>
-        private EffectCubemap effect = null;
-
-        /// <summary>
         /// Manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; set; }
@@ -29,22 +24,7 @@ namespace Engine
         public Cubemap(Game game, ModelContent content)
             : base(game, content, false, 0, false, false)
         {
-            this.effect = new EffectCubemap(game.Graphics.Device);
-
             this.Manipulator = new Manipulator3D();
-        }
-        /// <summary>
-        /// Resource disposing
-        /// </summary>
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            if (this.effect != null)
-            {
-                this.effect.Dispose();
-                this.effect = null;
-            }
         }
         /// <summary>
         /// Update
@@ -68,8 +48,8 @@ namespace Engine
             {
                 #region Per frame update
 
-                this.effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
-                this.effect.UpdatePerFrame();
+                DrawerPool.EffectCubemap.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
+                DrawerPool.EffectCubemap.UpdatePerFrame();
 
                 #endregion
 
@@ -79,15 +59,15 @@ namespace Engine
                     {
                         Mesh mesh = dictionary[material];
                         MeshMaterial mat = this.Materials[material];
-                        EffectTechnique technique = this.effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
+                        EffectTechnique technique = DrawerPool.EffectCubemap.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
                         #region Per object update
 
-                        this.effect.UpdatePerObject(mat.DiffuseTexture);
+                        DrawerPool.EffectCubemap.UpdatePerObject(mat.DiffuseTexture);
 
                         #endregion
 
-                        mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(technique));
+                        mesh.SetInputAssembler(this.DeviceContext, DrawerPool.EffectCubemap.GetInputLayout(technique));
 
                         for (int p = 0; p < technique.Description.PassCount; p++)
                         {

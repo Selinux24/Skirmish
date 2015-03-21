@@ -36,10 +36,6 @@ namespace Engine
     public class TextDrawer : Drawable
     {
         /// <summary>
-        /// Effect
-        /// </summary>
-        private EffectFont effect = null;
-        /// <summary>
         /// Technique name
         /// </summary>
         private EffectTechnique technique = null;
@@ -223,9 +219,8 @@ namespace Engine
         {
             this.Font = string.Format("{0} {1}", font, size);
 
-            this.effect = new EffectFont(game.Graphics.Device);
-            this.technique = this.effect.GetTechnique(VertexTypes.PositionTexture, DrawingStages.Drawing);
-            this.inputLayout = this.effect.GetInputLayout(this.technique);
+            this.technique = DrawerPool.EffectFont.GetTechnique(VertexTypes.PositionTexture, DrawingStages.Drawing);
+            this.inputLayout = DrawerPool.EffectFont.GetInputLayout(this.technique);
 
             Matrix view = Matrix.LookAtLH(
                 Vector3.UnitZ * -1f,
@@ -263,15 +258,11 @@ namespace Engine
             this.MapText();
         }
         /// <summary>
-        /// Dispose resources
+        /// Dispose
         /// </summary>
         public override void Dispose()
         {
-            if (this.effect != null)
-            {
-                this.effect.Dispose();
-                this.effect = null;
-            }
+            
         }
         /// <summary>
         /// Update component state
@@ -326,10 +317,10 @@ namespace Engine
             Matrix world = Matrix.Translation(pos);
             Matrix worldViewProjection = world * this.viewProjection;
 
-            this.effect.FrameBuffer.World = world;
-            this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;
-            this.effect.FrameBuffer.Color = color;
-            this.effect.UpdatePerFrame(this.fontMap.Texture);
+            DrawerPool.EffectFont.FrameBuffer.World = world;
+            DrawerPool.EffectFont.FrameBuffer.WorldViewProjection = worldViewProjection;
+            DrawerPool.EffectFont.FrameBuffer.Color = color;
+            DrawerPool.EffectFont.UpdatePerFrame(this.fontMap.Texture);
 
             #endregion
 

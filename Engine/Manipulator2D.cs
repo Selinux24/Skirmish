@@ -126,5 +126,14 @@ namespace Engine
         {
             this.position = new Vector2(position.X, -position.Y);
         }
+
+        /// <summary>
+        /// Gets manipulator text representation
+        /// </summary>
+        /// <returns>Returns manipulator text description</returns>
+        public override string ToString()
+        {
+            return string.Format("{0}", this.localTransform.GetDescription());
+        }
     }
 }

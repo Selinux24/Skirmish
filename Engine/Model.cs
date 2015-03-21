@@ -14,10 +14,6 @@ namespace Engine
     public class Model : ModelBase
     {
         /// <summary>
-        /// Effect to draw
-        /// </summary>
-        private EffectBasic effect;
-        /// <summary>
         /// Update point cache flag
         /// </summary>
         private bool updatePoints = true;
@@ -74,11 +70,6 @@ namespace Engine
         /// Texture index
         /// </summary>
         public int TextureIndex { get; set; }
-        /// <summary>
-        /// Culling test flag
-        /// </summary>
-        /// <remarks>True if passes culling test</remarks>
-        public bool Cull { get; set; }
 
         /// <summary>
         /// Constructor
@@ -90,23 +81,8 @@ namespace Engine
         {
             this.UseZBuffer = true;
 
-            this.effect = new EffectBasic(game.Graphics.Device);
-
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
-        }
-        /// <summary>
-        /// Resource disposing
-        /// </summary>
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            if (this.effect != null)
-            {
-                this.effect.Dispose();
-                this.effect = null;
-            }
         }
         /// <summary>
         /// Update
@@ -126,9 +102,13 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(GameTime gameTime, Context context)
         {
-            if (!this.Cull)
+            if (this.Meshes != null)
             {
-                if (this.Meshes != null)
+                Drawer effect = null;
+                if (context.DrawerMode == DrawerModesEnum.Default) effect = DrawerPool.EffectBasic;
+                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
+
+                if (effect != null)
                 {
                     if (this.UseZBuffer)
                     {
@@ -150,55 +130,80 @@ namespace Engine
 
                     #region Per frame update
 
-                    Matrix local = this.Manipulator.LocalTransform;
-                    Matrix world = context.World * local;
-                    Matrix worldInverse = Matrix.Invert(world);
-                    Matrix worldViewProjection = world * context.ViewProjection;
+                    if (context.DrawerMode == DrawerModesEnum.Default)
+                    {
+                        Matrix local = this.Manipulator.LocalTransform;
+                        Matrix world = context.World * local;
+                        Matrix worldInverse = Matrix.Invert(world);
+                        Matrix worldViewProjection = world * context.ViewProjection;
 
-                    this.effect.FrameBuffer.World = world;
-                    this.effect.FrameBuffer.WorldInverse = worldInverse;
-                    this.effect.FrameBuffer.WorldViewProjection = worldViewProjection;
-                    this.effect.FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
-                    this.effect.UpdatePerFrame();
+                        ((EffectBasic)effect).FrameBuffer.World = world;
+                        ((EffectBasic)effect).FrameBuffer.WorldInverse = worldInverse;
+                        ((EffectBasic)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
+                        ((EffectBasic)effect).FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
+                        ((EffectBasic)effect).UpdatePerFrame();
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    {
+                        Matrix local = this.Manipulator.LocalTransform;
+                        Matrix world = context.World * local;
+                        Matrix worldInverse = Matrix.Invert(world);
+                        Matrix worldViewProjection = world * context.ViewProjection;
+
+                        ((EffectShadow)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
+                        ((EffectShadow)effect).UpdatePerFrame();
+                    }
 
                     #endregion
 
                     foreach (string meshName in this.Meshes.Keys)
                     {
-                        MeshMaterialsDictionary dictionary = this.Meshes[meshName];
-
                         #region Per skinning update
 
                         if (this.SkinningData != null)
                         {
-                            this.effect.SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                            this.effect.UpdatePerSkinning();
+                            if (context.DrawerMode == DrawerModesEnum.Default)
+                            {
+                                ((EffectBasic)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
+                                ((EffectBasic)effect).UpdatePerSkinning();
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                            {
+                                ((EffectShadow)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
+                                ((EffectShadow)effect).UpdatePerSkinning();
+                            }
                         }
 
                         #endregion
+
+                        MeshMaterialsDictionary dictionary = this.Meshes[meshName];
 
                         foreach (string material in dictionary.Keys)
                         {
                             Mesh mesh = dictionary[material];
                             MeshMaterial mat = this.Materials[material];
-                            EffectTechnique technique = this.effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
                             #region Per object update
 
-                            if (mat != null)
+                            if (context.DrawerMode == DrawerModesEnum.Default)
                             {
-                                this.effect.ObjectBuffer.Material.SetMaterial(mat.Material);
-                                this.effect.UpdatePerObject(mat.DiffuseTexture, mat.NormalMap, this.TextureIndex);
-                            }
-                            else
-                            {
-                                this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-                                this.effect.UpdatePerObject(null, null, 0);
+                                if (mat != null)
+                                {
+                                    ((EffectBasic)effect).ObjectBuffer.Material.SetMaterial(mat.Material);
+                                    ((EffectBasic)effect).UpdatePerObject(mat.DiffuseTexture, mat.NormalMap, this.TextureIndex);
+                                }
+                                else
+                                {
+                                    ((EffectBasic)effect).ObjectBuffer.Material.SetMaterial(Material.Default);
+                                    ((EffectBasic)effect).UpdatePerObject(null, null, 0);
+                                }
                             }
 
                             #endregion
 
-                            mesh.SetInputAssembler(this.DeviceContext, this.effect.GetInputLayout(technique));
+                            EffectTechnique technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
+
+                            mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 
                             for (int p = 0; p < technique.Description.PassCount; p++)
                             {
@@ -416,5 +421,28 @@ namespace Engine
 
             return false;
         }
+    }
+
+    /// <summary>
+    /// Terrain description
+    /// </summary>
+    public class ModelDescription
+    {
+        /// <summary>
+        /// Content path
+        /// </summary>
+        public string ContentPath = "Resources";
+        /// <summary>
+        /// Model file name
+        /// </summary>
+        public string ModelFileName = null;
+        /// <summary>
+        /// Texture index
+        /// </summary>
+        public int TextureIndex = 0;
+        /// <summary>
+        /// Drops shadow
+        /// </summary>
+        public bool DropShadow = false;
     }
 }

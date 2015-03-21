@@ -13,6 +13,11 @@ namespace Engine.PathFinding
     public static class PathFinder
     {
         /// <summary>
+        /// Constant for second diagonal distance method
+        /// </summary>
+        private static readonly float ChebisevCnt = (float)Math.Sqrt(2) - 2f;
+
+        /// <summary>
         /// Cached paths
         /// </summary>
         private static List<PathCache> Cache = new List<PathCache>(10);
@@ -23,10 +28,10 @@ namespace Engine.PathFinding
         /// <param name="grid">Grid</param>
         /// <param name="startPosition">Start point</param>
         /// <param name="endPosition">End point</param>
-        /// <param name="heuristicMethod">Heuristic metod (Manhattan by default)</param>
+        /// <param name="heuristicMethod">Heuristic metod (Diagonal distance 2 by default)</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value (8 by default)</param>
         /// <returns>Returns the path from start to end</returns>
-        public static Path FindPath(Grid grid, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.Manhattan, int heuristicEstimateValue = 8)
+        public static Path FindPath(Grid grid, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
         {
             GridNode start = grid.FindNode(startPosition);
             GridNode end = grid.FindNode(endPosition);
@@ -152,10 +157,9 @@ namespace Engine.PathFinding
                                 float heuristicValue = CalcHeuristic(
                                     nextNode.Center,
                                     end.Center,
-                                    heuristicMethod,
-                                    heuristicEstimateValue);
+                                    heuristicMethod);
 
-                                openPathsQueue.Enqueue(nextNode, newGone + heuristicValue);
+                                openPathsQueue.Enqueue(nextNode, newGone + (heuristicEstimateValue * heuristicValue));
                             }
                         }
                     }
@@ -189,24 +193,49 @@ namespace Engine.PathFinding
         /// <param name="start">Start position</param>
         /// <param name="end">End position</param>
         /// <param name="heuristicMethod">Calculation method</param>
-        /// <param name="heuristicEstimateValue">Estimated value</param>
         /// <returns>Returns the heuristic value according to the start and end positions</returns>
-        private static float CalcHeuristic(Vector3 start, Vector3 end, HeuristicMethods heuristicMethod, float heuristicEstimateValue)
+        private static float CalcHeuristic(Vector3 start, Vector3 end, HeuristicMethods heuristicMethod)
         {
             if (heuristicMethod == HeuristicMethods.Euclidean)
             {
-                //Euclidean
-                return heuristicEstimateValue * (float)(Math.Sqrt(Math.Pow((start.X - end.X), 2) + Math.Pow((start.Y - end.Y), 2) + Math.Pow((start.Z - end.Z), 2)));
+                float dx = (end.X - start.X);
+                float dz = (end.Z - start.Z);
+                float h = (float)Math.Sqrt(dx * dx + dz * dz);
+
+                return h;
             }
             else if (heuristicMethod == HeuristicMethods.Manhattan)
             {
-                //Manhattan
-                return heuristicEstimateValue * (Math.Abs(end.X - start.X) + Math.Abs(end.Y - start.Y) + Math.Abs(end.Z - start.Z));
+                float dx = Math.Abs(start.X - end.X);
+                float dz = Math.Abs(start.Z - end.Z);
+                float h = dx + dz;
+
+                return h;
             }
-            else if (heuristicMethod == HeuristicMethods.DiagonalDistance)
+            else if (heuristicMethod == HeuristicMethods.DiagonalDistance1)
             {
-                //Diagonal distance
-                return heuristicEstimateValue * (Math.Max(Math.Abs(start.X - end.X), Math.Abs(start.X - end.Z)));
+                float dx = Math.Abs(start.X - end.X);
+                float dz = Math.Abs(start.Z - end.Z);
+                float h = Math.Max(dx, dz);
+
+                return h;
+            }
+            else if (heuristicMethod == HeuristicMethods.DiagonalDistance2)
+            {
+                float dx = Math.Abs(start.X - end.X);
+                float dz = Math.Abs(start.Z - end.Z);
+                float h = (dx + dz) + ChebisevCnt * Math.Min(dx, dz);
+
+                return h;
+            }
+            else if (heuristicMethod == HeuristicMethods.HexDistance)
+            {
+                float dx = start.X - end.X;
+                float dy = start.Y - end.Y;
+                float dz = dx - dy;
+                float h = Math.Max(Math.Abs(dx), Math.Max(Math.Abs(dy), Math.Abs(dz)));
+
+                return h;
             }
             else
             {
