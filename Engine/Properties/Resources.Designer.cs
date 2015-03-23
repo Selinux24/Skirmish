@@ -63,9 +63,9 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] IncLights {
+        internal static byte[] IncLightsFx {
             get {
-                object obj = ResourceManager.GetObject("IncLights", resourceCulture);
+                object obj = ResourceManager.GetObject("IncLightsFx", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] IncVertexFormats {
+        internal static byte[] IncVertexFormatsFx {
             get {
-                object obj = ResourceManager.GetObject("IncVertexFormats", resourceCulture);
+                object obj = ResourceManager.GetObject("IncVertexFormatsFx", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] ShaderBasic {
+        internal static byte[] ShaderBasicFx {
             get {
-                object obj = ResourceManager.GetObject("ShaderBasic", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderBasicFx", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] ShaderBillboard {
+        internal static byte[] ShaderBasicFxo {
             get {
-                object obj = ResourceManager.GetObject("ShaderBillboard", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderBasicFxo", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] ShaderCubemap {
+        internal static byte[] ShaderBillboardFx {
             get {
-                object obj = ResourceManager.GetObject("ShaderCubemap", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderBillboardFx", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -113,9 +113,9 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] ShaderFont {
+        internal static byte[] ShaderBillboardFxo {
             get {
-                object obj = ResourceManager.GetObject("ShaderFont", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderBillboardFxo", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -123,9 +123,9 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] ShaderInstancing {
+        internal static byte[] ShaderCubemapFx {
             get {
-                object obj = ResourceManager.GetObject("ShaderInstancing", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderCubemapFx", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -133,9 +133,9 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] ShaderParticles {
+        internal static byte[] ShaderCubemapFxo {
             get {
-                object obj = ResourceManager.GetObject("ShaderParticles", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderCubemapFxo", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -143,9 +143,79 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] ShaderShadow {
+        internal static byte[] ShaderFontFx {
             get {
-                object obj = ResourceManager.GetObject("ShaderShadow", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderFontFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderFontFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderFontFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderInstancingFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderInstancingFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderInstancingFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderInstancingFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderParticlesFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderParticlesFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderParticlesFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderParticlesFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderShadowFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderShadowFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderShadowFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderShadowFxo", resourceCulture);
                 return ((byte[])(obj));
             }
         }

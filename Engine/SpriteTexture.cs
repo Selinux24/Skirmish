@@ -142,7 +142,7 @@ namespace Engine
             this.effect.FrameBuffer.World = this.drawContext.World;
             this.effect.FrameBuffer.WorldInverse = Matrix.Invert(this.drawContext.World);
             this.effect.FrameBuffer.WorldViewProjection = this.drawContext.World * this.drawContext.ViewProjection;
-            this.effect.UpdatePerFrame();
+            this.effect.UpdatePerFrame(null);
 
             this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
             this.effect.UpdatePerObject(this.Texture, null, 0);

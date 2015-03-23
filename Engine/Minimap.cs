@@ -241,7 +241,7 @@ namespace Engine
             DrawerPool.EffectBasic.FrameBuffer.WorldInverse = Matrix.Invert(this.minimapDrawContext.World);
             DrawerPool.EffectBasic.FrameBuffer.WorldViewProjection = this.minimapDrawContext.World * this.minimapDrawContext.ViewProjection;
             DrawerPool.EffectBasic.FrameBuffer.Lights = new BufferLights(this.minimapDrawContext.EyePosition, this.minimapDrawContext.Lights);
-            DrawerPool.EffectBasic.UpdatePerFrame();
+            DrawerPool.EffectBasic.UpdatePerFrame(null);
 
             DrawerPool.EffectBasic.ObjectBuffer.Material.SetMaterial(Material.Default);
             DrawerPool.EffectBasic.UpdatePerObject(this.renderTexture, null, 0);

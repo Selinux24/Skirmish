@@ -140,8 +140,9 @@ namespace Engine
                         ((EffectBasic)effect).FrameBuffer.World = world;
                         ((EffectBasic)effect).FrameBuffer.WorldInverse = worldInverse;
                         ((EffectBasic)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
+                        ((EffectBasic)effect).FrameBuffer.ShadowTransform = context.ShadowTransform;
                         ((EffectBasic)effect).FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
-                        ((EffectBasic)effect).UpdatePerFrame();
+                        ((EffectBasic)effect).UpdatePerFrame(context.ShadowMap);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {

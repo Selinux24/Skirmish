@@ -125,6 +125,10 @@ namespace Engine.Common
         /// Shadow map
         /// </summary>
         public ShaderResourceView ShadowMap;
+        /// <summary>
+        /// Shadow transform
+        /// </summary>
+        public Matrix ShadowTransform;
     }
 
     /// <summary>

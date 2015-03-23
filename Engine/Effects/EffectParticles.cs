@@ -286,8 +286,10 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="device">Graphics device</param>
-        public EffectParticles(Device device)
-            : base(device, Resources.ShaderParticles)
+        /// <param name="effect">Effect code</param>
+        /// <param name="compile">Compile code</param>
+        public EffectParticles(Device device, byte[] effect, bool compile)
+            : base(device, effect, compile)
         {
             this.FireStreamOut = this.Effect.GetTechniqueByName("FireStreamOut");
             this.RainStreamOut = this.Effect.GetTechniqueByName("RainStreamOut");

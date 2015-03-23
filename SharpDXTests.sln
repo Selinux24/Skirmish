@@ -27,6 +27,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E510EEF8-84D0-4A28-9E35-5B55A34893CC}"
 	ProjectSection(SolutionItems) = preProject
 		Backup.bat = Backup.bat
+		Effect Compile.cmd = Effect Compile.cmd
 		Exclude.txt = Exclude.txt
 	EndProjectSection
 EndProject

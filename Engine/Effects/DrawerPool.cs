@@ -2,157 +2,45 @@
 
 namespace Engine.Effects
 {
+    using Properties;
+
     /// <summary>
     /// Pool of drawers
     /// </summary>
     static class DrawerPool
     {
         /// <summary>
-        /// Device
-        /// </summary>
-        private static Device device;
-
-        /// <summary>
         /// Basic effect
         /// </summary>
-        private static EffectBasic effectBasic = null;
+        public static EffectBasic EffectBasic { get; private set; }
         /// <summary>
         /// Billboards effect
         /// </summary>
-        private static EffectBillboard effectBillboard = null;
+        public static EffectBillboard EffectBillboard { get; private set; }
         /// <summary>
         /// Cube map effect
         /// </summary>
-        private static EffectCubemap effectCubemap = null;
+        public static EffectCubemap EffectCubemap { get; private set; }
         /// <summary>
         /// Font drawing effect
         /// </summary>
-        private static EffectFont effectFont = null;
+        public static EffectFont EffectFont { get; private set; }
         /// <summary>
         /// Instancing effect
         /// </summary>
-        private static EffectInstancing effectInstancing = null;
+        public static EffectInstancing EffectInstancing { get; private set; }
         /// <summary>
         /// Particles drawing effect
         /// </summary>
-        private static EffectParticles effectParticles = null;
+        public static EffectParticles EffectParticles { get; private set; }
         /// <summary>
         /// Shadows effect
         /// </summary>
-        private static EffectShadow effectShadow = null;
-
+        public static EffectShadow EffectShadow { get; private set; }
         /// <summary>
-        /// Gets basic effect
+        /// Instancing shadows effect
         /// </summary>
-        /// <remarks>Creates it if not instantiated yet</remarks>
-        public static EffectBasic EffectBasic
-        {
-            get
-            {
-                if (effectBasic == null)
-                {
-                    effectBasic = new EffectBasic(device);
-                }
-
-                return effectBasic;
-            }
-        }
-        /// <summary>
-        /// Gets billboards effect
-        /// </summary>
-        /// <remarks>Creates it if not instantiated yet</remarks>
-        public static EffectBillboard EffectBillboard
-        {
-            get
-            {
-                if (effectBillboard == null)
-                {
-                    effectBillboard = new EffectBillboard(device);
-                }
-
-                return effectBillboard;
-            }
-        }
-        /// <summary>
-        /// Gets cube map effect
-        /// </summary>
-        /// <remarks>Creates it if not instantiated yet</remarks>
-        public static EffectCubemap EffectCubemap
-        {
-            get
-            {
-                if (effectCubemap == null)
-                {
-                    effectCubemap = new EffectCubemap(device);
-                }
-
-                return effectCubemap;
-            }
-        }
-        /// <summary>
-        /// Gets font drawing effect
-        /// </summary>
-        /// <remarks>Creates it if not instantiated yet</remarks>
-        public static EffectFont EffectFont
-        {
-            get
-            {
-                if (effectFont == null)
-                {
-                    effectFont = new EffectFont(device);
-                }
-
-                return effectFont;
-            }
-        }
-        /// <summary>
-        /// Gets instancing effect
-        /// </summary>
-        /// <remarks>Creates it if not instantiated yet</remarks>
-        public static EffectInstancing EffectInstancing
-        {
-            get
-            {
-                if (effectInstancing == null)
-                {
-                    effectInstancing = new EffectInstancing(device);
-                }
-
-                return effectInstancing;
-            }
-        }
-        /// <summary>
-        /// Gets particles drawing effect
-        /// </summary>
-        /// <remarks>Creates it if not instantiated yet</remarks>
-        public static EffectParticles EffectParticles
-        {
-            get
-            {
-                if (effectParticles == null)
-                {
-                    effectParticles = new EffectParticles(device);
-                }
-
-                return effectParticles;
-            }
-        }
-        /// <summary>
-        /// Gets shadow effect
-        /// </summary>
-        /// <remarks>Creates it if not instantiated yet</remarks>
-        public static EffectShadow EffectShadow
-        {
-            get
-            {
-                if (effectShadow == null)
-                {
-                    effectShadow = new EffectShadow(device);
-                }
-
-                return effectShadow;
-            }
-        }
+        public static EffectInstancingShadow EffectInstancingShadow { get; private set; }
 
         /// <summary>
         /// Initializes pool
@@ -160,53 +48,129 @@ namespace Engine.Effects
         /// <param name="device">Device</param>
         public static void Initialize(Device device)
         {
-            DrawerPool.device = device;
+            if (Resources.ShaderBasicFxo != null)
+            {
+                EffectBasic = new EffectBasic(device, Resources.ShaderBasicFxo, false);
+            }
+            else
+            {
+                EffectBasic = new EffectBasic(device, Resources.ShaderBasicFx, true);
+            }
+
+            if (Resources.ShaderBillboardFxo != null)
+            {
+                EffectBillboard = new EffectBillboard(device, Resources.ShaderBillboardFxo, false);
+            }
+            else
+            {
+                EffectBillboard = new EffectBillboard(device, Resources.ShaderBillboardFx, true);
+            }
+
+            if (Resources.ShaderCubemapFxo != null)
+            {
+                EffectCubemap = new EffectCubemap(device, Resources.ShaderCubemapFxo, false);
+            }
+            else
+            {
+                EffectCubemap = new EffectCubemap(device, Resources.ShaderCubemapFx, true);
+            }
+
+            if (Resources.ShaderFontFxo != null)
+            {
+                EffectFont = new EffectFont(device, Resources.ShaderFontFxo, false);
+            }
+            else
+            {
+                EffectFont = new EffectFont(device, Resources.ShaderFontFx, true);
+            }
+
+            if (Resources.ShaderInstancingFxo != null)
+            {
+                EffectInstancing = new EffectInstancing(device, Resources.ShaderInstancingFxo, false);
+            }
+            else
+            {
+                EffectInstancing = new EffectInstancing(device, Resources.ShaderInstancingFx, true);
+            }
+
+            if (Resources.ShaderParticlesFxo != null)
+            {
+                EffectParticles = new EffectParticles(device, Resources.ShaderParticlesFxo, false);
+            }
+            else
+            {
+                EffectParticles = new EffectParticles(device, Resources.ShaderParticlesFx, true);
+            }
+
+            if (Resources.ShaderShadowFxo != null)
+            {
+                EffectShadow = new EffectShadow(device, Resources.ShaderShadowFxo, false);
+            }
+            else
+            {
+                EffectShadow = new EffectShadow(device, Resources.ShaderShadowFx, true);
+            }
+
+            if (Resources.ShaderShadowFxo != null)
+            {
+                EffectInstancingShadow = new EffectInstancingShadow(device, Resources.ShaderShadowFxo, false);
+            }
+            else
+            {
+                EffectInstancingShadow = new EffectInstancingShadow(device, Resources.ShaderShadowFx, true);
+            }
         }
         /// <summary>
         /// Dispose of used resources
         /// </summary>
         public static void Dispose()
         {
-            if (effectBasic != null)
+            if (EffectBasic != null)
             {
-                effectBasic.Dispose();
-                effectBasic = null;
+                EffectBasic.Dispose();
+                EffectBasic = null;
             }
 
-            if (effectBillboard != null)
+            if (EffectBillboard != null)
             {
-                effectBillboard.Dispose();
-                effectBillboard = null;
+                EffectBillboard.Dispose();
+                EffectBillboard = null;
             }
 
-            if (effectCubemap != null)
+            if (EffectCubemap != null)
             {
-                effectCubemap.Dispose();
-                effectCubemap = null;
+                EffectCubemap.Dispose();
+                EffectCubemap = null;
             }
 
-            if (effectFont != null)
+            if (EffectFont != null)
             {
-                effectFont.Dispose();
-                effectFont = null;
+                EffectFont.Dispose();
+                EffectFont = null;
             }
 
-            if (effectInstancing != null)
+            if (EffectInstancing != null)
             {
-                effectInstancing.Dispose();
-                effectInstancing = null;
+                EffectInstancing.Dispose();
+                EffectInstancing = null;
             }
 
-            if (effectParticles != null)
+            if (EffectParticles != null)
             {
-                effectParticles.Dispose();
-                effectParticles = null;
+                EffectParticles.Dispose();
+                EffectParticles = null;
             }
 
-            if (effectShadow != null)
+            if (EffectShadow != null)
             {
-                effectShadow.Dispose();
-                effectShadow = null;
+                EffectShadow.Dispose();
+                EffectShadow = null;
+            }
+
+            if (EffectInstancingShadow != null)
+            {
+                EffectInstancingShadow.Dispose();
+                EffectInstancingShadow = null;
             }
         }
     }

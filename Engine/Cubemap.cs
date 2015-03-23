@@ -46,34 +46,37 @@ namespace Engine
         {
             if (this.Meshes != null)
             {
-                #region Per frame update
-
-                DrawerPool.EffectCubemap.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
-                DrawerPool.EffectCubemap.UpdatePerFrame();
-
-                #endregion
-
-                foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+                if (context.DrawerMode == DrawerModesEnum.Default)
                 {
-                    foreach (string material in dictionary.Keys)
+                    #region Per frame update
+
+                    DrawerPool.EffectCubemap.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
+                    DrawerPool.EffectCubemap.UpdatePerFrame();
+
+                    #endregion
+
+                    foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
                     {
-                        Mesh mesh = dictionary[material];
-                        MeshMaterial mat = this.Materials[material];
-                        EffectTechnique technique = DrawerPool.EffectCubemap.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
-
-                        #region Per object update
-
-                        DrawerPool.EffectCubemap.UpdatePerObject(mat.DiffuseTexture);
-
-                        #endregion
-
-                        mesh.SetInputAssembler(this.DeviceContext, DrawerPool.EffectCubemap.GetInputLayout(technique));
-
-                        for (int p = 0; p < technique.Description.PassCount; p++)
+                        foreach (string material in dictionary.Keys)
                         {
-                            technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+                            Mesh mesh = dictionary[material];
+                            MeshMaterial mat = this.Materials[material];
+                            EffectTechnique technique = DrawerPool.EffectCubemap.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
-                            mesh.Draw(gameTime, this.DeviceContext);
+                            #region Per object update
+
+                            DrawerPool.EffectCubemap.UpdatePerObject(mat.DiffuseTexture);
+
+                            #endregion
+
+                            mesh.SetInputAssembler(this.DeviceContext, DrawerPool.EffectCubemap.GetInputLayout(technique));
+
+                            for (int p = 0; p < technique.Description.PassCount; p++)
+                            {
+                                technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+
+                                mesh.Draw(gameTime, this.DeviceContext);
+                            }
                         }
                     }
                 }

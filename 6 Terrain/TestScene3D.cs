@@ -33,6 +33,8 @@ namespace TerrainTest
         private LineListDrawer terrainGridDrawer = null;
         private LineListDrawer terrainPointDrawer = null;
 
+        private ModelInstanced obelisk = null;
+
         private Model helicopter = null;
         private float v = 0f;
         private BezierPath curve = null;
@@ -177,6 +179,33 @@ namespace TerrainTest
 
             #endregion
 
+            #region Obelisk
+
+            sw.Restart();
+            this.obelisk = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = "Resources",
+                ModelFileName = "obelisk.dae",
+                DropShadow = true,
+                Instances = 4,
+            });
+            sw.Stop();
+            loadingText += string.Format("obelisk: {0} ", sw.Elapsed.TotalSeconds);
+
+            for (int i = 0; i < 4; i++)
+            {
+                int ox = i == 0 || i == 2 ? 1 : -1;
+                int oy = i == 0 || i == 1 ? 1 : -1;
+
+                Vector3 obeliskPosition;
+                if (this.terrain.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition))
+                {
+                    this.obelisk.Instances[i].Manipulator.SetPosition(obeliskPosition, true);
+                }
+            }
+
+            #endregion
+
             this.load.Text = loadingText;
 
             #endregion
@@ -294,7 +323,7 @@ namespace TerrainTest
             this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
             this.Camera.LookTo(this.helicopter.Manipulator.Position);
 
-            this.EnableShadows = true;
+            this.Lights.EnableShadows = true;
         }
 
         public override void Dispose()
@@ -355,10 +384,17 @@ namespace TerrainTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                this.EnableShadows = !this.EnableShadows;
+                this.Lights.EnableShadows = !this.Lights.EnableShadows;
+
+                this.shadowMapDrawer.Visible = this.Lights.EnableShadows;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
+            {
+                this.shadowMapDrawer.Visible = !this.shadowMapDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F7))
             {
                 this.useDebugTex = !this.useDebugTex;
             }

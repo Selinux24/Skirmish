@@ -190,7 +190,7 @@ namespace Engine
                 DrawerPool.EffectBasic.FrameBuffer.WorldInverse = worldInverse;
                 DrawerPool.EffectBasic.FrameBuffer.WorldViewProjection = worldViewProjection;
                 DrawerPool.EffectBasic.FrameBuffer.Lights = new BufferLights(this.eyePosition);
-                DrawerPool.EffectBasic.UpdatePerFrame();
+                DrawerPool.EffectBasic.UpdatePerFrame(null);
 
                 #endregion
 

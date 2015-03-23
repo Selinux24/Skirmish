@@ -90,8 +90,10 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="device">Graphics device</param>
-        public EffectCubemap(Device device)
-            : base(device, Resources.ShaderCubemap)
+        /// <param name="effect">Effect code</param>
+        /// <param name="compile">Compile code</param>
+        public EffectCubemap(Device device, byte[] effect, bool compile)
+            : base(device, effect, compile)
         {
             this.Cubemap = this.Effect.GetTechniqueByName("Cubemap");
 

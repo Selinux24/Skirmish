@@ -321,8 +321,10 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="device">Graphics device</param>
-        public EffectBillboard(Device device)
-            : base(device, Resources.ShaderBillboard)
+        /// <param name="effect">Effect code</param>
+        /// <param name="compile">Compile code</param>
+        public EffectBillboard(Device device, byte[] effect, bool compile)
+            : base(device, effect, compile)
         {
             this.Billboard = this.Effect.GetTechniqueByName("Billboard");
 

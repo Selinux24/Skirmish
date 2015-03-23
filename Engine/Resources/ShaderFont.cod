@@ -11,7 +11,7 @@ cbuffer cbPerFrame : register(b0)
 }
 
 //
-// 9 local object(s)
+// 10 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -102,6 +102,15 @@ SamplerState SamplerAnisotropic
 };
 SamplerState SamplerFont
 {
+};
+SamplerComparisonState SamplerShadow
+{
+    Filter   = uint(COMPARISON_MIN_MAG_LINEAR_MIP_POINT /* 148 */);
+    AddressU = uint(BORDER /* 4 */);
+    AddressV = uint(BORDER /* 4 */);
+    AddressW = uint(BORDER /* 4 */);
+    BorderColor = float4(0, 0, 0, 0);
+    ComparisonFunc = uint(LESS /* 2 */);
 };
 Texture2D gTexture;
 

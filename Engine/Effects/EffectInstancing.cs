@@ -13,8 +13,6 @@ using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 namespace Engine.Effects
 {
     using Engine.Common;
-    using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Instancing effect
@@ -37,6 +35,7 @@ namespace Engine.Effects
             public Matrix World;
             public Matrix WorldInverse;
             public Matrix WorldViewProjection;
+            public Matrix ShadowTransform;
             public BufferLights Lights;
 
             public static int Size
@@ -87,13 +86,25 @@ namespace Engine.Effects
         /// </summary>
         public readonly EffectTechnique PositionColor = null;
         /// <summary>
+        /// Position color skinned drawing technique
+        /// </summary>
+        public readonly EffectTechnique PositionColorSkinned = null;
+        /// <summary>
         /// Position normal color drawing technique
         /// </summary>
         public readonly EffectTechnique PositionNormalColor = null;
         /// <summary>
+        /// Position normal color skinned drawing technique
+        /// </summary>
+        public readonly EffectTechnique PositionNormalColorSkinned = null;
+        /// <summary>
         /// Position texture technique
         /// </summary>
         public readonly EffectTechnique PositionTexture = null;
+        /// <summary>
+        /// Position texture skinned technique
+        /// </summary>
+        public readonly EffectTechnique PositionTextureSkinned = null;
         /// <summary>
         /// Position normal texture technique
         /// </summary>
@@ -102,6 +113,14 @@ namespace Engine.Effects
         /// Skinned position normal texture technique
         /// </summary>
         public readonly EffectTechnique PositionNormalTextureSkinned = null;
+        /// <summary>
+        /// Position normal texture tangent technique
+        /// </summary>
+        public readonly EffectTechnique PositionNormalTextureTangent = null;
+        /// <summary>
+        /// Position normal texture tangent skinned technique
+        /// </summary>
+        public readonly EffectTechnique PositionNormalTextureTangentSkinned = null;
 
         /// <summary>
         /// Directional lights effect variable
@@ -132,6 +151,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectVectorVariable fogColor = null;
         /// <summary>
+        /// Enable shados effect variable
+        /// </summary>
+        private EffectScalarVariable enableShadows = null;
+        /// <summary>
         /// World matrix effect variable
         /// </summary>
         private EffectMatrixVariable world = null;
@@ -144,6 +167,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
+        /// Shadow transform
+        /// </summary>
+        private EffectMatrixVariable shadowTransform = null;
+        /// <summary>
         /// Material effect variable
         /// </summary>
         private EffectVariable material = null;
@@ -155,6 +182,10 @@ namespace Engine.Effects
         /// Texture effect variable
         /// </summary>
         private EffectShaderResourceVariable textures = null;
+        /// <summary>
+        /// Shadow map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable shadowMap = null;
 
         /// <summary>
         /// Directional lights
@@ -289,6 +320,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Enable shadows
+        /// </summary>
+        protected float EnableShadows
+        {
+            get
+            {
+                return this.enableShadows.GetFloat();
+            }
+            set
+            {
+                this.enableShadows.Set(value);
+            }
+        }
+        /// <summary>
         /// World matrix
         /// </summary>
         protected Matrix World
@@ -328,6 +373,20 @@ namespace Engine.Effects
             set
             {
                 this.worldViewProjection.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// Shadow transform
+        /// </summary>
+        protected Matrix ShadowTransform
+        {
+            get
+            {
+                return this.shadowTransform.GetMatrix();
+            }
+            set
+            {
+                this.shadowTransform.SetMatrix(value);
             }
         }
         /// <summary>
@@ -384,6 +443,20 @@ namespace Engine.Effects
                 this.textures.SetResource(value);
             }
         }
+        /// <summary>
+        /// Shadow map
+        /// </summary>
+        protected ShaderResourceView ShadowMap
+        {
+            get
+            {
+                return this.shadowMap.GetResource();
+            }
+            set
+            {
+                this.shadowMap.SetResource(value);
+            }
+        }
 
         /// <summary>
         /// Per frame buffer structure
@@ -402,24 +475,37 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="device">Graphics device</param>
-        public EffectInstancing(Device device)
-            : base(device, Resources.ShaderInstancing)
+        /// <param name="effect">Effect code</param>
+        /// <param name="compile">Compile code</param>
+        public EffectInstancing(Device device, byte[] effect, bool compile)
+            : base(device, effect, compile)
         {
             this.PositionColor = this.Effect.GetTechniqueByName("PositionColor");
+            this.PositionColorSkinned = this.Effect.GetTechniqueByName("PositionColorSkinned");
             this.PositionNormalColor = this.Effect.GetTechniqueByName("PositionNormalColor");
+            this.PositionNormalColorSkinned = this.Effect.GetTechniqueByName("PositionNormalColorSkinned");
             this.PositionTexture = this.Effect.GetTechniqueByName("PositionTexture");
+            this.PositionTextureSkinned = this.Effect.GetTechniqueByName("PositionTextureSkinned");
             this.PositionNormalTexture = this.Effect.GetTechniqueByName("PositionNormalTexture");
             this.PositionNormalTextureSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureSkinned");
+            this.PositionNormalTextureTangent = this.Effect.GetTechniqueByName("PositionNormalTextureTangent");
+            this.PositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureTangentSkinned");
 
             this.AddInputLayout(this.PositionColor, VertexPositionColor.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionColorSkinned, VertexSkinnedPositionColor.GetInput().Join(VertexInstancingData.GetInput()));
             this.AddInputLayout(this.PositionNormalColor, VertexPositionNormalColor.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalColorSkinned, VertexSkinnedPositionNormalColor.GetInput().Join(VertexInstancingData.GetInput()));
             this.AddInputLayout(this.PositionTexture, VertexPositionTexture.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionTextureSkinned, VertexSkinnedPositionTexture.GetInput().Join(VertexInstancingData.GetInput()));
             this.AddInputLayout(this.PositionNormalTexture, VertexPositionNormalTexture.GetInput().Join(VertexInstancingData.GetInput()));
             this.AddInputLayout(this.PositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput().Join(VertexInstancingData.GetInput()));
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.shadowTransform = this.Effect.GetVariableByName("gShadowTransform").AsMatrix();
             this.material = this.Effect.GetVariableByName("gMaterial");
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
             this.pointLight = this.Effect.GetVariableByName("gPointLight");
@@ -428,8 +514,10 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
+            this.enableShadows = this.Effect.GetVariableByName("gEnableShadows").AsScalar();
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
+            this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -445,13 +533,25 @@ namespace Engine.Effects
                 {
                     return this.PositionColor;
                 }
+                else if (vertexType == VertexTypes.PositionColorSkinned)
+                {
+                    return this.PositionColorSkinned;
+                }
                 else if (vertexType == VertexTypes.PositionNormalColor)
                 {
                     return this.PositionNormalColor;
                 }
+                else if (vertexType == VertexTypes.PositionNormalColorSkinned)
+                {
+                    return this.PositionNormalColorSkinned;
+                }
                 else if (vertexType == VertexTypes.PositionTexture)
                 {
                     return this.PositionTexture;
+                }
+                else if (vertexType == VertexTypes.PositionTextureSkinned)
+                {
+                    return this.PositionTextureSkinned;
                 }
                 else if (vertexType == VertexTypes.PositionNormalTexture)
                 {
@@ -460,6 +560,14 @@ namespace Engine.Effects
                 else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
                 {
                     return this.PositionNormalTextureSkinned;
+                }
+                else if (vertexType == VertexTypes.PositionNormalTextureTangent)
+                {
+                    return this.PositionNormalTextureTangent;
+                }
+                else if (vertexType == VertexTypes.PositionNormalTextureTangentSkinned)
+                {
+                    return this.PositionNormalTextureTangentSkinned;
                 }
                 else
                 {
@@ -474,11 +582,14 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        public void UpdatePerFrame()
+        /// <param name="shadowMap">Shadow map texture</param>
+        public void UpdatePerFrame(ShaderResourceView shadowMap)
         {
             this.World = this.FrameBuffer.World;
             this.WorldInverse = this.FrameBuffer.WorldInverse;
             this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
+            this.ShadowTransform = this.FrameBuffer.ShadowTransform;
+
             this.DirLights = new BufferDirectionalLight[]
             {
                 this.FrameBuffer.Lights.DirectionalLight1,
@@ -488,9 +599,13 @@ namespace Engine.Effects
             this.PointLight = this.FrameBuffer.Lights.PointLight;
             this.SpotLight = this.FrameBuffer.Lights.SpotLight;
             this.EyePositionWorld = this.FrameBuffer.Lights.EyePositionWorld;
+          
             this.FogStart = this.FrameBuffer.Lights.FogStart;
             this.FogRange = this.FrameBuffer.Lights.FogRange;
             this.FogColor = this.FrameBuffer.Lights.FogColor;
+            this.EnableShadows = shadowMap != null ? this.FrameBuffer.Lights.EnableShadows : 0;
+
+            this.ShadowMap = shadowMap;
         }
         /// <summary>
         /// Update per model object data

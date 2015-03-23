@@ -13,7 +13,6 @@ using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 namespace Engine.Effects
 {
     using Engine.Common;
-    using Engine.Properties;
 
     /// <summary>
     /// Basic effect
@@ -36,6 +35,7 @@ namespace Engine.Effects
             public Matrix World;
             public Matrix WorldInverse;
             public Matrix WorldViewProjection;
+            public Matrix ShadowTransform;
             public BufferLights Lights;
 
             public static int Size
@@ -164,6 +164,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectVectorVariable fogColor = null;
         /// <summary>
+        /// Enable shados effect variable
+        /// </summary>
+        private EffectScalarVariable enableShadows = null;
+        /// <summary>
         /// World matrix effect variable
         /// </summary>
         private EffectMatrixVariable world = null;
@@ -175,6 +179,10 @@ namespace Engine.Effects
         /// World view projection effect variable
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
+        /// <summary>
+        /// Shadow transform
+        /// </summary>
+        private EffectMatrixVariable shadowTransform = null;
         /// <summary>
         /// Texture index effect variable
         /// </summary>
@@ -195,6 +203,10 @@ namespace Engine.Effects
         /// Normal map effect variable
         /// </summary>
         private EffectShaderResourceVariable normalMap = null;
+        /// <summary>
+        /// Shadow map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable shadowMap = null;
 
         /// <summary>
         /// Directional lights
@@ -329,6 +341,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Enable shadows
+        /// </summary>
+        protected float EnableShadows
+        {
+            get
+            {
+                return this.enableShadows.GetFloat();
+            }
+            set
+            {
+                this.enableShadows.Set(value);
+            }
+        }
+        /// <summary>
         /// World matrix
         /// </summary>
         protected Matrix World
@@ -368,6 +394,20 @@ namespace Engine.Effects
             set
             {
                 this.worldViewProjection.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// Shadow transform
+        /// </summary>
+        protected Matrix ShadowTransform
+        {
+            get
+            {
+                return this.shadowTransform.GetMatrix();
+            }
+            set
+            {
+                this.shadowTransform.SetMatrix(value);
             }
         }
         /// <summary>
@@ -452,6 +492,20 @@ namespace Engine.Effects
                 this.normalMap.SetResource(value);
             }
         }
+        /// <summary>
+        /// Shadow map
+        /// </summary>
+        protected ShaderResourceView ShadowMap
+        {
+            get
+            {
+                return this.shadowMap.GetResource();
+            }
+            set
+            {
+                this.shadowMap.SetResource(value);
+            }
+        }
 
         /// <summary>
         /// Per frame buffer structure
@@ -470,8 +524,10 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="device">Graphics device</param>
-        public EffectBasic(Device device)
-            : base(device, Resources.ShaderBasic)
+        /// <param name="effect">Effect code</param>
+        /// <param name="compile">Compile code</param>
+        public EffectBasic(Device device, byte[] effect, bool compile)
+            : base(device, effect, compile)
         {
             this.PositionColor = this.Effect.GetTechniqueByName("PositionColor");
             this.PositionColorSkinned = this.Effect.GetTechniqueByName("PositionColorSkinned");
@@ -504,6 +560,7 @@ namespace Engine.Effects
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.shadowTransform = this.Effect.GetVariableByName("gShadowTransform").AsMatrix();
             this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
             this.material = this.Effect.GetVariableByName("gMaterial");
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
@@ -513,9 +570,11 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
+            this.enableShadows = this.Effect.GetVariableByName("gEnableShadows").AsScalar();
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
+            this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -580,11 +639,14 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        public void UpdatePerFrame()
+        /// <param name="shadowMap">Shadow map texture</param>
+        public void UpdatePerFrame(ShaderResourceView shadowMap)
         {
             this.World = this.FrameBuffer.World;
             this.WorldInverse = this.FrameBuffer.WorldInverse;
             this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
+            this.ShadowTransform = this.FrameBuffer.ShadowTransform;
+            
             this.DirLights = new BufferDirectionalLight[]
             {
                 this.FrameBuffer.Lights.DirectionalLight1,
@@ -594,9 +656,13 @@ namespace Engine.Effects
             this.PointLight = this.FrameBuffer.Lights.PointLight;
             this.SpotLight = this.FrameBuffer.Lights.SpotLight;
             this.EyePositionWorld = this.FrameBuffer.Lights.EyePositionWorld;
+         
             this.FogStart = this.FrameBuffer.Lights.FogStart;
             this.FogRange = this.FrameBuffer.Lights.FogRange;
             this.FogColor = this.FrameBuffer.Lights.FogColor;
+            this.EnableShadows = shadowMap != null ? this.FrameBuffer.Lights.EnableShadows : 0;
+          
+            this.ShadowMap = shadowMap;
         }
         /// <summary>
         /// Update per model object data

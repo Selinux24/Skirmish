@@ -109,6 +109,10 @@ namespace Engine
         /// Fog color
         /// </summary>
         public Color4 FogColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+        /// <summary>
+        /// Enable shadows
+        /// </summary>
+        public bool EnableShadows = false;
 
         /// <summary>
         /// Constructor

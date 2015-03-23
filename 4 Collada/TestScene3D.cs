@@ -74,6 +74,7 @@ namespace Collada
                 Seed = 1024,
                 UsePathFinding = true,
                 PathNodeSize = 20f,
+                DropShadow = true,
             };
 
             this.ground = this.AddTerrain(terrainDescription, Matrix.Scaling(20, 20, 20));
@@ -82,6 +83,7 @@ namespace Collada
                 ContentPath = "Resources",
                 ModelFileName = "Helicopter.dae",
                 Instances = 15,
+                DropShadow = true,
             });
             this.lampsModel = this.AddInstancingModel(new ModelInstancedDescription()
             {
@@ -142,6 +144,9 @@ namespace Collada
             this.Lights.SpotLight.Attenuation = new Vector3(0.15f, 0.0f, 0.0f);
             this.Lights.SpotLight.Spot = 16f;
             this.Lights.SpotLight.Range = 100.0f;
+
+            this.Lights.EnableShadows = false;
+            this.SceneVolume = this.ground.GetBoundingSphere();
         }
         private void InitializeHelicopters()
         {
@@ -265,6 +270,11 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.F2))
             {
                 this.terrainGridDrawer.Visible = !this.terrainGridDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            {
+                this.Lights.EnableShadows = !this.Lights.EnableShadows;
             }
 
             #endregion

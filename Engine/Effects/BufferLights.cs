@@ -48,6 +48,10 @@ namespace Engine.Effects
         /// </summary>
         public Color4 FogColor;
         /// <summary>
+        /// Enable shadows
+        /// </summary>
+        public float EnableShadows;
+        /// <summary>
         /// Size in bytes
         /// </summary>
         public int Stride
@@ -74,6 +78,7 @@ namespace Engine.Effects
             this.FogColor = Color.White;
             this.FogStart = 0;
             this.FogRange = 0;
+            this.EnableShadows = 0;
         }
         /// <summary>
         /// Constructor
@@ -92,6 +97,7 @@ namespace Engine.Effects
             this.FogColor = lights.FogColor;
             this.FogStart = lights.FogStart;
             this.FogRange = lights.FogRange;
+            this.EnableShadows = lights.EnableShadows ? 1 : 0;
         }
     }
 

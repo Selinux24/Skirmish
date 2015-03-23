@@ -6,6 +6,7 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorld;
 	float4x4 gWorldInverse;
 	float4x4 gWorldViewProjection;
+	float4x4 gShadowTransform; 
 	DirectionalLight gDirLights[3];
 	PointLight gPointLight;
 	SpotLight gSpotLight;
@@ -13,6 +14,7 @@ cbuffer cbPerFrame : register (b0)
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
+	float gEnableShadows;
 };
 
 cbuffer cbPerObject : register (b1)
@@ -28,6 +30,7 @@ cbuffer cbSkinned : register (b2)
 
 Texture2DArray gTextureArray;
 Texture2D gNormalMap;
+Texture2D gShadowMap;
 
 PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
 {
@@ -44,18 +47,14 @@ PSVertexPositionColor VSPositionColorSkinned(VSVertexPositionColorSkinned input)
 {
     PSVertexPositionColor output = (PSVertexPositionColor)0;
 
-	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-	weights[0] = input.weights.x;
-	weights[1] = input.weights.y;
-	weights[2] = input.weights.z;
-	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
-	
 	float3 posL = float3(0.0f, 0.0f, 0.0f);
 	
-	for(int i = 0; i < 4; ++i)
-	{
-		posL += weights[i] * mul(float4(input.positionLocal, 1.0f), gBoneTransforms[input.boneIndices[i]]).xyz;
-	}
+	ComputePositionWeights(
+		gBoneTransforms,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		posL);
 
 	output.positionHomogeneous = mul(float4(posL, 1.0f), gWorldViewProjection);
 	output.positionWorld = mul(float4(posL, 1.0f), gWorld).xyz;
@@ -87,6 +86,7 @@ PSVertexPositionNormalColor VSPositionNormalColor(VSVertexPositionNormalColor in
     output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
     output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.color = input.color;
+	output.shadowHomogeneous = mul(float4(input.positionLocal, 1.0f), gShadowTransform);
     
 	output.normalWorld = normalize(output.normalWorld);
 
@@ -97,25 +97,23 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinned(VSVertexPositionNormalC
 {
     PSVertexPositionNormalColor output = (PSVertexPositionNormalColor)0;
 
-	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-	weights[0] = input.weights.x;
-	weights[1] = input.weights.y;
-	weights[2] = input.weights.z;
-	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
-	
 	float3 posL = float3(0.0f, 0.0f, 0.0f);
 	float3 normalL = float3(0.0f, 0.0f, 0.0f);
 	
-	for(int i = 0; i < 4; ++i)
-	{
-		posL += weights[i] * mul(float4(input.positionLocal, 1.0f), gBoneTransforms[input.boneIndices[i]]).xyz;
-		normalL += weights[i] * mul(input.normalLocal, (float3x3)gBoneTransforms[input.boneIndices[i]]);
-	}
+	ComputePositionNormalWeights(
+		gBoneTransforms,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		input.normalLocal,
+		posL,
+		normalL);
 
 	output.positionHomogeneous = mul(float4(posL, 1.0f), gWorldViewProjection);
 	output.positionWorld = mul(float4(posL, 1.0f), gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL, (float3x3)gWorldInverse));
 	output.color = input.color;
+	output.shadowHomogeneous = mul(float4(posL, 1.0f), gShadowTransform);
     
 	output.normalWorld = normalize(output.normalWorld);
 
@@ -136,8 +134,10 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.dirLights = gDirLights;
 	lInput.pointLight = gPointLight;
 	lInput.spotLight = gSpotLight;
+	lInput.enableShadows = gEnableShadows;
+	lInput.shadowPosition = input.shadowHomogeneous;
 
-	LightOutput lOutput = ComputeLights(lInput);
+	LightOutput lOutput = ComputeLights(lInput, gShadowMap);
 
 	float4 litColor = input.color * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
 
@@ -167,18 +167,14 @@ PSVertexPositionTexture VSPositionTextureSkinned(VSVertexPositionTextureSkinned 
 {
     PSVertexPositionTexture output = (PSVertexPositionTexture)0;
 
-	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-	weights[0] = input.weights.x;
-	weights[1] = input.weights.y;
-	weights[2] = input.weights.z;
-	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
-	
 	float3 posL = float3(0.0f, 0.0f, 0.0f);
 	
-	for(int i = 0; i < 4; ++i)
-	{
-		posL += weights[i] * mul(float4(input.positionLocal, 1.0f), gBoneTransforms[input.boneIndices[i]]).xyz;
-	}
+	ComputePositionWeights(
+		gBoneTransforms,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		posL);
 
 	output.positionHomogeneous = mul(float4(posL, 1.0f), gWorldViewProjection);
 	output.positionWorld = mul(float4(posL, 1.0f), gWorld).xyz;
@@ -238,6 +234,7 @@ PSVertexPositionNormalTexture VSPositionNormalTexture(VSVertexPositionNormalText
     output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
+	output.shadowHomogeneous = mul(float4(input.positionLocal, 1.0f), gShadowTransform);
     
     return output;
 }
@@ -246,26 +243,24 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNor
 {
 	PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture)0;
 	
-	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-	weights[0] = input.weights.x;
-	weights[1] = input.weights.y;
-	weights[2] = input.weights.z;
-	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
-	
 	float3 posL = float3(0.0f, 0.0f, 0.0f);
 	float3 normalL = float3(0.0f, 0.0f, 0.0f);
 	
-	for(int i = 0; i < 4; ++i)
-	{
-		posL += weights[i] * mul(float4(input.positionLocal, 1.0f), gBoneTransforms[input.boneIndices[i]]).xyz;
-		normalL += weights[i] * mul(input.normalLocal, (float3x3)gBoneTransforms[input.boneIndices[i]]);
-	}
+	ComputePositionNormalWeights(
+		gBoneTransforms,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		input.normalLocal,
+		posL,
+		normalL);
 	
 	output.positionHomogeneous = mul(float4(posL, 1.0f), gWorldViewProjection);
 	output.positionWorld = mul(float4(posL, 1.0f), gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL, (float3x3)gWorldInverse));
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
+	output.shadowHomogeneous = mul(float4(posL, 1.0f), gShadowTransform);
 	
 	return output;
 }
@@ -284,8 +279,10 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	lInput.dirLights = gDirLights;
 	lInput.pointLight = gPointLight;
 	lInput.spotLight = gSpotLight;
+	lInput.enableShadows = gEnableShadows;
+	lInput.shadowPosition = input.shadowHomogeneous;
 
-	LightOutput lOutput = ComputeLights(lInput);
+	LightOutput lOutput = ComputeLights(lInput, gShadowMap);
 
     float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
@@ -305,12 +302,12 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangent(VSVertexPosi
 {
     PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-    output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection);
+    output.positionWorld = mul(float4(input.positionLocal, 1.0f), gWorld).xyz;
     output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
-	//TODO: Not sure about this
-	output.tangentWorld = normalize(mul(input.tangentLocal, (float3x3)gWorld));
+	output.tangentWorld = mul(input.tangentLocal, (float3x3)gWorld);
 	output.tex = input.tex;
+	output.shadowHomogeneous = mul(float4(input.positionLocal, 1.0f), gShadowTransform);
 	output.textureIndex = gTextureIndex;
     
     return output;
@@ -320,30 +317,27 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinned(VSVer
 {
     PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
 
-	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-	weights[0] = input.weights.x;
-	weights[1] = input.weights.y;
-	weights[2] = input.weights.z;
-	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
-	
 	float3 posL = float3(0.0f, 0.0f, 0.0f);
 	float3 normalL = float3(0.0f, 0.0f, 0.0f);
-	float4 tangentL = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	
-	for(int i = 0; i < 4; ++i)
-	{
-		posL += weights[i] * mul(float4(input.positionLocal, 1.0f), gBoneTransforms[input.boneIndices[i]]).xyz;
-		normalL += weights[i] * mul(input.normalLocal, (float3x3)gBoneTransforms[input.boneIndices[i]]);
-		//TODO: Not sure about this
-		tangentL += weights[i] * mul(input.tangentLocal, gBoneTransforms[input.boneIndices[i]]);
-	}
-	
+	float3 tangentL = float3(0.0f, 0.0f, 0.0f);
+
+	ComputePositionNormalTangentWeights(
+		gBoneTransforms,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		input.normalLocal,
+		input.tangentLocal,
+		posL,
+		normalL,
+		tangentL);
+
 	output.positionHomogeneous = mul(float4(posL, 1.0f), gWorldViewProjection);
 	output.positionWorld = mul(float4(posL, 1.0f), gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL, (float3x3)gWorldInverse));
-	//TODO: Not sure about this
-	output.tangentWorld = normalize(mul(tangentL, (float3x3)gWorld));
+	output.tangentWorld = mul(tangentL, (float3x3)gWorld);
 	output.tex = input.tex;
+	output.shadowHomogeneous = mul(float4(posL, 1.0f), gShadowTransform);
 	output.textureIndex = gTextureIndex;
     
     return output;
@@ -366,8 +360,10 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	lInput.dirLights = gDirLights;
 	lInput.pointLight = gPointLight;
 	lInput.spotLight = gSpotLight;
+	lInput.enableShadows = gEnableShadows;
+	lInput.shadowPosition = input.shadowHomogeneous;
 
-	LightOutput lOutput = ComputeLights(lInput);
+	LightOutput lOutput = ComputeLights(lInput, gShadowMap);
 
     float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 

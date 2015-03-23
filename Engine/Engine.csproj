@@ -97,6 +97,9 @@
     <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="SharpDX, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
@@ -299,6 +302,7 @@
     <Compile Include="Common\QuadTree.cs" />
     <Compile Include="Common\QuadTreeNode.cs" />
     <Compile Include="Common\Skeleton.cs" />
+    <Compile Include="Effects\EffectInstancingShadow.cs" />
     <Compile Include="SpriteTexture.cs" />
     <Compile Include="Curve.cs" />
     <Compile Include="Effects\DrawerPool.cs" />
@@ -419,6 +423,12 @@
     <None Include="Diagrams\ColladaClasses.cd" />
     <None Include="Diagrams\Drawables.cd" />
     <None Include="packages.config" />
+    <None Include="Resources\ShaderBasic.fxo" />
+    <None Include="Resources\ShaderBillboard.fxo" />
+    <None Include="Resources\ShaderCubemap.fxo" />
+    <None Include="Resources\ShaderFont.fxo" />
+    <None Include="Resources\ShaderInstancing.fxo" />
+    <None Include="Resources\ShaderParticles.fxo" />
     <None Include="Resources\ShaderShadow.fx" />
     <None Include="Resources\IncVertexFormats.fx" />
     <None Include="Resources\ShaderBasic.fx" />
@@ -427,6 +437,7 @@
     <None Include="Resources\ShaderCubemap.fx" />
     <None Include="Resources\ShaderInstancing.fx" />
     <None Include="Resources\ShaderParticles.fx" />
+    <None Include="Resources\ShaderShadow.fxo" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\IncLights.fx" />
@@ -454,14 +465,8 @@
     </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>cd $(ProjectDir)Resources
-"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderBasic.fxo ShaderBasic.fx
-"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderBillboard.fxo ShaderBillboard.fx
-"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderCubemap.fxo ShaderCubemap.fx
-"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderFont.fxo ShaderFont.fx
-"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderInstancing.fxo ShaderInstancing.fx
-"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderParticles.fxo ShaderParticles.fx
-"%25DXSDK_DIR%25Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadow.fxo ShaderShadow.fx</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

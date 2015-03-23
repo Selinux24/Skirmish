@@ -47,48 +47,51 @@ namespace Engine
         {
             if (this.Meshes != null)
             {
-                this.Game.Graphics.SetBlendTransparent();
-
-                #region Per frame update
-
-                DrawerPool.EffectBillboard.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
-                DrawerPool.EffectBillboard.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
-                DrawerPool.EffectBillboard.UpdatePerFrame();
-
-                #endregion
-
-                foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+                if (context.DrawerMode == DrawerModesEnum.Default)
                 {
-                    foreach (string material in dictionary.Keys)
+                    this.Game.Graphics.SetBlendTransparent();
+
+                    #region Per frame update
+
+                    DrawerPool.EffectBillboard.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
+                    DrawerPool.EffectBillboard.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
+                    DrawerPool.EffectBillboard.UpdatePerFrame();
+
+                    #endregion
+
+                    foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
                     {
-                        Mesh mesh = dictionary[material];
-                        MeshMaterial mat = this.Materials[material];
-                        EffectTechnique technique = DrawerPool.EffectBillboard.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
-
-                        #region Per object update
-
-                        if (mat != null)
+                        foreach (string material in dictionary.Keys)
                         {
-                            DrawerPool.EffectBillboard.ObjectBuffer.Material.SetMaterial(mat.Material);
-                            DrawerPool.EffectBillboard.ObjectBuffer.TextureCount = (uint)mat.DiffuseTexture.Description.Texture2DArray.ArraySize;
-                            DrawerPool.EffectBillboard.UpdatePerObject(mat.DiffuseTexture);
-                        }
-                        else
-                        {
-                            DrawerPool.EffectBillboard.ObjectBuffer.Material.SetMaterial(Material.Default);
-                            DrawerPool.EffectBillboard.ObjectBuffer.TextureCount = (uint)this.Textures.Count;
-                            DrawerPool.EffectBillboard.UpdatePerObject(null);
-                        }
+                            Mesh mesh = dictionary[material];
+                            MeshMaterial mat = this.Materials[material];
+                            EffectTechnique technique = DrawerPool.EffectBillboard.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
-                        #endregion
+                            #region Per object update
 
-                        mesh.SetInputAssembler(this.DeviceContext, DrawerPool.EffectBillboard.GetInputLayout(technique));
+                            if (mat != null)
+                            {
+                                DrawerPool.EffectBillboard.ObjectBuffer.Material.SetMaterial(mat.Material);
+                                DrawerPool.EffectBillboard.ObjectBuffer.TextureCount = (uint)mat.DiffuseTexture.Description.Texture2DArray.ArraySize;
+                                DrawerPool.EffectBillboard.UpdatePerObject(mat.DiffuseTexture);
+                            }
+                            else
+                            {
+                                DrawerPool.EffectBillboard.ObjectBuffer.Material.SetMaterial(Material.Default);
+                                DrawerPool.EffectBillboard.ObjectBuffer.TextureCount = (uint)this.Textures.Count;
+                                DrawerPool.EffectBillboard.UpdatePerObject(null);
+                            }
 
-                        for (int p = 0; p < technique.Description.PassCount; p++)
-                        {
-                            technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+                            #endregion
 
-                            mesh.Draw(gameTime, this.DeviceContext);
+                            mesh.SetInputAssembler(this.DeviceContext, DrawerPool.EffectBillboard.GetInputLayout(technique));
+
+                            for (int p = 0; p < technique.Description.PassCount; p++)
+                            {
+                                technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+
+                                mesh.Draw(gameTime, this.DeviceContext);
+                            }
                         }
                     }
                 }

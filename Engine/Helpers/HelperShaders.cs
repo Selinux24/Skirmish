@@ -302,15 +302,15 @@ namespace Engine.Helpers
         /// Loads an effect from byte code
         /// </summary>
         /// <param name="device">Graphics device</param>
-        /// <param name="byteCode">Byte code</param>
+        /// <param name="bytes">Byte code</param>
         /// <returns>Returns loaded effect</returns>
-        public static Effect LoadEffect(
+        public static Effect CompileEffect(
             this Device device,
-            byte[] byteCode)
+            byte[] bytes)
         {
             using (ShaderIncludeManager includeManager = new ShaderIncludeManager())
             using (CompilationResult cmpResult = ShaderBytecode.Compile(
-                byteCode,
+                bytes,
                 null,
                 FXProfile,
                 ShaderFlags.EnableStrictness,
@@ -322,6 +322,29 @@ namespace Engine.Helpers
                     device,
                     cmpResult.Bytecode.Data,
                     EffectFlags.None);
+            }
+        }
+        /// <summary>
+        /// Loads an effect from pre-compiled file
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="bytes">Pre-compiled byte code</param>
+        /// <returns>Returns loaded effect</returns>
+        public static Effect LoadEffect(
+            this Device device,
+            byte[] bytes)
+        {
+            using (MemoryStream ms = new MemoryStream(bytes))
+            {
+                ms.Position = 0;
+
+                using (ShaderBytecode effectCode = ShaderBytecode.FromStream(ms))
+                {
+                    return new Effect(
+                        device,
+                        effectCode.Data,
+                        EffectFlags.None);
+                }
             }
         }
     }

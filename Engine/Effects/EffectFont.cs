@@ -129,8 +129,10 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="device">Graphics device</param>
-        public EffectFont(Device device)
-            : base(device, Resources.ShaderFont)
+        /// <param name="effect">Effect code</param>
+        /// <param name="compile">Compile code</param>
+        public EffectFont(Device device, byte[] effect, bool compile)
+            : base(device, effect, compile)
         {
             this.FontDrawer = this.Effect.GetTechniqueByName("FontDrawer");
 

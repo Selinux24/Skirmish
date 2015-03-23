@@ -1,0 +1,105 @@
+//
+// FX Version: fx_5_0
+//
+// 9 local object(s)
+//
+RasterizerState RasterizerSolid
+{
+    FillMode = uint(SOLID /* 3 */);
+    CullMode = uint(BACK /* 3 */);
+};
+RasterizerState RasterizerWireFrame
+{
+    FillMode = uint(WIREFRAME /* 2 */);
+    CullMode = uint(NONE /* 1 */);
+};
+DepthStencilState StencilDisableDepth
+{
+    DepthEnable = bool(FALSE /* 0 */);
+    DepthWriteMask = uint(ZERO /* 0 */);
+};
+DepthStencilState StencilNoDepthWrites
+{
+    DepthEnable = bool(TRUE /* 1 */);
+    DepthWriteMask = uint(ZERO /* 0 */);
+};
+BlendState BlendAdditive
+{
+    AlphaToCoverageEnable = bool(FALSE /* 0 */);
+    BlendEnable[0] = bool(TRUE /* 1 */);
+    SrcBlend[0] = uint(SRC_ALPHA /* 5 */);
+    SrcBlend[1] = uint(SRC_ALPHA /* 5 */);
+    SrcBlend[2] = uint(SRC_ALPHA /* 5 */);
+    SrcBlend[3] = uint(SRC_ALPHA /* 5 */);
+    SrcBlend[4] = uint(SRC_ALPHA /* 5 */);
+    SrcBlend[5] = uint(SRC_ALPHA /* 5 */);
+    SrcBlend[6] = uint(SRC_ALPHA /* 5 */);
+    SrcBlend[7] = uint(SRC_ALPHA /* 5 */);
+    DestBlend[0] = uint(ONE /* 2 */);
+    DestBlend[1] = uint(ONE /* 2 */);
+    DestBlend[2] = uint(ONE /* 2 */);
+    DestBlend[3] = uint(ONE /* 2 */);
+    DestBlend[4] = uint(ONE /* 2 */);
+    DestBlend[5] = uint(ONE /* 2 */);
+    DestBlend[6] = uint(ONE /* 2 */);
+    DestBlend[7] = uint(ONE /* 2 */);
+    BlendOp[0] = uint(ADD /* 1 */);
+    BlendOp[1] = uint(ADD /* 1 */);
+    BlendOp[2] = uint(ADD /* 1 */);
+    BlendOp[3] = uint(ADD /* 1 */);
+    BlendOp[4] = uint(ADD /* 1 */);
+    BlendOp[5] = uint(ADD /* 1 */);
+    BlendOp[6] = uint(ADD /* 1 */);
+    BlendOp[7] = uint(ADD /* 1 */);
+    SrcBlendAlpha[0] = uint(ZERO /* 1 */);
+    SrcBlendAlpha[1] = uint(ZERO /* 1 */);
+    SrcBlendAlpha[2] = uint(ZERO /* 1 */);
+    SrcBlendAlpha[3] = uint(ZERO /* 1 */);
+    SrcBlendAlpha[4] = uint(ZERO /* 1 */);
+    SrcBlendAlpha[5] = uint(ZERO /* 1 */);
+    SrcBlendAlpha[6] = uint(ZERO /* 1 */);
+    SrcBlendAlpha[7] = uint(ZERO /* 1 */);
+    DestBlendAlpha[0] = uint(ZERO /* 1 */);
+    DestBlendAlpha[1] = uint(ZERO /* 1 */);
+    DestBlendAlpha[2] = uint(ZERO /* 1 */);
+    DestBlendAlpha[3] = uint(ZERO /* 1 */);
+    DestBlendAlpha[4] = uint(ZERO /* 1 */);
+    DestBlendAlpha[5] = uint(ZERO /* 1 */);
+    DestBlendAlpha[6] = uint(ZERO /* 1 */);
+    DestBlendAlpha[7] = uint(ZERO /* 1 */);
+    BlendOpAlpha[0] = uint(ADD /* 1 */);
+    BlendOpAlpha[1] = uint(ADD /* 1 */);
+    BlendOpAlpha[2] = uint(ADD /* 1 */);
+    BlendOpAlpha[3] = uint(ADD /* 1 */);
+    BlendOpAlpha[4] = uint(ADD /* 1 */);
+    BlendOpAlpha[5] = uint(ADD /* 1 */);
+    BlendOpAlpha[6] = uint(ADD /* 1 */);
+    BlendOpAlpha[7] = uint(ADD /* 1 */);
+    RenderTargetWriteMask[0] = byte(0x0f);
+};
+SamplerState SamplerLinear
+{
+    Filter   = uint(MIN_MAG_MIP_LINEAR /* 21 */);
+    AddressU = uint(WRAP /* 1 */);
+    AddressV = uint(WRAP /* 1 */);
+};
+SamplerState SamplerAnisotropic
+{
+    Filter   = uint(ANISOTROPIC /* 85 */);
+    MaxAnisotropy = uint(4);
+    AddressU = uint(WRAP /* 1 */);
+    AddressV = uint(WRAP /* 1 */);
+};
+SamplerState SamplerFont
+{
+};
+SamplerComparisonState SamplerShadow
+{
+    Filter   = uint(COMPARISON_MIN_MAG_LINEAR_MIP_POINT /* 148 */);
+    AddressU = uint(BORDER /* 4 */);
+    AddressV = uint(BORDER /* 4 */);
+    AddressW = uint(BORDER /* 4 */);
+    BorderColor = float4(0, 0, 0, 0);
+    ComparisonFunc = uint(LESS /* 2 */);
+};
+

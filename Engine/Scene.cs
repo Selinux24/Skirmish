@@ -62,7 +62,7 @@ namespace Engine
         /// <summary>
         /// Draw context
         /// </summary>
-        protected Context DrawContext = new Context();
+        protected Context DrawContext = null;
         /// <summary>
         /// Gets or sets whether the scene was handling control captures
         /// </summary>
@@ -85,7 +85,7 @@ namespace Engine
         /// <summary>
         /// Context for shadow map drawing
         /// </summary>
-        protected Context DrawShadowsContext = new Context();
+        protected Context DrawShadowsContext = null;
 
         /// <summary>
         /// Indicates whether the current scene is active
@@ -107,10 +107,6 @@ namespace Engine
         /// Scene volume
         /// </summary>
         public BoundingSphere SceneVolume { get; protected set; }
-        /// <summary>
-        /// Gets or sets whether the scene has shadows activated
-        /// </summary>
-        public bool EnableShadows { get; set; }
         /// <summary>
         /// Gets or sets if scene has to perform frustum culling with objects
         /// </summary>
@@ -159,9 +155,18 @@ namespace Engine
             this.Lights.SpotLightEnabled = false;
 
             this.SceneVolume = new BoundingSphere(Vector3.Zero, 1000);
-            this.EnableShadows = false;
 
             this.PerformFrustumCulling = true;
+
+            this.DrawContext = new Context()
+            {
+                DrawerMode = DrawerModesEnum.Default,
+            };
+
+            this.DrawShadowsContext = new Context()
+            {
+                DrawerMode = DrawerModesEnum.ShadowMap,
+            };
         }
 
         /// <summary>
@@ -178,23 +183,6 @@ namespace Engine
         public virtual void Update(GameTime gameTime)
         {
             this.Camera.Update(gameTime);
-
-            if (this.EnableShadows)
-            {
-                this.ShadowMap.Update(this.Lights.DirectionalLight1.Direction, this.SceneVolume);
-
-                this.DrawShadowsContext.DrawerMode = DrawerModesEnum.ShadowMap;
-                this.DrawShadowsContext.World = Matrix.Identity;
-                this.DrawShadowsContext.ViewProjection = this.ShadowMap.View * this.ShadowMap.Projection;
-                this.DrawShadowsContext.ShadowMap = null;
-            }
-
-            this.DrawContext.DrawerMode = DrawerModesEnum.Default;
-            this.DrawContext.World = this.world;
-            this.DrawContext.ViewProjection = this.Camera.View * this.Camera.Projection;
-            this.DrawContext.EyePosition = this.Camera.Position;
-            this.DrawContext.Lights = this.Lights;
-            this.DrawContext.ShadowMap = null;
 
             //Update active components
             List<Drawable> activeComponents = this.components.FindAll(c => c.Active);
@@ -244,10 +232,25 @@ namespace Engine
             List<Drawable> visibleComponents = this.components.FindAll(c => c.Visible);
             if (visibleComponents.Count > 0)
             {
-                if (this.EnableShadows)
-                {
-                    this.DrawContext.ShadowMap = null;
+                this.DrawContext.DrawerMode = DrawerModesEnum.Default;
+                this.DrawContext.World = this.world;
+                this.DrawContext.ViewProjection = this.Camera.View * this.Camera.Projection;
+                this.DrawContext.EyePosition = this.Camera.Position;
+                this.DrawContext.Lights = this.Lights;
+                this.DrawContext.ShadowMap = null;
+                this.DrawContext.ShadowTransform = Matrix.Identity;
 
+                if (this.Lights.EnableShadows)
+                {
+                    this.ShadowMap.Update(this.Lights.DirectionalLight1.Direction, this.SceneVolume);
+
+                    this.DrawShadowsContext.DrawerMode = DrawerModesEnum.ShadowMap;
+                    this.DrawShadowsContext.World = Matrix.Identity;
+                    this.DrawShadowsContext.ViewProjection = this.ShadowMap.View * this.ShadowMap.Projection;
+                    this.DrawShadowsContext.ShadowMap = null;
+                    this.DrawShadowsContext.ShadowTransform = Matrix.Identity;
+
+                    //Draw components if drop shadow
                     List<Drawable> shadowComponents = visibleComponents.FindAll(c => c.DropShadow);
                     if (shadowComponents.Count > 0)
                     {
@@ -256,6 +259,7 @@ namespace Engine
                         this.Game.Graphics.SetDefaultRenderTarget(false);
 
                         this.DrawContext.ShadowMap = this.ShadowMap.ShadowMapTexture;
+                        this.DrawContext.ShadowTransform = this.shadowMap.Transform;
                     }
                 }
 

@@ -108,7 +108,7 @@ namespace Engine
             {
                 Drawer effect = null;
                 if (context.DrawerMode == DrawerModesEnum.Default) effect = DrawerPool.EffectInstancing;
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
+                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectInstancingShadow;
 
                 if (effect != null)
                 {
@@ -152,13 +152,14 @@ namespace Engine
                         ((EffectInstancing)effect).FrameBuffer.World = context.World;
                         ((EffectInstancing)effect).FrameBuffer.WorldInverse = Matrix.Invert(context.World);
                         ((EffectInstancing)effect).FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
+                        ((EffectInstancing)effect).FrameBuffer.ShadowTransform = context.ShadowTransform;
                         ((EffectInstancing)effect).FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
-                        ((EffectInstancing)effect).UpdatePerFrame();
+                        ((EffectInstancing)effect).UpdatePerFrame(context.ShadowMap);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        ((EffectShadow)effect).FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
-                        ((EffectShadow)effect).UpdatePerFrame();
+                        ((EffectInstancingShadow)effect).FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
+                        ((EffectInstancingShadow)effect).UpdatePerFrame();
                     }
 
                     #endregion
@@ -173,6 +174,11 @@ namespace Engine
                             {
                                 ((EffectInstancing)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
                                 ((EffectInstancing)effect).UpdatePerSkinning();
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                            {
+                                ((EffectInstancingShadow)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
+                                ((EffectInstancingShadow)effect).UpdatePerSkinning();
                             }
                         }
 

@@ -29,11 +29,19 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="device">Graphics device</param>
-        /// <param name="effect">Effect</param>
-        public Drawer(Device device, byte[] effect)
+        /// <param name="effect">Effect file</param>
+        /// <param name="compile">Compile effect</param>
+        public Drawer(Device device, byte[] effect, bool compile)
         {
             this.Device = device;
-            this.Effect = device.LoadEffect(effect);
+            if (compile)
+            {
+                this.Effect = device.CompileEffect(effect);
+            }
+            else
+            {
+                this.Effect = device.LoadEffect(effect);
+            }
         }
         /// <summary>
         /// Dispose resources

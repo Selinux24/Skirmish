@@ -13,7 +13,7 @@ namespace Engine.Effects
     /// <summary>
     /// Basic effect
     /// </summary>
-    public class EffectShadow : Drawer
+    public class EffectInstancingShadow : Drawer
     {
         /// <summary>
         /// Maximum number of bones in a skeleton
@@ -153,30 +153,30 @@ namespace Engine.Effects
         /// <param name="device">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectShadow(Device device, byte[] effect, bool compile)
+        public EffectInstancingShadow(Device device, byte[] effect, bool compile)
             : base(device, effect, compile)
         {
-            this.ShadowMapPositionColor = this.Effect.GetTechniqueByName("ShadowMapPositionColor");
-            this.ShadowMapPositionColorSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionColorSkinned");
-            this.ShadowMapPositionNormalColor = this.Effect.GetTechniqueByName("ShadowMapPositionNormalColor");
-            this.ShadowMapPositionNormalColorSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalColorSkinned");
-            this.ShadowMapPositionTexture = this.Effect.GetTechniqueByName("ShadowMapPositionTexture");
-            this.ShadowMapPositionTextureSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionTextureSkinned");
-            this.ShadowMapPositionNormalTexture = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTexture");
-            this.ShadowMapPositionNormalTextureSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureSkinned");
-            this.ShadowMapPositionNormalTextureTangent = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangent");
-            this.ShadowMapPositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentSkinned");
+            this.ShadowMapPositionColor = this.Effect.GetTechniqueByName("ShadowMapPositionColorI");
+            this.ShadowMapPositionColorSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionColorSkinnedI");
+            this.ShadowMapPositionNormalColor = this.Effect.GetTechniqueByName("ShadowMapPositionNormalColorI");
+            this.ShadowMapPositionNormalColorSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalColorSkinnedI");
+            this.ShadowMapPositionTexture = this.Effect.GetTechniqueByName("ShadowMapPositionTextureI");
+            this.ShadowMapPositionTextureSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionTextureSkinnedI");
+            this.ShadowMapPositionNormalTexture = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureI");
+            this.ShadowMapPositionNormalTextureSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureSkinnedI");
+            this.ShadowMapPositionNormalTextureTangent = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentI");
+            this.ShadowMapPositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentSkinnedI");
 
-            this.AddInputLayout(this.ShadowMapPositionColor, VertexPositionColor.GetInput());
-            this.AddInputLayout(this.ShadowMapPositionColorSkinned, VertexSkinnedPositionColor.GetInput());
-            this.AddInputLayout(this.ShadowMapPositionNormalColor, VertexPositionNormalColor.GetInput());
-            this.AddInputLayout(this.ShadowMapPositionNormalColorSkinned, VertexSkinnedPositionNormalColor.GetInput());
-            this.AddInputLayout(this.ShadowMapPositionTexture, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.ShadowMapPositionTextureSkinned, VertexSkinnedPositionTexture.GetInput());
-            this.AddInputLayout(this.ShadowMapPositionNormalTexture, VertexPositionNormalTexture.GetInput());
-            this.AddInputLayout(this.ShadowMapPositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput());
-            this.AddInputLayout(this.ShadowMapPositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput());
-            this.AddInputLayout(this.ShadowMapPositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput());
+            this.AddInputLayout(this.ShadowMapPositionColor, VertexPositionColor.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.ShadowMapPositionColorSkinned, VertexSkinnedPositionColor.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.ShadowMapPositionNormalColor, VertexPositionNormalColor.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.ShadowMapPositionNormalColorSkinned, VertexSkinnedPositionNormalColor.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.ShadowMapPositionTexture, VertexPositionTexture.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.ShadowMapPositionTextureSkinned, VertexSkinnedPositionTexture.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.ShadowMapPositionNormalTexture, VertexPositionNormalTexture.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.ShadowMapPositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.ShadowMapPositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.ShadowMapPositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput().Join(VertexInstancingData.GetInput()));
 
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();

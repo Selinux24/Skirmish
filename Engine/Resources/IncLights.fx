@@ -49,6 +49,17 @@ SamplerState SamplerAnisotropic
 };
 SamplerState SamplerFont;
 
+SamplerComparisonState SamplerShadow
+{
+	Filter   = COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	AddressU = BORDER;
+	AddressV = BORDER;
+	AddressW = BORDER;
+	BorderColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    ComparisonFunc = LESS;
+};
+
 struct Material
 {
 	float4 Ambient;
@@ -98,6 +109,8 @@ struct LightInput
 	DirectionalLight dirLights[3];
 	PointLight pointLight;
 	SpotLight spotLight;
+	float enableShadows;
+	float4 shadowPosition;
 };
 struct LightOutput
 {
@@ -261,13 +274,49 @@ void ComputeSpotLight(
 	spec *= attenuation;
 }
 
-LightOutput ComputeLights(LightInput input)
+static const float SMAP_SIZE = 2048.0f;
+static const float SMAP_DX = 1.0f / SMAP_SIZE;
+static	const float2 SamplerShadowOffsets[9] =
+{
+	float2(-SMAP_DX, -SMAP_DX),		float2(0.0f, -SMAP_DX),		float2(SMAP_DX, -SMAP_DX),
+	float2(-SMAP_DX, 0.0f),			float2(0.0f, 0.0f),			float2(SMAP_DX, 0.0f),
+	float2(-SMAP_DX, +SMAP_DX),		float2(0.0f, +SMAP_DX),		float2(SMAP_DX, +SMAP_DX)
+};
+
+float CalcShadowFactor(float4 shadowPosH, Texture2D shadowMap)
+{
+	// Complete projection by doing division by w.
+	shadowPosH.xyz /= shadowPosH.w;
+
+	// Depth in NDC space.
+	float depth = shadowPosH.z;
+
+	// 3×3 box filter pattern. Each sample does a 4-tap PCF.
+	float percentLit = 0.0f;
+	[unroll]
+	for(int i = 0; i < 9; ++i)
+	{
+		percentLit += shadowMap.SampleCmpLevelZero(SamplerShadow, shadowPosH.xy + SamplerShadowOffsets[i], depth).r;
+	}
+
+	// Average the samples.
+	return percentLit /= 9.0f;
+}
+
+LightOutput ComputeLights(LightInput input, Texture2D shadowMap)
 {
 	LightOutput output = (LightOutput)0;
 
 	float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	float3 shadow = float3(1.0f, 1.0f, 1.0f);
+	if(input.enableShadows == 1)
+	{
+		// Only the first light casts a shadow.
+		shadow[0] = CalcShadowFactor(input.shadowPosition, shadowMap);
+	}
 
 	float4 A, D, S;
 
@@ -286,8 +335,8 @@ LightOutput ComputeLights(LightInput input)
 				S);
 
 			ambient += A;
-			diffuse += D;
-			specular += S;
+			diffuse += shadow[i] * D;
+			specular += shadow[i] * S;
 		}
 	}
 
@@ -339,36 +388,4 @@ float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRan
 	return lerp(litColor, fogColor, fogLerp);
 }
 
-static const float SMAP_SIZE = 2048.0f;
-static const float SMAP_DX = 1.0f / SMAP_SIZE;
 
-float CalcShadowFactor(SamplerComparisonState samShadow, Texture2D shadowMap, float4 shadowPosH)
-{
-	// Complete projection by doing division by w.
-	shadowPosH.xyz /= shadowPosH.w;
-
-	// Depth in NDC space.
-	float depth = shadowPosH.z;
-
-	// Texel size.
-	const float dx = SMAP_DX;
-
-	float percentLit = 0.0f;
-
-	const float2 offsets[9] =
-	{
-		float2(-dx, -dx), float2(0.0f, -dx), float2(dx, -dx),
-		float2(-dx, 0.0f), float2(0.0f, 0.0f), float2(dx, 0.0f),
-		float2(-dx, +dx), float2(0.0f, +dx), float2(dx, +dx)
-	};
-
-	// 3×3 box filter pattern. Each sample does a 4-tap PCF.
-	[unroll]
-	for(int i = 0; i < 9; ++i)
-	{
-		percentLit += shadowMap.SampleCmpLevelZero(samShadow, shadowPosH.xy + offsets[i], depth).r;
-	}
-
-	// Average the samples.
-	return percentLit /= 9.0f;
-}

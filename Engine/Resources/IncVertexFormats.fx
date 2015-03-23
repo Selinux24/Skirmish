@@ -91,7 +91,7 @@ struct VSVertexPositionNormalTextureTangentSkinned
 {
     float3 positionLocal : POSITION;
     float3 normalLocal : NORMAL;
-    float4 tangentLocal : TANGENT;
+    float3 tangentLocal : TANGENT;
     float2 tex : TEXCOORD0;
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
@@ -145,7 +145,7 @@ struct VSVertexPositionNormalTextureTangentI
 {
     float3 positionLocal : POSITION;
     float3 normalLocal : NORMAL;
-	float4 tangentLocal : TANGENT;
+	float3 tangentLocal : TANGENT;
     float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : localTransform;
 	float textureIndex : textureIndex;
@@ -210,7 +210,7 @@ struct VSVertexPositionNormalTextureTangentSkinnedI
 {
     float3 positionLocal : POSITION;
     float3 normalLocal : NORMAL;
-	float4 tangentLocal : TANGENT;
+	float3 tangentLocal : TANGENT;
     float2 tex : TEXCOORD0;
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
@@ -248,20 +248,20 @@ struct PSVertexBillboard
 	float4 positionHomogeneous : SV_POSITION;
 	float3 positionWorld : POSITION;
 	float3 normalWorld : NORMAL;
-	float2 tex : TEXCOORD;
+	float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PrimitiveID;
 };
 struct PSParticleSolid
 {
 	float4 positionHomogeneous : SV_POSITION;
 	float4 color : COLOR;
-	float2 tex : TEXCOORD;
+	float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PrimitiveID;
 };
 struct PSParticleLine
 {
 	float4 positionHomogeneous : SV_POSITION;
-	float2 tex : TEXCOORD;
+	float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PrimitiveID;
 };
 struct PSVertexPosition
@@ -281,6 +281,7 @@ struct PSVertexPositionNormalColor
 	float3 positionWorld : POSITION;
     float3 normalWorld : NORMAL;
     float4 color : COLOR0;
+	float4 shadowHomogeneous : TEXCOORD1;
 };
 struct PSVertexPositionTexture
 {
@@ -295,6 +296,7 @@ struct PSVertexPositionNormalTexture
 	float3 positionWorld : POSITION;
     float3 normalWorld : NORMAL;
     float2 tex : TEXCOORD0;
+	float4 shadowHomogeneous : TEXCOORD1;
 	float textureIndex : textureIndex;
 };
 struct PSVertexPositionNormalTextureTangent
@@ -304,5 +306,82 @@ struct PSVertexPositionNormalTextureTangent
     float3 normalWorld : NORMAL;
     float3 tangentWorld : TANGENT;
     float2 tex : TEXCOORD0;
+	float4 shadowHomogeneous : TEXCOORD1;
 	float textureIndex : textureIndex;
 };
+
+void ComputePositionWeights(
+	float4x4 boneTransforms[96],
+	float3 inputWeights, 
+	uint4 inputBoneIndices, 
+	float3 inputPositionLocal, 
+	out float3 positionLocal)
+{
+	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+	weights[0] = inputWeights.x;
+	weights[1] = inputWeights.y;
+	weights[2] = inputWeights.z;
+	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
+	
+	positionLocal = float3(0.0f, 0.0f, 0.0f);
+	
+	for(int i = 0; i < 4; ++i)
+	{
+		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]).xyz;
+	}
+}
+
+void ComputePositionNormalWeights(
+	float4x4 boneTransforms[96],
+	float3 inputWeights, 
+	uint4 inputBoneIndices, 
+	float3 inputPositionLocal, 
+	float3 inputNormalLocal,
+	out float3 positionLocal,
+	out float3 normalLocal)
+{
+	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+	weights[0] = inputWeights.x;
+	weights[1] = inputWeights.y;
+	weights[2] = inputWeights.z;
+	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
+	
+	positionLocal = float3(0.0f, 0.0f, 0.0f);
+	normalLocal = float3(0.0f, 0.0f, 0.0f);
+	
+	for(int i = 0; i < 4; ++i)
+	{
+		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]).xyz;
+		normalLocal += weights[i] * mul(inputNormalLocal, (float3x3)boneTransforms[inputBoneIndices[i]]);
+	}
+}
+
+void ComputePositionNormalTangentWeights(
+	float4x4 boneTransforms[96],
+	float3 inputWeights, 
+	uint4 inputBoneIndices, 
+	float3 inputPositionLocal, 
+	float3 inputNormalLocal,
+	float3 inputTangentLocal,
+	out float3 positionLocal,
+	out float3 normalLocal,
+	out float3 tangentLocal)
+{
+	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+	weights[0] = inputWeights.x;
+	weights[1] = inputWeights.y;
+	weights[2] = inputWeights.z;
+	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
+	
+	positionLocal = float3(0.0f, 0.0f, 0.0f);
+	normalLocal = float3(0.0f, 0.0f, 0.0f);
+	tangentLocal = float3(0.0f, 0.0f, 0.0f);
+	
+	for(int i = 0; i < 4; ++i)
+	{
+		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]).xyz;
+		normalLocal += weights[i] * mul(inputNormalLocal, (float3x3)boneTransforms[inputBoneIndices[i]]);
+		//TODO: Not sure about this
+		tangentLocal += weights[i] * mul(float4(inputTangentLocal, 1.0f), boneTransforms[inputBoneIndices[i]]).xyz;
+	}
+}
