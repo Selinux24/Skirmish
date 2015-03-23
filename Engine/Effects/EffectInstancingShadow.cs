@@ -8,7 +8,6 @@ using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 namespace Engine.Effects
 {
     using Engine.Common;
-    using Engine.Properties;
 
     /// <summary>
     /// Basic effect
@@ -141,11 +140,11 @@ namespace Engine.Effects
         /// <summary>
         /// Per frame buffer structure
         /// </summary>
-        public EffectShadow.PerFrameBuffer FrameBuffer = new EffectShadow.PerFrameBuffer();
+        public EffectBasicShadow.PerFrameBuffer FrameBuffer = new EffectBasicShadow.PerFrameBuffer();
         /// <summary>
         /// Per skin buffer structure
         /// </summary>
-        public EffectShadow.PerSkinningBuffer SkinningBuffer = new EffectShadow.PerSkinningBuffer();
+        public EffectBasicShadow.PerSkinningBuffer SkinningBuffer = new EffectBasicShadow.PerSkinningBuffer();
 
         /// <summary>
         /// Constructor

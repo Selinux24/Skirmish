@@ -116,13 +116,18 @@ namespace GameLogic
                 ContentPath = "Resources3D",
                 UsePathFinding = true,
                 PathNodeSize = 5f,
+                DropShadow = true,
             });
             this.model = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = "Resources3D",
                 ModelFileName = "soldier.dae",
-                Instances = this.skirmishGame.AllSoldiers.Length
+                Instances = this.skirmishGame.AllSoldiers.Length,
+                DropShadow = true,
             });
+
+            this.Lights.EnableShadows = true;
+            this.SceneVolume = this.terrain.GetBoundingSphere();
 
             #region HUD
 

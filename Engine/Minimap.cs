@@ -244,10 +244,13 @@ namespace Engine
             DrawerPool.EffectBasic.UpdatePerFrame(null);
 
             DrawerPool.EffectBasic.ObjectBuffer.Material.SetMaterial(Material.Default);
-            DrawerPool.EffectBasic.UpdatePerObject(this.renderTexture, null, 0);
+            DrawerPool.EffectBasic.UpdatePerObject(this.renderTexture, null);
 
             DrawerPool.EffectBasic.SkinningBuffer.FinalTransforms = null;
             DrawerPool.EffectBasic.UpdatePerSkinning();
+
+            DrawerPool.EffectBasic.InstanceBuffer.TextureIndex = 0;
+            DrawerPool.EffectBasic.UpdatePerInstance();
 
             #endregion
 

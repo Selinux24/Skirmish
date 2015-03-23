@@ -52,7 +52,6 @@ namespace Engine.Effects
         [StructLayout(LayoutKind.Sequential)]
         public struct PerObjectBuffer
         {
-            public float TextureIndex;
             public BufferMaterials Material;
 
             public static int Size
@@ -76,6 +75,22 @@ namespace Engine.Effects
                 get
                 {
                     return Marshal.SizeOf(typeof(Matrix)) * MaxBoneTransforms;
+                }
+            }
+        }
+        /// <summary>
+        /// Per model instance update buffer
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct PerInstanceBuffer
+        {
+            public float TextureIndex;
+
+            public static int Size
+            {
+                get
+                {
+                    return Marshal.SizeOf(typeof(PerInstanceBuffer));
                 }
             }
         }
@@ -519,6 +534,10 @@ namespace Engine.Effects
         /// Per skin buffer structure
         /// </summary>
         public EffectBasic.PerSkinningBuffer SkinningBuffer = new EffectBasic.PerSkinningBuffer();
+        /// <summary>
+        /// Per model instance buffer structure
+        /// </summary>
+        public EffectBasic.PerInstanceBuffer InstanceBuffer = new EffectBasic.PerInstanceBuffer();
 
         /// <summary>
         /// Constructor
@@ -668,11 +687,10 @@ namespace Engine.Effects
         /// Update per model object data
         /// </summary>
         /// <param name="texture">Texture</param>
-        /// <param name="textureIndex">Texture index</param>
-        public void UpdatePerObject(ShaderResourceView texture, ShaderResourceView normalMap, int textureIndex = 0)
+        /// <param name="normalMap">Normal map</param>
+        public void UpdatePerObject(ShaderResourceView texture, ShaderResourceView normalMap)
         {
             this.Material = this.ObjectBuffer.Material;
-            this.TextureIndex = textureIndex;
             this.Textures = texture;
             this.NormalMap = normalMap;
         }
@@ -685,6 +703,13 @@ namespace Engine.Effects
             {
                 this.BoneTransforms = this.SkinningBuffer.FinalTransforms;
             }
+        }
+        /// <summary>
+        /// Update per model instance data
+        /// </summary>
+        public void UpdatePerInstance()
+        {
+            this.TextureIndex = (int)this.InstanceBuffer.TextureIndex;
         }
     }
 }

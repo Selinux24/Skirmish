@@ -249,6 +249,7 @@ struct PSVertexBillboard
 	float3 positionWorld : POSITION;
 	float3 normalWorld : NORMAL;
 	float2 tex : TEXCOORD0;
+	float4 shadowHomogeneous : TEXCOORD1;
 	uint primitiveID : SV_PrimitiveID;
 };
 struct PSParticleSolid
@@ -310,78 +311,98 @@ struct PSVertexPositionNormalTextureTangent
 	float textureIndex : textureIndex;
 };
 
-void ComputePositionWeights(
-	float4x4 boneTransforms[96],
-	float3 inputWeights, 
-	uint4 inputBoneIndices, 
-	float3 inputPositionLocal, 
-	out float3 positionLocal)
+/*
+SHADOW MAP INPUTS
+*/
+struct ShadowMapOutput
 {
-	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+	float4 positionHomogeneous : SV_POSITION;
+};
+
+/*
+HELPER FUNCTIONS
+*/
+static const int MAXBONETRANSFORMS = 96;
+
+void PopulateWeights(float3 inputWeights, out float weights[4])
+{
 	weights[0] = inputWeights.x;
 	weights[1] = inputWeights.y;
 	weights[2] = inputWeights.z;
 	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
+}
+
+void ComputePositionWeights(
+	float4x4 boneTransforms[MAXBONETRANSFORMS],
+	float3 inputWeights, 
+	uint4 inputBoneIndices, 
+	float3 inputPositionLocal, 
+	out float4 positionLocal)
+{
+	float weights[4];
+	PopulateWeights(inputWeights, weights);
 	
-	positionLocal = float3(0.0f, 0.0f, 0.0f);
+	positionLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	for(int i = 0; i < 4; ++i)
 	{
-		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]).xyz;
+		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]);
 	}
+
+	positionLocal.w = 1.0f;
 }
 
 void ComputePositionNormalWeights(
-	float4x4 boneTransforms[96],
+	float4x4 boneTransforms[MAXBONETRANSFORMS],
 	float3 inputWeights, 
 	uint4 inputBoneIndices, 
 	float3 inputPositionLocal, 
 	float3 inputNormalLocal,
-	out float3 positionLocal,
-	out float3 normalLocal)
+	out float4 positionLocal,
+	out float4 normalLocal)
 {
-	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-	weights[0] = inputWeights.x;
-	weights[1] = inputWeights.y;
-	weights[2] = inputWeights.z;
-	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
+	float weights[4];
+	PopulateWeights(inputWeights, weights);
 	
-	positionLocal = float3(0.0f, 0.0f, 0.0f);
-	normalLocal = float3(0.0f, 0.0f, 0.0f);
+	positionLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	normalLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	for(int i = 0; i < 4; ++i)
 	{
-		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]).xyz;
-		normalLocal += weights[i] * mul(inputNormalLocal, (float3x3)boneTransforms[inputBoneIndices[i]]);
+		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]);
+		normalLocal += weights[i] * mul(float4(inputNormalLocal, 0.0f), boneTransforms[inputBoneIndices[i]]);
 	}
+
+	positionLocal.w = 1.0f;
+	normalLocal.w = 0.0f;
 }
 
 void ComputePositionNormalTangentWeights(
-	float4x4 boneTransforms[96],
+	float4x4 boneTransforms[MAXBONETRANSFORMS],
 	float3 inputWeights, 
 	uint4 inputBoneIndices, 
 	float3 inputPositionLocal, 
 	float3 inputNormalLocal,
 	float3 inputTangentLocal,
-	out float3 positionLocal,
-	out float3 normalLocal,
-	out float3 tangentLocal)
+	out float4 positionLocal,
+	out float4 normalLocal,
+	out float4 tangentLocal)
 {
-	float weights[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-	weights[0] = inputWeights.x;
-	weights[1] = inputWeights.y;
-	weights[2] = inputWeights.z;
-	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
+	float weights[4];
+	PopulateWeights(inputWeights, weights);
 	
-	positionLocal = float3(0.0f, 0.0f, 0.0f);
-	normalLocal = float3(0.0f, 0.0f, 0.0f);
-	tangentLocal = float3(0.0f, 0.0f, 0.0f);
-	
+	positionLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	normalLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	tangentLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
 	for(int i = 0; i < 4; ++i)
 	{
-		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]).xyz;
-		normalLocal += weights[i] * mul(inputNormalLocal, (float3x3)boneTransforms[inputBoneIndices[i]]);
-		//TODO: Not sure about this
-		tangentLocal += weights[i] * mul(float4(inputTangentLocal, 1.0f), boneTransforms[inputBoneIndices[i]]).xyz;
+		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]);
+		normalLocal += weights[i] * mul(float4(inputNormalLocal, 0.0f), boneTransforms[inputBoneIndices[i]]);
+		tangentLocal += weights[i] * mul(float4(inputTangentLocal, 0.0f), boneTransforms[inputBoneIndices[i]]);
 	}
+
+	positionLocal.w = 1.0f;
+	normalLocal.w = 0.0f;
+	tangentLocal.w = 0.0f;
 }

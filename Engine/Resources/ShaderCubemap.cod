@@ -9,7 +9,7 @@ cbuffer cbPerFrame : register(b0)
 }
 
 //
-// 12 local object(s)
+// 13 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -20,6 +20,12 @@ RasterizerState RasterizerWireFrame
 {
     FillMode = uint(WIREFRAME /* 2 */);
     CullMode = uint(NONE /* 1 */);
+};
+RasterizerState RasterizerDepth
+{
+    DepthBias = uint(10000);
+    DepthBiasClamp = float(0);
+    SlopeScaledDepthBias = float(1);
 };
 DepthStencilState StencilDisableDepth
 {
@@ -177,7 +183,7 @@ fxgroup
                 dcl_output o1.xyz
                 dcl_temps 2
                 
-                #line 24 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
+                #line 24 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 r1.x, r0.xyzw, cb0[0].xyzw  // output<0:NaN:Inf>
@@ -227,7 +233,7 @@ fxgroup
                 dcl_input_ps linear v1.xyz
                 dcl_output o0.xyzw
                 
-                #line 32 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
+                #line 32 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 sample_indexable(texturecube)(float,float,float,float) o0.xyzw, v1.xyzx, t0.xyzw, s0  // PSCubic<0:Inf,1:Inf,2:Inf,3:Inf>
                 ret 
                 // Approximately 2 instruction slots used

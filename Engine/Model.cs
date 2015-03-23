@@ -151,8 +151,8 @@ namespace Engine
                         Matrix worldInverse = Matrix.Invert(world);
                         Matrix worldViewProjection = world * context.ViewProjection;
 
-                        ((EffectShadow)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
-                        ((EffectShadow)effect).UpdatePerFrame();
+                        ((EffectBasicShadow)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
+                        ((EffectBasicShadow)effect).UpdatePerFrame();
                     }
 
                     #endregion
@@ -170,8 +170,8 @@ namespace Engine
                             }
                             else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                             {
-                                ((EffectShadow)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                                ((EffectShadow)effect).UpdatePerSkinning();
+                                ((EffectBasicShadow)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
+                                ((EffectBasicShadow)effect).UpdatePerSkinning();
                             }
                         }
 
@@ -191,13 +191,23 @@ namespace Engine
                                 if (mat != null)
                                 {
                                     ((EffectBasic)effect).ObjectBuffer.Material.SetMaterial(mat.Material);
-                                    ((EffectBasic)effect).UpdatePerObject(mat.DiffuseTexture, mat.NormalMap, this.TextureIndex);
+                                    ((EffectBasic)effect).UpdatePerObject(mat.DiffuseTexture, mat.NormalMap);
                                 }
                                 else
                                 {
                                     ((EffectBasic)effect).ObjectBuffer.Material.SetMaterial(Material.Default);
-                                    ((EffectBasic)effect).UpdatePerObject(null, null, 0);
+                                    ((EffectBasic)effect).UpdatePerObject(null, null);
                                 }
+                            }
+
+                            #endregion
+
+                            #region Per instance update
+
+                            if (context.DrawerMode == DrawerModesEnum.Default)
+                            {
+                                ((EffectBasic)effect).InstanceBuffer.TextureIndex = this.TextureIndex;
+                                ((EffectBasic)effect).UpdatePerInstance();
                             }
 
                             #endregion

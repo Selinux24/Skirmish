@@ -1,7 +1,7 @@
 //
 // FX Version: fx_5_0
 //
-// 9 local object(s)
+// 10 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -12,6 +12,12 @@ RasterizerState RasterizerWireFrame
 {
     FillMode = uint(WIREFRAME /* 2 */);
     CullMode = uint(NONE /* 1 */);
+};
+RasterizerState RasterizerDepth
+{
+    DepthBias = uint(10000);
+    DepthBiasClamp = float(0);
+    SlopeScaledDepthBias = float(1);
 };
 DepthStencilState StencilDisableDepth
 {

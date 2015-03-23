@@ -54,8 +54,9 @@ namespace Engine
                     #region Per frame update
 
                     DrawerPool.EffectBillboard.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
+                    DrawerPool.EffectBillboard.FrameBuffer.ShadowTransform = context.ShadowTransform;
                     DrawerPool.EffectBillboard.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
-                    DrawerPool.EffectBillboard.UpdatePerFrame();
+                    DrawerPool.EffectBillboard.UpdatePerFrame(context.ShadowMap);
 
                     #endregion
 

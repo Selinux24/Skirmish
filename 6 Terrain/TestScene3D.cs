@@ -128,7 +128,7 @@ namespace TerrainTest
                 ContentPath = "Resources",
                 ModelFileName = "helicopter.dae",
                 DropShadow = true,
-                TextureIndex = 1,
+                TextureIndex = 2,
             });
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
@@ -397,6 +397,12 @@ namespace TerrainTest
             if (this.Game.Input.KeyJustReleased(Keys.F7))
             {
                 this.useDebugTex = !this.useDebugTex;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Add))
+            {
+                this.helicopter.TextureIndex++;
+                if (this.helicopter.TextureIndex > 2) this.helicopter.TextureIndex = 0;
             }
 
             if (this.Game.Input.LeftMouseButtonPressed)

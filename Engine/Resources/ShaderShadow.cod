@@ -26,6 +26,12 @@ RasterizerState RasterizerWireFrame
     FillMode = uint(WIREFRAME /* 2 */);
     CullMode = uint(NONE /* 1 */);
 };
+RasterizerState RasterizerDepth
+{
+    DepthBias = uint(10000);
+    DepthBiasClamp = float(0);
+    SlopeScaledDepthBias = float(1);
+};
 DepthStencilState StencilDisableDepth
 {
     DepthEnable = bool(FALSE /* 0 */);
@@ -115,12 +121,6 @@ SamplerComparisonState SamplerShadow
     BorderColor = float4(0, 0, 0, 0);
     ComparisonFunc = uint(LESS /* 2 */);
 };
-RasterizerState Depth
-{
-    DepthBias = uint(10000);
-    DepthBiasClamp = float(0);
-    SlopeScaledDepthBias = float(1);
-};
 
 //
 // 1 groups(s)
@@ -162,7 +162,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
+                // COLOR                    0   xyzw        1     NONE  float       
                 //
                 //
                 // Output signature:
@@ -170,33 +170,28 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_input v0.xyz
-                dcl_input v1.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xyzw
                 dcl_temps 1
                 
-                #line 37 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 18 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw  // VSSMPositionColor<0:NaN:Inf>
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionColor<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionColor<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionColor<3:NaN:Inf>
-                
-                #line 40
-                mov o1.xyzw, v1.xyzw  // VSSMPositionColor<4,5,6,7>
                 ret 
-                // Approximately 8 instruction slots used
+                // Approximately 7 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -233,7 +228,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
+                // COLOR                    0   xyzw        1     NONE  float       
                 // localTransform           0   xyzw        2     NONE  float   xyzw
                 // localTransform           1   xyzw        3     NONE  float   xyzw
                 // localTransform           2   xyzw        4     NONE  float   xyzw
@@ -247,22 +242,19 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_input v0.xyz
-                dcl_input v1.xyzw
                 dcl_input v2.xyzw
                 dcl_input v3.xyzw
                 dcl_input v4.xyzw
                 dcl_input v5.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xyzw
                 dcl_temps 1
                 
-                #line 47 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 27 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -271,15 +263,13 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionColorI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionColorI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionColorI<3:NaN:Inf>
-                
-                #line 52
-                mov o1.xyzw, v1.xyzw  // VSSMPositionColorI<4,5,6,7>
                 ret 
-                // Approximately 10 instruction slots used
+                // Approximately 9 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -324,7 +314,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
+                // COLOR                    0   xyzw        1     NONE  float       
                 // WEIGHTS                  0   xyz         2     NONE  float   xyz 
                 // BONEINDICES              0   xyzw        3     NONE   uint   xyzw
                 //
@@ -334,31 +324,30 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_constantbuffer cb1[383], dynamicIndexed
                 dcl_input v0.xyz
-                dcl_input v1.xyzw
                 dcl_input v2.xyz
                 dcl_input v3.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xyzw
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 321 "IncVertexFormats.fx"
-                mov x0[0].x, v2.x  // weights<0>
-                mov x0[1].x, v2.y  // weights<1>
-                mov x0[2].x, v2.z  // weights<2>
+                #line 332 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
+                
+                #line 343
+                mov x0[0].x, v2.x  // weights<0>
+                mov x0[1].x, v2.y  // weights<1>
+                mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 330
+                #line 349
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -384,21 +373,19 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 68 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 47 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[0].xyzw  // VSSMPositionColorSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[1].xyzw  // VSSMPositionColorSkinned<1:NaN:Inf>
                 dp4 o0.z, r1.xyzw, cb0[2].xyzw  // VSSMPositionColorSkinned<2:NaN:Inf>
                 dp4 o0.w, r1.xyzw, cb0[3].xyzw  // VSSMPositionColorSkinned<3:NaN:Inf>
-                
-                #line 71
-                mov o1.xyzw, v1.xyzw  // VSSMPositionColorSkinned<4,5,6,7>
                 ret 
-                // Approximately 38 instruction slots used
+                // Approximately 37 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -443,7 +430,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
+                // COLOR                    0   xyzw        1     NONE  float       
                 // WEIGHTS                  0   xyz         2     NONE  float   xyz 
                 // BONEINDICES              0   xyzw        3     NONE   uint   xyzw
                 // localTransform           0   xyzw        4     NONE  float   xyzw
@@ -459,14 +446,12 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_constantbuffer cb1[383], dynamicIndexed
                 dcl_input v0.xyz
-                dcl_input v1.xyzw
                 dcl_input v2.xyz
                 dcl_input v3.xyzw
                 dcl_input v4.xyzw
@@ -474,20 +459,21 @@ fxgroup
                 dcl_input v6.xyzw
                 dcl_input v7.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xyzw
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 321 "IncVertexFormats.fx"
-                mov x0[0].x, v2.x  // weights<0>
-                mov x0[1].x, v2.y  // weights<1>
-                mov x0[2].x, v2.z  // weights<2>
+                #line 332 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
+                
+                #line 343
+                mov x0[0].x, v2.x  // weights<0>
+                mov x0[1].x, v2.y  // weights<1>
+                mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 330
+                #line 349
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -513,7 +499,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 87 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 65 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -522,15 +508,13 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionColorSkinnedI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionColorSkinnedI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionColorSkinnedI<3:NaN:Inf>
-                
-                #line 92
-                mov o1.xyzw, v1.xyzw  // VSSMPositionColorSkinnedI<4,5,6,7>
                 ret 
-                // Approximately 41 instruction slots used
+                // Approximately 40 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -568,7 +552,7 @@ fxgroup
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
-                // COLOR                    0   xyzw        2     NONE  float   xyzw
+                // COLOR                    0   xyzw        2     NONE  float       
                 //
                 //
                 // Output signature:
@@ -576,33 +560,28 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_input v0.xyz
-                dcl_input v2.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xyzw
                 dcl_temps 1
                 
-                #line 99 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 76 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw  // VSSMPositionNormalColor<0:NaN:Inf>
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionNormalColor<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionNormalColor<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionNormalColor<3:NaN:Inf>
-                
-                #line 102
-                mov o1.xyzw, v2.xyzw  // VSSMPositionNormalColor<4,5,6,7>
                 ret 
-                // Approximately 8 instruction slots used
+                // Approximately 7 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -640,7 +619,7 @@ fxgroup
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
-                // COLOR                    0   xyzw        2     NONE  float   xyzw
+                // COLOR                    0   xyzw        2     NONE  float       
                 // localTransform           0   xyzw        3     NONE  float   xyzw
                 // localTransform           1   xyzw        4     NONE  float   xyzw
                 // localTransform           2   xyzw        5     NONE  float   xyzw
@@ -654,22 +633,19 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_input v0.xyz
-                dcl_input v2.xyzw
                 dcl_input v3.xyzw
                 dcl_input v4.xyzw
                 dcl_input v5.xyzw
                 dcl_input v6.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xyzw
                 dcl_temps 1
                 
-                #line 109 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 85 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -678,15 +654,13 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionNormalColorI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionNormalColorI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionNormalColorI<3:NaN:Inf>
-                
-                #line 114
-                mov o1.xyzw, v2.xyzw  // VSSMPositionNormalColorI<4,5,6,7>
                 ret 
-                // Approximately 10 instruction slots used
+                // Approximately 9 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -732,7 +706,7 @@ fxgroup
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
-                // COLOR                    0   xyzw        2     NONE  float   xyzw
+                // COLOR                    0   xyzw        2     NONE  float       
                 // WEIGHTS                  0   xyz         3     NONE  float   xyz 
                 // BONEINDICES              0   xyzw        4     NONE   uint   xyzw
                 //
@@ -742,31 +716,30 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_constantbuffer cb1[383], dynamicIndexed
                 dcl_input v0.xyz
-                dcl_input v2.xyzw
                 dcl_input v3.xyz
                 dcl_input v4.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xyzw
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 321 "IncVertexFormats.fx"
-                mov x0[0].x, v3.x  // weights<0>
-                mov x0[1].x, v3.y  // weights<1>
-                mov x0[2].x, v3.z  // weights<2>
+                #line 332 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
+                
+                #line 343
+                mov x0[0].x, v3.x  // weights<0>
+                mov x0[1].x, v3.y  // weights<1>
+                mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 330
+                #line 349
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -792,21 +765,19 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 130 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 105 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[0].xyzw  // VSSMPositionNormalColorSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[1].xyzw  // VSSMPositionNormalColorSkinned<1:NaN:Inf>
                 dp4 o0.z, r1.xyzw, cb0[2].xyzw  // VSSMPositionNormalColorSkinned<2:NaN:Inf>
                 dp4 o0.w, r1.xyzw, cb0[3].xyzw  // VSSMPositionNormalColorSkinned<3:NaN:Inf>
-                
-                #line 133
-                mov o1.xyzw, v2.xyzw  // VSSMPositionNormalColorSkinned<4,5,6,7>
                 ret 
-                // Approximately 38 instruction slots used
+                // Approximately 37 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -852,7 +823,7 @@ fxgroup
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
-                // COLOR                    0   xyzw        2     NONE  float   xyzw
+                // COLOR                    0   xyzw        2     NONE  float       
                 // WEIGHTS                  0   xyz         3     NONE  float   xyz 
                 // BONEINDICES              0   xyzw        4     NONE   uint   xyzw
                 // localTransform           0   xyzw        5     NONE  float   xyzw
@@ -868,14 +839,12 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // COLOR                    0   xyzw        1     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_constantbuffer cb1[383], dynamicIndexed
                 dcl_input v0.xyz
-                dcl_input v2.xyzw
                 dcl_input v3.xyz
                 dcl_input v4.xyzw
                 dcl_input v5.xyzw
@@ -883,20 +852,21 @@ fxgroup
                 dcl_input v7.xyzw
                 dcl_input v8.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xyzw
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 321 "IncVertexFormats.fx"
-                mov x0[0].x, v3.x  // weights<0>
-                mov x0[1].x, v3.y  // weights<1>
-                mov x0[2].x, v3.z  // weights<2>
+                #line 332 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
+                
+                #line 343
+                mov x0[0].x, v3.x  // weights<0>
+                mov x0[1].x, v3.y  // weights<1>
+                mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 330
+                #line 349
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -922,7 +892,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 149 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 123 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, r1.yyyy, v6.xyzw
                 mad r0.xyzw, r1.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v7.xyzw, r0.xyzw
@@ -931,15 +901,13 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionNormalColorSkinnedI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionNormalColorSkinnedI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionNormalColorSkinnedI<3:NaN:Inf>
-                
-                #line 154
-                mov o1.xyzw, v2.xyzw  // VSSMPositionNormalColorSkinnedI<4,5,6,7>
                 ret 
-                // Approximately 41 instruction slots used
+                // Approximately 40 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -976,7 +944,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
+                // TEXCOORD                 0   xy          1     NONE  float       
                 //
                 //
                 // Output signature:
@@ -984,33 +952,28 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_input v0.xyz
-                dcl_input v1.xy
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 1
                 
-                #line 161 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 134 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw  // VSSMPositionTexture<0:NaN:Inf>
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionTexture<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionTexture<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionTexture<3:NaN:Inf>
-                
-                #line 164
-                mov o1.xy, v1.xyxx  // VSSMPositionTexture<4,5>
                 ret 
-                // Approximately 8 instruction slots used
+                // Approximately 7 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -1047,7 +1010,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
+                // TEXCOORD                 0   xy          1     NONE  float       
                 // localTransform           0   xyzw        2     NONE  float   xyzw
                 // localTransform           1   xyzw        3     NONE  float   xyzw
                 // localTransform           2   xyzw        4     NONE  float   xyzw
@@ -1061,22 +1024,19 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_input v0.xyz
-                dcl_input v1.xy
                 dcl_input v2.xyzw
                 dcl_input v3.xyzw
                 dcl_input v4.xyzw
                 dcl_input v5.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 1
                 
-                #line 171 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 143 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -1085,15 +1045,13 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionTextureI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionTextureI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionTextureI<3:NaN:Inf>
-                
-                #line 176
-                mov o1.xy, v1.xyxx  // VSSMPositionTextureI<4,5>
                 ret 
-                // Approximately 10 instruction slots used
+                // Approximately 9 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -1138,7 +1096,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
+                // TEXCOORD                 0   xy          1     NONE  float       
                 // WEIGHTS                  0   xyz         2     NONE  float   xyz 
                 // BONEINDICES              0   xyzw        3     NONE   uint   xyzw
                 //
@@ -1148,31 +1106,30 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_constantbuffer cb1[383], dynamicIndexed
                 dcl_input v0.xyz
-                dcl_input v1.xy
                 dcl_input v2.xyz
                 dcl_input v3.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 321 "IncVertexFormats.fx"
-                mov x0[0].x, v2.x  // weights<0>
-                mov x0[1].x, v2.y  // weights<1>
-                mov x0[2].x, v2.z  // weights<2>
+                #line 332 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
+                
+                #line 343
+                mov x0[0].x, v2.x  // weights<0>
+                mov x0[1].x, v2.y  // weights<1>
+                mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 330
+                #line 349
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1198,21 +1155,19 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 192 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 163 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[0].xyzw  // VSSMPositionTextureSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[1].xyzw  // VSSMPositionTextureSkinned<1:NaN:Inf>
                 dp4 o0.z, r1.xyzw, cb0[2].xyzw  // VSSMPositionTextureSkinned<2:NaN:Inf>
                 dp4 o0.w, r1.xyzw, cb0[3].xyzw  // VSSMPositionTextureSkinned<3:NaN:Inf>
-                
-                #line 195
-                mov o1.xy, v1.xyxx  // VSSMPositionTextureSkinned<4,5>
                 ret 
-                // Approximately 38 instruction slots used
+                // Approximately 37 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -1257,7 +1212,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
+                // TEXCOORD                 0   xy          1     NONE  float       
                 // WEIGHTS                  0   xyz         2     NONE  float   xyz 
                 // BONEINDICES              0   xyzw        3     NONE   uint   xyzw
                 // localTransform           0   xyzw        4     NONE  float   xyzw
@@ -1273,14 +1228,12 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_constantbuffer cb1[383], dynamicIndexed
                 dcl_input v0.xyz
-                dcl_input v1.xy
                 dcl_input v2.xyz
                 dcl_input v3.xyzw
                 dcl_input v4.xyzw
@@ -1288,20 +1241,21 @@ fxgroup
                 dcl_input v6.xyzw
                 dcl_input v7.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 321 "IncVertexFormats.fx"
-                mov x0[0].x, v2.x  // weights<0>
-                mov x0[1].x, v2.y  // weights<1>
-                mov x0[2].x, v2.z  // weights<2>
+                #line 332 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
+                
+                #line 343
+                mov x0[0].x, v2.x  // weights<0>
+                mov x0[1].x, v2.y  // weights<1>
+                mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 330
+                #line 349
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1327,7 +1281,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 211 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 181 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -1336,15 +1290,13 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionTextureSkinnedI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionTextureSkinnedI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionTextureSkinnedI<3:NaN:Inf>
-                
-                #line 216
-                mov o1.xy, v1.xyxx  // VSSMPositionTextureSkinnedI<4,5>
                 ret 
-                // Approximately 41 instruction slots used
+                // Approximately 40 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -1382,7 +1334,7 @@ fxgroup
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
-                // TEXCOORD                 0   xy          2     NONE  float   xy  
+                // TEXCOORD                 0   xy          2     NONE  float       
                 //
                 //
                 // Output signature:
@@ -1390,33 +1342,28 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_input v0.xyz
-                dcl_input v2.xy
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 1
                 
-                #line 223 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 192 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw  // VSSMPositionNormalTexture<0:NaN:Inf>
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionNormalTexture<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionNormalTexture<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionNormalTexture<3:NaN:Inf>
-                
-                #line 226
-                mov o1.xy, v2.xyxx  // VSSMPositionNormalTexture<4,5>
                 ret 
-                // Approximately 8 instruction slots used
+                // Approximately 7 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -1454,7 +1401,7 @@ fxgroup
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
-                // TEXCOORD                 0   xy          2     NONE  float   xy  
+                // TEXCOORD                 0   xy          2     NONE  float       
                 // localTransform           0   xyzw        3     NONE  float   xyzw
                 // localTransform           1   xyzw        4     NONE  float   xyzw
                 // localTransform           2   xyzw        5     NONE  float   xyzw
@@ -1468,22 +1415,19 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_input v0.xyz
-                dcl_input v2.xy
                 dcl_input v3.xyzw
                 dcl_input v4.xyzw
                 dcl_input v5.xyzw
                 dcl_input v6.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 1
                 
-                #line 233 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 201 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -1492,15 +1436,13 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionNormalTextureI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionNormalTextureI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionNormalTextureI<3:NaN:Inf>
-                
-                #line 238
-                mov o1.xy, v2.xyxx  // VSSMPositionNormalTextureI<4,5>
                 ret 
-                // Approximately 10 instruction slots used
+                // Approximately 9 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -1546,7 +1488,7 @@ fxgroup
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
-                // TEXCOORD                 0   xy          2     NONE  float   xy  
+                // TEXCOORD                 0   xy          2     NONE  float       
                 // WEIGHTS                  0   xyz         3     NONE  float   xyz 
                 // BONEINDICES              0   xyzw        4     NONE   uint   xyzw
                 //
@@ -1556,31 +1498,30 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_constantbuffer cb1[383], dynamicIndexed
                 dcl_input v0.xyz
-                dcl_input v2.xy
                 dcl_input v3.xyz
                 dcl_input v4.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 321 "IncVertexFormats.fx"
-                mov x0[0].x, v3.x  // weights<0>
-                mov x0[1].x, v3.y  // weights<1>
-                mov x0[2].x, v3.z  // weights<2>
+                #line 332 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
+                
+                #line 343
+                mov x0[0].x, v3.x  // weights<0>
+                mov x0[1].x, v3.y  // weights<1>
+                mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 330
+                #line 349
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1606,21 +1547,19 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 254 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 221 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[0].xyzw  // VSSMPositionNormalTextureSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[1].xyzw  // VSSMPositionNormalTextureSkinned<1:NaN:Inf>
                 dp4 o0.z, r1.xyzw, cb0[2].xyzw  // VSSMPositionNormalTextureSkinned<2:NaN:Inf>
                 dp4 o0.w, r1.xyzw, cb0[3].xyzw  // VSSMPositionNormalTextureSkinned<3:NaN:Inf>
-                
-                #line 257
-                mov o1.xy, v2.xyxx  // VSSMPositionNormalTextureSkinned<4,5>
                 ret 
-                // Approximately 38 instruction slots used
+                // Approximately 37 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -1666,7 +1605,7 @@ fxgroup
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
-                // TEXCOORD                 0   xy          2     NONE  float   xy  
+                // TEXCOORD                 0   xy          2     NONE  float       
                 // WEIGHTS                  0   xyz         3     NONE  float   xyz 
                 // BONEINDICES              0   xyzw        4     NONE   uint   xyzw
                 // localTransform           0   xyzw        5     NONE  float   xyzw
@@ -1682,14 +1621,12 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_constantbuffer cb1[383], dynamicIndexed
                 dcl_input v0.xyz
-                dcl_input v2.xy
                 dcl_input v3.xyz
                 dcl_input v4.xyzw
                 dcl_input v5.xyzw
@@ -1697,20 +1634,21 @@ fxgroup
                 dcl_input v7.xyzw
                 dcl_input v8.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 321 "IncVertexFormats.fx"
-                mov x0[0].x, v3.x  // weights<0>
-                mov x0[1].x, v3.y  // weights<1>
-                mov x0[2].x, v3.z  // weights<2>
+                #line 332 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
+                
+                #line 343
+                mov x0[0].x, v3.x  // weights<0>
+                mov x0[1].x, v3.y  // weights<1>
+                mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 330
+                #line 349
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1736,7 +1674,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 273 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 239 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, r1.yyyy, v6.xyzw
                 mad r0.xyzw, r1.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v7.xyzw, r0.xyzw
@@ -1745,15 +1683,13 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionNormalTextureSkinnedI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionNormalTextureSkinnedI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionNormalTextureSkinnedI<3:NaN:Inf>
-                
-                #line 278
-                mov o1.xy, v2.xyxx  // VSSMPositionNormalTextureSkinnedI<4,5>
                 ret 
-                // Approximately 41 instruction slots used
+                // Approximately 40 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -1792,7 +1728,7 @@ fxgroup
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
                 // TANGENT                  0   xyz         2     NONE  float       
-                // TEXCOORD                 0   xy          3     NONE  float   xy  
+                // TEXCOORD                 0   xy          3     NONE  float       
                 //
                 //
                 // Output signature:
@@ -1800,33 +1736,28 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_input v0.xyz
-                dcl_input v3.xy
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 1
                 
-                #line 285 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 250 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw  // VSSMPositionNormalTextureTangent<0:NaN:Inf>
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionNormalTextureTangent<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionNormalTextureTangent<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionNormalTextureTangent<3:NaN:Inf>
-                
-                #line 288
-                mov o1.xy, v3.xyxx  // VSSMPositionNormalTextureTangent<4,5>
                 ret 
-                // Approximately 8 instruction slots used
+                // Approximately 7 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -1865,7 +1796,7 @@ fxgroup
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
                 // TANGENT                  0   xyz         2     NONE  float       
-                // TEXCOORD                 0   xy          3     NONE  float   xy  
+                // TEXCOORD                 0   xy          3     NONE  float       
                 // localTransform           0   xyzw        4     NONE  float   xyzw
                 // localTransform           1   xyzw        5     NONE  float   xyzw
                 // localTransform           2   xyzw        6     NONE  float   xyzw
@@ -1879,22 +1810,19 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_input v0.xyz
-                dcl_input v3.xy
                 dcl_input v4.xyzw
                 dcl_input v5.xyzw
                 dcl_input v6.xyzw
                 dcl_input v7.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 1
                 
-                #line 295 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 259 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, v0.yyyy, v5.xyzw
                 mad r0.xyzw, v0.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v6.xyzw, r0.xyzw
@@ -1903,15 +1831,13 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionNormalTextureTangentI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionNormalTextureTangentI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionNormalTextureTangentI<3:NaN:Inf>
-                
-                #line 300
-                mov o1.xy, v3.xyxx  // VSSMPositionNormalTextureTangentI<4,5>
                 ret 
-                // Approximately 10 instruction slots used
+                // Approximately 9 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -1958,7 +1884,7 @@ fxgroup
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
                 // TANGENT                  0   xyz         2     NONE  float       
-                // TEXCOORD                 0   xy          3     NONE  float   xy  
+                // TEXCOORD                 0   xy          3     NONE  float       
                 // WEIGHTS                  0   xyz         4     NONE  float   xyz 
                 // BONEINDICES              0   xyzw        5     NONE   uint   xyzw
                 //
@@ -1968,31 +1894,30 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_constantbuffer cb1[383], dynamicIndexed
                 dcl_input v0.xyz
-                dcl_input v3.xy
                 dcl_input v4.xyz
                 dcl_input v5.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 321 "IncVertexFormats.fx"
-                mov x0[0].x, v4.x  // weights<0>
-                mov x0[1].x, v4.y  // weights<1>
-                mov x0[2].x, v4.z  // weights<2>
+                #line 332 "IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
+                
+                #line 343
+                mov x0[0].x, v4.x  // weights<0>
+                mov x0[1].x, v4.y  // weights<1>
+                mov x0[2].x, v4.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 330
+                #line 349
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -2018,21 +1943,19 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 316 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 279 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[0].xyzw  // VSSMPositionNormalTextureTangentSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[1].xyzw  // VSSMPositionNormalTextureTangentSkinned<1:NaN:Inf>
                 dp4 o0.z, r1.xyzw, cb0[2].xyzw  // VSSMPositionNormalTextureTangentSkinned<2:NaN:Inf>
                 dp4 o0.w, r1.xyzw, cb0[3].xyzw  // VSSMPositionNormalTextureTangentSkinned<3:NaN:Inf>
-                
-                #line 319
-                mov o1.xy, v3.xyxx  // VSSMPositionNormalTextureTangentSkinned<4,5>
                 ret 
-                // Approximately 38 instruction slots used
+                // Approximately 37 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }
@@ -2079,7 +2002,7 @@ fxgroup
                 // POSITION                 0   xyz         0     NONE  float   xyz 
                 // NORMAL                   0   xyz         1     NONE  float       
                 // TANGENT                  0   xyz         2     NONE  float       
-                // TEXCOORD                 0   xy          3     NONE  float   xy  
+                // TEXCOORD                 0   xy          3     NONE  float       
                 // WEIGHTS                  0   xyz         4     NONE  float   xyz 
                 // BONEINDICES              0   xyzw        5     NONE   uint   xyzw
                 // localTransform           0   xyzw        6     NONE  float   xyzw
@@ -2095,14 +2018,12 @@ fxgroup
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
                 // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                // TEXCOORD                 0   xy          1     NONE  float   xy  
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[4], immediateIndexed
                 dcl_constantbuffer cb1[383], dynamicIndexed
                 dcl_input v0.xyz
-                dcl_input v3.xy
                 dcl_input v4.xyz
                 dcl_input v5.xyzw
                 dcl_input v6.xyzw
@@ -2110,20 +2031,21 @@ fxgroup
                 dcl_input v8.xyzw
                 dcl_input v9.xyzw
                 dcl_output_siv o0.xyzw, position
-                dcl_output o1.xy
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 321 "IncVertexFormats.fx"
-                mov x0[0].x, v4.x  // weights<0>
-                mov x0[1].x, v4.y  // weights<1>
-                mov x0[2].x, v4.z  // weights<2>
+                #line 332 "IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
+                
+                #line 343
+                mov x0[0].x, v4.x  // weights<0>
+                mov x0[1].x, v4.y  // weights<1>
+                mov x0[2].x, v4.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 330
+                #line 349
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -2149,7 +2071,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 335 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 297 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, r1.yyyy, v7.xyzw
                 mad r0.xyzw, r1.xxxx, v6.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v8.xyzw, r0.xyzw
@@ -2158,15 +2080,13 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[1].xyzw  // VSSMPositionNormalTextureTangentSkinnedI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[2].xyzw  // VSSMPositionNormalTextureTangentSkinnedI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[3].xyzw  // VSSMPositionNormalTextureTangentSkinnedI<3:NaN:Inf>
-                
-                #line 340
-                mov o1.xy, v3.xyxx  // VSSMPositionNormalTextureTangentSkinnedI<4,5>
                 ret 
-                // Approximately 41 instruction slots used
+                // Approximately 40 instruction slots used
                             
             };
+            GeometryShader = NULL;
             PixelShader = NULL;
-            RasterizerState = Depth;
+            RasterizerState = RasterizerDepth;
         }
 
     }

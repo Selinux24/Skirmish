@@ -145,10 +145,13 @@ namespace Engine
             this.effect.UpdatePerFrame(null);
 
             this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-            this.effect.UpdatePerObject(this.Texture, null, 0);
+            this.effect.UpdatePerObject(this.Texture, null);
 
             this.effect.SkinningBuffer.FinalTransforms = null;
             this.effect.UpdatePerSkinning();
+
+            this.effect.InstanceBuffer.TextureIndex = 0;
+            this.effect.UpdatePerInstance();
 
             #endregion
 

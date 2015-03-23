@@ -36,7 +36,7 @@ namespace Engine.Effects
         /// <summary>
         /// Shadows effect
         /// </summary>
-        public static EffectShadow EffectShadow { get; private set; }
+        public static EffectBasicShadow EffectShadow { get; private set; }
         /// <summary>
         /// Instancing shadows effect
         /// </summary>
@@ -51,28 +51,23 @@ namespace Engine.Effects
             if (Resources.ShaderBasicFxo != null)
             {
                 EffectBasic = new EffectBasic(device, Resources.ShaderBasicFxo, false);
+                EffectInstancing = new EffectInstancing(device, Resources.ShaderBasicFxo, false);
             }
             else
             {
                 EffectBasic = new EffectBasic(device, Resources.ShaderBasicFx, true);
+                EffectInstancing = new EffectInstancing(device, Resources.ShaderBasicFx, true);
             }
 
-            if (Resources.ShaderBillboardFxo != null)
+            if (Resources.ShaderShadowFxo != null)
             {
-                EffectBillboard = new EffectBillboard(device, Resources.ShaderBillboardFxo, false);
+                EffectShadow = new EffectBasicShadow(device, Resources.ShaderShadowFxo, false);
+                EffectInstancingShadow = new EffectInstancingShadow(device, Resources.ShaderShadowFxo, false);
             }
             else
             {
-                EffectBillboard = new EffectBillboard(device, Resources.ShaderBillboardFx, true);
-            }
-
-            if (Resources.ShaderCubemapFxo != null)
-            {
-                EffectCubemap = new EffectCubemap(device, Resources.ShaderCubemapFxo, false);
-            }
-            else
-            {
-                EffectCubemap = new EffectCubemap(device, Resources.ShaderCubemapFx, true);
+                EffectShadow = new EffectBasicShadow(device, Resources.ShaderShadowFx, true);
+                EffectInstancingShadow = new EffectInstancingShadow(device, Resources.ShaderShadowFx, true);
             }
 
             if (Resources.ShaderFontFxo != null)
@@ -84,13 +79,22 @@ namespace Engine.Effects
                 EffectFont = new EffectFont(device, Resources.ShaderFontFx, true);
             }
 
-            if (Resources.ShaderInstancingFxo != null)
+            if (Resources.ShaderCubemapFxo != null)
             {
-                EffectInstancing = new EffectInstancing(device, Resources.ShaderInstancingFxo, false);
+                EffectCubemap = new EffectCubemap(device, Resources.ShaderCubemapFxo, false);
             }
             else
             {
-                EffectInstancing = new EffectInstancing(device, Resources.ShaderInstancingFx, true);
+                EffectCubemap = new EffectCubemap(device, Resources.ShaderCubemapFx, true);
+            }
+
+            if (Resources.ShaderBillboardFxo != null)
+            {
+                EffectBillboard = new EffectBillboard(device, Resources.ShaderBillboardFxo, false);
+            }
+            else
+            {
+                EffectBillboard = new EffectBillboard(device, Resources.ShaderBillboardFx, true);
             }
 
             if (Resources.ShaderParticlesFxo != null)
@@ -102,23 +106,7 @@ namespace Engine.Effects
                 EffectParticles = new EffectParticles(device, Resources.ShaderParticlesFx, true);
             }
 
-            if (Resources.ShaderShadowFxo != null)
-            {
-                EffectShadow = new EffectShadow(device, Resources.ShaderShadowFxo, false);
-            }
-            else
-            {
-                EffectShadow = new EffectShadow(device, Resources.ShaderShadowFx, true);
-            }
-
-            if (Resources.ShaderShadowFxo != null)
-            {
-                EffectInstancingShadow = new EffectInstancingShadow(device, Resources.ShaderShadowFxo, false);
-            }
-            else
-            {
-                EffectInstancingShadow = new EffectInstancingShadow(device, Resources.ShaderShadowFx, true);
-            }
+            
         }
         /// <summary>
         /// Dispose of used resources

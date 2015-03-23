@@ -8,6 +8,12 @@ RasterizerState RasterizerWireFrame
 	FillMode = WIREFRAME;
 	CullMode = NONE;
 };
+RasterizerState RasterizerDepth
+{
+	DepthBias = 10000;
+    DepthBiasClamp = 0.0f;
+	SlopeScaledDepthBias = 1.0f;
+};
 
 DepthStencilState StencilDisableDepth
 {
@@ -131,9 +137,7 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, floa
 	float3x3 TBN = float3x3(T, B, N);
 	
 	// Transform from tangent space to world space.
-	float3 bumpedNormalW = mul(normalT, TBN);
-
-	return bumpedNormalW;
+	return mul(normalT, TBN);
 }
 
 void ComputeDirectionalLight(
@@ -274,13 +278,13 @@ void ComputeSpotLight(
 	spec *= attenuation;
 }
 
-static const float SMAP_SIZE = 2048.0f;
-static const float SMAP_DX = 1.0f / SMAP_SIZE;
-static	const float2 SamplerShadowOffsets[9] =
+static const float SHADOWMAPSIZE = 2048.0f;
+static const float SHADOWMAPDX = 1.0f / SHADOWMAPSIZE;
+static const float2 SamplerShadowOffsets[9] =
 {
-	float2(-SMAP_DX, -SMAP_DX),		float2(0.0f, -SMAP_DX),		float2(SMAP_DX, -SMAP_DX),
-	float2(-SMAP_DX, 0.0f),			float2(0.0f, 0.0f),			float2(SMAP_DX, 0.0f),
-	float2(-SMAP_DX, +SMAP_DX),		float2(0.0f, +SMAP_DX),		float2(SMAP_DX, +SMAP_DX)
+	float2(-SHADOWMAPDX, -SHADOWMAPDX),		float2(0.0f, -SHADOWMAPDX),		float2(SHADOWMAPDX, -SHADOWMAPDX),
+	float2(-SHADOWMAPDX, 0.0f),				float2(0.0f, 0.0f),				float2(SHADOWMAPDX, 0.0f),
+	float2(-SHADOWMAPDX, +SHADOWMAPDX),		float2(0.0f, +SHADOWMAPDX),		float2(SHADOWMAPDX, +SHADOWMAPDX)
 };
 
 float CalcShadowFactor(float4 shadowPosH, Texture2D shadowMap)

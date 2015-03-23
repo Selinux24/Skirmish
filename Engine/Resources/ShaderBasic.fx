@@ -1,6 +1,9 @@
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
+/**********************************************************************************************************
+BUFFERS & VARIABLES
+**********************************************************************************************************/
 cbuffer cbPerFrame : register (b0)
 {
 	float4x4 gWorld;
@@ -19,19 +22,26 @@ cbuffer cbPerFrame : register (b0)
 
 cbuffer cbPerObject : register (b1)
 {
-	float gTextureIndex;
 	Material gMaterial;
 };
 
 cbuffer cbSkinned : register (b2)
 {
-	float4x4 gBoneTransforms[96];
+	float4x4 gBoneTransforms[MAXBONETRANSFORMS];
+};
+
+cbuffer cbPerInstance : register (b3)
+{
+	float gTextureIndex;
 };
 
 Texture2DArray gTextureArray;
 Texture2D gNormalMap;
 Texture2D gShadowMap;
 
+/**********************************************************************************************************
+POSITION COLOR
+**********************************************************************************************************/
 PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
 {
     PSVertexPositionColor output = (PSVertexPositionColor)0;
@@ -43,21 +53,56 @@ PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
     return output;
 }
 
+PSVertexPositionColor VSPositionColorI(VSVertexPositionColorI input)
+{
+    PSVertexPositionColor output = (PSVertexPositionColor)0;
+
+    float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
+
+    output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+    output.positionWorld = mul(instancePosition, gWorld).xyz;
+	output.color = input.color;
+    
+    return output;
+}
+
 PSVertexPositionColor VSPositionColorSkinned(VSVertexPositionColorSkinned input)
 {
     PSVertexPositionColor output = (PSVertexPositionColor)0;
 
-	float3 posL = float3(0.0f, 0.0f, 0.0f);
+	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionWeights(
 		gBoneTransforms,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
-		posL);
+		positionL);
 
-	output.positionHomogeneous = mul(float4(posL, 1.0f), gWorldViewProjection);
-	output.positionWorld = mul(float4(posL, 1.0f), gWorld).xyz;
+	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
+	output.positionWorld = mul(positionL, gWorld).xyz;
+	output.color = input.color;
+    
+    return output;
+}
+
+PSVertexPositionColor VSPositionColorSkinnedI(VSVertexPositionColorSkinnedI input)
+{
+    PSVertexPositionColor output = (PSVertexPositionColor)0;
+
+	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	ComputePositionWeights(
+		gBoneTransforms,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		positionL);
+
+    float4 instancePosition = mul(positionL, input.localTransform);
+	
+	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.color = input.color;
     
     return output;
@@ -78,17 +123,33 @@ float4 PSPositionColor(PSVertexPositionColor input) : SV_TARGET
 	return litColor;
 }
 
+/**********************************************************************************************************
+POSITION NORMAL COLOR
+**********************************************************************************************************/
 PSVertexPositionNormalColor VSPositionNormalColor(VSVertexPositionNormalColor input)
 {
     PSVertexPositionNormalColor output = (PSVertexPositionNormalColor)0;
 
     output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
     output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
-    output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
+	output.shadowHomogeneous = mul(float4(input.positionLocal, 1), gShadowTransform);
+    output.normalWorld = mul(float4(input.normalLocal, 0), gWorldInverse).xyz;
 	output.color = input.color;
-	output.shadowHomogeneous = mul(float4(input.positionLocal, 1.0f), gShadowTransform);
     
-	output.normalWorld = normalize(output.normalWorld);
+    return output;
+}
+
+PSVertexPositionNormalColor VSPositionNormalColorI(VSVertexPositionNormalColorI input)
+{
+    PSVertexPositionNormalColor output = (PSVertexPositionNormalColor)0;
+
+    float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
+
+    output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+    output.positionWorld = mul(instancePosition, gWorld).xyz;
+	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
+    output.normalWorld = mul(float4(input.normalLocal, 0), gWorldInverse).xyz;
+	output.color = input.color;
 
     return output;
 }
@@ -97,8 +158,8 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinned(VSVertexPositionNormalC
 {
     PSVertexPositionNormalColor output = (PSVertexPositionNormalColor)0;
 
-	float3 posL = float3(0.0f, 0.0f, 0.0f);
-	float3 normalL = float3(0.0f, 0.0f, 0.0f);
+	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionNormalWeights(
 		gBoneTransforms,
@@ -106,16 +167,41 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinned(VSVertexPositionNormalC
 		input.boneIndices,
 		input.positionLocal,
 		input.normalLocal,
-		posL,
+		positionL,
 		normalL);
 
-	output.positionHomogeneous = mul(float4(posL, 1.0f), gWorldViewProjection);
-	output.positionWorld = mul(float4(posL, 1.0f), gWorld).xyz;
-	output.normalWorld = normalize(mul(normalL, (float3x3)gWorldInverse));
+	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
+	output.positionWorld = mul(positionL, gWorld).xyz;
+	output.shadowHomogeneous = mul(positionL, gShadowTransform);
+	output.normalWorld = mul(normalL, gWorldInverse).xyz;
 	output.color = input.color;
-	output.shadowHomogeneous = mul(float4(posL, 1.0f), gShadowTransform);
-    
-	output.normalWorld = normalize(output.normalWorld);
+
+    return output;
+}
+
+PSVertexPositionNormalColor VSPositionNormalColorSkinnedI(VSVertexPositionNormalColorSkinnedI input)
+{
+    PSVertexPositionNormalColor output = (PSVertexPositionNormalColor)0;
+
+	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	ComputePositionNormalWeights(
+		gBoneTransforms,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		input.normalLocal,
+		positionL,
+		normalL);
+
+    float4 instancePosition = mul(positionL, input.localTransform);
+	
+	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+	output.positionWorld = mul(instancePosition, gWorld).xyz;
+	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
+	output.normalWorld = mul(normalL, gWorldInverse).xyz;
+	output.color = input.color;
 
     return output;
 }
@@ -129,7 +215,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	LightInput lInput = (LightInput)0;
 	lInput.toEyeWorld = toEyeWorld;
 	lInput.positionWorld = input.positionWorld;
-	lInput.normalWorld = input.normalWorld;
+	lInput.normalWorld = normalize(input.normalWorld);
 	lInput.material = gMaterial;
 	lInput.dirLights = gDirLights;
 	lInput.pointLight = gPointLight;
@@ -151,6 +237,9 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	return litColor;
 }
 
+/**********************************************************************************************************
+POSITION TEXTURE
+**********************************************************************************************************/
 PSVertexPositionTexture VSPositionTexture(VSVertexPositionTexture input)
 {
     PSVertexPositionTexture output = (PSVertexPositionTexture)0;
@@ -163,23 +252,60 @@ PSVertexPositionTexture VSPositionTexture(VSVertexPositionTexture input)
     return output;
 }
 
+PSVertexPositionTexture VSPositionTextureI(VSVertexPositionTextureI input)
+{
+    PSVertexPositionTexture output = (PSVertexPositionTexture)0;
+
+    float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
+
+    output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+    output.positionWorld = mul(instancePosition, gWorld).xyz;
+	output.tex = input.tex;
+	output.textureIndex = input.textureIndex;
+    
+    return output;
+}
+
 PSVertexPositionTexture VSPositionTextureSkinned(VSVertexPositionTextureSkinned input)
 {
     PSVertexPositionTexture output = (PSVertexPositionTexture)0;
 
-	float3 posL = float3(0.0f, 0.0f, 0.0f);
+	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionWeights(
 		gBoneTransforms,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
-		posL);
+		positionL);
 
-	output.positionHomogeneous = mul(float4(posL, 1.0f), gWorldViewProjection);
-	output.positionWorld = mul(float4(posL, 1.0f), gWorld).xyz;
+	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
+	output.positionWorld = mul(positionL, gWorld).xyz;
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
+    
+    return output;
+}
+
+PSVertexPositionTexture VSPositionTextureSkinnedI(VSVertexPositionTextureSkinnedI input)
+{
+    PSVertexPositionTexture output = (PSVertexPositionTexture)0;
+
+	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	ComputePositionWeights(
+		gBoneTransforms,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		positionL);
+
+    float4 instancePosition = mul(positionL, input.localTransform);
+	
+	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+	output.positionWorld = mul(instancePosition, gWorld).xyz;
+	output.tex = input.tex;
+	output.textureIndex = input.textureIndex;
     
     return output;
 }
@@ -225,16 +351,35 @@ float4 PSPositionTextureBLUE(PSVertexPositionTexture input) : SV_TARGET
 	return float4(litColor.bbb, 1);
 }
 
+/**********************************************************************************************************
+POSITION NORMAL TEXTURE
+**********************************************************************************************************/
 PSVertexPositionNormalTexture VSPositionNormalTexture(VSVertexPositionNormalTexture input)
 {
     PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture)0;
 
     output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
     output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
-    output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
+	output.shadowHomogeneous = mul(float4(input.positionLocal, 1), gShadowTransform);
+    output.normalWorld = mul(float4(input.normalLocal, 0), gWorldInverse).xyz;
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
-	output.shadowHomogeneous = mul(float4(input.positionLocal, 1.0f), gShadowTransform);
+    
+    return output;
+}
+
+PSVertexPositionNormalTexture VSPositionNormalTextureI(VSVertexPositionNormalTextureI input)
+{
+    PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture)0;
+
+    float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
+
+    output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+    output.positionWorld = mul(instancePosition, gWorld).xyz;
+	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
+    output.normalWorld = mul(float4(input.normalLocal, 0), gWorldInverse).xyz;
+	output.tex = input.tex;
+	output.textureIndex = input.textureIndex;
     
     return output;
 }
@@ -243,8 +388,8 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNor
 {
 	PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture)0;
 	
-	float3 posL = float3(0.0f, 0.0f, 0.0f);
-	float3 normalL = float3(0.0f, 0.0f, 0.0f);
+	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionNormalWeights(
 		gBoneTransforms,
@@ -252,16 +397,44 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNor
 		input.boneIndices,
 		input.positionLocal,
 		input.normalLocal,
-		posL,
+		positionL,
 		normalL);
 	
-	output.positionHomogeneous = mul(float4(posL, 1.0f), gWorldViewProjection);
-	output.positionWorld = mul(float4(posL, 1.0f), gWorld).xyz;
-	output.normalWorld = normalize(mul(normalL, (float3x3)gWorldInverse));
+	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
+	output.positionWorld = mul(positionL, gWorld).xyz;
+	output.shadowHomogeneous = mul(positionL, gShadowTransform);
+	output.normalWorld = mul(normalL, gWorldInverse).xyz;
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
-	output.shadowHomogeneous = mul(float4(posL, 1.0f), gShadowTransform);
 	
+	return output;
+}
+
+PSVertexPositionNormalTexture VSPositionNormalTextureSkinnedI(VSVertexPositionNormalTextureSkinnedI input)
+{
+	PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture)0;
+
+	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+	ComputePositionNormalWeights(
+		gBoneTransforms,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		input.normalLocal,
+		positionL,
+		normalL);
+
+    float4 instancePosition = mul(positionL, input.localTransform);
+	
+	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+	output.positionWorld = mul(instancePosition, gWorld).xyz;
+	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
+	output.normalWorld = mul(normalL, gWorldInverse).xyz;
+	output.tex = input.tex;
+	output.textureIndex = input.textureIndex;
+
 	return output;
 }
 
@@ -274,7 +447,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	LightInput lInput = (LightInput)0;
 	lInput.toEyeWorld = toEyeWorld;
 	lInput.positionWorld = input.positionWorld;
-	lInput.normalWorld = input.normalWorld;
+	lInput.normalWorld = normalize(input.normalWorld);
 	lInput.material = gMaterial;
 	lInput.dirLights = gDirLights;
 	lInput.pointLight = gPointLight;
@@ -298,17 +471,37 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	return litColor;
 }
 
+/**********************************************************************************************************
+POSITION NORMAL TEXTURE TANGENT
+**********************************************************************************************************/
 PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangent(VSVertexPositionNormalTextureTangent input)
 {
     PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection);
-    output.positionWorld = mul(float4(input.positionLocal, 1.0f), gWorld).xyz;
-    output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
-	output.tangentWorld = mul(input.tangentLocal, (float3x3)gWorld);
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
+    output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
+	output.shadowHomogeneous = mul(float4(input.positionLocal, 1), gShadowTransform);
+    output.normalWorld = mul(float4(input.normalLocal, 0), gWorldInverse).xyz;
+	output.tangentWorld = mul(float4(input.tangentLocal, 0), gWorld).xyz;
 	output.tex = input.tex;
-	output.shadowHomogeneous = mul(float4(input.positionLocal, 1.0f), gShadowTransform);
 	output.textureIndex = gTextureIndex;
+    
+    return output;
+}
+
+PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentI(VSVertexPositionNormalTextureTangentI input)
+{
+    PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
+
+    float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
+
+    output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+    output.positionWorld = mul(instancePosition, gWorld).xyz;
+	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
+    output.normalWorld = mul(float4(input.normalLocal, 0), gWorldInverse).xyz;
+	output.tangentWorld = mul(float4(input.tangentLocal, 0), gWorld).xyz;
+	output.tex = input.tex;
+	output.textureIndex = input.textureIndex;
     
     return output;
 }
@@ -317,9 +510,9 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinned(VSVer
 {
     PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
 
-	float3 posL = float3(0.0f, 0.0f, 0.0f);
-	float3 normalL = float3(0.0f, 0.0f, 0.0f);
-	float3 tangentL = float3(0.0f, 0.0f, 0.0f);
+	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 tangentL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	ComputePositionNormalTangentWeights(
 		gBoneTransforms,
@@ -328,21 +521,56 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinned(VSVer
 		input.positionLocal,
 		input.normalLocal,
 		input.tangentLocal,
-		posL,
+		positionL,
 		normalL,
 		tangentL);
 
-	output.positionHomogeneous = mul(float4(posL, 1.0f), gWorldViewProjection);
-	output.positionWorld = mul(float4(posL, 1.0f), gWorld).xyz;
-	output.normalWorld = normalize(mul(normalL, (float3x3)gWorldInverse));
-	output.tangentWorld = mul(tangentL, (float3x3)gWorld);
+	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
+	output.positionWorld = mul(positionL, gWorld).xyz;
+	output.shadowHomogeneous = mul(positionL, gShadowTransform);
+	output.normalWorld = mul(normalL, gWorldInverse).xyz;
+	output.tangentWorld = mul(tangentL, gWorld).xyz;
 	output.tex = input.tex;
-	output.shadowHomogeneous = mul(float4(posL, 1.0f), gShadowTransform);
 	output.textureIndex = gTextureIndex;
     
     return output;
 }
 
+PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinnedI(VSVertexPositionNormalTextureTangentSkinnedI input)
+{
+	PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
+
+	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 tangentL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	ComputePositionNormalTangentWeights(
+		gBoneTransforms,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		input.normalLocal,
+		input.tangentLocal,
+		positionL,
+		normalL,
+		tangentL);
+
+    float4 instancePosition = mul(positionL, input.localTransform);
+	
+	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+	output.positionWorld = mul(instancePosition, gWorld).xyz;
+	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
+	output.normalWorld = mul(normalL, gWorldInverse).xyz;
+	output.tangentWorld = mul(tangentL, gWorld).xyz;
+	output.tex = input.tex;
+	output.textureIndex = input.textureIndex;
+
+	return output;
+}
+
+/**********************************************************************************************************
+EFFECTS
+**********************************************************************************************************/
 float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input) : SV_TARGET
 {
 	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
@@ -350,7 +578,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	toEyeWorld /= distToEye;
 
 	float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
-	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
+	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, normalize(input.normalWorld), input.tangentWorld);
 
 	LightInput lInput = (LightInput)0;
 	lInput.toEyeWorld = toEyeWorld;
@@ -383,8 +611,17 @@ technique11 PositionColor
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionColor()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionColor()));
+	}
+}
+
+technique11 PositionColorI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionColorI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionColor()));
 	}
@@ -394,8 +631,17 @@ technique11 PositionColorSkinned
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionColorSkinned()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionColor()));
+	}
+}
+
+technique11 PositionColorSkinnedI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionColorSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionColor()));
 	}
@@ -405,8 +651,17 @@ technique11 PositionNormalColor
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalColor()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalColor()));
+	}
+}
+
+technique11 PositionNormalColorI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalColorI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalColor()));
 	}
@@ -416,8 +671,17 @@ technique11 PositionNormalColorSkinned
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalColorSkinned()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalColor()));
+	}
+}
+
+technique11 PositionNormalColorSkinnedI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalColorSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalColor()));
 	}
@@ -427,8 +691,17 @@ technique11 PositionTexture
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionTexture()));
+	}
+}
+
+technique11 PositionTextureI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTexture()));
 	}
@@ -438,7 +711,6 @@ technique11 PositionTextureRED
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureRED()));
@@ -449,7 +721,6 @@ technique11 PositionTextureGREEN
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureGREEN()));
@@ -460,7 +731,6 @@ technique11 PositionTextureBLUE
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureBLUE()));
@@ -471,8 +741,17 @@ technique11 PositionTextureSkinned
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureSkinned()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionTexture()));
+	}
+}
+
+technique11 PositionTextureSkinnedI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTexture()));
 	}
@@ -482,8 +761,17 @@ technique11 PositionNormalTexture
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTexture()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTexture()));
+	}
+}
+
+technique11 PositionNormalTextureI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTexture()));
 	}
@@ -493,8 +781,17 @@ technique11 PositionNormalTextureSkinned
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureSkinned()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTexture()));
+	}
+}
+
+technique11 PositionNormalTextureSkinnedI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTexture()));
 	}
@@ -504,8 +801,17 @@ technique11 PositionNormalTextureTangent
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureTangent()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTextureTangent()));
+	}
+}
+
+technique11 PositionNormalTextureTangentI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureTangentI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTextureTangent()));
 	}
@@ -515,8 +821,17 @@ technique11 PositionNormalTextureTangentSkinned
 {
 	pass P0
 	{
-		SetRasterizerState(RasterizerSolid);
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureTangentSkinned()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTextureTangent()));
+	}
+}
+
+technique11 PositionNormalTextureTangentSkinnedI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureTangentSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTextureTangent()));
 	}

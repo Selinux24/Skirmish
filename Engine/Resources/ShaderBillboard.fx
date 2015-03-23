@@ -4,6 +4,7 @@
 cbuffer cbPerFrame : register (b0)
 {
 	float4x4 gWorldViewProjection;
+	float4x4 gShadowTransform; 
 	DirectionalLight gDirLights[3];
 	PointLight gPointLight;
 	SpotLight gSpotLight;
@@ -11,6 +12,7 @@ cbuffer cbPerFrame : register (b0)
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
+	float gEnableShadows;
 };
 
 cbuffer cbPerObject : register (b1)
@@ -31,6 +33,7 @@ cbuffer cbFixed : register (b2)
 };
 
 Texture2DArray gTextureArray;
+Texture2D gShadowMap;
 
 GSVertexBillboard VSBillboard(VSVertexBillboard input)
 {
@@ -68,6 +71,7 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 	{
 		gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
 		gout.positionWorld = v[i].xyz;
+		gout.shadowHomogeneous = mul(v[i], gShadowTransform);
 		gout.normalWorld = up;
 		gout.tex = gQuadTexC[i];
 		gout.primitiveID = primID;
@@ -90,8 +94,10 @@ float4 PSBillboard(PSVertexBillboard input) : SV_Target
 	lInput.dirLights = gDirLights;
 	lInput.pointLight = gPointLight;
 	lInput.spotLight = gSpotLight;
+	lInput.enableShadows = gEnableShadows;
+	lInput.shadowPosition = input.shadowHomogeneous;
 
-	LightOutput lOutput = ComputeLights(lInput);
+	LightOutput lOutput = ComputeLights(lInput, gShadowMap);
 
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);

@@ -219,13 +219,20 @@ namespace Engine
                         if (mat != null)
                         {
                             DrawerPool.EffectBasic.ObjectBuffer.Material.SetMaterial(mat.Material);
-                            DrawerPool.EffectBasic.UpdatePerObject(mat.DiffuseTexture, mat.NormalMap, this.TextureIndex);
+                            DrawerPool.EffectBasic.UpdatePerObject(mat.DiffuseTexture, mat.NormalMap);
                         }
                         else
                         {
                             DrawerPool.EffectBasic.ObjectBuffer.Material.SetMaterial(Material.Default);
-                            DrawerPool.EffectBasic.UpdatePerObject(null, null, this.TextureIndex);
+                            DrawerPool.EffectBasic.UpdatePerObject(null, null);
                         }
+
+                        #endregion
+
+                        #region Per instance update
+
+                        DrawerPool.EffectBasic.InstanceBuffer.TextureIndex = this.TextureIndex;
+                        DrawerPool.EffectBasic.UpdatePerInstance();
 
                         #endregion
 

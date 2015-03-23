@@ -480,16 +480,16 @@ namespace Engine.Effects
         public EffectInstancing(Device device, byte[] effect, bool compile)
             : base(device, effect, compile)
         {
-            this.PositionColor = this.Effect.GetTechniqueByName("PositionColor");
-            this.PositionColorSkinned = this.Effect.GetTechniqueByName("PositionColorSkinned");
-            this.PositionNormalColor = this.Effect.GetTechniqueByName("PositionNormalColor");
-            this.PositionNormalColorSkinned = this.Effect.GetTechniqueByName("PositionNormalColorSkinned");
-            this.PositionTexture = this.Effect.GetTechniqueByName("PositionTexture");
-            this.PositionTextureSkinned = this.Effect.GetTechniqueByName("PositionTextureSkinned");
-            this.PositionNormalTexture = this.Effect.GetTechniqueByName("PositionNormalTexture");
-            this.PositionNormalTextureSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureSkinned");
-            this.PositionNormalTextureTangent = this.Effect.GetTechniqueByName("PositionNormalTextureTangent");
-            this.PositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureTangentSkinned");
+            this.PositionColor = this.Effect.GetTechniqueByName("PositionColorI");
+            this.PositionColorSkinned = this.Effect.GetTechniqueByName("PositionColorSkinnedI");
+            this.PositionNormalColor = this.Effect.GetTechniqueByName("PositionNormalColorI");
+            this.PositionNormalColorSkinned = this.Effect.GetTechniqueByName("PositionNormalColorSkinnedI");
+            this.PositionTexture = this.Effect.GetTechniqueByName("PositionTextureI");
+            this.PositionTextureSkinned = this.Effect.GetTechniqueByName("PositionTextureSkinnedI");
+            this.PositionNormalTexture = this.Effect.GetTechniqueByName("PositionNormalTextureI");
+            this.PositionNormalTextureSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureSkinnedI");
+            this.PositionNormalTextureTangent = this.Effect.GetTechniqueByName("PositionNormalTextureTangentI");
+            this.PositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureTangentSkinnedI");
 
             this.AddInputLayout(this.PositionColor, VertexPositionColor.GetInput().Join(VertexInstancingData.GetInput()));
             this.AddInputLayout(this.PositionColorSkinned, VertexSkinnedPositionColor.GetInput().Join(VertexInstancingData.GetInput()));

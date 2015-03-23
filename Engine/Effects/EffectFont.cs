@@ -11,7 +11,6 @@ using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 namespace Engine.Effects
 {
     using Engine.Common;
-    using Engine.Properties;
 
     /// <summary>
     /// Font effect

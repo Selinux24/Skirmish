@@ -90,6 +90,7 @@ namespace Skybox
                 ModelFileName = "ruins.dae",
                 AddSkydom = true,
                 SkydomTexture = "sunset.dds",
+                DropShadow = true,
             };
             this.ruins = this.AddTerrain(desc, false);
 
@@ -113,7 +114,8 @@ namespace Skybox
             {
                 ContentPath = "Resources",
                 ModelFileName = "torch.dae",
-                Instances = this.firePositions.Length
+                Instances = this.firePositions.Length,
+                DropShadow = true,
             });
             for (int i = 0; i < this.firePositions.Length; i++)
             {
@@ -144,6 +146,9 @@ namespace Skybox
             this.Lights.PointLight.Specular = new Color4(1f, 0.8f, 0.8f, 1.0f);
             this.Lights.PointLight.Attenuation = new Vector3(1.0f, 0.0f, 0.0f);
             this.Lights.PointLight.Range = 20.0f;
+            this.Lights.EnableShadows = true;
+
+            this.SceneVolume = this.ruins.GetBoundingSphere();
 
             this.InitializeCamera();
         }
