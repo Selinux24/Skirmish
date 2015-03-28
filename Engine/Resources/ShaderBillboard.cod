@@ -29,7 +29,7 @@ cbuffer cbFixed : register(b2)
 }
 
 //
-// 12 local object(s)
+// 14 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -43,19 +43,27 @@ RasterizerState RasterizerWireFrame
 };
 RasterizerState RasterizerDepth
 {
-    DepthBias = uint(10000);
+    DepthBias = uint(0x000186a0);
     DepthBiasClamp = float(0);
     SlopeScaledDepthBias = float(1);
+};
+RasterizerState RasterizerNoCull
+{
+    CullMode = uint(NONE /* 1 */);
+};
+DepthStencilState StencilEnableDepth
+{
+    DepthEnable = bool(TRUE /* 1 */);
+    DepthWriteMask = uint(ZERO /* 0 */);
 };
 DepthStencilState StencilDisableDepth
 {
     DepthEnable = bool(FALSE /* 0 */);
     DepthWriteMask = uint(ZERO /* 0 */);
 };
-DepthStencilState StencilNoDepthWrites
+DepthStencilState StencilLessEqualDSS
 {
-    DepthEnable = bool(TRUE /* 1 */);
-    DepthWriteMask = uint(ZERO /* 0 */);
+    DepthFunc = uint(LESS_EQUAL /* 4 */);
 };
 BlendState BlendAdditive
 {
@@ -145,7 +153,7 @@ Texture2D gShadowMap;
 fxgroup
 {
     //
-    // 1 technique(s)
+    // 2 technique(s)
     //
     technique11 Billboard
     {
@@ -179,7 +187,7 @@ fxgroup
                 dcl_output o0.xyz
                 dcl_output o1.xy
                 
-                #line 45 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 45 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 mov o0.xyz, v0.xyzx  // VSBillboard<0,1,2>
                 mov o1.xy, v1.xyxx  // VSBillboard<3,4>
                 ret 
@@ -305,7 +313,7 @@ fxgroup
                 dcl_output_sgv o5.x, primitive_id
                 dcl_maxout 4
                 
-                #line 53 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 53 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 add r0.xy, cb0[31].zxzz, -v[0][0].zxzz  // look<2:Inf,0:Inf>
                 dp2 r0.z, r0.xyxx, r0.xyxx
                 rsq r1.x, r0.z
@@ -654,20 +662,20 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 8
                 
-                #line 85 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 115 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 add r0.xyz, -v1.xyzx, cb0[31].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
                 div r0.xyz, r0.xyzx, r0.wwww  // toEyeWorld<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 319 "IncLights.fx"
+                #line 327 "IncLights.fx"
                 eq r1.x, cb0[34].x, l(1.000000)
                 if_nz r1.x
                 
-                #line 293
+                #line 301
                   div r1.xyz, v4.xyzx, v4.wwww  // shadowPosH<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 303
+                #line 311
                   add r2.xyzw, r1.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r2.xyxx, t1.xxxx, s1, r1.z  // percentLit<0:[0f,1f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t1.xxxx, s1, r1.z
@@ -690,25 +698,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r2.zwzz, t1.xxxx, s1, r1.z
                   add r1.x, r1.y, r1.x  // percentLit<0:[0f,9f]>
                 
-                #line 307
+                #line 315
                   mul r1.x, r1.x, l(0.111111)  // percentLit<0:[0f,1f]>
                 
-                #line 319
+                #line 327
                 else 
                   mov r1.x, l(1.000000)  // shadow<0: 1f>
                 endif 
                 
-                #line 330
+                #line 338
                 eq r1.y, cb0[11].w, l(1.000000)
                 if_nz r1.y
                 
-                #line 160
+                #line 168
                   mul r1.yzw, cb0[8].xxyz, cb1[0].xxyz  // ambient<0:Inf,1:Inf,2:Inf>
                 
-                #line 163
+                #line 171
                   dp3 r2.x, -cb0[11].xyzx, v2.xyzx  // diffuseFactor<0:NaN:Inf>
                 
-                #line 167
+                #line 175
                   lt r2.y, l(0.000000), r2.x
                   dp3 r2.z, cb0[11].xyzx, v2.xyzx
                   add r2.z, r2.z, r2.z
@@ -723,15 +731,15 @@ fxgroup
                   mul r2.xzw, r2.zzzz, cb1[2].xxyz
                   mul r2.xzw, r2.xxzw, cb0[10].xxyz  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 167
+                #line 175
                   and r3.xyz, r2.yyyy, r3.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   and r2.xyz, r2.xzwx, r2.yyyy  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 342
+                #line 350
                   mul r3.xyz, r1.xxxx, r3.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   mul r2.xyz, r1.xxxx, r2.xyzx  // specular<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 330
+                #line 338
                 else 
                   mov r1.yzw, l(0,0,0,0)  // ambient<0: 0f,1: 0f,2: 0f>
                   mov r3.xyz, l(0,0,0,0)  // diffuse<0: 0f,1: 0f,2: 0f>
@@ -740,10 +748,10 @@ fxgroup
                 eq r1.x, cb0[15].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 163
+                #line 171
                   dp3 r1.x, -cb0[15].xyzx, v2.xyzx  // diffuseFactor<0:NaN:Inf>
                 
-                #line 167
+                #line 175
                   lt r2.w, l(0.000000), r1.x
                   dp3 r3.w, cb0[15].xyzx, v2.xyzx
                   add r3.w, r3.w, r3.w
@@ -758,24 +766,24 @@ fxgroup
                   mul r5.xyz, r3.wwww, cb1[2].xyzx
                   mul r5.xyz, r5.xyzx, cb0[14].xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 167
+                #line 175
                   and r4.xyz, r2.wwww, r4.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   and r5.xyz, r2.wwww, r5.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 341
+                #line 349
                   mad r1.yzw, cb1[0].xxyz, cb0[12].xxyz, r1.yyzw  // ambient<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   add r3.xyz, r3.xyzx, r4.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   add r2.xyz, r2.xyzx, r5.xyzx  // specular<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 330
+                #line 338
                 endif 
                 eq r1.x, cb0[19].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 163
+                #line 171
                   dp3 r1.x, -cb0[19].xyzx, v2.xyzx  // diffuseFactor<0:NaN:Inf>
                 
-                #line 167
+                #line 175
                   lt r2.w, l(0.000000), r1.x
                   dp3 r3.w, cb0[19].xyzx, v2.xyzx
                   add r3.w, r3.w, r3.w
@@ -790,40 +798,40 @@ fxgroup
                   mul r5.xyz, r3.wwww, cb1[2].xyzx
                   mul r5.xyz, r5.xyzx, cb0[18].xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 167
+                #line 175
                   and r4.xyz, r2.wwww, r4.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   and r5.xyz, r2.wwww, r5.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 341
+                #line 349
                   mad r1.yzw, cb1[0].xxyz, cb0[16].xxyz, r1.yyzw  // ambient<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   add r3.xyz, r3.xyzx, r4.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   add r2.xyz, r2.xyzx, r5.xyzx  // specular<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 330
+                #line 338
                 endif 
                 
-                #line 347
+                #line 355
                 eq r1.x, cb0[24].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 192
+                #line 200
                   add r4.xyz, -v1.xyzx, cb0[23].xyzx  // lightVec<0:Inf,1:Inf,2:Inf>
                 
-                #line 195
+                #line 203
                   dp3 r5.z, r4.xyzx, r4.xyzx
                   sqrt r5.y, r5.z  // d<0:NaN:Inf>
                 
-                #line 202
+                #line 210
                   ge r1.x, cb0[23].w, r5.y
                   div r4.xyz, r4.xyzx, r5.yyyy  // lightVec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 205
+                #line 213
                   mul r6.xyz, cb0[20].xyzx, cb1[0].xyzx  // ambient<0:Inf,1:Inf,2:Inf>
                 
-                #line 208
+                #line 216
                   dp3 r2.w, r4.xyzx, v2.xyzx  // diffuseFactor<0:NaN:Inf>
                 
-                #line 212
+                #line 220
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -838,52 +846,52 @@ fxgroup
                   mul r7.xyz, r4.xxxx, cb1[2].xyzx
                   mul r7.xyz, r7.xyzx, cb0[22].xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 212
+                #line 220
                   and r4.xyz, r3.wwww, r4.yzwy  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   and r7.xyz, r3.wwww, r7.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 222
+                #line 230
                   mov r5.x, l(1.000000)
                   dp3 r2.w, cb0[24].xyzx, r5.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // attenuation<0:NaN:Inf>
                   mul r4.xyz, r2.wwww, r4.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   mul r5.xyz, r2.wwww, r7.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 202
+                #line 210
                   and r6.xyz, r1.xxxx, r6.xyzx  // ambient<0:Inf,1:Inf,2:Inf>
                   and r4.xyz, r1.xxxx, r4.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   and r5.xyz, r1.xxxx, r5.xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 359
+                #line 367
                   add r1.yzw, r1.yyzw, r6.xxyz  // ambient<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   add r3.xyz, r3.xyzx, r4.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   add r2.xyz, r2.xyzx, r5.xyzx  // specular<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 347
+                #line 355
                 endif 
                 
-                #line 364
+                #line 372
                 eq r1.x, cb0[30].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 242
+                #line 250
                   add r4.xyz, -v1.xyzx, cb0[28].xyzx  // lightVec<0:Inf,1:Inf,2:Inf>
                 
-                #line 245
+                #line 253
                   dp3 r5.z, r4.xyzx, r4.xyzx
                   sqrt r5.y, r5.z  // d<0:NaN:Inf>
                 
-                #line 252
+                #line 260
                   ge r1.x, cb0[28].w, r5.y
                   div r4.xyz, r4.xyzx, r5.yyyy  // lightVec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 255
+                #line 263
                   mul r6.xyz, cb0[25].xyzx, cb1[0].xyzx  // ambient<0:Inf,1:Inf,2:Inf>
                 
-                #line 258
+                #line 266
                   dp3 r2.w, r4.xyzx, v2.xyzx  // diffuseFactor<0:NaN:Inf>
                 
-                #line 262
+                #line 270
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -898,18 +906,18 @@ fxgroup
                   mul r0.xyz, r0.xxxx, cb1[2].xyzx
                   mul r0.xyz, r0.xyzx, cb0[27].xyzx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 262
+                #line 270
                   and r7.xyz, r3.wwww, r7.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   and r0.xyz, r0.xyzx, r3.wwww  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 272
+                #line 280
                   dp3 r2.w, -r4.xyzx, cb0[29].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[29].w
                   exp r2.w, r2.w  // spot<0:NaN:Inf>
                 
-                #line 275
+                #line 283
                   mov r5.x, l(1.000000)
                   dp3 r3.w, cb0[30].xyzx, r5.xyzx
                   div r3.w, r2.w, r3.w  // attenuation<0:NaN:Inf>
@@ -917,20 +925,20 @@ fxgroup
                   mul r5.xyz, r3.wwww, r7.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   mul r0.xyz, r0.xyzx, r3.wwww  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 252
+                #line 260
                   and r4.xyz, r1.xxxx, r4.xyzx  // ambient<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   and r5.xyz, r1.xxxx, r5.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   and r0.xyz, r0.xyzx, r1.xxxx  // spec<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 376
+                #line 384
                   add r1.yzw, r1.yyzw, r4.xxyz  // ambient<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   add r3.xyz, r3.xyzx, r5.xyzx  // diffuse<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                   add r2.xyz, r0.xyzx, r2.xyzx  // specular<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 364
+                #line 372
                 endif 
                 
-                #line 102 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 132 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 udiv null, r0.x, v5.x, cb1[4].y
                 utof r0.z, r0.x  // uvw<2:[0f,4.29497e+009f]>
                 mov r0.xy, v3.xyxx
@@ -942,21 +950,232 @@ fxgroup
                 mad r0.xyz, r4.xyzx, r0.xyzx, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 lt r1.x, l(0.000000), cb0[32].x
                 
-                #line 390 "IncLights.fx"
+                #line 398 "IncLights.fx"
                 add r0.w, r0.w, -cb0[31].w
                 div_sat r0.w, r0.w, cb0[32].x  // fogLerp<0:[0f,1f]>
                 add r1.yzw, -r0.xxyz, cb0[33].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 108 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 138 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx  // PSBillboard<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 113
+                #line 143
                 mul o0.w, r4.w, cb1[1].w  // PSBillboard<3:NaN:Inf>
                 ret 
                 // Approximately 197 instruction slots used
                             
             };
+            RasterizerState = RasterizerSolid;
+        }
+
+    }
+
+    technique11 ShadowMapBillboard
+    {
+        pass P0
+        {
+            VertexShader = asm {
+                //
+                // Generated by Microsoft (R) HLSL Shader Compiler 9.29.952.3111
+                //
+                //
+                //
+                // Input signature:
+                //
+                // Name                 Index   Mask Register SysValue Format   Used
+                // -------------------- ----- ------ -------- -------- ------ ------
+                // POSITION                 0   xyz         0     NONE  float   xyz 
+                // SIZE                     0   xy          1     NONE  float   xy  
+                //
+                //
+                // Output signature:
+                //
+                // Name                 Index   Mask Register SysValue Format   Used
+                // -------------------- ----- ------ -------- -------- ------ ------
+                // POSITION                 0   xyz         0     NONE  float   xyz 
+                // SIZE                     0   xy          1     NONE  float   xy  
+                //
+                vs_5_0
+                dcl_globalFlags refactoringAllowed
+                dcl_input v0.xyz
+                dcl_input v1.xy
+                dcl_output o0.xyz
+                dcl_output o1.xy
+                
+                #line 45 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                mov o0.xyz, v0.xyzx  // VSBillboard<0,1,2>
+                mov o1.xy, v1.xyxx  // VSBillboard<3,4>
+                ret 
+                // Approximately 3 instruction slots used
+                            
+            };
+            GeometryShader = asm {
+                //
+                // Generated by Microsoft (R) HLSL Shader Compiler 9.29.952.3111
+                //
+                //
+                // Buffer Definitions: 
+                //
+                // cbuffer cbPerFrame
+                // {
+                //
+                //   float4x4 gWorldViewProjection;     // Offset:    0 Size:    64
+                //   float4x4 gShadowTransform;         // Offset:   64 Size:    64 [unused]
+                //   
+                //   struct DirectionalLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  128
+                //       float4 Diffuse;                // Offset:  144
+                //       float4 Specular;               // Offset:  160
+                //       float3 Direction;              // Offset:  176
+                //       float Padding;                 // Offset:  188
+                //
+                //   } gDirLights[3];                   // Offset:  128 Size:   192 [unused]
+                //   
+                //   struct PointLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  320
+                //       float4 Diffuse;                // Offset:  336
+                //       float4 Specular;               // Offset:  352
+                //       float3 Position;               // Offset:  368
+                //       float Range;                   // Offset:  380
+                //       float3 Attenuation;            // Offset:  384
+                //       float Padding;                 // Offset:  396
+                //
+                //   } gPointLight;                     // Offset:  320 Size:    80 [unused]
+                //   
+                //   struct SpotLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  400
+                //       float4 Diffuse;                // Offset:  416
+                //       float4 Specular;               // Offset:  432
+                //       float3 Position;               // Offset:  448
+                //       float Range;                   // Offset:  460
+                //       float3 Direction;              // Offset:  464
+                //       float Spot;                    // Offset:  476
+                //       float3 Attenuation;            // Offset:  480
+                //       float Padding;                 // Offset:  492
+                //
+                //   } gSpotLight;                      // Offset:  400 Size:    96 [unused]
+                //   float3 gEyePositionWorld;          // Offset:  496 Size:    12
+                //   float gFogStart;                   // Offset:  508 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  512 Size:     4 [unused]
+                //   float4 gFogColor;                  // Offset:  528 Size:    16 [unused]
+                //   float gEnableShadows;              // Offset:  544 Size:     4 [unused]
+                //
+                // }
+                //
+                //
+                // Resource Bindings:
+                //
+                // Name                                 Type  Format         Dim Slot Elements
+                // ------------------------------ ---------- ------- ----------- ---- --------
+                // cbPerFrame                        cbuffer      NA          NA    0        1
+                //
+                //
+                //
+                // Input signature:
+                //
+                // Name                 Index   Mask Register SysValue Format   Used
+                // -------------------- ----- ------ -------- -------- ------ ------
+                // POSITION                 0   xyz         0     NONE  float   xyz 
+                // SIZE                     0   xy          1     NONE  float   xy  
+                // SV_PrimitiveID           0    N/A   primID   PRIMID   uint     NO
+                //
+                //
+                // Output signature:
+                //
+                // Name                 Index   Mask Register SysValue Format   Used
+                // -------------------- ----- ------ -------- -------- ------ ------
+                // m0:SV_POSITION           0   xyzw        0      POS  float   xyzw
+                //
+                gs_5_0
+                dcl_globalFlags refactoringAllowed
+                dcl_constantbuffer cb0[32], immediateIndexed
+                dcl_input v[1][0].xyz
+                dcl_input v[1][1].xy
+                dcl_input vPrim
+                dcl_temps 3
+                dcl_inputprimitive point 
+                dcl_stream m0
+                dcl_outputtopology trianglestrip 
+                dcl_output_siv o0.xyzw, position
+                dcl_maxout 4
+                
+                #line 88 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                add r0.xy, cb0[31].zxzz, -v[0][0].zxzz  // look<2:Inf,0:Inf>
+                dp2 r0.z, r0.xyxx, r0.xyxx
+                rsq r1.x, r0.z
+                mul r1.yz, r0.xxyx, r1.xxxx  // look<2:NaN:Inf,0:NaN:Inf>
+                mul r0.xy, r1.yzyy, l(1.000000, 0.000000, 0.000000, 0.000000)
+                mov r0.z, l(0)
+                mad r0.xyz, -r1.xyzx, l(0.000000, 0.000000, 1.000000, 0.000000), r0.xyzx  // right<0:NaN:Inf,1: 0f,2:NaN:Inf>
+                
+                #line 97
+                mul r0.w, l(0.500000), v[0][1].x  // halfWidth<0:[-1.70141e+038f,1.70141e+038f]>
+                mad r1.xyz, r0.wwww, r0.xyzx, v[0][0].xyzx
+                mad r0.xyz, -r0.wwww, r0.xyzx, v[0][0].xyzx
+                mad r2.xyz, -v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r1.xyzx
+                mad r1.xyz, v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r1.xyzx
+                
+                #line 107
+                mov r2.w, l(1.000000)
+                dp4 r0.w, r2.xyzw, cb0[0].xyzw  // gout<0:NaN:Inf>
+                mov o0.x, r0.w  // outputStream<0>
+                dp4 r0.w, r2.xyzw, cb0[1].xyzw  // gout<1:NaN:Inf>
+                mov o0.y, r0.w  // outputStream<0>
+                dp4 r0.w, r2.xyzw, cb0[2].xyzw  // gout<2:NaN:Inf>
+                dp4 r2.x, r2.xyzw, cb0[3].xyzw  // gout<3:NaN:Inf>
+                mov o0.z, r0.w  // outputStream<0>
+                mov o0.w, r2.x  // outputStream<0>
+                emit_stream m0
+                mov r1.w, l(1.000000)
+                dp4 r0.w, r1.xyzw, cb0[0].xyzw  // gout<0:NaN:Inf>
+                mov o0.x, r0.w  // outputStream<0>
+                dp4 r0.w, r1.xyzw, cb0[1].xyzw  // gout<1:NaN:Inf>
+                mov o0.y, r0.w  // outputStream<0>
+                dp4 r0.w, r1.xyzw, cb0[2].xyzw  // gout<2:NaN:Inf>
+                dp4 r1.x, r1.xyzw, cb0[3].xyzw  // gout<3:NaN:Inf>
+                mov o0.z, r0.w  // outputStream<0>
+                mov o0.w, r1.x  // outputStream<0>
+                emit_stream m0
+                
+                #line 99
+                mad r1.xyz, -v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r0.xyzx
+                mad r0.xyz, v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r0.xyzx
+                
+                #line 107
+                mov r1.w, l(1.000000)
+                dp4 r2.x, r1.xyzw, cb0[0].xyzw  // gout<0:NaN:Inf>
+                mov o0.x, r2.x  // outputStream<0>
+                dp4 r2.x, r1.xyzw, cb0[1].xyzw  // gout<1:NaN:Inf>
+                mov o0.y, r2.x  // outputStream<0>
+                dp4 r2.x, r1.xyzw, cb0[2].xyzw  // gout<2:NaN:Inf>
+                dp4 r1.x, r1.xyzw, cb0[3].xyzw  // gout<3:NaN:Inf>
+                mov o0.z, r2.x  // outputStream<0>
+                mov o0.w, r1.x  // outputStream<0>
+                emit_stream m0
+                mov r0.w, l(1.000000)
+                dp4 r1.x, r0.xyzw, cb0[0].xyzw  // gout<0:NaN:Inf>
+                mov o0.x, r1.x  // outputStream<0>
+                dp4 r1.x, r0.xyzw, cb0[1].xyzw  // gout<1:NaN:Inf>
+                mov o0.y, r1.x  // outputStream<0>
+                dp4 r1.x, r0.xyzw, cb0[2].xyzw  // gout<2:NaN:Inf>
+                dp4 r0.x, r0.xyzw, cb0[3].xyzw  // gout<3:NaN:Inf>
+                mov o0.z, r1.x  // outputStream<0>
+                mov o0.w, r0.x  // outputStream<0>
+                emit_stream m0
+                
+                #line 84
+                ret 
+                // Approximately 55 instruction slots used
+                            
+            };
+            PixelShader = NULL;
+            RasterizerState = RasterizerDepth;
         }
 
     }

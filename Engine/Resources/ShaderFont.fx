@@ -40,5 +40,7 @@ technique11 FontDrawer
 		SetVertexShader(CompileShader(vs_5_0, VSFont()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSFont()));
+	
+		SetRasterizerState(RasterizerSolid);
 	}
 }

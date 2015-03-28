@@ -10,20 +10,28 @@ RasterizerState RasterizerWireFrame
 };
 RasterizerState RasterizerDepth
 {
-	DepthBias = 10000;
+	DepthBias = 100000;
     DepthBiasClamp = 0.0f;
 	SlopeScaledDepthBias = 1.0f;
 };
+RasterizerState RasterizerNoCull
+{
+    CullMode = None;
+};
 
+DepthStencilState StencilEnableDepth
+{
+    DepthEnable = TRUE;
+    DepthWriteMask = ZERO;
+};
 DepthStencilState StencilDisableDepth
 {
     DepthEnable = FALSE;
     DepthWriteMask = ZERO;
 };
-DepthStencilState StencilNoDepthWrites
+DepthStencilState StencilLessEqualDSS
 {
-    DepthEnable = TRUE;
-    DepthWriteMask = ZERO;
+    DepthFunc = LESS_EQUAL;
 };
 
 BlendState BlendAdditive

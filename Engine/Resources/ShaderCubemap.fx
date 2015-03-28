@@ -8,15 +8,6 @@ cbuffer cbPerFrame : register (b0)
 
 TextureCube gCubemap;
 
-RasterizerState NoCull
-{
-    CullMode = None;
-};
-DepthStencilState LessEqualDSS
-{
-    DepthFunc = LESS_EQUAL;
-};
-
 PSVertexPosition VSCubic(VSVertexPosition input)
 {
 	PSVertexPosition output;
@@ -40,7 +31,7 @@ technique11 Cubemap
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PSCubic()));
         
-        SetRasterizerState(NoCull);
-        SetDepthStencilState(LessEqualDSS, 0);
+        SetRasterizerState(RasterizerNoCull);
+        SetDepthStencilState(StencilLessEqualDSS, 0);
     }
 }

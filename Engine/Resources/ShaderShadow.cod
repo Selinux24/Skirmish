@@ -14,7 +14,7 @@ cbuffer cbSkinned : register(b1)
 }
 
 //
-// 10 local object(s)
+// 12 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -28,19 +28,27 @@ RasterizerState RasterizerWireFrame
 };
 RasterizerState RasterizerDepth
 {
-    DepthBias = uint(10000);
+    DepthBias = uint(0x000186a0);
     DepthBiasClamp = float(0);
     SlopeScaledDepthBias = float(1);
+};
+RasterizerState RasterizerNoCull
+{
+    CullMode = uint(NONE /* 1 */);
+};
+DepthStencilState StencilEnableDepth
+{
+    DepthEnable = bool(TRUE /* 1 */);
+    DepthWriteMask = uint(ZERO /* 0 */);
 };
 DepthStencilState StencilDisableDepth
 {
     DepthEnable = bool(FALSE /* 0 */);
     DepthWriteMask = uint(ZERO /* 0 */);
 };
-DepthStencilState StencilNoDepthWrites
+DepthStencilState StencilLessEqualDSS
 {
-    DepthEnable = bool(TRUE /* 1 */);
-    DepthWriteMask = uint(ZERO /* 0 */);
+    DepthFunc = uint(LESS_EQUAL /* 4 */);
 };
 BlendState BlendAdditive
 {
@@ -178,7 +186,7 @@ fxgroup
                 dcl_output_siv o0.xyzw, position
                 dcl_temps 1
                 
-                #line 18 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 18 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw  // VSSMPositionColor<0:NaN:Inf>
@@ -254,7 +262,7 @@ fxgroup
                 dcl_output_siv o0.xyzw, position
                 dcl_temps 1
                 
-                #line 27 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 27 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -373,7 +381,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 47 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 47 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[0].xyzw  // VSSMPositionColorSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[1].xyzw  // VSSMPositionColorSkinned<1:NaN:Inf>
@@ -499,7 +507,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 65 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 65 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -568,7 +576,7 @@ fxgroup
                 dcl_output_siv o0.xyzw, position
                 dcl_temps 1
                 
-                #line 76 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 76 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw  // VSSMPositionNormalColor<0:NaN:Inf>
@@ -645,7 +653,7 @@ fxgroup
                 dcl_output_siv o0.xyzw, position
                 dcl_temps 1
                 
-                #line 85 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 85 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -765,7 +773,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 105 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 105 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[0].xyzw  // VSSMPositionNormalColorSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[1].xyzw  // VSSMPositionNormalColorSkinned<1:NaN:Inf>
@@ -892,7 +900,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 123 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 123 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, r1.yyyy, v6.xyzw
                 mad r0.xyzw, r1.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v7.xyzw, r0.xyzw
@@ -960,7 +968,7 @@ fxgroup
                 dcl_output_siv o0.xyzw, position
                 dcl_temps 1
                 
-                #line 134 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 134 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw  // VSSMPositionTexture<0:NaN:Inf>
@@ -1036,7 +1044,7 @@ fxgroup
                 dcl_output_siv o0.xyzw, position
                 dcl_temps 1
                 
-                #line 143 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 143 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -1155,7 +1163,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 163 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 163 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[0].xyzw  // VSSMPositionTextureSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[1].xyzw  // VSSMPositionTextureSkinned<1:NaN:Inf>
@@ -1281,7 +1289,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 181 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 181 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -1350,7 +1358,7 @@ fxgroup
                 dcl_output_siv o0.xyzw, position
                 dcl_temps 1
                 
-                #line 192 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 192 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw  // VSSMPositionNormalTexture<0:NaN:Inf>
@@ -1427,7 +1435,7 @@ fxgroup
                 dcl_output_siv o0.xyzw, position
                 dcl_temps 1
                 
-                #line 201 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 201 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -1547,7 +1555,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 221 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 221 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[0].xyzw  // VSSMPositionNormalTextureSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[1].xyzw  // VSSMPositionNormalTextureSkinned<1:NaN:Inf>
@@ -1674,7 +1682,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 239 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 239 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, r1.yyyy, v6.xyzw
                 mad r0.xyzw, r1.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v7.xyzw, r0.xyzw
@@ -1744,7 +1752,7 @@ fxgroup
                 dcl_output_siv o0.xyzw, position
                 dcl_temps 1
                 
-                #line 250 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 250 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw  // VSSMPositionNormalTextureTangent<0:NaN:Inf>
@@ -1822,7 +1830,7 @@ fxgroup
                 dcl_output_siv o0.xyzw, position
                 dcl_temps 1
                 
-                #line 259 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 259 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, v0.yyyy, v5.xyzw
                 mad r0.xyzw, v0.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v6.xyzw, r0.xyzw
@@ -1943,7 +1951,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 279 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 279 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[0].xyzw  // VSSMPositionNormalTextureTangentSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[1].xyzw  // VSSMPositionNormalTextureTangentSkinned<1:NaN:Inf>
@@ -2071,7 +2079,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 297 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
+                #line 297 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderShadow.fx"
                 mul r0.xyzw, r1.yyyy, v7.xyzw
                 mad r0.xyzw, r1.xxxx, v6.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v8.xyzw, r0.xyzw

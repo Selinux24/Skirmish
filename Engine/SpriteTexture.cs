@@ -114,6 +114,7 @@ namespace Engine
                 EyePosition = eyePos,
                 World = world,
                 ViewProjection = view * proj,
+                Lights = SceneLight.Default,
             };
         }
         /// <summary>

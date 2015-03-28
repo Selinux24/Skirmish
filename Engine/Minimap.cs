@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.DXGI;
-using Buffer = SharpDX.Direct3D11.Buffer;
+﻿using SharpDX;
 using RenderTargetView = SharpDX.Direct3D11.RenderTargetView;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Effects;
     using Engine.Helpers;
 
     /// <summary>
@@ -20,13 +13,13 @@ namespace Engine
     public class Minimap : Drawable
     {
         /// <summary>
-        /// Reference to the terrain that we render in the minimap
-        /// </summary>
-        private readonly Terrain terrain;
-        /// <summary>
         /// Viewport to match the minimap texture size
         /// </summary>
         private readonly Viewport viewport;
+        /// <summary>
+        /// Surface to draw
+        /// </summary>
+        private SpriteTexture minimapBox;
         /// <summary>
         /// Minimap render target
         /// </summary>
@@ -36,25 +29,18 @@ namespace Engine
         /// </summary>
         private ShaderResourceView renderTexture;
         /// <summary>
-        /// Minimap vertex buffer
+        /// Context to draw
         /// </summary>
-        private Buffer vertexBuffer;
+        private Context drawContext;
         /// <summary>
-        /// Minimap index buffer
+        /// Minimap rendered area
         /// </summary>
-        private Buffer indexBuffer;
+        private BoundingBox minimapArea;
+
         /// <summary>
-        /// Line drawer for viewer frustum
+        /// Reference to the objects that we render in the minimap
         /// </summary>
-        private LineListDrawer lineDrawer;
-        /// <summary>
-        /// Context to draw terrain
-        /// </summary>
-        private Context terrainDrawContext;
-        /// <summary>
-        /// Context to draw minimap
-        /// </summary>
-        private Context minimapDrawContext;
+        public Drawable[] Drawables;
 
         /// <summary>
         /// Contructor
@@ -64,7 +50,17 @@ namespace Engine
         public Minimap(Game game, MinimapDescription description)
             : base(game)
         {
-            this.terrain = description.Terrain;
+            this.Drawables = description.Drawables;
+
+            this.minimapArea = description.MinimapArea;
+
+            this.minimapBox = new SpriteTexture(game, new SpriteTextureDescription()
+            {
+                Top = description.Top,
+                Left = description.Left,
+                Width = description.Width,
+                Height = description.Height,
+            });
 
             this.viewport = new Viewport(0, 0, description.Width, description.Height);
 
@@ -74,40 +70,20 @@ namespace Engine
                 this.renderTexture = new ShaderResourceView(this.Device, texture);
             }
 
-            VertexData[] cv;
-            uint[] ci;
-            VertexData.CreateSprite(
-                Vector2.Zero,
-                1, 1,
-                0, 0,
-                out cv,
-                out ci);
-
-            List<VertexPositionNormalTexture> vertList = new List<VertexPositionNormalTexture>();
-
-            Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPositionNormalTexture(v)); });
-
-            this.vertexBuffer = this.Device.CreateVertexBufferImmutable(vertList.ToArray());
-            this.indexBuffer = this.Device.CreateIndexBufferImmutable(ci);
-
-            this.lineDrawer = new LineListDrawer(game, 12);
-            this.lineDrawer.UseZBuffer = false;
-
-            this.InitializeTerrainContext();
-            this.InitializeMinimapContext(description.Left, description.Top, description.Width, description.Height);
+            this.InitializeContext();
         }
         /// <summary>
         /// Initialize terrain context
         /// </summary>
-        private void InitializeTerrainContext()
+        private void InitializeContext()
         {
-            BoundingBox bbox = this.terrain.GetBoundingBox();
+            float x = this.minimapArea.Maximum.X - this.minimapArea.Minimum.X;
+            float y = this.minimapArea.Maximum.Y - this.minimapArea.Minimum.Y;
+            float z = this.minimapArea.Maximum.Z - this.minimapArea.Minimum.Z;
 
-            float x = bbox.Maximum.X - bbox.Minimum.X;
-            float y = bbox.Maximum.Y - bbox.Minimum.Y;
-            float z = bbox.Maximum.Z - bbox.Minimum.Z;
+            float near = 0.1f;
 
-            Vector3 eyePos = new Vector3(0, y + 5f, 0);
+            Vector3 eyePos = new Vector3(0, y + near, 0);
             Vector3 target = Vector3.Zero;
             Vector3 dir = Vector3.Normalize(target - eyePos);
 
@@ -119,73 +95,16 @@ namespace Engine
             Matrix proj = Matrix.OrthoLH(
                 x,
                 z,
-                0.1f,
-                2000f);
+                near,
+                y + near);
 
-            this.terrainDrawContext = new Context()
+            this.drawContext = new Context()
             {
-                EyePosition = eyePos,
+                DrawerMode = DrawerModesEnum.Default,
                 World = Matrix.Identity,
                 ViewProjection = view * proj,
-                Lights = new SceneLight()
-                {
-                    DirectionalLight1 = new SceneLightDirectional()
-                    {
-                        Ambient = new Color4(0.4f, 0.4f, 0.4f, 1.0f),
-                        Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                        Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                        Direction = dir,
-                    },
-                    DirectionalLight1Enabled = true,
-                },
-            };
-        }
-        /// <summary>
-        /// Initialize minimap context
-        /// </summary>
-        /// <param name="left">Left</param>
-        /// <param name="top">Top</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        private void InitializeMinimapContext(int left, int top, int width, int height)
-        {
-            Vector3 eyePos = new Vector3(0, 0, -1);
-            Vector3 target = Vector3.Zero;
-            Vector3 dir = Vector3.Normalize(target - eyePos);
-
-            Manipulator2D man = new Manipulator2D();
-            man.SetPosition(left, top);
-            man.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
-
-            Matrix world = man.LocalTransform;
-
-            Matrix view = Matrix.LookAtLH(
-                eyePos,
-                target,
-                Vector3.Up);
-
-            Matrix proj = Matrix.OrthoLH(
-                this.Game.Form.RenderWidth,
-                this.Game.Form.RenderHeight,
-                0.1f,
-                100f);
-
-            this.minimapDrawContext = new Context()
-            {
                 EyePosition = eyePos,
-                World = world,
-                ViewProjection = view * proj,
-                Lights = new SceneLight()
-                {
-                    DirectionalLight1 = new SceneLightDirectional()
-                    {
-                        Ambient = new Color4(0.4f, 0.4f, 0.4f, 1.0f),
-                        Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                        Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                        Direction = dir,
-                    },
-                    DirectionalLight1Enabled = true,
-                },
+                Lights = SceneLight.Default,
             };
         }
         /// <summary>
@@ -195,7 +114,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(GameTime gameTime, Context context)
         {
-            this.lineDrawer.SetLines(Color.Red, GeometryUtil.CreateWiredFrustum(new BoundingFrustum(context.ViewProjection)));
+
         }
         /// <summary>
         /// Draw objects
@@ -204,62 +123,20 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(GameTime gameTime, Context context)
         {
-            this.DrawTerrain(gameTime, context);
-
-            this.DrawMinimap(gameTime, context);
-        }
-        /// <summary>
-        /// Draw terrain
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="context">Context</param>
-        private void DrawTerrain(GameTime gameTime, Context context)
-        {
-            this.Game.Graphics.SetRenderTarget(this.viewport, null, this.renderTarget, true, Color.Silver);
-
-            this.terrain.Draw(gameTime, this.terrainDrawContext);
-
-            this.lineDrawer.Draw(gameTime, this.terrainDrawContext);
-
-            this.Game.Graphics.SetDefaultRenderTarget(false);
-        }
-        /// <summary>
-        /// Draw minimap
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="context">Context</param>
-        private void DrawMinimap(GameTime gameTime, Context context)
-        {
-            #region Effect update
-
-            this.DeviceContext.InputAssembler.InputLayout = DrawerPool.EffectBasic.GetInputLayout(DrawerPool.EffectBasic.PositionNormalTexture);
-            this.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            this.DeviceContext.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(this.vertexBuffer, new VertexPositionNormalTexture().Stride, 0));
-            this.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-
-            DrawerPool.EffectBasic.FrameBuffer.World = this.minimapDrawContext.World;
-            DrawerPool.EffectBasic.FrameBuffer.WorldInverse = Matrix.Invert(this.minimapDrawContext.World);
-            DrawerPool.EffectBasic.FrameBuffer.WorldViewProjection = this.minimapDrawContext.World * this.minimapDrawContext.ViewProjection;
-            DrawerPool.EffectBasic.FrameBuffer.Lights = new BufferLights(this.minimapDrawContext.EyePosition, this.minimapDrawContext.Lights);
-            DrawerPool.EffectBasic.UpdatePerFrame(null);
-
-            DrawerPool.EffectBasic.ObjectBuffer.Material.SetMaterial(Material.Default);
-            DrawerPool.EffectBasic.UpdatePerObject(this.renderTexture, null);
-
-            DrawerPool.EffectBasic.SkinningBuffer.FinalTransforms = null;
-            DrawerPool.EffectBasic.UpdatePerSkinning();
-
-            DrawerPool.EffectBasic.InstanceBuffer.TextureIndex = 0;
-            DrawerPool.EffectBasic.UpdatePerInstance();
-
-            #endregion
-
-            for (int p = 0; p < DrawerPool.EffectBasic.PositionNormalTexture.Description.PassCount; p++)
+            if (this.Drawables != null && this.Drawables.Length > 0)
             {
-                DrawerPool.EffectBasic.PositionNormalTexture.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+                this.Game.Graphics.SetRenderTarget(this.viewport, null, this.renderTarget, true, Color.Silver);
 
-                this.DeviceContext.DrawIndexed(6, 0, 0);
+                for (int i = 0; i < this.Drawables.Length; i++)
+                {
+                    this.Drawables[i].Draw(gameTime, this.drawContext);
+                }
+
+                this.Game.Graphics.SetDefaultRenderTarget(false);
             }
+
+            this.minimapBox.Texture = this.renderTexture;
+            this.minimapBox.Draw(gameTime, context);
         }
         /// <summary>
         /// Dispose objects
@@ -278,22 +155,10 @@ namespace Engine
                 this.renderTexture = null;
             }
 
-            if (this.lineDrawer != null)
+            if (this.minimapBox != null)
             {
-                this.lineDrawer.Dispose();
-                this.lineDrawer = null;
-            }
-
-            if (this.vertexBuffer != null)
-            {
-                this.vertexBuffer.Dispose();
-                this.vertexBuffer = null;
-            }
-
-            if (this.indexBuffer != null)
-            {
-                this.indexBuffer.Dispose();
-                this.indexBuffer = null;
+                this.minimapBox.Dispose();
+                this.minimapBox = null;
             }
         }
     }
@@ -322,6 +187,10 @@ namespace Engine
         /// <summary>
         /// Terrain to draw
         /// </summary>
-        public Terrain Terrain;
+        public Drawable[] Drawables;
+        /// <summary>
+        /// Minimap render area
+        /// </summary>
+        public BoundingBox MinimapArea;
     }
 }

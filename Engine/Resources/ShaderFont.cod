@@ -11,7 +11,7 @@ cbuffer cbPerFrame : register(b0)
 }
 
 //
-// 11 local object(s)
+// 13 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -25,19 +25,27 @@ RasterizerState RasterizerWireFrame
 };
 RasterizerState RasterizerDepth
 {
-    DepthBias = uint(10000);
+    DepthBias = uint(0x000186a0);
     DepthBiasClamp = float(0);
     SlopeScaledDepthBias = float(1);
+};
+RasterizerState RasterizerNoCull
+{
+    CullMode = uint(NONE /* 1 */);
+};
+DepthStencilState StencilEnableDepth
+{
+    DepthEnable = bool(TRUE /* 1 */);
+    DepthWriteMask = uint(ZERO /* 0 */);
 };
 DepthStencilState StencilDisableDepth
 {
     DepthEnable = bool(FALSE /* 0 */);
     DepthWriteMask = uint(ZERO /* 0 */);
 };
-DepthStencilState StencilNoDepthWrites
+DepthStencilState StencilLessEqualDSS
 {
-    DepthEnable = bool(TRUE /* 1 */);
-    DepthWriteMask = uint(ZERO /* 0 */);
+    DepthFunc = uint(LESS_EQUAL /* 4 */);
 };
 BlendState BlendAdditive
 {
@@ -185,7 +193,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_temps 1
                 
-                #line 17 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderFont.fx"
+                #line 17 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderFont.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[4].xyzw  // VSFont<0:NaN:Inf>
@@ -256,7 +264,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 4
                 
-                #line 28 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderFont.fx"
+                #line 28 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderFont.fx"
                 mov r0.w, l(0)
                 sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v2.xyxx, t0.xyzw, s0  // litColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 ne r2.x, r1.w, l(0.000000)
@@ -269,6 +277,7 @@ fxgroup
                 // Approximately 7 instruction slots used
                             
             };
+            RasterizerState = RasterizerSolid;
         }
 
     }

@@ -89,15 +89,17 @@ namespace Engine.Effects
         {
             this.EyePositionWorld = eyePosition;
 
-            this.DirectionalLight1 = new BufferDirectionalLight(lights.DirectionalLight1);
-            this.DirectionalLight2 = new BufferDirectionalLight(lights.DirectionalLight2);
-            this.DirectionalLight3 = new BufferDirectionalLight(lights.DirectionalLight3);
-            this.PointLight = new BufferPointLight(lights.PointLight);
-            this.SpotLight = new BufferSpotLight(lights.SpotLight);
-            this.FogColor = lights.FogColor;
-            this.FogStart = lights.FogStart;
-            this.FogRange = lights.FogRange;
-            this.EnableShadows = lights.EnableShadows ? 1 : 0;
+            SceneLight setLights = lights != null ? lights : SceneLight.Empty;
+
+            this.DirectionalLight1 = new BufferDirectionalLight(setLights.DirectionalLight1);
+            this.DirectionalLight2 = new BufferDirectionalLight(setLights.DirectionalLight2);
+            this.DirectionalLight3 = new BufferDirectionalLight(setLights.DirectionalLight3);
+            this.PointLight = new BufferPointLight(setLights.PointLight);
+            this.SpotLight = new BufferSpotLight(setLights.SpotLight);
+            this.FogColor = setLights.FogColor;
+            this.FogStart = setLights.FogStart;
+            this.FogRange = setLights.FogRange;
+            this.EnableShadows = setLights.EnableShadows ? 1 : 0;
         }
     }
 

@@ -6,6 +6,7 @@ using Engine.Common;
 using Engine.Helpers;
 using Engine.PathFinding;
 using SharpDX;
+using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace TerrainTest
 {
@@ -17,7 +18,7 @@ namespace TerrainTest
 
         private bool useDebugTex = false;
         private SpriteTexture shadowMapDrawer = null;
-        private SharpDX.Direct3D11.ShaderResourceView debugTex = null;
+        private ShaderResourceView debugTex = null;
 
         private TextDrawer title = null;
         private TextDrawer load = null;
@@ -111,6 +112,9 @@ namespace TerrainTest
                 PathNodeInclination = MathUtil.DegreesToRadians(35),
                 AddSkydom = true,
                 SkydomTexture = "sunset.dds",
+                AddVegetation = true,
+                VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
+                Saturation = 5f,
                 DropShadow = true,
             });
             sw.Stop();

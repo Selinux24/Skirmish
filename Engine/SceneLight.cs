@@ -7,6 +7,81 @@ namespace Engine
     /// </summary>
     public class SceneLight
     {
+        #region Preconfigured lights
+
+        /// <summary>
+        /// Default ligths
+        /// </summary>
+        public static readonly SceneLight Default = new SceneLight()
+        {
+            DirectionalLight1 = new SceneLightDirectional()
+            {
+                Ambient = new Color4(0.8f, 0.8f, 0.8f, 1.0f),
+                Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                Direction = Vector3.Normalize(new Vector3(0.57735f, -0.57735f, 0.57735f)),
+            },
+            DirectionalLight1Enabled = true,
+
+            DirectionalLight2 = new SceneLightDirectional()
+            {
+                Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
+                Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                Specular = new Color4(0.25f, 0.25f, 0.25f, 1.0f),
+                Direction = Vector3.Normalize(new Vector3(-0.57735f, -0.57735f, 0.57735f)),
+            },
+            DirectionalLight2Enabled = true,
+
+            DirectionalLight3 = new SceneLightDirectional()
+            {
+                Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
+                Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                Specular = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
+                Direction = Vector3.Normalize(new Vector3(0.0f, -0.707f, -0.707f)),
+            },
+            DirectionalLight3Enabled = true,
+
+            PointLight = new SceneLightPoint() { },
+            PointLightEnabled = false,
+
+            SpotLight = new SceneLightSpot() { },
+            SpotLightEnabled = false,
+
+            FogColor = Color.Transparent,
+            FogStart = 0,
+            FogRange = 0,
+
+            EnableShadows = false,
+        };
+        /// <summary>
+        /// Empty lights
+        /// </summary>
+        public static SceneLight Empty = new SceneLight()
+        {
+            DirectionalLight1 = new SceneLightDirectional() { },
+            DirectionalLight1Enabled = false,
+
+            DirectionalLight2 = new SceneLightDirectional() { },
+            DirectionalLight2Enabled = false,
+
+            DirectionalLight3 = new SceneLightDirectional() { },
+            DirectionalLight3Enabled = false,
+
+            PointLight = new SceneLightPoint() { },
+            PointLightEnabled = false,
+
+            SpotLight = new SceneLightSpot() { },
+            SpotLightEnabled = false,
+
+            FogColor = Color.Transparent,
+            FogStart = 0,
+            FogRange = 0,
+
+            EnableShadows = false,
+        };
+
+        #endregion
+
         /// <summary>
         /// Enables or disabled first directional light
         /// </summary>

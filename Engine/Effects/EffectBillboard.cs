@@ -63,6 +63,10 @@ namespace Engine.Effects
         /// Billboard drawing technique
         /// </summary>
         public readonly EffectTechnique Billboard = null;
+        /// <summary>
+        /// Billboard shadow map drawing technique
+        /// </summary>
+        public readonly EffectTechnique ShadowMapBillboard = null;
 
         /// <summary>
         /// Directional lights effect variable
@@ -381,8 +385,10 @@ namespace Engine.Effects
             : base(device, effect, compile)
         {
             this.Billboard = this.Effect.GetTechniqueByName("Billboard");
+            this.ShadowMapBillboard = this.Effect.GetTechniqueByName("ShadowMapBillboard");
 
             this.AddInputLayout(this.Billboard, VertexBillboard.GetInput());
+            this.AddInputLayout(this.ShadowMapBillboard, VertexBillboard.GetInput());
 
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.shadowTransform = this.Effect.GetVariableByName("gShadowTransform").AsMatrix();

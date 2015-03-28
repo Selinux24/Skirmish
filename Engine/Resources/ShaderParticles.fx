@@ -268,6 +268,8 @@ technique11 FireStreamOut
         SetVertexShader(CompileShader(vs_5_0, VSStreamOut()));
         SetGeometryShader(gsStreamOutFire);
         SetPixelShader(NULL);
+
+		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
@@ -281,6 +283,8 @@ technique11 SmokeStreamOut
         SetVertexShader(CompileShader(vs_5_0, VSStreamOut()));
         SetGeometryShader(gsStreamOutSmoke);
         SetPixelShader(NULL);
+
+		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
@@ -294,6 +298,8 @@ technique11 RainStreamOut
         SetVertexShader(CompileShader(vs_5_0, VSStreamOut()));
         SetGeometryShader(gsStreamOutRain);
         SetPixelShader(NULL);
+
+		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
@@ -306,8 +312,9 @@ technique11 SolidDraw
         SetGeometryShader(CompileShader(gs_5_0, GSDrawSolid()));
         SetPixelShader(CompileShader(ps_5_0, PSDrawSolid()));
 
+		SetRasterizerState(RasterizerSolid);
         SetBlendState(BlendAdditive, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xffffffff);
-        SetDepthStencilState(StencilNoDepthWrites, 0);
+        SetDepthStencilState(StencilEnableDepth, 0);
     }
 }
 
@@ -319,6 +326,7 @@ technique11 LineDraw
         SetGeometryShader(CompileShader(gs_5_0, GSDrawLine()));
         SetPixelShader(CompileShader(ps_5_0, PSDrawLine()));
 
-        SetDepthStencilState(StencilNoDepthWrites, 0);
+		SetRasterizerState(RasterizerSolid);
+        SetDepthStencilState(StencilEnableDepth, 0);
     }
 }

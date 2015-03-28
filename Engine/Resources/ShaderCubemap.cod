@@ -23,19 +23,27 @@ RasterizerState RasterizerWireFrame
 };
 RasterizerState RasterizerDepth
 {
-    DepthBias = uint(10000);
+    DepthBias = uint(0x000186a0);
     DepthBiasClamp = float(0);
     SlopeScaledDepthBias = float(1);
+};
+RasterizerState RasterizerNoCull
+{
+    CullMode = uint(NONE /* 1 */);
+};
+DepthStencilState StencilEnableDepth
+{
+    DepthEnable = bool(TRUE /* 1 */);
+    DepthWriteMask = uint(ZERO /* 0 */);
 };
 DepthStencilState StencilDisableDepth
 {
     DepthEnable = bool(FALSE /* 0 */);
     DepthWriteMask = uint(ZERO /* 0 */);
 };
-DepthStencilState StencilNoDepthWrites
+DepthStencilState StencilLessEqualDSS
 {
-    DepthEnable = bool(TRUE /* 1 */);
-    DepthWriteMask = uint(ZERO /* 0 */);
+    DepthFunc = uint(LESS_EQUAL /* 4 */);
 };
 BlendState BlendAdditive
 {
@@ -117,14 +125,6 @@ SamplerComparisonState SamplerShadow
     ComparisonFunc = uint(LESS /* 2 */);
 };
 TextureCube gCubemap;
-RasterizerState NoCull
-{
-    CullMode = uint(NONE /* 1 */);
-};
-DepthStencilState LessEqualDSS
-{
-    DepthFunc = uint(LESS_EQUAL /* 4 */);
-};
 
 //
 // 1 groups(s)
@@ -183,14 +183,14 @@ fxgroup
                 dcl_output o1.xyz
                 dcl_temps 2
                 
-                #line 24 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
+                #line 15 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 r1.x, r0.xyzw, cb0[0].xyzw  // output<0:NaN:Inf>
                 dp4 r1.y, r0.xyzw, cb0[1].xyzw  // output<1:NaN:Inf>
                 dp4 r1.z, r0.xyzw, cb0[3].xyzw  // output<2:NaN:Inf>
                 
-                #line 27
+                #line 18
                 mov o0.xyzw, r1.xyzz  // VSCubic<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 mov o1.xyz, v0.xyzx  // VSCubic<4,5,6>
                 ret 
@@ -233,15 +233,15 @@ fxgroup
                 dcl_input_ps linear v1.xyz
                 dcl_output o0.xyzw
                 
-                #line 32 "C:\Users\25466449\Documents\Visual Studio 2010\Projects\Prototypes\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
+                #line 23 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 sample_indexable(texturecube)(float,float,float,float) o0.xyzw, v1.xyzx, t0.xyzw, s0  // PSCubic<0:Inf,1:Inf,2:Inf,3:Inf>
                 ret 
                 // Approximately 2 instruction slots used
                             
             };
-            RasterizerState = NoCull;
+            RasterizerState = RasterizerNoCull;
             DS_StencilRef = uint(0);
-            DepthStencilState = LessEqualDSS;
+            DepthStencilState = StencilLessEqualDSS;
         }
 
     }

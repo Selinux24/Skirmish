@@ -1,7 +1,7 @@
 //
 // FX Version: fx_5_0
 //
-// 10 local object(s)
+// 12 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -15,19 +15,27 @@ RasterizerState RasterizerWireFrame
 };
 RasterizerState RasterizerDepth
 {
-    DepthBias = uint(10000);
+    DepthBias = uint(0x000186a0);
     DepthBiasClamp = float(0);
     SlopeScaledDepthBias = float(1);
+};
+RasterizerState RasterizerNoCull
+{
+    CullMode = uint(NONE /* 1 */);
+};
+DepthStencilState StencilEnableDepth
+{
+    DepthEnable = bool(TRUE /* 1 */);
+    DepthWriteMask = uint(ZERO /* 0 */);
 };
 DepthStencilState StencilDisableDepth
 {
     DepthEnable = bool(FALSE /* 0 */);
     DepthWriteMask = uint(ZERO /* 0 */);
 };
-DepthStencilState StencilNoDepthWrites
+DepthStencilState StencilLessEqualDSS
 {
-    DepthEnable = bool(TRUE /* 1 */);
-    DepthWriteMask = uint(ZERO /* 0 */);
+    DepthFunc = uint(LESS_EQUAL /* 4 */);
 };
 BlendState BlendAdditive
 {

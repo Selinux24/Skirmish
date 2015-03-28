@@ -537,10 +537,30 @@ namespace Engine.Content
                             FaceIndex = i,
                         };
 
-                        if (vertexInput != null) vert.VertexIndex = polyList.P[index + vertexInput.Offset];
-                        if (vertexInput != null) vert.Position = Vector3.TransformCoordinate(positions[polyList.P[index + vertexInput.Offset]].ChangeTransformAxis(conversion), transform);
-                        if (normalInput != null) vert.Normal = Vector3.TransformNormal(normals[polyList.P[index + normalInput.Offset]].ChangeTransformAxis(conversion), transform);
-                        if (texCoordInput != null) vert.Texture = texCoords[polyList.P[index + texCoordInput.Offset]];
+                        if (vertexInput != null)
+                        {
+                            int vIndex = polyList.P[index + vertexInput.Offset];
+                            Vector3 pos = positions[vIndex].ChangeTransformAxis(conversion);
+
+                            vert.VertexIndex = vIndex;
+                            vert.Position = transform.IsIdentity ? pos : Vector3.TransformCoordinate(pos, transform);
+                        }
+
+                        if (normalInput != null)
+                        {
+                            int nIndex = polyList.P[index + normalInput.Offset];
+                            Vector3 nor = normals[nIndex].ChangeTransformAxis(conversion);
+
+                            vert.Normal = transform.IsIdentity ? nor : Vector3.TransformNormal(nor, transform);
+                        }
+
+                        if (texCoordInput != null)
+                        {
+                            int tIndex = polyList.P[index + texCoordInput.Offset];
+                            Vector2 tex = texCoords[tIndex];
+
+                            vert.Texture = tex;
+                        }
 
                         verts.Add(vert);
 

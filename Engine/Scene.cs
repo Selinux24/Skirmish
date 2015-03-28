@@ -130,29 +130,7 @@ namespace Engine
                 this.Game.Form.RenderWidth,
                 this.Game.Form.RenderHeight);
 
-            this.Lights = new SceneLight();
-
-            this.Lights.DirectionalLight1.Ambient = new Color4(0.8f, 0.8f, 0.8f, 1.0f);
-            this.Lights.DirectionalLight1.Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
-            this.Lights.DirectionalLight1.Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f);
-            this.Lights.DirectionalLight1.Direction = Vector3.Normalize(new Vector3(0.57735f, -0.57735f, 0.57735f));
-            this.Lights.DirectionalLight1Enabled = true;
-
-            this.Lights.DirectionalLight2.Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
-            this.Lights.DirectionalLight2.Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f);
-            this.Lights.DirectionalLight2.Specular = new Color4(0.25f, 0.25f, 0.25f, 1.0f);
-            this.Lights.DirectionalLight2.Direction = Vector3.Normalize(new Vector3(-0.57735f, -0.57735f, 0.57735f));
-            this.Lights.DirectionalLight2Enabled = true;
-
-            this.Lights.DirectionalLight3.Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
-            this.Lights.DirectionalLight3.Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f);
-            this.Lights.DirectionalLight3.Specular = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
-            this.Lights.DirectionalLight3.Direction = Vector3.Normalize(new Vector3(0.0f, -0.707f, -0.707f));
-            this.Lights.DirectionalLight3Enabled = true;
-
-            this.Lights.PointLightEnabled = false;
-
-            this.Lights.SpotLightEnabled = false;
+            this.Lights = SceneLight.Default;
 
             this.SceneVolume = new BoundingSphere(Vector3.Zero, 1000);
 
@@ -183,6 +161,16 @@ namespace Engine
         public virtual void Update(GameTime gameTime)
         {
             this.Camera.Update(gameTime);
+
+            this.DrawContext.World = this.world;
+            this.DrawContext.ViewProjection = this.Camera.View * this.Camera.Projection;
+            this.DrawContext.EyePosition = this.Camera.Position;
+
+            if (this.Lights.EnableShadows)
+            {
+                this.DrawShadowsContext.World = Matrix.Identity;
+                this.DrawShadowsContext.ViewProjection = this.ShadowMap.View * this.ShadowMap.Projection;
+            }
 
             //Update active components
             List<Drawable> activeComponents = this.components.FindAll(c => c.Active);
@@ -232,10 +220,6 @@ namespace Engine
             List<Drawable> visibleComponents = this.components.FindAll(c => c.Visible);
             if (visibleComponents.Count > 0)
             {
-                this.DrawContext.DrawerMode = DrawerModesEnum.Default;
-                this.DrawContext.World = this.world;
-                this.DrawContext.ViewProjection = this.Camera.View * this.Camera.Projection;
-                this.DrawContext.EyePosition = this.Camera.Position;
                 this.DrawContext.Lights = this.Lights;
                 this.DrawContext.ShadowMap = null;
                 this.DrawContext.ShadowTransform = Matrix.Identity;
@@ -244,9 +228,6 @@ namespace Engine
                 {
                     this.ShadowMap.Update(this.Lights.DirectionalLight1.Direction, this.SceneVolume);
 
-                    this.DrawShadowsContext.DrawerMode = DrawerModesEnum.ShadowMap;
-                    this.DrawShadowsContext.World = Matrix.Identity;
-                    this.DrawShadowsContext.ViewProjection = this.ShadowMap.View * this.ShadowMap.Projection;
                     this.DrawShadowsContext.ShadowMap = null;
                     this.DrawShadowsContext.ShadowTransform = Matrix.Identity;
 

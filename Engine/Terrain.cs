@@ -62,6 +62,7 @@ namespace Engine
                     description.Seed);
 
                 this.vegetation = new Billboard(game, vegetationContent);
+                this.vegetation.DropShadow = description.DropShadow;
             }
 
             if (description != null && description.AddSkydom)
@@ -127,16 +128,16 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(GameTime gameTime, Context context)
         {
+            if (this.skydom != null)
+            {
+                this.skydom.Draw(gameTime, context);
+            }
+
             this.terrain.Draw(gameTime, context);
 
             if (this.vegetation != null)
             {
                 this.vegetation.Draw(gameTime, context);
-            }
-
-            if (this.skydom != null)
-            {
-                this.skydom.Draw(gameTime, context);
             }
         }
 
@@ -352,15 +353,15 @@ namespace Engine
         /// <summary>
         /// Vegetation saturation per triangle
         /// </summary>
-        public float Saturation = 0f;
+        public float Saturation = 0.1f;
         /// <summary>
         /// Vegetation sprite minimum size
         /// </summary>
-        public Vector2 MinSize = Vector2.Zero;
+        public Vector2 MinSize = Vector2.One;
         /// <summary>
         /// Vegetation sprite maximum size
         /// </summary>
-        public Vector2 MaxSize = Vector2.Zero;
+        public Vector2 MaxSize = Vector2.One * 2f;
         /// <summary>
         /// Seed for random position generation
         /// </summary>

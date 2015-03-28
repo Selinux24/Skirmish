@@ -140,7 +140,12 @@ namespace GameLogic
                 Top = this.Game.Form.RenderHeight - minimapHeight - (this.Game.Form.RenderHeight / 100),
                 Width = minimapWidth,
                 Height = minimapHeight,
-                Terrain = this.terrain,
+                Drawables = new Drawable[]
+                {
+                    this.terrain,
+                    this.model,
+                },
+                MinimapArea = this.terrain.GetBoundingBox(),
             };
             this.minimap = this.AddMinimap(minimapDesc);
 
