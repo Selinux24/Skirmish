@@ -156,7 +156,6 @@
     <Compile Include="Collada\Camera.cs" />
     <Compile Include="Collada\Channel.cs" />
     <Compile Include="Collada\COLLADA.cs" />
-    <Compile Include="Collada\Types\EnumAxisConversion.cs" />
     <Compile Include="Collada\Types\NamedArray.cs" />
     <Compile Include="Collada\Types\NamedNode.cs" />
     <Compile Include="Collada\Contributor.cs">
@@ -166,7 +165,6 @@
     <Compile Include="Collada\ConvexMesh.cs" />
     <Compile Include="Collada\Effect.cs" />
     <Compile Include="Collada\EvaluateScene.cs" />
-    <Compile Include="Collada\Extensions.cs" />
     <Compile Include="Collada\Extra.cs" />
     <Compile Include="Collada\ForceField.cs" />
     <Compile Include="Collada\FX\BlinnPhong.cs" />
@@ -312,6 +310,9 @@
     <Compile Include="Common\QuadTree.cs" />
     <Compile Include="Common\QuadTreeNode.cs" />
     <Compile Include="Common\Skeleton.cs" />
+    <Compile Include="Content\LoaderConversion.cs" />
+    <Compile Include="Content\CoordinateSystems.cs" />
+    <Compile Include="Content\GeometryOrientations.cs" />
     <Compile Include="Effects\EffectInstancingShadow.cs" />
     <Compile Include="SpriteTexture.cs" />
     <Compile Include="Curve.cs" />

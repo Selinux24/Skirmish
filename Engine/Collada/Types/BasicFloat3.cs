@@ -1,4 +1,5 @@
 ﻿using System;
+using SharpDX;
 
 namespace Engine.Collada.Types
 {
@@ -13,6 +14,18 @@ namespace Engine.Collada.Types
         public BasicFloat3(float a, float b, float c)
         {
             this.Values = new float[] { a, b, c };
+        }
+
+        public Vector3 ToVector3()
+        {
+            if (this.Values != null && this.Values.Length == 3)
+            {
+                return new Vector3(this.Values[0], this.Values[1], this.Values[2]);
+            }
+            else
+            {
+                throw new Exception(string.Format("El valor no es un {0} válido.", this.GetType()));
+            }
         }
 
         public override string ToString()
