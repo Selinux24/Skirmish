@@ -216,7 +216,7 @@ namespace Engine.Collada
             for (int i = 0; i < length * stride; i += stride)
             {
                 Vector3 v = new Vector3(
-                    source.FloatArray[i + 0],
+                    -source.FloatArray[i + 0], //Right handed to left handed
                     source.FloatArray[i + 1],
                     source.FloatArray[i + 2]);
 

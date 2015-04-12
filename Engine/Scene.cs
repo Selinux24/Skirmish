@@ -637,6 +637,35 @@ namespace Engine
 
             return newModel;
         }
+        /// <summary>
+        /// Adds a triangle list drawer
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="color">Color</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new triangle list drawer</returns>
+        public TriangleListDrawer AddTriangleListDrawer(Triangle[] triangles, Color4 color, int order = 0)
+        {
+            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, triangles, color);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
+        /// Adds a triangle list drawer
+        /// </summary>
+        /// <param name="count">Triangle count</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new triangle list drawer</returns>
+        public TriangleListDrawer AddTriangleListDrawer(int count, int order = 0)
+        {
+            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, count);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
 
         /// <summary>
         /// Add component to collection

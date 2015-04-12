@@ -64,9 +64,20 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(GameTime gameTime, Context context)
         {
-            this.WriteDataInBuffer();
+            if (this.lineDictionary.Count > 0)
+            {
+                this.WriteDataInBuffer();
 
-            base.Draw(gameTime, context);
+                base.Draw(gameTime, context);
+            }
+        }
+        /// <summary>
+        /// No frustum culling
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        public override void FrustumCulling(BoundingFrustum frustum)
+        {
+            this.Cull = false;
         }
 
         /// <summary>

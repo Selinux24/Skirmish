@@ -29,7 +29,7 @@ namespace Skybox
         private TextDrawer fps = null;
 
         private Terrain ruins = null;
-        private LineListDrawer pickedTri = null;
+        private TriangleListDrawer pickedTri = null;
         private LineListDrawer bboxGlobalDrawer = null;
         //private LineListDrawer bboxMeshesDrawer = null;
         //private LineListDrawer bsphMeshesDrawer = null;
@@ -101,7 +101,7 @@ namespace Skybox
             //this.bboxMeshesDrawer.UseZBuffer = true;
             //this.bsphMeshesDrawer.UseZBuffer = true;
 
-            this.pickedTri = this.AddLineListDrawer(new Line[3], Color.Red);
+            this.pickedTri = this.AddTriangleListDrawer(1);
             this.pickedTri.UseZBuffer = false;
 
             #endregion
@@ -311,7 +311,7 @@ namespace Skybox
                 Triangle t;
                 if (this.ruins.PickNearest(ref pRay, out p, out t))
                 {
-                    this.pickedTri.SetLines(Color.Red, GeometryUtil.CreateWiredTriangle(t));
+                    this.pickedTri.SetTriangles(Color.Red, new[] { t });
                 }
             }
 

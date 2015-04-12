@@ -64,9 +64,20 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(GameTime gameTime, Context context)
         {
-            this.WriteDataInBuffer();
+            if (this.triangleDictionary.Count > 0)
+            {
+                this.WriteDataInBuffer();
 
-            base.Draw(gameTime, context);
+                base.Draw(gameTime, context);
+            }
+        }
+        /// <summary>
+        /// No frustum culling
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        public override void FrustumCulling(BoundingFrustum frustum)
+        {
+            this.Cull = false;
         }
 
         /// <summary>
@@ -150,13 +161,19 @@ namespace Engine
 
                 foreach (Color4 color in this.triangleDictionary.Keys)
                 {
-                    List<Triangle> lines = this.triangleDictionary[color];
-                    if (lines.Count > 0)
+                    List<Triangle> triangles = this.triangleDictionary[color];
+                    if (triangles.Count > 0)
                     {
-                        for (int i = 0; i < lines.Count; i++)
+                        for (int i = 0; i < triangles.Count; i++)
                         {
-                            data.Add(new VertexPositionColor() { Position = lines[i].Point1, Color = color });
-                            data.Add(new VertexPositionColor() { Position = lines[i].Point2, Color = color });
+                            data.Add(new VertexPositionColor() { Position = triangles[i].Point1, Color = color });
+                            data.Add(new VertexPositionColor() { Position = triangles[i].Point2, Color = color });
+
+                            data.Add(new VertexPositionColor() { Position = triangles[i].Point2, Color = color });
+                            data.Add(new VertexPositionColor() { Position = triangles[i].Point3, Color = color });
+
+                            data.Add(new VertexPositionColor() { Position = triangles[i].Point3, Color = color });
+                            data.Add(new VertexPositionColor() { Position = triangles[i].Point1, Color = color });
                         }
                     }
                 }

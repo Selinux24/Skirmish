@@ -99,7 +99,7 @@ namespace Engine.Content
 
                                 if (node.HasGeometry)
                                 {
-                                    Transforms trn = node.ReadTransforms();
+                                    //Transforms trn = node.ReadTransforms();
 
                                     MeshContent info = new MeshContent()
                                     {
@@ -566,6 +566,14 @@ namespace Engine.Content
 
                         index += inputCount;
                     }
+                }
+
+                //From right handed to left handed
+                for (int i = 0; i < verts.Count; i += 3)
+                {
+                    VertexData tmp = verts[i + 1];
+                    verts[i + 1] = verts[i + 2];
+                    verts[i + 2] = tmp;
                 }
 
                 SubMeshContent meshInfo = new SubMeshContent()
