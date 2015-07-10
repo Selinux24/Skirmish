@@ -1,0 +1,121 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Common.Camera" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AARAJgIIAKAAEACiAiAIIDQEIAEEAAGIRAAQAAAAAAg=</HashCode>
+      <FileName>Camera.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Common.Graphics" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="4" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAgAAAACAAAwAAEAIAAAAAACAAEAAABiAAAAEAAAA=</HashCode>
+      <FileName>Graphics.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Common.Input" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="2.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EARAAAAoACAAAAAAZEAEAUAABAAAAlAAAAAAAIBQAFA=</HashCode>
+      <FileName>Input.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Common.Game" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <AssociationLine Name="Input" Type="Common.Input" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="1.188" Y="1.062" />
+        <Point X="1.188" Y="2.375" />
+        <Point X="3" Y="2.375" />
+        <Point X="3" Y="2.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.648" Y="0.694" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Camera" Type="Common.Camera" FixedFromPoint="true">
+      <Path>
+        <Point X="1" Y="1.062" />
+        <Point X="1" Y="2.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.775" Y="0.498" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Graphics" Type="Common.Graphics" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="1.375" Y="1.062" />
+        <Point X="1.375" Y="1.438" />
+        <Point X="4.75" Y="1.438" />
+        <Point X="4.75" Y="2.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.848" Y="0.956" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAACAAAAACAAAAAAAAAAAIAAGAAQAAAAIAgAAAEAAAM=</HashCode>
+      <FileName>Game.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Input" />
+      <Property Name="Camera" />
+      <Property Name="Graphics" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Field Name="scenes" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Common.TextureShader" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="5.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAABACAAAAAAEAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>TextureShader.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Common.Model" Collapsed="true">
+    <Position X="7.5" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAIAAAACAAAoAgAAAAAAAAAAAAAgAAAAAAAAAAAAA=</HashCode>
+      <FileName>Model.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Common.Sprite" Collapsed="true">
+    <Position X="9.25" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AASAIAAAQCAAAgAoAAAAACAAAAAAAgAAAAAAAAAAAAA=</HashCode>
+      <FileName>Sprite.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Common.Scene" Collapsed="true">
+    <Position X="5.75" Y="2.75" Width="1.5" />
+    <AssociationLine Name="components" Type="Common.Utils.DrawableComponent">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.057" Y="1.935" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAUAAAAAACAIAwAAAACAAAAAAAgAAAAkAAAAAAAAAAA=</HashCode>
+      <FileName>Scene.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="components" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Common.Utils.DrawableComponent" Collapsed="true">
+    <Position X="7.5" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAAgAAAAAAAAAAAAgAAAAoAAAAAEAAAAA=</HashCode>
+      <FileName>Utils\DrawableComponent.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
