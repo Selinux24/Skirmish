@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Engine;
+﻿using Engine;
 using Engine.Common;
 using Engine.Helpers;
 using Engine.PathFinding;
 using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace TerrainTest
