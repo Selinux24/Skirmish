@@ -1,0 +1,31 @@
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Resources3D\soldier.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Resources3D\terrain.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Resources3D\cursor.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Resources3D\soldier1.jpg
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Resources3D\soldier0.jpg
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Resources3D\terrain.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Resources3D\terrain_nmap.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Resources\button_off.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Resources\button_on.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Resources\HUD.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\sharpdx_direct3d11_effects_x64.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\sharpdx_direct3d11_effects_x86.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Game Logic.exe
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Game Logic.pdb
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Engine.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\SharpDX.Direct3D11.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\SharpDX.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\SharpDX.DXGI.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\SharpDX.D3DCompiler.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\SharpDX.Direct3D11.Effects.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\Engine.pdb
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\SharpDX.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\SharpDX.Direct3D11.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\SharpDX.DXGI.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\SharpDX.D3DCompiler.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\bin\Debug\SharpDX.Direct3D11.Effects.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\obj\Debug\Z Game Logic.csprojResolveAssemblyReference.cache
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\obj\Debug\GameLogic.Properties.Resources.resources
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\obj\Debug\Z Game Logic.csproj.GenerateResource.Cache
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\obj\Debug\Game Logic.exe
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Z Game Logic\obj\Debug\Game Logic.pdb

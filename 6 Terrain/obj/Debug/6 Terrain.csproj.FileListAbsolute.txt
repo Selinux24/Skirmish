@@ -1,0 +1,49 @@
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\obj\Debug\6 Terrain.csprojResolveAssemblyReference.cache
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\obj\Debug\TerrainTest.Properties.Resources.resources
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\obj\Debug\6 Terrain.csproj.GenerateResource.Cache
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - tires - 2.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - black - 0.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - black - 1.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - black - 2.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - gray - 0.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - gray - 1.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - gray - 2.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - green - 0.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - green - 1.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - green - 2.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - tires - 0.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\helicopter - tires - 1.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\terrain.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\terrain_nmap.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\tree4.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\tree5.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\uvtest.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\terrain.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\Helicopter.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\two_levels.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\cursor.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\tank.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\sunset.dds
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\obelisk.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\tree0.dds
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\tree1.dds
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\tree2.dds
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Resources\tree3.dds
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\sharpdx_direct3d11_effects_x64.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\sharpdx_direct3d11_effects_x86.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Terrain.exe
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Terrain.pdb
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Engine.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\SharpDX.Direct3D11.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\SharpDX.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\SharpDX.DXGI.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\SharpDX.D3DCompiler.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\SharpDX.Direct3D11.Effects.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\Engine.pdb
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\SharpDX.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\SharpDX.Direct3D11.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\SharpDX.DXGI.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\SharpDX.D3DCompiler.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\bin\Debug\SharpDX.Direct3D11.Effects.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\obj\Debug\Terrain.exe
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\6 Terrain\obj\Debug\Terrain.pdb

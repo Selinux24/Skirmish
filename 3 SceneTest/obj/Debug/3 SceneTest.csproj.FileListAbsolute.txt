@@ -1,0 +1,26 @@
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\sharpdx_direct3d11_effects_x64.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\sharpdx_direct3d11_effects_x86.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\Resources3D\Poly.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\ResourcesHID\background.jpg
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\Resources3D\Poly.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\ResourcesHID\smiley.jpg
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SceneTest.exe.config
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SceneTest.exe
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SceneTest.pdb
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\Engine.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SharpDX.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SharpDX.Direct3D11.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SharpDX.D3DCompiler.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SharpDX.Direct3D11.Effects.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SharpDX.DXGI.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\Engine.pdb
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SharpDX.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SharpDX.Direct3D11.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SharpDX.D3DCompiler.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SharpDX.Direct3D11.Effects.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\bin\Debug\SharpDX.DXGI.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\obj\Debug\3 SceneTest.csprojResolveAssemblyReference.cache
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\obj\Debug\SceneTest.Properties.Resources.resources
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\obj\Debug\3 SceneTest.csproj.GenerateResource.Cache
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\obj\Debug\SceneTest.exe
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\3 SceneTest\obj\Debug\SceneTest.pdb

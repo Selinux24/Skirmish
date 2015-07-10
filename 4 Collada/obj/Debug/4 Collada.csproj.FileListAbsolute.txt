@@ -1,0 +1,48 @@
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\ground_nmap.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\helicopter - tires - 1.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter - black - 0.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter - black - 1.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter - gray - 0.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter - gray - 1.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter - green - 0.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter - green - 1.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\helicopter - tires - 0.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\target.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\tree4.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\tree5.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\ground.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Poly.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Poly.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\tree0.dds
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\tree1.dds
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\tree2.dds
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\tree3.dds
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\Helicopter.dae
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\raindrop.dds
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Resources\ground.png
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\sharpdx_direct3d11_effects_x64.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\sharpdx_direct3d11_effects_x86.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.exe.config
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.exe.manifest
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.application
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.exe
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Collada.pdb
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Engine.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.Direct3D11.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.D3DCompiler.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.Direct3D11.Effects.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.DXGI.dll
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\Engine.pdb
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.Direct3D11.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.D3DCompiler.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.Direct3D11.Effects.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\bin\Debug\SharpDX.DXGI.xml
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\obj\Debug\4 Collada.csprojResolveAssemblyReference.cache
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\obj\Debug\Collada.Properties.Resources.resources
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\obj\Debug\4 Collada.csproj.GenerateResource.Cache
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\obj\Debug\Collada.exe.manifest
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\obj\Debug\Collada.application
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\obj\Debug\Collada.exe
+C:\Users\25466449\Documents\GitHub\SharpDX-Tests\4 Collada\obj\Debug\Collada.pdb
