@@ -62,6 +62,7 @@ namespace Engine
                     description.Seed);
 
                 this.vegetation = new Billboard(game, vegetationContent);
+                this.vegetation.Radius = description.Radius;
                 this.vegetation.DropShadow = description.DropShadow;
             }
 
@@ -362,6 +363,10 @@ namespace Engine
         /// Vegetation sprite maximum size
         /// </summary>
         public Vector2 MaxSize = Vector2.One * 2f;
+        /// <summary>
+        /// Drawing radius for vegetation
+        /// </summary>
+        public float Radius = 0f;
         /// <summary>
         /// Seed for random position generation
         /// </summary>

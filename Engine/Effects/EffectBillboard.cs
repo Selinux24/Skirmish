@@ -30,6 +30,7 @@ namespace Engine.Effects
             public Matrix WorldViewProjection;
             public Matrix ShadowTransform;
             public BufferLights Lights;
+            public float Radius;
 
             public static int Size
             {
@@ -97,9 +98,13 @@ namespace Engine.Effects
         /// </summary>
         private EffectVectorVariable fogColor = null;
         /// <summary>
-        /// Enable shados effect variable
+        /// Enable shadows effect variable
         /// </summary>
         private EffectScalarVariable enableShadows = null;
+        /// <summary>
+        /// Bounding sphere
+        /// </summary>
+        private EffectScalarVariable radius = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
@@ -272,6 +277,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Bounding sphere
+        /// </summary>
+        protected float Radius
+        {
+            get
+            {
+                return this.radius.GetFloat();
+            }
+            set
+            {
+                this.radius.Set(value);
+            }
+        }
+        /// <summary>
         /// World view projection matrix
         /// </summary>
         protected Matrix WorldViewProjection
@@ -401,6 +420,7 @@ namespace Engine.Effects
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
             this.enableShadows = this.Effect.GetVariableByName("gEnableShadows").AsScalar();
+            this.radius = this.Effect.GetVariableByName("gRadius").AsScalar();
             this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
@@ -452,6 +472,8 @@ namespace Engine.Effects
             this.FogRange = this.FrameBuffer.Lights.FogRange;
             this.FogColor = this.FrameBuffer.Lights.FogColor;
             this.EnableShadows = shadowMap != null ? this.FrameBuffer.Lights.EnableShadows : 0;
+            
+            this.Radius = this.FrameBuffer.Radius;
 
             this.ShadowMap = shadowMap;
         }

@@ -262,7 +262,7 @@ fxgroup
                 dcl_output o2.xyzw
                 dcl_temps 1
                 
-                #line 49 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 49 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionColor<0:NaN:Inf>
@@ -373,7 +373,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 2
                 
-                #line 117 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 117 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
@@ -384,7 +384,7 @@ fxgroup
                 add r1.xyzw, -v2.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r1.xyzw, v2.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
-                #line 115 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 115 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r1.x, l(0.000000), cb0[40].x
                 movc o0.xyzw, r1.xxxx, r0.xyzw, v2.xyzw  // PSPositionColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
@@ -508,7 +508,7 @@ fxgroup
                 dcl_output o2.xyzw
                 dcl_temps 1
                 
-                #line 60 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 60 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -621,7 +621,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 2
                 
-                #line 117 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 117 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
@@ -632,7 +632,7 @@ fxgroup
                 add r1.xyzw, -v2.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r1.xyzw, v2.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
-                #line 115 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 115 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r1.x, l(0.000000), cb0[40].x
                 movc o0.xyzw, r1.xxxx, r0.xyzw, v2.xyzw  // PSPositionColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
@@ -797,7 +797,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 82 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 82 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw  // VSPositionColorSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw  // VSPositionColorSkinned<1:NaN:Inf>
@@ -907,7 +907,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 2
                 
-                #line 117 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 117 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
@@ -918,7 +918,7 @@ fxgroup
                 add r1.xyzw, -v2.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r1.xyzw, v2.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
-                #line 115 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 115 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r1.x, l(0.000000), cb0[40].x
                 movc o0.xyzw, r1.xxxx, r0.xyzw, v2.xyzw  // PSPositionColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
@@ -1093,7 +1093,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 102 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 102 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -1206,7 +1206,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 2
                 
-                #line 117 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 117 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
@@ -1217,7 +1217,7 @@ fxgroup
                 add r1.xyzw, -v2.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r1.xyzw, v2.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
-                #line 115 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 115 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r1.x, l(0.000000), cb0[40].x
                 movc o0.xyzw, r1.xxxx, r0.xyzw, v2.xyzw  // PSPositionColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
@@ -1337,7 +1337,7 @@ fxgroup
                 dcl_output o4.xyzw
                 dcl_temps 1
                 
-                #line 133 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 133 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionNormalColor<0:NaN:Inf>
@@ -1485,7 +1485,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 211 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 211 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -1766,7 +1766,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 228 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 228 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, v3.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 lt r1.x, l(0.000000), cb0[40].x
@@ -1777,7 +1777,7 @@ fxgroup
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 230 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 230 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx  // PSPositionNormalColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 235
@@ -1907,7 +1907,7 @@ fxgroup
                 dcl_output o4.xyzw
                 dcl_temps 1
                 
-                #line 146 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 146 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -2057,7 +2057,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 211 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 211 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -2338,7 +2338,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 228 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 228 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, v3.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 lt r1.x, l(0.000000), cb0[40].x
@@ -2349,7 +2349,7 @@ fxgroup
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 230 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 230 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx  // PSPositionNormalColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 235
@@ -2527,7 +2527,7 @@ fxgroup
                 #line 370
                 endloop 
                 
-                #line 173 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 173 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw  // VSPositionNormalColorSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw  // VSPositionNormalColorSkinned<1:NaN:Inf>
@@ -2670,7 +2670,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 211 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 211 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -2951,7 +2951,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 228 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 228 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, v3.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 lt r1.x, l(0.000000), cb0[40].x
@@ -2962,7 +2962,7 @@ fxgroup
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 230 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 230 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx  // PSPositionNormalColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 235
@@ -3150,7 +3150,7 @@ fxgroup
                 #line 370
                 endloop 
                 
-                #line 198 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 198 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -3296,7 +3296,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 211 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 211 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -3577,7 +3577,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 228 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 228 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, v3.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 lt r1.x, l(0.000000), cb0[40].x
@@ -3588,7 +3588,7 @@ fxgroup
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 230 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 230 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx  // PSPositionNormalColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 235
@@ -3713,7 +3713,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_temps 1
                 
-                #line 247 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 247 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionTexture<0:NaN:Inf>
@@ -3849,7 +3849,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 3
                 
-                #line 319 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 319 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
@@ -3858,14 +3858,14 @@ fxgroup
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // fogLerp<0:[0f,1f]>
                 
-                #line 315 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 315 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // litColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
                 #line 400 "IncLights.fx"
                 add r2.xyzw, -r1.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
-                #line 317 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 317 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r2.x, l(0.000000), cb0[40].x
                 movc r0.xyzw, r2.xxxx, r0.xyzw, r1.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
@@ -3994,7 +3994,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_temps 1
                 
-                #line 259 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 259 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -4132,7 +4132,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 3
                 
-                #line 319 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 319 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
@@ -4141,14 +4141,14 @@ fxgroup
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // fogLerp<0:[0f,1f]>
                 
-                #line 315 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 315 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // litColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
                 #line 400 "IncLights.fx"
                 add r2.xyzw, -r1.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
-                #line 317 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 317 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r2.x, l(0.000000), cb0[40].x
                 movc r0.xyzw, r2.xxxx, r0.xyzw, r1.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
@@ -4275,7 +4275,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_temps 1
                 
-                #line 247 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 247 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionTexture<0:NaN:Inf>
@@ -4333,7 +4333,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 1
                 
-                #line 332 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 332 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.x, v2.xyzx, t0.xyzw, s0  // litColor<0:Inf>
                 
                 #line 335
@@ -4459,7 +4459,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_temps 1
                 
-                #line 247 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 247 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionTexture<0:NaN:Inf>
@@ -4517,7 +4517,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 1
                 
-                #line 340 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 340 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.x, v2.xyzx, t0.yxzw, s0  // litColor<1:Inf>
                 
                 #line 343
@@ -4643,7 +4643,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_temps 1
                 
-                #line 247 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 247 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionTexture<0:NaN:Inf>
@@ -4701,7 +4701,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 1
                 
-                #line 348 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 348 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.x, v2.xyzx, t0.zxyw, s0  // litColor<2:Inf>
                 
                 #line 351
@@ -4878,7 +4878,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 282 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 282 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw  // VSPositionTextureSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw  // VSPositionTextureSkinned<1:NaN:Inf>
@@ -5013,7 +5013,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 3
                 
-                #line 319 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 319 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
@@ -5022,14 +5022,14 @@ fxgroup
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // fogLerp<0:[0f,1f]>
                 
-                #line 315 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 315 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // litColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
                 #line 400 "IncLights.fx"
                 add r2.xyzw, -r1.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
-                #line 317 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 317 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r2.x, l(0.000000), cb0[40].x
                 movc r0.xyzw, r2.xxxx, r0.xyzw, r1.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
@@ -5209,7 +5209,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 303 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 303 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -5347,7 +5347,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 3
                 
-                #line 319 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 319 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
@@ -5356,14 +5356,14 @@ fxgroup
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // fogLerp<0:[0f,1f]>
                 
-                #line 315 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 315 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // litColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
                 #line 400 "IncLights.fx"
                 add r2.xyzw, -r1.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
-                #line 317 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 317 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r2.x, l(0.000000), cb0[40].x
                 movc r0.xyzw, r2.xxxx, r0.xyzw, r1.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
@@ -5496,7 +5496,7 @@ fxgroup
                 dcl_output o4.xyzw
                 dcl_temps 1
                 
-                #line 361 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 361 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionNormalTexture<0:NaN:Inf>
@@ -5651,7 +5651,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 443 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 443 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -5932,7 +5932,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 460 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v3.xyzx, t0.xyzw, s0  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -5944,7 +5944,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 464 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 464 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTexture<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 469
@@ -6077,7 +6077,7 @@ fxgroup
                 dcl_output o4.xyzw
                 dcl_temps 1
                 
-                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 375 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -6234,7 +6234,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 443 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 443 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -6515,7 +6515,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 460 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v3.xyzx, t0.xyzw, s0  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -6527,7 +6527,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 464 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 464 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTexture<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 469
@@ -6716,7 +6716,7 @@ fxgroup
                 #line 370
                 endloop 
                 
-                #line 403 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 403 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw  // VSPositionNormalTextureSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw  // VSPositionNormalTextureSkinned<1:NaN:Inf>
@@ -6866,7 +6866,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 443 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 443 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -7147,7 +7147,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 460 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v3.xyzx, t0.xyzw, s0  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -7159,7 +7159,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 464 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 464 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTexture<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 469
@@ -7350,7 +7350,7 @@ fxgroup
                 #line 370
                 endloop 
                 
-                #line 429 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 429 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -7503,7 +7503,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 443 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 443 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -7784,7 +7784,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 460 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v3.xyzx, t0.xyzw, s0  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -7796,7 +7796,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 464 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 464 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTexture<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 469
@@ -7931,7 +7931,7 @@ fxgroup
                 dcl_output o5.xyzw
                 dcl_temps 1
                 
-                #line 481 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 481 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionNormalTextureTangent<0:NaN:Inf>
@@ -8095,7 +8095,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 576 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 576 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -8392,7 +8392,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 596 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 596 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -8404,7 +8404,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 600 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 600 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTextureTangent<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 605
@@ -8541,7 +8541,7 @@ fxgroup
                 dcl_output o5.xyzw
                 dcl_temps 1
                 
-                #line 496 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 496 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v5.xyzw
                 mad r0.xyzw, v0.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v6.xyzw, r0.xyzw
@@ -8707,7 +8707,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 576 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 576 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -9004,7 +9004,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 596 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 596 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -9016,7 +9016,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 600 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 600 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTextureTangent<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 605
@@ -9214,7 +9214,7 @@ fxgroup
                 #line 398
                 endloop 
                 
-                #line 528 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 528 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw  // VSPositionNormalTextureTangentSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw  // VSPositionNormalTextureTangentSkinned<1:NaN:Inf>
@@ -9373,7 +9373,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 576 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 576 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -9670,7 +9670,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 596 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 596 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -9682,7 +9682,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 600 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 600 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTextureTangent<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 605
@@ -9882,7 +9882,7 @@ fxgroup
                 #line 398
                 endloop 
                 
-                #line 558 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 558 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r3.yyyy, v7.xyzw
                 mad r0.xyzw, r3.xxxx, v6.xyzw, r0.xyzw
                 mad r0.xyzw, r3.zzzz, v8.xyzw, r0.xyzw
@@ -10044,7 +10044,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 576 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 576 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -10341,7 +10341,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 596 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 596 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -10353,7 +10353,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 600 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 600 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTextureTangent<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 605

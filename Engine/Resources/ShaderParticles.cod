@@ -215,7 +215,7 @@ GeometryShader gsStreamOutFire =
         dcl_output o3.x
         dcl_maxout 2
         
-        #line 53 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+        #line 53 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
         add r0.x, cb0[0].w, v[0][2].z  // input<8:Inf>
         if_z v[0][3].x
           lt r0.y, cb0[0].y, r0.x
@@ -352,7 +352,7 @@ GeometryShader gsStreamOutSmoke =
         dcl_output o3.x
         dcl_maxout 50
         
-        #line 89 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+        #line 89 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
         add r0.x, cb0[0].w, v[0][2].z  // input<8:Inf>
         if_z v[0][3].x
           lt r0.y, cb0[0].y, r0.x
@@ -497,7 +497,7 @@ GeometryShader gsStreamOutRain =
         dcl_output o3.x
         dcl_maxout 6
         
-        #line 128 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+        #line 128 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
         add r0.x, cb0[0].w, v[0][2].z  // input<8:Inf>
         if_z v[0][3].x
           lt r0.y, cb0[0].y, r0.x
@@ -622,7 +622,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_output o3.x
                 
-                #line 47 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+                #line 47 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 mov o0.xyz, v0.xyzx  // VSStreamOut<0,1,2>
                 mov o1.xyz, v1.xyzx  // VSStreamOut<3,4,5>
                 mov o2.xy, v2.xyxx  // VSStreamOut<6,7>
@@ -685,7 +685,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_output o3.x
                 
-                #line 47 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+                #line 47 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 mov o0.xyz, v0.xyzx  // VSStreamOut<0,1,2>
                 mov o1.xyz, v1.xyzx  // VSStreamOut<3,4,5>
                 mov o2.xy, v2.xyxx  // VSStreamOut<6,7>
@@ -748,7 +748,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_output o3.x
                 
-                #line 47 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+                #line 47 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 mov o0.xyz, v0.xyzx  // VSStreamOut<0,1,2>
                 mov o1.xyz, v1.xyzx  // VSStreamOut<3,4,5>
                 mov o2.xy, v2.xyxx  // VSStreamOut<6,7>
@@ -836,7 +836,7 @@ fxgroup
                 dcl_output o3.x
                 dcl_temps 1
                 
-                #line 168 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+                #line 168 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 mul r0.x, v3.x, v3.x
                 mul r0.x, r0.x, l(0.500000)
                 mul r0.yzw, v1.xxyz, v3.xxxx
@@ -947,7 +947,7 @@ fxgroup
                 dcl_output_sgv o3.x, primitive_id
                 dcl_maxout 4
                 
-                #line 195 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+                #line 195 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 if_nz v[0][3].x
                   add r0.xyz, cb0[2].zxyz, -v[0][0].zxyz
                   dp3 r0.w, r0.xyzx, r0.xyzx
@@ -1110,7 +1110,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 1
                 
-                #line 250 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+                #line 250 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 udiv null, r0.x, v3.x, cb0[11].x
                 utof r0.z, r0.x  // uvw<2:[0f,4.29497e+009f]>
                 mov r0.xy, v2.xyxx
@@ -1194,7 +1194,7 @@ fxgroup
                 dcl_output o1.x
                 dcl_temps 1
                 
-                #line 183 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+                #line 183 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 mul r0.x, v3.x, v3.x
                 mul r0.x, r0.x, l(0.500000)
                 mul r0.yzw, v1.xxyz, v3.xxxx
@@ -1276,7 +1276,7 @@ fxgroup
                 dcl_output_sgv o2.x, primitive_id
                 dcl_maxout 2
                 
-                #line 229 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+                #line 229 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 if_nz v[0][1].x
                 
                 #line 232
@@ -1379,7 +1379,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 1
                 
-                #line 257 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
+                #line 257 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 udiv null, r0.x, v2.x, cb0[11].x
                 utof r0.z, r0.x  // uvw<2:[0f,4.29497e+009f]>
                 mov r0.xy, v1.xyxx

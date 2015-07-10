@@ -15,6 +15,10 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; set; }
+        /// <summary>
+        /// Drawing radius from eye point
+        /// </summary>
+        public float Radius { get; set; }
 
         /// <summary>
         /// Constructor
@@ -25,6 +29,7 @@ namespace Engine
             : base(game, content, false, 0, false, false)
         {
             this.Manipulator = new Manipulator3D();
+            this.Radius = 0;
         }
 
         /// <summary>
@@ -68,6 +73,7 @@ namespace Engine
                         effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
                         effect.FrameBuffer.ShadowTransform = context.ShadowTransform;
                         effect.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
+                        effect.FrameBuffer.Radius = this.Radius;
                         effect.UpdatePerFrame(context.ShadowMap);
                     }
 

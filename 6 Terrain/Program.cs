@@ -7,7 +7,7 @@ namespace TerrainTest
         static void Main()
         {
 #if DEBUG
-            using (Game cl = new Game("6 Terrain", false, 800, 450))
+            using (Game cl = new Game("6 Terrain", false, 400, 225))
 #else
             using (Game cl = new Game("6 Terrain"))
 #endif
