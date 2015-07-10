@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Windows Desktop
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1 SpriteDrawing", "1 SpriteDrawing\1 SpriteDrawing.csproj", "{07F24264-227B-4B09-85FD-816D7EE352D3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2 ModelDrawing", "2 ModelDrawing\2 ModelDrawing.csproj", "{817BF123-186B-4376-9332-B9CA2CFA0E3E}"
