@@ -66,6 +66,7 @@ namespace Engine
                     if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
                         effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
+                        effect.FrameBuffer.Radius = this.Radius;
                         effect.UpdatePerFrame(null);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Default)

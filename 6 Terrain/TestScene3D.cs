@@ -113,8 +113,27 @@ namespace TerrainTest
                 AddSkydom = true,
                 SkydomTexture = "sunset.dds",
                 AddVegetation = true,
-                VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
-                Saturation = 5f,
+                Vegetation = new[]
+                {
+                    new TerrainDescription.VegetationDescription()
+                    {
+                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
+                        Saturation = 2f,
+                        DropShadow = true,
+                        Radius = 300f,
+                        MinSize = Vector2.One * 2.50f,
+                        MaxSize = Vector2.One * 3.50f,
+                    },
+                    new TerrainDescription.VegetationDescription()
+                    {
+                        VegetarionTextures = new[] { "grass0.png", "grass1.png", "grass2.png" },
+                        Saturation = 200f,
+                        DropShadow = false,
+                        Radius = 50f,
+                        MinSize = Vector2.One * 0.20f,
+                        MaxSize = Vector2.One * 0.25f,
+                    }
+                },
                 DropShadow = true,
             });
             sw.Stop();

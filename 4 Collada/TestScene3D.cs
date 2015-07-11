@@ -67,11 +67,18 @@ namespace Collada
                 ContentPath = "Resources",
                 ModelFileName = "Ground.dae",
                 AddVegetation = true,
-                VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
-                Saturation = 0.05f,
-                MinSize = Vector2.One * 2f,
-                MaxSize = Vector2.One * 4f,
-                Seed = 1024,
+                Vegetation = new[]
+                {
+                    new TerrainDescription.VegetationDescription()
+                    {
+                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
+                        Saturation = 0.05f,
+                        MinSize = Vector2.One * 2f,
+                        MaxSize = Vector2.One * 4f,
+                        Seed = 1024,
+                        DropShadow = true,
+                    },
+                },
                 UsePathFinding = true,
                 PathNodeSize = 20f,
                 DropShadow = true,

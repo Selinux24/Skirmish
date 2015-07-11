@@ -18,7 +18,7 @@ namespace Engine
         /// <summary>
         /// Vegetation
         /// </summary>
-        private Billboard vegetation = null;
+        private Billboard[] vegetation = null;
         /// <summary>
         /// Skydom
         /// </summary>
@@ -51,19 +51,26 @@ namespace Engine
 
             if (description != null && description.AddVegetation)
             {
-                ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
-                    contentFolder,
-                    bbox,
-                    triangles,
-                    description.VegetarionTextures,
-                    description.Saturation,
-                    description.MinSize,
-                    description.MaxSize,
-                    description.Seed);
+                this.vegetation = new Billboard[description.Vegetation.Length];
 
-                this.vegetation = new Billboard(game, vegetationContent);
-                this.vegetation.Radius = description.Radius;
-                this.vegetation.DropShadow = description.DropShadow;
+                for (int i = 0; i < description.Vegetation.Length; i++)
+                {
+                    TerrainDescription.VegetationDescription vegetationDesc = description.Vegetation[i];
+
+                    ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
+                        contentFolder,
+                        bbox,
+                        triangles,
+                        vegetationDesc.VegetarionTextures,
+                        vegetationDesc.Saturation,
+                        vegetationDesc.MinSize,
+                        vegetationDesc.MaxSize,
+                        vegetationDesc.Seed);
+
+                    this.vegetation[i] = new Billboard(game, vegetationContent);
+                    this.vegetation[i].Radius = vegetationDesc.Radius;
+                    this.vegetation[i].DropShadow = vegetationDesc.DropShadow;
+                }
             }
 
             if (description != null && description.AddSkydom)
@@ -97,9 +104,13 @@ namespace Engine
                 this.terrain = null;
             }
 
-            if (this.vegetation != null)
+            if (this.vegetation != null && this.vegetation.Length > 0)
             {
-                this.vegetation.Dispose();
+                for (int i = 0; i < this.vegetation.Length; i++)
+                {
+                    this.vegetation[i].Dispose();
+                }
+
                 this.vegetation = null;
             }
 
@@ -118,7 +129,13 @@ namespace Engine
         {
             this.terrain.Update(gameTime, context);
 
-            if (this.vegetation != null) this.vegetation.Update(gameTime, context);
+            if (this.vegetation != null && this.vegetation.Length > 0)
+            {
+                for (int i = 0; i < this.vegetation.Length; i++)
+                {
+                    this.vegetation[i].Update(gameTime, context);
+                }
+            }
 
             if (this.skydom != null) this.skydom.Update(gameTime, context);
         }
@@ -136,9 +153,12 @@ namespace Engine
 
             this.terrain.Draw(gameTime, context);
 
-            if (this.vegetation != null)
+            if (this.vegetation != null && this.vegetation.Length > 0)
             {
-                this.vegetation.Draw(gameTime, context);
+                for (int i = 0; i < this.vegetation.Length; i++)
+                {
+                    this.vegetation[i].Draw(gameTime, context);
+                }
             }
         }
 
@@ -335,6 +355,41 @@ namespace Engine
     public class TerrainDescription
     {
         /// <summary>
+        /// Vegetation
+        /// </summary>
+        public class VegetationDescription
+        {
+            /// <summary>
+            /// Texture names array for vegetation
+            /// </summary>
+            public string[] VegetarionTextures = null;
+            /// <summary>
+            /// Vegetation saturation per triangle
+            /// </summary>
+            public float Saturation = 0.1f;
+            /// <summary>
+            /// Vegetation sprite minimum size
+            /// </summary>
+            public Vector2 MinSize = Vector2.One;
+            /// <summary>
+            /// Vegetation sprite maximum size
+            /// </summary>
+            public Vector2 MaxSize = Vector2.One * 2f;
+            /// <summary>
+            /// Drawing radius for vegetation
+            /// </summary>
+            public float Radius = 0f;
+            /// <summary>
+            /// Seed for random position generation
+            /// </summary>
+            public int Seed = 0;
+            /// <summary>
+            /// Drops shadow
+            /// </summary>
+            public bool DropShadow = false;
+        }
+
+        /// <summary>
         /// Content path
         /// </summary>
         public string ContentPath = "Resources";
@@ -348,29 +403,9 @@ namespace Engine
         /// </summary>
         public bool AddVegetation = false;
         /// <summary>
-        /// Texture names array for vegetation
+        /// Vegetation collection
         /// </summary>
-        public string[] VegetarionTextures = null;
-        /// <summary>
-        /// Vegetation saturation per triangle
-        /// </summary>
-        public float Saturation = 0.1f;
-        /// <summary>
-        /// Vegetation sprite minimum size
-        /// </summary>
-        public Vector2 MinSize = Vector2.One;
-        /// <summary>
-        /// Vegetation sprite maximum size
-        /// </summary>
-        public Vector2 MaxSize = Vector2.One * 2f;
-        /// <summary>
-        /// Drawing radius for vegetation
-        /// </summary>
-        public float Radius = 0f;
-        /// <summary>
-        /// Seed for random position generation
-        /// </summary>
-        public int Seed = 0;
+        public VegetationDescription[] Vegetation = null;
 
         /// <summary>
         /// Indicates whether the new terrain has skydom
@@ -380,6 +415,7 @@ namespace Engine
         /// Skydom cube texture
         /// </summary>
         public string SkydomTexture = null;
+
         /// <summary>
         /// Drops shadow
         /// </summary>
