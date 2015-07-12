@@ -8095,7 +8095,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 576 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 573 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -8392,7 +8392,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 596 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 593 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -8404,10 +8404,10 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 600 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 597 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTextureTangent<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 605
+                #line 602
                 mul o0.w, r1.w, cb1[1].w  // PSPositionNormalTextureTangent<3:NaN:Inf>
                 ret 
                 // Approximately 206 instruction slots used
@@ -8707,7 +8707,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 576 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 573 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -9004,7 +9004,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 596 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 593 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -9016,10 +9016,10 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 600 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 597 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTextureTangent<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 605
+                #line 602
                 mul o0.w, r1.w, cb1[1].w  // PSPositionNormalTextureTangent<3:NaN:Inf>
                 ret 
                 // Approximately 206 instruction slots used
@@ -9373,7 +9373,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 576 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 573 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -9670,7 +9670,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 596 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 593 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -9682,10 +9682,10 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 600 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 597 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTextureTangent<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 605
+                #line 602
                 mul o0.w, r1.w, cb1[1].w  // PSPositionNormalTextureTangent<3:NaN:Inf>
                 ret 
                 // Approximately 206 instruction slots used
@@ -10044,7 +10044,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 9
                 
-                #line 576 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 573 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // distToEye<0:NaN:Inf>
@@ -10341,7 +10341,7 @@ fxgroup
                 #line 372
                 endif 
                 
-                #line 596 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 593 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -10353,10 +10353,10 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 600 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 597 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx  // PSPositionNormalTextureTangent<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 605
+                #line 602
                 mul o0.w, r1.w, cb1[1].w  // PSPositionNormalTextureTangent<3:NaN:Inf>
                 ret 
                 // Approximately 206 instruction slots used

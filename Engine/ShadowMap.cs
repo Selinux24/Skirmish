@@ -149,7 +149,7 @@ namespace Engine
             this.Projection = Matrix.OrthoOffCenterLH(xleft, xright, ybottom, ytop, znear, zfar);
 
             // Normal device coordinates transformation
-            this.Transform = Helper.NormalDeviceCoordinatesTransform(this.View * this.Projection);
+            this.Transform = Helper.NormalDeviceCoordinatesTransform(this.View, this.Projection);
         }
 
         /// <summary>

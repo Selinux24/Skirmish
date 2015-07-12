@@ -157,11 +157,12 @@ namespace Engine
         /// <summary>
         /// Set transform to normal device coordinates
         /// </summary>
-        /// <param name="matrix">Transform matrix</param>
+        /// <param name="view">View matrix</param>
+        /// <param name="projection">Projection matrix</param>
         /// <returns>Returns NDC matrix</returns>
-        public static Matrix NormalDeviceCoordinatesTransform(Matrix matrix)
+        public static Matrix NormalDeviceCoordinatesTransform(Matrix view, Matrix projection)
         {
-            return matrix * ndcTransform;
+            return view * projection * ndcTransform;
         }
         /// <summary>
         /// Gets matrix description

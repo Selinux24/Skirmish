@@ -155,7 +155,7 @@ namespace Engine
         /// <param name="form">Game form</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampleCount">Multisample count</param>
-        public Graphics(EngineForm form, int refreshRate = 0, int multiSampleCount = 0)
+        public Graphics(EngineForm form, bool vsyncEnabled = false, int refreshRate = 0, int multiSampleCount = 0)
         {
             Adapter1 adapter = null;
             ModeDescription displayMode = this.FindModeDescription(
@@ -168,7 +168,7 @@ namespace Engine
 
             using (adapter)
             {
-                this.vsyncEnabled = displayMode.RefreshRate != new Rational(0, 1);
+                this.vsyncEnabled = vsyncEnabled && displayMode.RefreshRate != new Rational(0, 1);
 
                 using (Device tmpDevice = new Device(adapter))
                 {

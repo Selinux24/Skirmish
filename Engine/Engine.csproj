@@ -434,10 +434,12 @@
     <None Include="Diagrams\ColladaClasses.cd" />
     <None Include="Diagrams\Drawables.cd" />
     <None Include="packages.config" />
+    <None Include="Resources\ShaderGBuffer.fx" />
     <None Include="Resources\ShaderBasic.fxo" />
     <None Include="Resources\ShaderBillboard.fxo" />
     <None Include="Resources\ShaderCubemap.fxo" />
     <None Include="Resources\ShaderFont.fxo" />
+    <None Include="Resources\ShaderGBuffer.fxo" />
     <None Include="Resources\ShaderParticles.fxo" />
     <None Include="Resources\ShaderShadow.fx" />
     <None Include="Resources\IncVertexFormats.fx" />
