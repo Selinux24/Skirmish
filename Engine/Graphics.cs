@@ -216,9 +216,8 @@ namespace Engine
                 this.Device = device;
                 this.DeviceContext = device.ImmediateContext;
                 this.DeviceDescription = string.Format(
-                    "{0} {1}MB",
-                    adapter.Description1.Description,
-                    adapter.Description1.DedicatedVideoMemory >> 10 >> 10);
+                    "{0}",
+                    adapter.Description1.Description);
             }
 
             this.PrepareDevice(displayMode.Width, displayMode.Height, false);
@@ -664,33 +663,7 @@ namespace Engine
 
             using (Factory1 factory = new Factory1())
             {
-                if (factory.GetAdapterCount1() > 1)
-                {
-                    Adapter1 selectedAdapter = null;
-
-                    //Select best adapter
-                    Array.ForEach(factory.Adapters1, a =>
-                    {
-                        if (selectedAdapter == null)
-                        {
-                            selectedAdapter = a;
-                        }
-                        else
-                        {
-                            if (selectedAdapter.Description1.DedicatedVideoMemory < a.Description1.DedicatedVideoMemory)
-                            {
-                                selectedAdapter = a;
-                            }
-                        }
-                    });
-
-                    adapter = selectedAdapter;
-                }
-                else
-                {
-                    //Select first adapter
-                    adapter = factory.GetAdapter1(0);
-                }
+                adapter = factory.GetAdapter1(0);
 
                 using (Adapter1 firstAdapter = factory.GetAdapter1(0))
                 {

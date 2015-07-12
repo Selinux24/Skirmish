@@ -67,11 +67,28 @@ namespace Collada
                 ContentPath = "Resources",
                 ModelFileName = "Ground.dae",
                 AddVegetation = true,
-                VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
-                Saturation = 0.05f,
-                MinSize = Vector2.One * 2f,
-                MaxSize = Vector2.One * 4f,
-                Seed = 1024,
+                Vegetation = new[]
+                {
+                    new TerrainDescription.VegetationDescription()
+                    {
+                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
+                        Saturation = 0.05f,
+                        Radius = 300f,
+                        MinSize = Vector2.One * 2f,
+                        MaxSize = Vector2.One * 4f,
+                        Seed = 1024,
+                        DropShadow = true,
+                    },
+                    new TerrainDescription.VegetationDescription()
+                    {
+                        VegetarionTextures = new[] { "grass2.png" },
+                        Saturation = 10f,
+                        DropShadow = false,
+                        Radius = 50f,
+                        MinSize = Vector2.One * 0.20f,
+                        MaxSize = Vector2.One * 0.25f,
+                    }
+                },
                 UsePathFinding = true,
                 PathNodeSize = 20f,
                 DropShadow = true,
@@ -192,7 +209,7 @@ namespace Collada
 
                 points[0] = manipulator.Position;
 
-                this.helicopters[i].SetPath(this.ground, points, 10f, 15f);
+                //this.helicopters[i].SetPath(this.ground, points, 10f, 15f);
             }
 
             this.Camera.Goto(this.helicopters[this.selectedHelicopter].Manipulator.Position + (Vector3.One * 10f));

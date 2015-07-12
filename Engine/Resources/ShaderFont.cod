@@ -193,7 +193,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_temps 1
                 
-                #line 17 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderFont.fx"
+                #line 17 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderFont.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[4].xyzw  // VSFont<0:NaN:Inf>
@@ -264,7 +264,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 4
                 
-                #line 28 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderFont.fx"
+                #line 28 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderFont.fx"
                 mov r0.w, l(0)
                 sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v2.xyxx, t0.xyzw, s0  // litColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 ne r2.x, r1.w, l(0.000000)
