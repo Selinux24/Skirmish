@@ -401,7 +401,7 @@ namespace Engine.Content
                     inc = (inc + maxAngle) / maxAngle;
                 }
 
-                int num = (int)(area * saturation * inc * 0.1f);
+                int num = (int)(area * saturation * inc);
                 for (int b = 0; b < num; b++)
                 {
                     //Buscar un punto en el triángulo
