@@ -256,7 +256,20 @@ namespace Engine.Collections
 
             return newItems;
         }
-
+        /// <summary>
+        /// Gets whether access to the ICollection is safe for multithreaded (Thread Safe)
+        /// </summary>
+        protected bool IsSynchronized
+        {
+            get { return false; }
+        }
+        /// <summary>
+        /// Gets a value that can be used to synchronize access to the ICollection
+        /// </summary>
+        protected object SyncRoot
+        {
+            get { return items.SyncRoot; }
+        }
         /// <summary>
         /// Removes a node at the specified position of the tail
         /// </summary>
@@ -306,14 +319,14 @@ namespace Engine.Collections
         /// </summary>
         bool ICollection.IsSynchronized
         {
-            get { return false; }
+            get { return this.IsSynchronized; }
         }
         /// <summary>
         /// Gets a value that can be used to synchronize access to the ICollection
         /// </summary>
         object ICollection.SyncRoot
         {
-            get { return items.SyncRoot; }
+            get { return this.SyncRoot; }
         }
         /// <summary>
         /// Returns an enumerator that iterates through a collection

@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Render scene
     /// </summary>
-    public class Scene
+    public class Scene : IDisposable
     {
         /// <summary>
         /// Scene world matrix
@@ -290,6 +290,12 @@ namespace Engine
             {
                 this.Camera.Dispose();
                 this.Camera = null;
+            }
+
+            if (this.shadowMap != null)
+            {
+                this.shadowMap.Dispose();
+                this.shadowMap = null;
             }
 
             for (int i = 0; i < this.components.Count; i++)

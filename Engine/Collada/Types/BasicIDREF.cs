@@ -23,7 +23,7 @@ namespace Engine.Collada.Types
 
         public override string ToString()
         {
-            return string.Format("{1}", this.Reference);
+            return string.Format("{0}", this.Reference);
         }
     }
 }

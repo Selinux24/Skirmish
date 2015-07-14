@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
@@ -399,6 +400,7 @@ namespace Engine
     /// <summary>
     /// Font map
     /// </summary>
+    [Serializable]
     public class FontMap : Dictionary<char, FontMapChar>, IDisposable
     {
         /// <summary>
@@ -557,6 +559,25 @@ namespace Engine
             }
 
             return map;
+        }
+
+         /// <summary>
+        /// Constructor
+        /// </summary>
+        public FontMap()
+            : base()
+        {
+
+        }
+        /// <summary>
+        /// Constructor de serialización
+        /// </summary>
+        /// <param name="info">Info</param>
+        /// <param name="context">Context</param>
+        protected FontMap(SerializationInfo info, StreamingContext context)
+            : base(info, context)
+        {
+
         }
 
         /// <summary>

@@ -70,7 +70,6 @@ namespace Engine.Helpers
         {
             public void Close(Stream stream)
             {
-                stream.Close();
                 stream.Dispose();
             }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using SharpDX;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
@@ -23,8 +24,28 @@ namespace Engine.Common
         /// Key: mesh name
         /// Value: dictionary of meshes by material
         /// </remarks>
+        [Serializable]
         protected class MeshDictionary : Dictionary<string, MeshMaterialsDictionary>
         {
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public MeshDictionary()
+                : base()
+            {
+
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected MeshDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
+
             /// <summary>
             /// Adds new mesh to dictionary
             /// </summary>
@@ -44,13 +65,32 @@ namespace Engine.Common
         /// <summary>
         /// Mesh by material dictionary
         /// </summary>
+        [Serializable]
         protected class MeshMaterialsDictionary : Dictionary<string, Mesh>
         {
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public MeshMaterialsDictionary()
+                : base()
+            {
 
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected MeshMaterialsDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
         }
         /// <summary>
         /// Material by name dictionary
         /// </summary>
+        [Serializable]
         protected class MaterialDictionary : Dictionary<string, MeshMaterial>
         {
             /// <summary>
@@ -73,10 +113,30 @@ namespace Engine.Common
                     return null;
                 }
             }
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public MaterialDictionary()
+                : base()
+            {
+
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected MaterialDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
         }
         /// <summary>
         /// Texture by material dictionary
         /// </summary>
+        [Serializable]
         protected class TextureDictionary : Dictionary<string, ShaderResourceView>
         {
             /// <summary>
@@ -92,7 +152,7 @@ namespace Engine.Common
                     {
                         if (!base.ContainsKey(image))
                         {
-                            throw new Exception(string.Format("Texture resource not found: {0}", image));
+                            throw new KeyNotFoundException(string.Format("Texture resource not found: {0}", image));
                         }
 
                         return base[image];
@@ -100,6 +160,25 @@ namespace Engine.Common
 
                     return null;
                 }
+            }
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public TextureDictionary()
+                : base()
+            {
+
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected TextureDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
             }
         }
 

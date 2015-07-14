@@ -5,7 +5,7 @@ namespace Engine.Helpers
     /// <summary>
     /// Windows API functions
     /// </summary>
-    static class WindowsAPI
+    static class NativeMethods
     {
         /// <summary>
         /// Gets current keyboard state

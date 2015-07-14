@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using SharpDX;
 using SharpDX.Direct3D;
 
@@ -27,6 +28,7 @@ namespace Engine.Content
         /// <summary>
         /// Images dictionary by image name
         /// </summary>
+        [Serializable]
         public class ImageDictionary : Dictionary<string, ImageContent>
         {
             /// <summary>
@@ -38,6 +40,25 @@ namespace Engine.Content
                 {
                     return string.Format("_image_{0}_", this.Count + 1);
                 }
+            }
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public ImageDictionary()
+                : base()
+            {
+
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected ImageDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
             }
 
             /// <summary>
@@ -96,16 +117,54 @@ namespace Engine.Content
         /// <summary>
         /// Materials dictionary by material name
         /// </summary>
+        [Serializable]
         public class MaterialDictionary : Dictionary<string, MaterialContent>
         {
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public MaterialDictionary()
+                : base()
+            {
 
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected MaterialDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
         }
         /// <summary>
         /// Geometry dictionary by mesh name
         /// </summary>
         /// <remarks>Each mesh has one or more submeshes in a dictionary by material name</remarks>
+        [Serializable]
         public class GeometryDictionary : Dictionary<string, Dictionary<string, SubMeshContent>>
         {
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public GeometryDictionary()
+                : base()
+            {
+
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected GeometryDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
+
             /// <summary>
             /// Adds a submesh to mesh by mesh and material names
             /// </summary>
@@ -146,6 +205,7 @@ namespace Engine.Content
         /// <summary>
         /// Controller dictionary by controller name
         /// </summary>
+        [Serializable]
         public class ControllerDictionary : Dictionary<string, ControllerContent>
         {
             /// <summary>
@@ -165,6 +225,26 @@ namespace Engine.Content
                     return skins.ToArray();
                 }
             }
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public ControllerDictionary()
+                : base()
+            {
+
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected ControllerDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
+
             /// <summary>
             /// Get controller for mesh by mesh name
             /// </summary>
@@ -183,9 +263,27 @@ namespace Engine.Content
         /// <summary>
         /// Animation dictionary by animation name
         /// </summary>
+        [Serializable]
         public class AnimationDictionary : Dictionary<string, AnimationContent[]>
         {
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public AnimationDictionary()
+                : base()
+            {
 
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected AnimationDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
         }
 
         #endregion

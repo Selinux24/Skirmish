@@ -14,7 +14,7 @@ namespace Engine.Collada.Types
         public override string ToString()
         {
             if (!string.IsNullOrEmpty(this.Id) && !string.IsNullOrEmpty(this.Name))
-                return string.Format("Id: {0}; Name: {0};", this.Id, this.Name);
+                return string.Format("Id: {0}; Name: {1};", this.Id, this.Name);
             if (!string.IsNullOrEmpty(this.Id)) 
                 return string.Format("Id: {0};", this.Id);
             if (!string.IsNullOrEmpty(this.Name)) 

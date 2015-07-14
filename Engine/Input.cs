@@ -457,7 +457,7 @@ namespace Engine
             List<Keys> pressedKeys = new List<Keys>();
 
             byte[] array = new byte[256];
-            if (WindowsAPI.GetKeyboardState(array))
+            if (NativeMethods.GetKeyboardState(array))
             {
                 for (int i = 0; i < array.Length; i++)
                 {

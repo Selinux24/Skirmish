@@ -157,8 +157,6 @@ namespace Engine.Collada
                         XmlSerializer sr = new XmlSerializer(typeof(COLLADA), "http://www.collada.org/2005/11/COLLADASchema");
 
                         dae = (COLLADA)sr.Deserialize(rd);
-
-                        rd.Close();
                     }
                 }
                 catch (Exception ex)

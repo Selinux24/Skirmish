@@ -314,6 +314,7 @@
     <Compile Include="Content\CoordinateSystems.cs" />
     <Compile Include="Content\GeometryOrientations.cs" />
     <Compile Include="Effects\EffectInstancingShadow.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="SpriteTexture.cs" />
     <Compile Include="Curve.cs" />
     <Compile Include="Effects\DrawerPool.cs" />
@@ -356,7 +357,7 @@
     <Compile Include="Effects\EffectParticles.cs" />
     <Compile Include="Effects\IDrawer.cs" />
     <Compile Include="Helper.cs" />
-    <Compile Include="Helpers\WindowsAPI.cs" />
+    <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Manipulator2D.cs" />
     <Compile Include="ParticleClasses.cs" />
     <Compile Include="ParticleSystem.cs" />
