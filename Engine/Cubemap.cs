@@ -48,6 +48,8 @@ namespace Engine
             {
                 if (context.DrawerMode == DrawerModesEnum.Default)
                 {
+                    this.Game.Graphics.SetBlendAlphaToCoverage();
+
                     #region Per frame update
 
                     DrawerPool.EffectCubemap.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
