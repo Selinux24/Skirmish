@@ -11,11 +11,39 @@ namespace Engine.Content
         /// Path list
         /// </summary>
         private string[] paths = null;
+        /// <summary>
+        /// Stream list
+        /// </summary>
+        private MemoryStream[] streams = null;
 
         /// <summary>
         /// Image data in stream
         /// </summary>
-        public MemoryStream Stream { get; set; }
+        public MemoryStream Stream
+        {
+            get
+            {
+                return this.streams != null && this.streams.Length == 1 ? this.streams[0] : null;
+            }
+            set
+            {
+                this.streams = new[] { value };
+            }
+        }
+        /// <summary>
+        /// Image array streams
+        /// </summary>
+        public MemoryStream[] Streams
+        {
+            get
+            {
+                return this.streams != null && this.streams.Length > 1 ? this.streams : null;
+            }
+            set
+            {
+                this.streams = value;
+            }
+        }
         /// <summary>
         /// Image path
         /// </summary>
@@ -51,7 +79,9 @@ namespace Engine.Content
         {
             get
             {
-                return this.paths != null && this.paths.Length > 1;
+                return 
+                    (this.paths != null && this.paths.Length > 1) ||
+                    (this.streams != null && this.streams.Length > 1);
             }
         }
         /// <summary>
@@ -76,6 +106,18 @@ namespace Engine.Content
             };
         }
         /// <summary>
+        /// Creates a unique texture image
+        /// </summary>
+        /// <param name="texture">Texture stream</param>
+        /// <returns>Returns content</returns>
+        public static ImageContent Texture(MemoryStream texture)
+        {
+            return new ImageContent()
+            {
+                Stream = texture,
+            };
+        }
+        /// <summary>
         /// Creates a texture array image
         /// </summary>
         /// <param name="textures">Paths to textures</param>
@@ -85,6 +127,18 @@ namespace Engine.Content
             return new ImageContent()
             {
                 Paths = textures,
+            };
+        }
+        /// <summary>
+        /// Creates a texture array image
+        /// </summary>
+        /// <param name="textures">Texture streams</param>
+        /// <returns>Returns content</returns>
+        public static ImageContent Array(MemoryStream[] textures)
+        {
+            return new ImageContent()
+            {
+                Streams = textures,
             };
         }
         /// <summary>
@@ -98,6 +152,21 @@ namespace Engine.Content
             return new ImageContent()
             {
                 Path = texture,
+                IsCubic = true,
+                CubicFaceSize = faceSize,
+            };
+        }
+        /// <summary>
+        /// Creates a cubic texture image
+        /// </summary>
+        /// <param name="texture">Texture stream</param>
+        /// <param name="faceSize">Face size</param>
+        /// <returns>Returns content</returns>
+        public static ImageContent Cubic(MemoryStream texture, int faceSize)
+        {
+            return new ImageContent()
+            {
+                Stream = texture,
                 IsCubic = true,
                 CubicFaceSize = faceSize,
             };

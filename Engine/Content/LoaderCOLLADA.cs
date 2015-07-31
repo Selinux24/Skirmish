@@ -39,7 +39,7 @@ namespace Engine.Content
         /// <returns>Returns de content loaded</returns>
         public static ModelContent Load(string contentFolder, string fileName, Matrix transform, CoordinateSystems coordinate = CoordinateSystems.LeftHanded, GeometryOrientations orientation = GeometryOrientations.YUp)
         {
-            string[] modelList = ContentManager.FindContent(contentFolder, fileName);
+            MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList != null && modelList.Length == 1)
             {
                 COLLADA dae = COLLADA.Load(modelList[0]);
@@ -199,7 +199,7 @@ namespace Engine.Content
                     }
                     else if (!string.IsNullOrEmpty(image.InitFrom))
                     {
-                        info.Paths = ContentManager.FindContent(contentFolder, Uri.UnescapeDataString(image.InitFrom));
+                        info.Streams = ContentManager.FindContent(contentFolder, Uri.UnescapeDataString(image.InitFrom));
                     }
 
                     modelContent.Images[image.Id] = info;

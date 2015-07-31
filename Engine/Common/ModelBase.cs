@@ -290,22 +290,38 @@ namespace Engine.Common
                     {
                         if (info.IsArray)
                         {
-                            string[] res = info.Paths;
-
-                            view = this.Game.Graphics.Device.LoadTextureArray(res);
+                            if (info.Paths != null && info.Paths.Length > 0)
+                            {
+                                view = this.Game.Graphics.Device.LoadTextureArray(info.Paths);
+                            }
+                            else if (info.Streams != null && info.Streams.Length > 0)
+                            {
+                                view = this.Game.Graphics.Device.LoadTextureArray(info.Streams);
+                            }
                         }
                         else if (info.IsCubic)
                         {
-                            string res = info.Path;
                             int faceSize = info.CubicFaceSize;
 
-                            view = this.Game.Graphics.Device.LoadTextureCube(res, faceSize);
+                            if (info.Path != null)
+                            {
+                                view = this.Game.Graphics.Device.LoadTextureCube(info.Path, faceSize);
+                            }
+                            else if (info.Stream != null)
+                            {
+                                view = this.Game.Graphics.Device.LoadTextureCube(info.Stream, faceSize);
+                            }
                         }
                         else
                         {
-                            string res = info.Path;
-
-                            view = this.Game.Graphics.Device.LoadTexture(res);
+                            if (info.Path != null)
+                            {
+                                view = this.Game.Graphics.Device.LoadTexture(info.Path);
+                            }
+                            else if (info.Stream != null)
+                            {
+                                view = this.Game.Graphics.Device.LoadTexture(info.Stream);
+                            }
                         }
                     }
 

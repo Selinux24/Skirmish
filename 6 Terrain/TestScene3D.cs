@@ -92,7 +92,7 @@ namespace TerrainTest
             sw.Restart();
             this.cursor3D = this.AddModel(new ModelDescription()
             {
-                ContentPath = "Resources",
+                ContentPath = @"Resources\Resources.zip",
                 ModelFileName = "cursor.dae",
             });
             sw.Stop();
@@ -105,6 +105,7 @@ namespace TerrainTest
             sw.Restart();
             this.terrain = this.AddTerrain(new TerrainDescription()
             {
+                ContentPath = @"Resources\Resources.zip",
                 ModelFileName = "two_levels.dae",
                 UseQuadtree = true,
                 UsePathFinding = true,
@@ -148,7 +149,7 @@ namespace TerrainTest
             sw.Restart();
             this.helicopter = this.AddModel(new ModelDescription()
             {
-                ContentPath = "Resources",
+                ContentPath = @"Resources\Resources.zip",
                 ModelFileName = "helicopter.dae",
                 DropShadow = true,
                 TextureIndex = 2,
@@ -185,7 +186,7 @@ namespace TerrainTest
             sw.Restart();
             this.tank = this.AddModel(new ModelDescription()
             {
-                ContentPath = "Resources",
+                ContentPath = @"Resources\Resources.zip",
                 ModelFileName = "tank.dae",
                 DropShadow = true,
             });
@@ -207,7 +208,7 @@ namespace TerrainTest
             sw.Restart();
             this.obelisk = this.AddInstancingModel(new ModelInstancedDescription()
             {
-                ContentPath = "Resources",
+                ContentPath = @"Resources\Resources.zip",
                 ModelFileName = "obelisk.dae",
                 DropShadow = true,
                 Instances = 4,

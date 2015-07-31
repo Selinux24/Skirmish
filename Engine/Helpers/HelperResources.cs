@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using SharpDX;
@@ -279,6 +280,16 @@ namespace Engine.Helpers
             return ShaderResourceView.FromFile(device, filename);
         }
         /// <summary>
+        /// Loads a texture from file in the graphics device
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="file">Stream</param>
+        /// <returns>Returns the resource view</returns>
+        public static ShaderResourceView LoadTexture(this Device device, MemoryStream file)
+        {
+            return ShaderResourceView.FromStream(device, file, (int)file.Length);
+        }
+        /// <summary>
         /// Loads a texture array from a file collection in the graphics device
         /// </summary>
         /// <param name="device">Graphics device</param>
@@ -380,6 +391,108 @@ namespace Engine.Helpers
             }
         }
         /// <summary>
+        /// Loads a texture array from a file collection in the graphics device
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="files">Stream collection</param>
+        /// <returns>Returns the resource view</returns>
+        public static ShaderResourceView LoadTextureArray(this Device device, MemoryStream[] files)
+        {
+            List<Texture2D> textureList = new List<Texture2D>();
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                textureList.Add(Texture2D.FromStream<Texture2D>(
+                    device,
+                    files[i],
+                    (int)files[i].Length,
+                    new ImageLoadInformation()
+                    {
+                        FirstMipLevel = 0,
+                        Usage = ResourceUsage.Staging,
+                        BindFlags = BindFlags.None,
+                        CpuAccessFlags = CpuAccessFlags.Write | CpuAccessFlags.Read,
+                        OptionFlags = ResourceOptionFlags.None,
+                        Format = Format.R8G8B8A8_UNorm,
+                        Filter = FilterFlags.None,
+                        MipFilter = FilterFlags.Linear,
+                    }));
+            }
+
+            Texture2DDescription textureDescription = textureList[0].Description;
+
+            using (Texture2D textureArray = new Texture2D(
+                device,
+                new Texture2DDescription()
+                {
+                    Width = textureDescription.Width,
+                    Height = textureDescription.Height,
+                    MipLevels = textureDescription.MipLevels,
+                    ArraySize = files.Length,
+                    Format = textureDescription.Format,
+                    SampleDescription = new SampleDescription()
+                    {
+                        Count = 1,
+                        Quality = 0,
+                    },
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.ShaderResource,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.None,
+                }))
+            {
+
+                for (int i = 0; i < textureList.Count; i++)
+                {
+                    for (int mipLevel = 0; mipLevel < textureDescription.MipLevels; mipLevel++)
+                    {
+                        DataBox mappedTex2D = device.ImmediateContext.MapSubresource(
+                            textureList[i],
+                            mipLevel,
+                            MapMode.Read,
+                            MapFlags.None);
+
+                        int subIndex = Resource.CalculateSubResourceIndex(
+                            mipLevel,
+                            i,
+                            textureDescription.MipLevels);
+
+                        device.ImmediateContext.UpdateSubresource(
+                            textureArray,
+                            subIndex,
+                            null,
+                            mappedTex2D.DataPointer,
+                            mappedTex2D.RowPitch,
+                            mappedTex2D.SlicePitch);
+
+                        device.ImmediateContext.UnmapSubresource(
+                            textureList[i],
+                            mipLevel);
+                    }
+
+                    textureList[i].Dispose();
+                }
+
+                ShaderResourceView result = new ShaderResourceView(
+                    device,
+                    textureArray,
+                    new ShaderResourceViewDescription()
+                    {
+                        Format = textureDescription.Format,
+                        Dimension = ShaderResourceViewDimension.Texture2DArray,
+                        Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
+                        {
+                            MostDetailedMip = 0,
+                            MipLevels = textureDescription.MipLevels,
+                            FirstArraySlice = 0,
+                            ArraySize = files.Length,
+                        },
+                    });
+
+                return result;
+            }
+        }
+        /// <summary>
         /// Loads a cube texture from file in the graphics device
         /// </summary>
         /// <param name="device">Graphics device</param>
@@ -387,6 +500,52 @@ namespace Engine.Helpers
         /// <param name="faceSize">Face size</param>
         /// <returns>Returns the resource view</returns>
         public static ShaderResourceView LoadTextureCube(this Device device, string filename, int faceSize)
+        {
+            Format format = Format.R8G8B8A8_UNorm;
+
+            using (Texture2D cubeTex = new Texture2D(
+                device,
+                new Texture2DDescription()
+                {
+                    Width = faceSize,
+                    Height = faceSize,
+                    MipLevels = 0,
+                    ArraySize = 6,
+                    SampleDescription = new SampleDescription()
+                    {
+                        Count = 1,
+                        Quality = 0,
+                    },
+                    Format = format,
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
+                }))
+            {
+                return new ShaderResourceView(
+                    device,
+                    cubeTex,
+                    new ShaderResourceViewDescription()
+                    {
+                        Format = format,
+                        Dimension = ShaderResourceViewDimension.TextureCube,
+                        TextureCube = new ShaderResourceViewDescription.TextureCubeResource()
+                        {
+                            MostDetailedMip = 0,
+                            MipLevels = -1,
+                        },
+                    });
+            }
+        }
+        /// <summary>
+        /// Loads a cube texture from file in the graphics device
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="file">Stream</param>
+        /// <param name="faceSize">Face size</param>
+        /// <returns>Returns the resource view</returns>
+        public static ShaderResourceView LoadTextureCube(this Device device, MemoryStream file, int faceSize)
         {
             Format format = Format.R8G8B8A8_UNorm;
 

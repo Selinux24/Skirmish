@@ -144,32 +144,25 @@ namespace Engine.Collada
         /// <param name="file">Filename</param>
         /// <param name="upAxis">Desired up axis</param>
         /// <returns>Return helper clases</returns>
-        public static COLLADA Load(string file)
+        public static COLLADA Load(MemoryStream file)
         {
-            if (File.Exists(file))
+            COLLADA dae = null;
+
+            try
             {
-                COLLADA dae = null;
-
-                try
+                using (StreamReader rd = new StreamReader(file, Encoding.Default))
                 {
-                    using (StreamReader rd = new StreamReader(file, Encoding.Default))
-                    {
-                        XmlSerializer sr = new XmlSerializer(typeof(COLLADA), "http://www.collada.org/2005/11/COLLADASchema");
+                    XmlSerializer sr = new XmlSerializer(typeof(COLLADA), "http://www.collada.org/2005/11/COLLADASchema");
 
-                        dae = (COLLADA)sr.Deserialize(rd);
-                    }
+                    dae = (COLLADA)sr.Deserialize(rd);
                 }
-                catch (Exception ex)
-                {
-                    throw new Exception("Invalid COLLADA file.", ex);
-                }
-
-                return dae;
             }
-            else
+            catch (Exception ex)
             {
-                throw new Exception("Filename not exists.");
+                throw new Exception("Invalid COLLADA file.", ex);
             }
+
+            return dae;
         }
 
         /// <summary>

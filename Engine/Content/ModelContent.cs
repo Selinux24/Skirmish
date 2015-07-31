@@ -526,7 +526,7 @@ namespace Engine.Content
 
             ImageContent imageContent = new ImageContent()
             {
-                Paths = ContentManager.FindContent(contentFolder, textures),
+                Streams = ContentManager.FindContent(contentFolder, textures),
             };
 
             modelContent.Images.Add(imageName, imageContent);
@@ -567,7 +567,7 @@ namespace Engine.Content
 
             ImageContent image = new ImageContent()
             {
-                Paths = ContentManager.FindContent(contentFolder, texture),
+                Streams = ContentManager.FindContent(contentFolder, texture),
             };
 
             MaterialContent material = MaterialContent.Default;
