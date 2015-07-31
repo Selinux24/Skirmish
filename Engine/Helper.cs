@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SharpDX;
+using System.IO;
 
 namespace Engine
 {
@@ -306,6 +307,33 @@ namespace Engine
             }
 
             return dictionary.Select(item => item.Key);
+        }
+        /// <summary>
+        /// Writes stream to memory
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <returns>Returns a memory stream</returns>
+        public static MemoryStream WriteToMemory(this Stream stream)
+        {
+            MemoryStream ms = new MemoryStream();
+
+            stream.CopyTo(ms);
+
+            ms.Position = 0;
+
+            return ms;
+        }
+        /// <summary>
+        /// Writes file to memory
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <returns>Returns a memory stream</returns>
+        public static MemoryStream WriteToMemory(this string fileName)
+        {
+            using (var stream = File.OpenRead(fileName))
+            {
+                return stream.WriteToMemory();
+            }
         }
     }
 }

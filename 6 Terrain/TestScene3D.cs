@@ -83,6 +83,8 @@ namespace TerrainTest
 
             #region Models
 
+            string resources = @"Resources\Resources.zip";
+
             Stopwatch sw = Stopwatch.StartNew();
 
             string loadingText = null;
@@ -92,7 +94,7 @@ namespace TerrainTest
             sw.Restart();
             this.cursor3D = this.AddModel(new ModelDescription()
             {
-                ContentPath = @"Resources\Resources.zip",
+                ContentPath = resources,
                 ModelFileName = "cursor.dae",
             });
             sw.Stop();
@@ -105,7 +107,7 @@ namespace TerrainTest
             sw.Restart();
             this.terrain = this.AddTerrain(new TerrainDescription()
             {
-                ContentPath = @"Resources\Resources.zip",
+                ContentPath = resources,
                 ModelFileName = "two_levels.dae",
                 UseQuadtree = true,
                 UsePathFinding = true,
@@ -149,7 +151,7 @@ namespace TerrainTest
             sw.Restart();
             this.helicopter = this.AddModel(new ModelDescription()
             {
-                ContentPath = @"Resources\Resources.zip",
+                ContentPath = resources,
                 ModelFileName = "helicopter.dae",
                 DropShadow = true,
                 TextureIndex = 2,
@@ -186,7 +188,7 @@ namespace TerrainTest
             sw.Restart();
             this.tank = this.AddModel(new ModelDescription()
             {
-                ContentPath = @"Resources\Resources.zip",
+                ContentPath = resources,
                 ModelFileName = "tank.dae",
                 DropShadow = true,
             });
@@ -208,7 +210,7 @@ namespace TerrainTest
             sw.Restart();
             this.obelisk = this.AddInstancingModel(new ModelInstancedDescription()
             {
-                ContentPath = @"Resources\Resources.zip",
+                ContentPath = resources,
                 ModelFileName = "obelisk.dae",
                 DropShadow = true,
                 Instances = 4,

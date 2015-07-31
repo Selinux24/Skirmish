@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
+using System.Text.RegularExpressions;
 
 namespace Engine.Content
 {
@@ -9,13 +12,137 @@ namespace Engine.Content
     public static class ContentManager
     {
         /// <summary>
+        /// Zip files manager
+        /// </summary>
+        static class ZipManager
+        {
+            /// <summary>
+            /// Reads zip file entry names
+            /// </summary>
+            /// <param name="file">Zip file name</param>
+            /// <returns>Returns zip file entry names array</returns>
+            public static string[] ReadEntryNames(string file)
+            {
+                List<string> files = new List<string>();
+
+                using (ZipArchive archive = ZipFile.OpenRead(file))
+                {
+                    foreach (var compressedFile in archive.Entries)
+                    {
+                        files.Add(compressedFile.Name);
+                    }
+                }
+
+                return files.ToArray();
+            }
+            /// <summary>
+            /// Gets an entry name, comparing names using ordinal ignore case
+            /// </summary>
+            /// <param name="file">Zip file name</param>
+            /// <param name="entryName">Entry name</param>
+            /// <returns>Returns entry name if exists</returns>
+            public static string GetEntryName(string file, string entryName)
+            {
+                string[] entries = ReadEntryNames(file);
+
+                return Array.Find(entries, e => e.Equals(entryName, StringComparison.OrdinalIgnoreCase));
+            }
+            /// <summary>
+            /// Gets if an entry name eixts into the zip file, comparing names using ordinal ignore case
+            /// </summary>
+            /// <param name="file">Zip file name</param>
+            /// <param name="entryName">Entry name</param>
+            /// <returns>Returns true if the entry exists</returns>
+            public static bool Contains(string file, string entryName)
+            {
+                string entry = GetEntryName(file, entryName);
+
+                return !string.IsNullOrEmpty(entry);
+            }
+            /// <summary>
+            /// Gets file stream of the entry
+            /// </summary>
+            /// <param name="file">Zip file name</param>
+            /// <param name="entryName">Entry name</param>
+            /// <returns>Returns file stream of the entry</returns>
+            public static MemoryStream GetFile(string file, string entryName)
+            {
+                using (ZipArchive archive = ZipFile.OpenRead(file))
+                {
+                    ZipArchiveEntry entry = archive.GetEntry(GetEntryName(file, entryName));
+
+                    using (var stream = entry.Open())
+                    {
+                        return stream.WriteToMemory();
+                    }
+                }
+            }
+            /// <summary>
+            /// Gets file stream of the entry pattern
+            /// </summary>
+            /// <param name="file">Zip file name</param>
+            /// <param name="pattern">Entry name</param>
+            /// <returns>Returns file streams for the entry pattern</returns>
+            public static MemoryStream[] GetFiles(string file, string pattern)
+            {
+                List<MemoryStream> res = new List<MemoryStream>();
+
+                string regexMask = Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".");
+
+                using (ZipArchive archive = ZipFile.OpenRead(file))
+                {
+                    for (int i = 0; i < archive.Entries.Count; i++)
+                    {
+                        ZipArchiveEntry entry = archive.Entries[i];
+
+                        Match match = Regex.Match(entry.Name, regexMask);
+                        if (match.Success)
+                        {
+                            using (var stream = entry.Open())
+                            {
+                                res.Add(stream.WriteToMemory());
+                            }
+                        }
+                    }
+                }
+
+                return res.ToArray();
+            }
+            /// <summary>
+            /// Gets file streams of the entry list
+            /// </summary>
+            /// <param name="file">Zip file name</param>
+            /// <param name="entryNames">Entry names list</param>
+            /// <returns>Returns file streams of the entry list</returns>
+            public static MemoryStream[] GetFiles(string file, string[] entryNames)
+            {
+                MemoryStream[] res = new MemoryStream[entryNames.Length];
+
+                using (ZipArchive archive = ZipFile.OpenRead(file))
+                {
+                    for (int i = 0; i < entryNames.Length; i++)
+                    {
+                        ZipArchiveEntry entry = archive.GetEntry(GetEntryName(file, entryNames[i]));
+
+                        using (var stream = entry.Open())
+                        {
+                            res[i] = stream.WriteToMemory();
+                        }
+                    }
+                }
+
+                return res;
+            }
+        }
+
+        /// <summary>
         /// Finds content
         /// </summary>
         /// <param name="contentSource">Content source</param>
         /// <param name="resourcePath">Resource path</param>
         /// <returns>Returns resource paths found</returns>
         /// <remarks>
-        /// Content source could be a folder or a zip file
+        /// Content source can be a folder or a zip file
         /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
         /// </remarks>
         public static MemoryStream[] FindContent(string contentSource, string resourcePath)
@@ -26,7 +153,7 @@ namespace Engine.Content
             }
             else if (File.Exists(resourcePath))
             {
-                return new[] { ReadToMemory(resourcePath) };
+                return new[] { resourcePath.WriteToMemory() };
             }
             else
             {
@@ -36,7 +163,7 @@ namespace Engine.Content
                     resourcePath = Path.Combine(contentSource, resourcePath);
                     if (File.Exists(resourcePath))
                     {
-                        return new[] { ReadToMemory(resourcePath) };
+                        return new[] { resourcePath.WriteToMemory() };
                     }
                     else
                     {
@@ -45,7 +172,14 @@ namespace Engine.Content
                             Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
                         if (files != null && files.Length > 0)
                         {
-                            return ReadToMemory(files);
+                            MemoryStream[] msList = new MemoryStream[files.Length];
+
+                            for (int i = 0; i < files.Length; i++)
+                            {
+                                msList[i] = files[i].WriteToMemory();
+                            }
+
+                            return msList;
                         }
                         else
                         {
@@ -56,13 +190,13 @@ namespace Engine.Content
                 else if (File.Exists(contentSource))
                 {
                     //Compressed file
-                    if (Compression.Contains(contentSource, resourcePath))
+                    if (ZipManager.Contains(contentSource, resourcePath))
                     {
-                        return new[] { Compression.GetFile(contentSource, resourcePath) };
+                        return new[] { ZipManager.GetFile(contentSource, resourcePath) };
                     }
                     else
                     {
-                        MemoryStream[] res = Compression.GetFiles(contentSource, Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
+                        MemoryStream[] res = ZipManager.GetFiles(contentSource, Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
                         if (res != null && res.Length > 0)
                         {
                             return res;
@@ -86,7 +220,7 @@ namespace Engine.Content
         /// <param name="resourcePaths">Resource path list</param>
         /// <returns>Returns resource path list</returns>
         /// <remarks>
-        /// Content source could be a folder or a zip file
+        /// Content source can be a folder or a zip file
         /// </remarks>
         public static MemoryStream[] FindContent(string contentSource, string[] resourcePaths)
         {
@@ -109,32 +243,6 @@ namespace Engine.Content
             }
 
             return res.ToArray();
-        }
-
-        private static MemoryStream ReadToMemory(string file)
-        {
-            using (var stream = File.OpenRead(file))
-            {
-                MemoryStream ms = new MemoryStream();
-
-                stream.CopyTo(ms);
-
-                ms.Position = 0;
-
-                return ms;
-            }
-        }
-
-        private static MemoryStream[] ReadToMemory(string[] files)
-        {
-            MemoryStream[] msList = new MemoryStream[files.Length];
-
-            for (int i = 0; i < files.Length; i++)
-            {
-                msList[i] = ReadToMemory(files[i]);
-            }
-
-            return msList;
         }
     }
 }

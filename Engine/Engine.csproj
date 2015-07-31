@@ -316,7 +316,6 @@
     <Compile Include="Common\QuadTree.cs" />
     <Compile Include="Common\QuadTreeNode.cs" />
     <Compile Include="Common\Skeleton.cs" />
-    <Compile Include="Content\Compression.cs" />
     <Compile Include="Content\LoaderConversion.cs" />
     <Compile Include="Content\CoordinateSystems.cs" />
     <Compile Include="Content\GeometryOrientations.cs" />

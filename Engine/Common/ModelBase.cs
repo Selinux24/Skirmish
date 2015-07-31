@@ -1,13 +1,12 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using SharpDX;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Common
 {
     using Engine.Content;
-    using Engine.Helpers;
 
     /// <summary>
     /// Model basic implementation
@@ -278,53 +277,7 @@ namespace Engine.Common
                 {
                     ImageContent info = modelContent.Images[images];
 
-                    ShaderResourceView view = null;
-
-                    if (info.Stream != null)
-                    {
-                        byte[] buffer = info.Stream.GetBuffer();
-
-                        view = this.Game.Graphics.Device.LoadTexture(buffer);
-                    }
-                    else
-                    {
-                        if (info.IsArray)
-                        {
-                            if (info.Paths != null && info.Paths.Length > 0)
-                            {
-                                view = this.Game.Graphics.Device.LoadTextureArray(info.Paths);
-                            }
-                            else if (info.Streams != null && info.Streams.Length > 0)
-                            {
-                                view = this.Game.Graphics.Device.LoadTextureArray(info.Streams);
-                            }
-                        }
-                        else if (info.IsCubic)
-                        {
-                            int faceSize = info.CubicFaceSize;
-
-                            if (info.Path != null)
-                            {
-                                view = this.Game.Graphics.Device.LoadTextureCube(info.Path, faceSize);
-                            }
-                            else if (info.Stream != null)
-                            {
-                                view = this.Game.Graphics.Device.LoadTextureCube(info.Stream, faceSize);
-                            }
-                        }
-                        else
-                        {
-                            if (info.Path != null)
-                            {
-                                view = this.Game.Graphics.Device.LoadTexture(info.Path);
-                            }
-                            else if (info.Stream != null)
-                            {
-                                view = this.Game.Graphics.Device.LoadTexture(info.Stream);
-                            }
-                        }
-                    }
-
+                    ShaderResourceView view = info.CreateResource(this.Game.Graphics.Device);
                     if (view != null)
                     {
                         this.Textures.Add(images, view);
