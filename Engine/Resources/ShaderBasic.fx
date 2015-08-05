@@ -52,7 +52,6 @@ PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
     
     return output;
 }
-
 PSVertexPositionColor VSPositionColorI(VSVertexPositionColorI input)
 {
     PSVertexPositionColor output = (PSVertexPositionColor)0;
@@ -65,7 +64,6 @@ PSVertexPositionColor VSPositionColorI(VSVertexPositionColorI input)
     
     return output;
 }
-
 PSVertexPositionColor VSPositionColorSkinned(VSVertexPositionColorSkinned input)
 {
     PSVertexPositionColor output = (PSVertexPositionColor)0;
@@ -85,7 +83,6 @@ PSVertexPositionColor VSPositionColorSkinned(VSVertexPositionColorSkinned input)
     
     return output;
 }
-
 PSVertexPositionColor VSPositionColorSkinnedI(VSVertexPositionColorSkinnedI input)
 {
     PSVertexPositionColor output = (PSVertexPositionColor)0;
@@ -138,7 +135,6 @@ PSVertexPositionNormalColor VSPositionNormalColor(VSVertexPositionNormalColor in
     
     return output;
 }
-
 PSVertexPositionNormalColor VSPositionNormalColorI(VSVertexPositionNormalColorI input)
 {
     PSVertexPositionNormalColor output = (PSVertexPositionNormalColor)0;
@@ -153,7 +149,6 @@ PSVertexPositionNormalColor VSPositionNormalColorI(VSVertexPositionNormalColorI 
 
     return output;
 }
-
 PSVertexPositionNormalColor VSPositionNormalColorSkinned(VSVertexPositionNormalColorSkinned input)
 {
     PSVertexPositionNormalColor output = (PSVertexPositionNormalColor)0;
@@ -178,7 +173,6 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinned(VSVertexPositionNormalC
 
     return output;
 }
-
 PSVertexPositionNormalColor VSPositionNormalColorSkinnedI(VSVertexPositionNormalColorSkinnedI input)
 {
     PSVertexPositionNormalColor output = (PSVertexPositionNormalColor)0;
@@ -251,7 +245,6 @@ PSVertexPositionTexture VSPositionTexture(VSVertexPositionTexture input)
     
     return output;
 }
-
 PSVertexPositionTexture VSPositionTextureI(VSVertexPositionTextureI input)
 {
     PSVertexPositionTexture output = (PSVertexPositionTexture)0;
@@ -265,7 +258,6 @@ PSVertexPositionTexture VSPositionTextureI(VSVertexPositionTextureI input)
     
     return output;
 }
-
 PSVertexPositionTexture VSPositionTextureSkinned(VSVertexPositionTextureSkinned input)
 {
     PSVertexPositionTexture output = (PSVertexPositionTexture)0;
@@ -286,7 +278,6 @@ PSVertexPositionTexture VSPositionTextureSkinned(VSVertexPositionTextureSkinned 
     
     return output;
 }
-
 PSVertexPositionTexture VSPositionTextureSkinnedI(VSVertexPositionTextureSkinnedI input)
 {
     PSVertexPositionTexture output = (PSVertexPositionTexture)0;
@@ -326,7 +317,6 @@ float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 
 	return litColor;
 }
-
 float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 {
     float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex)).r;
@@ -334,7 +324,6 @@ float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 	//Grayscale
 	return float4(litColor.rrr, 1);
 }
-
 float4 PSPositionTextureGREEN(PSVertexPositionTexture input) : SV_TARGET
 {
     float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex)).g;
@@ -342,7 +331,6 @@ float4 PSPositionTextureGREEN(PSVertexPositionTexture input) : SV_TARGET
 	//Grayscale
 	return float4(litColor.ggg, 1);
 }
-
 float4 PSPositionTextureBLUE(PSVertexPositionTexture input) : SV_TARGET
 {
     float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex)).b;
@@ -367,7 +355,6 @@ PSVertexPositionNormalTexture VSPositionNormalTexture(VSVertexPositionNormalText
     
     return output;
 }
-
 PSVertexPositionNormalTexture VSPositionNormalTextureI(VSVertexPositionNormalTextureI input)
 {
     PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture)0;
@@ -383,7 +370,6 @@ PSVertexPositionNormalTexture VSPositionNormalTextureI(VSVertexPositionNormalTex
     
     return output;
 }
-
 PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNormalTextureSkinned input)
 {
 	PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture)0;
@@ -409,7 +395,6 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNor
 	
 	return output;
 }
-
 PSVertexPositionNormalTexture VSPositionNormalTextureSkinnedI(VSVertexPositionNormalTextureSkinnedI input)
 {
 	PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture)0;
@@ -488,7 +473,6 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangent(VSVertexPosi
     
     return output;
 }
-
 PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentI(VSVertexPositionNormalTextureTangentI input)
 {
     PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
@@ -505,7 +489,6 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentI(VSVertexPos
     
     return output;
 }
-
 PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinned(VSVertexPositionNormalTextureTangentSkinned input)
 {
     PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
@@ -535,7 +518,6 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinned(VSVer
     
     return output;
 }
-
 PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinnedI(VSVertexPositionNormalTextureTangentSkinnedI input)
 {
 	PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
@@ -618,7 +600,6 @@ technique11 PositionColor
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionColorI
 {
 	pass P0
@@ -630,7 +611,6 @@ technique11 PositionColorI
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionColorSkinned
 {
 	pass P0
@@ -642,7 +622,6 @@ technique11 PositionColorSkinned
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionColorSkinnedI
 {
 	pass P0
@@ -666,7 +645,6 @@ technique11 PositionNormalColor
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionNormalColorI
 {
 	pass P0
@@ -678,7 +656,6 @@ technique11 PositionNormalColorI
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionNormalColorSkinned
 {
 	pass P0
@@ -690,7 +667,6 @@ technique11 PositionNormalColorSkinned
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionNormalColorSkinnedI
 {
 	pass P0
@@ -714,7 +690,6 @@ technique11 PositionTexture
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionTextureI
 {
 	pass P0
@@ -726,7 +701,6 @@ technique11 PositionTextureI
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionTextureRED
 {
 	pass P0
@@ -738,7 +712,6 @@ technique11 PositionTextureRED
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionTextureGREEN
 {
 	pass P0
@@ -750,7 +723,6 @@ technique11 PositionTextureGREEN
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionTextureBLUE
 {
 	pass P0
@@ -762,7 +734,6 @@ technique11 PositionTextureBLUE
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionTextureSkinned
 {
 	pass P0
@@ -774,7 +745,6 @@ technique11 PositionTextureSkinned
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionTextureSkinnedI
 {
 	pass P0
@@ -798,7 +768,6 @@ technique11 PositionNormalTexture
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionNormalTextureI
 {
 	pass P0
@@ -810,7 +779,6 @@ technique11 PositionNormalTextureI
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionNormalTextureSkinned
 {
 	pass P0
@@ -822,7 +790,6 @@ technique11 PositionNormalTextureSkinned
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionNormalTextureSkinnedI
 {
 	pass P0
@@ -846,7 +813,6 @@ technique11 PositionNormalTextureTangent
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionNormalTextureTangentI
 {
 	pass P0
@@ -858,7 +824,6 @@ technique11 PositionNormalTextureTangentI
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionNormalTextureTangentSkinned
 {
 	pass P0
@@ -870,7 +835,6 @@ technique11 PositionNormalTextureTangentSkinned
 		SetRasterizerState(RasterizerSolid);
 	}
 }
-
 technique11 PositionNormalTextureTangentSkinnedI
 {
 	pass P0

@@ -19,7 +19,6 @@ ShadowMapOutput VSSMPositionColor(VSVertexPositionColor input)
 
 	return output;
 }
-
 ShadowMapOutput VSSMPositionColorI(VSVertexPositionColorI input)
 {
     ShadowMapOutput output = (ShadowMapOutput)0;
@@ -30,7 +29,6 @@ ShadowMapOutput VSSMPositionColorI(VSVertexPositionColorI input)
     
     return output;
 }
-
 ShadowMapOutput VSSMPositionColorSkinned(VSVertexPositionColorSkinned input)
 {
 	ShadowMapOutput output = (ShadowMapOutput)0;
@@ -48,7 +46,6 @@ ShadowMapOutput VSSMPositionColorSkinned(VSVertexPositionColorSkinned input)
 
 	return output;
 }
-
 ShadowMapOutput VSSMPositionColorSkinnedI(VSVertexPositionColorSkinnedI input)
 {
     ShadowMapOutput output = (ShadowMapOutput)0;
@@ -77,7 +74,6 @@ ShadowMapOutput VSSMPositionNormalColor(VSVertexPositionNormalColor input)
 
 	return output;
 }
-
 ShadowMapOutput VSSMPositionNormalColorI(VSVertexPositionNormalColorI input)
 {
     ShadowMapOutput output = (ShadowMapOutput)0;
@@ -88,7 +84,6 @@ ShadowMapOutput VSSMPositionNormalColorI(VSVertexPositionNormalColorI input)
 
     return output;
 }
-
 ShadowMapOutput VSSMPositionNormalColorSkinned(VSVertexPositionNormalColorSkinned input)
 {
 	ShadowMapOutput output = (ShadowMapOutput)0;
@@ -106,7 +101,6 @@ ShadowMapOutput VSSMPositionNormalColorSkinned(VSVertexPositionNormalColorSkinne
 
 	return output;
 }
-
 ShadowMapOutput VSSMPositionNormalColorSkinnedI(VSVertexPositionNormalColorSkinnedI input)
 {
     ShadowMapOutput output = (ShadowMapOutput)0;
@@ -135,7 +129,6 @@ ShadowMapOutput VSSMPositionTexture(VSVertexPositionTexture input)
 
 	return output;
 }
-
 ShadowMapOutput VSSMPositionTextureI(VSVertexPositionTextureI input)
 {
     ShadowMapOutput output = (ShadowMapOutput)0;
@@ -146,7 +139,6 @@ ShadowMapOutput VSSMPositionTextureI(VSVertexPositionTextureI input)
     
     return output;
 }
-
 ShadowMapOutput VSSMPositionTextureSkinned(VSVertexPositionTextureSkinned input)
 {
 	ShadowMapOutput output = (ShadowMapOutput)0;
@@ -164,7 +156,6 @@ ShadowMapOutput VSSMPositionTextureSkinned(VSVertexPositionTextureSkinned input)
 
 	return output;
 }
-
 ShadowMapOutput VSSMPositionTextureSkinnedI(VSVertexPositionTextureSkinnedI input)
 {
     ShadowMapOutput output = (ShadowMapOutput)0;
@@ -193,7 +184,6 @@ ShadowMapOutput VSSMPositionNormalTexture(VSVertexPositionNormalTexture input)
 
 	return output;
 }
-
 ShadowMapOutput VSSMPositionNormalTextureI(VSVertexPositionNormalTextureI input)
 {
     ShadowMapOutput output = (ShadowMapOutput)0;
@@ -204,7 +194,6 @@ ShadowMapOutput VSSMPositionNormalTextureI(VSVertexPositionNormalTextureI input)
 
     return output;
 }
-
 ShadowMapOutput VSSMPositionNormalTextureSkinned(VSVertexPositionNormalTextureSkinned input)
 {
 	ShadowMapOutput output = (ShadowMapOutput)0;
@@ -222,7 +211,6 @@ ShadowMapOutput VSSMPositionNormalTextureSkinned(VSVertexPositionNormalTextureSk
 	
 	return output;
 }
-
 ShadowMapOutput VSSMPositionNormalTextureSkinnedI(VSVertexPositionNormalTextureSkinnedI input)
 {
 	ShadowMapOutput output = (ShadowMapOutput)0;
@@ -251,7 +239,6 @@ ShadowMapOutput VSSMPositionNormalTextureTangent(VSVertexPositionNormalTextureTa
 
 	return output;
 }
-
 ShadowMapOutput VSSMPositionNormalTextureTangentI(VSVertexPositionNormalTextureTangentI input)
 {
     ShadowMapOutput output = (ShadowMapOutput)0;
@@ -262,7 +249,6 @@ ShadowMapOutput VSSMPositionNormalTextureTangentI(VSVertexPositionNormalTextureT
     
     return output;
 }
-
 ShadowMapOutput VSSMPositionNormalTextureTangentSkinned(VSVertexPositionNormalTextureTangentSkinned input)
 {
 	ShadowMapOutput output = (ShadowMapOutput)0;
@@ -280,7 +266,6 @@ ShadowMapOutput VSSMPositionNormalTextureTangentSkinned(VSVertexPositionNormalTe
 
 	return output;
 }
-
 ShadowMapOutput VSSMPositionNormalTextureTangentSkinnedI(VSVertexPositionNormalTextureTangentSkinnedI input)
 {
 	ShadowMapOutput output = (ShadowMapOutput)0;
@@ -312,7 +297,6 @@ technique11 ShadowMapPositionColor
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionColorI
 {
     pass P0
@@ -324,7 +308,6 @@ technique11 ShadowMapPositionColorI
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionColorSkinned
 {
     pass P0
@@ -336,7 +319,6 @@ technique11 ShadowMapPositionColorSkinned
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionColorSkinnedI
 {
     pass P0
@@ -360,7 +342,6 @@ technique11 ShadowMapPositionNormalColor
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionNormalColorI
 {
     pass P0
@@ -372,7 +353,6 @@ technique11 ShadowMapPositionNormalColorI
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionNormalColorSkinned
 {
     pass P0
@@ -384,7 +364,6 @@ technique11 ShadowMapPositionNormalColorSkinned
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionNormalColorSkinnedI
 {
     pass P0
@@ -408,7 +387,6 @@ technique11 ShadowMapPositionTexture
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionTextureI
 {
     pass P0
@@ -420,7 +398,6 @@ technique11 ShadowMapPositionTextureI
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionTextureSkinned
 {
     pass P0
@@ -432,7 +409,6 @@ technique11 ShadowMapPositionTextureSkinned
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionTextureSkinnedI
 {
     pass P0
@@ -456,7 +432,6 @@ technique11 ShadowMapPositionNormalTexture
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionNormalTextureI
 {
     pass P0
@@ -468,7 +443,6 @@ technique11 ShadowMapPositionNormalTextureI
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionNormalTextureSkinned
 {
     pass P0
@@ -480,7 +454,6 @@ technique11 ShadowMapPositionNormalTextureSkinned
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionNormalTextureSkinnedI
 {
     pass P0
@@ -504,7 +477,6 @@ technique11 ShadowMapPositionNormalTextureTangent
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionNormalTextureTangentI
 {
     pass P0
@@ -516,7 +488,6 @@ technique11 ShadowMapPositionNormalTextureTangentI
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionNormalTextureTangentSkinned
 {
     pass P0
@@ -528,7 +499,6 @@ technique11 ShadowMapPositionNormalTextureTangentSkinned
 		SetRasterizerState(RasterizerDepth);
     }
 }
-
 technique11 ShadowMapPositionNormalTextureTangentSkinnedI
 {
     pass P0

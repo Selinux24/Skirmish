@@ -462,6 +462,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="engine.ico" />
+    <Content Include="Resources\ShaderDeferred.fx" />
     <Content Include="sharpdx_direct3d11_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
