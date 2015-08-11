@@ -55,10 +55,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Indicates whether the draw call uses z-buffer if available
-        /// </summary>
-        public bool UseZBuffer { get; set; }
-        /// <summary>
         /// Enables transparent blending
         /// </summary>
         public bool EnableAlphaBlending { get; set; }
@@ -79,8 +75,6 @@ namespace Engine
         public Model(Game game, ModelContent content)
             : base(game, content, false, 0, true, true)
         {
-            this.UseZBuffer = true;
-
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
         }
@@ -105,20 +99,12 @@ namespace Engine
             if (this.Meshes != null)
             {
                 Drawer effect = null;
-                if (context.DrawerMode == DrawerModesEnum.Default) effect = DrawerPool.EffectBasic;
+                if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectBasic;
+                else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectGBuffer;
                 else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
 
                 if (effect != null)
                 {
-                    if (this.UseZBuffer)
-                    {
-                        this.Game.Graphics.EnableZBuffer();
-                    }
-                    else
-                    {
-                        this.Game.Graphics.DisableZBuffer();
-                    }
-
                     if (this.EnableAlphaBlending)
                     {
                         this.Game.Graphics.SetBlendTransparent();
@@ -130,7 +116,7 @@ namespace Engine
 
                     #region Per frame update
 
-                    if (context.DrawerMode == DrawerModesEnum.Default)
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
                         Matrix local = this.Manipulator.LocalTransform;
                         Matrix world = context.World * local;
@@ -143,6 +129,18 @@ namespace Engine
                         ((EffectBasic)effect).FrameBuffer.ShadowTransform = context.ShadowTransform;
                         ((EffectBasic)effect).FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
                         ((EffectBasic)effect).UpdatePerFrame(context.ShadowMap);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        Matrix local = this.Manipulator.LocalTransform;
+                        Matrix world = context.World * local;
+                        Matrix worldInverse = Matrix.Invert(world);
+                        Matrix worldViewProjection = world * context.ViewProjection;
+
+                        ((EffectBasicGBuffer)effect).FrameBuffer.World = world;
+                        ((EffectBasicGBuffer)effect).FrameBuffer.WorldInverse = worldInverse;
+                        ((EffectBasicGBuffer)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
+                        ((EffectBasicGBuffer)effect).UpdatePerFrame();
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
@@ -163,10 +161,15 @@ namespace Engine
 
                         if (this.SkinningData != null)
                         {
-                            if (context.DrawerMode == DrawerModesEnum.Default)
+                            if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
                                 ((EffectBasic)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
                                 ((EffectBasic)effect).UpdatePerSkinning();
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                            {
+                                ((EffectBasicGBuffer)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
+                                ((EffectBasicGBuffer)effect).UpdatePerSkinning();
                             }
                             else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                             {
@@ -186,28 +189,34 @@ namespace Engine
 
                             #region Per object update
 
-                            if (context.DrawerMode == DrawerModesEnum.Default)
+                            var matdata = mat != null ? mat.Material : Material.Default;
+                            var texture = mat != null ? mat.DiffuseTexture : null;
+                            var normalMap = mat != null ? mat.NormalMap : null;
+
+                            if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
-                                if (mat != null)
-                                {
-                                    ((EffectBasic)effect).ObjectBuffer.Material.SetMaterial(mat.Material);
-                                    ((EffectBasic)effect).UpdatePerObject(mat.DiffuseTexture, mat.NormalMap);
-                                }
-                                else
-                                {
-                                    ((EffectBasic)effect).ObjectBuffer.Material.SetMaterial(Material.Default);
-                                    ((EffectBasic)effect).UpdatePerObject(null, null);
-                                }
+                                ((EffectBasic)effect).ObjectBuffer.Material.SetMaterial(matdata);
+                                ((EffectBasic)effect).UpdatePerObject(texture, normalMap);
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                            {
+                                ((EffectBasicGBuffer)effect).ObjectBuffer.Material.SetMaterial(mat.Material);
+                                ((EffectBasicGBuffer)effect).UpdatePerObject(texture);
                             }
 
                             #endregion
 
                             #region Per instance update
 
-                            if (context.DrawerMode == DrawerModesEnum.Default)
+                            if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
                                 ((EffectBasic)effect).InstanceBuffer.TextureIndex = this.TextureIndex;
                                 ((EffectBasic)effect).UpdatePerInstance();
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                            {
+                                ((EffectBasicGBuffer)effect).InstanceBuffer.TextureIndex = this.TextureIndex;
+                                ((EffectBasicGBuffer)effect).UpdatePerInstance();
                             }
 
                             #endregion
@@ -454,6 +463,6 @@ namespace Engine
         /// <summary>
         /// Drops shadow
         /// </summary>
-        public bool DropShadow = false;
+        public bool Opaque = false;
     }
 }

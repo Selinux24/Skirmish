@@ -117,7 +117,7 @@ void GSSMBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveI
 	}
 }
 
-float4 PSBillboard(PSVertexBillboard input) : SV_Target
+float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 {
 	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 	float distToEye = length(toEyeWorld);
@@ -151,19 +151,44 @@ float4 PSBillboard(PSVertexBillboard input) : SV_Target
 
 	return litColor;
 }
+GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
+{
+    GBufferPSOutput output = (GBufferPSOutput)0;
 
-technique11 Billboard
+	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
+	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
+	clip(textureColor.a - 0.05f);
+
+	output.color = textureColor;
+	output.normal.xyz = input.normalWorld;
+	output.normal.w = 1.0f;
+	output.depth = input.positionHomogeneous.z / input.positionHomogeneous.w;
+
+    return output;
+}
+
+technique11 ForwardBillboard
 {
 	pass P0
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSBillboard()));
 		SetGeometryShader(CompileShader(gs_5_0, GSBillboard()));
-		SetPixelShader(CompileShader(ps_5_0, PSBillboard()));
+		SetPixelShader(CompileShader(ps_5_0, PSForwardBillboard()));
 
 		SetRasterizerState(RasterizerSolid);
 	}
 }
+technique11 DeferredBillboard
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSBillboard()));
+		SetGeometryShader(CompileShader(gs_5_0, GSBillboard()));
+		SetPixelShader(CompileShader(ps_5_0, PSDeferredBillboard()));
 
+		SetRasterizerState(RasterizerSolid);
+	}
+}
 technique11 ShadowMapBillboard
 {
 	pass P0

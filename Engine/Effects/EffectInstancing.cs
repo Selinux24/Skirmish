@@ -183,6 +183,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectShaderResourceVariable textures = null;
         /// <summary>
+        /// Normal map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable normalMap = null;
+        /// <summary>
         /// Shadow map effect variable
         /// </summary>
         private EffectShaderResourceVariable shadowMap = null;
@@ -444,6 +448,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Normal map
+        /// </summary>
+        protected ShaderResourceView NormalMap
+        {
+            get
+            {
+                return this.normalMap.GetResource();
+            }
+            set
+            {
+                this.normalMap.SetResource(value);
+            }
+        }
+        /// <summary>
         /// Shadow map
         /// </summary>
         protected ShaderResourceView ShadowMap
@@ -517,6 +535,7 @@ namespace Engine.Effects
             this.enableShadows = this.Effect.GetVariableByName("gEnableShadows").AsScalar();
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
+            this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
             this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
         }
         /// <summary>
@@ -611,10 +630,12 @@ namespace Engine.Effects
         /// Update per model object data
         /// </summary>
         /// <param name="texture">Texture</param>
-        public void UpdatePerObject(ShaderResourceView texture)
+        /// <param name="normalMap">Normal Map</param>
+        public void UpdatePerObject(ShaderResourceView texture, ShaderResourceView normalMap)
         {
             this.Material = this.ObjectBuffer.Material;
             this.Textures = texture;
+            this.NormalMap = normalMap;
         }
         /// <summary>
         /// Update per model skin data

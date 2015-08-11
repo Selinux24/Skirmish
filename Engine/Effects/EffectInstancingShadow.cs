@@ -140,11 +140,11 @@ namespace Engine.Effects
         /// <summary>
         /// Per frame buffer structure
         /// </summary>
-        public EffectBasicShadow.PerFrameBuffer FrameBuffer = new EffectBasicShadow.PerFrameBuffer();
+        public EffectInstancingShadow.PerFrameBuffer FrameBuffer = new EffectInstancingShadow.PerFrameBuffer();
         /// <summary>
         /// Per skin buffer structure
         /// </summary>
-        public EffectBasicShadow.PerSkinningBuffer SkinningBuffer = new EffectBasicShadow.PerSkinningBuffer();
+        public EffectInstancingShadow.PerSkinningBuffer SkinningBuffer = new EffectInstancingShadow.PerSkinningBuffer();
 
         /// <summary>
         /// Constructor

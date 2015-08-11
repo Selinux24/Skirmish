@@ -43,7 +43,7 @@ namespace Engine
             : base(game)
         {
             this.terrain = new Model(game, content);
-            this.terrain.DropShadow = this.DropShadow = description.DropShadow;
+            this.terrain.Opaque = this.Opaque = description.Opaque;
 
             BoundingBox bbox = this.terrain.GetBoundingBox();
             BoundingSphere bsph = this.terrain.GetBoundingSphere();
@@ -69,7 +69,7 @@ namespace Engine
 
                     this.vegetation[i] = new Billboard(game, vegetationContent);
                     this.vegetation[i].Radius = vegetationDesc.Radius;
-                    this.vegetation[i].DropShadow = vegetationDesc.DropShadow;
+                    this.vegetation[i].Opaque = vegetationDesc.Opaque;
                 }
             }
 
@@ -386,7 +386,7 @@ namespace Engine
             /// <summary>
             /// Drops shadow
             /// </summary>
-            public bool DropShadow = false;
+            public bool Opaque = false;
         }
 
         /// <summary>
@@ -419,7 +419,7 @@ namespace Engine
         /// <summary>
         /// Drops shadow
         /// </summary>
-        public bool DropShadow = false;
+        public bool Opaque = false;
 
         /// <summary>
         /// Use quadtree for picking

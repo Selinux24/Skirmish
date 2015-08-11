@@ -90,19 +90,17 @@ namespace Skybox
                 ModelFileName = "ruins.dae",
                 AddSkydom = true,
                 SkydomTexture = "sunset.dds",
-                DropShadow = true,
+                Opaque = true,
             };
             this.ruins = this.AddTerrain(desc, false);
 
             this.bboxGlobalDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
             //this.bboxMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.StaticBoundingBoxes), this.bboxColor);
             //this.bsphMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredSphere(this.ruins.StaticBoundingSpheres, this.bsphSlices, this.bsphStacks), this.bsphColor);
-            this.bboxGlobalDrawer.UseZBuffer = false;
             //this.bboxMeshesDrawer.UseZBuffer = true;
             //this.bsphMeshesDrawer.UseZBuffer = true;
 
             this.pickedTri = this.AddTriangleListDrawer(1);
-            this.pickedTri.UseZBuffer = false;
 
             #endregion
 
@@ -115,7 +113,7 @@ namespace Skybox
                 ContentPath = "Resources",
                 ModelFileName = "torch.dae",
                 Instances = this.firePositions.Length,
-                DropShadow = true,
+                Opaque = true,
             });
             for (int i = 0; i < this.firePositions.Length; i++)
             {

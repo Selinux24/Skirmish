@@ -1,5 +1,4 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
@@ -11,37 +10,52 @@ namespace Engine
     /// <summary>
     /// Sprite drawer
     /// </summary>
-    public class Sprite : ModelBase
+    public class Sprite : ModelBase, IScreenFitted
     {
+        /// <summary>
+        /// Creates view and orthoprojection from specified size
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <returns>Returns view * orthoprojection matrix</returns>
+        public static Matrix CreateViewOrthoProjection(int width, int height)
+        {
+            Vector3 pos = new Vector3(0, 0, -1);
+
+            Matrix view = Matrix.LookAtLH(
+                pos,
+                pos + Vector3.ForwardLH,
+                Vector3.Up);
+
+            Matrix orthoProj = Matrix.OrthoLH(
+                width,
+                height,
+                0f, 100f);
+
+            return view * orthoProj;
+        }
+
         /// <summary>
         /// Source render width
         /// </summary>
-        private float previousRenderWidth;
+        private readonly int renderWidth;
         /// <summary>
         /// Source render height
         /// </summary>
-        private float previousRenderHeight;
+        private readonly int renderHeight;
         /// <summary>
         /// Source width
         /// </summary>
-        private readonly float sourceWidth;
+        private readonly int sourceWidth;
         /// <summary>
         /// Source height
         /// </summary>
-        private readonly float sourceHeight;
+        private readonly int sourceHeight;
         /// <summary>
         /// View * projection matrix
         /// </summary>
         private Matrix viewProjection;
-        /// <summary>
-        /// Eye position
-        /// </summary>
-        private Vector3 eyePosition;
 
-        /// <summary>
-        /// Indicates whether the sprite has to maintain proportion with window size
-        /// </summary>
-        public bool FitScreen { get; set; }
         /// <summary>
         /// Gets or sets text left position in 2D screen
         /// </summary>
@@ -73,19 +87,11 @@ namespace Engine
         /// <summary>
         /// Width
         /// </summary>
-        public float Width { get; set; }
+        public int Width { get; set; }
         /// <summary>
         /// Height
         /// </summary>
-        public float Height { get; set; }
-        /// <summary>
-        /// Manipulator
-        /// </summary>
-        public Manipulator2D Manipulator { get; private set; }
-        /// <summary>
-        /// Gets or sets the texture index to render
-        /// </summary>
-        public int TextureIndex { get; set; }
+        public int Height { get; set; }
         /// <summary>
         /// Sprite rectangle
         /// </summary>
@@ -94,12 +100,24 @@ namespace Engine
             get
             {
                 return new Rectangle(
-                    (int)this.Manipulator.Position.X,
-                    (int)this.Manipulator.Position.Y,
-                    (int)this.Width,
-                    (int)this.Height);
+                    this.Left,
+                    this.Top,
+                    this.Width,
+                    this.Height);
             }
         }
+        /// <summary>
+        /// Indicates whether the sprite has to maintain proportion with window size
+        /// </summary>
+        public bool FitScreen { get; set; }
+        /// <summary>
+        /// Gets or sets the texture index to render
+        /// </summary>
+        public int TextureIndex { get; set; }
+        /// <summary>
+        /// Manipulator
+        /// </summary>
+        public Manipulator2D Manipulator { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -109,33 +127,15 @@ namespace Engine
         public Sprite(Game game, SpriteDescription description)
             : base(game, ModelContent.GenerateSprite(description.ContentPath, description.Textures), false, 0, false, false)
         {
-            int renderWidth = game.Form.RenderWidth;
-            int renderHeight = game.Form.RenderHeight;
+            this.renderWidth = game.Form.RenderWidth.Pair();
+            this.renderHeight = game.Form.RenderHeight.Pair();
+            this.sourceWidth = description.Width <= 0 ? this.renderWidth : description.Width.Pair();
+            this.sourceHeight = description.Height <= 0 ? this.renderHeight : description.Height.Pair();
+            this.viewProjection = Sprite.CreateViewOrthoProjection(this.renderWidth, this.renderHeight);
 
-            this.eyePosition = Vector3.UnitZ * -1f;
-
-            Matrix view = Matrix.LookAtLH(
-                this.eyePosition,
-                Vector3.Zero,
-                Vector3.Up);
-
-            Matrix proj = Matrix.OrthoLH(
-                renderWidth,
-                renderHeight,
-                0.1f,
-                100f);
-
-            this.viewProjection = view * proj;
-
-            this.Width = description.Width <= 0 ? renderWidth : description.Width;
-            this.Height = description.Height <= 0 ? renderHeight : description.Height;
+            this.Width = this.sourceWidth;
+            this.Height = this.sourceHeight;
             this.FitScreen = description.FitScreen;
-
-            this.previousRenderWidth = renderWidth;
-            this.previousRenderHeight = renderHeight;
-            this.sourceWidth = this.Width / renderWidth;
-            this.sourceHeight = this.Height / renderHeight;
-
             this.TextureIndex = 0;
 
             this.Manipulator = new Manipulator2D();
@@ -149,25 +149,11 @@ namespace Engine
         {
             base.Update(gameTime, context);
 
-            if (this.FitScreen)
-            {
-                if (this.previousRenderWidth != this.Game.Form.RenderWidth ||
-                    this.previousRenderHeight != this.Game.Form.RenderHeight)
-                {
-                    float leftRelative = (float)this.Left / (float)this.previousRenderWidth;
-                    float topRelative = (float)this.Top / (float)this.previousRenderHeight;
-                    this.Left = (int)Math.Round(leftRelative * this.Game.Form.RenderWidth, 0);
-                    this.Top = (int)Math.Round(topRelative * this.Game.Form.RenderHeight, 0);
-
-                    this.Width = this.sourceWidth * this.Game.Form.RenderWidth;
-                    this.Height = this.sourceHeight * this.Game.Form.RenderHeight;
-
-                    this.previousRenderWidth = this.Game.Form.RenderWidth;
-                    this.previousRenderHeight = this.Game.Form.RenderHeight;
-                }
-            }
-
-            this.Manipulator.Update(gameTime, this.Game.Form.RelativeCenter, this.Width, this.Height);
+            this.Manipulator.Update(
+                gameTime, 
+                this.Game.Form.RelativeCenter, 
+                this.Width, 
+                this.Height);
         }
         /// <summary>
         /// Draw
@@ -178,8 +164,6 @@ namespace Engine
         {
             if (this.Meshes != null)
             {
-                this.Game.Graphics.EnableZBuffer();
-
                 #region Per frame update
 
                 Matrix world = this.Manipulator.LocalTransform;
@@ -189,7 +173,6 @@ namespace Engine
                 DrawerPool.EffectBasic.FrameBuffer.World = world;
                 DrawerPool.EffectBasic.FrameBuffer.WorldInverse = worldInverse;
                 DrawerPool.EffectBasic.FrameBuffer.WorldViewProjection = worldViewProjection;
-                DrawerPool.EffectBasic.FrameBuffer.Lights = new BufferLights(this.eyePosition);
                 DrawerPool.EffectBasic.UpdatePerFrame(null);
 
                 #endregion
@@ -248,6 +231,25 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Resize
+        /// </summary>
+        public virtual void Resize()
+        {
+            int width = this.Game.Form.RenderWidth.Pair();
+            int height = this.Game.Form.RenderHeight.Pair();
+
+            this.viewProjection = Sprite.CreateViewOrthoProjection(width, height);
+
+            if (this.FitScreen)
+            {
+                float w = width / (float)this.renderWidth;
+                float h = height / (float)this.renderHeight;
+
+                this.Width = ((int)(this.sourceWidth * w)).Pair();
+                this.Height = ((int)(this.sourceHeight * h)).Pair();
+            }
+        }
     }
 
     /// <summary>
@@ -266,11 +268,11 @@ namespace Engine
         /// <summary>
         /// Width
         /// </summary>
-        public float Width;
+        public int Width;
         /// <summary>
         /// Height
         /// </summary>
-        public float Height;
+        public int Height;
         /// <summary>
         /// Fit screen
         /// </summary>

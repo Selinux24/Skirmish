@@ -311,6 +311,7 @@
     <Compile Include="Common\IBufferData.cs" />
     <Compile Include="Common\IControl.cs" />
     <Compile Include="Common\IPath.cs" />
+    <Compile Include="Common\IScreenFitted.cs" />
     <Compile Include="Common\PriorityQueue.cs" />
     <Compile Include="Common\PriorityQueueItem.cs" />
     <Compile Include="Common\QuadTree.cs" />
@@ -319,8 +320,13 @@
     <Compile Include="Content\LoaderConversion.cs" />
     <Compile Include="Content\CoordinateSystems.cs" />
     <Compile Include="Content\GeometryOrientations.cs" />
+    <Compile Include="Effects\EffectDeferred.cs" />
+    <Compile Include="GBuffer.cs" />
+    <Compile Include="Effects\EffectInstancingGBuffer.cs" />
+    <Compile Include="Effects\EffectBasicGBuffer.cs" />
     <Compile Include="Effects\EffectInstancingShadow.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="SceneModesEnum.cs" />
     <Compile Include="SpriteTexture.cs" />
     <Compile Include="Curve.cs" />
     <Compile Include="Effects\DrawerPool.cs" />
@@ -429,6 +435,7 @@
     <Compile Include="Common\VertexPositionTexture.cs" />
     <Compile Include="Common\VertexTypes.cs" />
     <Compile Include="Terrain.cs" />
+    <Compile Include="DeferredRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -441,6 +448,7 @@
     <None Include="Diagrams\ColladaClasses.cd" />
     <None Include="Diagrams\Drawables.cd" />
     <None Include="packages.config" />
+    <None Include="Resources\ShaderDeferred.fxo" />
     <None Include="Resources\ShaderGBuffer.fx" />
     <None Include="Resources\ShaderBasic.fxo" />
     <None Include="Resources\ShaderBillboard.fxo" />

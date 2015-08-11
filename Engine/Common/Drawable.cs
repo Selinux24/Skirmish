@@ -43,9 +43,9 @@ namespace Engine.Common
         /// <remarks>True if passes culling test</remarks>
         public bool Cull { get; set; }
         /// <summary>
-        /// Gets or sets whether the object drops shadow
+        /// Gets or sets whether the object its opaque
         /// </summary>
-        public bool DropShadow { get; set; }
+        public bool Opaque { get; set; }
         
         /// <summary>
         /// Constructor
@@ -104,7 +104,7 @@ namespace Engine.Common
         /// <summary>
         /// Drawer mode
         /// </summary>
-        public DrawerModesEnum DrawerMode = DrawerModesEnum.Default;
+        public DrawerModesEnum DrawerMode = DrawerModesEnum.Forward;
         /// <summary>
         /// World matrix
         /// </summary>
@@ -129,6 +129,9 @@ namespace Engine.Common
         /// Shadow transform
         /// </summary>
         public Matrix ShadowTransform;
+
+
+        public ShaderResourceView[] GBuffer;
     }
 
     /// <summary>
@@ -137,16 +140,16 @@ namespace Engine.Common
     public enum DrawerModesEnum
     {
         /// <summary>
-        /// Default
+        /// Forward rendering (default)
         /// </summary>
-        Default,
-        /// <summary>
-        /// Shadow map
-        /// </summary>
-        ShadowMap,
+        Forward,
         /// <summary>
         /// Deferred rendering
         /// </summary>
         Deferred,
+        /// <summary>
+        /// Shadow map
+        /// </summary>
+        ShadowMap,
     }
 }

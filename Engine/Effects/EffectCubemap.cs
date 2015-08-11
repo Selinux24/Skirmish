@@ -40,7 +40,11 @@ namespace Engine.Effects
         /// <summary>
         /// Cubemap drawing technique
         /// </summary>
-        public readonly EffectTechnique Cubemap = null;
+        public readonly EffectTechnique ForwardCubemap = null;
+        /// <summary>
+        /// Cubemap drawing technique
+        /// </summary>
+        public readonly EffectTechnique DeferredCubemap = null;
 
         /// <summary>
         /// World view projection effect variable
@@ -94,9 +98,11 @@ namespace Engine.Effects
         public EffectCubemap(Device device, byte[] effect, bool compile)
             : base(device, effect, compile)
         {
-            this.Cubemap = this.Effect.GetTechniqueByName("Cubemap");
+            this.ForwardCubemap = this.Effect.GetTechniqueByName("ForwardCubemap");
+            this.DeferredCubemap = this.Effect.GetTechniqueByName("DeferredCubemap");
 
-            this.AddInputLayout(this.Cubemap, VertexPosition.GetInput());
+            this.AddInputLayout(this.ForwardCubemap, VertexPosition.GetInput());
+            this.AddInputLayout(this.DeferredCubemap, VertexPosition.GetInput());
 
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.cubeTexture = this.Effect.GetVariableByName("gCubemap").AsShaderResource();
@@ -113,7 +119,7 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Position)
                 {
-                    return this.Cubemap;
+                    return this.ForwardCubemap;
                 }
                 else
                 {

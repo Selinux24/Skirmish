@@ -46,7 +46,12 @@ namespace Engine
         {
             if (this.Meshes != null)
             {
-                if (context.DrawerMode == DrawerModesEnum.Default)
+                EffectCubemap effect = DrawerPool.EffectCubemap;
+                EffectTechnique technique = null;
+                if (context.DrawerMode == DrawerModesEnum.Forward) { technique = effect.ForwardCubemap; }
+                else if (context.DrawerMode == DrawerModesEnum.Deferred) { technique = effect.DeferredCubemap; }
+
+                if (technique != null)
                 {
                     this.Game.Graphics.SetBlendAlphaToCoverage();
 
@@ -63,7 +68,6 @@ namespace Engine
                         {
                             Mesh mesh = dictionary[material];
                             MeshMaterial mat = this.Materials[material];
-                            EffectTechnique technique = DrawerPool.EffectCubemap.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
                             #region Per object update
 

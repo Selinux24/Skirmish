@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Sprite button
     /// </summary>
-    public class SpriteButton : Drawable, IControl
+    public class SpriteButton : Drawable, IControl, IScreenFitted
     {
         /// <summary>
         /// Click event
@@ -135,7 +135,12 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(description.Font))
             {
-                this.text = new TextDrawer(game, description.Font, description.FontSize, description.TextColor, description.TextShadowColor);
+                this.text = new TextDrawer(
+                    game,
+                    description.Font,
+                    description.FontSize,
+                    description.TextColor,
+                    description.TextShadowColor);
             }
 
             this.Left = description.Left;
@@ -190,12 +195,20 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(GameTime gameTime, Context context)
         {
+            this.button.Draw(gameTime, context);
+
             if (!string.IsNullOrEmpty(this.Text))
             {
                 this.text.Draw(gameTime, context);
             }
-
-            this.button.Draw(gameTime, context);
+        }
+        /// <summary>
+        /// Resize
+        /// </summary>
+        public virtual void Resize()
+        {
+            if (this.button != null) this.button.Resize();
+            if (this.text != null) this.text.Resize();
         }
         /// <summary>
         /// Fires on-click event

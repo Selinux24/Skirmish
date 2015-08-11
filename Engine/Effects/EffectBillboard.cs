@@ -63,7 +63,11 @@ namespace Engine.Effects
         /// <summary>
         /// Billboard drawing technique
         /// </summary>
-        public readonly EffectTechnique Billboard = null;
+        public readonly EffectTechnique ForwardBillboard = null;
+        /// <summary>
+        /// Billboard drawing technique
+        /// </summary>
+        public readonly EffectTechnique DeferredBillboard = null;
         /// <summary>
         /// Billboard shadow map drawing technique
         /// </summary>
@@ -403,10 +407,12 @@ namespace Engine.Effects
         public EffectBillboard(Device device, byte[] effect, bool compile)
             : base(device, effect, compile)
         {
-            this.Billboard = this.Effect.GetTechniqueByName("Billboard");
+            this.ForwardBillboard = this.Effect.GetTechniqueByName("ForwardBillboard");
+            this.DeferredBillboard = this.Effect.GetTechniqueByName("DeferredBillboard");
             this.ShadowMapBillboard = this.Effect.GetTechniqueByName("ShadowMapBillboard");
 
-            this.AddInputLayout(this.Billboard, VertexBillboard.GetInput());
+            this.AddInputLayout(this.ForwardBillboard, VertexBillboard.GetInput());
+            this.AddInputLayout(this.DeferredBillboard, VertexBillboard.GetInput());
             this.AddInputLayout(this.ShadowMapBillboard, VertexBillboard.GetInput());
 
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
@@ -437,7 +443,7 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Billboard)
                 {
-                    return this.Billboard;
+                    return this.ForwardBillboard;
                 }
                 else
                 {

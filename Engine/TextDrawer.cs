@@ -8,7 +8,6 @@ using SharpDX.DXGI;
 using Bitmap = System.Drawing.Bitmap;
 using Brushes = System.Drawing.Brushes;
 using Buffer = SharpDX.Direct3D11.Buffer;
-using CompositingMode = System.Drawing.Drawing2D.CompositingMode;
 using Device = SharpDX.Direct3D11.Device;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using Font = System.Drawing.Font;
@@ -34,7 +33,7 @@ namespace Engine
     /// <summary>
     /// Text drawer
     /// </summary>
-    public class TextDrawer : Drawable
+    public class TextDrawer : Drawable, IScreenFitted
     {
         /// <summary>
         /// Technique name
@@ -223,20 +222,11 @@ namespace Engine
             this.technique = DrawerPool.EffectFont.GetTechnique(VertexTypes.PositionTexture, DrawingStages.Drawing);
             this.inputLayout = DrawerPool.EffectFont.GetInputLayout(this.technique);
 
-            Matrix view = Matrix.LookAtLH(
-                Vector3.UnitZ * -1f,
-                Vector3.Zero,
-                Vector3.Up);
+            this.viewProjection = Sprite.CreateViewOrthoProjection(
+                game.Form.RenderWidth.Pair(),
+                game.Form.RenderHeight.Pair());
 
-            Matrix proj = Matrix.OrthoLH(
-                this.Game.Form.RenderWidth,
-                this.Game.Form.RenderHeight,
-                0.1f,
-                100f);
-
-            this.viewProjection = view * proj;
-
-            this.fontMap = FontMap.MapFont(game.Graphics.Device, font, size);
+            this.fontMap = FontMap.Map(game.Graphics.Device, font, size);
 
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
 
@@ -263,7 +253,7 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            
+
         }
         /// <summary>
         /// Update component state
@@ -283,23 +273,31 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
-                this.Game.Graphics.EnableZBuffer();
-
                 this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                 this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
                 this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-
-                //Draw text
-                this.DrawText(context, this.Position, this.TextColor);
 
                 if (this.ShadowColor != Color.Transparent)
                 {
                     //Draw shadow
                     this.DrawText(context, this.Position + this.ShadowRelative, this.ShadowColor);
                 }
+
+                //Draw text
+                this.DrawText(context, this.Position, this.TextColor);
             }
         }
+        /// <summary>
+        /// Resize
+        /// </summary>
+        public void Resize()
+        {
+            this.viewProjection = Sprite.CreateViewOrthoProjection(
+                this.Game.Form.RenderWidth.Pair(),
+                this.Game.Form.RenderHeight.Pair());
+        }
+
         /// <summary>
         /// Draw text
         /// </summary>
@@ -310,12 +308,10 @@ namespace Engine
         {
             #region Per frame update
 
-            Vector3 pos = new Vector3(
-                position.X - this.Game.Form.RelativeCenter.X,
-                -position.Y + this.Game.Form.RelativeCenter.Y,
-                0f);
+            float x = +position.X - this.Game.Form.RelativeCenter.X;
+            float y = -position.Y + this.Game.Form.RelativeCenter.Y;
 
-            Matrix world = Matrix.Translation(pos);
+            Matrix world = Matrix.Translation(x, y, 0f);
             Matrix worldViewProjection = world * this.viewProjection;
 
             DrawerPool.EffectFont.FrameBuffer.World = world;
@@ -474,7 +470,7 @@ namespace Engine
         /// <param name="font">Font name</param>
         /// <param name="size">Size</param>
         /// <returns>Returns created font map</returns>
-        public static FontMap MapFont(Device device, string font, int size)
+        public static FontMap Map(Device device, string font, int size)
         {
             FontMap map = gCache.Find(f => f.Font == font && f.Size == size);
             if (map == null)
@@ -490,7 +486,6 @@ namespace Engine
                 {
                     gra.TextContrast = 12;
                     gra.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;
-                    gra.CompositingMode = CompositingMode.SourceCopy;
 
                     gra.FillRegion(
                         Brushes.Transparent,
@@ -561,7 +556,7 @@ namespace Engine
             return map;
         }
 
-         /// <summary>
+        /// <summary>
         /// Constructor
         /// </summary>
         public FontMap()

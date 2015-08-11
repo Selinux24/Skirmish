@@ -17,7 +17,7 @@ namespace Engine
     /// <summary>
     /// Minimap
     /// </summary>
-    public class SpriteTexture : Drawable
+    public class SpriteTexture : Drawable, IScreenFitted
     {
         /// <summary>
         /// Minimap vertex buffer
@@ -43,7 +43,11 @@ namespace Engine
         /// Context to draw minimap
         /// </summary>
         private Context drawContext;
-        
+        /// <summary>
+        /// View * ortho projection matrix
+        /// </summary>
+        private Matrix viewProjection;
+
         /// <summary>
         /// Texture
         /// </summary>
@@ -75,7 +79,12 @@ namespace Engine
             this.indexBuffer = this.Device.CreateIndexBufferImmutable(ci);
 
             this.effect = DrawerPool.EffectBasic;
-            this.effectTechnique = DrawerPool.EffectBasic.PositionTextureRED;
+
+            if (description.Channel == SpriteTextureChannelsEnum.All) this.effectTechnique = this.effect.PositionTexture;
+            else if (description.Channel == SpriteTextureChannelsEnum.Red) this.effectTechnique = this.effect.PositionTextureRED;
+            else if (description.Channel == SpriteTextureChannelsEnum.Green) this.effectTechnique = this.effect.PositionTextureGREEN;
+            else if (description.Channel == SpriteTextureChannelsEnum.Blue) this.effectTechnique = this.effect.PositionTextureBLUE;
+            else if (description.Channel == SpriteTextureChannelsEnum.NoAlpha) this.effectTechnique = this.effect.PositionTextureNOALPHA;
 
             this.InitializeContext(description.Left, description.Top, description.Width, description.Height);
         }
@@ -88,32 +97,17 @@ namespace Engine
         /// <param name="height">Height</param>
         private void InitializeContext(int left, int top, int width, int height)
         {
-            Vector3 eyePos = new Vector3(0, 0, -1);
-            Vector3 target = Vector3.Zero;
-            Vector3 dir = Vector3.Normalize(target - eyePos);
-
             Manipulator2D man = new Manipulator2D();
             man.SetPosition(left, top);
             man.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
 
-            Matrix world = man.LocalTransform;
-
-            Matrix view = Matrix.LookAtLH(
-                eyePos,
-                target,
-                Vector3.Up);
-
-            Matrix proj = Matrix.OrthoLH(
-                this.Game.Form.RenderWidth,
-                this.Game.Form.RenderHeight,
-                0.1f,
-                100f);
+            this.viewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
 
             this.drawContext = new Context()
             {
-                EyePosition = eyePos,
-                World = world,
-                ViewProjection = view * proj,
+                EyePosition = new Vector3(0, 0, -1),
+                World = man.LocalTransform,
+                ViewProjection = this.viewProjection,
                 Lights = SceneLight.Default,
             };
         }
@@ -164,6 +158,13 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Resize
+        /// </summary>
+        public virtual void Resize()
+        {
+            this.viewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+        }
+        /// <summary>
         /// Dispose objects
         /// </summary>
         public override void Dispose()
@@ -180,6 +181,33 @@ namespace Engine
                 this.indexBuffer = null;
             }
         }
+    }
+
+    /// <summary>
+    /// Channel color
+    /// </summary>
+    public enum SpriteTextureChannelsEnum
+    {
+        /// <summary>
+        /// All
+        /// </summary>
+        All,
+        /// <summary>
+        /// Red channel
+        /// </summary>
+        Red,
+        /// <summary>
+        /// Green channel
+        /// </summary>
+        Green,
+        /// <summary>
+        /// Blue channel
+        /// </summary>
+        Blue,
+        /// <summary>
+        /// Without Alpha Channel
+        /// </summary>
+        NoAlpha,
     }
 
     /// <summary>
@@ -203,5 +231,9 @@ namespace Engine
         /// Height
         /// </summary>
         public int Height;
+        /// <summary>
+        /// Channel color
+        /// </summary>
+        public SpriteTextureChannelsEnum Channel = SpriteTextureChannelsEnum.All;
     }
 }

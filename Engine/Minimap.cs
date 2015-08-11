@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Minimap
     /// </summary>
-    public class Minimap : Drawable
+    public class Minimap : Drawable, IScreenFitted
     {
         /// <summary>
         /// Viewport to match the minimap texture size
@@ -100,7 +100,7 @@ namespace Engine
 
             this.drawContext = new Context()
             {
-                DrawerMode = DrawerModesEnum.Default,
+                DrawerMode = DrawerModesEnum.Forward,
                 World = Matrix.Identity,
                 ViewProjection = view * proj,
                 EyePosition = eyePos,
@@ -160,6 +160,13 @@ namespace Engine
                 this.minimapBox.Dispose();
                 this.minimapBox = null;
             }
+        }
+        /// <summary>
+        /// Resize
+        /// </summary>
+        public virtual void Resize()
+        {
+            this.minimapBox.Resize();
         }
     }
 

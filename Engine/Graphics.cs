@@ -525,7 +525,10 @@ namespace Engine
         /// <param name="depthMap">Depth map</param>
         /// <param name="renderTarget">Render target</param>
         /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
-        public void SetRenderTarget(Viewport viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear, Color4 clearColor)
+        /// <param name="clearColor">Clear color</param>
+        /// <param name="depthClearFlags">Depth cleraring flags</param>
+        /// <remarks>By default, depth clearing flags were "Depth" and "Stencil"</remarks>
+        public void SetRenderTarget(Viewport viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear, Color4 clearColor, DepthStencilClearFlags depthClearFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
         {
             this.DeviceContext.Rasterizer.SetViewport(viewport);
             this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTarget);
@@ -543,7 +546,43 @@ namespace Engine
                 {
                     this.DeviceContext.ClearDepthStencilView(
                         depthMap,
-                        DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
+                        depthClearFlags,
+                        1.0f, 0);
+                }
+            }
+        }
+        /// <summary>
+        /// Set render targets
+        /// </summary>
+        /// <param name="viewport">Viewport</param>
+        /// <param name="depthMap">Depth map</param>
+        /// <param name="renderTargets">Render targets</param>
+        /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
+        /// <param name="clearColor">Clear color</param>
+        /// <param name="depthClearFlags">Depth cleraring flags</param>
+        /// <remarks>By default, depth clearing flags were "Depth" and "Stencil"</remarks>
+        public void SetRenderTargets(Viewport viewport, DepthStencilView depthMap, RenderTargetView[] renderTargets, bool clear, Color4 clearColor, DepthStencilClearFlags depthClearFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
+        {
+            this.DeviceContext.Rasterizer.SetViewport(viewport);
+            this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTargets.Length, renderTargets);
+
+            if (clear)
+            {
+                if (renderTargets != null && renderTargets.Length > 0)
+                {
+                    for (int i = 0; i < renderTargets.Length; i++)
+                    {
+                        this.DeviceContext.ClearRenderTargetView(
+                            renderTargets[i],
+                            clearColor);
+                    }
+                }
+
+                if (depthMap != null)
+                {
+                    this.DeviceContext.ClearDepthStencilView(
+                        depthMap,
+                        depthClearFlags,
                         1.0f, 0);
                 }
             }
@@ -555,7 +594,10 @@ namespace Engine
         /// <param name="depthMap">Depth map</param>
         /// <param name="renderTarget">Render target</param>
         /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
-        public void SetRenderTarget(ViewportF viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear, Color4 clearColor)
+        /// <param name="clearColor">Clear color</param>
+        /// <param name="depthClearFlags">Depth cleraring flags</param>
+        /// <remarks>By default, depth clearing flags were "Depth" and "Stencil"</remarks>
+        public void SetRenderTarget(ViewportF viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear, Color4 clearColor, DepthStencilClearFlags depthClearFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
         {
             this.DeviceContext.Rasterizer.SetViewport(viewport);
             this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTarget);
@@ -573,7 +615,43 @@ namespace Engine
                 {
                     this.DeviceContext.ClearDepthStencilView(
                         depthMap,
-                        DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
+                        depthClearFlags,
+                        1.0f, 0);
+                }
+            }
+        }
+        /// <summary>
+        /// Set render targets
+        /// </summary>
+        /// <param name="viewport">Viewport</param>
+        /// <param name="depthMap">Depth map</param>
+        /// <param name="renderTargets">Render targets</param>
+        /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
+        /// <param name="clearColor">Clear color</param>
+        /// <param name="depthClearFlags">Depth cleraring flags</param>
+        /// <remarks>By default, depth clearing flags were "Depth" and "Stencil"</remarks>
+        public void SetRenderTargets(ViewportF viewport, DepthStencilView depthMap, RenderTargetView[] renderTargets, bool clear, Color4 clearColor, DepthStencilClearFlags depthClearFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
+        {
+            this.DeviceContext.Rasterizer.SetViewport(viewport);
+            this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTargets.Length, renderTargets);
+
+            if (clear)
+            {
+                if (renderTargets != null && renderTargets.Length > 0)
+                {
+                    for (int i = 0; i < renderTargets.Length; i++)
+                    {
+                        this.DeviceContext.ClearRenderTargetView(
+                            renderTargets[i],
+                            clearColor);
+                    }
+                }
+
+                if (depthMap != null)
+                {
+                    this.DeviceContext.ClearDepthStencilView(
+                        depthMap,
+                        depthClearFlags,
                         1.0f, 0);
                 }
             }

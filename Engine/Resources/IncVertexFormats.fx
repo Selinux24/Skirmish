@@ -312,7 +312,7 @@ struct PSVertexPositionNormalTextureTangent
 };
 
 /*
-SHADOW MAPOING
+SHADOW MAPPING
 */
 struct ShadowMapOutput
 {
@@ -322,15 +322,11 @@ struct ShadowMapOutput
 /*
 DEFERRED LIGHTNING
 */
-struct GBufferPSInput
-{
-    float4 positionHomogeneous : SV_POSITION;
-};
 struct GBufferPSOutput
 {
-    float4 Color : SV_TARGET1;
-    float4 Normal : SV_TARGET2;
-    float4 Depth : SV_TARGET3;
+    float4 color : SV_TARGET0;
+    float4 normal : SV_TARGET1;
+    float4 depth : SV_TARGET2;
 };
 
 /*

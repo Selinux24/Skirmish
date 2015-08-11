@@ -105,31 +105,42 @@ namespace GameLogic
 
             this.NewGame();
 
+            this.Lights.EnableShadows = true;
+
+            #region 3D models
+
             this.cursor3D = this.AddModel(new ModelDescription()
             {
                 ContentPath = "Resources3D",
                 ModelFileName = "cursor.dae",
             });
+
             this.terrain = this.AddTerrain(new TerrainDescription()
             {
                 ModelFileName = "terrain.dae",
                 ContentPath = "Resources3D",
                 UsePathFinding = true,
                 PathNodeSize = 5f,
-                DropShadow = true,
+                Opaque = true,
             });
             this.model = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = "Resources3D",
                 ModelFileName = "soldier.dae",
                 Instances = this.skirmishGame.AllSoldiers.Length,
-                DropShadow = true,
+                Opaque = true,
             });
 
-            this.Lights.EnableShadows = true;
-            this.SceneVolume = this.terrain.GetBoundingSphere();
+            #endregion
 
             #region HUD
+
+            BackgroundDescription bkDesc = new BackgroundDescription()
+            {
+                ContentPath = "Resources",
+                Textures = new[] { "HUD.png" },
+            };
+            this.sprHUD = this.AddBackgroud(bkDesc);
 
             int minimapWidth = this.Game.Form.RenderWidth / 4;
             int minimapHeight = this.Game.Form.RenderHeight / 4;
@@ -155,13 +166,6 @@ namespace GameLogic
             this.txtSoldier = this.AddText("Lucida Casual", 12, Color.Yellow);
             this.txtActionList = this.AddText("Lucida Casual", 12, Color.Yellow);
             this.txtAction = this.AddText("Lucida Casual", 12, Color.Yellow);
-
-            BackgroundDescription bkDesc = new BackgroundDescription()
-            {
-                ContentPath = "Resources",
-                Textures = new[] { "HUD.png" },
-            };
-            this.sprHUD = this.AddBackgroud(bkDesc, 99);
 
             this.butClose = this.AddSpriteButton(new SpriteButtonDescription()
             {
@@ -246,6 +250,8 @@ namespace GameLogic
             this.txtTitle.Text = "Game Logic";
 
             #endregion
+
+            this.SceneVolume = this.terrain.GetBoundingSphere();
 
             this.UpdateLayout();
 

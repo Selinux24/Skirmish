@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using SharpDX;
-using System.IO;
 
 namespace Engine
 {
@@ -307,6 +307,15 @@ namespace Engine
             }
 
             return dictionary.Select(item => item.Key);
+        }
+        /// <summary>
+        /// Gets next pair of even number, if even
+        /// </summary>
+        /// <param name="num">Number</param>
+        /// <returns>Returns next pair</returns>
+        public static int Pair(this int num)
+        {
+            return num = num * 0.5f != (int)(num * 0.5f) ? num + 1 : num;
         }
         /// <summary>
         /// Writes stream to memory

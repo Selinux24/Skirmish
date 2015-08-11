@@ -142,11 +142,23 @@
   <data name="ShaderCubemapFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shadercubemap.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="ShaderDeferredFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdeferred.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDeferredFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdeferred.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="ShaderFontFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\ShaderFont.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="ShaderFontFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderfont.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderGBufferFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadergbuffer.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderGBufferFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadergbuffer.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="ShaderParticlesFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

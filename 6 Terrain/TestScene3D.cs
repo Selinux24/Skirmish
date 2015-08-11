@@ -1,11 +1,11 @@
-﻿using Engine;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using Engine;
 using Engine.Common;
 using Engine.Helpers;
 using Engine.PathFinding;
 using SharpDX;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace TerrainTest
@@ -122,7 +122,7 @@ namespace TerrainTest
                     {
                         VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
                         Saturation = 0.5f,
-                        DropShadow = true,
+                        Opaque = true,
                         Radius = 300f,
                         MinSize = Vector2.One * 2.50f,
                         MaxSize = Vector2.One * 3.50f,
@@ -131,13 +131,13 @@ namespace TerrainTest
                     {
                         VegetarionTextures = new[] { "grass0.png", "grass1.png", "grass2.png" },
                         Saturation = 10f,
-                        DropShadow = false,
+                        Opaque = false,
                         Radius = 50f,
                         MinSize = Vector2.One * 0.20f,
                         MaxSize = Vector2.One * 0.25f,
                     }
                 },
-                DropShadow = true,
+                Opaque = true,
             });
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
@@ -153,7 +153,7 @@ namespace TerrainTest
             {
                 ContentPath = resources,
                 ModelFileName = "helicopter.dae",
-                DropShadow = true,
+                Opaque = true,
                 TextureIndex = 2,
             });
             sw.Stop();
@@ -190,7 +190,7 @@ namespace TerrainTest
             {
                 ContentPath = resources,
                 ModelFileName = "tank.dae",
-                DropShadow = true,
+                Opaque = true,
             });
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
@@ -212,7 +212,7 @@ namespace TerrainTest
             {
                 ContentPath = resources,
                 ModelFileName = "obelisk.dae",
-                DropShadow = true,
+                Opaque = true,
                 Instances = 4,
             });
             sw.Stop();
@@ -249,6 +249,7 @@ namespace TerrainTest
                 Top = smTop,
                 Width = width,
                 Height = height,
+                Channel = SpriteTextureChannelsEnum.Red,
             });
 
             this.debugTex = this.Device.LoadTexture(@"Resources\uvtest.png");
@@ -260,7 +261,6 @@ namespace TerrainTest
             if (this.terrain.grid != null && this.terrain.grid.Nodes.Length > 0)
             {
                 this.terrainGridDrawer = this.AddLineListDrawer(this.terrain.grid.Nodes.Length * 4);
-                this.terrainGridDrawer.UseZBuffer = true;
                 this.terrainGridDrawer.EnableAlphaBlending = true;
                 this.terrainGridDrawer.Visible = false;
 
@@ -306,7 +306,6 @@ namespace TerrainTest
             }
 
             this.terrainLineDrawer = this.AddLineListDrawer(oks.Count + errs.Count);
-            this.terrainLineDrawer.UseZBuffer = true;
             this.terrainLineDrawer.Visible = false;
 
             if (this.oks.Count > 0)
@@ -324,7 +323,6 @@ namespace TerrainTest
 
             this.terrainPointDrawer = this.AddLineListDrawer(1000);
             this.terrainPointDrawer.Visible = false;
-            this.terrainPointDrawer.UseZBuffer = false;
 
             #endregion
 
@@ -338,7 +336,6 @@ namespace TerrainTest
             #region DEBUG Trajectory
 
             this.curveLineDrawer = this.AddLineListDrawer(20000);
-            this.curveLineDrawer.UseZBuffer = false;
             this.curveLineDrawer.Visible = false;
             this.curveLineDrawer.SetLines(this.wAxisColor, GeometryUtil.CreateAxis(Matrix.Identity, 20f));
 
@@ -487,16 +484,6 @@ namespace TerrainTest
                 this.DEBUGComputePath();
             }
 
-#if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
-#endif
-            {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
-            }
-
             if (this.curve != null && this.v != 0f)
             {
                 if (this.v < 10f) this.v += 0.01f;
@@ -577,6 +564,16 @@ namespace TerrainTest
             #endregion
 
             #region Camera
+
+#if DEBUG
+            if (this.Game.Input.RightMouseButtonPressed)
+#endif
+            {
+                this.Camera.RotateMouse(
+                    this.Game.GameTime,
+                    this.Game.Input.MouseXDelta,
+                    this.Game.Input.MouseYDelta);
+            }
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {

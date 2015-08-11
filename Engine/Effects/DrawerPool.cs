@@ -41,6 +41,18 @@ namespace Engine.Effects
         /// Instancing shadows effect
         /// </summary>
         public static EffectInstancingShadow EffectInstancingShadow { get; private set; }
+        /// <summary>
+        /// Geometry Buffer effect
+        /// </summary>
+        public static EffectBasicGBuffer EffectGBuffer { get; private set; }
+        /// <summary>
+        /// Geometry Buffer Instancing effect
+        /// </summary>
+        public static EffectInstancingGBuffer EffectInstancingGBuffer { get; private set; }
+        /// <summary>
+        /// Deferred lightning effect
+        /// </summary>
+        public static EffectDeferred EffectDeferred { get; private set; }
 
         /// <summary>
         /// Initializes pool
@@ -68,6 +80,17 @@ namespace Engine.Effects
             {
                 EffectShadow = new EffectBasicShadow(device, Resources.ShaderShadowFx, true);
                 EffectInstancingShadow = new EffectInstancingShadow(device, Resources.ShaderShadowFx, true);
+            }
+
+            if (Resources.ShaderGBufferFxo != null)
+            {
+                EffectGBuffer = new EffectBasicGBuffer(device, Resources.ShaderGBufferFxo, false);
+                EffectInstancingGBuffer = new EffectInstancingGBuffer(device, Resources.ShaderGBufferFxo, false);
+            }
+            else
+            {
+                EffectGBuffer = new EffectBasicGBuffer(device, Resources.ShaderGBufferFx, true);
+                EffectInstancingGBuffer = new EffectInstancingGBuffer(device, Resources.ShaderGBufferFx, true);
             }
 
             if (Resources.ShaderFontFxo != null)
@@ -106,7 +129,14 @@ namespace Engine.Effects
                 EffectParticles = new EffectParticles(device, Resources.ShaderParticlesFx, true);
             }
 
-            
+            if (Resources.ShaderDeferredFxo != null)
+            {
+                EffectDeferred = new EffectDeferred(device, Resources.ShaderDeferredFxo, false);
+            }
+            else
+            {
+                EffectDeferred = new EffectDeferred(device, Resources.ShaderDeferredFx, true);
+            }
         }
         /// <summary>
         /// Dispose of used resources
@@ -159,6 +189,24 @@ namespace Engine.Effects
             {
                 EffectInstancingShadow.Dispose();
                 EffectInstancingShadow = null;
+            }
+
+            if (EffectGBuffer != null)
+            {
+                EffectGBuffer.Dispose();
+                EffectGBuffer = null;
+            }
+
+            if (EffectInstancingGBuffer != null)
+            {
+                EffectInstancingGBuffer.Dispose();
+                EffectInstancingGBuffer = null;
+            }
+
+            if (EffectDeferred != null)
+            {
+                EffectDeferred.Dispose();
+                EffectDeferred = null;
             }
         }
     }

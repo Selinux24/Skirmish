@@ -1,79 +1,163 @@
-﻿
-struct RenderVertexShaderInput
+#include "IncLights.fx"
+#include "IncVertexFormats.fx"
+
+cbuffer cbPerFrame : register (b0)
 {
-    float4 Position : POSITION0;
-    float3 Normal : NORMAL0;
-    float2 TexCoord : TEXCOORD0;
-	float3 Binormal : BINORMAL0;
-    float3 Tangent : TANGENT0;
+	float4x4 gWorld;
+	float4x4 gWorldInverse;
+	float4x4 gWorldViewProjection;
 };
 
-struct RenderVertexShaderOutput
+cbuffer cbPerDirectional : register (b1)
 {
-    float4 Position : POSITION0;
-    float2 TexCoord : TEXCOORD0;
-    float2 Depth : TEXCOORD1;
-    float3x3 tangentToWorld : TEXCOORD2;
+	DirectionalLight gDirLight;
 };
 
-RenderVertexShaderOutput RenderVertexShaderFunction(RenderVertexShaderInput input)
+cbuffer cbPerPoint : register (b2)
 {
-    RenderVertexShaderOutput output;
+	PointLight gPointLight;
+};
 
-    float4 worldPosition = mul(float4(input.Position.xyz,1), World);
-    float4 viewPosition = mul(worldPosition, View);
-    output.Position = mul(viewPosition, Projection);
+cbuffer cbPerSpot : register (b3)
+{
+	SpotLight gSpotLight;
+};
 
-    output.TexCoord = input.TexCoord;
-    output.Depth.x = output.Position.z;
-    output.Depth.y = output.Position.w;
+Texture2D gColorMap : register(t0);
+Texture2D gNormalMap : register(t1);
+Texture2D gDepthMap : register(t2);
 
-    // calculate tangent space to world space matrix using the world space tangent,
-    // binormal, and normal as basis vectors
-    output.tangentToWorld[0] = mul(input.Tangent, World);
-    output.tangentToWorld[1] = mul(input.Binormal, World);
-    output.tangentToWorld[2] = mul(input.Normal, World);
+SamplerState SampleTypePoint : register(s0);
+
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+PixelInputType VSDeferred(VSVertexPositionTexture input)
+{
+    PixelInputType output = (PixelInputType)0;
+
+	float4 pos = 0.0f;
+	pos.xyz = input.positionLocal;
+	pos.w = 1.0f;
+
+	output.position = mul(pos, gWorldViewProjection);
+    output.tex = input.tex;
     
-	return output;
+    return output;
 }
 
-struct RenderPixelShaderOutput
+float4 PSDirectionalLight(PixelInputType input) : SV_TARGET
 {
-    half4 Color : SV_TARGET0;
-    half4 Normal : SV_TARGET1;
-    half4 Depth : SV_TARGET2;
-};
+	float4 outputColor = 0.0f;
 
-RenderPixelShaderOutput RenderPixelShaderFunction(RenderVertexShaderOutput input)
+    //Color
+    float4 color = gColorMap.Sample(SampleTypePoint, input.tex);
+    //Normal
+    float4 normal = gNormalMap.Sample(SampleTypePoint, input.tex);
+	//Depth
+    float4 depth = gDepthMap.Sample(SampleTypePoint, input.tex);
+
+	if(length(normal) != 0.0f)
+	{
+		//Get the light direction
+		float3 lightDir = -gDirLight.Direction;
+
+		//Calculate the amount of light on this pixel
+		float lightIntensity = saturate(dot(normal.xyz, lightDir));
+
+		//Determine the final amount of diffuse color based on the color of the pixel combined with the light intensity.
+		outputColor = saturate(color * lightIntensity);
+		
+		outputColor.a = 1.0f;
+	}
+	else
+	{
+		outputColor = color;
+	}
+
+	return outputColor;
+}
+float4 PSPointLight(PixelInputType input) : SV_TARGET
 {
-    RenderPixelShaderOutput output;
+	float4 outputColor = 0.0f;
 
-	// read specular attributes
-    float4 specularAttributes = SpecularMap.Sample(diffuseSampler, input.TexCoord);
-    
-	float4 color;
-	color = Texture.Sample(diffuseSampler, input.TexCoord); //output Color
-	color.a = specularAttributes.r; //specular Intensity
-    
-    // read the normal from the normal map
-    float3 normalFromMap = NormalMap.Sample(diffuseSampler, input.TexCoord);
-    normalFromMap = 2.0f * normalFromMap - 1.0f; //tranform to [-1,1]
-    normalFromMap = mul(normalFromMap, input.tangentToWorld); //transform into world space
-    normalFromMap = normalize(normalFromMap); //normalize the result
-   
-    output.Color = color;
-    output.Normal.rgb = 0.5f * (normalFromMap + 1.0f); //output the normal, in [0,1] space
-    output.Normal.a = specularAttributes.a; //specular Power
-    output.Depth = input.Depth.x / input.Depth.y;
-    
-	return output;
+    //Color
+    float4 color = gColorMap.Sample(SampleTypePoint, input.tex);
+    //Normal
+    float4 normal = gNormalMap.Sample(SampleTypePoint, input.tex);
+	//Depth
+    float4 depth = gDepthMap.Sample(SampleTypePoint, input.tex);
+
+	if(length(normal) != 0.0f)
+	{
+		//Obtain screen position
+		float4 position;
+		position.xy = input.position.xy / input.position.w;
+		position.z = depth.r;
+		position.w = 1.0f;
+	
+		outputColor = color;
+	}
+	else
+	{
+		outputColor = color;
+	}
+
+	return outputColor;
+}
+float4 PSSpotLight(PixelInputType input) : SV_TARGET
+{
+	float4 outputColor = 0.0f;
+
+    //Color
+    float4 color = gColorMap.Sample(SampleTypePoint, input.tex);
+    //Normal
+    float4 normal = gNormalMap.Sample(SampleTypePoint, input.tex);
+	//Depth
+    float4 depth = gDepthMap.Sample(SampleTypePoint, input.tex);
+
+	if(length(normal) != 0.0f)
+	{
+		//Obtain screen position
+		float4 position;
+		position.xy = input.position.xy / input.position.w;
+		position.z = depth.r;
+		position.w = 1.0f;
+	
+		outputColor = color;
+	}
+	else
+	{
+		outputColor = color;
+	}
+
+	return outputColor;
 }
 
-technique11 Render
+technique11 DeferredDirectionalLight
 {
     pass P0
     {
-        VertexShader = compile vs_5_0 RenderVertexShaderFunction();
-        PixelShader = compile ps_5_0 RenderPixelShaderFunction();
+        VertexShader = compile vs_5_0 VSDeferred();
+        PixelShader = compile ps_5_0 PSDirectionalLight();
+    }
+}
+technique11 DeferredPointLight
+{
+    pass P0
+    {
+        VertexShader = compile vs_5_0 VSDeferred();
+        PixelShader = compile ps_5_0 PSPointLight();
+    }
+}
+technique11 DeferredSpotLight
+{
+    pass P0
+    {
+        VertexShader = compile vs_5_0 VSDeferred();
+        PixelShader = compile ps_5_0 PSSpotLight();
     }
 }

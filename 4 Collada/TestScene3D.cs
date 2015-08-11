@@ -77,13 +77,13 @@ namespace Collada
                         MinSize = Vector2.One * 2f,
                         MaxSize = Vector2.One * 4f,
                         Seed = 1024,
-                        DropShadow = true,
+                        Opaque = true,
                     },
                     new TerrainDescription.VegetationDescription()
                     {
                         VegetarionTextures = new[] { "grass2.png" },
                         Saturation = 10f,
-                        DropShadow = false,
+                        Opaque = false,
                         Radius = 50f,
                         MinSize = Vector2.One * 0.20f,
                         MaxSize = Vector2.One * 0.25f,
@@ -91,7 +91,7 @@ namespace Collada
                 },
                 UsePathFinding = true,
                 PathNodeSize = 20f,
-                DropShadow = true,
+                Opaque = true,
             };
 
             this.ground = this.AddTerrain(terrainDescription, Matrix.Scaling(20, 20, 20));
@@ -100,7 +100,7 @@ namespace Collada
                 ContentPath = "Resources",
                 ModelFileName = "Helicopter.dae",
                 Instances = 15,
-                DropShadow = true,
+                Opaque = true,
             });
             this.lampsModel = this.AddInstancingModel(new ModelInstancedDescription()
             {
@@ -125,7 +125,6 @@ namespace Collada
 
             this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));
             this.terrainGridDrawer.Visible = false;
-            this.terrainGridDrawer.UseZBuffer = false;
             this.terrainGridDrawer.EnableAlphaBlending = true;
 
             this.InitializeCamera();

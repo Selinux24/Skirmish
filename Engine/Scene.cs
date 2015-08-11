@@ -31,9 +31,17 @@ namespace Engine
         /// <remarks>When mouse was pressed, the control beneath him was stored here. When mouse is released, if it is above this control, an click event occurs</remarks>
         private IControl capturedControl = null;
         /// <summary>
+        /// Deferred renderer
+        /// </summary>
+        private DeferredRenderer deferredRenderer = null;
+        /// <summary>
         /// Shadow mapper
         /// </summary>
         private ShadowMap shadowMap = null;
+        /// <summary>
+        /// Geometry buffer
+        /// </summary>
+        private GBuffer gBuffer = null;
 
         /// <summary>
         /// Game class
@@ -60,13 +68,17 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Gets or sets whether the scene was handling control captures
+        /// </summary>
+        protected bool CapturedControl { get; private set; }
+        /// <summary>
         /// Draw context
         /// </summary>
         protected Context DrawContext = null;
         /// <summary>
-        /// Gets or sets whether the scene was handling control captures
+        /// Context for shadow map drawing
         /// </summary>
-        protected bool CapturedControl { get; private set; }
+        protected Context DrawShadowsContext = null;
         /// <summary>
         /// Shadow map
         /// </summary>
@@ -83,9 +95,20 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Context for shadow map drawing
+        /// Geometry Buffer
         /// </summary>
-        protected Context DrawShadowsContext = null;
+        protected GBuffer GBuffer
+        {
+            get
+            {
+                if (this.gBuffer == null)
+                {
+                    this.gBuffer = new GBuffer(this.Game);
+                }
+
+                return this.gBuffer;
+            }
+        }
 
         /// <summary>
         /// Indicates whether the current scene is active
@@ -116,7 +139,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        public Scene(Game game)
+        public Scene(Game game, SceneModesEnum sceneMode = SceneModesEnum.ForwardLigthning)
         {
             this.Game = game;
 
@@ -138,13 +161,15 @@ namespace Engine
 
             this.DrawContext = new Context()
             {
-                DrawerMode = DrawerModesEnum.Default,
+                DrawerMode = sceneMode == SceneModesEnum.ForwardLigthning ? DrawerModesEnum.Forward : DrawerModesEnum.Deferred,
             };
 
             this.DrawShadowsContext = new Context()
             {
                 DrawerMode = DrawerModesEnum.ShadowMap,
             };
+
+            this.deferredRenderer = new DeferredRenderer(game);
         }
 
         /// <summary>
@@ -220,31 +245,138 @@ namespace Engine
             List<Drawable> visibleComponents = this.components.FindAll(c => c.Visible);
             if (visibleComponents.Count > 0)
             {
+                //Set lights
                 this.DrawContext.Lights = this.Lights;
+
+                //Clear data
+                this.DrawContext.GBuffer = null;
                 this.DrawContext.ShadowMap = null;
                 this.DrawContext.ShadowTransform = Matrix.Identity;
 
+                #region Shadow mapping
+
                 if (this.Lights.EnableShadows)
                 {
-                    this.ShadowMap.Update(this.Lights.DirectionalLight1.Direction, this.SceneVolume);
-
+                    //Clear context data
                     this.DrawShadowsContext.ShadowMap = null;
                     this.DrawShadowsContext.ShadowTransform = Matrix.Identity;
 
-                    //Draw components if drop shadow
-                    List<Drawable> shadowComponents = visibleComponents.FindAll(c => c.DropShadow);
+                    //Update shadow transform using first ligth direction
+                    this.ShadowMap.Update(this.Lights.DirectionalLight1.Direction, this.SceneVolume);
+
+                    //Draw components if drop shadow (opaque)
+                    List<Drawable> shadowComponents = visibleComponents.FindAll(c => c.Opaque);
                     if (shadowComponents.Count > 0)
                     {
-                        this.Game.Graphics.SetRenderTarget(this.ShadowMap.Viewport, this.ShadowMap.DepthMap, null, true, Color.Silver);
-                        this.DrawComponents(gameTime, this.DrawShadowsContext, shadowComponents.ToArray());
-                        this.Game.Graphics.SetDefaultRenderTarget(false);
+                        //Set shadow map depth map without render target
+                        this.Game.Graphics.SetRenderTarget(
+                            this.ShadowMap.Viewport, 
+                            this.ShadowMap.DepthMap, 
+                            null, 
+                            true, 
+                            Color.Silver,
+                            DepthStencilClearFlags.Depth);
 
+                        //Use z-buffer by default for opaque components
+                        this.Game.Graphics.EnableZBuffer();
+
+                        //Draw scene using depth map
+                        this.DrawComponents(gameTime, this.DrawShadowsContext, shadowComponents);
+
+                        //Set shadow map and transform to drawing context
                         this.DrawContext.ShadowMap = this.ShadowMap.ShadowMapTexture;
                         this.DrawContext.ShadowTransform = this.shadowMap.Transform;
                     }
                 }
 
-                this.DrawComponents(gameTime, this.DrawContext, visibleComponents.ToArray());
+                #endregion
+
+                #region Render
+
+                if (DrawContext.DrawerMode == DrawerModesEnum.Forward)
+                {
+                    #region Forward rendering
+
+                    //Set default render target and depth buffer, and clear it
+                    this.Game.Graphics.SetDefaultRenderTarget(true);
+
+                    List<Drawable> solidComponents = visibleComponents.FindAll(c => c.Opaque);
+                    if (solidComponents.Count > 0)
+                    {
+                        //Use z-buffer by default for opaque components
+                        this.Game.Graphics.EnableZBuffer();
+
+                        //Draw solid
+                        this.DrawComponents(gameTime, this.DrawContext, solidComponents);
+                    }
+
+                    List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.Opaque);
+                    if (otherComponents.Count > 0)
+                    {
+                        //Disable z-buffer by default for non-opaque components
+                        this.Game.Graphics.DisableZBuffer();
+
+                        //Draw other
+                        this.DrawComponents(gameTime, this.DrawContext, otherComponents);
+                    }
+
+                    #endregion
+                }
+                else if (DrawContext.DrawerMode == DrawerModesEnum.Deferred)
+                {
+                    #region Deferred rendering
+
+                    //Render to G-Buffer only opaque objects
+                    List<Drawable> solidComponents = visibleComponents.FindAll(c => c.Opaque);
+                    if (solidComponents.Count > 0)
+                    {
+                        //Set g-buffer render targets
+                        this.Game.Graphics.SetRenderTargets(
+                            this.GBuffer.Viewport, 
+                            this.GBuffer.DepthMap, 
+                            this.GBuffer.RenderTargets, 
+                            true, Color.Black, DepthStencilClearFlags.Depth);
+
+                        //Enable z-buffer by default for opaque components
+                        this.Game.Graphics.EnableZBuffer();
+
+                        //Draw scene on g-buffer render targets
+                        this.DrawComponents(gameTime, this.DrawContext, solidComponents);
+
+                        //Assign result of render in drawing context
+                        this.DrawContext.GBuffer = this.GBuffer.Textures;
+                    }
+
+                    //Restore backbuffer as render target and clear it
+                    this.Game.Graphics.SetDefaultRenderTarget(true);
+
+                    //Disable z-buffer for deferred rendering
+                    this.Game.Graphics.DisableZBuffer();
+
+                    //Map scene on screen using g-buffer
+                    this.deferredRenderer.Draw(this.DrawContext);
+
+                    //Render to screen the rest of objects
+                    List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.Opaque);
+                    if (otherComponents.Count > 0)
+                    {
+                        //Disable z-buffer by default for non-opaque components
+                        this.Game.Graphics.DisableZBuffer();
+
+                        //Set forward mode
+                        this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
+
+                        //Draw scene
+                        this.DrawComponents(gameTime, this.DrawContext, otherComponents);
+
+                        //Set deferred mode
+                        this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
+                    }
+
+                    #endregion
+                }
+
+                #endregion
             }
         }
         /// <summary>
@@ -253,11 +385,11 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Drawing context</param>
         /// <param name="components">Components</param>
-        protected virtual void DrawComponents(GameTime gameTime, Context context, Drawable[] components)
+        protected virtual void DrawComponents(GameTime gameTime, Context context, IList<Drawable> components)
         {
             if (this.PerformFrustumCulling)
             {
-                for (int i = 0; i < components.Length; i++)
+                for (int i = 0; i < components.Count; i++)
                 {
                     components[i].FrustumCulling(this.Camera.Frustum);
 
@@ -272,7 +404,7 @@ namespace Engine
             }
             else
             {
-                for (int i = 0; i < components.Length; i++)
+                for (int i = 0; i < components.Count; i++)
                 {
                     this.Game.Graphics.SetDefaultRasterizer();
                     this.Game.Graphics.SetBlendAlphaToCoverage();
@@ -292,6 +424,12 @@ namespace Engine
                 this.Camera = null;
             }
 
+            if (this.gBuffer != null)
+            {
+                this.gBuffer.Dispose();
+                this.gBuffer = null;
+            }
+
             if (this.shadowMap != null)
             {
                 this.shadowMap.Dispose();
@@ -305,6 +443,12 @@ namespace Engine
 
             this.components.Clear();
             this.components = null;
+
+            if (this.deferredRenderer != null)
+            {
+                this.deferredRenderer.Dispose();
+                this.deferredRenderer = null;
+            }
         }
 
         /// <summary>
@@ -314,7 +458,19 @@ namespace Engine
         /// <param name="e">Event arguments</param>
         protected virtual void Resized(object sender, EventArgs e)
         {
+            if (this.gBuffer != null)
+            {
+                this.gBuffer.Resize();
+            }
 
+            for (int i = 0; i < this.components.Count; i++)
+            {
+                var fitted = this.components[i] as IScreenFitted;
+                if (fitted != null)
+                {
+                    fitted.Resize();
+                }
+            }
         }
         /// <summary>
         /// Adds new model
@@ -343,7 +499,7 @@ namespace Engine
 
             Model newModel = new Model(this.Game, geo);
 
-            newModel.DropShadow = description.DropShadow;
+            newModel.Opaque = description.Opaque;
             newModel.TextureIndex = description.TextureIndex;
 
             this.AddComponent(newModel, order);
@@ -393,7 +549,7 @@ namespace Engine
 
             ModelInstanced newModel = new ModelInstanced(this.Game, geo, description.Instances);
 
-            newModel.DropShadow = description.DropShadow;
+            newModel.Opaque = description.Opaque;
 
             this.AddComponent(newModel, order);
 

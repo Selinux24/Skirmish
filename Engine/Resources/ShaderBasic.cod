@@ -160,7 +160,7 @@ Texture2D gShadowMap;
 fxgroup
 {
     //
-    // 23 technique(s)
+    // 24 technique(s)
     //
     technique11 PositionColor
     {
@@ -802,18 +802,18 @@ fxgroup
                 //   o1.x <- <VSPositionColorSkinned return value>.positionWorld.x; o1.y <- <VSPositionColorSkinned return value>.positionWorld.y; o1.z <- <VSPositionColorSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionColorSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionColorSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionColorSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionColorSkinned return value>.positionHomogeneous.w
                 //
-                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 357
+                #line 353
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 363
+                #line 359
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -1120,18 +1120,18 @@ fxgroup
                 //   o1.x <- <VSPositionColorSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionColorSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionColorSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionColorSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionColorSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionColorSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionColorSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 357
+                #line 353
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 363
+                #line 359
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -2556,18 +2556,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColorSkinned return value>.positionWorld.x; o1.y <- <VSPositionNormalColorSkinned return value>.positionWorld.y; o1.z <- <VSPositionNormalColorSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.w
                 //
-                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 379
+                #line 375
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 386
+                #line 382
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -3178,18 +3178,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColorSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionNormalColorSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionNormalColorSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 379
+                #line 375
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 386
+                #line 382
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- normalLocal.x; r1.y <- normalLocal.y; r1.z <- normalLocal.z
@@ -3946,308 +3946,6 @@ fxgroup
 
     }
 
-    technique11 PositionTextureI
-    {
-        pass P0
-        {
-            VertexShader = asm {
-                //
-                // Generated by Microsoft (R) HLSL Shader Compiler 6.3.9600.16384
-                //
-                //
-                // Buffer Definitions: 
-                //
-                // cbuffer cbPerFrame
-                // {
-                //
-                //   float4x4 gWorld;                   // Offset:    0 Size:    64
-                //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
-                //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
-                //   
-                //   struct DirectionalLight
-                //   {
-                //       
-                //       float4 Ambient;                // Offset:  256
-                //       float4 Diffuse;                // Offset:  272
-                //       float4 Specular;               // Offset:  288
-                //       float3 Direction;              // Offset:  304
-                //       float Padding;                 // Offset:  316
-                //
-                //   } gDirLights[3];                   // Offset:  256 Size:   192 [unused]
-                //   
-                //   struct PointLight
-                //   {
-                //       
-                //       float4 Ambient;                // Offset:  448
-                //       float4 Diffuse;                // Offset:  464
-                //       float4 Specular;               // Offset:  480
-                //       float3 Position;               // Offset:  496
-                //       float Range;                   // Offset:  508
-                //       float3 Attenuation;            // Offset:  512
-                //       float Padding;                 // Offset:  524
-                //
-                //   } gPointLight;                     // Offset:  448 Size:    80 [unused]
-                //   
-                //   struct SpotLight
-                //   {
-                //       
-                //       float4 Ambient;                // Offset:  528
-                //       float4 Diffuse;                // Offset:  544
-                //       float4 Specular;               // Offset:  560
-                //       float3 Position;               // Offset:  576
-                //       float Range;                   // Offset:  588
-                //       float3 Direction;              // Offset:  592
-                //       float Spot;                    // Offset:  604
-                //       float3 Attenuation;            // Offset:  608
-                //       float Padding;                 // Offset:  620
-                //
-                //   } gSpotLight;                      // Offset:  528 Size:    96 [unused]
-                //   float3 gEyePositionWorld;          // Offset:  624 Size:    12 [unused]
-                //   float gFogStart;                   // Offset:  636 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  640 Size:     4 [unused]
-                //   float4 gFogColor;                  // Offset:  656 Size:    16 [unused]
-                //   float gEnableShadows;              // Offset:  672 Size:     4 [unused]
-                //
-                // }
-                //
-                //
-                // Resource Bindings:
-                //
-                // Name                                 Type  Format         Dim Slot Elements
-                // ------------------------------ ---------- ------- ----------- ---- --------
-                // cbPerFrame                        cbuffer      NA          NA    0        1
-                //
-                //
-                //
-                // Input signature:
-                //
-                // Name                 Index   Mask Register SysValue  Format   Used
-                // -------------------- ----- ------ -------- -------- ------- ------
-                // POSITION                 0   xyz         0     NONE   float   xyz 
-                // TEXCOORD                 0   xy          1     NONE   float   xy  
-                // localTransform           0   xyzw        2     NONE   float   xyzw
-                // localTransform           1   xyzw        3     NONE   float   xyzw
-                // localTransform           2   xyzw        4     NONE   float   xyzw
-                // localTransform           3   xyzw        5     NONE   float   xyzw
-                // textureIndex             0   x           6     NONE   float   x   
-                // SV_InstanceID            0   x           7   INSTID    uint       
-                //
-                //
-                // Output signature:
-                //
-                // Name                 Index   Mask Register SysValue  Format   Used
-                // -------------------- ----- ------ -------- -------- ------- ------
-                // SV_POSITION              0   xyzw        0      POS   float   xyzw
-                // POSITION                 0   xyz         1     NONE   float   xyz 
-                // TEXCOORD                 0   xy          2     NONE   float   xy  
-                // textureIndex             0     z         2     NONE   float     z 
-                //
-                vs_5_0
-                dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[12], immediateIndexed
-                dcl_input v0.xyz
-                dcl_input v1.xy
-                dcl_input v2.xyzw
-                dcl_input v3.xyzw
-                dcl_input v4.xyzw
-                dcl_input v5.xyzw
-                dcl_input v6.x
-                dcl_output_siv o0.xyzw, position
-                dcl_output o1.xyz
-                dcl_output o2.xy
-                dcl_output o2.z
-                dcl_temps 1
-                //
-                // Initial variable locations:
-                //   v0.x <- input.positionLocal.x; v0.y <- input.positionLocal.y; v0.z <- input.positionLocal.z; 
-                //   v1.x <- input.tex.x; v1.y <- input.tex.y; 
-                //   v2.x <- input.localTransform._m00; v2.y <- input.localTransform._m01; v2.z <- input.localTransform._m02; v2.w <- input.localTransform._m03; 
-                //   v3.x <- input.localTransform._m10; v3.y <- input.localTransform._m11; v3.z <- input.localTransform._m12; v3.w <- input.localTransform._m13; 
-                //   v4.x <- input.localTransform._m20; v4.y <- input.localTransform._m21; v4.z <- input.localTransform._m22; v4.w <- input.localTransform._m23; 
-                //   v5.x <- input.localTransform._m30; v5.y <- input.localTransform._m31; v5.z <- input.localTransform._m32; v5.w <- input.localTransform._m33; 
-                //   v6.x <- input.textureIndex; 
-                //   v7.x <- input.instanceId; 
-                //   o2.x <- <VSPositionTextureI return value>.tex.x; o2.y <- <VSPositionTextureI return value>.tex.y; o2.z <- <VSPositionTextureI return value>.textureIndex; 
-                //   o1.x <- <VSPositionTextureI return value>.positionWorld.x; o1.y <- <VSPositionTextureI return value>.positionWorld.y; o1.z <- <VSPositionTextureI return value>.positionWorld.z; 
-                //   o0.x <- <VSPositionTextureI return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureI return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureI return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureI return value>.positionHomogeneous.w
-                //
-                #line 252 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
-                mul r0.xyzw, v0.yyyy, v3.xyzw
-                mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
-                mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
-                add r0.xyzw, r0.xyzw, v5.xyzw  // r0.x <- instancePosition.x; r0.y <- instancePosition.y; r0.z <- instancePosition.z; r0.w <- instancePosition.w
-                dp4 o0.x, r0.xyzw, cb0[8].xyzw
-                dp4 o0.y, r0.xyzw, cb0[9].xyzw
-                dp4 o0.z, r0.xyzw, cb0[10].xyzw
-                dp4 o0.w, r0.xyzw, cb0[11].xyzw
-                dp4 o1.x, r0.xyzw, cb0[0].xyzw
-                dp4 o1.y, r0.xyzw, cb0[1].xyzw
-                dp4 o1.z, r0.xyzw, cb0[2].xyzw
-                
-                #line 259
-                mov o2.xy, v1.xyxx
-                mov o2.z, v6.x
-                ret 
-                // Approximately 14 instruction slots used
-                            
-            };
-            GeometryShader = NULL;
-            PixelShader = asm {
-                //
-                // Generated by Microsoft (R) HLSL Shader Compiler 6.3.9600.16384
-                //
-                //
-                // Buffer Definitions: 
-                //
-                // cbuffer cbPerFrame
-                // {
-                //
-                //   float4x4 gWorld;                   // Offset:    0 Size:    64 [unused]
-                //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
-                //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64 [unused]
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
-                //   
-                //   struct DirectionalLight
-                //   {
-                //       
-                //       float4 Ambient;                // Offset:  256
-                //       float4 Diffuse;                // Offset:  272
-                //       float4 Specular;               // Offset:  288
-                //       float3 Direction;              // Offset:  304
-                //       float Padding;                 // Offset:  316
-                //
-                //   } gDirLights[3];                   // Offset:  256 Size:   192 [unused]
-                //   
-                //   struct PointLight
-                //   {
-                //       
-                //       float4 Ambient;                // Offset:  448
-                //       float4 Diffuse;                // Offset:  464
-                //       float4 Specular;               // Offset:  480
-                //       float3 Position;               // Offset:  496
-                //       float Range;                   // Offset:  508
-                //       float3 Attenuation;            // Offset:  512
-                //       float Padding;                 // Offset:  524
-                //
-                //   } gPointLight;                     // Offset:  448 Size:    80 [unused]
-                //   
-                //   struct SpotLight
-                //   {
-                //       
-                //       float4 Ambient;                // Offset:  528
-                //       float4 Diffuse;                // Offset:  544
-                //       float4 Specular;               // Offset:  560
-                //       float3 Position;               // Offset:  576
-                //       float Range;                   // Offset:  588
-                //       float3 Direction;              // Offset:  592
-                //       float Spot;                    // Offset:  604
-                //       float3 Attenuation;            // Offset:  608
-                //       float Padding;                 // Offset:  620
-                //
-                //   } gSpotLight;                      // Offset:  528 Size:    96 [unused]
-                //   float3 gEyePositionWorld;          // Offset:  624 Size:    12
-                //   float gFogStart;                   // Offset:  636 Size:     4
-                //   float gFogRange;                   // Offset:  640 Size:     4
-                //   float4 gFogColor;                  // Offset:  656 Size:    16
-                //   float gEnableShadows;              // Offset:  672 Size:     4 [unused]
-                //
-                // }
-                //
-                // cbuffer cbPerObject
-                // {
-                //
-                //   struct Material
-                //   {
-                //       
-                //       float4 Ambient;                // Offset:    0
-                //       float4 Diffuse;                // Offset:   16
-                //       float4 Specular;               // Offset:   32
-                //       float4 Reflect;                // Offset:   48
-                //       float Padding;                 // Offset:   64
-                //
-                //   } gMaterial;                       // Offset:    0 Size:    68
-                //
-                // }
-                //
-                //
-                // Resource Bindings:
-                //
-                // Name                                 Type  Format         Dim Slot Elements
-                // ------------------------------ ---------- ------- ----------- ---- --------
-                // SamplerAnisotropic                sampler      NA          NA    0        1
-                // gTextureArray                     texture  float4     2darray    0        1
-                // cbPerFrame                        cbuffer      NA          NA    0        1
-                // cbPerObject                       cbuffer      NA          NA    1        1
-                //
-                //
-                //
-                // Input signature:
-                //
-                // Name                 Index   Mask Register SysValue  Format   Used
-                // -------------------- ----- ------ -------- -------- ------- ------
-                // SV_POSITION              0   xyzw        0      POS   float       
-                // POSITION                 0   xyz         1     NONE   float   xyz 
-                // TEXCOORD                 0   xy          2     NONE   float   xy  
-                // textureIndex             0     z         2     NONE   float     z 
-                //
-                //
-                // Output signature:
-                //
-                // Name                 Index   Mask Register SysValue  Format   Used
-                // -------------------- ----- ------ -------- -------- ------- ------
-                // SV_TARGET                0   xyzw        0   TARGET   float   xyzw
-                //
-                ps_5_0
-                dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[42], immediateIndexed
-                dcl_constantbuffer cb1[2], immediateIndexed
-                dcl_sampler s0, mode_default
-                dcl_resource_texture2darray (float,float,float,float) t0
-                dcl_input_ps linear v1.xyz
-                dcl_input_ps linear v2.xy
-                dcl_input_ps linear v2.z
-                dcl_output o0.xyzw
-                dcl_temps 3
-                //
-                // Initial variable locations:
-                //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
-                //   v1.x <- input.positionWorld.x; v1.y <- input.positionWorld.y; v1.z <- input.positionWorld.z; 
-                //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
-                //   o0.x <- <PSPositionTexture return value>.x; o0.y <- <PSPositionTexture return value>.y; o0.z <- <PSPositionTexture return value>.z; o0.w <- <PSPositionTexture return value>.w
-                //
-                #line 310 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
-                add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
-                dp3 r0.x, r0.xyzx, r0.xyzx
-                sqrt r0.x, r0.x  // r0.x <- distToEye
-                
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                add r0.x, r0.x, -cb0[39].w
-                div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
-                
-                #line 306 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
-                sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
-                
-                #line 400 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                add r2.xyzw, -r1.xyzw, cb0[41].xyzw
-                mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z; r0.w <- <ComputeFog return value>.w
-                
-                #line 308 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
-                lt r2.x, l(0.000000), cb0[40].x
-                
-                #line 314
-                movc r0.xyzw, r2.xxxx, r0.xyzw, r1.xyzw  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z; r0.w <- litColor.w
-                mul o0.w, r0.w, cb1[1].w
-                mov o0.xyz, r0.xyzx
-                ret 
-                // Approximately 13 instruction slots used
-                            
-            };
-            RasterizerState = RasterizerSolid;
-        }
-
-    }
-
     technique11 PositionTextureRED
     {
         pass P0
@@ -4839,6 +4537,583 @@ fxgroup
 
     }
 
+    technique11 PositionTextureNOALPHA
+    {
+        pass P0
+        {
+            VertexShader = asm {
+                //
+                // Generated by Microsoft (R) HLSL Shader Compiler 6.3.9600.16384
+                //
+                //
+                // Buffer Definitions: 
+                //
+                // cbuffer cbPerFrame
+                // {
+                //
+                //   float4x4 gWorld;                   // Offset:    0 Size:    64
+                //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
+                //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
+                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
+                //   
+                //   struct DirectionalLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  256
+                //       float4 Diffuse;                // Offset:  272
+                //       float4 Specular;               // Offset:  288
+                //       float3 Direction;              // Offset:  304
+                //       float Padding;                 // Offset:  316
+                //
+                //   } gDirLights[3];                   // Offset:  256 Size:   192 [unused]
+                //   
+                //   struct PointLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  448
+                //       float4 Diffuse;                // Offset:  464
+                //       float4 Specular;               // Offset:  480
+                //       float3 Position;               // Offset:  496
+                //       float Range;                   // Offset:  508
+                //       float3 Attenuation;            // Offset:  512
+                //       float Padding;                 // Offset:  524
+                //
+                //   } gPointLight;                     // Offset:  448 Size:    80 [unused]
+                //   
+                //   struct SpotLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  528
+                //       float4 Diffuse;                // Offset:  544
+                //       float4 Specular;               // Offset:  560
+                //       float3 Position;               // Offset:  576
+                //       float Range;                   // Offset:  588
+                //       float3 Direction;              // Offset:  592
+                //       float Spot;                    // Offset:  604
+                //       float3 Attenuation;            // Offset:  608
+                //       float Padding;                 // Offset:  620
+                //
+                //   } gSpotLight;                      // Offset:  528 Size:    96 [unused]
+                //   float3 gEyePositionWorld;          // Offset:  624 Size:    12 [unused]
+                //   float gFogStart;                   // Offset:  636 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  640 Size:     4 [unused]
+                //   float4 gFogColor;                  // Offset:  656 Size:    16 [unused]
+                //   float gEnableShadows;              // Offset:  672 Size:     4 [unused]
+                //
+                // }
+                //
+                // cbuffer cbPerInstance
+                // {
+                //
+                //   float gTextureIndex;               // Offset:    0 Size:     4
+                //
+                // }
+                //
+                //
+                // Resource Bindings:
+                //
+                // Name                                 Type  Format         Dim Slot Elements
+                // ------------------------------ ---------- ------- ----------- ---- --------
+                // cbPerFrame                        cbuffer      NA          NA    0        1
+                // cbPerInstance                     cbuffer      NA          NA    3        1
+                //
+                //
+                //
+                // Input signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // POSITION                 0   xyz         0     NONE   float   xyz 
+                // TEXCOORD                 0   xy          1     NONE   float   xy  
+                //
+                //
+                // Output signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // SV_POSITION              0   xyzw        0      POS   float   xyzw
+                // POSITION                 0   xyz         1     NONE   float   xyz 
+                // TEXCOORD                 0   xy          2     NONE   float   xy  
+                // textureIndex             0     z         2     NONE   float     z 
+                //
+                vs_5_0
+                dcl_globalFlags refactoringAllowed
+                dcl_constantbuffer cb0[12], immediateIndexed
+                dcl_constantbuffer cb3[1], immediateIndexed
+                dcl_input v0.xyz
+                dcl_input v1.xy
+                dcl_output_siv o0.xyzw, position
+                dcl_output o1.xyz
+                dcl_output o2.xy
+                dcl_output o2.z
+                dcl_temps 1
+                //
+                // Initial variable locations:
+                //   v0.x <- input.positionLocal.x; v0.y <- input.positionLocal.y; v0.z <- input.positionLocal.z; 
+                //   v1.x <- input.tex.x; v1.y <- input.tex.y; 
+                //   o2.x <- <VSPositionTexture return value>.tex.x; o2.y <- <VSPositionTexture return value>.tex.y; o2.z <- <VSPositionTexture return value>.textureIndex; 
+                //   o1.x <- <VSPositionTexture return value>.positionWorld.x; o1.y <- <VSPositionTexture return value>.positionWorld.y; o1.z <- <VSPositionTexture return value>.positionWorld.z; 
+                //   o0.x <- <VSPositionTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionTexture return value>.positionHomogeneous.w
+                //
+                #line 241 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                mov r0.xyz, v0.xyzx
+                mov r0.w, l(1.000000)
+                dp4 o0.x, r0.xyzw, cb0[8].xyzw
+                dp4 o0.y, r0.xyzw, cb0[9].xyzw
+                dp4 o0.z, r0.xyzw, cb0[10].xyzw
+                dp4 o0.w, r0.xyzw, cb0[11].xyzw
+                dp4 o1.x, r0.xyzw, cb0[0].xyzw
+                dp4 o1.y, r0.xyzw, cb0[1].xyzw
+                dp4 o1.z, r0.xyzw, cb0[2].xyzw
+                
+                #line 246
+                mov o2.xy, v1.xyxx
+                mov o2.z, cb3[0].x
+                ret 
+                // Approximately 12 instruction slots used
+                            
+            };
+            GeometryShader = NULL;
+            PixelShader = asm {
+                //
+                // Generated by Microsoft (R) HLSL Shader Compiler 6.3.9600.16384
+                //
+                //
+                // Buffer Definitions: 
+                //
+                // cbuffer cbPerFrame
+                // {
+                //
+                //   float4x4 gWorld;                   // Offset:    0 Size:    64 [unused]
+                //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
+                //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64 [unused]
+                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
+                //   
+                //   struct DirectionalLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  256
+                //       float4 Diffuse;                // Offset:  272
+                //       float4 Specular;               // Offset:  288
+                //       float3 Direction;              // Offset:  304
+                //       float Padding;                 // Offset:  316
+                //
+                //   } gDirLights[3];                   // Offset:  256 Size:   192 [unused]
+                //   
+                //   struct PointLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  448
+                //       float4 Diffuse;                // Offset:  464
+                //       float4 Specular;               // Offset:  480
+                //       float3 Position;               // Offset:  496
+                //       float Range;                   // Offset:  508
+                //       float3 Attenuation;            // Offset:  512
+                //       float Padding;                 // Offset:  524
+                //
+                //   } gPointLight;                     // Offset:  448 Size:    80 [unused]
+                //   
+                //   struct SpotLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  528
+                //       float4 Diffuse;                // Offset:  544
+                //       float4 Specular;               // Offset:  560
+                //       float3 Position;               // Offset:  576
+                //       float Range;                   // Offset:  588
+                //       float3 Direction;              // Offset:  592
+                //       float Spot;                    // Offset:  604
+                //       float3 Attenuation;            // Offset:  608
+                //       float Padding;                 // Offset:  620
+                //
+                //   } gSpotLight;                      // Offset:  528 Size:    96 [unused]
+                //   float3 gEyePositionWorld;          // Offset:  624 Size:    12
+                //   float gFogStart;                   // Offset:  636 Size:     4
+                //   float gFogRange;                   // Offset:  640 Size:     4
+                //   float4 gFogColor;                  // Offset:  656 Size:    16
+                //   float gEnableShadows;              // Offset:  672 Size:     4 [unused]
+                //
+                // }
+                //
+                //
+                // Resource Bindings:
+                //
+                // Name                                 Type  Format         Dim Slot Elements
+                // ------------------------------ ---------- ------- ----------- ---- --------
+                // SamplerAnisotropic                sampler      NA          NA    0        1
+                // gTextureArray                     texture  float4     2darray    0        1
+                // cbPerFrame                        cbuffer      NA          NA    0        1
+                //
+                //
+                //
+                // Input signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // SV_POSITION              0   xyzw        0      POS   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
+                // TEXCOORD                 0   xy          2     NONE   float   xy  
+                // textureIndex             0     z         2     NONE   float     z 
+                //
+                //
+                // Output signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // SV_TARGET                0   xyzw        0   TARGET   float   xyzw
+                //
+                ps_5_0
+                dcl_globalFlags refactoringAllowed
+                dcl_constantbuffer cb0[42], immediateIndexed
+                dcl_sampler s0, mode_default
+                dcl_resource_texture2darray (float,float,float,float) t0
+                dcl_input_ps linear v1.xyz
+                dcl_input_ps linear v2.xy
+                dcl_input_ps linear v2.z
+                dcl_output o0.xyzw
+                dcl_temps 2
+                //
+                // Initial variable locations:
+                //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
+                //   v1.x <- input.positionWorld.x; v1.y <- input.positionWorld.y; v1.z <- input.positionWorld.z; 
+                //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
+                //   o0.x <- <PSPositionTextureNOALPHA return value>.x; o0.y <- <PSPositionTextureNOALPHA return value>.y; o0.z <- <PSPositionTextureNOALPHA return value>.z; o0.w <- <PSPositionTextureNOALPHA return value>.w
+                //
+                #line 347 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
+                dp3 r0.x, r0.xyzx, r0.xyzx
+                sqrt r0.x, r0.x  // r0.x <- distToEye
+                
+                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                add r0.x, r0.x, -cb0[39].w
+                div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
+                
+                #line 343 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                sample_indexable(texture2darray)(float,float,float,float) r0.yzw, v2.xyzx, t0.wxyz, s0  // r0.y <- litColor.x; r0.z <- litColor.y; r0.w <- litColor.z
+                
+                #line 400 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                add r1.xyz, -r0.yzwy, cb0[41].xyzx
+                mad r1.xyz, r0.xxxx, r1.xyzx, r0.yzwy  // r1.x <- <ComputeFog return value>.x; r1.y <- <ComputeFog return value>.y; r1.z <- <ComputeFog return value>.z
+                
+                #line 345 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                lt r0.x, l(0.000000), cb0[40].x
+                
+                #line 351
+                movc o0.xyz, r0.xxxx, r1.xyzx, r0.yzwy
+                
+                #line 355
+                mov o0.w, l(1.000000)
+                ret 
+                // Approximately 12 instruction slots used
+                            
+            };
+            RasterizerState = RasterizerSolid;
+        }
+
+    }
+
+    technique11 PositionTextureI
+    {
+        pass P0
+        {
+            VertexShader = asm {
+                //
+                // Generated by Microsoft (R) HLSL Shader Compiler 6.3.9600.16384
+                //
+                //
+                // Buffer Definitions: 
+                //
+                // cbuffer cbPerFrame
+                // {
+                //
+                //   float4x4 gWorld;                   // Offset:    0 Size:    64
+                //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
+                //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
+                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
+                //   
+                //   struct DirectionalLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  256
+                //       float4 Diffuse;                // Offset:  272
+                //       float4 Specular;               // Offset:  288
+                //       float3 Direction;              // Offset:  304
+                //       float Padding;                 // Offset:  316
+                //
+                //   } gDirLights[3];                   // Offset:  256 Size:   192 [unused]
+                //   
+                //   struct PointLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  448
+                //       float4 Diffuse;                // Offset:  464
+                //       float4 Specular;               // Offset:  480
+                //       float3 Position;               // Offset:  496
+                //       float Range;                   // Offset:  508
+                //       float3 Attenuation;            // Offset:  512
+                //       float Padding;                 // Offset:  524
+                //
+                //   } gPointLight;                     // Offset:  448 Size:    80 [unused]
+                //   
+                //   struct SpotLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  528
+                //       float4 Diffuse;                // Offset:  544
+                //       float4 Specular;               // Offset:  560
+                //       float3 Position;               // Offset:  576
+                //       float Range;                   // Offset:  588
+                //       float3 Direction;              // Offset:  592
+                //       float Spot;                    // Offset:  604
+                //       float3 Attenuation;            // Offset:  608
+                //       float Padding;                 // Offset:  620
+                //
+                //   } gSpotLight;                      // Offset:  528 Size:    96 [unused]
+                //   float3 gEyePositionWorld;          // Offset:  624 Size:    12 [unused]
+                //   float gFogStart;                   // Offset:  636 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  640 Size:     4 [unused]
+                //   float4 gFogColor;                  // Offset:  656 Size:    16 [unused]
+                //   float gEnableShadows;              // Offset:  672 Size:     4 [unused]
+                //
+                // }
+                //
+                //
+                // Resource Bindings:
+                //
+                // Name                                 Type  Format         Dim Slot Elements
+                // ------------------------------ ---------- ------- ----------- ---- --------
+                // cbPerFrame                        cbuffer      NA          NA    0        1
+                //
+                //
+                //
+                // Input signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // POSITION                 0   xyz         0     NONE   float   xyz 
+                // TEXCOORD                 0   xy          1     NONE   float   xy  
+                // localTransform           0   xyzw        2     NONE   float   xyzw
+                // localTransform           1   xyzw        3     NONE   float   xyzw
+                // localTransform           2   xyzw        4     NONE   float   xyzw
+                // localTransform           3   xyzw        5     NONE   float   xyzw
+                // textureIndex             0   x           6     NONE   float   x   
+                // SV_InstanceID            0   x           7   INSTID    uint       
+                //
+                //
+                // Output signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // SV_POSITION              0   xyzw        0      POS   float   xyzw
+                // POSITION                 0   xyz         1     NONE   float   xyz 
+                // TEXCOORD                 0   xy          2     NONE   float   xy  
+                // textureIndex             0     z         2     NONE   float     z 
+                //
+                vs_5_0
+                dcl_globalFlags refactoringAllowed
+                dcl_constantbuffer cb0[12], immediateIndexed
+                dcl_input v0.xyz
+                dcl_input v1.xy
+                dcl_input v2.xyzw
+                dcl_input v3.xyzw
+                dcl_input v4.xyzw
+                dcl_input v5.xyzw
+                dcl_input v6.x
+                dcl_output_siv o0.xyzw, position
+                dcl_output o1.xyz
+                dcl_output o2.xy
+                dcl_output o2.z
+                dcl_temps 1
+                //
+                // Initial variable locations:
+                //   v0.x <- input.positionLocal.x; v0.y <- input.positionLocal.y; v0.z <- input.positionLocal.z; 
+                //   v1.x <- input.tex.x; v1.y <- input.tex.y; 
+                //   v2.x <- input.localTransform._m00; v2.y <- input.localTransform._m01; v2.z <- input.localTransform._m02; v2.w <- input.localTransform._m03; 
+                //   v3.x <- input.localTransform._m10; v3.y <- input.localTransform._m11; v3.z <- input.localTransform._m12; v3.w <- input.localTransform._m13; 
+                //   v4.x <- input.localTransform._m20; v4.y <- input.localTransform._m21; v4.z <- input.localTransform._m22; v4.w <- input.localTransform._m23; 
+                //   v5.x <- input.localTransform._m30; v5.y <- input.localTransform._m31; v5.z <- input.localTransform._m32; v5.w <- input.localTransform._m33; 
+                //   v6.x <- input.textureIndex; 
+                //   v7.x <- input.instanceId; 
+                //   o2.x <- <VSPositionTextureI return value>.tex.x; o2.y <- <VSPositionTextureI return value>.tex.y; o2.z <- <VSPositionTextureI return value>.textureIndex; 
+                //   o1.x <- <VSPositionTextureI return value>.positionWorld.x; o1.y <- <VSPositionTextureI return value>.positionWorld.y; o1.z <- <VSPositionTextureI return value>.positionWorld.z; 
+                //   o0.x <- <VSPositionTextureI return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureI return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureI return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureI return value>.positionHomogeneous.w
+                //
+                #line 252 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                mul r0.xyzw, v0.yyyy, v3.xyzw
+                mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
+                mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
+                add r0.xyzw, r0.xyzw, v5.xyzw  // r0.x <- instancePosition.x; r0.y <- instancePosition.y; r0.z <- instancePosition.z; r0.w <- instancePosition.w
+                dp4 o0.x, r0.xyzw, cb0[8].xyzw
+                dp4 o0.y, r0.xyzw, cb0[9].xyzw
+                dp4 o0.z, r0.xyzw, cb0[10].xyzw
+                dp4 o0.w, r0.xyzw, cb0[11].xyzw
+                dp4 o1.x, r0.xyzw, cb0[0].xyzw
+                dp4 o1.y, r0.xyzw, cb0[1].xyzw
+                dp4 o1.z, r0.xyzw, cb0[2].xyzw
+                
+                #line 259
+                mov o2.xy, v1.xyxx
+                mov o2.z, v6.x
+                ret 
+                // Approximately 14 instruction slots used
+                            
+            };
+            GeometryShader = NULL;
+            PixelShader = asm {
+                //
+                // Generated by Microsoft (R) HLSL Shader Compiler 6.3.9600.16384
+                //
+                //
+                // Buffer Definitions: 
+                //
+                // cbuffer cbPerFrame
+                // {
+                //
+                //   float4x4 gWorld;                   // Offset:    0 Size:    64 [unused]
+                //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
+                //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64 [unused]
+                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
+                //   
+                //   struct DirectionalLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  256
+                //       float4 Diffuse;                // Offset:  272
+                //       float4 Specular;               // Offset:  288
+                //       float3 Direction;              // Offset:  304
+                //       float Padding;                 // Offset:  316
+                //
+                //   } gDirLights[3];                   // Offset:  256 Size:   192 [unused]
+                //   
+                //   struct PointLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  448
+                //       float4 Diffuse;                // Offset:  464
+                //       float4 Specular;               // Offset:  480
+                //       float3 Position;               // Offset:  496
+                //       float Range;                   // Offset:  508
+                //       float3 Attenuation;            // Offset:  512
+                //       float Padding;                 // Offset:  524
+                //
+                //   } gPointLight;                     // Offset:  448 Size:    80 [unused]
+                //   
+                //   struct SpotLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  528
+                //       float4 Diffuse;                // Offset:  544
+                //       float4 Specular;               // Offset:  560
+                //       float3 Position;               // Offset:  576
+                //       float Range;                   // Offset:  588
+                //       float3 Direction;              // Offset:  592
+                //       float Spot;                    // Offset:  604
+                //       float3 Attenuation;            // Offset:  608
+                //       float Padding;                 // Offset:  620
+                //
+                //   } gSpotLight;                      // Offset:  528 Size:    96 [unused]
+                //   float3 gEyePositionWorld;          // Offset:  624 Size:    12
+                //   float gFogStart;                   // Offset:  636 Size:     4
+                //   float gFogRange;                   // Offset:  640 Size:     4
+                //   float4 gFogColor;                  // Offset:  656 Size:    16
+                //   float gEnableShadows;              // Offset:  672 Size:     4 [unused]
+                //
+                // }
+                //
+                // cbuffer cbPerObject
+                // {
+                //
+                //   struct Material
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:    0
+                //       float4 Diffuse;                // Offset:   16
+                //       float4 Specular;               // Offset:   32
+                //       float4 Reflect;                // Offset:   48
+                //       float Padding;                 // Offset:   64
+                //
+                //   } gMaterial;                       // Offset:    0 Size:    68
+                //
+                // }
+                //
+                //
+                // Resource Bindings:
+                //
+                // Name                                 Type  Format         Dim Slot Elements
+                // ------------------------------ ---------- ------- ----------- ---- --------
+                // SamplerAnisotropic                sampler      NA          NA    0        1
+                // gTextureArray                     texture  float4     2darray    0        1
+                // cbPerFrame                        cbuffer      NA          NA    0        1
+                // cbPerObject                       cbuffer      NA          NA    1        1
+                //
+                //
+                //
+                // Input signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // SV_POSITION              0   xyzw        0      POS   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
+                // TEXCOORD                 0   xy          2     NONE   float   xy  
+                // textureIndex             0     z         2     NONE   float     z 
+                //
+                //
+                // Output signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // SV_TARGET                0   xyzw        0   TARGET   float   xyzw
+                //
+                ps_5_0
+                dcl_globalFlags refactoringAllowed
+                dcl_constantbuffer cb0[42], immediateIndexed
+                dcl_constantbuffer cb1[2], immediateIndexed
+                dcl_sampler s0, mode_default
+                dcl_resource_texture2darray (float,float,float,float) t0
+                dcl_input_ps linear v1.xyz
+                dcl_input_ps linear v2.xy
+                dcl_input_ps linear v2.z
+                dcl_output o0.xyzw
+                dcl_temps 3
+                //
+                // Initial variable locations:
+                //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
+                //   v1.x <- input.positionWorld.x; v1.y <- input.positionWorld.y; v1.z <- input.positionWorld.z; 
+                //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
+                //   o0.x <- <PSPositionTexture return value>.x; o0.y <- <PSPositionTexture return value>.y; o0.z <- <PSPositionTexture return value>.z; o0.w <- <PSPositionTexture return value>.w
+                //
+                #line 310 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
+                dp3 r0.x, r0.xyzx, r0.xyzx
+                sqrt r0.x, r0.x  // r0.x <- distToEye
+                
+                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                add r0.x, r0.x, -cb0[39].w
+                div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
+                
+                #line 306 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
+                
+                #line 400 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                add r2.xyzw, -r1.xyzw, cb0[41].xyzw
+                mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z; r0.w <- <ComputeFog return value>.w
+                
+                #line 308 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                lt r2.x, l(0.000000), cb0[40].x
+                
+                #line 314
+                movc r0.xyzw, r2.xxxx, r0.xyzw, r1.xyzw  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z; r0.w <- litColor.w
+                mul o0.w, r0.w, cb1[1].w
+                mov o0.xyz, r0.xyzx
+                ret 
+                // Approximately 13 instruction slots used
+                            
+            };
+            RasterizerState = RasterizerSolid;
+        }
+
+    }
+
     technique11 PositionTextureSkinned
     {
         pass P0
@@ -4974,18 +5249,18 @@ fxgroup
                 //   o1.x <- <VSPositionTextureSkinned return value>.positionWorld.x; o1.y <- <VSPositionTextureSkinned return value>.positionWorld.y; o1.z <- <VSPositionTextureSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTextureSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureSkinned return value>.positionHomogeneous.w
                 //
-                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 357
+                #line 353
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 363
+                #line 359
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -5327,18 +5602,18 @@ fxgroup
                 //   o1.x <- <VSPositionTextureSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionTextureSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionTextureSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 357
+                #line 353
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 363
+                #line 359
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -5667,7 +5942,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTexture return value>.positionWorld.x; o1.y <- <VSPositionNormalTexture return value>.positionWorld.y; o1.z <- <VSPositionNormalTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTexture return value>.positionHomogeneous.w
                 //
-                #line 349 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 365 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -5684,17 +5959,17 @@ fxgroup
                 rsq r1.w, r1.w
                 mul o2.xyz, r1.wwww, r1.xyzx
                 
-                #line 356
+                #line 372
                 mov o3.xy, v2.xyxx
                 mov o3.z, cb3[0].x
                 
-                #line 351
+                #line 367
                 dp4 o4.x, r0.xyzw, cb0[12].xyzw
                 dp4 o4.y, r0.xyzw, cb0[13].xyzw
                 dp4 o4.z, r0.xyzw, cb0[14].xyzw
                 dp4 o4.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 356
+                #line 372
                 ret 
                 // Approximately 22 instruction slots used
                             
@@ -5834,7 +6109,7 @@ fxgroup
                 //   v3.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTexture return value>.x; o0.y <- <PSPositionNormalTexture return value>.y; o0.z <- <PSPositionNormalTexture return value>.z; o0.w <- <PSPositionNormalTexture return value>.w
                 //
-                #line 428 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 444 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -6088,7 +6363,7 @@ fxgroup
                   add r2.xyz, r0.xyzx, r2.xyzx
                 endif 
                 
-                #line 445 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r4.xyzw, v3.xyzx, t0.xyzw, s0  // r4.x <- textureColor.x; r4.y <- textureColor.y; r4.z <- textureColor.z; r4.w <- textureColor.w
                 add r0.xyz, r1.yzwy, r3.xyzx
                 mad r0.xyz, r4.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
@@ -6100,7 +6375,7 @@ fxgroup
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // r1.y <- <ComputeFog return value>.x; r1.z <- <ComputeFog return value>.y; r1.w <- <ComputeFog return value>.z
                 
-                #line 452 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 468 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx
                 mul o0.w, r4.w, cb1[1].w
                 ret 
@@ -6247,7 +6522,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureI return value>.positionHomogeneous.w
                 //
-                #line 362 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 378 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -6266,17 +6541,17 @@ fxgroup
                 rsq r1.w, r1.w
                 mul o2.xyz, r1.wwww, r1.xyzx
                 
-                #line 371
+                #line 387
                 mov o3.xy, v2.xyxx
                 mov o3.z, v7.x
                 
-                #line 366
+                #line 382
                 dp4 o4.x, r0.xyzw, cb0[12].xyzw
                 dp4 o4.y, r0.xyzw, cb0[13].xyzw
                 dp4 o4.z, r0.xyzw, cb0[14].xyzw
                 dp4 o4.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 371
+                #line 387
                 ret 
                 // Approximately 24 instruction slots used
                             
@@ -6416,7 +6691,7 @@ fxgroup
                 //   v3.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTexture return value>.x; o0.y <- <PSPositionNormalTexture return value>.y; o0.z <- <PSPositionNormalTexture return value>.z; o0.w <- <PSPositionNormalTexture return value>.w
                 //
-                #line 428 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 444 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -6670,7 +6945,7 @@ fxgroup
                   add r2.xyz, r0.xyzx, r2.xyzx
                 endif 
                 
-                #line 445 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r4.xyzw, v3.xyzx, t0.xyzw, s0  // r4.x <- textureColor.x; r4.y <- textureColor.y; r4.z <- textureColor.z; r4.w <- textureColor.w
                 add r0.xyz, r1.yzwy, r3.xyzx
                 mad r0.xyz, r4.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
@@ -6682,7 +6957,7 @@ fxgroup
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // r1.y <- <ComputeFog return value>.x; r1.z <- <ComputeFog return value>.y; r1.w <- <ComputeFog return value>.z
                 
-                #line 452 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 468 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx
                 mul o0.w, r4.w, cb1[1].w
                 ret 
@@ -6838,18 +7113,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureSkinned return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureSkinned return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.w
                 //
-                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 379
+                #line 375
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 386
+                #line 382
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -6880,7 +7155,7 @@ fxgroup
                   mad r2.xyz, r2.wwww, r4.xyzx, r2.xyzx
                 endloop 
                 
-                #line 389 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 405 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -6900,7 +7175,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 396
+                #line 412
                 mov o3.xy, v2.xyxx
                 mov o3.z, cb3[0].x
                 ret 
@@ -7042,7 +7317,7 @@ fxgroup
                 //   v3.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTexture return value>.x; o0.y <- <PSPositionNormalTexture return value>.y; o0.z <- <PSPositionNormalTexture return value>.z; o0.w <- <PSPositionNormalTexture return value>.w
                 //
-                #line 428 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 444 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -7296,7 +7571,7 @@ fxgroup
                   add r2.xyz, r0.xyzx, r2.xyzx
                 endif 
                 
-                #line 445 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r4.xyzw, v3.xyzx, t0.xyzw, s0  // r4.x <- textureColor.x; r4.y <- textureColor.y; r4.z <- textureColor.z; r4.w <- textureColor.w
                 add r0.xyz, r1.yzwy, r3.xyzx
                 mad r0.xyz, r4.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
@@ -7308,7 +7583,7 @@ fxgroup
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // r1.y <- <ComputeFog return value>.x; r1.z <- <ComputeFog return value>.y; r1.w <- <ComputeFog return value>.z
                 
-                #line 452 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 468 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx
                 mul o0.w, r4.w, cb1[1].w
                 ret 
@@ -7472,18 +7747,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 379
+                #line 375
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 386
+                #line 382
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- normalLocal.x; r1.y <- normalLocal.y; r1.z <- normalLocal.z
@@ -7514,7 +7789,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r4.xyzx, r1.xyzx
                 endloop 
                 
-                #line 414 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 430 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -7537,7 +7812,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 423
+                #line 439
                 mov o3.xy, v2.xyxx
                 mov o3.z, v9.x
                 ret 
@@ -7679,7 +7954,7 @@ fxgroup
                 //   v3.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTexture return value>.x; o0.y <- <PSPositionNormalTexture return value>.y; o0.z <- <PSPositionNormalTexture return value>.z; o0.w <- <PSPositionNormalTexture return value>.w
                 //
-                #line 428 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 444 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -7933,7 +8208,7 @@ fxgroup
                   add r2.xyz, r0.xyzx, r2.xyzx
                 endif 
                 
-                #line 445 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r4.xyzw, v3.xyzx, t0.xyzw, s0  // r4.x <- textureColor.x; r4.y <- textureColor.y; r4.z <- textureColor.z; r4.w <- textureColor.w
                 add r0.xyz, r1.yzwy, r3.xyzx
                 mad r0.xyz, r4.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
@@ -7945,7 +8220,7 @@ fxgroup
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // r1.y <- <ComputeFog return value>.x; r1.z <- <ComputeFog return value>.y; r1.w <- <ComputeFog return value>.z
                 
-                #line 452 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 468 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx
                 mul o0.w, r4.w, cb1[1].w
                 ret 
@@ -8090,7 +8365,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangent return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangent return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangent return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.w
                 //
-                #line 466 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 482 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -8110,17 +8385,17 @@ fxgroup
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx
                 
-                #line 474
+                #line 490
                 mov o4.xy, v3.xyxx
                 mov o4.z, cb3[0].x
                 
-                #line 468
+                #line 484
                 dp4 o5.x, r0.xyzw, cb0[12].xyzw
                 dp4 o5.y, r0.xyzw, cb0[13].xyzw
                 dp4 o5.z, r0.xyzw, cb0[14].xyzw
                 dp4 o5.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 474
+                #line 490
                 ret 
                 // Approximately 25 instruction slots used
                             
@@ -8267,7 +8542,7 @@ fxgroup
                 //   v4.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.x; o0.y <- <PSPositionNormalTextureTangent return value>.y; o0.z <- <PSPositionNormalTextureTangent return value>.z; o0.w <- <PSPositionNormalTextureTangent return value>.w
                 //
-                #line 555 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 571 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -8539,7 +8814,7 @@ fxgroup
                   add r3.xyz, r0.xyzx, r3.xyzx
                 endif 
                 
-                #line 575 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 591 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
@@ -8551,7 +8826,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // r2.x <- <ComputeFog return value>.x; r2.y <- <ComputeFog return value>.y; r2.z <- <ComputeFog return value>.z
                 
-                #line 582 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 598 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx
                 mul o0.w, r1.w, cb1[1].w
                 ret 
@@ -8704,7 +8979,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.w
                 //
-                #line 480 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 496 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v5.xyzw
                 mad r0.xyzw, v0.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v6.xyzw, r0.xyzw
@@ -8726,17 +9001,17 @@ fxgroup
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx
                 
-                #line 490
+                #line 506
                 mov o4.xy, v3.xyxx
                 mov o4.z, v8.x
                 
-                #line 484
+                #line 500
                 dp4 o5.x, r0.xyzw, cb0[12].xyzw
                 dp4 o5.y, r0.xyzw, cb0[13].xyzw
                 dp4 o5.z, r0.xyzw, cb0[14].xyzw
                 dp4 o5.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 490
+                #line 506
                 ret 
                 // Approximately 27 instruction slots used
                             
@@ -8883,7 +9158,7 @@ fxgroup
                 //   v4.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.x; o0.y <- <PSPositionNormalTextureTangent return value>.y; o0.z <- <PSPositionNormalTextureTangent return value>.z; o0.w <- <PSPositionNormalTextureTangent return value>.w
                 //
-                #line 555 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 571 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -9155,7 +9430,7 @@ fxgroup
                   add r3.xyz, r0.xyzx, r3.xyzx
                 endif 
                 
-                #line 575 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 591 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
@@ -9167,7 +9442,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // r2.x <- <ComputeFog return value>.x; r2.y <- <ComputeFog return value>.y; r2.z <- <ComputeFog return value>.z
                 
-                #line 582 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 598 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx
                 mul o0.w, r1.w, cb1[1].w
                 ret 
@@ -9329,18 +9604,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentSkinned return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentSkinned return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.w
                 //
-                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 406
+                #line 402
                 mov x0[0].x, v4.x
                 mov x0[1].x, v4.y
                 mov x0[2].x, v4.z
                 mov x0[3].x, r0.x
                 
-                #line 414
+                #line 410
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -9355,10 +9630,10 @@ fxgroup
                   ult r5.xyz, r4.xxxx, l(1, 2, 3, 0)
                   and r6.y, r3.w, r5.y
                 
-                #line 417
+                #line 413
                   iadd r4.xy, r4.xxxx, l(1, -3, 0, 0)
                 
-                #line 414
+                #line 410
                   movc r6.z, r5.y, l(0), r4.y
                   ieq r6.w, r5.z, l(0)
                   mov r6.x, r5.x
@@ -9380,7 +9655,7 @@ fxgroup
                   mad r3.xyz, r2.wwww, r5.xyzx, r3.xyzx
                 endloop 
                 
-                #line 511 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 527 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -9403,7 +9678,7 @@ fxgroup
                 dp3 o3.y, r3.xyzx, cb0[1].xyzx
                 dp3 o3.z, r3.xyzx, cb0[2].xyzx
                 
-                #line 519
+                #line 535
                 mov o4.xy, v3.xyxx
                 mov o4.z, cb3[0].x
                 ret 
@@ -9552,7 +9827,7 @@ fxgroup
                 //   v4.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.x; o0.y <- <PSPositionNormalTextureTangent return value>.y; o0.z <- <PSPositionNormalTextureTangent return value>.z; o0.w <- <PSPositionNormalTextureTangent return value>.w
                 //
-                #line 555 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 571 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -9824,7 +10099,7 @@ fxgroup
                   add r3.xyz, r0.xyzx, r3.xyzx
                 endif 
                 
-                #line 575 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 591 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
@@ -9836,7 +10111,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // r2.x <- <ComputeFog return value>.x; r2.y <- <ComputeFog return value>.y; r2.z <- <ComputeFog return value>.z
                 
-                #line 582 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 598 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx
                 mul o0.w, r1.w, cb1[1].w
                 ret 
@@ -10006,18 +10281,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 406
+                #line 402
                 mov x0[0].x, v4.x
                 mov x0[1].x, v4.y
                 mov x0[2].x, v4.z
                 mov x0[3].x, r0.x
                 
-                #line 414
+                #line 410
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- normalLocal.x; r1.y <- normalLocal.y; r1.z <- normalLocal.z
@@ -10032,10 +10307,10 @@ fxgroup
                   ult r5.xyz, r4.xxxx, l(1, 2, 3, 0)
                   and r6.y, r2.w, r5.y
                 
-                #line 417
+                #line 413
                   iadd r4.xy, r4.xxxx, l(1, -3, 0, 0)
                 
-                #line 414
+                #line 410
                   movc r6.z, r5.y, l(0), r4.y
                   ieq r6.w, r5.z, l(0)
                   mov r6.x, r5.x
@@ -10057,7 +10332,7 @@ fxgroup
                   mad r2.xyz, r1.wwww, r5.xyzx, r2.xyzx
                 endloop 
                 
-                #line 540 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 556 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r3.yyyy, v7.xyzw
                 mad r0.xyzw, r3.xxxx, v6.xyzw, r0.xyzw
                 mad r0.xyzw, r3.zzzz, v8.xyzw, r0.xyzw
@@ -10083,7 +10358,7 @@ fxgroup
                 dp3 o3.y, r2.xyzx, cb0[1].xyzx
                 dp3 o3.z, r2.xyzx, cb0[2].xyzx
                 
-                #line 550
+                #line 566
                 mov o4.xy, v3.xyxx
                 mov o4.z, v10.x
                 ret 
@@ -10232,7 +10507,7 @@ fxgroup
                 //   v4.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.x; o0.y <- <PSPositionNormalTextureTangent return value>.y; o0.z <- <PSPositionNormalTextureTangent return value>.z; o0.w <- <PSPositionNormalTextureTangent return value>.w
                 //
-                #line 555 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 571 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -10504,7 +10779,7 @@ fxgroup
                   add r3.xyz, r0.xyzx, r3.xyzx
                 endif 
                 
-                #line 575 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 591 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
@@ -10516,7 +10791,7 @@ fxgroup
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // r2.x <- <ComputeFog return value>.x; r2.y <- <ComputeFog return value>.y; r2.z <- <ComputeFog return value>.z
                 
-                #line 582 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 598 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx
                 mul o0.w, r1.w, cb1[1].w
                 ret 

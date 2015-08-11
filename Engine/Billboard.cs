@@ -54,7 +54,8 @@ namespace Engine
             {
                 EffectBillboard effect = DrawerPool.EffectBillboard;
                 EffectTechnique technique = null;
-                if (context.DrawerMode == DrawerModesEnum.Default) { technique = effect.Billboard; }
+                if (context.DrawerMode == DrawerModesEnum.Forward) { technique = effect.ForwardBillboard; }
+                else if (context.DrawerMode == DrawerModesEnum.Deferred) { technique = effect.DeferredBillboard; }
                 else if (context.DrawerMode == DrawerModesEnum.ShadowMap) { technique = effect.ShadowMapBillboard; }
 
                 if (technique != null)
@@ -63,19 +64,26 @@ namespace Engine
 
                     #region Per frame update
 
-                    if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
-                        effect.FrameBuffer.Radius = this.Radius;
-                        effect.UpdatePerFrame(null);
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.Default)
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
                         effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
                         effect.FrameBuffer.ShadowTransform = context.ShadowTransform;
                         effect.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
                         effect.FrameBuffer.Radius = this.Radius;
                         effect.UpdatePerFrame(context.ShadowMap);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
+                        effect.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
+                        effect.FrameBuffer.Radius = this.Radius;
+                        effect.UpdatePerFrame(null);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    {
+                        effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
+                        effect.FrameBuffer.Radius = this.Radius;
+                        effect.UpdatePerFrame(null);
                     }
 
                     #endregion
@@ -89,20 +97,21 @@ namespace Engine
 
                             #region Per object update
 
-                            if (context.DrawerMode == DrawerModesEnum.Default)
+                            var matData = mat != null ? mat.Material : Material.Default;
+                            var textureCount = mat != null ? (uint)mat.DiffuseTexture.Description.Texture2DArray.ArraySize : (uint)this.Textures.Count;
+                            var diffuseTexture = mat != null ? mat.DiffuseTexture : null;
+
+                            if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
-                                if (mat != null)
-                                {
-                                    effect.ObjectBuffer.Material.SetMaterial(mat.Material);
-                                    effect.ObjectBuffer.TextureCount = (uint)mat.DiffuseTexture.Description.Texture2DArray.ArraySize;
-                                    effect.UpdatePerObject(mat.DiffuseTexture);
-                                }
-                                else
-                                {
-                                    effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-                                    effect.ObjectBuffer.TextureCount = (uint)this.Textures.Count;
-                                    effect.UpdatePerObject(null);
-                                }
+                                effect.ObjectBuffer.Material.SetMaterial(matData);
+                                effect.ObjectBuffer.TextureCount = textureCount;
+                                effect.UpdatePerObject(diffuseTexture);
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                            {
+                                effect.ObjectBuffer.Material.SetMaterial(matData);
+                                effect.ObjectBuffer.TextureCount = textureCount;
+                                effect.UpdatePerObject(diffuseTexture);
                             }
 
                             #endregion
