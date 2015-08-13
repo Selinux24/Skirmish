@@ -138,12 +138,21 @@ namespace Skybox
 
             #endregion
 
-            this.Lights.PointLightEnabled = true;
-            this.Lights.PointLight.Ambient = new Color4(1f, 0.5f, 0.5f, 1.0f);
-            this.Lights.PointLight.Diffuse = new Color4(1f, 0.8f, 0.8f, 1.0f);
-            this.Lights.PointLight.Specular = new Color4(1f, 0.8f, 0.8f, 1.0f);
-            this.Lights.PointLight.Attenuation = new Vector3(1.0f, 0.0f, 0.0f);
-            this.Lights.PointLight.Range = 20.0f;
+            SceneLightPoint pointLight = new SceneLightPoint()
+            {
+                Ambient = new Color4(1f, 0.5f, 0.5f, 1.0f),
+                Diffuse = new Color4(1f, 0.8f, 0.8f, 1.0f),
+                Specular = new Color4(1f, 0.8f, 0.8f, 1.0f),
+                Attenuation = new Vector3(1.0f, 0.0f, 0.0f),
+                Range = 20.0f,
+                Enabled = true,
+            };
+
+            this.Lights.PointLights = new []
+            {
+                pointLight,
+            };
+
             this.Lights.EnableShadows = true;
 
             this.SceneVolume = this.ruins.GetBoundingSphere();
@@ -179,7 +188,7 @@ namespace Skybox
             position.Y = 1f;
             position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
 
-            this.Lights.PointLight.Position = position;
+            this.Lights.PointLights[0].Position = position;
             this.movingfire.Manipulator.SetPosition(position);
 
             #endregion

@@ -322,6 +322,23 @@ struct ShadowMapOutput
 /*
 DEFERRED LIGHTNING
 */
+struct GBufferVSColorOutput
+{
+    float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float3 normalWorld : NORMAL;
+    float4 color : COLOR0;
+    float2 depth : TEXCOORD0;
+};
+struct GBufferVSTextureOutput
+{
+    float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float3 normalWorld : NORMAL;
+    float2 tex : TEXCOORD0;
+	float textureIndex : textureIndex;
+    float2 depth : TEXCOORD1;
+};
 struct GBufferPSOutput
 {
     float4 color : SV_TARGET0;

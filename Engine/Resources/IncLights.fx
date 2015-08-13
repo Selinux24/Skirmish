@@ -209,9 +209,6 @@ void ComputePointLight(
 	//Normalize the light vector.
 	lightVec /= d;
 
-	//Ambient term.
-	ambient = mat.Ambient * L.Ambient;
-
 	//Add diffuse and specular term, provided the surface is in the line of site of the light.
 	float diffuseFactor = dot(lightVec, normal);
 
@@ -227,7 +224,10 @@ void ComputePointLight(
 	}
 
 	//Attenuate
-	float attenuation = 1.0f / dot(L.Attenuation, float3(1.0f, d, d*d));
+	//float attenuation = 1.0f / dot(L.Attenuation, float3(1.0f, d, d*d));
+	float attenuation = saturate(1.0f - d/L.Range);
+
+	ambient = (mat.Ambient * L.Ambient) * attenuation;
 	diffuse *= attenuation;
 	spec *= attenuation;
 }

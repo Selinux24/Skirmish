@@ -131,7 +131,9 @@ namespace Engine.Common
         public Matrix ShadowTransform;
 
 
-        public ShaderResourceView[] GBuffer;
+        public ShaderResourceView[] GeometryMap;
+
+        public ShaderResourceView LightMap;
     }
 
     /// <summary>

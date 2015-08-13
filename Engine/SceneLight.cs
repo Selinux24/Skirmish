@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine
 {
@@ -12,166 +13,117 @@ namespace Engine
         /// <summary>
         /// Default ligths
         /// </summary>
-        public static readonly SceneLight Default = new SceneLight()
-        {
-            DirectionalLight1 = new SceneLightDirectional()
-            {
-                Ambient = new Color4(0.8f, 0.8f, 0.8f, 1.0f),
-                Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                Direction = Vector3.Normalize(new Vector3(0.57735f, -0.57735f, 0.57735f)),
-            },
-            DirectionalLight1Enabled = true,
-
-            DirectionalLight2 = new SceneLightDirectional()
-            {
-                Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
-                Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                Specular = new Color4(0.25f, 0.25f, 0.25f, 1.0f),
-                Direction = Vector3.Normalize(new Vector3(-0.57735f, -0.57735f, 0.57735f)),
-            },
-            DirectionalLight2Enabled = true,
-
-            DirectionalLight3 = new SceneLightDirectional()
-            {
-                Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
-                Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                Specular = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
-                Direction = Vector3.Normalize(new Vector3(0.0f, -0.707f, -0.707f)),
-            },
-            DirectionalLight3Enabled = true,
-
-            PointLight = new SceneLightPoint() { },
-            PointLightEnabled = false,
-
-            SpotLight = new SceneLightSpot() { },
-            SpotLightEnabled = false,
-
-            FogColor = Color.Transparent,
-            FogStart = 0,
-            FogRange = 0,
-
-            EnableShadows = false,
-        };
+        public static readonly SceneLight Default = CreateDefault();
         /// <summary>
         /// Empty lights
         /// </summary>
-        public static SceneLight Empty = new SceneLight()
+        public static readonly SceneLight Empty = new SceneLight();
+
+        /// <summary>
+        /// Create default set of lights
+        /// </summary>
+        /// <returns>Returns default set of ligths</returns>
+        public static SceneLight CreateDefault()
         {
-            DirectionalLight1 = new SceneLightDirectional() { },
-            DirectionalLight1Enabled = false,
+            SceneLight res = new SceneLight();
 
-            DirectionalLight2 = new SceneLightDirectional() { },
-            DirectionalLight2Enabled = false,
+            res.DirectionalLights = new[]
+            {
+                new SceneLightDirectional()
+                {
+                    Ambient = new Color4(0.8f, 0.8f, 0.8f, 1.0f),
+                    Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                    Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                    Direction = Vector3.Normalize(new Vector3(0.57735f, -0.57735f, 0.57735f)),
+                },
+                new SceneLightDirectional()
+                {
+                    Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
+                    Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                    Specular = new Color4(0.25f, 0.25f, 0.25f, 1.0f),
+                    Direction = Vector3.Normalize(new Vector3(-0.57735f, -0.57735f, 0.57735f)),
+                },
+                new SceneLightDirectional()
+                {
+                    Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
+                    Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                    Specular = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
+                    Direction = Vector3.Normalize(new Vector3(0.0f, -0.707f, -0.707f)),
+                },
+            };
 
-            DirectionalLight3 = new SceneLightDirectional() { },
-            DirectionalLight3Enabled = false,
+            res.FogColor = Color.Transparent;
+            res.FogStart = 0;
+            res.FogRange = 0;
 
-            PointLight = new SceneLightPoint() { },
-            PointLightEnabled = false,
+            res.EnableShadows = false;
 
-            SpotLight = new SceneLightSpot() { },
-            SpotLightEnabled = false,
-
-            FogColor = Color.Transparent,
-            FogStart = 0,
-            FogRange = 0,
-
-            EnableShadows = false,
-        };
+            return res;
+        }
 
         #endregion
 
+        private List<SceneLightDirectional> directionalLights = new List<SceneLightDirectional>();
+        private List<SceneLightPoint> pointLights = new List<SceneLightPoint>();
+        private List<SceneLightSpot> spotLights = new List<SceneLightSpot>();
+
         /// <summary>
-        /// Enables or disabled first directional light
+        /// Gets or sets directional lights
         /// </summary>
-        public bool DirectionalLight1Enabled
+        public SceneLightDirectional[] DirectionalLights
         {
             get
             {
-                return this.DirectionalLight1.Enabled;
+                return this.directionalLights.ToArray();
             }
             set
             {
-                this.DirectionalLight1.Enabled = value;
+                this.directionalLights.Clear();
+
+                if (value != null && value.Length > 0)
+                {
+                    this.directionalLights.AddRange(value);
+                }
             }
         }
         /// <summary>
-        /// Enables or disabled second directional light
+        /// Gets or sets point lights
         /// </summary>
-        public bool DirectionalLight2Enabled
+        public SceneLightPoint[] PointLights
         {
             get
             {
-                return this.DirectionalLight2.Enabled;
+                return this.pointLights.ToArray();
             }
             set
             {
-                this.DirectionalLight2.Enabled = value;
+                this.pointLights.Clear();
+
+                if (value != null && value.Length > 0)
+                {
+                    this.pointLights.AddRange(value);
+                }
             }
         }
         /// <summary>
-        /// Enables or disabled third directional light
+        /// Gets or sets spot lights
         /// </summary>
-        public bool DirectionalLight3Enabled
+        public SceneLightSpot[] SpotLights
         {
             get
             {
-                return this.DirectionalLight3.Enabled;
+                return this.spotLights.ToArray();
             }
             set
             {
-                this.DirectionalLight3.Enabled = value;
+                this.spotLights.Clear();
+
+                if (value != null && value.Length > 0)
+                {
+                    this.spotLights.AddRange(value);
+                }
             }
         }
-        /// <summary>
-        /// Gets or sets first directional light
-        /// </summary>
-        public SceneLightDirectional DirectionalLight1 { get; set; }
-        /// <summary>
-        /// Gets or sets second directional light
-        /// </summary>
-        public SceneLightDirectional DirectionalLight2 { get; set; }
-        /// <summary>
-        /// Gets or sets third directional light
-        /// </summary>
-        public SceneLightDirectional DirectionalLight3 { get; set; }
-        /// <summary>
-        /// Enables or disables first point light
-        /// </summary>
-        public bool PointLightEnabled
-        {
-            get
-            {
-                return this.PointLight.Enabled;
-            }
-            set
-            {
-                this.PointLight.Enabled = value;
-            }
-        }
-        /// <summary>
-        /// Gets or sets first point light
-        /// </summary>
-        public SceneLightPoint PointLight { get; set; }
-        /// <summary>
-        /// Enables or disables first spot light
-        /// </summary>
-        public bool SpotLightEnabled
-        {
-            get
-            {
-                return this.SpotLight.Enabled;
-            }
-            set
-            {
-                this.SpotLight.Enabled = value;
-            }
-        }
-        /// <summary>
-        /// Gets or sets first spot light
-        /// </summary>
-        public SceneLightSpot SpotLight { get; set; }
         /// <summary>
         /// Fog start value
         /// </summary>
@@ -194,11 +146,7 @@ namespace Engine
         /// </summary>
         public SceneLight()
         {
-            this.DirectionalLight1 = new SceneLightDirectional();
-            this.DirectionalLight2 = new SceneLightDirectional();
-            this.DirectionalLight3 = new SceneLightDirectional();
-            this.PointLight = new SceneLightPoint();
-            this.SpotLight = new SceneLightSpot();
+
         }
     }
 }

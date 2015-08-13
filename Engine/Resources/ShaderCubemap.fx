@@ -28,7 +28,8 @@ GBufferPSOutput PSDeferredCubic(PSVertexPosition input)
 
 	output.color = gCubemap.Sample(SamplerLinear, input.positionLocal);
 	output.normal = 0.0f;
-	output.depth = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.depth.xyz = input.positionLocal;
+	output.depth.w = 1.0f;
 
     return output;
 }

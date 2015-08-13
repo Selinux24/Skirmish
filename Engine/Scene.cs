@@ -38,10 +38,6 @@ namespace Engine
         /// Shadow mapper
         /// </summary>
         private ShadowMap shadowMap = null;
-        /// <summary>
-        /// Geometry buffer
-        /// </summary>
-        private GBuffer gBuffer = null;
 
         /// <summary>
         /// Game class
@@ -92,21 +88,6 @@ namespace Engine
                 }
 
                 return this.shadowMap;
-            }
-        }
-        /// <summary>
-        /// Geometry Buffer
-        /// </summary>
-        protected GBuffer GBuffer
-        {
-            get
-            {
-                if (this.gBuffer == null)
-                {
-                    this.gBuffer = new GBuffer(this.Game);
-                }
-
-                return this.gBuffer;
             }
         }
 
@@ -249,20 +230,20 @@ namespace Engine
                 this.DrawContext.Lights = this.Lights;
 
                 //Clear data
-                this.DrawContext.GBuffer = null;
+                this.DrawContext.GeometryMap = null;
                 this.DrawContext.ShadowMap = null;
                 this.DrawContext.ShadowTransform = Matrix.Identity;
 
                 #region Shadow mapping
 
-                if (this.Lights.EnableShadows)
+                if (this.Lights.EnableShadows && this.Lights.DirectionalLights.Length > 0)
                 {
                     //Clear context data
                     this.DrawShadowsContext.ShadowMap = null;
                     this.DrawShadowsContext.ShadowTransform = Matrix.Identity;
 
                     //Update shadow transform using first ligth direction
-                    this.ShadowMap.Update(this.Lights.DirectionalLight1.Direction, this.SceneVolume);
+                    this.ShadowMap.Update(this.Lights.DirectionalLights[0].Direction, this.SceneVolume);
 
                     //Draw components if drop shadow (opaque)
                     List<Drawable> shadowComponents = visibleComponents.FindAll(c => c.Opaque);
@@ -330,11 +311,13 @@ namespace Engine
                     List<Drawable> solidComponents = visibleComponents.FindAll(c => c.Opaque);
                     if (solidComponents.Count > 0)
                     {
+                        #region Geometry Buffer
+
                         //Set g-buffer render targets
                         this.Game.Graphics.SetRenderTargets(
-                            this.GBuffer.Viewport, 
-                            this.GBuffer.DepthMap, 
-                            this.GBuffer.RenderTargets, 
+                            this.deferredRenderer.Viewport,
+                            this.deferredRenderer.GeometryBuffer.DepthMap,
+                            this.deferredRenderer.GeometryBuffer.RenderTargets, 
                             true, Color.Black, DepthStencilClearFlags.Depth);
 
                         //Enable z-buffer by default for opaque components
@@ -344,7 +327,26 @@ namespace Engine
                         this.DrawComponents(gameTime, this.DrawContext, solidComponents);
 
                         //Assign result of render in drawing context
-                        this.DrawContext.GBuffer = this.GBuffer.Textures;
+                        this.DrawContext.GeometryMap = this.deferredRenderer.GeometryBuffer.Textures;
+
+                        #endregion
+
+                        #region Light Buffer
+
+                        //Set light buffer to draw lights
+                        this.Game.Graphics.SetRenderTarget(
+                            this.deferredRenderer.Viewport,
+                            this.deferredRenderer.LightBuffer.DepthMap,
+                            this.deferredRenderer.LightBuffer.RenderTarget,
+                            true, Color.Black, DepthStencilClearFlags.Depth);
+
+                        //Draw scene lights on light buffer using g-buffer output
+                        this.deferredRenderer.DrawLights(this.DrawContext);
+
+                        //Assign result of render in drawing context
+                        this.DrawContext.LightMap = this.deferredRenderer.LightBuffer.Texture;
+
+                        #endregion
                     }
 
                     //Restore backbuffer as render target and clear it
@@ -353,8 +355,8 @@ namespace Engine
                     //Disable z-buffer for deferred rendering
                     this.Game.Graphics.DisableZBuffer();
 
-                    //Map scene on screen using g-buffer
-                    this.deferredRenderer.Draw(this.DrawContext);
+                    //Draw scene result on screen using g-buffer and light buffer
+                    this.deferredRenderer.DrawResult(this.DrawContext);
 
                     //Render to screen the rest of objects
                     List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.Opaque);
@@ -424,12 +426,6 @@ namespace Engine
                 this.Camera = null;
             }
 
-            if (this.gBuffer != null)
-            {
-                this.gBuffer.Dispose();
-                this.gBuffer = null;
-            }
-
             if (this.shadowMap != null)
             {
                 this.shadowMap.Dispose();
@@ -458,9 +454,9 @@ namespace Engine
         /// <param name="e">Event arguments</param>
         protected virtual void Resized(object sender, EventArgs e)
         {
-            if (this.gBuffer != null)
+            if (this.deferredRenderer != null)
             {
-                this.gBuffer.Resize();
+                this.deferredRenderer.Resize();
             }
 
             for (int i = 0; i < this.components.Count; i++)

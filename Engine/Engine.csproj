@@ -326,6 +326,7 @@
     <Compile Include="Effects\EffectBasicGBuffer.cs" />
     <Compile Include="Effects\EffectInstancingShadow.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="LightBuffer.cs" />
     <Compile Include="SceneModesEnum.cs" />
     <Compile Include="SpriteTexture.cs" />
     <Compile Include="Curve.cs" />

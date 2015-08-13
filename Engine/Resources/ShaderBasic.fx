@@ -338,21 +338,18 @@ float4 PSPositionTextureBLUE(PSVertexPositionTexture input) : SV_TARGET
 	//Grayscale
 	return float4(litColor.bbb, 1);
 }
+float4 PSPositionTextureALPHA(PSVertexPositionTexture input) : SV_TARGET
+{
+    float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex)).a;
+	
+	//Grayscale
+	return float4(litColor.aaa, 1);
+}
 float4 PSPositionTextureNOALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
     float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
-	if(gFogRange > 0)
-	{
-		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
-		float distToEye = length(toEyeWorld);
-
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
-	}
-
-	litColor.a = 1.0f;
-
-	return litColor;
+	return float4(litColor.rgb, 1);
 }
 
 /**********************************************************************************************************
@@ -735,6 +732,17 @@ technique11 PositionTextureBLUE
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureBLUE()));
+
+		SetRasterizerState(RasterizerSolid);
+	}
+}
+technique11 PositionTextureALPHA
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureALPHA()));
 
 		SetRasterizerState(RasterizerSolid);
 	}

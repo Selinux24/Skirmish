@@ -145,21 +145,37 @@ namespace Collada
             this.Lights.FogRange = this.Camera.FarPlaneDistance * fogRangeRel;
             this.Lights.FogColor = Color.CornflowerBlue;
 
-            this.Lights.PointLightEnabled = true;
-            this.Lights.PointLight.Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f);
-            this.Lights.PointLight.Diffuse = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
-            this.Lights.PointLight.Specular = new Color4(0.7f, 0.7f, 0.7f, 1.0f);
-            this.Lights.PointLight.Attenuation = new Vector3(0.1f, 0.0f, 0.0f);
-            this.Lights.PointLight.Range = 80.0f;
+            SceneLightPoint pointLight = new SceneLightPoint()
+            {
+                Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f),
+                Diffuse = new Color4(0.7f, 0.7f, 0.7f, 1.0f),
+                Specular = new Color4(0.7f, 0.7f, 0.7f, 1.0f),
+                Attenuation = new Vector3(0.1f, 0.0f, 0.0f),
+                Range = 80.0f,
+                Enabled = true,
+            };
 
-            this.Lights.SpotLightEnabled = true;
-            this.Lights.SpotLight.Direction = Vector3.Down;
-            this.Lights.SpotLight.Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
-            this.Lights.SpotLight.Diffuse = new Color4(1.0f, 1.0f, 0.0f, 1.0f);
-            this.Lights.SpotLight.Specular = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
-            this.Lights.SpotLight.Attenuation = new Vector3(0.15f, 0.0f, 0.0f);
-            this.Lights.SpotLight.Spot = 16f;
-            this.Lights.SpotLight.Range = 100.0f;
+            SceneLightSpot spotLight = new SceneLightSpot()
+            {
+                Direction = Vector3.Down,
+                Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
+                Diffuse = new Color4(1.0f, 1.0f, 0.0f, 1.0f),
+                Specular = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                Attenuation = new Vector3(0.15f, 0.0f, 0.0f),
+                Spot = 16f,
+                Range = 100.0f,
+                Enabled = true,
+            };
+
+            this.Lights.PointLights = new []
+            {
+                pointLight,  
+            };
+
+            this.Lights.SpotLights = new[]
+            {
+                spotLight,  
+            };
 
             this.Lights.EnableShadows = false;
             this.SceneVolume = this.ground.GetBoundingSphere();
@@ -228,36 +244,36 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.NumPad0))
             {
-                this.Lights.DirectionalLight1Enabled = true;
-                this.Lights.DirectionalLight2Enabled = true;
-                this.Lights.DirectionalLight3Enabled = true;
-                this.Lights.PointLightEnabled = true;
-                this.Lights.SpotLightEnabled = true;
+                this.Lights.DirectionalLights[0].Enabled = true;
+                this.Lights.DirectionalLights[1].Enabled = true;
+                this.Lights.DirectionalLights[2].Enabled = true;
+                this.Lights.PointLights[0].Enabled = true;
+                this.Lights.SpotLights[0].Enabled = true;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.NumPad1))
             {
-                this.Lights.DirectionalLight1Enabled = !this.Lights.DirectionalLight1Enabled;
+                this.Lights.DirectionalLights[0].Enabled = !this.Lights.DirectionalLights[0].Enabled;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.NumPad2))
             {
-                this.Lights.DirectionalLight2Enabled = !this.Lights.DirectionalLight2Enabled;
+                this.Lights.DirectionalLights[1].Enabled = !this.Lights.DirectionalLights[1].Enabled;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.NumPad3))
             {
-                this.Lights.DirectionalLight3Enabled = !this.Lights.DirectionalLight3Enabled;
+                this.Lights.DirectionalLights[2].Enabled = !this.Lights.DirectionalLights[2].Enabled;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.NumPad4))
             {
-                this.Lights.PointLightEnabled = !this.Lights.PointLightEnabled;
+                this.Lights.PointLights[0].Enabled = !this.Lights.PointLights[0].Enabled;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.NumPad5))
             {
-                this.Lights.SpotLightEnabled = !this.Lights.SpotLightEnabled;
+                this.Lights.SpotLights[0].Enabled = !this.Lights.SpotLights[0].Enabled;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.NumPad6))
@@ -336,7 +352,7 @@ namespace Collada
                 this.lampsModel.Instances[0].Manipulator.SetPosition(lampPos + (Vector3.UnitY * 30f));
             }
 
-            this.Lights.PointLight.Position = this.lampsModel.Instances[0].Manipulator.Position;
+            this.Lights.PointLights[0].Position = this.lampsModel.Instances[0].Manipulator.Position;
 
             #endregion
 
@@ -362,8 +378,8 @@ namespace Collada
             this.lampsModel.Instances[1].Manipulator.SetPosition(lampPosition + this.helicopters[this.selectedHelicopter].Manipulator.Position);
             this.lampsModel.Instances[1].Manipulator.SetRotation(lampRotation * this.helicopters[this.selectedHelicopter].Manipulator.Rotation);
 
-            this.Lights.SpotLight.Position = this.lampsModel.Instances[1].Manipulator.Position;
-            this.Lights.SpotLight.Direction = this.lampsModel.Instances[1].Manipulator.Down;
+            this.Lights.SpotLights[0].Position = this.lampsModel.Instances[1].Manipulator.Position;
+            this.Lights.SpotLights[0].Direction = this.lampsModel.Instances[1].Manipulator.Down;
 
             #endregion
 

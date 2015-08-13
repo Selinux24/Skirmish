@@ -47,11 +47,42 @@ namespace Engine
         /// View * ortho projection matrix
         /// </summary>
         private Matrix viewProjection;
+        /// <summary>
+        /// Drawing channels
+        /// </summary>
+        private SpriteTextureChannelsEnum channels = SpriteTextureChannelsEnum.All;
 
         /// <summary>
         /// Texture
         /// </summary>
         public ShaderResourceView Texture;
+        /// <summary>
+        /// Drawing channels
+        /// </summary>
+        public SpriteTextureChannelsEnum Channels
+        {
+            get
+            {
+                return this.channels;
+            }
+            set
+            {
+                if (this.channels != value)
+                {
+                    this.channels = value;
+
+                    if (this.effect != null)
+                    {
+                        if (value == SpriteTextureChannelsEnum.All) this.effectTechnique = this.effect.PositionTexture;
+                        else if (value == SpriteTextureChannelsEnum.Red) this.effectTechnique = this.effect.PositionTextureRED;
+                        else if (value == SpriteTextureChannelsEnum.Green) this.effectTechnique = this.effect.PositionTextureGREEN;
+                        else if (value == SpriteTextureChannelsEnum.Blue) this.effectTechnique = this.effect.PositionTextureBLUE;
+                        else if (value == SpriteTextureChannelsEnum.Alpha) this.effectTechnique = this.effect.PositionTextureALPHA;
+                        else if (value == SpriteTextureChannelsEnum.NoAlpha) this.effectTechnique = this.effect.PositionTextureNOALPHA;
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Contructor
@@ -79,12 +110,7 @@ namespace Engine
             this.indexBuffer = this.Device.CreateIndexBufferImmutable(ci);
 
             this.effect = DrawerPool.EffectBasic;
-
-            if (description.Channel == SpriteTextureChannelsEnum.All) this.effectTechnique = this.effect.PositionTexture;
-            else if (description.Channel == SpriteTextureChannelsEnum.Red) this.effectTechnique = this.effect.PositionTextureRED;
-            else if (description.Channel == SpriteTextureChannelsEnum.Green) this.effectTechnique = this.effect.PositionTextureGREEN;
-            else if (description.Channel == SpriteTextureChannelsEnum.Blue) this.effectTechnique = this.effect.PositionTextureBLUE;
-            else if (description.Channel == SpriteTextureChannelsEnum.NoAlpha) this.effectTechnique = this.effect.PositionTextureNOALPHA;
+            this.Channels = description.Channel;
 
             this.InitializeContext(description.Left, description.Top, description.Width, description.Height);
         }
@@ -204,6 +230,10 @@ namespace Engine
         /// Blue channel
         /// </summary>
         Blue,
+        /// <summary>
+        /// Alpha channel
+        /// </summary>
+        Alpha,
         /// <summary>
         /// Without Alpha Channel
         /// </summary>

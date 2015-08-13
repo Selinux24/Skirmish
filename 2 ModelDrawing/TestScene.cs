@@ -54,12 +54,18 @@ namespace ModelDrawing
                 range = Vector3.Distance(this.Camera.Position, p);
             }
 
-            this.Lights.SpotLight.SetDefault();
-            this.Lights.SpotLight.Position = this.Camera.Position;
-            this.Lights.SpotLight.Direction = this.Camera.Direction;
-            this.Lights.SpotLight.Range = range;
-            this.Lights.SpotLight.Spot = 0f;
-            this.Lights.SpotLightEnabled = true;
+            SceneLightSpot spotLight = new SceneLightSpot();
+            spotLight.SetDefault();
+            spotLight.Position = this.Camera.Position;
+            spotLight.Direction = this.Camera.Direction;
+            spotLight.Range = range;
+            spotLight.Spot = 0f;
+            spotLight.Enabled = true;
+
+            this.Lights.SpotLights = new[]
+            {
+                spotLight,
+            };
 
             this.InitializePositions();
         }
@@ -150,7 +156,7 @@ namespace ModelDrawing
             if (this.Game.Input.KeyJustReleased(Keys.Tab)) { this.NextModel(); }
             if (this.Game.Input.KeyJustReleased(Keys.Space)) { this.NextAttenuation(); }
 
-            if (this.Game.Input.KeyJustReleased(Keys.L)) { this.Lights.SpotLightEnabled = !this.Lights.SpotLightEnabled; }
+            if (this.Game.Input.KeyJustReleased(Keys.L)) { this.Lights.SpotLights[0].Enabled = !this.Lights.SpotLights[0].Enabled; }
 
             Manipulator3D selectedModel = this.models[this.selected].Manipulator;
             if (selectedModel != null)
@@ -175,8 +181,8 @@ namespace ModelDrawing
             }
             if (spot < 0f) spot = 0f;
 
-            this.Lights.SpotLight.Spot = spot;
-            this.Lights.SpotLight.Attenuation = this.attenuation;
+            this.Lights.SpotLights[0].Spot = spot;
+            this.Lights.SpotLights[0].Attenuation = this.attenuation;
 
             this.text.Text = string.Format("Spot {0:0.00}; Attenuation {1}", spot, this.attenuation);
         }

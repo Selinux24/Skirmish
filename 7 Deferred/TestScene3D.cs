@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Engine;
 using Engine.PathFinding;
@@ -10,9 +11,6 @@ namespace DeferredTest
     {
         private Random rnd = new Random();
 
-        private SpriteTexture gBufferDrawer = null;
-        private int bufferIndex = 0;
-
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer help = null;
@@ -21,6 +19,8 @@ namespace DeferredTest
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
         private Terrain terrain = null;
+
+        private SpriteTexture bufferDrawer = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
@@ -34,6 +34,48 @@ namespace DeferredTest
 
             this.Camera.NearPlaneDistance = 0.5f;
             this.Camera.FarPlaneDistance = 5000f;
+
+            List<SceneLightPoint> lights = new List<SceneLightPoint>();
+
+            for (int i = 0; i < 5; i++)
+            {
+                for (int x = 0; x < 5; x++)
+                {
+                    SceneLightPoint pointLight = new SceneLightPoint()
+                    {
+                        Position = new Vector3((i * 10) - 20, 5, (x * 10) - 20),
+                        Range = 8f,
+                        Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f),
+                        Diffuse = new Color4(0.7f, 0.7f, 0.7f, 1.0f),
+                        Specular = new Color4(0.7f, 0.7f, 0.7f, 1.0f),
+                        Attenuation = new Vector3(1.0f, 0.0f, 0.1f),
+                        Enabled = true,
+                    };
+
+                    lights.Add(pointLight);
+                }
+            }
+
+            this.Lights.PointLights = lights.ToArray();
+
+            //Vector3 att = this.Lights.PointLight.Attenuation;
+
+            //System.Collections.Generic.List<float> attList1 = new System.Collections.Generic.List<float>();
+            //System.Collections.Generic.List<float> attList2 = new System.Collections.Generic.List<float>();
+            //for (int x = 0; x < this.Lights.PointLight.Range + 1; x++)
+            //{
+            //    Vector3 dist = new Vector3(1, x, x * x);
+            //    float attenuation1 = 1.0f / Vector3.Dot(att, dist);
+            //    float attenuation2 = 1.0f - x / this.Lights.PointLight.Range;
+            //    attList1.Add(attenuation1);
+            //    attList2.Add(attenuation2);
+            //}
+
+            this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[1].Enabled = false;
+            this.Lights.DirectionalLights[2].Enabled = false;
+
+            this.Lights.EnableShadows = false;
 
             #region Texts
 
@@ -72,28 +114,6 @@ namespace DeferredTest
                 PathNodeInclination = MathUtil.DegreesToRadians(35),
                 AddSkydom = true,
                 SkydomTexture = "sunset.dds",
-                AddVegetation = true,
-                Vegetation = new[]
-                {
-                    new TerrainDescription.VegetationDescription()
-                    {
-                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds" },
-                        Saturation = 0.5f,
-                        Opaque = true,
-                        Radius = 300f,
-                        MinSize = Vector2.One * 2.50f,
-                        MaxSize = Vector2.One * 3.50f,
-                    },
-                    new TerrainDescription.VegetationDescription()
-                    {
-                        VegetarionTextures = new[] { "grass.png" },
-                        Saturation = 10f,
-                        Opaque = false,
-                        Radius = 50f,
-                        MinSize = Vector2.One * 0.20f,
-                        MaxSize = Vector2.One * 0.25f,
-                    }
-                },
                 Opaque = true,
             });
             sw.Stop();
@@ -153,14 +173,14 @@ namespace DeferredTest
 
             #endregion
 
-            #region G Buffer
+            #region Debug Buffer Drawer
 
             int width = (int)(this.Game.Form.RenderWidth * 0.33f);
             int height = (int)(this.Game.Form.RenderHeight * 0.33f);
             int smLeft = this.Game.Form.RenderWidth - width;
             int smTop = this.Game.Form.RenderHeight - height;
 
-            this.gBufferDrawer = this.AddSpriteTexture(new SpriteTextureDescription()
+            this.bufferDrawer = this.AddSpriteTexture(new SpriteTextureDescription()
             {
                 Left = smLeft,
                 Top = smTop,
@@ -169,7 +189,11 @@ namespace DeferredTest
                 Channel = SpriteTextureChannelsEnum.NoAlpha,
             });
 
+            this.bufferDrawer.Visible = false;
+
             #endregion
+
+            #region Object locations
 
             Vector3 cameraPosition = Vector3.Zero;
             int modelCount = 0;
@@ -205,15 +229,7 @@ namespace DeferredTest
             this.Camera.Goto(cameraPosition + (Vector3.One * 30f));
             this.Camera.LookTo(cameraPosition + Vector3.Up);
 
-            this.Lights.PointLight.Position = Vector3.Zero;
-            this.Lights.PointLight.Range = 15f;
-            this.Lights.PointLight.Enabled = true;
-
-            this.Lights.DirectionalLight1.Enabled = false;
-            this.Lights.DirectionalLight2.Enabled = false;
-            this.Lights.DirectionalLight3.Enabled = false;
-
-            this.Lights.EnableShadows = false;
+            #endregion
         }
 
         public override void Dispose()
@@ -242,29 +258,43 @@ namespace DeferredTest
 
             #region Debug
 
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            if (this.DrawContext.GeometryMap != null && this.DrawContext.GeometryMap.Length > 0)
             {
-                this.bufferIndex = 0;
+                if (this.Game.Input.KeyJustReleased(Keys.F1))
+                {
+                    this.bufferDrawer.Texture = this.DrawContext.GeometryMap[0];
+                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                    this.bufferDrawer.Visible = true;
+                }
+
+                if (this.Game.Input.KeyJustReleased(Keys.F2))
+                {
+                    this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
+                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                    this.bufferDrawer.Visible = true;
+                }
+
+                if (this.Game.Input.KeyJustReleased(Keys.F3))
+                {
+                    this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
+                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
+                    this.bufferDrawer.Visible = true;
+                }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            if (this.DrawContext.LightMap != null)
             {
-                this.bufferIndex = 1;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F3))
-            {
-                this.bufferIndex = 2;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F4))
-            {
-                this.bufferIndex = -1;
+                if (this.Game.Input.KeyJustReleased(Keys.F4))
+                {
+                    this.bufferDrawer.Texture = this.DrawContext.LightMap;
+                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.All;
+                    this.bufferDrawer.Visible = true;
+                }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                this.gBufferDrawer.Visible = !this.gBufferDrawer.Visible;
+                this.bufferDrawer.Visible = !this.bufferDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
@@ -280,6 +310,11 @@ namespace DeferredTest
             if (this.Game.Input.KeyJustReleased(Keys.F8))
             {
                 this.helicopter.Visible = !this.helicopter.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F9))
+            {
+                this.helicopters.Visible = !this.helicopters.Visible;
             }
 
             #endregion
@@ -334,6 +369,50 @@ namespace DeferredTest
 
             #endregion
 
+            #region Light
+
+            if (this.Game.Input.KeyPressed(Keys.Left))
+            {
+                this.Lights.PointLights[0].Position += (Vector3.Left) * 0.1f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Right))
+            {
+                this.Lights.PointLights[0].Position += (Vector3.Right) * 0.1f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Up))
+            {
+                this.Lights.PointLights[0].Position += (Vector3.ForwardLH) * 0.1f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Down))
+            {
+                this.Lights.PointLights[0].Position += (Vector3.BackwardLH) * 0.1f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.PageUp))
+            {
+                this.Lights.PointLights[0].Position += (Vector3.Up) * 0.1f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.PageDown))
+            {
+                this.Lights.PointLights[0].Position += (Vector3.Down) * 0.1f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Add))
+            {
+                this.Lights.PointLights[0].Range += 0.1f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Subtract))
+            {
+                this.Lights.PointLights[0].Range -= 0.1f;
+            }
+
+            #endregion
+
             if (this.Game.Form.IsFullscreen)
             {
                 this.load.Text = this.Game.RuntimeText;
@@ -343,15 +422,6 @@ namespace DeferredTest
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
-
-            if (this.bufferIndex >= 0 && this.DrawContext.GBuffer != null && this.DrawContext.GBuffer.Length > 0)
-            {
-                this.gBufferDrawer.Texture = this.bufferIndex >= 0 ? this.DrawContext.GBuffer[this.bufferIndex] : null;
-            }
-            else
-            {
-                this.gBufferDrawer.Texture = null;
-            }
         }
     }
 }

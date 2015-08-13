@@ -268,7 +268,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // COLOR                    0   xyzw        2     NONE   float       
                 //
                 //
@@ -284,6 +284,7 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb1[2], immediateIndexed
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
@@ -296,12 +297,13 @@ fxgroup
                 //   o1.x <- <PSPositionColor return value>.normal.x; o1.y <- <PSPositionColor return value>.normal.y; o1.z <- <PSPositionColor return value>.normal.z; o1.w <- <PSPositionColor return value>.normal.w; 
                 //   o0.x <- <PSPositionColor return value>.color.x; o0.y <- <PSPositionColor return value>.color.y; o0.z <- <PSPositionColor return value>.color.z; o0.w <- <PSPositionColor return value>.color.w
                 //
-                #line 106 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 107 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
-                mov o1.xyzw, l(0,0,0,1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.xyzw, l(0,0,0,0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 4 instruction slots used
+                // Approximately 5 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -444,7 +446,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // COLOR                    0   xyzw        2     NONE   float       
                 //
                 //
@@ -460,6 +462,7 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb1[2], immediateIndexed
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
@@ -472,12 +475,13 @@ fxgroup
                 //   o1.x <- <PSPositionColor return value>.normal.x; o1.y <- <PSPositionColor return value>.normal.y; o1.z <- <PSPositionColor return value>.normal.z; o1.w <- <PSPositionColor return value>.normal.w; 
                 //   o0.x <- <PSPositionColor return value>.color.x; o0.y <- <PSPositionColor return value>.color.y; o0.z <- <PSPositionColor return value>.color.z; o0.w <- <PSPositionColor return value>.color.w
                 //
-                #line 106 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 107 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
-                mov o1.xyzw, l(0,0,0,1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.xyzw, l(0,0,0,0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 4 instruction slots used
+                // Approximately 5 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -564,18 +568,18 @@ fxgroup
                 //   o1.x <- <VSPositionColorSkinned return value>.positionWorld.x; o1.y <- <VSPositionColorSkinned return value>.positionWorld.y; o1.z <- <VSPositionColorSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionColorSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionColorSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionColorSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionColorSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -655,7 +659,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // COLOR                    0   xyzw        2     NONE   float       
                 //
                 //
@@ -671,6 +675,7 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb1[2], immediateIndexed
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
@@ -683,12 +688,13 @@ fxgroup
                 //   o1.x <- <PSPositionColor return value>.normal.x; o1.y <- <PSPositionColor return value>.normal.y; o1.z <- <PSPositionColor return value>.normal.z; o1.w <- <PSPositionColor return value>.normal.w; 
                 //   o0.x <- <PSPositionColor return value>.color.x; o0.y <- <PSPositionColor return value>.color.y; o0.z <- <PSPositionColor return value>.color.z; o0.w <- <PSPositionColor return value>.color.w
                 //
-                #line 106 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 107 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
-                mov o1.xyzw, l(0,0,0,1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.xyzw, l(0,0,0,0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 4 instruction slots used
+                // Approximately 5 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -791,18 +797,18 @@ fxgroup
                 //   o1.x <- <VSPositionColorSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionColorSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionColorSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionColorSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionColorSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionColorSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionColorSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -885,7 +891,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // COLOR                    0   xyzw        2     NONE   float       
                 //
                 //
@@ -901,6 +907,7 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb1[2], immediateIndexed
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
@@ -913,12 +920,13 @@ fxgroup
                 //   o1.x <- <PSPositionColor return value>.normal.x; o1.y <- <PSPositionColor return value>.normal.y; o1.z <- <PSPositionColor return value>.normal.z; o1.w <- <PSPositionColor return value>.normal.w; 
                 //   o0.x <- <PSPositionColor return value>.color.x; o0.y <- <PSPositionColor return value>.color.y; o0.z <- <PSPositionColor return value>.color.z; o0.w <- <PSPositionColor return value>.color.w
                 //
-                #line 106 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 107 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
-                mov o1.xyzw, l(0,0,0,1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.xyzw, l(0,0,0,0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 4 instruction slots used
+                // Approximately 5 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -997,7 +1005,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColor return value>.positionWorld.x; o1.y <- <VSPositionNormalColor return value>.positionWorld.y; o1.z <- <VSPositionNormalColor return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColor return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColor return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColor return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColor return value>.positionHomogeneous.w
                 //
-                #line 116 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 117 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -1014,7 +1022,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 121
+                #line 122
                 mov o3.xyzw, v2.xyzw
                 mov o4.xyzw, l(0,0,0,0)
                 ret 
@@ -1059,7 +1067,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // COLOR                    0   xyzw        3     NONE   float       
                 // TEXCOORD                 1   xyzw        4     NONE   float       
@@ -1077,6 +1085,7 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb1[2], immediateIndexed
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
@@ -1092,13 +1101,14 @@ fxgroup
                 //   o1.x <- <PSPositionNormalColor return value>.normal.x; o1.y <- <PSPositionNormalColor return value>.normal.y; o1.z <- <PSPositionNormalColor return value>.normal.z; o1.w <- <PSPositionNormalColor return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalColor return value>.color.x; o0.y <- <PSPositionNormalColor return value>.color.y; o0.z <- <PSPositionNormalColor return value>.color.z; o0.w <- <PSPositionNormalColor return value>.color.w
                 //
-                #line 194 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 196 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -1193,7 +1203,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColorI return value>.positionWorld.x; o1.y <- <VSPositionNormalColorI return value>.positionWorld.y; o1.z <- <VSPositionNormalColorI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColorI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColorI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColorI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColorI return value>.positionHomogeneous.w
                 //
-                #line 127 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 128 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -1212,7 +1222,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 134
+                #line 135
                 mov o3.xyzw, v2.xyzw
                 mov o4.xyzw, l(0,0,0,0)
                 ret 
@@ -1257,7 +1267,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // COLOR                    0   xyzw        3     NONE   float       
                 // TEXCOORD                 1   xyzw        4     NONE   float       
@@ -1275,6 +1285,7 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb1[2], immediateIndexed
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
@@ -1290,13 +1301,14 @@ fxgroup
                 //   o1.x <- <PSPositionNormalColor return value>.normal.x; o1.y <- <PSPositionNormalColor return value>.normal.y; o1.z <- <PSPositionNormalColor return value>.normal.z; o1.w <- <PSPositionNormalColor return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalColor return value>.color.x; o0.y <- <PSPositionNormalColor return value>.color.y; o0.z <- <PSPositionNormalColor return value>.color.z; o0.w <- <PSPositionNormalColor return value>.color.w
                 //
-                #line 194 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 196 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -1392,18 +1404,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColorSkinned return value>.positionWorld.x; o1.y <- <VSPositionNormalColorSkinned return value>.positionWorld.y; o1.z <- <VSPositionNormalColorSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 392
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 382
+                #line 399
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -1434,7 +1446,7 @@ fxgroup
                   mad r2.xyz, r2.wwww, r4.xyzx, r2.xyzx
                 endloop 
                 
-                #line 152 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 153 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -1450,7 +1462,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 157
+                #line 158
                 mov o3.xyzw, v2.xyzw
                 mov o4.xyzw, l(0,0,0,0)
                 ret 
@@ -1495,7 +1507,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // COLOR                    0   xyzw        3     NONE   float       
                 // TEXCOORD                 1   xyzw        4     NONE   float       
@@ -1513,6 +1525,7 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb1[2], immediateIndexed
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
@@ -1528,13 +1541,14 @@ fxgroup
                 //   o1.x <- <PSPositionNormalColor return value>.normal.x; o1.y <- <PSPositionNormalColor return value>.normal.y; o1.z <- <PSPositionNormalColor return value>.normal.z; o1.w <- <PSPositionNormalColor return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalColor return value>.color.x; o0.y <- <PSPositionNormalColor return value>.color.y; o0.z <- <PSPositionNormalColor return value>.color.z; o0.w <- <PSPositionNormalColor return value>.color.w
                 //
-                #line 194 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 196 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -1646,18 +1660,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColorSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionNormalColorSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionNormalColorSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 392
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 382
+                #line 399
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- normalLocal.x; r1.y <- normalLocal.y; r1.z <- normalLocal.z
@@ -1688,7 +1702,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r4.xyzx, r1.xyzx
                 endloop 
                 
-                #line 175 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 176 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -1707,7 +1721,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 182
+                #line 183
                 mov o3.xyzw, v2.xyzw
                 mov o4.xyzw, l(0,0,0,0)
                 ret 
@@ -1752,7 +1766,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // COLOR                    0   xyzw        3     NONE   float       
                 // TEXCOORD                 1   xyzw        4     NONE   float       
@@ -1770,6 +1784,7 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb1[2], immediateIndexed
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
@@ -1785,13 +1800,14 @@ fxgroup
                 //   o1.x <- <PSPositionNormalColor return value>.normal.x; o1.y <- <PSPositionNormalColor return value>.normal.y; o1.z <- <PSPositionNormalColor return value>.normal.z; o1.w <- <PSPositionNormalColor return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalColor return value>.color.x; o0.y <- <PSPositionNormalColor return value>.color.y; o0.z <- <PSPositionNormalColor return value>.color.z; o0.w <- <PSPositionNormalColor return value>.color.w
                 //
-                #line 194 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 196 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -1872,7 +1888,7 @@ fxgroup
                 //   o1.x <- <VSPositionTexture return value>.positionWorld.x; o1.y <- <VSPositionTexture return value>.positionWorld.y; o1.z <- <VSPositionTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionTexture return value>.positionHomogeneous.w
                 //
-                #line 204 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 206 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -1883,7 +1899,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 209
+                #line 211
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -1910,7 +1926,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // TEXCOORD                 0   xy          2     NONE   float   xy  
                 // textureIndex             0     z         2     NONE   float     z 
                 //
@@ -1928,6 +1944,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xy
                 dcl_input_ps linear v2.z
                 dcl_output o0.xyzw
@@ -1942,14 +1959,15 @@ fxgroup
                 //   o1.x <- <PSPositionTexture return value>.normal.x; o1.y <- <PSPositionTexture return value>.normal.y; o1.z <- <PSPositionTexture return value>.normal.z; o1.w <- <PSPositionTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionTexture return value>.color.x; o0.y <- <PSPositionTexture return value>.color.y; o0.z <- <PSPositionTexture return value>.color.z; o0.w <- <PSPositionTexture return value>.color.w
                 //
-                #line 271 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 273 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0
                 
-                #line 276
-                mov o1.xyzw, l(0,0,0,1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                #line 279
+                mov o1.xyzw, l(0,0,0,0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 4 instruction slots used
+                // Approximately 5 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -2038,7 +2056,7 @@ fxgroup
                 //   o1.x <- <VSPositionTextureI return value>.positionWorld.x; o1.y <- <VSPositionTextureI return value>.positionWorld.y; o1.z <- <VSPositionTextureI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTextureI return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureI return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureI return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureI return value>.positionHomogeneous.w
                 //
-                #line 215 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 217 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -2051,7 +2069,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 222
+                #line 224
                 mov o2.xy, v1.xyxx
                 mov o2.z, v6.x
                 ret 
@@ -2078,7 +2096,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // TEXCOORD                 0   xy          2     NONE   float   xy  
                 // textureIndex             0     z         2     NONE   float     z 
                 //
@@ -2096,6 +2114,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xy
                 dcl_input_ps linear v2.z
                 dcl_output o0.xyzw
@@ -2110,14 +2129,15 @@ fxgroup
                 //   o1.x <- <PSPositionTexture return value>.normal.x; o1.y <- <PSPositionTexture return value>.normal.y; o1.z <- <PSPositionTexture return value>.normal.z; o1.w <- <PSPositionTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionTexture return value>.color.x; o0.y <- <PSPositionTexture return value>.color.y; o0.z <- <PSPositionTexture return value>.color.z; o0.w <- <PSPositionTexture return value>.color.w
                 //
-                #line 271 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 273 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0
                 
-                #line 276
-                mov o1.xyzw, l(0,0,0,1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                #line 279
+                mov o1.xyzw, l(0,0,0,0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 4 instruction slots used
+                // Approximately 5 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -2215,18 +2235,18 @@ fxgroup
                 //   o1.x <- <VSPositionTextureSkinned return value>.positionWorld.x; o1.y <- <VSPositionTextureSkinned return value>.positionWorld.y; o1.z <- <VSPositionTextureSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTextureSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -2252,7 +2272,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx
                 endloop 
                 
-                #line 237 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 239 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -2262,7 +2282,7 @@ fxgroup
                 dp4 o1.y, r1.xyzw, cb0[1].xyzw
                 dp4 o1.z, r1.xyzw, cb0[2].xyzw
                 
-                #line 242
+                #line 244
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -2289,7 +2309,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // TEXCOORD                 0   xy          2     NONE   float   xy  
                 // textureIndex             0     z         2     NONE   float     z 
                 //
@@ -2307,6 +2327,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xy
                 dcl_input_ps linear v2.z
                 dcl_output o0.xyzw
@@ -2321,14 +2342,15 @@ fxgroup
                 //   o1.x <- <PSPositionTexture return value>.normal.x; o1.y <- <PSPositionTexture return value>.normal.y; o1.z <- <PSPositionTexture return value>.normal.z; o1.w <- <PSPositionTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionTexture return value>.color.x; o0.y <- <PSPositionTexture return value>.color.y; o0.z <- <PSPositionTexture return value>.color.z; o0.w <- <PSPositionTexture return value>.color.w
                 //
-                #line 271 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 273 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0
                 
-                #line 276
-                mov o1.xyzw, l(0,0,0,1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                #line 279
+                mov o1.xyzw, l(0,0,0,0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 4 instruction slots used
+                // Approximately 5 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -2434,18 +2456,18 @@ fxgroup
                 //   o1.x <- <VSPositionTextureSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionTextureSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionTextureSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -2471,7 +2493,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx
                 endloop 
                 
-                #line 257 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 259 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -2484,7 +2506,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 264
+                #line 266
                 mov o2.xy, v1.xyxx
                 mov o2.z, v8.x
                 ret 
@@ -2511,7 +2533,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // TEXCOORD                 0   xy          2     NONE   float   xy  
                 // textureIndex             0     z         2     NONE   float     z 
                 //
@@ -2529,6 +2551,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xy
                 dcl_input_ps linear v2.z
                 dcl_output o0.xyzw
@@ -2543,14 +2566,15 @@ fxgroup
                 //   o1.x <- <PSPositionTexture return value>.normal.x; o1.y <- <PSPositionTexture return value>.normal.y; o1.z <- <PSPositionTexture return value>.normal.z; o1.w <- <PSPositionTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionTexture return value>.color.x; o0.y <- <PSPositionTexture return value>.color.y; o0.z <- <PSPositionTexture return value>.color.z; o0.w <- <PSPositionTexture return value>.color.w
                 //
-                #line 271 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 273 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0
                 
-                #line 276
-                mov o1.xyzw, l(0,0,0,1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                #line 279
+                mov o1.xyzw, l(0,0,0,0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 4 instruction slots used
+                // Approximately 5 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -2640,7 +2664,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTexture return value>.positionWorld.x; o1.y <- <VSPositionNormalTexture return value>.positionWorld.y; o1.z <- <VSPositionNormalTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTexture return value>.positionHomogeneous.w
                 //
-                #line 286 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 289 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -2657,7 +2681,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 292
+                #line 295
                 mov o3.xy, v2.xyxx
                 mov o3.z, cb3[0].x
                 mov o4.xyzw, l(0,0,0,0)
@@ -2685,7 +2709,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // TEXCOORD                 0   xy          3     NONE   float   xy  
                 // textureIndex             0     z         3     NONE   float     z 
@@ -2705,6 +2729,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_input_ps linear v3.xy
                 dcl_input_ps linear v3.z
@@ -2723,15 +2748,16 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTexture return value>.normal.x; o1.y <- <PSPositionNormalTexture return value>.normal.y; o1.z <- <PSPositionNormalTexture return value>.normal.z; o1.w <- <PSPositionNormalTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTexture return value>.color.x; o0.y <- <PSPositionNormalTexture return value>.color.y; o0.z <- <PSPositionNormalTexture return value>.color.z; o0.w <- <PSPositionNormalTexture return value>.color.w
                 //
-                #line 363 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 366 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0
                 
-                #line 368
+                #line 372
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -2829,7 +2855,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureI return value>.positionHomogeneous.w
                 //
-                #line 298 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 301 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -2848,7 +2874,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 306
+                #line 309
                 mov o3.xy, v2.xyxx
                 mov o3.z, v7.x
                 mov o4.xyzw, l(0,0,0,0)
@@ -2876,7 +2902,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // TEXCOORD                 0   xy          3     NONE   float   xy  
                 // textureIndex             0     z         3     NONE   float     z 
@@ -2896,6 +2922,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_input_ps linear v3.xy
                 dcl_input_ps linear v3.z
@@ -2914,15 +2941,16 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTexture return value>.normal.x; o1.y <- <PSPositionNormalTexture return value>.normal.y; o1.z <- <PSPositionNormalTexture return value>.normal.z; o1.w <- <PSPositionNormalTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTexture return value>.color.x; o0.y <- <PSPositionNormalTexture return value>.color.y; o0.z <- <PSPositionNormalTexture return value>.color.z; o0.w <- <PSPositionNormalTexture return value>.color.w
                 //
-                #line 363 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 366 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0
                 
-                #line 368
+                #line 372
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3029,18 +3057,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureSkinned return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureSkinned return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 392
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 382
+                #line 399
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -3071,7 +3099,7 @@ fxgroup
                   mad r2.xyz, r2.wwww, r4.xyzx, r2.xyzx
                 endloop 
                 
-                #line 324 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 327 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -3087,7 +3115,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 330
+                #line 333
                 mov o4.xyzw, l(0,0,0,0)
                 mov o3.xy, v2.xyxx
                 mov o3.z, cb3[0].x
@@ -3115,7 +3143,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // TEXCOORD                 0   xy          3     NONE   float   xy  
                 // textureIndex             0     z         3     NONE   float     z 
@@ -3135,6 +3163,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_input_ps linear v3.xy
                 dcl_input_ps linear v3.z
@@ -3153,15 +3182,16 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTexture return value>.normal.x; o1.y <- <PSPositionNormalTexture return value>.normal.y; o1.z <- <PSPositionNormalTexture return value>.normal.z; o1.w <- <PSPositionNormalTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTexture return value>.color.x; o0.y <- <PSPositionNormalTexture return value>.color.y; o0.z <- <PSPositionNormalTexture return value>.color.z; o0.w <- <PSPositionNormalTexture return value>.color.w
                 //
-                #line 363 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 366 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0
                 
-                #line 368
+                #line 372
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3276,18 +3306,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 392
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 382
+                #line 399
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- normalLocal.x; r1.y <- normalLocal.y; r1.z <- normalLocal.z
@@ -3318,7 +3348,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r4.xyzx, r1.xyzx
                 endloop 
                 
-                #line 348 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 351 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -3337,7 +3367,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 356
+                #line 359
                 mov o4.xyzw, l(0,0,0,0)
                 mov o3.xy, v2.xyxx
                 mov o3.z, v9.x
@@ -3365,7 +3395,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // TEXCOORD                 0   xy          3     NONE   float   xy  
                 // textureIndex             0     z         3     NONE   float     z 
@@ -3385,6 +3415,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_input_ps linear v3.xy
                 dcl_input_ps linear v3.z
@@ -3403,15 +3434,16 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTexture return value>.normal.x; o1.y <- <PSPositionNormalTexture return value>.normal.y; o1.z <- <PSPositionNormalTexture return value>.normal.z; o1.w <- <PSPositionNormalTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTexture return value>.color.x; o0.y <- <PSPositionNormalTexture return value>.color.y; o0.z <- <PSPositionNormalTexture return value>.color.z; o0.w <- <PSPositionNormalTexture return value>.color.w
                 //
-                #line 363 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 366 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0
                 
-                #line 368
+                #line 372
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3507,7 +3539,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangent return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangent return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangent return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.w
                 //
-                #line 378 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 382 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -3527,7 +3559,7 @@ fxgroup
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx
                 
-                #line 385
+                #line 389
                 mov o4.xy, v3.xyxx
                 mov o4.z, cb3[0].x
                 mov o5.xyzw, l(0,0,0,0)
@@ -3555,7 +3587,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // TANGENT                  0   xyz         3     NONE   float       
                 // TEXCOORD                 0   xy          4     NONE   float   xy  
@@ -3576,6 +3608,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_input_ps linear v4.xy
                 dcl_input_ps linear v4.z
@@ -3595,15 +3628,16 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; o1.w <- <PSPositionNormalTextureTangent return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w
                 //
-                #line 465 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 469 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s0
                 
-                #line 470
+                #line 475
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3707,7 +3741,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.w
                 //
-                #line 391 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 395 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v5.xyzw
                 mad r0.xyzw, v0.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v6.xyzw, r0.xyzw
@@ -3729,7 +3763,7 @@ fxgroup
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx
                 
-                #line 400
+                #line 404
                 mov o4.xy, v3.xyxx
                 mov o4.z, v8.x
                 mov o5.xyzw, l(0,0,0,0)
@@ -3757,7 +3791,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // TANGENT                  0   xyz         3     NONE   float       
                 // TEXCOORD                 0   xy          4     NONE   float   xy  
@@ -3778,6 +3812,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_input_ps linear v4.xy
                 dcl_input_ps linear v4.z
@@ -3797,15 +3832,16 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; o1.w <- <PSPositionNormalTextureTangent return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w
                 //
-                #line 465 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 469 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s0
                 
-                #line 470
+                #line 475
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3918,18 +3954,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentSkinned return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentSkinned return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 402
+                #line 419
                 mov x0[0].x, v4.x
                 mov x0[1].x, v4.y
                 mov x0[2].x, v4.z
                 mov x0[3].x, r0.x
                 
-                #line 410
+                #line 427
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -3944,10 +3980,10 @@ fxgroup
                   ult r5.xyz, r4.xxxx, l(1, 2, 3, 0)
                   and r6.y, r3.w, r5.y
                 
-                #line 413
+                #line 430
                   iadd r4.xy, r4.xxxx, l(1, -3, 0, 0)
                 
-                #line 410
+                #line 427
                   movc r6.z, r5.y, l(0), r4.y
                   ieq r6.w, r5.z, l(0)
                   mov r6.x, r5.x
@@ -3969,7 +4005,7 @@ fxgroup
                   mad r3.xyz, r2.wwww, r5.xyzx, r3.xyzx
                 endloop 
                 
-                #line 421 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 425 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -3988,7 +4024,7 @@ fxgroup
                 dp3 o3.y, r3.xyzx, cb0[1].xyzx
                 dp3 o3.z, r3.xyzx, cb0[2].xyzx
                 
-                #line 428
+                #line 432
                 mov o5.xyzw, l(0,0,0,0)
                 mov o4.xy, v3.xyxx
                 mov o4.z, cb3[0].x
@@ -4016,7 +4052,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // TANGENT                  0   xyz         3     NONE   float       
                 // TEXCOORD                 0   xy          4     NONE   float   xy  
@@ -4037,6 +4073,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_input_ps linear v4.xy
                 dcl_input_ps linear v4.z
@@ -4056,15 +4093,16 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; o1.w <- <PSPositionNormalTextureTangent return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w
                 //
-                #line 465 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 469 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s0
                 
-                #line 470
+                #line 475
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -4185,18 +4223,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 402
+                #line 419
                 mov x0[0].x, v4.x
                 mov x0[1].x, v4.y
                 mov x0[2].x, v4.z
                 mov x0[3].x, r0.x
                 
-                #line 410
+                #line 427
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- normalLocal.x; r1.y <- normalLocal.y; r1.z <- normalLocal.z
@@ -4211,10 +4249,10 @@ fxgroup
                   ult r5.xyz, r4.xxxx, l(1, 2, 3, 0)
                   and r6.y, r2.w, r5.y
                 
-                #line 413
+                #line 430
                   iadd r4.xy, r4.xxxx, l(1, -3, 0, 0)
                 
-                #line 410
+                #line 427
                   movc r6.z, r5.y, l(0), r4.y
                   ieq r6.w, r5.z, l(0)
                   mov r6.x, r5.x
@@ -4236,7 +4274,7 @@ fxgroup
                   mad r2.xyz, r1.wwww, r5.xyzx, r2.xyzx
                 endloop 
                 
-                #line 449 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 453 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r3.yyyy, v7.xyzw
                 mad r0.xyzw, r3.xxxx, v6.xyzw, r0.xyzw
                 mad r0.xyzw, r3.zzzz, v8.xyzw, r0.xyzw
@@ -4258,7 +4296,7 @@ fxgroup
                 dp3 o3.y, r2.xyzx, cb0[1].xyzx
                 dp3 o3.z, r2.xyzx, cb0[2].xyzx
                 
-                #line 458
+                #line 462
                 mov o5.xyzw, l(0,0,0,0)
                 mov o4.xy, v3.xyxx
                 mov o4.z, v10.x
@@ -4286,7 +4324,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float     zw
-                // POSITION                 0   xyz         1     NONE   float       
+                // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
                 // TANGENT                  0   xyz         3     NONE   float       
                 // TEXCOORD                 0   xy          4     NONE   float   xy  
@@ -4307,6 +4345,7 @@ fxgroup
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_input_ps_siv linear noperspective v0.zw, position
+                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_input_ps linear v4.xy
                 dcl_input_ps linear v4.z
@@ -4326,15 +4365,16 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; o1.w <- <PSPositionNormalTextureTangent return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w
                 //
-                #line 465 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 469 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s0
                 
-                #line 470
+                #line 475
                 mov o1.xyz, v2.xyzx
-                mov o1.w, l(1.000000)
-                div o2.xyzw, v0.zzzz, v0.wwww
+                mov o1.w, l(0)
+                div o2.w, v0.z, v0.w
+                mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 5 instruction slots used
+                // Approximately 6 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;

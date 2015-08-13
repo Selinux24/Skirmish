@@ -1,5 +1,4 @@
 ﻿using System;
-using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using BindFlags = SharpDX.Direct3D11.BindFlags;
@@ -41,10 +40,6 @@ namespace Engine
         /// Depth map
         /// </summary>
         public DepthStencilView DepthMap { get; protected set; }
-        /// <summary>
-        /// Viewport
-        /// </summary>
-        public Viewport Viewport;
 
         /// <summary>
         /// Constructor
@@ -81,8 +76,6 @@ namespace Engine
             int height = this.Game.Form.RenderHeight;
             Format rtFormat = Format.R32G32B32A32_Float;
             Format dbFormat = Format.D24_UNorm_S8_UInt;
-
-            this.Viewport = new Viewport(0, 0, width, height, 0, 1.0f);
 
             int buffers = 3;
             this.Textures = new ShaderResourceView[buffers];

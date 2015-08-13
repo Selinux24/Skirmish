@@ -75,7 +75,7 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 			gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
 			gout.positionWorld = v[i].xyz;
 			gout.shadowHomogeneous = mul(v[i], gShadowTransform);
-			gout.normalWorld = up;
+			gout.normalWorld = look;
 			gout.tex = gQuadTexC[i];
 			gout.primitiveID = primID;
 
@@ -83,7 +83,6 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 		}
 	}
 }
-
 [maxvertexcount(4)]
 void GSSMBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, inout TriangleStream<ShadowMapOutput> outputStream)
 {
@@ -161,8 +160,9 @@ GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 
 	output.color = textureColor;
 	output.normal.xyz = input.normalWorld;
-	output.normal.w = 1.0f;
-	output.depth = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.normal.w = 0.0f;
+	output.depth.xyz = input.positionWorld;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;
 }

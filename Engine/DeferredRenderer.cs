@@ -15,7 +15,7 @@ namespace Engine
     /// <summary>
     /// Deferred renderer class
     /// </summary>
-    public class DeferredRenderer : IDisposable
+    public class DeferredRenderer : IDisposable, IScreenFitted
     {
         /// <summary>
         /// Light geometry
@@ -59,6 +59,14 @@ namespace Engine
         }
 
         /// <summary>
+        /// Geometry buffer
+        /// </summary>
+        private GBuffer geometryBuffer = null;
+        /// <summary>
+        /// Light buffer
+        /// </summary>
+        private LightBuffer lightBuffer = null;
+        /// <summary>
         /// Light geometry collection
         /// </summary>
         private LightGeometry[] lightGeometry = null;
@@ -81,6 +89,41 @@ namespace Engine
         protected Matrix ViewProjection;
 
         /// <summary>
+        /// Viewport
+        /// </summary>
+        public Viewport Viewport;
+        /// <summary>
+        /// Geometry Buffer
+        /// </summary>
+        public GBuffer GeometryBuffer
+        {
+            get
+            {
+                if (this.geometryBuffer == null)
+                {
+                    this.geometryBuffer = new GBuffer(this.Game);
+                }
+
+                return this.geometryBuffer;
+            }
+        }
+        /// <summary>
+        /// Light Buffer
+        /// </summary>
+        public LightBuffer LightBuffer
+        {
+            get
+            {
+                if (this.lightBuffer == null)
+                {
+                    this.lightBuffer = new LightBuffer(this.Game);
+                }
+
+                return this.lightBuffer;
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
@@ -95,6 +138,18 @@ namespace Engine
         /// </summary>
         public virtual void Dispose()
         {
+            if (this.geometryBuffer != null)
+            {
+                this.geometryBuffer.Dispose();
+                this.geometryBuffer = null;
+            }
+
+            if (this.lightBuffer != null)
+            {
+                this.lightBuffer.Dispose();
+                this.lightBuffer = null;
+            }
+
             if (this.lightGeometry != null && this.lightGeometry.Length > 0)
             {
                 for (int i = 0; i < this.lightGeometry.Length; i++)
@@ -106,16 +161,28 @@ namespace Engine
             this.lightGeometry = null;
         }
         /// <summary>
-        /// Draws a quad fitted to screen to perform pixel by pixel mapping
+        /// Resizes buffers
         /// </summary>
-        /// <param name="context">Drawing context</param>
-        public void Draw(Context context)
+        public virtual void Resize()
         {
-            if (this.Width != this.Game.Form.RenderWidth || this.Height != this.Game.Form.RenderHeight)
+            this.UpdateRectangleAndView();
+
+            if (this.geometryBuffer != null)
             {
-                this.UpdateRectangleAndView();
+                this.geometryBuffer.Resize();
             }
 
+            if (this.lightBuffer != null)
+            {
+                this.lightBuffer.Resize();
+            }
+        }
+        /// <summary>
+        /// Draw lights
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        public void DrawLights(Context context)
+        {
             var deviceContext = this.Game.Graphics.DeviceContext;
 
             var effect = DrawerPool.EffectDeferred;
@@ -123,31 +190,29 @@ namespace Engine
             #region Directional Lights
 
             {
-                var dirLights = new[]
-                {
-                    context.Lights.DirectionalLight1,
-                    context.Lights.DirectionalLight2,
-                    context.Lights.DirectionalLight3,
-                };
-
                 var effectTechnique = effect.DeferredDirectionalLight;
                 var geometry = this.lightGeometry[0];
 
-                for (int i = 0; i < dirLights.Length; i++)
+                this.Game.Graphics.DisableZBuffer();
+
+                for (int i = 0; i < context.Lights.DirectionalLights.Length; i++)
                 {
-                    if (dirLights[i].Enabled)
+                    var light = context.Lights.DirectionalLights[i];
+                    if (light.Enabled)
                     {
                         deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
                         deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                         deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                         deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                        effect.FrameBuffer.World = Matrix.Identity;
-                        effect.FrameBuffer.WorldInverse = Matrix.Identity;
-                        effect.FrameBuffer.WorldViewProjection = this.ViewProjection;
-                        effect.UpdatePerFrame(context.GBuffer[0], context.GBuffer[1], context.GBuffer[2]);
-
-                        effect.UpdatePerDirectionalLight(new BufferDirectionalLight(dirLights[i]));
+                        effect.UpdatePerDirectionalLight(
+                            new BufferDirectionalLight(light),
+                            Matrix.Identity,
+                            this.ViewProjection,
+                            context.EyePosition,
+                            context.GeometryMap[0],
+                            context.GeometryMap[1],
+                            context.GeometryMap[2]);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                         {
@@ -167,31 +232,41 @@ namespace Engine
             #region Point Lights
 
             {
-                var pointLights = new[]
-                {
-                    context.Lights.PointLight,
-                };
-
                 var effectTechnique = effect.DeferredPointLight;
                 var geometry = this.lightGeometry[1];
 
-                for (int i = 0; i < pointLights.Length; i++)
+                this.Game.Graphics.EnableZBuffer();
+
+                for (int i = 0; i < context.Lights.PointLights.Length; i++)
                 {
-                    if (pointLights[i].Enabled)
+                    var light = context.Lights.PointLights[i];
+                    if (light.Enabled)
                     {
+                        float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
+                        if (cameraToCenter < light.Range)
+                        {
+                            this.Game.Graphics.SetCullClockwiseFaceRasterizer();
+                        }
+                        else
+                        {
+                            this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+                        }
+
                         deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
                         deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                         deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                         deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                        Matrix world = Matrix.Scaling(pointLights[i].Range) * Matrix.Translation(pointLights[i].Position);
+                        Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
-                        effect.FrameBuffer.World = world;
-                        effect.FrameBuffer.WorldInverse = world;
-                        effect.FrameBuffer.WorldViewProjection = world * this.ViewProjection;
-                        effect.UpdatePerFrame(context.GBuffer[0], context.GBuffer[1], context.GBuffer[2]);
-
-                        effect.UpdatePerPointLight(new BufferPointLight(pointLights[i]));
+                        effect.UpdatePerPointLight(
+                            new BufferPointLight(light),
+                            world,
+                            world * context.ViewProjection,
+                            context.EyePosition,
+                            context.GeometryMap[0],
+                            context.GeometryMap[1],
+                            context.GeometryMap[2]);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                         {
@@ -211,29 +286,31 @@ namespace Engine
             #region Spot Lights
 
             {
-                var spotLights = new[]
-                {
-                    context.Lights.SpotLight,
-                };
-
                 var effectTechnique = effect.DeferredSpotLight;
                 var geometry = this.lightGeometry[2];
 
-                for (int i = 0; i < spotLights.Length; i++)
+                this.Game.Graphics.EnableZBuffer();
+
+                for (int i = 0; i < context.Lights.SpotLights.Length; i++)
                 {
-                    if (spotLights[i].Enabled)
+                    var light = context.Lights.SpotLights[i];
+                    if (light.Enabled)
                     {
                         deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
                         deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                         deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                         deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                        effect.FrameBuffer.World = Matrix.Identity;
-                        effect.FrameBuffer.WorldInverse = Matrix.Identity;
-                        effect.FrameBuffer.WorldViewProjection = this.ViewProjection;
-                        effect.UpdatePerFrame(context.GBuffer[0], context.GBuffer[1], context.GBuffer[2]);
+                        Matrix world = Matrix.Identity;
 
-                        effect.UpdatePerSpotLight(new BufferSpotLight(spotLights[i]));
+                        effect.UpdatePerSpotLight(
+                            new BufferSpotLight(light),
+                            world,
+                            world * context.ViewProjection,
+                            context.EyePosition,
+                            context.GeometryMap[0],
+                            context.GeometryMap[1],
+                            context.GeometryMap[2]);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                         {
@@ -249,6 +326,45 @@ namespace Engine
             }
 
             #endregion
+
+            this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+        }
+        /// <summary>
+        /// Draw result
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        public void DrawResult(Context context)
+        {
+            if (context.GeometryMap != null && context.LightMap != null)
+            {
+                var deviceContext = this.Game.Graphics.DeviceContext;
+                var effect = DrawerPool.EffectDeferred;
+                var effectTechnique = effect.DeferredCombineLights;
+                var geometry = this.lightGeometry[0];
+
+                deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
+                deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
+                deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+
+                effect.UpdatePerCombineLights(
+                    Matrix.Identity,
+                    this.ViewProjection,
+                    context.EyePosition,
+                    context.GeometryMap[0],
+                    context.GeometryMap[2],
+                    context.LightMap);
+
+                for (int p = 0; p < effectTechnique.Description.PassCount; p++)
+                {
+                    effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
+
+                    deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
+
+                    Counters.DrawCallsPerFrame++;
+                    Counters.InstancesPerFrame++;
+                }
+            }
         }
         /// <summary>
         /// Updates renderer parameters
@@ -257,6 +373,8 @@ namespace Engine
         {
             this.Width = this.Game.Form.RenderWidth;
             this.Height = this.Game.Form.RenderHeight;
+
+            this.Viewport = new Viewport(0, 0, this.Width, this.Height, 0, 1.0f);
 
             this.ViewProjection = Sprite.CreateViewOrthoProjection(this.Width, this.Height);
 
@@ -317,13 +435,13 @@ namespace Engine
             VertexData[] cv;
             uint[] ci;
             VertexData.CreateSphere(
-                1, 5, 5,
+                1, 10, 10,
                 out cv,
                 out ci);
 
-            List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
+            List<VertexPosition> vertList = new List<VertexPosition>();
 
-            Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPositionTexture(v)); });
+            Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPosition(v)); });
 
             if (geometry.VertexBuffer == null)
             {
@@ -355,9 +473,9 @@ namespace Engine
                 out cv,
                 out ci);
 
-            List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
+            List<VertexPosition> vertList = new List<VertexPosition>();
 
-            Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPositionTexture(v)); });
+            Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPosition(v)); });
 
             if (geometry.VertexBuffer == null)
             {

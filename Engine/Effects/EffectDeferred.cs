@@ -27,62 +27,19 @@ namespace Engine.Effects
         public struct PerFrameBuffer
         {
             public Matrix World;
-            public Matrix WorldInverse;
             public Matrix WorldViewProjection;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerFrameBuffer));
-                }
-            }
-        }
-        /// <summary>
-        /// Per directional light update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerDirectionalLightBuffer
-        {
+            public Matrix InvertViewProjection;
+            public Vector3 EyePositionWorld;
+            public float Padding;
             public BufferDirectionalLight DirectionalLight;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerDirectionalLightBuffer));
-                }
-            }
-        }
-        /// <summary>
-        /// Per point light update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerPointLightBuffer
-        {
             public BufferPointLight PointLight;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerPointLightBuffer));
-                }
-            }
-        }
-        /// <summary>
-        /// Per spot light update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerSpotLightBuffer
-        {
             public BufferSpotLight SpotLight;
 
             public static int Size
             {
                 get
                 {
-                    return Marshal.SizeOf(typeof(PerSpotLightBuffer));
+                    return Marshal.SizeOf(typeof(PerFrameBuffer));
                 }
             }
         }
@@ -101,19 +58,23 @@ namespace Engine.Effects
         /// Spot light technique
         /// </summary>
         public readonly EffectTechnique DeferredSpotLight = null;
+        /// <summary>
+        /// Technique to combine all light sources
+        /// </summary>
+        public readonly EffectTechnique DeferredCombineLights = null;
 
         /// <summary>
         /// World matrix effect variable
         /// </summary>
         private EffectMatrixVariable world = null;
         /// <summary>
-        /// Inverse world matrix effect variable
-        /// </summary>
-        private EffectMatrixVariable worldInverse = null;
-        /// <summary>
         /// World view projection effect variable
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
+        /// <summary>
+        /// Eye position effect variable
+        /// </summary>
+        private EffectVectorVariable eyePositionWorld = null;
         /// <summary>
         /// Directional light effect variable
         /// </summary>
@@ -138,6 +99,10 @@ namespace Engine.Effects
         /// Depth Map effect variable
         /// </summary>
         private EffectShaderResourceVariable depthMap = null;
+        /// <summary>
+        /// Light Map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable lightMap = null;
 
         /// <summary>
         /// World matrix
@@ -154,20 +119,6 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Inverse world matrix
-        /// </summary>
-        protected Matrix WorldInverse
-        {
-            get
-            {
-                return this.worldInverse.GetMatrix();
-            }
-            set
-            {
-                this.worldInverse.SetMatrix(value);
-            }
-        }
-        /// <summary>
         /// World view projection matrix
         /// </summary>
         protected Matrix WorldViewProjection
@@ -179,6 +130,24 @@ namespace Engine.Effects
             set
             {
                 this.worldViewProjection.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// Camera eye position
+        /// </summary>
+        protected Vector3 EyePositionWorld
+        {
+            get
+            {
+                Vector4 v = this.eyePositionWorld.GetFloatVector();
+
+                return new Vector3(v.X, v.Y, v.Z);
+            }
+            set
+            {
+                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
+
+                this.eyePositionWorld.Set(v4);
             }
         }
         /// <summary>
@@ -295,11 +264,20 @@ namespace Engine.Effects
                 this.depthMap.SetResource(value);
             }
         }
-
         /// <summary>
-        /// Per frame buffer structure
+        /// Light Map
         /// </summary>
-        public EffectDeferred.PerFrameBuffer FrameBuffer = new EffectDeferred.PerFrameBuffer();
+        protected ShaderResourceView LightMap
+        {
+            get
+            {
+                return this.lightMap.GetResource();
+            }
+            set
+            {
+                this.lightMap.SetResource(value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -313,20 +291,23 @@ namespace Engine.Effects
             this.DeferredDirectionalLight = this.Effect.GetTechniqueByName("DeferredDirectionalLight");
             this.DeferredPointLight = this.Effect.GetTechniqueByName("DeferredPointLight");
             this.DeferredSpotLight = this.Effect.GetTechniqueByName("DeferredSpotLight");
+            this.DeferredCombineLights = this.Effect.GetTechniqueByName("DeferredCombineLights");
 
             this.AddInputLayout(this.DeferredDirectionalLight, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.DeferredPointLight, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.DeferredSpotLight, VertexPositionTexture.GetInput());
+            this.AddInputLayout(this.DeferredPointLight, VertexPosition.GetInput());
+            this.AddInputLayout(this.DeferredSpotLight, VertexPosition.GetInput());
+            this.AddInputLayout(this.DeferredCombineLights, VertexPositionTexture.GetInput());
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
-            this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
             this.directionalLight = this.Effect.GetVariableByName("gDirLight");
             this.pointLight = this.Effect.GetVariableByName("gPointLight");
             this.spotLight = this.Effect.GetVariableByName("gSpotLight");
             this.colorMap = this.Effect.GetVariableByName("gColorMap").AsShaderResource();
             this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
             this.depthMap = this.Effect.GetVariableByName("gDepthMap").AsShaderResource();
+            this.lightMap = this.Effect.GetVariableByName("gLightMap").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -338,7 +319,11 @@ namespace Engine.Effects
         {
             if (stage == DrawingStages.Drawing)
             {
-                if (vertexType == VertexTypes.PositionTexture)
+                if (vertexType == VertexTypes.Position)
+                {
+                    return this.DeferredSpotLight;
+                }
+                else if (vertexType == VertexTypes.PositionTexture)
                 {
                     return this.DeferredDirectionalLight;
                 }
@@ -352,33 +337,79 @@ namespace Engine.Effects
                 throw new Exception(string.Format("Bad stage for effect: {0}", stage));
             }
         }
-        /// <summary>
-        /// Update per frame data
-        /// </summary>
-        public void UpdatePerFrame(ShaderResourceView colors, ShaderResourceView normals, ShaderResourceView depth)
-        {
-            this.World = this.FrameBuffer.World;
-            this.WorldInverse = this.FrameBuffer.WorldInverse;
-            this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
 
+        public void UpdatePerDirectionalLight(
+            BufferDirectionalLight light,
+            Matrix world,
+            Matrix worldViewProjection,
+            Vector3 eyePosition,
+            ShaderResourceView colors,
+            ShaderResourceView normals,
+            ShaderResourceView depth)
+        {
+            this.DirectionalLight = light;
+            this.World = world;
+            this.WorldViewProjection = worldViewProjection;
+            this.EyePositionWorld = eyePosition;
             this.ColorMap = colors;
             this.NormalMap = normals;
             this.DepthMap = depth;
+            this.LightMap = null;
         }
 
-        public void UpdatePerDirectionalLight(BufferDirectionalLight light)
-        {
-            this.DirectionalLight = light;
-        }
-
-        public void UpdatePerPointLight(BufferPointLight light)
+        public void UpdatePerPointLight(
+            BufferPointLight light,
+            Matrix world,
+            Matrix worldViewProjection,
+            Vector3 eyePosition,
+            ShaderResourceView colors,
+            ShaderResourceView normals,
+            ShaderResourceView depth)
         {
             this.PointLight = light;
+            this.World = world;
+            this.WorldViewProjection = worldViewProjection;
+            this.EyePositionWorld = eyePosition;
+            this.ColorMap = colors;
+            this.NormalMap = normals;
+            this.DepthMap = depth;
+            this.LightMap = null;
         }
 
-        public void UpdatePerSpotLight(BufferSpotLight light)
+        public void UpdatePerSpotLight(
+            BufferSpotLight light,
+            Matrix world,
+            Matrix worldViewProjection,
+            Vector3 eyePosition,
+            ShaderResourceView colors,
+            ShaderResourceView normals,
+            ShaderResourceView depth)
         {
             this.SpotLight = light;
+            this.World = world;
+            this.WorldViewProjection = worldViewProjection;
+            this.EyePositionWorld = eyePosition;
+            this.ColorMap = colors;
+            this.NormalMap = normals;
+            this.DepthMap = depth;
+            this.LightMap = null;
+        }
+
+        public void UpdatePerCombineLights(
+            Matrix world,
+            Matrix worldViewProjection,
+            Vector3 eyePosition,
+            ShaderResourceView colors,
+            ShaderResourceView depth,
+            ShaderResourceView lights)
+        {
+            this.World = world;
+            this.WorldViewProjection = worldViewProjection;
+            this.EyePositionWorld = eyePosition;
+            this.ColorMap = colors;
+            this.NormalMap = null;
+            this.DepthMap = depth;
+            this.LightMap = lights;
         }
     }
 }

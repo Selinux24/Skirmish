@@ -9,7 +9,7 @@ namespace DeferredTest
 #if DEBUG
             using (Game cl = new Game("7 Deferred", false, 801, 451, true))
 #else
-            using (Game cl = new Game("7 Deferred", true, 0, 0, true))
+            using (Game cl = new Game("7 Deferred", true, 0, 0, false))
 #endif
             {
 #if DEBUG

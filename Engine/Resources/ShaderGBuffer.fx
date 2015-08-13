@@ -100,8 +100,9 @@ GBufferPSOutput PSPositionColor(PSVertexPositionColor input)
 
 	output.color = gMaterial.Diffuse;
 	output.normal.xyz = 0.0f;
-	output.normal.w = 1.0f;
-	output.depth = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.normal.w = 0.0f;
+	output.depth.xyz = input.positionWorld;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;
 }
@@ -188,8 +189,9 @@ GBufferPSOutput PSPositionNormalColor(PSVertexPositionNormalColor input)
 
 	output.color = gMaterial.Diffuse;
 	output.normal.xyz = input.normalWorld;
-	output.normal.w = 1.0f;
-	output.depth = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.normal.w = 0.0f;
+	output.depth.xyz = input.positionWorld;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;
 }
@@ -270,8 +272,9 @@ GBufferPSOutput PSPositionTexture(PSVertexPositionTexture input)
 
 	output.color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 	output.normal.xyz = 0.0f;
-	output.normal.w = 1.0f;
-	output.depth = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.normal.w = 0.0f;
+	output.depth.xyz = input.positionWorld;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;
 }
@@ -362,8 +365,9 @@ GBufferPSOutput PSPositionNormalTexture(PSVertexPositionNormalTexture input)
 
 	output.color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 	output.normal.xyz = input.normalWorld;
-	output.normal.w = 1.0f;
-	output.depth = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.normal.w = 0.0f;
+	output.depth.xyz = input.positionWorld;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;
 }
@@ -464,8 +468,9 @@ GBufferPSOutput PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTang
 
 	output.color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 	output.normal.xyz = input.normalWorld;
-	output.normal.w = 1.0f;
-	output.depth = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.normal.w = 0.0f;
+	output.depth.xyz = input.positionWorld;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;
 }

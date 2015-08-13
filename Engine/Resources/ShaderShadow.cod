@@ -368,18 +368,18 @@ fxgroup
                 //   v3.x <- input.boneIndices.x; v3.y <- input.boneIndices.y; v3.z <- input.boneIndices.z; v3.w <- input.boneIndices.w; 
                 //   o0.x <- <VSSMPositionColorSkinned return value>.positionHomogeneous.x; o0.y <- <VSSMPositionColorSkinned return value>.positionHomogeneous.y; o0.z <- <VSSMPositionColorSkinned return value>.positionHomogeneous.z; o0.w <- <VSSMPositionColorSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -508,18 +508,18 @@ fxgroup
                 //   v9.x <- input.instanceId; 
                 //   o0.x <- <VSSMPositionColorSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSSMPositionColorSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSSMPositionColorSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSSMPositionColorSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -801,18 +801,18 @@ fxgroup
                 //   v4.x <- input.boneIndices.x; v4.y <- input.boneIndices.y; v4.z <- input.boneIndices.z; v4.w <- input.boneIndices.w; 
                 //   o0.x <- <VSSMPositionNormalColorSkinned return value>.positionHomogeneous.x; o0.y <- <VSSMPositionNormalColorSkinned return value>.positionHomogeneous.y; o0.z <- <VSSMPositionNormalColorSkinned return value>.positionHomogeneous.z; o0.w <- <VSSMPositionNormalColorSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -943,18 +943,18 @@ fxgroup
                 //   v10.x <- input.instanceId; 
                 //   o0.x <- <VSSMPositionNormalColorSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSSMPositionNormalColorSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSSMPositionNormalColorSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSSMPositionNormalColorSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -1230,18 +1230,18 @@ fxgroup
                 //   v3.x <- input.boneIndices.x; v3.y <- input.boneIndices.y; v3.z <- input.boneIndices.z; v3.w <- input.boneIndices.w; 
                 //   o0.x <- <VSSMPositionTextureSkinned return value>.positionHomogeneous.x; o0.y <- <VSSMPositionTextureSkinned return value>.positionHomogeneous.y; o0.z <- <VSSMPositionTextureSkinned return value>.positionHomogeneous.z; o0.w <- <VSSMPositionTextureSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -1370,18 +1370,18 @@ fxgroup
                 //   v9.x <- input.instanceId; 
                 //   o0.x <- <VSSMPositionTextureSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSSMPositionTextureSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSSMPositionTextureSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSSMPositionTextureSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -1663,18 +1663,18 @@ fxgroup
                 //   v4.x <- input.boneIndices.x; v4.y <- input.boneIndices.y; v4.z <- input.boneIndices.z; v4.w <- input.boneIndices.w; 
                 //   o0.x <- <VSSMPositionNormalTextureSkinned return value>.positionHomogeneous.x; o0.y <- <VSSMPositionNormalTextureSkinned return value>.positionHomogeneous.y; o0.z <- <VSSMPositionNormalTextureSkinned return value>.positionHomogeneous.z; o0.w <- <VSSMPositionNormalTextureSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -1805,18 +1805,18 @@ fxgroup
                 //   v10.x <- input.instanceId; 
                 //   o0.x <- <VSSMPositionNormalTextureSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSSMPositionNormalTextureSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSSMPositionNormalTextureSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSSMPositionNormalTextureSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -2104,18 +2104,18 @@ fxgroup
                 //   v5.x <- input.boneIndices.x; v5.y <- input.boneIndices.y; v5.z <- input.boneIndices.z; v5.w <- input.boneIndices.w; 
                 //   o0.x <- <VSSMPositionNormalTextureTangentSkinned return value>.positionHomogeneous.x; o0.y <- <VSSMPositionNormalTextureTangentSkinned return value>.positionHomogeneous.y; o0.z <- <VSSMPositionNormalTextureTangentSkinned return value>.positionHomogeneous.z; o0.w <- <VSSMPositionNormalTextureTangentSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v4.x
                 mov x0[1].x, v4.y
                 mov x0[2].x, v4.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -2248,18 +2248,18 @@ fxgroup
                 //   v11.x <- input.instanceId; 
                 //   o0.x <- <VSSMPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSSMPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSSMPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSSMPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v4.x
                 mov x0[1].x, v4.y
                 mov x0[2].x, v4.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z

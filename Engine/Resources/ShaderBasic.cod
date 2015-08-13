@@ -160,7 +160,7 @@ Texture2D gShadowMap;
 fxgroup
 {
     //
-    // 24 technique(s)
+    // 25 technique(s)
     //
     technique11 PositionColor
     {
@@ -391,7 +391,7 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
                 add r1.xyzw, -v2.xyzw, cb0[41].xyzw
@@ -658,7 +658,7 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
                 add r1.xyzw, -v2.xyzw, cb0[41].xyzw
@@ -802,18 +802,18 @@ fxgroup
                 //   o1.x <- <VSPositionColorSkinned return value>.positionWorld.x; o1.y <- <VSPositionColorSkinned return value>.positionWorld.y; o1.z <- <VSPositionColorSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionColorSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionColorSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionColorSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionColorSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -960,7 +960,7 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
                 add r1.xyzw, -v2.xyzw, cb0[41].xyzw
@@ -1120,18 +1120,18 @@ fxgroup
                 //   o1.x <- <VSPositionColorSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionColorSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionColorSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionColorSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionColorSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionColorSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionColorSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -1281,7 +1281,7 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
                 add r1.xyzw, -v2.xyzw, cb0[41].xyzw
@@ -1582,14 +1582,14 @@ fxgroup
                 sqrt r0.w, r0.w  // r0.w <- distToEye
                 div r0.xyz, r0.xyzx, r0.wwww
                 
-                #line 327 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 326 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.x, cb0[42].x, l(1.000000)
                 if_nz r1.x
                 
-                #line 301
+                #line 300
                   div r1.xyz, v4.xyzx, v4.wwww  // r1.x <- shadowPosH.x; r1.y <- shadowPosH.y; r1.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r2.xyzw, r1.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r2.xyxx, t0.xxxx, s0, r1.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t0.xxxx, s0, r1.z
@@ -1612,15 +1612,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r2.zwzz, t0.xxxx, s0, r1.z
                   add r1.x, r1.y, r1.x
                 
-                #line 315
+                #line 314
                   mul r1.x, r1.x, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.x, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.y, cb0[19].w, l(1.000000)
                 if_nz r1.y
                 
@@ -1647,7 +1647,7 @@ fxgroup
                   and r3.xyz, r2.yyyy, r3.xyzx
                   and r2.xyz, r2.xzwx, r2.yyyy  // r2.y <- spec.y; r2.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r3.xyz, r1.xxxx, r3.xyzx  // r3.x <- diffuse.x; r3.y <- diffuse.y; r3.z <- diffuse.z
                   mul r2.xyz, r1.xxxx, r2.xyzx  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 else 
@@ -1656,7 +1656,7 @@ fxgroup
                   mov r2.xyz, l(0,0,0,0)  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[23].w, l(1.000000)
                 if_nz r1.x
                 
@@ -1680,13 +1680,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[20].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[27].w, l(1.000000)
                 if_nz r1.x
                 
@@ -1710,13 +1710,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[24].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.x, cb0[32].w, l(1.000000)
                 if_nz r1.x
                 
@@ -1732,12 +1732,9 @@ fxgroup
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
                 #line 213
-                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -1749,47 +1746,48 @@ fxgroup
                   exp r4.x, r4.x  // r4.x <- specFactor
                   mul r4.yzw, r2.wwww, cb1[1].xxyz
                   mul r4.yzw, r4.yyzw, cb0[29].xxyz  // r4.y <- diffuse.x; r4.z <- diffuse.y; r4.w <- diffuse.z
-                  mul r7.xyz, r4.xxxx, cb1[2].xyzx
-                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
+                  mul r6.xyz, r4.xxxx, cb1[2].xyzx
+                  mul r6.xyz, r6.xyzx, cb0[30].xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
                   and r4.xyz, r3.wwww, r4.yzwy  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
-                  and r7.xyz, r3.wwww, r7.xyzx
+                  and r6.xyz, r3.wwww, r6.xyzx
                 
-                #line 230
+                #line 227
                   mov r5.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r5.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r5.xyz, cb0[28].xyzx, cb1[0].xyzx  // r5.x <- ambient.x; r5.y <- ambient.y; r5.z <- ambient.z
                   mul r4.xyz, r2.wwww, r4.xyzx
-                  mul r5.xyz, r2.wwww, r7.xyzx  // r5.x <- spec.x; r5.y <- spec.y; r5.z <- spec.z
-                  and r6.xyz, r1.xxxx, r6.xyzx
-                  and r4.xyz, r1.xxxx, r4.xyzx
+                  mul r6.xyz, r2.wwww, r6.xyzx
                   and r5.xyz, r1.xxxx, r5.xyzx
+                  and r4.xyz, r1.xxxx, r4.xyzx
+                  and r6.xyz, r1.xxxx, r6.xyzx
                 
-                #line 367
-                  add r1.yzw, r1.yyzw, r6.xxyz
+                #line 366
+                  add r1.yzw, r1.yyzw, r5.xxyz
                   add r3.xyz, r3.xyzx, r4.xyzx
-                  add r2.xyz, r2.xyzx, r5.xyzx
+                  add r2.xyz, r2.xyzx, r6.xyzx
                 endif 
                 eq r1.x, cb0[38].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 250
+                #line 249
                   add r4.xyz, -v1.xyzx, cb0[36].xyzx  // r4.x <- lightVec.x; r4.y <- lightVec.y; r4.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r5.z, r4.xyzx, r4.xyzx
                   sqrt r5.y, r5.z  // r5.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.x, cb0[36].w, r5.y
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
-                #line 263
+                #line 262
                   mul r6.xyz, cb0[33].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -1806,14 +1804,14 @@ fxgroup
                   and r7.xyz, r3.wwww, r7.xyzx
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r4.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r5.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r5.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -1824,7 +1822,7 @@ fxgroup
                   and r5.xyz, r1.xxxx, r5.xyzx
                   and r0.xyz, r0.xyzx, r1.xxxx
                 
-                #line 384
+                #line 383
                   add r1.yzw, r1.yyzw, r4.xxyz
                   add r3.xyz, r3.xyzx, r5.xyzx
                   add r2.xyz, r0.xyzx, r2.xyzx
@@ -1835,7 +1833,7 @@ fxgroup
                 mad r0.xyz, v3.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
@@ -2152,14 +2150,14 @@ fxgroup
                 sqrt r0.w, r0.w  // r0.w <- distToEye
                 div r0.xyz, r0.xyzx, r0.wwww
                 
-                #line 327 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 326 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.x, cb0[42].x, l(1.000000)
                 if_nz r1.x
                 
-                #line 301
+                #line 300
                   div r1.xyz, v4.xyzx, v4.wwww  // r1.x <- shadowPosH.x; r1.y <- shadowPosH.y; r1.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r2.xyzw, r1.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r2.xyxx, t0.xxxx, s0, r1.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t0.xxxx, s0, r1.z
@@ -2182,15 +2180,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r2.zwzz, t0.xxxx, s0, r1.z
                   add r1.x, r1.y, r1.x
                 
-                #line 315
+                #line 314
                   mul r1.x, r1.x, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.x, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.y, cb0[19].w, l(1.000000)
                 if_nz r1.y
                 
@@ -2217,7 +2215,7 @@ fxgroup
                   and r3.xyz, r2.yyyy, r3.xyzx
                   and r2.xyz, r2.xzwx, r2.yyyy  // r2.y <- spec.y; r2.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r3.xyz, r1.xxxx, r3.xyzx  // r3.x <- diffuse.x; r3.y <- diffuse.y; r3.z <- diffuse.z
                   mul r2.xyz, r1.xxxx, r2.xyzx  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 else 
@@ -2226,7 +2224,7 @@ fxgroup
                   mov r2.xyz, l(0,0,0,0)  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[23].w, l(1.000000)
                 if_nz r1.x
                 
@@ -2250,13 +2248,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[20].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[27].w, l(1.000000)
                 if_nz r1.x
                 
@@ -2280,13 +2278,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[24].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.x, cb0[32].w, l(1.000000)
                 if_nz r1.x
                 
@@ -2302,12 +2300,9 @@ fxgroup
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
                 #line 213
-                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -2319,47 +2314,48 @@ fxgroup
                   exp r4.x, r4.x  // r4.x <- specFactor
                   mul r4.yzw, r2.wwww, cb1[1].xxyz
                   mul r4.yzw, r4.yyzw, cb0[29].xxyz  // r4.y <- diffuse.x; r4.z <- diffuse.y; r4.w <- diffuse.z
-                  mul r7.xyz, r4.xxxx, cb1[2].xyzx
-                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
+                  mul r6.xyz, r4.xxxx, cb1[2].xyzx
+                  mul r6.xyz, r6.xyzx, cb0[30].xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
                   and r4.xyz, r3.wwww, r4.yzwy  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
-                  and r7.xyz, r3.wwww, r7.xyzx
+                  and r6.xyz, r3.wwww, r6.xyzx
                 
-                #line 230
+                #line 227
                   mov r5.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r5.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r5.xyz, cb0[28].xyzx, cb1[0].xyzx  // r5.x <- ambient.x; r5.y <- ambient.y; r5.z <- ambient.z
                   mul r4.xyz, r2.wwww, r4.xyzx
-                  mul r5.xyz, r2.wwww, r7.xyzx  // r5.x <- spec.x; r5.y <- spec.y; r5.z <- spec.z
-                  and r6.xyz, r1.xxxx, r6.xyzx
-                  and r4.xyz, r1.xxxx, r4.xyzx
+                  mul r6.xyz, r2.wwww, r6.xyzx
                   and r5.xyz, r1.xxxx, r5.xyzx
+                  and r4.xyz, r1.xxxx, r4.xyzx
+                  and r6.xyz, r1.xxxx, r6.xyzx
                 
-                #line 367
-                  add r1.yzw, r1.yyzw, r6.xxyz
+                #line 366
+                  add r1.yzw, r1.yyzw, r5.xxyz
                   add r3.xyz, r3.xyzx, r4.xyzx
-                  add r2.xyz, r2.xyzx, r5.xyzx
+                  add r2.xyz, r2.xyzx, r6.xyzx
                 endif 
                 eq r1.x, cb0[38].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 250
+                #line 249
                   add r4.xyz, -v1.xyzx, cb0[36].xyzx  // r4.x <- lightVec.x; r4.y <- lightVec.y; r4.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r5.z, r4.xyzx, r4.xyzx
                   sqrt r5.y, r5.z  // r5.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.x, cb0[36].w, r5.y
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
-                #line 263
+                #line 262
                   mul r6.xyz, cb0[33].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -2376,14 +2372,14 @@ fxgroup
                   and r7.xyz, r3.wwww, r7.xyzx
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r4.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r5.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r5.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -2394,7 +2390,7 @@ fxgroup
                   and r5.xyz, r1.xxxx, r5.xyzx
                   and r0.xyz, r0.xyzx, r1.xxxx
                 
-                #line 384
+                #line 383
                   add r1.yzw, r1.yyzw, r4.xxyz
                   add r3.xyz, r3.xyzx, r5.xyzx
                   add r2.xyz, r0.xyzx, r2.xyzx
@@ -2405,7 +2401,7 @@ fxgroup
                 mad r0.xyz, v3.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
@@ -2556,18 +2552,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColorSkinned return value>.positionWorld.x; o1.y <- <VSPositionNormalColorSkinned return value>.positionWorld.y; o1.z <- <VSPositionNormalColorSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColorSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 392
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 382
+                #line 399
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -2758,14 +2754,14 @@ fxgroup
                 sqrt r0.w, r0.w  // r0.w <- distToEye
                 div r0.xyz, r0.xyzx, r0.wwww
                 
-                #line 327 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 326 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.x, cb0[42].x, l(1.000000)
                 if_nz r1.x
                 
-                #line 301
+                #line 300
                   div r1.xyz, v4.xyzx, v4.wwww  // r1.x <- shadowPosH.x; r1.y <- shadowPosH.y; r1.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r2.xyzw, r1.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r2.xyxx, t0.xxxx, s0, r1.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t0.xxxx, s0, r1.z
@@ -2788,15 +2784,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r2.zwzz, t0.xxxx, s0, r1.z
                   add r1.x, r1.y, r1.x
                 
-                #line 315
+                #line 314
                   mul r1.x, r1.x, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.x, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.y, cb0[19].w, l(1.000000)
                 if_nz r1.y
                 
@@ -2823,7 +2819,7 @@ fxgroup
                   and r3.xyz, r2.yyyy, r3.xyzx
                   and r2.xyz, r2.xzwx, r2.yyyy  // r2.y <- spec.y; r2.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r3.xyz, r1.xxxx, r3.xyzx  // r3.x <- diffuse.x; r3.y <- diffuse.y; r3.z <- diffuse.z
                   mul r2.xyz, r1.xxxx, r2.xyzx  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 else 
@@ -2832,7 +2828,7 @@ fxgroup
                   mov r2.xyz, l(0,0,0,0)  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[23].w, l(1.000000)
                 if_nz r1.x
                 
@@ -2856,13 +2852,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[20].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[27].w, l(1.000000)
                 if_nz r1.x
                 
@@ -2886,13 +2882,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[24].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.x, cb0[32].w, l(1.000000)
                 if_nz r1.x
                 
@@ -2908,12 +2904,9 @@ fxgroup
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
                 #line 213
-                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -2925,47 +2918,48 @@ fxgroup
                   exp r4.x, r4.x  // r4.x <- specFactor
                   mul r4.yzw, r2.wwww, cb1[1].xxyz
                   mul r4.yzw, r4.yyzw, cb0[29].xxyz  // r4.y <- diffuse.x; r4.z <- diffuse.y; r4.w <- diffuse.z
-                  mul r7.xyz, r4.xxxx, cb1[2].xyzx
-                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
+                  mul r6.xyz, r4.xxxx, cb1[2].xyzx
+                  mul r6.xyz, r6.xyzx, cb0[30].xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
                   and r4.xyz, r3.wwww, r4.yzwy  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
-                  and r7.xyz, r3.wwww, r7.xyzx
+                  and r6.xyz, r3.wwww, r6.xyzx
                 
-                #line 230
+                #line 227
                   mov r5.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r5.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r5.xyz, cb0[28].xyzx, cb1[0].xyzx  // r5.x <- ambient.x; r5.y <- ambient.y; r5.z <- ambient.z
                   mul r4.xyz, r2.wwww, r4.xyzx
-                  mul r5.xyz, r2.wwww, r7.xyzx  // r5.x <- spec.x; r5.y <- spec.y; r5.z <- spec.z
-                  and r6.xyz, r1.xxxx, r6.xyzx
-                  and r4.xyz, r1.xxxx, r4.xyzx
+                  mul r6.xyz, r2.wwww, r6.xyzx
                   and r5.xyz, r1.xxxx, r5.xyzx
+                  and r4.xyz, r1.xxxx, r4.xyzx
+                  and r6.xyz, r1.xxxx, r6.xyzx
                 
-                #line 367
-                  add r1.yzw, r1.yyzw, r6.xxyz
+                #line 366
+                  add r1.yzw, r1.yyzw, r5.xxyz
                   add r3.xyz, r3.xyzx, r4.xyzx
-                  add r2.xyz, r2.xyzx, r5.xyzx
+                  add r2.xyz, r2.xyzx, r6.xyzx
                 endif 
                 eq r1.x, cb0[38].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 250
+                #line 249
                   add r4.xyz, -v1.xyzx, cb0[36].xyzx  // r4.x <- lightVec.x; r4.y <- lightVec.y; r4.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r5.z, r4.xyzx, r4.xyzx
                   sqrt r5.y, r5.z  // r5.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.x, cb0[36].w, r5.y
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
-                #line 263
+                #line 262
                   mul r6.xyz, cb0[33].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -2982,14 +2976,14 @@ fxgroup
                   and r7.xyz, r3.wwww, r7.xyzx
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r4.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r5.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r5.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -3000,7 +2994,7 @@ fxgroup
                   and r5.xyz, r1.xxxx, r5.xyzx
                   and r0.xyz, r0.xyzx, r1.xxxx
                 
-                #line 384
+                #line 383
                   add r1.yzw, r1.yyzw, r4.xxyz
                   add r3.xyz, r3.xyzx, r5.xyzx
                   add r2.xyz, r0.xyzx, r2.xyzx
@@ -3011,7 +3005,7 @@ fxgroup
                 mad r0.xyz, v3.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
@@ -3178,18 +3172,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColorSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionNormalColorSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionNormalColorSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColorSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 392
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 382
+                #line 399
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- normalLocal.x; r1.y <- normalLocal.y; r1.z <- normalLocal.z
@@ -3383,14 +3377,14 @@ fxgroup
                 sqrt r0.w, r0.w  // r0.w <- distToEye
                 div r0.xyz, r0.xyzx, r0.wwww
                 
-                #line 327 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 326 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.x, cb0[42].x, l(1.000000)
                 if_nz r1.x
                 
-                #line 301
+                #line 300
                   div r1.xyz, v4.xyzx, v4.wwww  // r1.x <- shadowPosH.x; r1.y <- shadowPosH.y; r1.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r2.xyzw, r1.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r2.xyxx, t0.xxxx, s0, r1.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t0.xxxx, s0, r1.z
@@ -3413,15 +3407,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r2.zwzz, t0.xxxx, s0, r1.z
                   add r1.x, r1.y, r1.x
                 
-                #line 315
+                #line 314
                   mul r1.x, r1.x, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.x, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.y, cb0[19].w, l(1.000000)
                 if_nz r1.y
                 
@@ -3448,7 +3442,7 @@ fxgroup
                   and r3.xyz, r2.yyyy, r3.xyzx
                   and r2.xyz, r2.xzwx, r2.yyyy  // r2.y <- spec.y; r2.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r3.xyz, r1.xxxx, r3.xyzx  // r3.x <- diffuse.x; r3.y <- diffuse.y; r3.z <- diffuse.z
                   mul r2.xyz, r1.xxxx, r2.xyzx  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 else 
@@ -3457,7 +3451,7 @@ fxgroup
                   mov r2.xyz, l(0,0,0,0)  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[23].w, l(1.000000)
                 if_nz r1.x
                 
@@ -3481,13 +3475,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[20].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[27].w, l(1.000000)
                 if_nz r1.x
                 
@@ -3511,13 +3505,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[24].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.x, cb0[32].w, l(1.000000)
                 if_nz r1.x
                 
@@ -3533,12 +3527,9 @@ fxgroup
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
                 #line 213
-                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -3550,47 +3541,48 @@ fxgroup
                   exp r4.x, r4.x  // r4.x <- specFactor
                   mul r4.yzw, r2.wwww, cb1[1].xxyz
                   mul r4.yzw, r4.yyzw, cb0[29].xxyz  // r4.y <- diffuse.x; r4.z <- diffuse.y; r4.w <- diffuse.z
-                  mul r7.xyz, r4.xxxx, cb1[2].xyzx
-                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
+                  mul r6.xyz, r4.xxxx, cb1[2].xyzx
+                  mul r6.xyz, r6.xyzx, cb0[30].xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
                   and r4.xyz, r3.wwww, r4.yzwy  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
-                  and r7.xyz, r3.wwww, r7.xyzx
+                  and r6.xyz, r3.wwww, r6.xyzx
                 
-                #line 230
+                #line 227
                   mov r5.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r5.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r5.xyz, cb0[28].xyzx, cb1[0].xyzx  // r5.x <- ambient.x; r5.y <- ambient.y; r5.z <- ambient.z
                   mul r4.xyz, r2.wwww, r4.xyzx
-                  mul r5.xyz, r2.wwww, r7.xyzx  // r5.x <- spec.x; r5.y <- spec.y; r5.z <- spec.z
-                  and r6.xyz, r1.xxxx, r6.xyzx
-                  and r4.xyz, r1.xxxx, r4.xyzx
+                  mul r6.xyz, r2.wwww, r6.xyzx
                   and r5.xyz, r1.xxxx, r5.xyzx
+                  and r4.xyz, r1.xxxx, r4.xyzx
+                  and r6.xyz, r1.xxxx, r6.xyzx
                 
-                #line 367
-                  add r1.yzw, r1.yyzw, r6.xxyz
+                #line 366
+                  add r1.yzw, r1.yyzw, r5.xxyz
                   add r3.xyz, r3.xyzx, r4.xyzx
-                  add r2.xyz, r2.xyzx, r5.xyzx
+                  add r2.xyz, r2.xyzx, r6.xyzx
                 endif 
                 eq r1.x, cb0[38].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 250
+                #line 249
                   add r4.xyz, -v1.xyzx, cb0[36].xyzx  // r4.x <- lightVec.x; r4.y <- lightVec.y; r4.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r5.z, r4.xyzx, r4.xyzx
                   sqrt r5.y, r5.z  // r5.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.x, cb0[36].w, r5.y
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
-                #line 263
+                #line 262
                   mul r6.xyz, cb0[33].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -3607,14 +3599,14 @@ fxgroup
                   and r7.xyz, r3.wwww, r7.xyzx
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r4.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r5.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r5.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -3625,7 +3617,7 @@ fxgroup
                   and r5.xyz, r1.xxxx, r5.xyzx
                   and r0.xyz, r0.xyzx, r1.xxxx
                 
-                #line 384
+                #line 383
                   add r1.yzw, r1.yyzw, r4.xxyz
                   add r3.xyz, r3.xyzx, r5.xyzx
                   add r2.xyz, r0.xyzx, r2.xyzx
@@ -3636,7 +3628,7 @@ fxgroup
                 mad r0.xyz, v3.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
@@ -3919,14 +3911,14 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
                 
                 #line 306 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
                 
-                #line 400 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 399 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r2.xyzw, -r1.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z; r0.w <- <ComputeFog return value>.w
                 
@@ -4537,6 +4529,203 @@ fxgroup
 
     }
 
+    technique11 PositionTextureALPHA
+    {
+        pass P0
+        {
+            VertexShader = asm {
+                //
+                // Generated by Microsoft (R) HLSL Shader Compiler 6.3.9600.16384
+                //
+                //
+                // Buffer Definitions: 
+                //
+                // cbuffer cbPerFrame
+                // {
+                //
+                //   float4x4 gWorld;                   // Offset:    0 Size:    64
+                //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
+                //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
+                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
+                //   
+                //   struct DirectionalLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  256
+                //       float4 Diffuse;                // Offset:  272
+                //       float4 Specular;               // Offset:  288
+                //       float3 Direction;              // Offset:  304
+                //       float Padding;                 // Offset:  316
+                //
+                //   } gDirLights[3];                   // Offset:  256 Size:   192 [unused]
+                //   
+                //   struct PointLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  448
+                //       float4 Diffuse;                // Offset:  464
+                //       float4 Specular;               // Offset:  480
+                //       float3 Position;               // Offset:  496
+                //       float Range;                   // Offset:  508
+                //       float3 Attenuation;            // Offset:  512
+                //       float Padding;                 // Offset:  524
+                //
+                //   } gPointLight;                     // Offset:  448 Size:    80 [unused]
+                //   
+                //   struct SpotLight
+                //   {
+                //       
+                //       float4 Ambient;                // Offset:  528
+                //       float4 Diffuse;                // Offset:  544
+                //       float4 Specular;               // Offset:  560
+                //       float3 Position;               // Offset:  576
+                //       float Range;                   // Offset:  588
+                //       float3 Direction;              // Offset:  592
+                //       float Spot;                    // Offset:  604
+                //       float3 Attenuation;            // Offset:  608
+                //       float Padding;                 // Offset:  620
+                //
+                //   } gSpotLight;                      // Offset:  528 Size:    96 [unused]
+                //   float3 gEyePositionWorld;          // Offset:  624 Size:    12 [unused]
+                //   float gFogStart;                   // Offset:  636 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  640 Size:     4 [unused]
+                //   float4 gFogColor;                  // Offset:  656 Size:    16 [unused]
+                //   float gEnableShadows;              // Offset:  672 Size:     4 [unused]
+                //
+                // }
+                //
+                // cbuffer cbPerInstance
+                // {
+                //
+                //   float gTextureIndex;               // Offset:    0 Size:     4
+                //
+                // }
+                //
+                //
+                // Resource Bindings:
+                //
+                // Name                                 Type  Format         Dim Slot Elements
+                // ------------------------------ ---------- ------- ----------- ---- --------
+                // cbPerFrame                        cbuffer      NA          NA    0        1
+                // cbPerInstance                     cbuffer      NA          NA    3        1
+                //
+                //
+                //
+                // Input signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // POSITION                 0   xyz         0     NONE   float   xyz 
+                // TEXCOORD                 0   xy          1     NONE   float   xy  
+                //
+                //
+                // Output signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // SV_POSITION              0   xyzw        0      POS   float   xyzw
+                // POSITION                 0   xyz         1     NONE   float   xyz 
+                // TEXCOORD                 0   xy          2     NONE   float   xy  
+                // textureIndex             0     z         2     NONE   float     z 
+                //
+                vs_5_0
+                dcl_globalFlags refactoringAllowed
+                dcl_constantbuffer cb0[12], immediateIndexed
+                dcl_constantbuffer cb3[1], immediateIndexed
+                dcl_input v0.xyz
+                dcl_input v1.xy
+                dcl_output_siv o0.xyzw, position
+                dcl_output o1.xyz
+                dcl_output o2.xy
+                dcl_output o2.z
+                dcl_temps 1
+                //
+                // Initial variable locations:
+                //   v0.x <- input.positionLocal.x; v0.y <- input.positionLocal.y; v0.z <- input.positionLocal.z; 
+                //   v1.x <- input.tex.x; v1.y <- input.tex.y; 
+                //   o2.x <- <VSPositionTexture return value>.tex.x; o2.y <- <VSPositionTexture return value>.tex.y; o2.z <- <VSPositionTexture return value>.textureIndex; 
+                //   o1.x <- <VSPositionTexture return value>.positionWorld.x; o1.y <- <VSPositionTexture return value>.positionWorld.y; o1.z <- <VSPositionTexture return value>.positionWorld.z; 
+                //   o0.x <- <VSPositionTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionTexture return value>.positionHomogeneous.w
+                //
+                #line 241 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                mov r0.xyz, v0.xyzx
+                mov r0.w, l(1.000000)
+                dp4 o0.x, r0.xyzw, cb0[8].xyzw
+                dp4 o0.y, r0.xyzw, cb0[9].xyzw
+                dp4 o0.z, r0.xyzw, cb0[10].xyzw
+                dp4 o0.w, r0.xyzw, cb0[11].xyzw
+                dp4 o1.x, r0.xyzw, cb0[0].xyzw
+                dp4 o1.y, r0.xyzw, cb0[1].xyzw
+                dp4 o1.z, r0.xyzw, cb0[2].xyzw
+                
+                #line 246
+                mov o2.xy, v1.xyxx
+                mov o2.z, cb3[0].x
+                ret 
+                // Approximately 12 instruction slots used
+                            
+            };
+            GeometryShader = NULL;
+            PixelShader = asm {
+                //
+                // Generated by Microsoft (R) HLSL Shader Compiler 6.3.9600.16384
+                //
+                //
+                // Resource Bindings:
+                //
+                // Name                                 Type  Format         Dim Slot Elements
+                // ------------------------------ ---------- ------- ----------- ---- --------
+                // SamplerAnisotropic                sampler      NA          NA    0        1
+                // gTextureArray                     texture  float4     2darray    0        1
+                //
+                //
+                //
+                // Input signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // SV_POSITION              0   xyzw        0      POS   float       
+                // POSITION                 0   xyz         1     NONE   float       
+                // TEXCOORD                 0   xy          2     NONE   float   xy  
+                // textureIndex             0     z         2     NONE   float     z 
+                //
+                //
+                // Output signature:
+                //
+                // Name                 Index   Mask Register SysValue  Format   Used
+                // -------------------- ----- ------ -------- -------- ------- ------
+                // SV_TARGET                0   xyzw        0   TARGET   float   xyzw
+                //
+                ps_5_0
+                dcl_globalFlags refactoringAllowed
+                dcl_sampler s0, mode_default
+                dcl_resource_texture2darray (float,float,float,float) t0
+                dcl_input_ps linear v2.xy
+                dcl_input_ps linear v2.z
+                dcl_output o0.xyzw
+                dcl_temps 1
+                //
+                // Initial variable locations:
+                //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
+                //   v1.x <- input.positionWorld.x; v1.y <- input.positionWorld.y; v1.z <- input.positionWorld.z; 
+                //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
+                //   o0.x <- <PSPositionTextureALPHA return value>.x; o0.y <- <PSPositionTextureALPHA return value>.y; o0.z <- <PSPositionTextureALPHA return value>.z; o0.w <- <PSPositionTextureALPHA return value>.w
+                //
+                #line 343 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                sample_indexable(texture2darray)(float,float,float,float) r0.x, v2.xyzx, t0.wxyz, s0  // r0.x <- litColor.w
+                
+                #line 346
+                mov o0.xyz, r0.xxxx
+                mov o0.w, l(1.000000)
+                ret 
+                // Approximately 4 instruction slots used
+                            
+            };
+            RasterizerState = RasterizerSolid;
+        }
+
+    }
+
     technique11 PositionTextureNOALPHA
     {
         pass P0
@@ -4679,70 +4868,12 @@ fxgroup
                 // Generated by Microsoft (R) HLSL Shader Compiler 6.3.9600.16384
                 //
                 //
-                // Buffer Definitions: 
-                //
-                // cbuffer cbPerFrame
-                // {
-                //
-                //   float4x4 gWorld;                   // Offset:    0 Size:    64 [unused]
-                //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
-                //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64 [unused]
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
-                //   
-                //   struct DirectionalLight
-                //   {
-                //       
-                //       float4 Ambient;                // Offset:  256
-                //       float4 Diffuse;                // Offset:  272
-                //       float4 Specular;               // Offset:  288
-                //       float3 Direction;              // Offset:  304
-                //       float Padding;                 // Offset:  316
-                //
-                //   } gDirLights[3];                   // Offset:  256 Size:   192 [unused]
-                //   
-                //   struct PointLight
-                //   {
-                //       
-                //       float4 Ambient;                // Offset:  448
-                //       float4 Diffuse;                // Offset:  464
-                //       float4 Specular;               // Offset:  480
-                //       float3 Position;               // Offset:  496
-                //       float Range;                   // Offset:  508
-                //       float3 Attenuation;            // Offset:  512
-                //       float Padding;                 // Offset:  524
-                //
-                //   } gPointLight;                     // Offset:  448 Size:    80 [unused]
-                //   
-                //   struct SpotLight
-                //   {
-                //       
-                //       float4 Ambient;                // Offset:  528
-                //       float4 Diffuse;                // Offset:  544
-                //       float4 Specular;               // Offset:  560
-                //       float3 Position;               // Offset:  576
-                //       float Range;                   // Offset:  588
-                //       float3 Direction;              // Offset:  592
-                //       float Spot;                    // Offset:  604
-                //       float3 Attenuation;            // Offset:  608
-                //       float Padding;                 // Offset:  620
-                //
-                //   } gSpotLight;                      // Offset:  528 Size:    96 [unused]
-                //   float3 gEyePositionWorld;          // Offset:  624 Size:    12
-                //   float gFogStart;                   // Offset:  636 Size:     4
-                //   float gFogRange;                   // Offset:  640 Size:     4
-                //   float4 gFogColor;                  // Offset:  656 Size:    16
-                //   float gEnableShadows;              // Offset:  672 Size:     4 [unused]
-                //
-                // }
-                //
-                //
                 // Resource Bindings:
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
                 // SamplerAnisotropic                sampler      NA          NA    0        1
                 // gTextureArray                     texture  float4     2darray    0        1
-                // cbPerFrame                        cbuffer      NA          NA    0        1
                 //
                 //
                 //
@@ -4751,7 +4882,7 @@ fxgroup
                 // Name                 Index   Mask Register SysValue  Format   Used
                 // -------------------- ----- ------ -------- -------- ------- ------
                 // SV_POSITION              0   xyzw        0      POS   float       
-                // POSITION                 0   xyz         1     NONE   float   xyz 
+                // POSITION                 0   xyz         1     NONE   float       
                 // TEXCOORD                 0   xy          2     NONE   float   xy  
                 // textureIndex             0     z         2     NONE   float     z 
                 //
@@ -4764,14 +4895,12 @@ fxgroup
                 //
                 ps_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[42], immediateIndexed
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
-                dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xy
                 dcl_input_ps linear v2.z
                 dcl_output o0.xyzw
-                dcl_temps 2
+                dcl_temps 1
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -4779,32 +4908,12 @@ fxgroup
                 //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionTextureNOALPHA return value>.x; o0.y <- <PSPositionTextureNOALPHA return value>.y; o0.z <- <PSPositionTextureNOALPHA return value>.z; o0.w <- <PSPositionTextureNOALPHA return value>.w
                 //
-                #line 347 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
-                add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
-                dp3 r0.x, r0.xyzx, r0.xyzx
-                sqrt r0.x, r0.x  // r0.x <- distToEye
-                
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                add r0.x, r0.x, -cb0[39].w
-                div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
-                
-                #line 343 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
-                sample_indexable(texture2darray)(float,float,float,float) r0.yzw, v2.xyzx, t0.wxyz, s0  // r0.y <- litColor.x; r0.z <- litColor.y; r0.w <- litColor.z
-                
-                #line 400 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                add r1.xyz, -r0.yzwy, cb0[41].xyzx
-                mad r1.xyz, r0.xxxx, r1.xyzx, r0.yzwy  // r1.x <- <ComputeFog return value>.x; r1.y <- <ComputeFog return value>.y; r1.z <- <ComputeFog return value>.z
-                
-                #line 345 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
-                lt r0.x, l(0.000000), cb0[40].x
-                
-                #line 351
-                movc o0.xyz, r0.xxxx, r1.xyzx, r0.yzwy
-                
-                #line 355
+                #line 350 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                sample_indexable(texture2darray)(float,float,float,float) r0.xyz, v2.xyzx, t0.xyzw, s0  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
+                mov o0.xyz, r0.xyzx
                 mov o0.w, l(1.000000)
                 ret 
-                // Approximately 12 instruction slots used
+                // Approximately 4 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -5087,14 +5196,14 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
                 
                 #line 306 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
                 
-                #line 400 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 399 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r2.xyzw, -r1.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z; r0.w <- <ComputeFog return value>.w
                 
@@ -5249,18 +5358,18 @@ fxgroup
                 //   o1.x <- <VSPositionTextureSkinned return value>.positionWorld.x; o1.y <- <VSPositionTextureSkinned return value>.positionWorld.y; o1.z <- <VSPositionTextureSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTextureSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -5432,14 +5541,14 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
                 
                 #line 306 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
                 
-                #line 400 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 399 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r2.xyzw, -r1.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z; r0.w <- <ComputeFog return value>.w
                 
@@ -5602,18 +5711,18 @@ fxgroup
                 //   o1.x <- <VSPositionTextureSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionTextureSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionTextureSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 353
+                #line 370
                 mov x0[0].x, v2.x
                 mov x0[1].x, v2.y
                 mov x0[2].x, v2.z
                 mov x0[3].x, r0.x
                 
-                #line 359
+                #line 376
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -5788,14 +5897,14 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.x, r0.x, -cb0[39].w
                 div_sat r0.x, r0.x, cb0[40].x  // r0.x <- fogLerp
                 
                 #line 306 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
                 
-                #line 400 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 399 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r2.xyzw, -r1.xyzw, cb0[41].xyzw
                 mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z; r0.w <- <ComputeFog return value>.w
                 
@@ -5942,7 +6051,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTexture return value>.positionWorld.x; o1.y <- <VSPositionNormalTexture return value>.positionWorld.y; o1.z <- <VSPositionNormalTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTexture return value>.positionHomogeneous.w
                 //
-                #line 365 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 362 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -5959,17 +6068,17 @@ fxgroup
                 rsq r1.w, r1.w
                 mul o2.xyz, r1.wwww, r1.xyzx
                 
-                #line 372
+                #line 369
                 mov o3.xy, v2.xyxx
                 mov o3.z, cb3[0].x
                 
-                #line 367
+                #line 364
                 dp4 o4.x, r0.xyzw, cb0[12].xyzw
                 dp4 o4.y, r0.xyzw, cb0[13].xyzw
                 dp4 o4.z, r0.xyzw, cb0[14].xyzw
                 dp4 o4.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 372
+                #line 369
                 ret 
                 // Approximately 22 instruction slots used
                             
@@ -6109,20 +6218,20 @@ fxgroup
                 //   v3.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTexture return value>.x; o0.y <- <PSPositionNormalTexture return value>.y; o0.z <- <PSPositionNormalTexture return value>.z; o0.w <- <PSPositionNormalTexture return value>.w
                 //
-                #line 444 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 441 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
                 div r0.xyz, r0.xyzx, r0.wwww
                 
-                #line 327 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 326 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.x, cb0[42].x, l(1.000000)
                 if_nz r1.x
                 
-                #line 301
+                #line 300
                   div r1.xyz, v4.xyzx, v4.wwww  // r1.x <- shadowPosH.x; r1.y <- shadowPosH.y; r1.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r2.xyzw, r1.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r2.xyxx, t1.xxxx, s1, r1.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t1.xxxx, s1, r1.z
@@ -6145,15 +6254,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r2.zwzz, t1.xxxx, s1, r1.z
                   add r1.x, r1.y, r1.x
                 
-                #line 315
+                #line 314
                   mul r1.x, r1.x, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.x, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.y, cb0[19].w, l(1.000000)
                 if_nz r1.y
                 
@@ -6180,7 +6289,7 @@ fxgroup
                   and r3.xyz, r2.yyyy, r3.xyzx
                   and r2.xyz, r2.xzwx, r2.yyyy  // r2.y <- spec.y; r2.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r3.xyz, r1.xxxx, r3.xyzx  // r3.x <- diffuse.x; r3.y <- diffuse.y; r3.z <- diffuse.z
                   mul r2.xyz, r1.xxxx, r2.xyzx  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 else 
@@ -6189,7 +6298,7 @@ fxgroup
                   mov r2.xyz, l(0,0,0,0)  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[23].w, l(1.000000)
                 if_nz r1.x
                 
@@ -6213,13 +6322,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[20].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[27].w, l(1.000000)
                 if_nz r1.x
                 
@@ -6243,13 +6352,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[24].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.x, cb0[32].w, l(1.000000)
                 if_nz r1.x
                 
@@ -6265,12 +6374,9 @@ fxgroup
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
                 #line 213
-                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -6282,47 +6388,48 @@ fxgroup
                   exp r4.x, r4.x  // r4.x <- specFactor
                   mul r4.yzw, r2.wwww, cb1[1].xxyz
                   mul r4.yzw, r4.yyzw, cb0[29].xxyz  // r4.y <- diffuse.x; r4.z <- diffuse.y; r4.w <- diffuse.z
-                  mul r7.xyz, r4.xxxx, cb1[2].xyzx
-                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
+                  mul r6.xyz, r4.xxxx, cb1[2].xyzx
+                  mul r6.xyz, r6.xyzx, cb0[30].xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
                   and r4.xyz, r3.wwww, r4.yzwy  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
-                  and r7.xyz, r3.wwww, r7.xyzx
+                  and r6.xyz, r3.wwww, r6.xyzx
                 
-                #line 230
+                #line 227
                   mov r5.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r5.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r5.xyz, cb0[28].xyzx, cb1[0].xyzx  // r5.x <- ambient.x; r5.y <- ambient.y; r5.z <- ambient.z
                   mul r4.xyz, r2.wwww, r4.xyzx
-                  mul r5.xyz, r2.wwww, r7.xyzx  // r5.x <- spec.x; r5.y <- spec.y; r5.z <- spec.z
-                  and r6.xyz, r1.xxxx, r6.xyzx
-                  and r4.xyz, r1.xxxx, r4.xyzx
+                  mul r6.xyz, r2.wwww, r6.xyzx
                   and r5.xyz, r1.xxxx, r5.xyzx
+                  and r4.xyz, r1.xxxx, r4.xyzx
+                  and r6.xyz, r1.xxxx, r6.xyzx
                 
-                #line 367
-                  add r1.yzw, r1.yyzw, r6.xxyz
+                #line 366
+                  add r1.yzw, r1.yyzw, r5.xxyz
                   add r3.xyz, r3.xyzx, r4.xyzx
-                  add r2.xyz, r2.xyzx, r5.xyzx
+                  add r2.xyz, r2.xyzx, r6.xyzx
                 endif 
                 eq r1.x, cb0[38].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 250
+                #line 249
                   add r4.xyz, -v1.xyzx, cb0[36].xyzx  // r4.x <- lightVec.x; r4.y <- lightVec.y; r4.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r5.z, r4.xyzx, r4.xyzx
                   sqrt r5.y, r5.z  // r5.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.x, cb0[36].w, r5.y
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
-                #line 263
+                #line 262
                   mul r6.xyz, cb0[33].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -6339,14 +6446,14 @@ fxgroup
                   and r7.xyz, r3.wwww, r7.xyzx
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r4.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r5.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r5.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -6357,25 +6464,25 @@ fxgroup
                   and r5.xyz, r1.xxxx, r5.xyzx
                   and r0.xyz, r0.xyzx, r1.xxxx
                 
-                #line 384
+                #line 383
                   add r1.yzw, r1.yyzw, r4.xxyz
                   add r3.xyz, r3.xyzx, r5.xyzx
                   add r2.xyz, r0.xyzx, r2.xyzx
                 endif 
                 
-                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 458 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r4.xyzw, v3.xyzx, t0.xyzw, s0  // r4.x <- textureColor.x; r4.y <- textureColor.y; r4.z <- textureColor.z; r4.w <- textureColor.w
                 add r0.xyz, r1.yzwy, r3.xyzx
                 mad r0.xyz, r4.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // r1.y <- <ComputeFog return value>.x; r1.z <- <ComputeFog return value>.y; r1.w <- <ComputeFog return value>.z
                 
-                #line 468 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 465 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx
                 mul o0.w, r4.w, cb1[1].w
                 ret 
@@ -6522,7 +6629,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureI return value>.positionHomogeneous.w
                 //
-                #line 378 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -6541,17 +6648,17 @@ fxgroup
                 rsq r1.w, r1.w
                 mul o2.xyz, r1.wwww, r1.xyzx
                 
-                #line 387
+                #line 384
                 mov o3.xy, v2.xyxx
                 mov o3.z, v7.x
                 
-                #line 382
+                #line 379
                 dp4 o4.x, r0.xyzw, cb0[12].xyzw
                 dp4 o4.y, r0.xyzw, cb0[13].xyzw
                 dp4 o4.z, r0.xyzw, cb0[14].xyzw
                 dp4 o4.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 387
+                #line 384
                 ret 
                 // Approximately 24 instruction slots used
                             
@@ -6691,20 +6798,20 @@ fxgroup
                 //   v3.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTexture return value>.x; o0.y <- <PSPositionNormalTexture return value>.y; o0.z <- <PSPositionNormalTexture return value>.z; o0.w <- <PSPositionNormalTexture return value>.w
                 //
-                #line 444 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 441 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
                 div r0.xyz, r0.xyzx, r0.wwww
                 
-                #line 327 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 326 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.x, cb0[42].x, l(1.000000)
                 if_nz r1.x
                 
-                #line 301
+                #line 300
                   div r1.xyz, v4.xyzx, v4.wwww  // r1.x <- shadowPosH.x; r1.y <- shadowPosH.y; r1.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r2.xyzw, r1.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r2.xyxx, t1.xxxx, s1, r1.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t1.xxxx, s1, r1.z
@@ -6727,15 +6834,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r2.zwzz, t1.xxxx, s1, r1.z
                   add r1.x, r1.y, r1.x
                 
-                #line 315
+                #line 314
                   mul r1.x, r1.x, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.x, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.y, cb0[19].w, l(1.000000)
                 if_nz r1.y
                 
@@ -6762,7 +6869,7 @@ fxgroup
                   and r3.xyz, r2.yyyy, r3.xyzx
                   and r2.xyz, r2.xzwx, r2.yyyy  // r2.y <- spec.y; r2.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r3.xyz, r1.xxxx, r3.xyzx  // r3.x <- diffuse.x; r3.y <- diffuse.y; r3.z <- diffuse.z
                   mul r2.xyz, r1.xxxx, r2.xyzx  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 else 
@@ -6771,7 +6878,7 @@ fxgroup
                   mov r2.xyz, l(0,0,0,0)  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[23].w, l(1.000000)
                 if_nz r1.x
                 
@@ -6795,13 +6902,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[20].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[27].w, l(1.000000)
                 if_nz r1.x
                 
@@ -6825,13 +6932,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[24].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.x, cb0[32].w, l(1.000000)
                 if_nz r1.x
                 
@@ -6847,12 +6954,9 @@ fxgroup
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
                 #line 213
-                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -6864,47 +6968,48 @@ fxgroup
                   exp r4.x, r4.x  // r4.x <- specFactor
                   mul r4.yzw, r2.wwww, cb1[1].xxyz
                   mul r4.yzw, r4.yyzw, cb0[29].xxyz  // r4.y <- diffuse.x; r4.z <- diffuse.y; r4.w <- diffuse.z
-                  mul r7.xyz, r4.xxxx, cb1[2].xyzx
-                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
+                  mul r6.xyz, r4.xxxx, cb1[2].xyzx
+                  mul r6.xyz, r6.xyzx, cb0[30].xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
                   and r4.xyz, r3.wwww, r4.yzwy  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
-                  and r7.xyz, r3.wwww, r7.xyzx
+                  and r6.xyz, r3.wwww, r6.xyzx
                 
-                #line 230
+                #line 227
                   mov r5.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r5.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r5.xyz, cb0[28].xyzx, cb1[0].xyzx  // r5.x <- ambient.x; r5.y <- ambient.y; r5.z <- ambient.z
                   mul r4.xyz, r2.wwww, r4.xyzx
-                  mul r5.xyz, r2.wwww, r7.xyzx  // r5.x <- spec.x; r5.y <- spec.y; r5.z <- spec.z
-                  and r6.xyz, r1.xxxx, r6.xyzx
-                  and r4.xyz, r1.xxxx, r4.xyzx
+                  mul r6.xyz, r2.wwww, r6.xyzx
                   and r5.xyz, r1.xxxx, r5.xyzx
+                  and r4.xyz, r1.xxxx, r4.xyzx
+                  and r6.xyz, r1.xxxx, r6.xyzx
                 
-                #line 367
-                  add r1.yzw, r1.yyzw, r6.xxyz
+                #line 366
+                  add r1.yzw, r1.yyzw, r5.xxyz
                   add r3.xyz, r3.xyzx, r4.xyzx
-                  add r2.xyz, r2.xyzx, r5.xyzx
+                  add r2.xyz, r2.xyzx, r6.xyzx
                 endif 
                 eq r1.x, cb0[38].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 250
+                #line 249
                   add r4.xyz, -v1.xyzx, cb0[36].xyzx  // r4.x <- lightVec.x; r4.y <- lightVec.y; r4.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r5.z, r4.xyzx, r4.xyzx
                   sqrt r5.y, r5.z  // r5.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.x, cb0[36].w, r5.y
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
-                #line 263
+                #line 262
                   mul r6.xyz, cb0[33].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -6921,14 +7026,14 @@ fxgroup
                   and r7.xyz, r3.wwww, r7.xyzx
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r4.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r5.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r5.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -6939,25 +7044,25 @@ fxgroup
                   and r5.xyz, r1.xxxx, r5.xyzx
                   and r0.xyz, r0.xyzx, r1.xxxx
                 
-                #line 384
+                #line 383
                   add r1.yzw, r1.yyzw, r4.xxyz
                   add r3.xyz, r3.xyzx, r5.xyzx
                   add r2.xyz, r0.xyzx, r2.xyzx
                 endif 
                 
-                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 458 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r4.xyzw, v3.xyzx, t0.xyzw, s0  // r4.x <- textureColor.x; r4.y <- textureColor.y; r4.z <- textureColor.z; r4.w <- textureColor.w
                 add r0.xyz, r1.yzwy, r3.xyzx
                 mad r0.xyz, r4.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // r1.y <- <ComputeFog return value>.x; r1.z <- <ComputeFog return value>.y; r1.w <- <ComputeFog return value>.z
                 
-                #line 468 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 465 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx
                 mul o0.w, r4.w, cb1[1].w
                 ret 
@@ -7113,18 +7218,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureSkinned return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureSkinned return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 392
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 382
+                #line 399
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -7155,7 +7260,7 @@ fxgroup
                   mad r2.xyz, r2.wwww, r4.xyzx, r2.xyzx
                 endloop 
                 
-                #line 405 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 402 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -7175,7 +7280,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 412
+                #line 409
                 mov o3.xy, v2.xyxx
                 mov o3.z, cb3[0].x
                 ret 
@@ -7317,20 +7422,20 @@ fxgroup
                 //   v3.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTexture return value>.x; o0.y <- <PSPositionNormalTexture return value>.y; o0.z <- <PSPositionNormalTexture return value>.z; o0.w <- <PSPositionNormalTexture return value>.w
                 //
-                #line 444 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 441 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
                 div r0.xyz, r0.xyzx, r0.wwww
                 
-                #line 327 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 326 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.x, cb0[42].x, l(1.000000)
                 if_nz r1.x
                 
-                #line 301
+                #line 300
                   div r1.xyz, v4.xyzx, v4.wwww  // r1.x <- shadowPosH.x; r1.y <- shadowPosH.y; r1.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r2.xyzw, r1.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r2.xyxx, t1.xxxx, s1, r1.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t1.xxxx, s1, r1.z
@@ -7353,15 +7458,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r2.zwzz, t1.xxxx, s1, r1.z
                   add r1.x, r1.y, r1.x
                 
-                #line 315
+                #line 314
                   mul r1.x, r1.x, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.x, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.y, cb0[19].w, l(1.000000)
                 if_nz r1.y
                 
@@ -7388,7 +7493,7 @@ fxgroup
                   and r3.xyz, r2.yyyy, r3.xyzx
                   and r2.xyz, r2.xzwx, r2.yyyy  // r2.y <- spec.y; r2.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r3.xyz, r1.xxxx, r3.xyzx  // r3.x <- diffuse.x; r3.y <- diffuse.y; r3.z <- diffuse.z
                   mul r2.xyz, r1.xxxx, r2.xyzx  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 else 
@@ -7397,7 +7502,7 @@ fxgroup
                   mov r2.xyz, l(0,0,0,0)  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[23].w, l(1.000000)
                 if_nz r1.x
                 
@@ -7421,13 +7526,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[20].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[27].w, l(1.000000)
                 if_nz r1.x
                 
@@ -7451,13 +7556,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[24].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.x, cb0[32].w, l(1.000000)
                 if_nz r1.x
                 
@@ -7473,12 +7578,9 @@ fxgroup
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
                 #line 213
-                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -7490,47 +7592,48 @@ fxgroup
                   exp r4.x, r4.x  // r4.x <- specFactor
                   mul r4.yzw, r2.wwww, cb1[1].xxyz
                   mul r4.yzw, r4.yyzw, cb0[29].xxyz  // r4.y <- diffuse.x; r4.z <- diffuse.y; r4.w <- diffuse.z
-                  mul r7.xyz, r4.xxxx, cb1[2].xyzx
-                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
+                  mul r6.xyz, r4.xxxx, cb1[2].xyzx
+                  mul r6.xyz, r6.xyzx, cb0[30].xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
                   and r4.xyz, r3.wwww, r4.yzwy  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
-                  and r7.xyz, r3.wwww, r7.xyzx
+                  and r6.xyz, r3.wwww, r6.xyzx
                 
-                #line 230
+                #line 227
                   mov r5.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r5.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r5.xyz, cb0[28].xyzx, cb1[0].xyzx  // r5.x <- ambient.x; r5.y <- ambient.y; r5.z <- ambient.z
                   mul r4.xyz, r2.wwww, r4.xyzx
-                  mul r5.xyz, r2.wwww, r7.xyzx  // r5.x <- spec.x; r5.y <- spec.y; r5.z <- spec.z
-                  and r6.xyz, r1.xxxx, r6.xyzx
-                  and r4.xyz, r1.xxxx, r4.xyzx
+                  mul r6.xyz, r2.wwww, r6.xyzx
                   and r5.xyz, r1.xxxx, r5.xyzx
+                  and r4.xyz, r1.xxxx, r4.xyzx
+                  and r6.xyz, r1.xxxx, r6.xyzx
                 
-                #line 367
-                  add r1.yzw, r1.yyzw, r6.xxyz
+                #line 366
+                  add r1.yzw, r1.yyzw, r5.xxyz
                   add r3.xyz, r3.xyzx, r4.xyzx
-                  add r2.xyz, r2.xyzx, r5.xyzx
+                  add r2.xyz, r2.xyzx, r6.xyzx
                 endif 
                 eq r1.x, cb0[38].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 250
+                #line 249
                   add r4.xyz, -v1.xyzx, cb0[36].xyzx  // r4.x <- lightVec.x; r4.y <- lightVec.y; r4.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r5.z, r4.xyzx, r4.xyzx
                   sqrt r5.y, r5.z  // r5.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.x, cb0[36].w, r5.y
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
-                #line 263
+                #line 262
                   mul r6.xyz, cb0[33].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -7547,14 +7650,14 @@ fxgroup
                   and r7.xyz, r3.wwww, r7.xyzx
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r4.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r5.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r5.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -7565,25 +7668,25 @@ fxgroup
                   and r5.xyz, r1.xxxx, r5.xyzx
                   and r0.xyz, r0.xyzx, r1.xxxx
                 
-                #line 384
+                #line 383
                   add r1.yzw, r1.yyzw, r4.xxyz
                   add r3.xyz, r3.xyzx, r5.xyzx
                   add r2.xyz, r0.xyzx, r2.xyzx
                 endif 
                 
-                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 458 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r4.xyzw, v3.xyzx, t0.xyzw, s0  // r4.x <- textureColor.x; r4.y <- textureColor.y; r4.z <- textureColor.z; r4.w <- textureColor.w
                 add r0.xyz, r1.yzwy, r3.xyzx
                 mad r0.xyz, r4.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // r1.y <- <ComputeFog return value>.x; r1.z <- <ComputeFog return value>.y; r1.w <- <ComputeFog return value>.z
                 
-                #line 468 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 465 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx
                 mul o0.w, r4.w, cb1[1].w
                 ret 
@@ -7747,18 +7850,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 392
                 mov x0[0].x, v3.x
                 mov x0[1].x, v3.y
                 mov x0[2].x, v3.z
                 mov x0[3].x, r0.x
                 
-                #line 382
+                #line 399
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- normalLocal.x; r1.y <- normalLocal.y; r1.z <- normalLocal.z
@@ -7789,7 +7892,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r4.xyzx, r1.xyzx
                 endloop 
                 
-                #line 430 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 427 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -7812,7 +7915,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 439
+                #line 436
                 mov o3.xy, v2.xyxx
                 mov o3.z, v9.x
                 ret 
@@ -7954,20 +8057,20 @@ fxgroup
                 //   v3.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTexture return value>.x; o0.y <- <PSPositionNormalTexture return value>.y; o0.z <- <PSPositionNormalTexture return value>.z; o0.w <- <PSPositionNormalTexture return value>.w
                 //
-                #line 444 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 441 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
                 div r0.xyz, r0.xyzx, r0.wwww
                 
-                #line 327 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 326 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.x, cb0[42].x, l(1.000000)
                 if_nz r1.x
                 
-                #line 301
+                #line 300
                   div r1.xyz, v4.xyzx, v4.wwww  // r1.x <- shadowPosH.x; r1.y <- shadowPosH.y; r1.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r2.xyzw, r1.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r2.xyxx, t1.xxxx, s1, r1.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t1.xxxx, s1, r1.z
@@ -7990,15 +8093,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r2.zwzz, t1.xxxx, s1, r1.z
                   add r1.x, r1.y, r1.x
                 
-                #line 315
+                #line 314
                   mul r1.x, r1.x, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.x, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.y, cb0[19].w, l(1.000000)
                 if_nz r1.y
                 
@@ -8025,7 +8128,7 @@ fxgroup
                   and r3.xyz, r2.yyyy, r3.xyzx
                   and r2.xyz, r2.xzwx, r2.yyyy  // r2.y <- spec.y; r2.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r3.xyz, r1.xxxx, r3.xyzx  // r3.x <- diffuse.x; r3.y <- diffuse.y; r3.z <- diffuse.z
                   mul r2.xyz, r1.xxxx, r2.xyzx  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 else 
@@ -8034,7 +8137,7 @@ fxgroup
                   mov r2.xyz, l(0,0,0,0)  // r2.x <- specular.x; r2.y <- specular.y; r2.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[23].w, l(1.000000)
                 if_nz r1.x
                 
@@ -8058,13 +8161,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[20].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.x, cb0[27].w, l(1.000000)
                 if_nz r1.x
                 
@@ -8088,13 +8191,13 @@ fxgroup
                   and r4.xyz, r2.wwww, r4.xyzx
                   and r5.xyz, r2.wwww, r5.xyzx
                 
-                #line 349
+                #line 348
                   mad r1.yzw, cb1[0].xxyz, cb0[24].xxyz, r1.yyzw
                   add r3.xyz, r3.xyzx, r4.xyzx
                   add r2.xyz, r2.xyzx, r5.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.x, cb0[32].w, l(1.000000)
                 if_nz r1.x
                 
@@ -8110,12 +8213,9 @@ fxgroup
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
                 #line 213
-                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -8127,47 +8227,48 @@ fxgroup
                   exp r4.x, r4.x  // r4.x <- specFactor
                   mul r4.yzw, r2.wwww, cb1[1].xxyz
                   mul r4.yzw, r4.yyzw, cb0[29].xxyz  // r4.y <- diffuse.x; r4.z <- diffuse.y; r4.w <- diffuse.z
-                  mul r7.xyz, r4.xxxx, cb1[2].xyzx
-                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
+                  mul r6.xyz, r4.xxxx, cb1[2].xyzx
+                  mul r6.xyz, r6.xyzx, cb0[30].xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
                   and r4.xyz, r3.wwww, r4.yzwy  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
-                  and r7.xyz, r3.wwww, r7.xyzx
+                  and r6.xyz, r3.wwww, r6.xyzx
                 
-                #line 230
+                #line 227
                   mov r5.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r5.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r5.xyz, cb0[28].xyzx, cb1[0].xyzx  // r5.x <- ambient.x; r5.y <- ambient.y; r5.z <- ambient.z
                   mul r4.xyz, r2.wwww, r4.xyzx
-                  mul r5.xyz, r2.wwww, r7.xyzx  // r5.x <- spec.x; r5.y <- spec.y; r5.z <- spec.z
-                  and r6.xyz, r1.xxxx, r6.xyzx
-                  and r4.xyz, r1.xxxx, r4.xyzx
+                  mul r6.xyz, r2.wwww, r6.xyzx
                   and r5.xyz, r1.xxxx, r5.xyzx
+                  and r4.xyz, r1.xxxx, r4.xyzx
+                  and r6.xyz, r1.xxxx, r6.xyzx
                 
-                #line 367
-                  add r1.yzw, r1.yyzw, r6.xxyz
+                #line 366
+                  add r1.yzw, r1.yyzw, r5.xxyz
                   add r3.xyz, r3.xyzx, r4.xyzx
-                  add r2.xyz, r2.xyzx, r5.xyzx
+                  add r2.xyz, r2.xyzx, r6.xyzx
                 endif 
                 eq r1.x, cb0[38].w, l(1.000000)
                 if_nz r1.x
                 
-                #line 250
+                #line 249
                   add r4.xyz, -v1.xyzx, cb0[36].xyzx  // r4.x <- lightVec.x; r4.y <- lightVec.y; r4.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r5.z, r4.xyzx, r4.xyzx
                   sqrt r5.y, r5.z  // r5.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.x, cb0[36].w, r5.y
                   div r4.xyz, r4.xyzx, r5.yyyy
                 
-                #line 263
+                #line 262
                   mul r6.xyz, cb0[33].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r4.xyzx, v2.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r4.xyzx, v2.xyzx
                   add r4.w, r4.w, r4.w
@@ -8184,14 +8285,14 @@ fxgroup
                   and r7.xyz, r3.wwww, r7.xyzx
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r4.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r5.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r5.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -8202,25 +8303,25 @@ fxgroup
                   and r5.xyz, r1.xxxx, r5.xyzx
                   and r0.xyz, r0.xyzx, r1.xxxx
                 
-                #line 384
+                #line 383
                   add r1.yzw, r1.yyzw, r4.xxyz
                   add r3.xyz, r3.xyzx, r5.xyzx
                   add r2.xyz, r0.xyzx, r2.xyzx
                 endif 
                 
-                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 458 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r4.xyzw, v3.xyzx, t0.xyzw, s0  // r4.x <- textureColor.x; r4.y <- textureColor.y; r4.z <- textureColor.z; r4.w <- textureColor.w
                 add r0.xyz, r1.yzwy, r3.xyzx
                 mad r0.xyz, r4.xyzx, r0.xyzx, r2.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r1.yzw, -r0.xxyz, cb0[41].xxyz
                 mad r1.yzw, r0.wwww, r1.yyzw, r0.xxyz  // r1.y <- <ComputeFog return value>.x; r1.z <- <ComputeFog return value>.y; r1.w <- <ComputeFog return value>.z
                 
-                #line 468 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 465 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r1.yzwy, r0.xyzx
                 mul o0.w, r4.w, cb1[1].w
                 ret 
@@ -8365,7 +8466,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangent return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangent return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangent return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.w
                 //
-                #line 482 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 479 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -8385,17 +8486,17 @@ fxgroup
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx
                 
-                #line 490
+                #line 487
                 mov o4.xy, v3.xyxx
                 mov o4.z, cb3[0].x
                 
-                #line 484
+                #line 481
                 dp4 o5.x, r0.xyzw, cb0[12].xyzw
                 dp4 o5.y, r0.xyzw, cb0[13].xyzw
                 dp4 o5.z, r0.xyzw, cb0[14].xyzw
                 dp4 o5.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 490
+                #line 487
                 ret 
                 // Approximately 25 instruction slots used
                             
@@ -8530,7 +8631,7 @@ fxgroup
                 dcl_input_ps linear v4.z
                 dcl_input_ps linear v5.xyzw
                 dcl_output o0.xyzw
-                dcl_temps 9
+                dcl_temps 8
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -8542,7 +8643,7 @@ fxgroup
                 //   v4.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.x; o0.y <- <PSPositionNormalTextureTangent return value>.y; o0.z <- <PSPositionNormalTextureTangent return value>.z; o0.w <- <PSPositionNormalTextureTangent return value>.w
                 //
-                #line 571 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 568 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -8566,14 +8667,14 @@ fxgroup
                 mad r1.xyw, r1.xxxx, r2.xyxz, r3.xyxz
                 mad r1.xyz, r1.zzzz, v2.xyzx, r1.xywx  // r1.x <- <NormalSampleToWorldSpace return value>.x; r1.y <- <NormalSampleToWorldSpace return value>.y; r1.z <- <NormalSampleToWorldSpace return value>.z
                 
-                #line 327
+                #line 326
                 eq r1.w, cb0[42].x, l(1.000000)
                 if_nz r1.w
                 
-                #line 301
+                #line 300
                   div r2.xyz, v5.xyzx, v5.wwww  // r2.x <- shadowPosH.x; r2.y <- shadowPosH.y; r2.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r3.xyzw, r2.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r3.xyxx, t2.xxxx, s2, r2.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r3.zwzz, t2.xxxx, s2, r2.z
@@ -8596,15 +8697,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r3.zwzz, t2.xxxx, s2, r2.z
                   add r1.w, r1.w, r2.x
                 
-                #line 315
+                #line 314
                   mul r1.w, r1.w, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.w, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r2.x, cb0[19].w, l(1.000000)
                 if_nz r2.x
                 
@@ -8631,7 +8732,7 @@ fxgroup
                   and r4.xyz, r3.xxxx, r4.xyzx
                   and r3.xyz, r3.yzwy, r3.xxxx  // r3.x <- spec.x; r3.y <- spec.y; r3.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r4.xyz, r1.wwww, r4.xyzx  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
                   mul r3.xyz, r1.wwww, r3.xyzx  // r3.x <- specular.x; r3.y <- specular.y; r3.z <- specular.z
                 else 
@@ -8640,7 +8741,7 @@ fxgroup
                   mov r3.xyz, l(0,0,0,0)  // r3.x <- specular.x; r3.y <- specular.y; r3.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.w, cb0[23].w, l(1.000000)
                 if_nz r1.w
                 
@@ -8664,13 +8765,13 @@ fxgroup
                   and r5.xyz, r2.wwww, r5.xyzx
                   and r6.xyz, r2.wwww, r6.xyzx
                 
-                #line 349
+                #line 348
                   mad r2.xyz, cb1[0].xyzx, cb0[20].xyzx, r2.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
                   add r3.xyz, r3.xyzx, r6.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.w, cb0[27].w, l(1.000000)
                 if_nz r1.w
                 
@@ -8694,13 +8795,13 @@ fxgroup
                   and r5.xyz, r2.wwww, r5.xyzx
                   and r6.xyz, r2.wwww, r6.xyzx
                 
-                #line 349
+                #line 348
                   mad r2.xyz, cb1[0].xyzx, cb0[24].xyzx, r2.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
                   add r3.xyz, r3.xyzx, r6.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.w, cb0[32].w, l(1.000000)
                 if_nz r1.w
                 
@@ -8716,12 +8817,9 @@ fxgroup
                   div r5.xyz, r5.xyzx, r6.yyyy
                 
                 #line 213
-                  mul r7.xyz, cb0[28].xyzx, cb1[0].xyzx  // r7.x <- ambient.x; r7.y <- ambient.y; r7.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r5.xyzx, r1.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r5.xyzx, r1.xyzx
                   add r4.w, r4.w, r4.w
@@ -8733,47 +8831,48 @@ fxgroup
                   exp r4.w, r4.w  // r4.w <- specFactor
                   mul r5.xyz, r2.wwww, cb1[1].xyzx
                   mul r5.xyz, r5.xyzx, cb0[29].xyzx  // r5.x <- diffuse.x; r5.y <- diffuse.y; r5.z <- diffuse.z
-                  mul r8.xyz, r4.wwww, cb1[2].xyzx
-                  mul r8.xyz, r8.xyzx, cb0[30].xyzx  // r8.x <- spec.x; r8.y <- spec.y; r8.z <- spec.z
+                  mul r7.xyz, r4.wwww, cb1[2].xyzx
+                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
                   and r5.xyz, r3.wwww, r5.xyzx
-                  and r8.xyz, r3.wwww, r8.xyzx
+                  and r7.xyz, r3.wwww, r7.xyzx
                 
-                #line 230
+                #line 227
                   mov r6.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r6.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                   mul r5.xyz, r2.wwww, r5.xyzx
-                  mul r6.xyz, r2.wwww, r8.xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
-                  and r7.xyz, r1.wwww, r7.xyzx
-                  and r5.xyz, r1.wwww, r5.xyzx
+                  mul r7.xyz, r2.wwww, r7.xyzx
                   and r6.xyz, r1.wwww, r6.xyzx
+                  and r5.xyz, r1.wwww, r5.xyzx
+                  and r7.xyz, r1.wwww, r7.xyzx
                 
-                #line 367
-                  add r2.xyz, r2.xyzx, r7.xyzx
+                #line 366
+                  add r2.xyz, r2.xyzx, r6.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
-                  add r3.xyz, r3.xyzx, r6.xyzx
+                  add r3.xyz, r3.xyzx, r7.xyzx
                 endif 
                 eq r1.w, cb0[38].w, l(1.000000)
                 if_nz r1.w
                 
-                #line 250
+                #line 249
                   add r5.xyz, -v1.xyzx, cb0[36].xyzx  // r5.x <- lightVec.x; r5.y <- lightVec.y; r5.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r6.z, r5.xyzx, r5.xyzx
                   sqrt r6.y, r6.z  // r6.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.w, cb0[36].w, r6.y
                   div r5.xyz, r5.xyzx, r6.yyyy
                 
-                #line 263
+                #line 262
                   mul r7.xyz, cb0[33].xyzx, cb1[0].xyzx  // r7.x <- ambient.x; r7.y <- ambient.y; r7.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r5.xyzx, r1.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r5.xyzx, r1.xyzx
                   add r4.w, r4.w, r4.w
@@ -8790,14 +8889,14 @@ fxgroup
                   and r1.xyz, r1.xyzx, r3.wwww
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r5.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r6.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r6.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -8808,25 +8907,25 @@ fxgroup
                   and r1.xyz, r1.xyzx, r1.wwww
                   and r0.xyz, r0.xyzx, r1.wwww
                 
-                #line 384
+                #line 383
                   add r2.xyz, r2.xyzx, r5.xyzx
                   add r4.xyz, r1.xyzx, r4.xyzx
                   add r3.xyz, r0.xyzx, r3.xyzx
                 endif 
                 
-                #line 591 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 588 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // r2.x <- <ComputeFog return value>.x; r2.y <- <ComputeFog return value>.y; r2.z <- <ComputeFog return value>.z
                 
-                #line 598 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 595 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx
                 mul o0.w, r1.w, cb1[1].w
                 ret 
@@ -8979,7 +9078,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.w
                 //
-                #line 496 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 493 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v5.xyzw
                 mad r0.xyzw, v0.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v6.xyzw, r0.xyzw
@@ -9001,17 +9100,17 @@ fxgroup
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx
                 
-                #line 506
+                #line 503
                 mov o4.xy, v3.xyxx
                 mov o4.z, v8.x
                 
-                #line 500
+                #line 497
                 dp4 o5.x, r0.xyzw, cb0[12].xyzw
                 dp4 o5.y, r0.xyzw, cb0[13].xyzw
                 dp4 o5.z, r0.xyzw, cb0[14].xyzw
                 dp4 o5.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 506
+                #line 503
                 ret 
                 // Approximately 27 instruction slots used
                             
@@ -9146,7 +9245,7 @@ fxgroup
                 dcl_input_ps linear v4.z
                 dcl_input_ps linear v5.xyzw
                 dcl_output o0.xyzw
-                dcl_temps 9
+                dcl_temps 8
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -9158,7 +9257,7 @@ fxgroup
                 //   v4.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.x; o0.y <- <PSPositionNormalTextureTangent return value>.y; o0.z <- <PSPositionNormalTextureTangent return value>.z; o0.w <- <PSPositionNormalTextureTangent return value>.w
                 //
-                #line 571 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 568 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -9182,14 +9281,14 @@ fxgroup
                 mad r1.xyw, r1.xxxx, r2.xyxz, r3.xyxz
                 mad r1.xyz, r1.zzzz, v2.xyzx, r1.xywx  // r1.x <- <NormalSampleToWorldSpace return value>.x; r1.y <- <NormalSampleToWorldSpace return value>.y; r1.z <- <NormalSampleToWorldSpace return value>.z
                 
-                #line 327
+                #line 326
                 eq r1.w, cb0[42].x, l(1.000000)
                 if_nz r1.w
                 
-                #line 301
+                #line 300
                   div r2.xyz, v5.xyzx, v5.wwww  // r2.x <- shadowPosH.x; r2.y <- shadowPosH.y; r2.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r3.xyzw, r2.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r3.xyxx, t2.xxxx, s2, r2.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r3.zwzz, t2.xxxx, s2, r2.z
@@ -9212,15 +9311,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r3.zwzz, t2.xxxx, s2, r2.z
                   add r1.w, r1.w, r2.x
                 
-                #line 315
+                #line 314
                   mul r1.w, r1.w, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.w, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r2.x, cb0[19].w, l(1.000000)
                 if_nz r2.x
                 
@@ -9247,7 +9346,7 @@ fxgroup
                   and r4.xyz, r3.xxxx, r4.xyzx
                   and r3.xyz, r3.yzwy, r3.xxxx  // r3.x <- spec.x; r3.y <- spec.y; r3.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r4.xyz, r1.wwww, r4.xyzx  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
                   mul r3.xyz, r1.wwww, r3.xyzx  // r3.x <- specular.x; r3.y <- specular.y; r3.z <- specular.z
                 else 
@@ -9256,7 +9355,7 @@ fxgroup
                   mov r3.xyz, l(0,0,0,0)  // r3.x <- specular.x; r3.y <- specular.y; r3.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.w, cb0[23].w, l(1.000000)
                 if_nz r1.w
                 
@@ -9280,13 +9379,13 @@ fxgroup
                   and r5.xyz, r2.wwww, r5.xyzx
                   and r6.xyz, r2.wwww, r6.xyzx
                 
-                #line 349
+                #line 348
                   mad r2.xyz, cb1[0].xyzx, cb0[20].xyzx, r2.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
                   add r3.xyz, r3.xyzx, r6.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.w, cb0[27].w, l(1.000000)
                 if_nz r1.w
                 
@@ -9310,13 +9409,13 @@ fxgroup
                   and r5.xyz, r2.wwww, r5.xyzx
                   and r6.xyz, r2.wwww, r6.xyzx
                 
-                #line 349
+                #line 348
                   mad r2.xyz, cb1[0].xyzx, cb0[24].xyzx, r2.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
                   add r3.xyz, r3.xyzx, r6.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.w, cb0[32].w, l(1.000000)
                 if_nz r1.w
                 
@@ -9332,12 +9431,9 @@ fxgroup
                   div r5.xyz, r5.xyzx, r6.yyyy
                 
                 #line 213
-                  mul r7.xyz, cb0[28].xyzx, cb1[0].xyzx  // r7.x <- ambient.x; r7.y <- ambient.y; r7.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r5.xyzx, r1.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r5.xyzx, r1.xyzx
                   add r4.w, r4.w, r4.w
@@ -9349,47 +9445,48 @@ fxgroup
                   exp r4.w, r4.w  // r4.w <- specFactor
                   mul r5.xyz, r2.wwww, cb1[1].xyzx
                   mul r5.xyz, r5.xyzx, cb0[29].xyzx  // r5.x <- diffuse.x; r5.y <- diffuse.y; r5.z <- diffuse.z
-                  mul r8.xyz, r4.wwww, cb1[2].xyzx
-                  mul r8.xyz, r8.xyzx, cb0[30].xyzx  // r8.x <- spec.x; r8.y <- spec.y; r8.z <- spec.z
+                  mul r7.xyz, r4.wwww, cb1[2].xyzx
+                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
                   and r5.xyz, r3.wwww, r5.xyzx
-                  and r8.xyz, r3.wwww, r8.xyzx
+                  and r7.xyz, r3.wwww, r7.xyzx
                 
-                #line 230
+                #line 227
                   mov r6.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r6.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                   mul r5.xyz, r2.wwww, r5.xyzx
-                  mul r6.xyz, r2.wwww, r8.xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
-                  and r7.xyz, r1.wwww, r7.xyzx
-                  and r5.xyz, r1.wwww, r5.xyzx
+                  mul r7.xyz, r2.wwww, r7.xyzx
                   and r6.xyz, r1.wwww, r6.xyzx
+                  and r5.xyz, r1.wwww, r5.xyzx
+                  and r7.xyz, r1.wwww, r7.xyzx
                 
-                #line 367
-                  add r2.xyz, r2.xyzx, r7.xyzx
+                #line 366
+                  add r2.xyz, r2.xyzx, r6.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
-                  add r3.xyz, r3.xyzx, r6.xyzx
+                  add r3.xyz, r3.xyzx, r7.xyzx
                 endif 
                 eq r1.w, cb0[38].w, l(1.000000)
                 if_nz r1.w
                 
-                #line 250
+                #line 249
                   add r5.xyz, -v1.xyzx, cb0[36].xyzx  // r5.x <- lightVec.x; r5.y <- lightVec.y; r5.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r6.z, r5.xyzx, r5.xyzx
                   sqrt r6.y, r6.z  // r6.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.w, cb0[36].w, r6.y
                   div r5.xyz, r5.xyzx, r6.yyyy
                 
-                #line 263
+                #line 262
                   mul r7.xyz, cb0[33].xyzx, cb1[0].xyzx  // r7.x <- ambient.x; r7.y <- ambient.y; r7.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r5.xyzx, r1.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r5.xyzx, r1.xyzx
                   add r4.w, r4.w, r4.w
@@ -9406,14 +9503,14 @@ fxgroup
                   and r1.xyz, r1.xyzx, r3.wwww
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r5.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r6.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r6.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -9424,25 +9521,25 @@ fxgroup
                   and r1.xyz, r1.xyzx, r1.wwww
                   and r0.xyz, r0.xyzx, r1.wwww
                 
-                #line 384
+                #line 383
                   add r2.xyz, r2.xyzx, r5.xyzx
                   add r4.xyz, r1.xyzx, r4.xyzx
                   add r3.xyz, r0.xyzx, r3.xyzx
                 endif 
                 
-                #line 591 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 588 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // r2.x <- <ComputeFog return value>.x; r2.y <- <ComputeFog return value>.y; r2.z <- <ComputeFog return value>.z
                 
-                #line 598 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 595 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx
                 mul o0.w, r1.w, cb1[1].w
                 ret 
@@ -9604,18 +9701,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentSkinned return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentSkinned return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentSkinned return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentSkinned return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 402
+                #line 419
                 mov x0[0].x, v4.x
                 mov x0[1].x, v4.y
                 mov x0[2].x, v4.z
                 mov x0[3].x, r0.x
                 
-                #line 410
+                #line 427
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- positionLocal.x; r1.y <- positionLocal.y; r1.z <- positionLocal.z
@@ -9630,10 +9727,10 @@ fxgroup
                   ult r5.xyz, r4.xxxx, l(1, 2, 3, 0)
                   and r6.y, r3.w, r5.y
                 
-                #line 413
+                #line 430
                   iadd r4.xy, r4.xxxx, l(1, -3, 0, 0)
                 
-                #line 410
+                #line 427
                   movc r6.z, r5.y, l(0), r4.y
                   ieq r6.w, r5.z, l(0)
                   mov r6.x, r5.x
@@ -9655,7 +9752,7 @@ fxgroup
                   mad r3.xyz, r2.wwww, r5.xyzx, r3.xyzx
                 endloop 
                 
-                #line 527 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 524 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -9678,7 +9775,7 @@ fxgroup
                 dp3 o3.y, r3.xyzx, cb0[1].xyzx
                 dp3 o3.z, r3.xyzx, cb0[2].xyzx
                 
-                #line 535
+                #line 532
                 mov o4.xy, v3.xyxx
                 mov o4.z, cb3[0].x
                 ret 
@@ -9815,7 +9912,7 @@ fxgroup
                 dcl_input_ps linear v4.z
                 dcl_input_ps linear v5.xyzw
                 dcl_output o0.xyzw
-                dcl_temps 9
+                dcl_temps 8
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -9827,7 +9924,7 @@ fxgroup
                 //   v4.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.x; o0.y <- <PSPositionNormalTextureTangent return value>.y; o0.z <- <PSPositionNormalTextureTangent return value>.z; o0.w <- <PSPositionNormalTextureTangent return value>.w
                 //
-                #line 571 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 568 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -9851,14 +9948,14 @@ fxgroup
                 mad r1.xyw, r1.xxxx, r2.xyxz, r3.xyxz
                 mad r1.xyz, r1.zzzz, v2.xyzx, r1.xywx  // r1.x <- <NormalSampleToWorldSpace return value>.x; r1.y <- <NormalSampleToWorldSpace return value>.y; r1.z <- <NormalSampleToWorldSpace return value>.z
                 
-                #line 327
+                #line 326
                 eq r1.w, cb0[42].x, l(1.000000)
                 if_nz r1.w
                 
-                #line 301
+                #line 300
                   div r2.xyz, v5.xyzx, v5.wwww  // r2.x <- shadowPosH.x; r2.y <- shadowPosH.y; r2.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r3.xyzw, r2.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r3.xyxx, t2.xxxx, s2, r2.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r3.zwzz, t2.xxxx, s2, r2.z
@@ -9881,15 +9978,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r3.zwzz, t2.xxxx, s2, r2.z
                   add r1.w, r1.w, r2.x
                 
-                #line 315
+                #line 314
                   mul r1.w, r1.w, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.w, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r2.x, cb0[19].w, l(1.000000)
                 if_nz r2.x
                 
@@ -9916,7 +10013,7 @@ fxgroup
                   and r4.xyz, r3.xxxx, r4.xyzx
                   and r3.xyz, r3.yzwy, r3.xxxx  // r3.x <- spec.x; r3.y <- spec.y; r3.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r4.xyz, r1.wwww, r4.xyzx  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
                   mul r3.xyz, r1.wwww, r3.xyzx  // r3.x <- specular.x; r3.y <- specular.y; r3.z <- specular.z
                 else 
@@ -9925,7 +10022,7 @@ fxgroup
                   mov r3.xyz, l(0,0,0,0)  // r3.x <- specular.x; r3.y <- specular.y; r3.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.w, cb0[23].w, l(1.000000)
                 if_nz r1.w
                 
@@ -9949,13 +10046,13 @@ fxgroup
                   and r5.xyz, r2.wwww, r5.xyzx
                   and r6.xyz, r2.wwww, r6.xyzx
                 
-                #line 349
+                #line 348
                   mad r2.xyz, cb1[0].xyzx, cb0[20].xyzx, r2.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
                   add r3.xyz, r3.xyzx, r6.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.w, cb0[27].w, l(1.000000)
                 if_nz r1.w
                 
@@ -9979,13 +10076,13 @@ fxgroup
                   and r5.xyz, r2.wwww, r5.xyzx
                   and r6.xyz, r2.wwww, r6.xyzx
                 
-                #line 349
+                #line 348
                   mad r2.xyz, cb1[0].xyzx, cb0[24].xyzx, r2.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
                   add r3.xyz, r3.xyzx, r6.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.w, cb0[32].w, l(1.000000)
                 if_nz r1.w
                 
@@ -10001,12 +10098,9 @@ fxgroup
                   div r5.xyz, r5.xyzx, r6.yyyy
                 
                 #line 213
-                  mul r7.xyz, cb0[28].xyzx, cb1[0].xyzx  // r7.x <- ambient.x; r7.y <- ambient.y; r7.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r5.xyzx, r1.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r5.xyzx, r1.xyzx
                   add r4.w, r4.w, r4.w
@@ -10018,47 +10112,48 @@ fxgroup
                   exp r4.w, r4.w  // r4.w <- specFactor
                   mul r5.xyz, r2.wwww, cb1[1].xyzx
                   mul r5.xyz, r5.xyzx, cb0[29].xyzx  // r5.x <- diffuse.x; r5.y <- diffuse.y; r5.z <- diffuse.z
-                  mul r8.xyz, r4.wwww, cb1[2].xyzx
-                  mul r8.xyz, r8.xyzx, cb0[30].xyzx  // r8.x <- spec.x; r8.y <- spec.y; r8.z <- spec.z
+                  mul r7.xyz, r4.wwww, cb1[2].xyzx
+                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
                   and r5.xyz, r3.wwww, r5.xyzx
-                  and r8.xyz, r3.wwww, r8.xyzx
+                  and r7.xyz, r3.wwww, r7.xyzx
                 
-                #line 230
+                #line 227
                   mov r6.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r6.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                   mul r5.xyz, r2.wwww, r5.xyzx
-                  mul r6.xyz, r2.wwww, r8.xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
-                  and r7.xyz, r1.wwww, r7.xyzx
-                  and r5.xyz, r1.wwww, r5.xyzx
+                  mul r7.xyz, r2.wwww, r7.xyzx
                   and r6.xyz, r1.wwww, r6.xyzx
+                  and r5.xyz, r1.wwww, r5.xyzx
+                  and r7.xyz, r1.wwww, r7.xyzx
                 
-                #line 367
-                  add r2.xyz, r2.xyzx, r7.xyzx
+                #line 366
+                  add r2.xyz, r2.xyzx, r6.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
-                  add r3.xyz, r3.xyzx, r6.xyzx
+                  add r3.xyz, r3.xyzx, r7.xyzx
                 endif 
                 eq r1.w, cb0[38].w, l(1.000000)
                 if_nz r1.w
                 
-                #line 250
+                #line 249
                   add r5.xyz, -v1.xyzx, cb0[36].xyzx  // r5.x <- lightVec.x; r5.y <- lightVec.y; r5.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r6.z, r5.xyzx, r5.xyzx
                   sqrt r6.y, r6.z  // r6.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.w, cb0[36].w, r6.y
                   div r5.xyz, r5.xyzx, r6.yyyy
                 
-                #line 263
+                #line 262
                   mul r7.xyz, cb0[33].xyzx, cb1[0].xyzx  // r7.x <- ambient.x; r7.y <- ambient.y; r7.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r5.xyzx, r1.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r5.xyzx, r1.xyzx
                   add r4.w, r4.w, r4.w
@@ -10075,14 +10170,14 @@ fxgroup
                   and r1.xyz, r1.xyzx, r3.wwww
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r5.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r6.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r6.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -10093,25 +10188,25 @@ fxgroup
                   and r1.xyz, r1.xyzx, r1.wwww
                   and r0.xyz, r0.xyzx, r1.wwww
                 
-                #line 384
+                #line 383
                   add r2.xyz, r2.xyzx, r5.xyzx
                   add r4.xyz, r1.xyzx, r4.xyzx
                   add r3.xyz, r0.xyzx, r3.xyzx
                 endif 
                 
-                #line 591 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 588 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // r2.x <- <ComputeFog return value>.x; r2.y <- <ComputeFog return value>.y; r2.z <- <ComputeFog return value>.z
                 
-                #line 598 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 595 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx
                 mul o0.w, r1.w, cb1[1].w
                 ret 
@@ -10281,18 +10376,18 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentSkinnedI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentSkinnedI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentSkinnedI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentSkinnedI return value>.positionHomogeneous.w
                 //
-                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 402
+                #line 419
                 mov x0[0].x, v4.x
                 mov x0[1].x, v4.y
                 mov x0[2].x, v4.z
                 mov x0[3].x, r0.x
                 
-                #line 410
+                #line 427
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // r1.x <- normalLocal.x; r1.y <- normalLocal.y; r1.z <- normalLocal.z
@@ -10307,10 +10402,10 @@ fxgroup
                   ult r5.xyz, r4.xxxx, l(1, 2, 3, 0)
                   and r6.y, r2.w, r5.y
                 
-                #line 413
+                #line 430
                   iadd r4.xy, r4.xxxx, l(1, -3, 0, 0)
                 
-                #line 410
+                #line 427
                   movc r6.z, r5.y, l(0), r4.y
                   ieq r6.w, r5.z, l(0)
                   mov r6.x, r5.x
@@ -10332,7 +10427,7 @@ fxgroup
                   mad r2.xyz, r1.wwww, r5.xyzx, r2.xyzx
                 endloop 
                 
-                #line 556 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 553 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r3.yyyy, v7.xyzw
                 mad r0.xyzw, r3.xxxx, v6.xyzw, r0.xyzw
                 mad r0.xyzw, r3.zzzz, v8.xyzw, r0.xyzw
@@ -10358,7 +10453,7 @@ fxgroup
                 dp3 o3.y, r2.xyzx, cb0[1].xyzx
                 dp3 o3.z, r2.xyzx, cb0[2].xyzx
                 
-                #line 566
+                #line 563
                 mov o4.xy, v3.xyxx
                 mov o4.z, v10.x
                 ret 
@@ -10495,7 +10590,7 @@ fxgroup
                 dcl_input_ps linear v4.z
                 dcl_input_ps linear v5.xyzw
                 dcl_output o0.xyzw
-                dcl_temps 9
+                dcl_temps 8
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -10507,7 +10602,7 @@ fxgroup
                 //   v4.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionNormalTextureTangent return value>.x; o0.y <- <PSPositionNormalTextureTangent return value>.y; o0.z <- <PSPositionNormalTextureTangent return value>.z; o0.w <- <PSPositionNormalTextureTangent return value>.w
                 //
-                #line 571 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 568 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[39].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 sqrt r0.w, r0.w  // r0.w <- distToEye
@@ -10531,14 +10626,14 @@ fxgroup
                 mad r1.xyw, r1.xxxx, r2.xyxz, r3.xyxz
                 mad r1.xyz, r1.zzzz, v2.xyzx, r1.xywx  // r1.x <- <NormalSampleToWorldSpace return value>.x; r1.y <- <NormalSampleToWorldSpace return value>.y; r1.z <- <NormalSampleToWorldSpace return value>.z
                 
-                #line 327
+                #line 326
                 eq r1.w, cb0[42].x, l(1.000000)
                 if_nz r1.w
                 
-                #line 301
+                #line 300
                   div r2.xyz, v5.xyzx, v5.wwww  // r2.x <- shadowPosH.x; r2.y <- shadowPosH.y; r2.z <- shadowPosH.z
                 
-                #line 311
+                #line 310
                   add r3.xyzw, r2.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.w, r3.xyxx, t2.xxxx, s2, r2.z  // r1.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r3.zwzz, t2.xxxx, s2, r2.z
@@ -10561,15 +10656,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r3.zwzz, t2.xxxx, s2, r2.z
                   add r1.w, r1.w, r2.x
                 
-                #line 315
+                #line 314
                   mul r1.w, r1.w, l(0.111111)
                 
-                #line 331
+                #line 330
                 else 
                   mov r1.w, l(1.000000)
                 endif 
                 
-                #line 338
+                #line 337
                 eq r2.x, cb0[19].w, l(1.000000)
                 if_nz r2.x
                 
@@ -10596,7 +10691,7 @@ fxgroup
                   and r4.xyz, r3.xxxx, r4.xyzx
                   and r3.xyz, r3.yzwy, r3.xxxx  // r3.x <- spec.x; r3.y <- spec.y; r3.z <- spec.z
                 
-                #line 350
+                #line 349
                   mul r4.xyz, r1.wwww, r4.xyzx  // r4.x <- diffuse.x; r4.y <- diffuse.y; r4.z <- diffuse.z
                   mul r3.xyz, r1.wwww, r3.xyzx  // r3.x <- specular.x; r3.y <- specular.y; r3.z <- specular.z
                 else 
@@ -10605,7 +10700,7 @@ fxgroup
                   mov r3.xyz, l(0,0,0,0)  // r3.x <- specular.x; r3.y <- specular.y; r3.z <- specular.z
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.w, cb0[23].w, l(1.000000)
                 if_nz r1.w
                 
@@ -10629,13 +10724,13 @@ fxgroup
                   and r5.xyz, r2.wwww, r5.xyzx
                   and r6.xyz, r2.wwww, r6.xyzx
                 
-                #line 349
+                #line 348
                   mad r2.xyz, cb1[0].xyzx, cb0[20].xyzx, r2.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
                   add r3.xyz, r3.xyzx, r6.xyzx
                 endif 
                 
-                #line 338
+                #line 337
                 eq r1.w, cb0[27].w, l(1.000000)
                 if_nz r1.w
                 
@@ -10659,13 +10754,13 @@ fxgroup
                   and r5.xyz, r2.wwww, r5.xyzx
                   and r6.xyz, r2.wwww, r6.xyzx
                 
-                #line 349
+                #line 348
                   mad r2.xyz, cb1[0].xyzx, cb0[24].xyzx, r2.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
                   add r3.xyz, r3.xyzx, r6.xyzx
                 endif 
                 
-                #line 355
+                #line 354
                 eq r1.w, cb0[32].w, l(1.000000)
                 if_nz r1.w
                 
@@ -10681,12 +10776,9 @@ fxgroup
                   div r5.xyz, r5.xyzx, r6.yyyy
                 
                 #line 213
-                  mul r7.xyz, cb0[28].xyzx, cb1[0].xyzx  // r7.x <- ambient.x; r7.y <- ambient.y; r7.z <- ambient.z
-                
-                #line 216
                   dp3 r2.w, r5.xyzx, r1.xyzx  // r2.w <- diffuseFactor
                 
-                #line 220
+                #line 217
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r5.xyzx, r1.xyzx
                   add r4.w, r4.w, r4.w
@@ -10698,47 +10790,48 @@ fxgroup
                   exp r4.w, r4.w  // r4.w <- specFactor
                   mul r5.xyz, r2.wwww, cb1[1].xyzx
                   mul r5.xyz, r5.xyzx, cb0[29].xyzx  // r5.x <- diffuse.x; r5.y <- diffuse.y; r5.z <- diffuse.z
-                  mul r8.xyz, r4.wwww, cb1[2].xyzx
-                  mul r8.xyz, r8.xyzx, cb0[30].xyzx  // r8.x <- spec.x; r8.y <- spec.y; r8.z <- spec.z
+                  mul r7.xyz, r4.wwww, cb1[2].xyzx
+                  mul r7.xyz, r7.xyzx, cb0[30].xyzx  // r7.x <- spec.x; r7.y <- spec.y; r7.z <- spec.z
                   and r5.xyz, r3.wwww, r5.xyzx
-                  and r8.xyz, r3.wwww, r8.xyzx
+                  and r7.xyz, r3.wwww, r7.xyzx
                 
-                #line 230
+                #line 227
                   mov r6.x, l(1.000000)
                   dp3 r2.w, cb0[32].xyzx, r6.xyzx
                   div r2.w, l(1.000000, 1.000000, 1.000000, 1.000000), r2.w  // r2.w <- attenuation
+                  mul r6.xyz, cb0[28].xyzx, cb1[0].xyzx  // r6.x <- ambient.x; r6.y <- ambient.y; r6.z <- ambient.z
                   mul r5.xyz, r2.wwww, r5.xyzx
-                  mul r6.xyz, r2.wwww, r8.xyzx  // r6.x <- spec.x; r6.y <- spec.y; r6.z <- spec.z
-                  and r7.xyz, r1.wwww, r7.xyzx
-                  and r5.xyz, r1.wwww, r5.xyzx
+                  mul r7.xyz, r2.wwww, r7.xyzx
                   and r6.xyz, r1.wwww, r6.xyzx
+                  and r5.xyz, r1.wwww, r5.xyzx
+                  and r7.xyz, r1.wwww, r7.xyzx
                 
-                #line 367
-                  add r2.xyz, r2.xyzx, r7.xyzx
+                #line 366
+                  add r2.xyz, r2.xyzx, r6.xyzx
                   add r4.xyz, r4.xyzx, r5.xyzx
-                  add r3.xyz, r3.xyzx, r6.xyzx
+                  add r3.xyz, r3.xyzx, r7.xyzx
                 endif 
                 eq r1.w, cb0[38].w, l(1.000000)
                 if_nz r1.w
                 
-                #line 250
+                #line 249
                   add r5.xyz, -v1.xyzx, cb0[36].xyzx  // r5.x <- lightVec.x; r5.y <- lightVec.y; r5.z <- lightVec.z
                 
-                #line 253
+                #line 252
                   dp3 r6.z, r5.xyzx, r5.xyzx
                   sqrt r6.y, r6.z  // r6.y <- d
                 
-                #line 260
+                #line 259
                   ge r1.w, cb0[36].w, r6.y
                   div r5.xyz, r5.xyzx, r6.yyyy
                 
-                #line 263
+                #line 262
                   mul r7.xyz, cb0[33].xyzx, cb1[0].xyzx  // r7.x <- ambient.x; r7.y <- ambient.y; r7.z <- ambient.z
                 
-                #line 266
+                #line 265
                   dp3 r2.w, r5.xyzx, r1.xyzx  // r2.w <- diffuseFactor
                 
-                #line 270
+                #line 269
                   lt r3.w, l(0.000000), r2.w
                   dp3 r4.w, -r5.xyzx, r1.xyzx
                   add r4.w, r4.w, r4.w
@@ -10755,14 +10848,14 @@ fxgroup
                   and r1.xyz, r1.xyzx, r3.wwww
                   and r0.xyz, r0.xyzx, r3.wwww
                 
-                #line 280
+                #line 279
                   dp3 r2.w, -r5.xyzx, cb0[37].xyzx
                   max r2.w, r2.w, l(0.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, cb0[37].w
                   exp r2.w, r2.w  // r2.w <- spot
                 
-                #line 283
+                #line 282
                   mov r6.x, l(1.000000)
                   dp3 r3.w, cb0[38].xyzx, r6.xyzx
                   div r3.w, r2.w, r3.w  // r3.w <- attenuation
@@ -10773,25 +10866,25 @@ fxgroup
                   and r1.xyz, r1.xyzx, r1.wwww
                   and r0.xyz, r0.xyzx, r1.wwww
                 
-                #line 384
+                #line 383
                   add r2.xyz, r2.xyzx, r5.xyzx
                   add r4.xyz, r1.xyzx, r4.xyzx
                   add r3.xyz, r0.xyzx, r3.xyzx
                 endif 
                 
-                #line 591 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 588 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r0.xyz, r2.xyzx, r4.xyzx
                 mad r0.xyz, r1.xyzx, r0.xyzx, r3.xyzx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 lt r1.x, l(0.000000), cb0[40].x
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.w, r0.w, -cb0[39].w
                 div_sat r0.w, r0.w, cb0[40].x  // r0.w <- fogLerp
                 add r2.xyz, -r0.xyzx, cb0[41].xyzx
                 mad r2.xyz, r0.wwww, r2.xyzx, r0.xyzx  // r2.x <- <ComputeFog return value>.x; r2.y <- <ComputeFog return value>.y; r2.z <- <ComputeFog return value>.z
                 
-                #line 598 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 595 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r1.xxxx, r2.xyzx, r0.xyzx
                 mul o0.w, r1.w, cb1[1].w
                 ret 

@@ -104,6 +104,14 @@ namespace Engine
         /// No-cull rasterizer
         /// </summary>
         private RasterizerState rasterizerNoCull = null;
+        /// <summary>
+        /// Sets cull clockwise face rasterizer
+        /// </summary>
+        private RasterizerState rasterizerCullClockwiseFace = null;
+        /// <summary>
+        /// Sets cull counter-clockwise face rasterizer
+        /// </summary>
+        private RasterizerState rasterizerCullCounterClockwiseFace = null;
 
         /// <summary>
         /// Back buffer format
@@ -410,6 +418,38 @@ namespace Engine
                     SlopeScaledDepthBias = 0.0f,
                 });
 
+            this.rasterizerCullClockwiseFace = new RasterizerState(
+                this.Device,
+                new RasterizerStateDescription()
+                {
+                    CullMode = CullMode.Front,
+                    FillMode = FillMode.Solid,
+                    IsFrontCounterClockwise = false,
+                    IsAntialiasedLineEnabled = true,
+                    IsMultisampleEnabled = true,
+                    IsScissorEnabled = false,
+                    IsDepthClipEnabled = true,
+                    DepthBias = 0,
+                    DepthBiasClamp = 0.0f,
+                    SlopeScaledDepthBias = 0.0f,
+                });
+
+            this.rasterizerCullCounterClockwiseFace = new RasterizerState(
+                this.Device,
+                new RasterizerStateDescription()
+                {
+                    CullMode = CullMode.Back,
+                    FillMode = FillMode.Solid,
+                    IsFrontCounterClockwise = true,
+                    IsAntialiasedLineEnabled = true,
+                    IsMultisampleEnabled = true,
+                    IsScissorEnabled = false,
+                    IsDepthClipEnabled = true,
+                    DepthBias = 0,
+                    DepthBiasClamp = 0.0f,
+                    SlopeScaledDepthBias = 0.0f,
+                });
+
             #endregion
 
             #region Blend states
@@ -707,6 +747,20 @@ namespace Engine
             this.Device.ImmediateContext.Rasterizer.State = this.rasterizerNoCull;
         }
         /// <summary>
+        /// Sets cull clockwise face rasterizer
+        /// </summary>
+        public void SetCullClockwiseFaceRasterizer()
+        {
+            this.Device.ImmediateContext.Rasterizer.State = this.rasterizerCullClockwiseFace;
+        }
+        /// <summary>
+        /// Sets cull counter-clockwise face rasterizer
+        /// </summary>
+        public void SetCullCounterClockwiseFaceRasterizer()
+        {
+            this.Device.ImmediateContext.Rasterizer.State = this.rasterizerCullCounterClockwiseFace;
+        }
+        /// <summary>
         /// Dispose created resources
         /// </summary>
         public void Dispose()
@@ -857,6 +911,18 @@ namespace Engine
             {
                 this.rasterizerNoCull.Dispose();
                 this.rasterizerNoCull = null;
+            }
+
+            if (this.rasterizerCullClockwiseFace != null)
+            {
+                this.rasterizerCullClockwiseFace.Dispose();
+                this.rasterizerCullClockwiseFace = null;
+            }
+
+            if (this.rasterizerCullCounterClockwiseFace != null)
+            {
+                this.rasterizerCullCounterClockwiseFace.Dispose();
+                this.rasterizerCullCounterClockwiseFace = null;
             }
 
             if (this.blendAlphaToCoverage != null)

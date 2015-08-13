@@ -130,6 +130,10 @@ namespace Engine.Effects
         /// </summary>
         public readonly EffectTechnique PositionTextureBLUE = null;
         /// <summary>
+        /// Position texture using alpha channer as gray-scale technique
+        /// </summary>
+        public readonly EffectTechnique PositionTextureALPHA = null;
+        /// <summary>
         /// Position texture without alpha channel
         /// </summary>
         public readonly EffectTechnique PositionTextureNOALPHA = null;
@@ -561,6 +565,7 @@ namespace Engine.Effects
             this.PositionTextureRED = this.Effect.GetTechniqueByName("PositionTextureRED");
             this.PositionTextureGREEN = this.Effect.GetTechniqueByName("PositionTextureGREEN");
             this.PositionTextureBLUE = this.Effect.GetTechniqueByName("PositionTextureBLUE");
+            this.PositionTextureALPHA = this.Effect.GetTechniqueByName("PositionTextureALPHA");
             this.PositionTextureSkinned = this.Effect.GetTechniqueByName("PositionTextureSkinned");
             this.PositionNormalTexture = this.Effect.GetTechniqueByName("PositionNormalTexture");
             this.PositionNormalTextureSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureSkinned");
@@ -576,6 +581,7 @@ namespace Engine.Effects
             this.AddInputLayout(this.PositionTextureRED, VertexPositionTexture.GetInput());
             this.AddInputLayout(this.PositionTextureGREEN, VertexPositionTexture.GetInput());
             this.AddInputLayout(this.PositionTextureBLUE, VertexPositionTexture.GetInput());
+            this.AddInputLayout(this.PositionTextureALPHA, VertexPositionTexture.GetInput());
             this.AddInputLayout(this.PositionTextureSkinned, VertexSkinnedPositionTexture.GetInput());
             this.AddInputLayout(this.PositionNormalTexture, VertexPositionNormalTexture.GetInput());
             this.AddInputLayout(this.PositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput());

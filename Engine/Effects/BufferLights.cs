@@ -91,11 +91,18 @@ namespace Engine.Effects
 
             SceneLight setLights = lights != null ? lights : SceneLight.Empty;
 
-            this.DirectionalLight1 = new BufferDirectionalLight(setLights.DirectionalLight1);
-            this.DirectionalLight2 = new BufferDirectionalLight(setLights.DirectionalLight2);
-            this.DirectionalLight3 = new BufferDirectionalLight(setLights.DirectionalLight3);
-            this.PointLight = new BufferPointLight(setLights.PointLight);
-            this.SpotLight = new BufferSpotLight(setLights.SpotLight);
+            this.DirectionalLight1 = new BufferDirectionalLight();
+            this.DirectionalLight2 = new BufferDirectionalLight();
+            this.DirectionalLight3 = new BufferDirectionalLight();
+            this.PointLight = new BufferPointLight();
+            this.SpotLight = new BufferSpotLight();
+
+            if (setLights.DirectionalLights.Length > 0) this.DirectionalLight1 = new BufferDirectionalLight(setLights.DirectionalLights[0]);
+            if (setLights.DirectionalLights.Length > 1) this.DirectionalLight2 = new BufferDirectionalLight(setLights.DirectionalLights[1]);
+            if (setLights.DirectionalLights.Length > 2) this.DirectionalLight3 = new BufferDirectionalLight(setLights.DirectionalLights[2]);
+            if (setLights.PointLights.Length > 0) this.PointLight = new BufferPointLight(setLights.PointLights[0]);
+            if (setLights.SpotLights.Length > 0) this.SpotLight = new BufferSpotLight(setLights.SpotLights[0]);
+           
             this.FogColor = setLights.FogColor;
             this.FogStart = setLights.FogStart;
             this.FogRange = setLights.FogRange;
