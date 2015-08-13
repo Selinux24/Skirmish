@@ -296,12 +296,22 @@ namespace Engine
                     var light = context.Lights.SpotLights[i];
                     if (light.Enabled)
                     {
+                        float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
+                        if (cameraToCenter < light.Range)
+                        {
+                            this.Game.Graphics.SetCullClockwiseFaceRasterizer();
+                        }
+                        else
+                        {
+                            this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+                        }
+
                         deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
                         deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                         deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                         deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                        Matrix world = Matrix.Identity;
+                        Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
                         effect.UpdatePerSpotLight(
                             new BufferSpotLight(light),
@@ -435,7 +445,7 @@ namespace Engine
             VertexData[] cv;
             uint[] ci;
             VertexData.CreateSphere(
-                1, 10, 10,
+                1, 3, 3,
                 out cv,
                 out ci);
 

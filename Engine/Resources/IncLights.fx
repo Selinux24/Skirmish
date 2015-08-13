@@ -224,8 +224,7 @@ void ComputePointLight(
 	}
 
 	//Attenuate
-	//float attenuation = 1.0f / dot(L.Attenuation, float3(1.0f, d, d*d));
-	float attenuation = saturate(1.0f - d/L.Range);
+	float attenuation = 1.0f / dot(L.Attenuation, float3(1.0f, d, d*d));
 
 	ambient = (mat.Ambient * L.Ambient) * attenuation;
 	diffuse *= attenuation;
@@ -259,9 +258,6 @@ void ComputeSpotLight(
 	//Normalize the light vector.
 	lightVec /= d;
 
-	//Ambient term.
-	ambient = mat.Ambient * L.Ambient;
-
 	//Add diffuse and specular term, provided the surface is in the line of site of the light.
 	float diffuseFactor = dot(lightVec, normal);
 
@@ -281,9 +277,81 @@ void ComputeSpotLight(
 
 	//Attenuate.
 	float attenuation = spot / dot(L.Attenuation, float3(1.0f, d, d*d));
-	ambient *= spot;
+
+	//Ambient term.
+	ambient = (mat.Ambient * L.Ambient) * attenuation * spot;
 	diffuse *= attenuation;
 	spec *= attenuation;
+}
+
+float4 ComputeDirectionalLight2(
+	DirectionalLight L,
+	float3 normal,
+	float3 toEye)
+{
+	//The light vector aims opposite the direction the light rays travel.
+	float3 lightVec = -L.Direction;
+
+	float brightness = dot(normal, lightVec) / (length(lightVec) * length(normal));
+    brightness = clamp(brightness, 0, 1);
+
+    return float4(brightness * L.Diffuse.rgb, 1.0f);
+}
+
+float4 ComputePointLight2(
+	PointLight L, 
+	float3 pos,
+	float3 normal, 
+	float3 toEye)
+{
+	//The vector from the surface to the light.
+	float3 lightVec = L.Position - pos;
+
+	//The distance from surface to light.
+	float d = length(lightVec);
+
+	//Range test.
+	if(d > L.Range)
+	{
+		return 0.0f;
+	}
+
+	//Normalize the light vector.
+	lightVec /= d;
+
+	float intensity = saturate(dot(normal, lightVec));
+
+	return intensity * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
+}
+
+float4 ComputeSpotLight2(
+	SpotLight L,
+	float3 pos, 
+	float3 normal, 
+	float3 toEye)
+{
+	//The vector from the surface to the light.
+	float3 lightVec = L.Position - pos;
+
+	//The distance from surface to light.
+	float d = length(lightVec);
+
+	//Range test.
+	if( d > L.Range )
+	{
+		return 0.0f;
+	}
+
+	//Normalize the light vector.
+	lightVec /= d;
+
+	//Add diffuse and specular term, provided the surface is in the line of site of the light.
+	float intensity = saturate(dot(normal, lightVec));
+
+	//Scale by spotlight factor.
+	float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);
+
+	return intensity * spot * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
 }
 
 static const float SHADOWMAPSIZE = 2048.0f;

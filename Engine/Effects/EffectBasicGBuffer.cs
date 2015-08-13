@@ -34,6 +34,8 @@ namespace Engine.Effects
             public Matrix World;
             public Matrix WorldInverse;
             public Matrix WorldViewProjection;
+            public Matrix ShadowTransform;
+            public float EnableShadows;
 
             public static int Size
             {
@@ -148,13 +150,17 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
+        /// Shadow transform effect variable
+        /// </summary>
+        private EffectMatrixVariable shadowTransform = null;
+        /// <summary>
+        /// Enable shados effect variable
+        /// </summary>
+        private EffectScalarVariable enableShadows = null;
+        /// <summary>
         /// Material effect variable
         /// </summary>
         private EffectVariable material = null;
-        /// <summary>
-        /// Texture effect variable
-        /// </summary>
-        private EffectShaderResourceVariable textures = null;
         /// <summary>
         /// Texture index effect variable
         /// </summary>
@@ -163,6 +169,14 @@ namespace Engine.Effects
         /// Bone transformation matrices effect variable
         /// </summary>
         private EffectMatrixVariable boneTransforms = null;
+        /// <summary>
+        /// Texture effect variable
+        /// </summary>
+        private EffectShaderResourceVariable textures = null;
+        /// <summary>
+        /// Shadow map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable shadowMap = null;
 
         /// <summary>
         /// World matrix
@@ -207,6 +221,34 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Shadow transform matrix
+        /// </summary>
+        protected Matrix ShadowTransform
+        {
+            get
+            {
+                return this.shadowTransform.GetMatrix();
+            }
+            set
+            {
+                this.shadowTransform.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// Enable shadows
+        /// </summary>
+        protected float EnableShadows
+        {
+            get
+            {
+                return this.enableShadows.GetFloat();
+            }
+            set
+            {
+                this.enableShadows.Set(value);
+            }
+        }
+        /// <summary>
         /// Material
         /// </summary>
         protected BufferMaterials Material
@@ -228,20 +270,6 @@ namespace Engine.Effects
 
                     this.material.SetRawValue(ds, default(BufferMaterials).Stride);
                 }
-            }
-        }
-        /// <summary>
-        /// Texture
-        /// </summary>
-        protected ShaderResourceView Textures
-        {
-            get
-            {
-                return this.textures.GetResource();
-            }
-            set
-            {
-                this.textures.SetResource(value);
             }
         }
         /// <summary>
@@ -272,6 +300,34 @@ namespace Engine.Effects
             set
             {
                 this.textureIndex.Set((float)value);
+            }
+        }
+        /// <summary>
+        /// Texture
+        /// </summary>
+        protected ShaderResourceView Textures
+        {
+            get
+            {
+                return this.textures.GetResource();
+            }
+            set
+            {
+                this.textures.SetResource(value);
+            }
+        }
+        /// <summary>
+        /// Shadow map
+        /// </summary>
+        protected ShaderResourceView ShadowMap
+        {
+            get
+            {
+                return this.shadowMap.GetResource();
+            }
+            set
+            {
+                this.shadowMap.SetResource(value);
             }
         }
 
@@ -326,10 +382,13 @@ namespace Engine.Effects
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.shadowTransform = this.Effect.GetVariableByName("gShadowTransform").AsMatrix();
+            this.enableShadows = this.Effect.GetVariableByName("gEnableShadows").AsScalar();
             this.material = this.Effect.GetVariableByName("gMaterial");
-            this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
+            this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
+            this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -394,11 +453,15 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        public void UpdatePerFrame()
+        /// <param name="shadowMap">Shadow map texture</param>
+        public void UpdatePerFrame(ShaderResourceView shadowMap)
         {
             this.World = this.FrameBuffer.World;
             this.WorldInverse = this.FrameBuffer.WorldInverse;
             this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
+            this.ShadowTransform = this.FrameBuffer.ShadowTransform;
+            this.EnableShadows = shadowMap != null ? 1.0f : 0.0f;
+            this.ShadowMap = shadowMap;
         }
         /// <summary>
         /// Update per model object data

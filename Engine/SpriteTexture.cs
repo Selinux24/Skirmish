@@ -50,7 +50,7 @@ namespace Engine
         /// <summary>
         /// Drawing channels
         /// </summary>
-        private SpriteTextureChannelsEnum channels = SpriteTextureChannelsEnum.All;
+        private SpriteTextureChannelsEnum channels = SpriteTextureChannelsEnum.None;
 
         /// <summary>
         /// Texture
@@ -214,6 +214,10 @@ namespace Engine
     /// </summary>
     public enum SpriteTextureChannelsEnum
     {
+        /// <summary>
+        /// No channel selected
+        /// </summary>
+        None,
         /// <summary>
         /// All
         /// </summary>

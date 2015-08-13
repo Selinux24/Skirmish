@@ -136,11 +136,12 @@ namespace Engine
                         Matrix world = context.World * local;
                         Matrix worldInverse = Matrix.Invert(world);
                         Matrix worldViewProjection = world * context.ViewProjection;
+                        Matrix shadowTransform = context.ShadowTransform;
 
                         ((EffectBasicGBuffer)effect).FrameBuffer.World = world;
                         ((EffectBasicGBuffer)effect).FrameBuffer.WorldInverse = worldInverse;
                         ((EffectBasicGBuffer)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
-                        ((EffectBasicGBuffer)effect).UpdatePerFrame();
+                        ((EffectBasicGBuffer)effect).UpdatePerFrame(context.ShadowMap);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {

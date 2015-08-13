@@ -2,10 +2,11 @@
 using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
-using EffectVariable = SharpDX.Direct3D11.EffectVariable;
-using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
+using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
+using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+using EffectVariable = SharpDX.Direct3D11.EffectVariable;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
@@ -33,6 +34,8 @@ namespace Engine.Effects
             public Matrix World;
             public Matrix WorldInverse;
             public Matrix WorldViewProjection;
+            public Matrix ShadowTransform;
+            public float EnableShadows;
 
             public static int Size
             {
@@ -131,17 +134,29 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
+        /// Shadow transform effect variable
+        /// </summary>
+        private EffectMatrixVariable shadowTransform = null;
+        /// <summary>
+        /// Enable shados effect variable
+        /// </summary>
+        private EffectScalarVariable enableShadows = null;
+        /// <summary>
         /// Material effect variable
         /// </summary>
         private EffectVariable material = null;
+        /// <summary>
+        /// Bone transformation matrices effect variable
+        /// </summary>
+        private EffectMatrixVariable boneTransforms = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
         private EffectShaderResourceVariable textures = null;
         /// <summary>
-        /// Bone transformation matrices effect variable
+        /// Shadow map effect variable
         /// </summary>
-        private EffectMatrixVariable boneTransforms = null;
+        private EffectShaderResourceVariable shadowMap = null;
 
         /// <summary>
         /// World matrix
@@ -186,6 +201,34 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Shadow transform matrix
+        /// </summary>
+        protected Matrix ShadowTransform
+        {
+            get
+            {
+                return this.shadowTransform.GetMatrix();
+            }
+            set
+            {
+                this.shadowTransform.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// Enable shadows
+        /// </summary>
+        protected float EnableShadows
+        {
+            get
+            {
+                return this.enableShadows.GetFloat();
+            }
+            set
+            {
+                this.enableShadows.Set(value);
+            }
+        }
+        /// <summary>
         /// Material
         /// </summary>
         protected BufferMaterials Material
@@ -210,6 +253,22 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Bone transformations
+        /// </summary>
+        protected Matrix[] BoneTransforms
+        {
+            get
+            {
+                return this.boneTransforms.GetMatrixArray<Matrix>(MaxBoneTransforms);
+            }
+            set
+            {
+                if (value != null && value.Length > MaxBoneTransforms) throw new Exception(string.Format("Bonetransforms must set {0}. Has {1}", MaxBoneTransforms, value.Length));
+
+                this.boneTransforms.SetMatrix(value);
+            }
+        }
+        /// <summary>
         /// Texture
         /// </summary>
         protected ShaderResourceView Textures
@@ -224,19 +283,17 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Bone transformations
+        /// Shadow map
         /// </summary>
-        protected Matrix[] BoneTransforms
+        protected ShaderResourceView ShadowMap
         {
             get
             {
-                return this.boneTransforms.GetMatrixArray<Matrix>(MaxBoneTransforms);
+                return this.shadowMap.GetResource();
             }
             set
             {
-                if (value != null && value.Length > MaxBoneTransforms) throw new Exception(string.Format("Bonetransforms must set {0}. Has {1}", MaxBoneTransforms, value.Length));
-
-                this.boneTransforms.SetMatrix(value);
+                this.shadowMap.SetResource(value);
             }
         }
 
@@ -287,9 +344,12 @@ namespace Engine.Effects
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.shadowTransform = this.Effect.GetVariableByName("gShadowTransform").AsMatrix();
+            this.enableShadows = this.Effect.GetVariableByName("gEnableShadows").AsScalar();
             this.material = this.Effect.GetVariableByName("gMaterial");
-            this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
+            this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
+            this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -354,11 +414,15 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        public void UpdatePerFrame()
+        /// <param name="shadowMap">Shadow map texture</param>
+        public void UpdatePerFrame(ShaderResourceView shadowMap)
         {
             this.World = this.FrameBuffer.World;
             this.WorldInverse = this.FrameBuffer.WorldInverse;
             this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
+            this.ShadowTransform = this.FrameBuffer.ShadowTransform;
+            this.EnableShadows = shadowMap != null ? 1.0f : 0.0f;
+            this.ShadowMap = shadowMap;
         }
         /// <summary>
         /// Update per model object data

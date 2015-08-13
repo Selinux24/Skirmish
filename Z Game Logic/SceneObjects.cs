@@ -89,7 +89,7 @@ namespace GameLogic
         #endregion
 
         public SceneObjects(Game game)
-            : base(game)
+            : base(game, SceneModesEnum.DeferredLightning)
         {
 
         }
@@ -106,6 +106,7 @@ namespace GameLogic
             this.NewGame();
 
             this.Lights.EnableShadows = true;
+            this.Lights.DirectionalLights[0].Enabled = true;
 
             #region 3D models
 

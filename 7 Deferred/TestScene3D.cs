@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using Engine;
 using Engine.PathFinding;
@@ -34,48 +33,6 @@ namespace DeferredTest
 
             this.Camera.NearPlaneDistance = 0.5f;
             this.Camera.FarPlaneDistance = 5000f;
-
-            List<SceneLightPoint> lights = new List<SceneLightPoint>();
-
-            for (int i = 0; i < 5; i++)
-            {
-                for (int x = 0; x < 5; x++)
-                {
-                    SceneLightPoint pointLight = new SceneLightPoint()
-                    {
-                        Position = new Vector3((i * 10) - 20, 5, (x * 10) - 20),
-                        Range = 8f,
-                        Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f),
-                        Diffuse = new Color4(0.7f, 0.7f, 0.7f, 1.0f),
-                        Specular = new Color4(0.7f, 0.7f, 0.7f, 1.0f),
-                        Attenuation = new Vector3(1.0f, 0.0f, 0.1f),
-                        Enabled = true,
-                    };
-
-                    lights.Add(pointLight);
-                }
-            }
-
-            this.Lights.PointLights = lights.ToArray();
-
-            //Vector3 att = this.Lights.PointLight.Attenuation;
-
-            //System.Collections.Generic.List<float> attList1 = new System.Collections.Generic.List<float>();
-            //System.Collections.Generic.List<float> attList2 = new System.Collections.Generic.List<float>();
-            //for (int x = 0; x < this.Lights.PointLight.Range + 1; x++)
-            //{
-            //    Vector3 dist = new Vector3(1, x, x * x);
-            //    float attenuation1 = 1.0f / Vector3.Dot(att, dist);
-            //    float attenuation2 = 1.0f - x / this.Lights.PointLight.Range;
-            //    attList1.Add(attenuation1);
-            //    attList2.Add(attenuation2);
-            //}
-
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = false;
-            this.Lights.DirectionalLights[2].Enabled = false;
-
-            this.Lights.EnableShadows = false;
 
             #region Texts
 
@@ -230,6 +187,60 @@ namespace DeferredTest
             this.Camera.LookTo(cameraPosition + Vector3.Up);
 
             #endregion
+
+            #region Lights
+
+            this.Lights.EnableShadows = false;
+
+            this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[1].Enabled = false;
+            this.Lights.DirectionalLights[2].Enabled = false;
+
+            for (int i = 0; i < 5; i++)
+            {
+                for (int x = 0; x < 5; x++)
+                {
+                    Vector3 lightPosition;
+                    if (!this.terrain.FindTopGroundPosition((i * 10) - 20, (x * 10) - 20, out lightPosition))
+                    {
+                        lightPosition = new Vector3((i * 10) - 20, 0, (x * 10) - 20);
+                    }
+                    else
+                    {
+                        lightPosition.Y += 1f;
+                    }
+
+                    SceneLightPoint pointLight = new SceneLightPoint()
+                    {
+                        Enabled = true,
+                        Ambient = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                        Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                        Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                        Attenuation = new Vector3(1.0f, 0.0f, 0.1f),
+                        Position = lightPosition,
+                        Range = 20f,
+                    };
+
+                    this.Lights.Add(pointLight);
+                }
+            }
+
+            SceneLightSpot spotLight = new SceneLightSpot()
+            {
+                Enabled = true,
+                Ambient = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                Attenuation = new Vector3(1.0f, 0.0f, 0.1f),
+                Position = new Vector3(60, 15, 60),
+                Direction = Vector3.Normalize(-Vector3.One),
+                Range = 30,
+                Spot = 20,
+            };
+
+            this.Lights.Add(spotLight);
+
+            #endregion
         }
 
         public override void Dispose()
@@ -287,32 +298,42 @@ namespace DeferredTest
                 if (this.Game.Input.KeyJustReleased(Keys.F4))
                 {
                     this.bufferDrawer.Texture = this.DrawContext.LightMap;
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.All;
+                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                     this.bufferDrawer.Visible = true;
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            if (this.DrawContext.ShadowMap != null)
             {
-                this.bufferDrawer.Visible = !this.bufferDrawer.Visible;
+                if (this.Game.Input.KeyJustReleased(Keys.F5))
+                {
+                    this.bufferDrawer.Texture = this.DrawContext.ShadowMap;
+                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Red;
+                    this.bufferDrawer.Visible = true;
+                }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
-                this.terrain.Visible = !this.terrain.Visible;
+                this.bufferDrawer.Visible = !this.bufferDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F7))
             {
-                this.tank.Visible = !this.tank.Visible;
+                this.terrain.Visible = !this.terrain.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F8))
             {
-                this.helicopter.Visible = !this.helicopter.Visible;
+                this.tank.Visible = !this.tank.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F9))
+            {
+                this.helicopter.Visible = !this.helicopter.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F10))
             {
                 this.helicopters.Visible = !this.helicopters.Visible;
             }

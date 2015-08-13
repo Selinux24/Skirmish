@@ -83,33 +83,30 @@ PSCombineLightsInput VSCombineLights(VSVertexPositionTexture input)
 
 float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 {
-	float4 outputColor = 0.0f;
-
-    //Color
-    float4 color = gColorMap.Sample(SampleTypePoint, input.tex);
-    //Normal
-    float4 normal = gNormalMap.Sample(SampleTypePoint, input.tex);
 	//Depth
     float4 depth = gDepthMap.Sample(SampleTypePoint, input.tex);
-
-	if(length(normal) != 0.0f)
+	[flatten]
+	if(depth.w == 1.0f)
 	{
-		//Get the light direction
-		float3 lightDir = -gDirLight.Direction;
-
-		//Calculate the amount of light on this pixel
-		float lightIntensity = saturate(dot(normal.xyz, lightDir));
-
-		//Determine the final amount of diffuse color based on the color of the pixel combined with the light intensity.
-		outputColor = saturate(color * lightIntensity);
-		outputColor.a = 1.0f;
-	}
-	else
-	{
-		outputColor = color;
+		return float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
-	return outputColor;
+    //Normal
+    float4 normal = gNormalMap.Sample(SampleTypePoint, input.tex);
+	[flatten]
+	if(length(normal.xyz) == 0.0f)
+	{
+		return float4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+	float3 toEyeWorld = gEyePositionWorld - depth.xyz;
+	float distToEye = length(toEyeWorld);
+	toEyeWorld /= distToEye;
+
+	return ComputeDirectionalLight2(
+		gDirLight,
+		normal.xyz,
+		toEyeWorld);
 }
 float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 {
@@ -117,89 +114,83 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 
 	//Get texture coordinates
 	float4 position = input.positionScreen;
-	float2 texCoord = 0.5f * (float2(position.x, -position.y) + 1);
+	float2 tex = 0.5f * (float2(position.x, -position.y) + 1);
 
-    //Color
-    float4 color = gColorMap.Sample(SampleTypePoint, texCoord);
-    //Normal
-    float4 normal = gNormalMap.Sample(SampleTypePoint, texCoord);
 	//Depth
-    float4 depth = gDepthMap.Sample(SampleTypePoint, texCoord);
-
+    float4 depth = gDepthMap.Sample(SampleTypePoint, tex);
+	[flatten]
 	if(depth.w == 1.0f)
 	{
-		return color;
+		return float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
+    //Normal
+    float4 normal = gNormalMap.Sample(SampleTypePoint, tex);
+	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
-		return color;
+		return float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-
-	Material mat = (Material)0;
-	mat.Ambient = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	mat.Diffuse = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	mat.Specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	float3 toEyeWorld = gEyePositionWorld - depth.xyz;
 	float distToEye = length(toEyeWorld);
 	toEyeWorld /= distToEye;
 
-	float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	ComputePointLight(
-		mat, 
+	return ComputePointLight2(
 		gPointLight, 
 		depth.xyz,
 		normal.xyz, 
-		toEyeWorld,
-		ambient, 
-		diffuse, 
-		specular);
-
-	return color * (ambient + diffuse) + specular;
+		toEyeWorld);
 }
 float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 {
-	float4 outputColor = 0.0f;
+	input.positionScreen.xy /= input.positionScreen.w;
 
 	//Get texture coordinates
 	float4 position = input.positionScreen;
-    position.xy /= position.w;
-	float2 texCoord = 0.5f * (float2(position.x, -position.y) + 1);
+	float2 tex = 0.5f * (float2(position.x, -position.y) + 1);
 
-    //Color
-    float4 color = gColorMap.Sample(SampleTypePoint, texCoord);
-    //Normal
-    float4 normal = gNormalMap.Sample(SampleTypePoint, texCoord);
 	//Depth
-    float4 depth = gDepthMap.Sample(SampleTypePoint, texCoord);
-
-	if(length(normal) != 0.0f)
+    float4 depth = gDepthMap.Sample(SampleTypePoint, tex);
+	[flatten]
+	if(depth.w == 1.0f)
 	{
-		outputColor = color;
-	}
-	else
-	{
-		outputColor = color;
+		return float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
-	return outputColor;
+    //Normal
+    float4 normal = gNormalMap.Sample(SampleTypePoint, tex);
+	[flatten]
+	if(length(normal.xyz) == 0.0f)
+	{
+		return float4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+
+	float3 toEyeWorld = gEyePositionWorld - depth.xyz;
+	float distToEye = length(toEyeWorld);
+	toEyeWorld /= distToEye;
+
+	return ComputeSpotLight2(
+		gSpotLight, 
+		depth.xyz,
+		normal.xyz, 
+		toEyeWorld);
 }
 float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 {
     float4 diffuseColor = gColorMap.Sample(SampleTypePoint, input.tex);
     float4 depth = gDepthMap.Sample(SampleTypePoint, input.tex);
-    float4 lightColor = gLightMap.Sample(SampleTypePoint, input.tex);
 
 	if(depth.w == 1.0f)
 	{
-		return diffuseColor;
+		return float4(diffuseColor.rgb, 1.0f);
 	}
+	else
+	{
+		float4 lightColor = gLightMap.Sample(SampleTypePoint, input.tex);
 
-	return float4(diffuseColor.rgb * lightColor.rgb, 1.0f);
+		return float4(diffuseColor.rgb * lightColor.rgb, 1.0f);
+	}
 }
 
 technique11 DeferredDirectionalLight
@@ -210,7 +201,7 @@ technique11 DeferredDirectionalLight
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDirectionalLight()));
 
-		//SetRasterizerState(RasterizerSolid);
+		SetRasterizerState(RasterizerSolid);
     }
 }
 technique11 DeferredPointLight
@@ -220,7 +211,7 @@ technique11 DeferredPointLight
 		SetVertexShader(CompileShader(vs_5_0, VSPointLight()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPointLight()));
-    }
+	}
 }
 technique11 DeferredSpotLight
 {
@@ -229,7 +220,7 @@ technique11 DeferredSpotLight
 		SetVertexShader(CompileShader(vs_5_0, VSSpotLight()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSSpotLight()));
-    }
+	}
 }
 technique11 DeferredCombineLights
 {

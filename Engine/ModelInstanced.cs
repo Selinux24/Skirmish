@@ -147,7 +147,8 @@ namespace Engine
                         ((EffectInstancingGBuffer)effect).FrameBuffer.World = context.World;
                         ((EffectInstancingGBuffer)effect).FrameBuffer.WorldInverse = Matrix.Invert(context.World);
                         ((EffectInstancingGBuffer)effect).FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
-                        ((EffectInstancingGBuffer)effect).UpdatePerFrame();
+                        ((EffectInstancingGBuffer)effect).FrameBuffer.ShadowTransform = context.ShadowTransform;
+                        ((EffectInstancingGBuffer)effect).UpdatePerFrame(context.ShadowMap);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {

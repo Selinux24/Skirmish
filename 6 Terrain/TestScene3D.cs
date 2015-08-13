@@ -53,7 +53,7 @@ namespace TerrainTest
         private LineListDrawer curveLineDrawer = null;
 
         public TestScene3D(Game game)
-            : base(game)
+            : base(game, SceneModesEnum.DeferredLightning)
         {
 
         }
@@ -346,7 +346,30 @@ namespace TerrainTest
             this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
             this.Camera.LookTo(this.helicopter.Manipulator.Position);
 
-            this.Lights.EnableShadows = true;
+            this.Lights.EnableShadows = false;
+            this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[1].Enabled = false;
+            this.Lights.DirectionalLights[2].Enabled = false;
+            this.Lights.Add(new SceneLightPoint()
+            {
+                Ambient = Color.White,
+                Diffuse = Color.Blue,
+                Specular = Color.Transparent,
+                Attenuation = new Vector3(),
+                Position = Vector3.Zero,
+                Range = 0.5f,
+                Enabled = true,
+            });
+            this.Lights.Add(new SceneLightPoint()
+            {
+                Ambient = Color.White,
+                Diffuse = Color.Red,
+                Specular = Color.Transparent,
+                Attenuation = new Vector3(),
+                Position = Vector3.Zero,
+                Range = 0.5f,
+                Enabled = true,
+            });
         }
 
         public override void Dispose()
@@ -503,12 +526,12 @@ namespace TerrainTest
                 {
                     int segment2;
                     float segmentDistance2;
-                    this.curve.FindCurve(this.curveTime + time, out segment2, out segmentDistance2);
+                    this.curve.FindCurve(this.curveTime + gameTime.ElapsedSeconds, out segment2, out segmentDistance2);
 
                     float segmentDelta = segmentDistance2 - segmentDistance;
 
                     Vector3 p0 = this.curve.GetPosition(this.curveTime);
-                    Vector3 p1 = this.curve.GetPosition(this.curveTime + time);
+                    Vector3 p1 = this.curve.GetPosition(this.curveTime + gameTime.ElapsedSeconds);
 
                     Vector3 cfw = this.helicopter.Manipulator.Forward;
                     Vector3 nfw = Vector3.Normalize(p1 - p0);
@@ -531,6 +554,9 @@ namespace TerrainTest
 
                     this.helicopter.Manipulator.SetPosition(p0);
                     this.helicopter.Manipulator.SetRotation(r);
+
+                    this.Lights.PointLights[0].Position = (p0 + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Left);
+                    this.Lights.PointLights[1].Position = (p0 + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Right);
 
                     this.curveTime += time;
 
