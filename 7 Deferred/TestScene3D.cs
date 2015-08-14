@@ -156,9 +156,12 @@ namespace DeferredTest
             int modelCount = 0;
 
             Vector3 tankPosition;
-            if (this.terrain.FindTopGroundPosition(0, 0, out tankPosition))
+            Triangle tankTriangle;
+            if (this.terrain.FindTopGroundPosition(0, 0, out tankPosition, out tankTriangle))
             {
+                //Inclination
                 this.tank.Manipulator.SetPosition(tankPosition, true);
+                this.tank.Manipulator.SetNormal(tankTriangle.Normal);
                 cameraPosition += tankPosition;
                 modelCount++;
             }
@@ -166,6 +169,7 @@ namespace DeferredTest
             Vector3 helicopterPosition;
             if (this.terrain.FindTopGroundPosition(20, -20, out helicopterPosition))
             {
+                helicopterPosition.Y += 10f;
                 this.helicopter.Manipulator.SetPosition(helicopterPosition, true);
                 cameraPosition += helicopterPosition;
                 modelCount++;
@@ -176,6 +180,7 @@ namespace DeferredTest
                 Vector3 heliPos;
                 if (this.terrain.FindTopGroundPosition((i * 10) - 20, 20, out heliPos))
                 {
+                    heliPos.Y += 10f;
                     this.helicopters.Instances[i].Manipulator.SetPosition(heliPos, true);
                     cameraPosition += heliPos;
                     modelCount++;
@@ -375,6 +380,18 @@ namespace DeferredTest
                     {
                         this.tank.Manipulator.Follow(p.GenerateBezierPath(), 0.2f);
                     }
+                }
+            }
+
+            if (this.tank.Manipulator.IsFollowingPath)
+            {
+                Vector3 pos = this.tank.Manipulator.Position;
+
+                Vector3 tankPosition;
+                Triangle tankTriangle;
+                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out tankPosition, out tankTriangle))
+                {
+                    this.tank.Manipulator.SetNormal(tankTriangle.Normal);
                 }
             }
 

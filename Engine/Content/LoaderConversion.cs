@@ -294,8 +294,9 @@ namespace Engine.Content
                 else if (orientation == GeometryOrientationConversions.ZtoY)
                 {
                     var tmp = data[1];
+                    data[0] = data[0] * sign;
                     data[1] = data[2];
-                    data[2] = sign * tmp;
+                    data[2] = tmp;
                 }
             }
 

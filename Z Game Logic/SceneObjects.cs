@@ -566,7 +566,7 @@ namespace GameLogic
 
                     instance.Manipulator.SetScale(3, true);
 
-                    if (teamIndex > 0)
+                    if (teamIndex == 0)
                     {
                         instance.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
                     }

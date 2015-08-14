@@ -114,6 +114,16 @@ namespace Engine
         /// Angular velocity modifier
         /// </summary>
         public float AngularVelocity = 1f;
+        /// <summary>
+        /// Gets whether the model is following a path or not
+        /// </summary>
+        public bool IsFollowingPath
+        {
+            get
+            {
+                return this.following != null;
+            }
+        }
 
         /// <summary>
         /// Following path
@@ -475,6 +485,24 @@ namespace Engine
                 }
 
                 this.SetUpdateNeeded(true);
+            }
+        }
+        /// <summary>
+        /// Set model aligned to normal
+        /// </summary>
+        /// <param name="normal">Normal</param>
+        public void SetNormal(Vector3 normal)
+        {
+            float angle = Helper.Angle(Vector3.Up, normal);
+            if (angle != 0)
+            {
+                Vector3 axis = Vector3.Cross(Vector3.Up, normal);
+
+                this.SetRotation(Quaternion.RotationAxis(axis, angle));
+            }
+            else
+            {
+                this.SetRotation(Quaternion.RotationAxis(Vector3.Left, 0f));
             }
         }
 
