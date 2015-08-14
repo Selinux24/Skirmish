@@ -85,6 +85,10 @@ namespace Engine
         /// </summary>
         private DepthStencilState depthStencilzBufferDisabled = null;
         /// <summary>
+        /// No depth stencil
+        /// </summary>
+        private DepthStencilState depthStencilNone = null;
+        /// <summary>
         /// Blend state for alpha blending
         /// </summary>
         private BlendState blendAlphaToCoverage = null;
@@ -364,6 +368,15 @@ namespace Engine
                         PassOperation = StencilOperation.Keep,
                         Comparison = Comparison.Always,
                     },
+                });
+
+            this.depthStencilNone = new DepthStencilState(
+                this.Device,
+                new DepthStencilStateDescription()
+                {
+                    IsDepthEnabled = false,
+                    DepthWriteMask = DepthWriteMask.Zero,
+                    DepthComparison = Comparison.Always,
                 });
 
             #endregion
@@ -712,6 +725,13 @@ namespace Engine
             this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(this.depthStencilzBufferDisabled);
         }
         /// <summary>
+        /// Disables depth stencil
+        /// </summary>
+        public void DisableDepthStencil()
+        {
+            this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(this.depthStencilNone);
+        }
+        /// <summary>
         /// Sets alpha rendering blend state
         /// </summary>
         public void SetBlendAlphaToCoverage()
@@ -893,6 +913,12 @@ namespace Engine
             {
                 this.depthStencilzBufferDisabled.Dispose();
                 this.depthStencilzBufferDisabled = null;
+            }
+
+            if (this.depthStencilNone != null)
+            {
+                this.depthStencilNone.Dispose();
+                this.depthStencilNone = null;
             }
 
             if (this.rasterizerDefault != null)

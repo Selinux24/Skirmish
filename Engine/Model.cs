@@ -141,6 +141,7 @@ namespace Engine
                         ((EffectBasicGBuffer)effect).FrameBuffer.World = world;
                         ((EffectBasicGBuffer)effect).FrameBuffer.WorldInverse = worldInverse;
                         ((EffectBasicGBuffer)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
+                        ((EffectBasicGBuffer)effect).FrameBuffer.ShadowTransform = context.ShadowTransform;
                         ((EffectBasicGBuffer)effect).UpdatePerFrame(context.ShadowMap);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)

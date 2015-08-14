@@ -364,7 +364,8 @@ namespace Engine.Effects
             Vector3 eyePosition,
             ShaderResourceView colors,
             ShaderResourceView normals,
-            ShaderResourceView depth)
+            ShaderResourceView depth,
+            ShaderResourceView lights)
         {
             this.PointLight = light;
             this.World = world;
@@ -373,7 +374,7 @@ namespace Engine.Effects
             this.ColorMap = colors;
             this.NormalMap = normals;
             this.DepthMap = depth;
-            this.LightMap = null;
+            this.LightMap = lights;
         }
 
         public void UpdatePerSpotLight(
@@ -383,7 +384,8 @@ namespace Engine.Effects
             Vector3 eyePosition,
             ShaderResourceView colors,
             ShaderResourceView normals,
-            ShaderResourceView depth)
+            ShaderResourceView depth,
+            ShaderResourceView lights)
         {
             this.SpotLight = light;
             this.World = world;
@@ -392,7 +394,7 @@ namespace Engine.Effects
             this.ColorMap = colors;
             this.NormalMap = normals;
             this.DepthMap = depth;
-            this.LightMap = null;
+            this.LightMap = lights;
         }
 
         public void UpdatePerCombineLights(
@@ -400,6 +402,7 @@ namespace Engine.Effects
             Matrix worldViewProjection,
             Vector3 eyePosition,
             ShaderResourceView colors,
+            ShaderResourceView normals,
             ShaderResourceView depth,
             ShaderResourceView lights)
         {
@@ -407,7 +410,7 @@ namespace Engine.Effects
             this.WorldViewProjection = worldViewProjection;
             this.EyePositionWorld = eyePosition;
             this.ColorMap = colors;
-            this.NormalMap = null;
+            this.NormalMap = normals;
             this.DepthMap = depth;
             this.LightMap = lights;
         }

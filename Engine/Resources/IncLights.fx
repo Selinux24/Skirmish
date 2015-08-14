@@ -286,23 +286,23 @@ void ComputeSpotLight(
 
 float4 ComputeDirectionalLight2(
 	DirectionalLight L,
-	float3 normal,
-	float3 toEye)
+	float3 eyePosition,
+	float3 normal)
 {
 	//The light vector aims opposite the direction the light rays travel.
 	float3 lightVec = -L.Direction;
 
-	float brightness = dot(normal, lightVec) / (length(lightVec) * length(normal));
+	float brightness = max(0, dot(normal, lightVec)) / (length(lightVec) * length(normal));
     brightness = clamp(brightness, 0, 1);
 
     return float4(brightness * L.Diffuse.rgb, 1.0f);
 }
 
 float4 ComputePointLight2(
-	PointLight L, 
+	PointLight L,
+	float3 eyePosition,
 	float3 pos,
-	float3 normal, 
-	float3 toEye)
+	float3 normal)
 {
 	//The vector from the surface to the light.
 	float3 lightVec = L.Position - pos;
@@ -319,16 +319,16 @@ float4 ComputePointLight2(
 	//Normalize the light vector.
 	lightVec /= d;
 
-	float intensity = saturate(dot(normal, lightVec));
+	float intensity = max(0, dot(normal, lightVec));
 
 	return intensity * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
 }
 
 float4 ComputeSpotLight2(
 	SpotLight L,
+	float3 eyePosition,
 	float3 pos, 
-	float3 normal, 
-	float3 toEye)
+	float3 normal)
 {
 	//The vector from the surface to the light.
 	float3 lightVec = L.Position - pos;
@@ -346,7 +346,7 @@ float4 ComputeSpotLight2(
 	lightVec /= d;
 
 	//Add diffuse and specular term, provided the surface is in the line of site of the light.
-	float intensity = saturate(dot(normal, lightVec));
+	float intensity = max(0, dot(normal, lightVec));
 
 	//Scale by spotlight factor.
 	float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);

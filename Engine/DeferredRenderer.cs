@@ -193,8 +193,6 @@ namespace Engine
                 var effectTechnique = effect.DeferredDirectionalLight;
                 var geometry = this.lightGeometry[0];
 
-                this.Game.Graphics.DisableZBuffer();
-
                 for (int i = 0; i < context.Lights.DirectionalLights.Length; i++)
                 {
                     var light = context.Lights.DirectionalLights[i];
@@ -235,8 +233,6 @@ namespace Engine
                 var effectTechnique = effect.DeferredPointLight;
                 var geometry = this.lightGeometry[1];
 
-                this.Game.Graphics.EnableZBuffer();
-
                 for (int i = 0; i < context.Lights.PointLights.Length; i++)
                 {
                     var light = context.Lights.PointLights[i];
@@ -266,7 +262,8 @@ namespace Engine
                             context.EyePosition,
                             context.GeometryMap[0],
                             context.GeometryMap[1],
-                            context.GeometryMap[2]);
+                            context.GeometryMap[2],
+                            context.LightMap);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                         {
@@ -288,8 +285,6 @@ namespace Engine
             {
                 var effectTechnique = effect.DeferredSpotLight;
                 var geometry = this.lightGeometry[2];
-
-                this.Game.Graphics.EnableZBuffer();
 
                 for (int i = 0; i < context.Lights.SpotLights.Length; i++)
                 {
@@ -320,7 +315,8 @@ namespace Engine
                             context.EyePosition,
                             context.GeometryMap[0],
                             context.GeometryMap[1],
-                            context.GeometryMap[2]);
+                            context.GeometryMap[2],
+                            context.LightMap);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                         {
@@ -362,6 +358,7 @@ namespace Engine
                     this.ViewProjection,
                     context.EyePosition,
                     context.GeometryMap[0],
+                    context.GeometryMap[1],
                     context.GeometryMap[2],
                     context.LightMap);
 

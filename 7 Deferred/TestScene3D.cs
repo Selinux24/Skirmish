@@ -190,7 +190,7 @@ namespace DeferredTest
 
             #region Lights
 
-            this.Lights.EnableShadows = false;
+            this.Lights.EnableShadows = true;
 
             this.Lights.DirectionalLights[0].Enabled = true;
             this.Lights.DirectionalLights[1].Enabled = false;
@@ -273,23 +273,47 @@ namespace DeferredTest
             {
                 if (this.Game.Input.KeyJustReleased(Keys.F1))
                 {
+                    //Colors
                     this.bufferDrawer.Texture = this.DrawContext.GeometryMap[0];
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.All;
                     this.bufferDrawer.Visible = true;
                 }
 
                 if (this.Game.Input.KeyJustReleased(Keys.F2))
                 {
-                    this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                    if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[1] &&
+                        this.bufferDrawer.Channels == SpriteTextureChannelsEnum.Alpha)
+                    {
+                        //Normals
+                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
+                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                    }
+                    else
+                    {
+                        //Shadows
+                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
+                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
+                    }
                     this.bufferDrawer.Visible = true;
                 }
 
                 if (this.Game.Input.KeyJustReleased(Keys.F3))
                 {
-                    this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
-                    this.bufferDrawer.Visible = true;
+                    if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[2] &&
+                        this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
+                    {
+                        //Depth
+                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
+                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
+                        this.bufferDrawer.Visible = true;
+                    }
+                    else
+                    {
+                        //Position
+                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
+                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                        this.bufferDrawer.Visible = true;
+                    }
                 }
             }
 
@@ -298,7 +322,7 @@ namespace DeferredTest
                 if (this.Game.Input.KeyJustReleased(Keys.F4))
                 {
                     this.bufferDrawer.Texture = this.DrawContext.LightMap;
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.All;
                     this.bufferDrawer.Visible = true;
                 }
             }

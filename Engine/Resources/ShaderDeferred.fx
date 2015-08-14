@@ -99,14 +99,10 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 		return float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
-	float3 toEyeWorld = gEyePositionWorld - depth.xyz;
-	float distToEye = length(toEyeWorld);
-	toEyeWorld /= distToEye;
-
 	return ComputeDirectionalLight2(
 		gDirLight,
-		normal.xyz,
-		toEyeWorld);
+		gEyePositionWorld,
+		normal.xyz);
 }
 float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 {
@@ -132,15 +128,11 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 		return float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
-	float3 toEyeWorld = gEyePositionWorld - depth.xyz;
-	float distToEye = length(toEyeWorld);
-	toEyeWorld /= distToEye;
-
 	return ComputePointLight2(
-		gPointLight, 
+		gPointLight,
+		gEyePositionWorld,
 		depth.xyz,
-		normal.xyz, 
-		toEyeWorld);
+		normal.xyz);
 }
 float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 {
@@ -166,30 +158,27 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 		return float4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
-	float3 toEyeWorld = gEyePositionWorld - depth.xyz;
-	float distToEye = length(toEyeWorld);
-	toEyeWorld /= distToEye;
-
 	return ComputeSpotLight2(
-		gSpotLight, 
+		gSpotLight,
+		gEyePositionWorld,
 		depth.xyz,
-		normal.xyz, 
-		toEyeWorld);
+		normal.xyz);
 }
 float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 {
     float4 diffuseColor = gColorMap.Sample(SampleTypePoint, input.tex);
+    float4 normal = gNormalMap.Sample(SampleTypePoint, input.tex);
     float4 depth = gDepthMap.Sample(SampleTypePoint, input.tex);
 
 	if(depth.w == 1.0f)
 	{
-		return float4(diffuseColor.rgb, 1.0f);
+		return float4(diffuseColor.rgb + normal.w, 1.0f);
 	}
 	else
 	{
 		float4 lightColor = gLightMap.Sample(SampleTypePoint, input.tex);
-
-		return float4(diffuseColor.rgb * lightColor.rgb, 1.0f);
+		
+		return float4(diffuseColor.rgb * (lightColor.rgb + normal.w), 1.0f);
 	}
 }
 

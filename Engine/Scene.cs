@@ -336,15 +336,12 @@ namespace Engine
                         //Set light buffer to draw lights
                         this.Game.Graphics.SetRenderTarget(
                             this.deferredRenderer.Viewport,
-                            this.deferredRenderer.LightBuffer.DepthMap,
+                            null,
                             this.deferredRenderer.LightBuffer.RenderTarget,
-                            true, Color.Transparent, DepthStencilClearFlags.Depth);
+                            true, Color.Transparent);
 
-                        //Blend alpha channel enabled
+                        this.Game.Graphics.DisableDepthStencil();
                         this.Game.Graphics.SetBlendAlphaToCoverage();
-
-                        //Disable z-buffer for deferred rendering
-                        this.Game.Graphics.DisableZBuffer();
 
                         //Draw scene lights on light buffer using g-buffer output
                         this.deferredRenderer.DrawLights(this.DrawContext);
