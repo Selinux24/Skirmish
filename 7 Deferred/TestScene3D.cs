@@ -8,8 +8,6 @@ namespace DeferredTest
 {
     public class TestScene3D : Scene
     {
-        private Random rnd = new Random();
-
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer help = null;
@@ -20,6 +18,7 @@ namespace DeferredTest
         private Terrain terrain = null;
 
         private SpriteTexture bufferDrawer = null;
+        private int textIntex = 0;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
@@ -295,7 +294,7 @@ namespace DeferredTest
                     }
                     else
                     {
-                        //Shadows
+                        //Shadow factor map
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
                     }
@@ -305,18 +304,18 @@ namespace DeferredTest
                 if (this.Game.Input.KeyJustReleased(Keys.F3))
                 {
                     if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[2] &&
-                        this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
-                    {
-                        //Depth
-                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
-                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
-                        this.bufferDrawer.Visible = true;
-                    }
-                    else
+                        this.bufferDrawer.Channels == SpriteTextureChannelsEnum.Alpha)
                     {
                         //Position
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                        this.bufferDrawer.Visible = true;
+                    }
+                    else
+                    {
+                        //Depth
+                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
+                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
                         this.bufferDrawer.Visible = true;
                     }
                 }
@@ -326,9 +325,21 @@ namespace DeferredTest
             {
                 if (this.Game.Input.KeyJustReleased(Keys.F4))
                 {
-                    this.bufferDrawer.Texture = this.DrawContext.LightMap;
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.All;
-                    this.bufferDrawer.Visible = true;
+                    if (this.bufferDrawer.Texture == this.DrawContext.LightMap &&
+                        this.bufferDrawer.Channels == SpriteTextureChannelsEnum.Alpha)
+                    {
+                        //Light map
+                        this.bufferDrawer.Texture = this.DrawContext.LightMap;
+                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                        this.bufferDrawer.Visible = true;
+                    }
+                    else
+                    {
+                        //Specular map
+                        this.bufferDrawer.Texture = this.DrawContext.LightMap;
+                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
+                        this.bufferDrawer.Visible = true;
+                    }
                 }
             }
 
@@ -336,6 +347,7 @@ namespace DeferredTest
             {
                 if (this.Game.Input.KeyJustReleased(Keys.F5))
                 {
+                    //Shadow map
                     this.bufferDrawer.Texture = this.DrawContext.ShadowMap;
                     this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Red;
                     this.bufferDrawer.Visible = true;
@@ -365,6 +377,18 @@ namespace DeferredTest
             if (this.Game.Input.KeyJustReleased(Keys.F10))
             {
                 this.helicopters.Visible = !this.helicopters.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.D1))
+            {
+                this.textIntex = this.textIntex > 0 ? this.textIntex - 1 : 0;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.D2))
+            {
+                int max = (this.DebugText != null ? this.DebugText.Length : 0) - 1;
+
+                this.textIntex = this.textIntex < max ? this.textIntex + 1 : max;
             }
 
             #endregion
@@ -431,7 +455,7 @@ namespace DeferredTest
 
             #endregion
 
-            #region Light
+            #region Lights
 
             if (this.Game.Input.KeyPressed(Keys.Left))
             {
@@ -473,12 +497,19 @@ namespace DeferredTest
                 this.Lights.PointLights[0].Range -= 0.1f;
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                this.Lights.EnableShadows = !this.Lights.EnableShadows;
+            }
+
             #endregion
 
             if (this.Game.Form.IsFullscreen)
             {
                 this.load.Text = this.Game.RuntimeText;
             }
+
+            this.help.Text = this.DebugText != null && this.DebugText.Length > textIntex ? this.DebugText[textIntex] : null;
         }
 
         public override void Draw(GameTime gameTime)

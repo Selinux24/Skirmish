@@ -374,8 +374,8 @@ fxgroup
                 #line 29 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 sample_indexable(texturecube)(float,float,float,float) o0.xyzw, v1.xyzx, t0.xyzw, s0
                 
-                #line 34
-                mov o1.xyzw, l(0,0,0,0)
+                #line 35
+                mov o1.xyzw, l(0,0,0,1.000000)
                 mov o2.xyz, v1.xyzx
                 mov o2.w, l(1.000000)
                 ret 

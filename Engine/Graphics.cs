@@ -76,6 +76,10 @@ namespace Engine
         /// </summary>
         private DepthStencilView depthStencilView = null;
 
+        private DepthStencilState currentDepthStencilState = null;
+        private BlendState currentBlendState = null;
+        private RasterizerState currentRasterizerState = null;
+
         /// <summary>
         /// Depth stencil state with z-buffer enabled
         /// </summary>
@@ -96,6 +100,10 @@ namespace Engine
         /// Blend state for transparent blending
         /// </summary>
         private BlendState blendTransparent = null;
+        /// <summary>
+        /// Blend state for additive blending
+        /// </summary>
+        private BlendState blendAdditive = null;
         /// <summary>
         /// Default rasterizer
         /// </summary>
@@ -468,35 +476,51 @@ namespace Engine
             #region Blend states
 
             {
-                BlendStateDescription alphaToCoverageDesc = new BlendStateDescription();
-                alphaToCoverageDesc.AlphaToCoverageEnable = true;
-                alphaToCoverageDesc.IndependentBlendEnable = false;
-                alphaToCoverageDesc.RenderTarget[0].IsBlendEnabled = false;
-                alphaToCoverageDesc.RenderTarget[0].SourceBlend = BlendOption.One;
-                alphaToCoverageDesc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-                alphaToCoverageDesc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                alphaToCoverageDesc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-                alphaToCoverageDesc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-                alphaToCoverageDesc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                alphaToCoverageDesc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                BlendStateDescription desc = new BlendStateDescription();
+                desc.AlphaToCoverageEnable = true;
+                desc.IndependentBlendEnable = false;
+                desc.RenderTarget[0].IsBlendEnabled = false;
+                desc.RenderTarget[0].SourceBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
 
-                this.blendAlphaToCoverage = new BlendState(this.Device, alphaToCoverageDesc);
+                this.blendAlphaToCoverage = new BlendState(this.Device, desc);
             }
 
             {
-                BlendStateDescription transparentDesc = new BlendStateDescription();
-                transparentDesc.AlphaToCoverageEnable = false;
-                transparentDesc.IndependentBlendEnable = false;
-                transparentDesc.RenderTarget[0].IsBlendEnabled = true;
-                transparentDesc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
-                transparentDesc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-                transparentDesc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                transparentDesc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-                transparentDesc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-                transparentDesc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                transparentDesc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                BlendStateDescription desc = new BlendStateDescription();
+                desc.AlphaToCoverageEnable = false;
+                desc.IndependentBlendEnable = false;
+                desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
 
-                this.blendTransparent = new BlendState(this.Device, transparentDesc);
+                this.blendTransparent = new BlendState(this.Device, desc);
+            }
+
+            {
+                BlendStateDescription desc = new BlendStateDescription();
+                desc.AlphaToCoverageEnable = false;
+                desc.IndependentBlendEnable = false;
+                desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceBlend = BlendOption.One;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+                this.blendAdditive = new BlendState(this.Device, desc);
             }
 
             #endregion
@@ -715,70 +739,77 @@ namespace Engine
         /// </summary>
         public void EnableZBuffer()
         {
-            this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(this.depthStencilzBufferEnabled);
+            this.SetDepthStencilState(this.depthStencilzBufferEnabled);
         }
         /// <summary>
         /// Disables z-buffer
         /// </summary>
         public void DisableZBuffer()
         {
-            this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(this.depthStencilzBufferDisabled);
+            this.SetDepthStencilState(this.depthStencilzBufferDisabled);
         }
         /// <summary>
         /// Disables depth stencil
         /// </summary>
         public void DisableDepthStencil()
         {
-            this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(this.depthStencilNone);
+            this.SetDepthStencilState(this.depthStencilNone);
         }
         /// <summary>
         /// Sets alpha rendering blend state
         /// </summary>
         public void SetBlendAlphaToCoverage()
         {
-            this.Device.ImmediateContext.OutputMerger.SetBlendState(this.blendAlphaToCoverage, Color.Transparent, -1);
+            this.SetBlendState(this.blendAlphaToCoverage, Color.Transparent, -1);
         }
         /// <summary>
         /// Sets transparent blend state
         /// </summary>
         public void SetBlendTransparent()
         {
-            this.Device.ImmediateContext.OutputMerger.SetBlendState(this.blendTransparent, Color.Transparent, -1);
+            this.SetBlendState(this.blendTransparent, Color.Transparent, -1);
+        }
+        /// <summary>
+        /// Sets additive blend state
+        /// </summary>
+        public void SetBlendAdditive()
+        {
+            this.SetBlendState(this.blendAdditive, Color.Transparent, -1);
         }
         /// <summary>
         /// Sets default rasterizer
         /// </summary>
         public void SetDefaultRasterizer()
         {
-            this.Device.ImmediateContext.Rasterizer.State = this.rasterizerDefault;
+            this.SetRasterizerState(this.rasterizerDefault);
         }
         /// <summary>
         /// Sets wireframe rasterizer
         /// </summary>
         public void SetWireframeRasterizer()
         {
-            this.Device.ImmediateContext.Rasterizer.State = this.rasterizerWireframe;
+            this.SetRasterizerState(this.rasterizerWireframe);
         }
         /// <summary>
         /// Sets no-cull rasterizer
         /// </summary>
         public void SetNoCullRasterizer()
         {
-            this.Device.ImmediateContext.Rasterizer.State = this.rasterizerNoCull;
+            this.SetRasterizerState(this.rasterizerNoCull);
         }
         /// <summary>
         /// Sets cull clockwise face rasterizer
         /// </summary>
         public void SetCullClockwiseFaceRasterizer()
         {
-            this.Device.ImmediateContext.Rasterizer.State = this.rasterizerCullClockwiseFace;
+            this.SetRasterizerState(this.rasterizerCullClockwiseFace);
         }
         /// <summary>
         /// Sets cull counter-clockwise face rasterizer
         /// </summary>
         public void SetCullCounterClockwiseFaceRasterizer()
         {
-            this.Device.ImmediateContext.Rasterizer.State = this.rasterizerCullCounterClockwiseFace;
+            this.SetRasterizerState(this.rasterizerCullCounterClockwiseFace);
         }
         /// <summary>
         /// Dispose created resources
@@ -798,6 +829,48 @@ namespace Engine
             {
                 this.Device.Dispose();
                 this.Device = null;
+            }
+        }
+
+        /// <summary>
+        /// Sets depth stencil state
+        /// </summary>
+        /// <param name="state">Depth stencil state</param>
+        private void SetDepthStencilState(DepthStencilState state)
+        {
+            if (this.currentDepthStencilState != state)
+            {
+                this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(state);
+
+                this.currentDepthStencilState = state;
+            }
+        }
+        /// <summary>
+        /// Stes blend state
+        /// </summary>
+        /// <param name="state">Blend state</param>
+        /// <param name="blendFactor">Blend factor</param>
+        /// <param name="sampleMask">Sample mask</param>
+        private void SetBlendState(BlendState state, Color4? blendFactor = null, int sampleMask = -1)
+        {
+            if (this.currentBlendState != state)
+            {
+                this.Device.ImmediateContext.OutputMerger.SetBlendState(state, blendFactor, sampleMask);
+
+                this.currentBlendState = state;
+            }
+        }
+        /// <summary>
+        /// Sets rasterizer state
+        /// </summary>
+        /// <param name="state">Rasterizer state</param>
+        private void SetRasterizerState(RasterizerState state)
+        {
+            if (this.currentRasterizerState != state)
+            {
+                this.Device.ImmediateContext.Rasterizer.State = state;
+
+                this.currentRasterizerState = state;
             }
         }
 
@@ -961,6 +1034,12 @@ namespace Engine
             {
                 this.blendTransparent.Dispose();
                 this.blendTransparent = null;
+            }
+
+            if (this.blendAdditive != null)
+            {
+                this.blendAdditive.Dispose();
+                this.blendAdditive = null;
             }
         }
     }

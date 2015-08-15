@@ -187,6 +187,8 @@ namespace Engine
 
             var effect = DrawerPool.EffectDeferred;
 
+            this.Game.Graphics.SetBlendAlphaToCoverage();
+
             #region Directional Lights
 
             {
@@ -226,6 +228,8 @@ namespace Engine
             }
 
             #endregion
+
+            this.Game.Graphics.SetBlendAdditive();
 
             #region Point Lights
 
@@ -332,6 +336,8 @@ namespace Engine
             }
 
             #endregion
+
+            this.Game.Graphics.SetBlendAlphaToCoverage();
 
             this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
         }

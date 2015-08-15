@@ -295,7 +295,7 @@ float4 ComputeDirectionalLight2(
 	float brightness = max(0, dot(normal, lightVec)) / (length(lightVec) * length(normal));
     brightness = clamp(brightness, 0, 1);
 
-    return float4(brightness * L.Diffuse.rgb, 1.0f);
+    return float4(brightness * L.Diffuse.rgb, 0.0f);
 }
 
 float4 ComputePointLight2(
@@ -320,8 +320,8 @@ float4 ComputePointLight2(
 	lightVec /= d;
 
 	float intensity = max(0, dot(normal, lightVec));
-
-	return intensity * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
+	float4 light = intensity * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
+	return float4(light.rgb, 0.0f);
 }
 
 float4 ComputeSpotLight2(
@@ -351,7 +351,8 @@ float4 ComputeSpotLight2(
 	//Scale by spotlight factor.
 	float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);
 
-	return intensity * spot * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
+	float4 light = intensity * spot * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
+	return float4(light.rgb, 0.0f);
 }
 
 static const float SHADOWMAPSIZE = 2048.0f;
@@ -380,7 +381,7 @@ float CalcShadowFactor(float4 shadowPosH, Texture2D shadowMap)
 	}
 
 	// Average the samples.
-	return percentLit /= 9.0f;
+	return percentLit;
 }
 
 LightOutput ComputeLights(LightInput input, Texture2D shadowMap)

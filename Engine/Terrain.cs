@@ -161,6 +161,16 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Performs frustum culling test
+        /// </summary>
+        /// <param name="frustum">Camera frustum</param>
+        public override void FrustumCulling(BoundingFrustum frustum)
+        {
+            this.terrain.FrustumCulling(frustum);
+
+            this.Cull = this.terrain.Cull;
+        }
 
         /// <summary>
         /// Gets ground position giving x, z coordinates

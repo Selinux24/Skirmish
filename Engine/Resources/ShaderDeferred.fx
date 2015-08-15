@@ -88,7 +88,7 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 	[flatten]
 	if(depth.w == 1.0f)
 	{
-		return float4(1.0f, 1.0f, 1.0f, 1.0f);
+		return float4(1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
     //Normal
@@ -96,13 +96,15 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
-		return float4(1.0f, 1.0f, 1.0f, 1.0f);
+		return float4(1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
-	return ComputeDirectionalLight2(
+	float4 color = ComputeDirectionalLight2(
 		gDirLight,
 		gEyePositionWorld,
 		normal.xyz);
+
+	return color.r > 1 ? float4(10,0,0,0) : color;
 }
 float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 {
@@ -117,7 +119,7 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	[flatten]
 	if(depth.w == 1.0f)
 	{
-		return float4(1.0f, 1.0f, 1.0f, 1.0f);
+		return float4(1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
     //Normal
@@ -125,14 +127,16 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
-		return float4(1.0f, 1.0f, 1.0f, 1.0f);
+		return float4(1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
-	return ComputePointLight2(
+	float4 color = ComputePointLight2(
 		gPointLight,
 		gEyePositionWorld,
 		depth.xyz,
 		normal.xyz);
+
+	return color;
 }
 float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 {
@@ -147,7 +151,7 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	[flatten]
 	if(depth.w == 1.0f)
 	{
-		return float4(1.0f, 1.0f, 1.0f, 1.0f);
+		return float4(1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
     //Normal
@@ -155,14 +159,16 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
-		return float4(1.0f, 1.0f, 1.0f, 1.0f);
+		return float4(1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
-	return ComputeSpotLight2(
+	float4 color = ComputeSpotLight2(
 		gSpotLight,
 		gEyePositionWorld,
 		depth.xyz,
 		normal.xyz);
+
+	return color;
 }
 float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 {
@@ -170,16 +176,20 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
     float4 normal = gNormalMap.Sample(SampleTypePoint, input.tex);
     float4 depth = gDepthMap.Sample(SampleTypePoint, input.tex);
 
+	float4 color;
+
 	if(depth.w == 1.0f)
 	{
-		return float4(diffuseColor.rgb + normal.w, 1.0f);
+		color = float4(diffuseColor.rgb * normal.w, 1.0f);
 	}
 	else
 	{
 		float4 lightColor = gLightMap.Sample(SampleTypePoint, input.tex);
 		
-		return float4(diffuseColor.rgb * (lightColor.rgb + normal.w), 1.0f);
+		color = float4(diffuseColor.rgb * (lightColor.rgb + normal.w), 1.0f);
 	}
+
+	return color;
 }
 
 technique11 DeferredDirectionalLight
