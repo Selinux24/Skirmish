@@ -22,7 +22,7 @@ cbuffer cbFixed : register(b1)
 }
 
 //
-// 17 local object(s)
+// 18 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -126,6 +126,9 @@ SamplerState SamplerAnisotropic
     AddressV = uint(WRAP /* 1 */);
 };
 SamplerState SamplerFont
+{
+};
+SamplerState SamplerPoint
 {
 };
 SamplerComparisonState SamplerShadow

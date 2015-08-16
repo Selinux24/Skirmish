@@ -203,7 +203,7 @@ namespace Engine
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
                                 ((EffectBasicGBuffer)effect).ObjectBuffer.Material.SetMaterial(mat.Material);
-                                ((EffectBasicGBuffer)effect).UpdatePerObject(texture);
+                                ((EffectBasicGBuffer)effect).UpdatePerObject(texture, normalMap);
                             }
 
                             #endregion

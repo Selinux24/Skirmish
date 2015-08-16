@@ -129,11 +129,18 @@ namespace Engine.Common
         /// Shadow transform
         /// </summary>
         public Matrix ShadowTransform;
-
-
+        /// <summary>
+        /// Geometry map for deferred rendering
+        /// </summary>
         public ShaderResourceView[] GeometryMap;
-
+        /// <summary>
+        /// Light map for deferred rendering
+        /// </summary>
         public ShaderResourceView LightMap;
+        /// <summary>
+        /// Free use variable
+        /// </summary>
+        public object Tag;
     }
 
     /// <summary>

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+#if DEBUG
+using System.Diagnostics;
+#endif
 using SharpDX;
 using SharpDX.Direct3D11;
-using System.Diagnostics;
 
 namespace Engine
 {
@@ -94,7 +96,7 @@ namespace Engine
         /// <summary>
         /// Scene debug text
         /// </summary>
-        protected string[] DebugText = null;
+        protected string[] Statistics = null;
 
         /// <summary>
         /// Indicates whether the current scene is active
@@ -157,7 +159,7 @@ namespace Engine
 
             this.deferredRenderer = new DeferredRenderer(game);
 
-            this.DebugText = new string[15];
+            this.Statistics = new string[15];
         }
 
         /// <summary>
@@ -173,8 +175,9 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Update(GameTime gameTime)
         {
+#if DEBUG
             Stopwatch swTotal = Stopwatch.StartNew();
-
+#endif
             this.Camera.Update(gameTime);
 
             this.DrawContext.World = this.world;
@@ -224,10 +227,12 @@ namespace Engine
             }
 
             if (!this.Game.Input.LeftMouseButtonPressed) this.capturedControl = null;
-
+#if DEBUG
             swTotal.Stop();
-
-            this.DebugText[4] = string.Format("Update = {0:000000}", swTotal.ElapsedTicks);
+#endif
+#if DEBUG
+            this.Statistics[0] = string.Format("Update = {0:000000}", swTotal.ElapsedTicks);
+#endif
         }
         /// <summary>
         /// Draw scene objects
@@ -235,6 +240,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Draw(GameTime gameTime)
         {
+#if DEBUG
             long total = 0;
             long start = 0;
             long shadowMap_start = 0;
@@ -246,20 +252,27 @@ namespace Engine
             long forward_draw2D = 0;
             long deferred_cull = 0;
             long deferred_gbuffer = 0;
+            long deferred_gbuffer1 = 0;
+            long deferred_gbuffer2 = 0;
+            long deferred_gbuffer3 = 0;
             long deferred_lbuffer = 0;
+            long deferred_lbuffer1 = 0;
+            long deferred_lbuffer2 = 0;
+            long deferred_lbuffer3 = 0;
             long deferred_compose = 0;
             long deferred_draw2D = 0;
-
+#endif
+#if DEBUG
             Stopwatch swTotal = Stopwatch.StartNew();
-
+#endif
             //Draw visible components
             List<Drawable> visibleComponents = this.components.FindAll(c => c.Visible);
             if (visibleComponents.Count > 0)
             {
                 #region Preparation
-
+#if DEBUG
                 Stopwatch swStartup = Stopwatch.StartNew();
-
+#endif
                 //Set lights
                 this.DrawContext.Lights = this.Lights;
 
@@ -267,11 +280,11 @@ namespace Engine
                 this.DrawContext.GeometryMap = null;
                 this.DrawContext.ShadowMap = null;
                 this.DrawContext.ShadowTransform = Matrix.Identity;
-
+#if DEBUG
                 swStartup.Stop();
 
                 start = swStartup.ElapsedTicks;
-
+#endif
                 #endregion
 
                 #region Shadow mapping
@@ -279,20 +292,20 @@ namespace Engine
                 if (this.Lights.EnableShadows && this.Lights.DirectionalLights.Length > 0)
                 {
                     #region Preparation
-
+#if DEBUG
                     Stopwatch swShadowsPreparation = Stopwatch.StartNew();
-
+#endif
                     //Clear context data
                     this.DrawShadowsContext.ShadowMap = null;
                     this.DrawShadowsContext.ShadowTransform = Matrix.Identity;
 
                     //Update shadow transform using first ligth direction
                     this.ShadowMap.Update(this.Lights.DirectionalLights[0].Direction, this.SceneVolume);
-
+#if DEBUG
                     swShadowsPreparation.Stop();
 
                     shadowMap_start = swShadowsPreparation.ElapsedTicks;
-
+#endif
                     #endregion
 
                     //Draw components if drop shadow (opaque)
@@ -300,9 +313,9 @@ namespace Engine
                     if (shadowComponents.Count > 0)
                     {
                         #region Cull
-
+#if DEBUG
                         Stopwatch swCull = Stopwatch.StartNew();
-
+#endif
                         bool draw = false;
                         if (this.PerformFrustumCulling)
                         {
@@ -313,19 +326,20 @@ namespace Engine
                         {
                             draw = true;
                         }
-
+#if DEBUG
                         swCull.Stop();
 
                         shadowMap_cull = swCull.ElapsedTicks;
-
+#endif
                         #endregion
 
                         #region Draw
 
                         if (draw)
                         {
+#if DEBUG
                             Stopwatch swDraw = Stopwatch.StartNew();
-
+#endif
                             //Set shadow map depth map without render target
                             this.Game.Graphics.SetRenderTarget(
                                 this.ShadowMap.Viewport,
@@ -344,10 +358,11 @@ namespace Engine
                             //Set shadow map and transform to drawing context
                             this.DrawContext.ShadowMap = this.ShadowMap.ShadowMapTexture;
                             this.DrawContext.ShadowTransform = this.shadowMap.Transform;
-
+#if DEBUG
                             swDraw.Stop();
 
                             shadowMap_draw = swDraw.ElapsedTicks;
+#endif
                         }
 
                         #endregion
@@ -363,25 +378,25 @@ namespace Engine
                     #region Forward rendering
 
                     #region Preparation
-
+#if DEBUG
                     Stopwatch swPreparation = Stopwatch.StartNew();
-
+#endif
                     //Set default render target and depth buffer, and clear it
                     this.Game.Graphics.SetDefaultRenderTarget(true);
-
+#if DEBUG
                     swPreparation.Stop();
 
                     forward_start = swPreparation.ElapsedTicks;
-
+#endif
                     #endregion
 
                     List<Drawable> solidComponents = visibleComponents.FindAll(c => c.Opaque);
                     if (solidComponents.Count > 0)
                     {
                         #region Cull
-
+#if DEBUG
                         Stopwatch swCull = Stopwatch.StartNew();
-
+#endif
                         bool draw = false;
                         if (this.PerformFrustumCulling)
                         {
@@ -392,28 +407,30 @@ namespace Engine
                         {
                             draw = true;
                         }
-
+#if DEBUG
                         swCull.Stop();
 
                         forward_cull = swCull.ElapsedTicks;
-
+#endif
                         #endregion
 
                         #region Draw 3D
 
                         if (draw)
                         {
+#if DEBUG
                             Stopwatch swDraw = Stopwatch.StartNew();
-
+#endif
                             //Use z-buffer by default for opaque components
                             this.Game.Graphics.EnableZBuffer();
 
                             //Draw solid
                             this.DrawComponents(gameTime, this.DrawContext, solidComponents);
-
+#if DEBUG
                             swDraw.Stop();
 
                             forward_draw = swDraw.ElapsedTicks;
+#endif
                         }
 
                         #endregion
@@ -423,19 +440,19 @@ namespace Engine
                     if (otherComponents.Count > 0)
                     {
                         #region Draw 2D
-
+#if DEBUG
                         Stopwatch swDraw = Stopwatch.StartNew();
-
+#endif
                         //Disable z-buffer by default for non-opaque components
                         this.Game.Graphics.DisableZBuffer();
 
                         //Draw other
                         this.DrawComponents(gameTime, this.DrawContext, otherComponents);
-
+#if DEBUG
                         swDraw.Stop();
 
                         forward_draw2D = swDraw.ElapsedTicks;
-
+#endif
                         #endregion
                     }
 
@@ -450,9 +467,9 @@ namespace Engine
                     if (solidComponents.Count > 0)
                     {
                         #region Cull
-
+#if DEBUG
                         Stopwatch swCull = Stopwatch.StartNew();
-
+#endif
                         bool draw = false;
                         if (this.PerformFrustumCulling)
                         {
@@ -463,45 +480,65 @@ namespace Engine
                         {
                             draw = true;
                         }
-
+#if DEBUG
                         swCull.Stop();
 
                         deferred_cull = swCull.ElapsedTicks;
-
+#endif
                         #endregion
 
                         if (draw)
                         {
                             #region Geometry Buffer
-
+#if DEBUG
                             Stopwatch swGeometryBuffer = Stopwatch.StartNew();
-
+#endif
+#if DEBUG
+                            Stopwatch swGeometryBufferPass1 = Stopwatch.StartNew();
+#endif
                             //Set g-buffer render targets
                             this.Game.Graphics.SetRenderTargets(
                                 this.deferredRenderer.Viewport,
                                 this.deferredRenderer.GeometryBuffer.DepthMap,
                                 this.deferredRenderer.GeometryBuffer.RenderTargets,
-                                true, Color.Black, DepthStencilClearFlags.Depth);
+                                true, Color.Black);
 
                             //Enable z-buffer by default for opaque components
                             this.Game.Graphics.EnableZBuffer();
-
+#if DEBUG
+                            swGeometryBufferPass1.Stop();
+#endif
+#if DEBUG
+                            Stopwatch swGeometryBufferPass2 = Stopwatch.StartNew();
+#endif
                             //Draw scene on g-buffer render targets
                             this.DrawComponents(gameTime, this.DrawContext, solidComponents);
-
+#if DEBUG
+                            swGeometryBufferPass2.Stop();
+#endif
+#if DEBUG
+                            Stopwatch swGeometryBufferPass3 = Stopwatch.StartNew();
+#endif
                             //Assign result of render in drawing context
                             this.DrawContext.GeometryMap = this.deferredRenderer.GeometryBuffer.Textures;
-
+#if DEBUG
+                            swGeometryBufferPass3.Stop();
+#endif
+#if DEBUG
                             swGeometryBuffer.Stop();
-
+#endif
+#if DEBUG
                             deferred_gbuffer = swGeometryBuffer.ElapsedTicks;
-
+                            deferred_gbuffer1 = swGeometryBufferPass1.ElapsedTicks;
+                            deferred_gbuffer2 = swGeometryBufferPass2.ElapsedTicks;
+                            deferred_gbuffer3 = swGeometryBufferPass3.ElapsedTicks;
+#endif
                             #endregion
 
                             #region Light Buffer
-
+#if DEBUG
                             Stopwatch swLightBuffer = Stopwatch.StartNew();
-
+#endif
                             //Set light buffer to draw lights
                             this.Game.Graphics.SetRenderTarget(
                                 this.deferredRenderer.Viewport,
@@ -517,19 +554,23 @@ namespace Engine
 
                             //Assign result of render in drawing context
                             this.DrawContext.LightMap = this.deferredRenderer.LightBuffer.Texture;
-
+#if DEBUG
                             swLightBuffer.Stop();
-
+#endif
+#if DEBUG
                             deferred_lbuffer = swLightBuffer.ElapsedTicks;
-
+                            deferred_lbuffer1 = ((long[])this.DrawContext.Tag)[0];
+                            deferred_lbuffer2 = ((long[])this.DrawContext.Tag)[1];
+                            deferred_lbuffer3 = ((long[])this.DrawContext.Tag)[2];
+#endif
                             #endregion
                         }
                     }
 
                     #region Final composition
-
+#if DEBUG
                     Stopwatch swComponsition = Stopwatch.StartNew();
-
+#endif
                     //Restore backbuffer as render target and clear it
                     this.Game.Graphics.SetDefaultRenderTarget(true);
 
@@ -538,19 +579,20 @@ namespace Engine
 
                     //Draw scene result on screen using g-buffer and light buffer
                     this.deferredRenderer.DrawResult(this.DrawContext);
-
+#if DEBUG
                     swComponsition.Stop();
 
                     deferred_compose = swComponsition.ElapsedTicks;
-
+#endif
                     #endregion
 
                     //Render to screen the rest of objects
                     List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.Opaque);
                     if (otherComponents.Count > 0)
                     {
+#if DEBUG
                         Stopwatch swDraw = Stopwatch.StartNew();
-
+#endif
                         //Disable z-buffer by default for non-opaque components
                         this.Game.Graphics.DisableZBuffer();
 
@@ -562,10 +604,11 @@ namespace Engine
 
                         //Set deferred mode
                         this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
-
+#if DEBUG
                         swDraw.Stop();
 
                         deferred_draw2D = swDraw.ElapsedTicks;
+#endif
                     }
 
                     #endregion
@@ -573,11 +616,12 @@ namespace Engine
 
                 #endregion
             }
-
+#if DEBUG
             swTotal.Stop();
 
             total = swTotal.ElapsedTicks;
-
+#endif
+#if DEBUG
             long totalShadowMap = shadowMap_start + shadowMap_cull + shadowMap_draw;
             if (totalShadowMap > 0)
             {
@@ -585,7 +629,7 @@ namespace Engine
                 float prcCull = (float)shadowMap_cull / (float)totalShadowMap;
                 float prcDraw = (float)shadowMap_draw / (float)totalShadowMap;
 
-                this.DebugText[1] = string.Format(
+                this.Statistics[2] = string.Format(
                     "SM = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%",
                     totalShadowMap,
                     prcStart * 100f,
@@ -601,7 +645,7 @@ namespace Engine
                 float prcDraw = (float)forward_draw / (float)totalForward;
                 float prcDraw2D = (float)forward_draw2D / (float)totalForward;
 
-                this.DebugText[2] = string.Format(
+                this.Statistics[3] = string.Format(
                     "FR = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%; Draw2D {4:00}%",
                     totalForward,
                     prcStart * 100f,
@@ -619,7 +663,7 @@ namespace Engine
                 float prcCompose = (float)deferred_compose / (float)totalDeferred;
                 float prcDraw2D = (float)deferred_draw2D / (float)totalDeferred;
 
-                this.DebugText[3] = string.Format(
+                this.Statistics[4] = string.Format(
                     "DR = {0:000000}; Cull {1:00}%; GBuffer {2:00}%; LBuffer {3:00}%; Compose {4:00}%; Draw2D {5:00}%",
                     totalDeferred,
                     prcCull * 100f,
@@ -627,6 +671,34 @@ namespace Engine
                     prcLBuffer * 100f,
                     prcCompose * 100f,
                     prcDraw2D * 100f);
+
+                if (deferred_gbuffer > 0)
+                {
+                    float prcPass1 = (float)deferred_gbuffer1 / (float)deferred_gbuffer;
+                    float prcPass2 = (float)deferred_gbuffer2 / (float)deferred_gbuffer;
+                    float prcPass3 = (float)deferred_gbuffer3 / (float)deferred_gbuffer;
+
+                    this.Statistics[5] = string.Format(
+                        "GBuffer = {0:000000}; Pass1 {1:00}%; Pass2 {2:00}%; Pass3 {3:00}%",
+                        deferred_gbuffer,
+                        prcPass1 * 100f,
+                        prcPass2 * 100f,
+                        prcPass3 * 100f);
+                }
+
+                if (deferred_lbuffer > 0)
+                {
+                    float prcPass1 = (float)deferred_lbuffer1 / (float)deferred_lbuffer;
+                    float prcPass2 = (float)deferred_lbuffer2 / (float)deferred_lbuffer;
+                    float prcPass3 = (float)deferred_lbuffer3 / (float)deferred_lbuffer;
+
+                    this.Statistics[6] = string.Format(
+                        "LBuffer = {0:000000}; Pass1 {1:00}%; Pass2 {2:00}%; Pass3 {3:00}%",
+                        deferred_lbuffer,
+                        prcPass1 * 100f,
+                        prcPass2 * 100f,
+                        prcPass3 * 100f);
+                }
             }
 
             long other = total - (totalShadowMap + totalForward + totalDeferred);
@@ -636,13 +708,14 @@ namespace Engine
             float prcDR = (float)totalDeferred / (float)total;
             float prcOther = (float)other / (float)total;
 
-            this.DebugText[0] = string.Format(
+            this.Statistics[1] = string.Format(
                 "TOTAL = {0:000000}; Shadows {1:00}%; Forwars {2:00}%; Deferred {3:00}%; Other {4:00}%;",
                 total,
                 prcSM * 100f,
                 prcFR * 100f,
                 prcDR * 100f,
                 prcOther * 100f);
+#endif
         }
         /// <summary>
         /// Makes cull test for specified drawable collection

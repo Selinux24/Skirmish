@@ -204,7 +204,7 @@ namespace Engine
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
                                 ((EffectInstancingGBuffer)effect).ObjectBuffer.Material.SetMaterial(matdata);
-                                ((EffectInstancingGBuffer)effect).UpdatePerObject(texture);
+                                ((EffectInstancingGBuffer)effect).UpdatePerObject(texture, normalMap);
                             }
 
                             #endregion

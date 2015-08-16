@@ -5,8 +5,8 @@ using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
 using EffectVariable = SharpDX.Direct3D11.EffectVariable;
+using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
@@ -107,7 +107,7 @@ namespace Engine.Effects
         /// <summary>
         /// World matrix
         /// </summary>
-        protected Matrix World
+        public Matrix World
         {
             get
             {
@@ -121,7 +121,7 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection matrix
         /// </summary>
-        protected Matrix WorldViewProjection
+        public Matrix WorldViewProjection
         {
             get
             {
@@ -135,7 +135,7 @@ namespace Engine.Effects
         /// <summary>
         /// Camera eye position
         /// </summary>
-        protected Vector3 EyePositionWorld
+        public Vector3 EyePositionWorld
         {
             get
             {
@@ -153,7 +153,7 @@ namespace Engine.Effects
         /// <summary>
         /// Directional light
         /// </summary>
-        protected BufferDirectionalLight DirectionalLight
+        public BufferDirectionalLight DirectionalLight
         {
             get
             {
@@ -177,7 +177,7 @@ namespace Engine.Effects
         /// <summary>
         /// Point light
         /// </summary>
-        protected BufferPointLight PointLight
+        public BufferPointLight PointLight
         {
             get
             {
@@ -201,7 +201,7 @@ namespace Engine.Effects
         /// <summary>
         /// Spot light
         /// </summary>
-        protected BufferSpotLight SpotLight
+        public BufferSpotLight SpotLight
         {
             get
             {
@@ -225,7 +225,7 @@ namespace Engine.Effects
         /// <summary>
         /// Color Map
         /// </summary>
-        protected ShaderResourceView ColorMap
+        public ShaderResourceView ColorMap
         {
             get
             {
@@ -239,7 +239,7 @@ namespace Engine.Effects
         /// <summary>
         /// Normal Map
         /// </summary>
-        protected ShaderResourceView NormalMap
+        public ShaderResourceView NormalMap
         {
             get
             {
@@ -253,7 +253,7 @@ namespace Engine.Effects
         /// <summary>
         /// Depth Map
         /// </summary>
-        protected ShaderResourceView DepthMap
+        public ShaderResourceView DepthMap
         {
             get
             {
@@ -267,7 +267,7 @@ namespace Engine.Effects
         /// <summary>
         /// Light Map
         /// </summary>
-        protected ShaderResourceView LightMap
+        public ShaderResourceView LightMap
         {
             get
             {
@@ -336,83 +336,6 @@ namespace Engine.Effects
             {
                 throw new Exception(string.Format("Bad stage for effect: {0}", stage));
             }
-        }
-
-        public void UpdatePerDirectionalLight(
-            BufferDirectionalLight light,
-            Matrix world,
-            Matrix worldViewProjection,
-            Vector3 eyePosition,
-            ShaderResourceView colors,
-            ShaderResourceView normals,
-            ShaderResourceView depth)
-        {
-            this.DirectionalLight = light;
-            this.World = world;
-            this.WorldViewProjection = worldViewProjection;
-            this.EyePositionWorld = eyePosition;
-            this.ColorMap = colors;
-            this.NormalMap = normals;
-            this.DepthMap = depth;
-            this.LightMap = null;
-        }
-
-        public void UpdatePerPointLight(
-            BufferPointLight light,
-            Matrix world,
-            Matrix worldViewProjection,
-            Vector3 eyePosition,
-            ShaderResourceView colors,
-            ShaderResourceView normals,
-            ShaderResourceView depth,
-            ShaderResourceView lights)
-        {
-            this.PointLight = light;
-            this.World = world;
-            this.WorldViewProjection = worldViewProjection;
-            this.EyePositionWorld = eyePosition;
-            this.ColorMap = colors;
-            this.NormalMap = normals;
-            this.DepthMap = depth;
-            this.LightMap = lights;
-        }
-
-        public void UpdatePerSpotLight(
-            BufferSpotLight light,
-            Matrix world,
-            Matrix worldViewProjection,
-            Vector3 eyePosition,
-            ShaderResourceView colors,
-            ShaderResourceView normals,
-            ShaderResourceView depth,
-            ShaderResourceView lights)
-        {
-            this.SpotLight = light;
-            this.World = world;
-            this.WorldViewProjection = worldViewProjection;
-            this.EyePositionWorld = eyePosition;
-            this.ColorMap = colors;
-            this.NormalMap = normals;
-            this.DepthMap = depth;
-            this.LightMap = lights;
-        }
-
-        public void UpdatePerCombineLights(
-            Matrix world,
-            Matrix worldViewProjection,
-            Vector3 eyePosition,
-            ShaderResourceView colors,
-            ShaderResourceView normals,
-            ShaderResourceView depth,
-            ShaderResourceView lights)
-        {
-            this.World = world;
-            this.WorldViewProjection = worldViewProjection;
-            this.EyePositionWorld = eyePosition;
-            this.ColorMap = colors;
-            this.NormalMap = normals;
-            this.DepthMap = depth;
-            this.LightMap = lights;
         }
     }
 }

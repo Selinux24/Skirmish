@@ -29,6 +29,7 @@ cbuffer cbPerInstance : register (b3)
 };
 
 Texture2DArray gTextureArray;
+Texture2D gNormalMap;
 Texture2D gShadowMap;
 
 /**********************************************************************************************************
@@ -494,6 +495,8 @@ GBufferPSOutput PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTang
     GBufferPSOutput output = (GBufferPSOutput)0;
 
 	float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+	float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
+	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 	float shadow = 1.0f;
 	if(gEnableShadows == 1.0f)
 	{
@@ -501,7 +504,7 @@ GBufferPSOutput PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTang
 	}
 
 	output.color = color;
-	output.normal.xyz = input.normalWorld;
+	output.normal.xyz = bumpedNormalW.xyz;
 	output.normal.w = shadow;
 	output.depth.xyz = input.positionWorld;
 	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;

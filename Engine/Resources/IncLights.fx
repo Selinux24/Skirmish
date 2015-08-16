@@ -62,6 +62,7 @@ SamplerState SamplerAnisotropic
 	AddressV = WRAP;
 };
 SamplerState SamplerFont;
+SamplerState SamplerPoint;
 
 SamplerComparisonState SamplerShadow
 {
@@ -145,7 +146,7 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, floa
 	float3x3 TBN = float3x3(T, B, N);
 	
 	// Transform from tangent space to world space.
-	return mul(normalT, TBN);
+	return normalize(mul(normalT, TBN));
 }
 
 void ComputeDirectionalLight(
@@ -381,7 +382,7 @@ float CalcShadowFactor(float4 shadowPosH, Texture2D shadowMap)
 	}
 
 	// Average the samples.
-	return percentLit;
+	return percentLit / 9.0f;
 }
 
 LightOutput ComputeLights(LightInput input, Texture2D shadowMap)

@@ -17,8 +17,6 @@ Texture2D gNormalMap : register(t1);
 Texture2D gDepthMap : register(t2);
 Texture2D gLightMap : register(t3);
 
-SamplerState SampleTypePoint : register(s0);
-
 struct PSDirectionalLightInput
 {
     float4 positionHomogeneous : SV_POSITION;
@@ -84,7 +82,7 @@ PSCombineLightsInput VSCombineLights(VSVertexPositionTexture input)
 float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 {
 	//Depth
-    float4 depth = gDepthMap.Sample(SampleTypePoint, input.tex);
+    float4 depth = gDepthMap.Sample(SamplerPoint, input.tex);
 	[flatten]
 	if(depth.w == 1.0f)
 	{
@@ -92,7 +90,7 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 	}
 
     //Normal
-    float4 normal = gNormalMap.Sample(SampleTypePoint, input.tex);
+    float4 normal = gNormalMap.Sample(SamplerPoint, input.tex);
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
@@ -115,7 +113,7 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	float2 tex = 0.5f * (float2(position.x, -position.y) + 1);
 
 	//Depth
-    float4 depth = gDepthMap.Sample(SampleTypePoint, tex);
+    float4 depth = gDepthMap.Sample(SamplerPoint, tex);
 	[flatten]
 	if(depth.w == 1.0f)
 	{
@@ -123,7 +121,7 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	}
 
     //Normal
-    float4 normal = gNormalMap.Sample(SampleTypePoint, tex);
+    float4 normal = gNormalMap.Sample(SamplerPoint, tex);
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
@@ -147,7 +145,7 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	float2 tex = 0.5f * (float2(position.x, -position.y) + 1);
 
 	//Depth
-    float4 depth = gDepthMap.Sample(SampleTypePoint, tex);
+    float4 depth = gDepthMap.Sample(SamplerPoint, tex);
 	[flatten]
 	if(depth.w == 1.0f)
 	{
@@ -155,7 +153,7 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	}
 
     //Normal
-    float4 normal = gNormalMap.Sample(SampleTypePoint, tex);
+    float4 normal = gNormalMap.Sample(SamplerPoint, tex);
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
@@ -172,9 +170,9 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 }
 float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 {
-    float4 diffuseColor = gColorMap.Sample(SampleTypePoint, input.tex);
-    float4 normal = gNormalMap.Sample(SampleTypePoint, input.tex);
-    float4 depth = gDepthMap.Sample(SampleTypePoint, input.tex);
+    float4 diffuseColor = gColorMap.Sample(SamplerPoint, input.tex);
+    float4 normal = gNormalMap.Sample(SamplerPoint, input.tex);
+    float4 depth = gDepthMap.Sample(SamplerPoint, input.tex);
 
 	float4 color;
 
@@ -184,11 +182,11 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 	}
 	else
 	{
-		float4 lightColor = gLightMap.Sample(SampleTypePoint, input.tex);
+		float4 lightColor = gLightMap.Sample(SamplerPoint, input.tex);
 		
 		color = float4(diffuseColor.rgb * (lightColor.rgb + normal.w), 1.0f);
 	}
-
+	
 	return color;
 }
 

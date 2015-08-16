@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Engine;
 using Engine.PathFinding;
 using SharpDX;
@@ -200,14 +199,17 @@ namespace DeferredTest
             this.Lights.DirectionalLights[1].Enabled = false;
             this.Lights.DirectionalLights[2].Enabled = false;
 
-            for (int i = 0; i < 5; i++)
+            int f = 12;
+            int l = (f - 1) * 5;
+
+            for (int i = 0; i < f; i++)
             {
-                for (int x = 0; x < 5; x++)
+                for (int x = 0; x < f; x++)
                 {
                     Vector3 lightPosition;
-                    if (!this.terrain.FindTopGroundPosition((i * 10) - 20, (x * 10) - 20, out lightPosition))
+                    if (!this.terrain.FindTopGroundPosition((i * 10) - l, (x * 10) - l, out lightPosition))
                     {
-                        lightPosition = new Vector3((i * 10) - 20, 0, (x * 10) - 20);
+                        lightPosition = new Vector3((i * 10) - l, 1f, (x * 10) - l);
                     }
                     else
                     {
@@ -222,7 +224,7 @@ namespace DeferredTest
                         Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
                         Attenuation = new Vector3(1.0f, 0.0f, 0.1f),
                         Position = lightPosition,
-                        Range = 20f,
+                        Range = 10f,
                     };
 
                     this.Lights.Add(pointLight);
@@ -281,22 +283,25 @@ namespace DeferredTest
                     this.bufferDrawer.Texture = this.DrawContext.GeometryMap[0];
                     this.bufferDrawer.Channels = SpriteTextureChannelsEnum.All;
                     this.bufferDrawer.Visible = true;
+                    this.help.Text = "Colors";
                 }
 
                 if (this.Game.Input.KeyJustReleased(Keys.F2))
                 {
                     if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[1] &&
-                        this.bufferDrawer.Channels == SpriteTextureChannelsEnum.Alpha)
-                    {
-                        //Normals
-                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
-                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
-                    }
-                    else
+                        this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
                     {
                         //Shadow factor map
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
+                        this.help.Text = "Shadow factor map";
+                    }
+                    else
+                    {
+                        //Normals
+                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
+                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                        this.help.Text = "Normals";
                     }
                     this.bufferDrawer.Visible = true;
                 }
@@ -310,6 +315,7 @@ namespace DeferredTest
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                         this.bufferDrawer.Visible = true;
+                        this.help.Text = "Position";
                     }
                     else
                     {
@@ -317,6 +323,7 @@ namespace DeferredTest
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
                         this.bufferDrawer.Visible = true;
+                        this.help.Text = "Depth";
                     }
                 }
             }
@@ -332,6 +339,7 @@ namespace DeferredTest
                         this.bufferDrawer.Texture = this.DrawContext.LightMap;
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                         this.bufferDrawer.Visible = true;
+                        this.help.Text = "Light map";
                     }
                     else
                     {
@@ -339,6 +347,7 @@ namespace DeferredTest
                         this.bufferDrawer.Texture = this.DrawContext.LightMap;
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
                         this.bufferDrawer.Visible = true;
+                        this.help.Text = "Specular map";
                     }
                 }
             }
@@ -351,12 +360,14 @@ namespace DeferredTest
                     this.bufferDrawer.Texture = this.DrawContext.ShadowMap;
                     this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Red;
                     this.bufferDrawer.Visible = true;
+                    this.help.Text = "Shadow map";
                 }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
                 this.bufferDrawer.Visible = !this.bufferDrawer.Visible;
+                this.help.Visible = this.bufferDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F7))
@@ -386,7 +397,7 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.D2))
             {
-                int max = (this.DebugText != null ? this.DebugText.Length : 0) - 1;
+                int max = (this.Statistics != null ? this.Statistics.Length : 0) - 1;
 
                 this.textIntex = this.textIntex < max ? this.textIntex + 1 : max;
             }
@@ -508,8 +519,6 @@ namespace DeferredTest
             {
                 this.load.Text = this.Game.RuntimeText;
             }
-
-            this.help.Text = this.DebugText != null && this.DebugText.Length > textIntex ? this.DebugText[textIntex] : null;
         }
 
         public override void Draw(GameTime gameTime)

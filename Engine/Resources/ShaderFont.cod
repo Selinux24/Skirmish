@@ -11,7 +11,7 @@ cbuffer cbPerFrame : register(b0)
 }
 
 //
-// 13 local object(s)
+// 14 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -115,6 +115,9 @@ SamplerState SamplerAnisotropic
     AddressV = uint(WRAP /* 1 */);
 };
 SamplerState SamplerFont
+{
+};
+SamplerState SamplerPoint
 {
 };
 SamplerComparisonState SamplerShadow

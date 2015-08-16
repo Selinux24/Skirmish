@@ -151,13 +151,16 @@ namespace Engine
                 this.skydom.Draw(gameTime, context);
             }
 
-            this.terrain.Draw(gameTime, context);
-
-            if (this.vegetation != null && this.vegetation.Length > 0)
+            if (!this.terrain.Cull)
             {
-                for (int i = 0; i < this.vegetation.Length; i++)
+                this.terrain.Draw(gameTime, context);
+
+                if (this.vegetation != null && this.vegetation.Length > 0)
                 {
-                    this.vegetation[i].Draw(gameTime, context);
+                    for (int i = 0; i < this.vegetation.Length; i++)
+                    {
+                        this.vegetation[i].Draw(gameTime, context);
+                    }
                 }
             }
         }
@@ -168,8 +171,6 @@ namespace Engine
         public override void FrustumCulling(BoundingFrustum frustum)
         {
             this.terrain.FrustumCulling(frustum);
-
-            this.Cull = this.terrain.Cull;
         }
 
         /// <summary>

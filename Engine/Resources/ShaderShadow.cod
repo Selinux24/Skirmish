@@ -14,7 +14,7 @@ cbuffer cbSkinned : register(b1)
 }
 
 //
-// 12 local object(s)
+// 13 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -118,6 +118,9 @@ SamplerState SamplerAnisotropic
     AddressV = uint(WRAP /* 1 */);
 };
 SamplerState SamplerFont
+{
+};
+SamplerState SamplerPoint
 {
 };
 SamplerComparisonState SamplerShadow

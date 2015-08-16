@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if DEBUG
+using System.Diagnostics;
+#endif
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
@@ -184,162 +187,181 @@ namespace Engine
         public void DrawLights(Context context)
         {
             var deviceContext = this.Game.Graphics.DeviceContext;
-
             var effect = DrawerPool.EffectDeferred;
 
             this.Game.Graphics.SetBlendAlphaToCoverage();
-
+#if DEBUG
+            Stopwatch swDirectional = Stopwatch.StartNew();
+#endif
             #region Directional Lights
 
+            SceneLightDirectional[] directionalLights = Array.FindAll(context.Lights.DirectionalLights, l => l.Enabled);
+            if (directionalLights != null && directionalLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredDirectionalLight;
                 var geometry = this.lightGeometry[0];
 
-                for (int i = 0; i < context.Lights.DirectionalLights.Length; i++)
+                deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
+                deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
+                deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+
+                effect.World = Matrix.Identity;
+                effect.WorldViewProjection = this.ViewProjection;
+                effect.EyePositionWorld = context.EyePosition;
+                effect.ColorMap = context.GeometryMap[0];
+                effect.NormalMap = context.GeometryMap[1];
+                effect.DepthMap = context.GeometryMap[2];
+
+                for (int i = 0; i < directionalLights.Length; i++)
                 {
-                    var light = context.Lights.DirectionalLights[i];
-                    if (light.Enabled)
+                    var light = directionalLights[i];
+
+                    effect.DirectionalLight = new BufferDirectionalLight(light);
+
+                    for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                     {
-                        deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
-                        deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                        deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
-                        deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+                        effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
 
-                        effect.UpdatePerDirectionalLight(
-                            new BufferDirectionalLight(light),
-                            Matrix.Identity,
-                            this.ViewProjection,
-                            context.EyePosition,
-                            context.GeometryMap[0],
-                            context.GeometryMap[1],
-                            context.GeometryMap[2]);
+                        deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
 
-                        for (int p = 0; p < effectTechnique.Description.PassCount; p++)
-                        {
-                            effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
-
-                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
-
-                            Counters.DrawCallsPerFrame++;
-                            Counters.InstancesPerFrame++;
-                        }
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame++;
                     }
                 }
             }
 
             #endregion
-
+#if DEBUG
+            swDirectional.Stop();
+#endif
             this.Game.Graphics.SetBlendAdditive();
-
+#if DEBUG
+            Stopwatch swPoint = Stopwatch.StartNew();
+#endif
             #region Point Lights
 
+            SceneLightPoint[] pointLights = Array.FindAll(context.Lights.PointLights, l => l.Enabled);
+            if (pointLights != null && pointLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredPointLight;
                 var geometry = this.lightGeometry[1];
 
-                for (int i = 0; i < context.Lights.PointLights.Length; i++)
+                deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
+                deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
+                deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+
+                effect.EyePositionWorld = context.EyePosition;
+                effect.ColorMap = context.GeometryMap[0];
+                effect.NormalMap = context.GeometryMap[1];
+                effect.DepthMap = context.GeometryMap[2];
+                effect.LightMap = context.LightMap;
+
+                for (int i = 0; i < pointLights.Length; i++)
                 {
-                    var light = context.Lights.PointLights[i];
-                    if (light.Enabled)
+                    var light = pointLights[i];
+
+                    float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
+                    if (cameraToCenter < light.Range)
                     {
-                        float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
-                        if (cameraToCenter < light.Range)
-                        {
-                            this.Game.Graphics.SetCullClockwiseFaceRasterizer();
-                        }
-                        else
-                        {
-                            this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
-                        }
+                        this.Game.Graphics.SetCullClockwiseFaceRasterizer();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+                    }
 
-                        deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
-                        deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                        deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
-                        deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+                    Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
-                        Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
+                    effect.PointLight = new BufferPointLight(light);
+                    effect.World = world;
+                    effect.WorldViewProjection = world * context.ViewProjection;
 
-                        effect.UpdatePerPointLight(
-                            new BufferPointLight(light),
-                            world,
-                            world * context.ViewProjection,
-                            context.EyePosition,
-                            context.GeometryMap[0],
-                            context.GeometryMap[1],
-                            context.GeometryMap[2],
-                            context.LightMap);
+                    for (int p = 0; p < effectTechnique.Description.PassCount; p++)
+                    {
+                        effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
 
-                        for (int p = 0; p < effectTechnique.Description.PassCount; p++)
-                        {
-                            effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
+                        deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
 
-                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
-
-                            Counters.DrawCallsPerFrame++;
-                            Counters.InstancesPerFrame++;
-                        }
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame++;
                     }
                 }
             }
 
             #endregion
+#if DEBUG
+            swPoint.Stop();
 
+            Stopwatch swSpot = Stopwatch.StartNew();
+#endif
             #region Spot Lights
 
+            SceneLightSpot[] spotLights = Array.FindAll(context.Lights.SpotLights, l => l.Enabled);
+            if (spotLights != null && spotLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredSpotLight;
                 var geometry = this.lightGeometry[2];
 
-                for (int i = 0; i < context.Lights.SpotLights.Length; i++)
+                deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
+                deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
+                deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+
+                effect.EyePositionWorld = context.EyePosition;
+                effect.ColorMap = context.GeometryMap[0];
+                effect.NormalMap = context.GeometryMap[1];
+                effect.DepthMap = context.GeometryMap[2];
+                effect.LightMap = context.LightMap;
+
+                for (int i = 0; i < spotLights.Length; i++)
                 {
-                    var light = context.Lights.SpotLights[i];
-                    if (light.Enabled)
+                    var light = spotLights[i];
+
+                    float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
+                    if (cameraToCenter < light.Range)
                     {
-                        float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
-                        if (cameraToCenter < light.Range)
-                        {
-                            this.Game.Graphics.SetCullClockwiseFaceRasterizer();
-                        }
-                        else
-                        {
-                            this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
-                        }
+                        this.Game.Graphics.SetCullClockwiseFaceRasterizer();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+                    }
 
-                        deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
-                        deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                        deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
-                        deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+                    Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
-                        Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
+                    effect.SpotLight = new BufferSpotLight(light);
+                    effect.World = world;
+                    effect.WorldViewProjection = world * context.ViewProjection;
 
-                        effect.UpdatePerSpotLight(
-                            new BufferSpotLight(light),
-                            world,
-                            world * context.ViewProjection,
-                            context.EyePosition,
-                            context.GeometryMap[0],
-                            context.GeometryMap[1],
-                            context.GeometryMap[2],
-                            context.LightMap);
+                    for (int p = 0; p < effectTechnique.Description.PassCount; p++)
+                    {
+                        effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
 
-                        for (int p = 0; p < effectTechnique.Description.PassCount; p++)
-                        {
-                            effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
+                        deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
 
-                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
-
-                            Counters.DrawCallsPerFrame++;
-                            Counters.InstancesPerFrame++;
-                        }
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame++;
                     }
                 }
             }
 
             #endregion
-
+#if DEBUG
+            swSpot.Stop();
+#endif
             this.Game.Graphics.SetBlendAlphaToCoverage();
 
             this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+#if DEBUG
+            context.Tag = new[]
+            {
+                swDirectional.ElapsedTicks,
+                swPoint.ElapsedTicks,
+                swSpot.ElapsedTicks,
+            };
+#endif
         }
         /// <summary>
         /// Draw result
@@ -349,24 +371,24 @@ namespace Engine
         {
             if (context.GeometryMap != null && context.LightMap != null)
             {
-                var deviceContext = this.Game.Graphics.DeviceContext;
                 var effect = DrawerPool.EffectDeferred;
                 var effectTechnique = effect.DeferredCombineLights;
+
+                effect.World = Matrix.Identity;
+                effect.WorldViewProjection = this.ViewProjection;
+                effect.EyePositionWorld = context.EyePosition;
+                effect.ColorMap = context.GeometryMap[0];
+                effect.NormalMap = context.GeometryMap[1];
+                effect.DepthMap = context.GeometryMap[2];
+                effect.LightMap = context.LightMap;
+
+                var deviceContext = this.Game.Graphics.DeviceContext;
                 var geometry = this.lightGeometry[0];
 
                 deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
                 deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
-
-                effect.UpdatePerCombineLights(
-                    Matrix.Identity,
-                    this.ViewProjection,
-                    context.EyePosition,
-                    context.GeometryMap[0],
-                    context.GeometryMap[1],
-                    context.GeometryMap[2],
-                    context.LightMap);
 
                 for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                 {
@@ -448,7 +470,7 @@ namespace Engine
             VertexData[] cv;
             uint[] ci;
             VertexData.CreateSphere(
-                1, 3, 3,
+                1, 12, 12,
                 out cv,
                 out ci);
 
@@ -482,7 +504,7 @@ namespace Engine
             VertexData[] cv;
             uint[] ci;
             VertexData.CreateCone(
-                1, 3, 3,
+                1, 12, 12,
                 out cv,
                 out ci);
 

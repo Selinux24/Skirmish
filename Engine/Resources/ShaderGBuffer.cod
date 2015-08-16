@@ -28,7 +28,7 @@ cbuffer cbPerInstance : register(b3)
 }
 
 //
-// 14 local object(s)
+// 16 local object(s)
 //
 RasterizerState RasterizerSolid
 {
@@ -134,6 +134,9 @@ SamplerState SamplerAnisotropic
 SamplerState SamplerFont
 {
 };
+SamplerState SamplerPoint
+{
+};
 SamplerComparisonState SamplerShadow
 {
     Filter   = uint(COMPARISON_MIN_MAG_LINEAR_MIP_POINT /* 148 */);
@@ -144,6 +147,7 @@ SamplerComparisonState SamplerShadow
     ComparisonFunc = uint(LESS /* 2 */);
 };
 Texture2DArray gTextureArray;
+Texture2D gNormalMap;
 Texture2D gShadowMap;
 
 //
@@ -218,7 +222,7 @@ fxgroup
                 //   o1.x <- <VSPositionColor return value>.positionWorld.x; o1.y <- <VSPositionColor return value>.positionWorld.y; o1.z <- <VSPositionColor return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionColor return value>.positionHomogeneous.x; o0.y <- <VSPositionColor return value>.positionHomogeneous.y; o0.z <- <VSPositionColor return value>.positionHomogeneous.z; o0.w <- <VSPositionColor return value>.positionHomogeneous.w
                 //
-                #line 41 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 42 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -229,7 +233,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 45
+                #line 46
                 mov o2.xyzw, v1.xyzw
                 ret 
                 // Approximately 11 instruction slots used
@@ -302,7 +306,7 @@ fxgroup
                 //   o1.x <- <PSPositionColor return value>.normal.x; o1.y <- <PSPositionColor return value>.normal.y; o1.z <- <PSPositionColor return value>.normal.z; o1.w <- <PSPositionColor return value>.normal.w; 
                 //   o0.x <- <PSPositionColor return value>.color.x; o0.y <- <PSPositionColor return value>.color.y; o0.z <- <PSPositionColor return value>.color.z; o0.w <- <PSPositionColor return value>.color.w
                 //
-                #line 109 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 110 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
                 mov o1.xyzw, l(0,0,0,0)
                 div o2.w, v0.z, v0.w
@@ -396,7 +400,7 @@ fxgroup
                 //   o1.x <- <VSPositionColorI return value>.positionWorld.x; o1.y <- <VSPositionColorI return value>.positionWorld.y; o1.z <- <VSPositionColorI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionColorI return value>.positionHomogeneous.x; o0.y <- <VSPositionColorI return value>.positionHomogeneous.y; o0.z <- <VSPositionColorI return value>.positionHomogeneous.z; o0.w <- <VSPositionColorI return value>.positionHomogeneous.w
                 //
-                #line 51 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 52 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -409,7 +413,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 57
+                #line 58
                 mov o2.xyzw, v1.xyzw
                 ret 
                 // Approximately 13 instruction slots used
@@ -482,7 +486,7 @@ fxgroup
                 //   o1.x <- <PSPositionColor return value>.normal.x; o1.y <- <PSPositionColor return value>.normal.y; o1.z <- <PSPositionColor return value>.normal.z; o1.w <- <PSPositionColor return value>.normal.w; 
                 //   o0.x <- <PSPositionColor return value>.color.x; o0.y <- <PSPositionColor return value>.color.y; o0.z <- <PSPositionColor return value>.color.z; o0.w <- <PSPositionColor return value>.color.w
                 //
-                #line 109 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 110 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
                 mov o1.xyzw, l(0,0,0,0)
                 div o2.w, v0.z, v0.w
@@ -614,7 +618,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx
                 endloop 
                 
-                #line 72 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 73 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -624,7 +628,7 @@ fxgroup
                 dp4 o1.y, r1.xyzw, cb0[1].xyzw
                 dp4 o1.z, r1.xyzw, cb0[2].xyzw
                 
-                #line 76
+                #line 77
                 mov o2.xyzw, v1.xyzw
                 ret 
                 // Approximately 41 instruction slots used
@@ -697,7 +701,7 @@ fxgroup
                 //   o1.x <- <PSPositionColor return value>.normal.x; o1.y <- <PSPositionColor return value>.normal.y; o1.z <- <PSPositionColor return value>.normal.z; o1.w <- <PSPositionColor return value>.normal.w; 
                 //   o0.x <- <PSPositionColor return value>.color.x; o0.y <- <PSPositionColor return value>.color.y; o0.z <- <PSPositionColor return value>.color.z; o0.w <- <PSPositionColor return value>.color.w
                 //
-                #line 109 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 110 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
                 mov o1.xyzw, l(0,0,0,0)
                 div o2.w, v0.z, v0.w
@@ -845,7 +849,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx
                 endloop 
                 
-                #line 91 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 92 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -858,7 +862,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 97
+                #line 98
                 mov o2.xyzw, v1.xyzw
                 ret 
                 // Approximately 44 instruction slots used
@@ -931,7 +935,7 @@ fxgroup
                 //   o1.x <- <PSPositionColor return value>.normal.x; o1.y <- <PSPositionColor return value>.normal.y; o1.z <- <PSPositionColor return value>.normal.z; o1.w <- <PSPositionColor return value>.normal.w; 
                 //   o0.x <- <PSPositionColor return value>.color.x; o0.y <- <PSPositionColor return value>.color.y; o0.z <- <PSPositionColor return value>.color.z; o0.w <- <PSPositionColor return value>.color.w
                 //
-                #line 109 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 110 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o0.xyzw, cb1[1].xyzw
                 mov o1.xyzw, l(0,0,0,0)
                 div o2.w, v0.z, v0.w
@@ -1018,7 +1022,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColor return value>.positionWorld.x; o1.y <- <VSPositionNormalColor return value>.positionWorld.y; o1.z <- <VSPositionNormalColor return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColor return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColor return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColor return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColor return value>.positionHomogeneous.w
                 //
-                #line 119 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 120 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -1035,16 +1039,16 @@ fxgroup
                 rsq r1.w, r1.w
                 mul o2.xyz, r1.wwww, r1.xyzx
                 
-                #line 125
+                #line 126
                 mov o3.xyzw, v2.xyzw
                 
-                #line 120
+                #line 121
                 dp4 o4.x, r0.xyzw, cb0[12].xyzw
                 dp4 o4.y, r0.xyzw, cb0[13].xyzw
                 dp4 o4.z, r0.xyzw, cb0[14].xyzw
                 dp4 o4.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 125
+                #line 126
                 ret 
                 // Approximately 21 instruction slots used
                             
@@ -1140,14 +1144,14 @@ fxgroup
                 //   o1.x <- <PSPositionNormalColor return value>.normal.x; o1.y <- <PSPositionNormalColor return value>.normal.y; o1.z <- <PSPositionNormalColor return value>.normal.z; o1.w <- <PSPositionNormalColor return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalColor return value>.color.x; o0.y <- <PSPositionNormalColor return value>.color.y; o0.z <- <PSPositionNormalColor return value>.color.z; o0.w <- <PSPositionNormalColor return value>.color.w
                 //
-                #line 198 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 199 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t0.xxxx, s0, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
@@ -1170,15 +1174,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
                 
-                #line 201 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 202 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
                   mov r0.x, l(1.000000)
                 endif 
                 
-                #line 207
+                #line 208
                 div o2.w, v0.z, v0.w
                 mov o0.xyzw, cb1[1].xyzw
                 mov r0.yzw, v2.xxyz
@@ -1282,7 +1286,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColorI return value>.positionWorld.x; o1.y <- <VSPositionNormalColorI return value>.positionWorld.y; o1.z <- <VSPositionNormalColorI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColorI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColorI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColorI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColorI return value>.positionHomogeneous.w
                 //
-                #line 131 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 132 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -1301,16 +1305,16 @@ fxgroup
                 rsq r1.w, r1.w
                 mul o2.xyz, r1.wwww, r1.xyzx
                 
-                #line 139
+                #line 140
                 mov o3.xyzw, v2.xyzw
                 
-                #line 134
+                #line 135
                 dp4 o4.x, r0.xyzw, cb0[12].xyzw
                 dp4 o4.y, r0.xyzw, cb0[13].xyzw
                 dp4 o4.z, r0.xyzw, cb0[14].xyzw
                 dp4 o4.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 139
+                #line 140
                 ret 
                 // Approximately 23 instruction slots used
                             
@@ -1406,14 +1410,14 @@ fxgroup
                 //   o1.x <- <PSPositionNormalColor return value>.normal.x; o1.y <- <PSPositionNormalColor return value>.normal.y; o1.z <- <PSPositionNormalColor return value>.normal.z; o1.w <- <PSPositionNormalColor return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalColor return value>.color.x; o0.y <- <PSPositionNormalColor return value>.color.y; o0.z <- <PSPositionNormalColor return value>.color.z; o0.w <- <PSPositionNormalColor return value>.color.w
                 //
-                #line 198 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 199 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t0.xxxx, s0, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
@@ -1436,15 +1440,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
                 
-                #line 201 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 202 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
                   mov r0.x, l(1.000000)
                 endif 
                 
-                #line 207
+                #line 208
                 div o2.w, v0.z, v0.w
                 mov o0.xyzw, cb1[1].xyzw
                 mov r0.yzw, v2.xxyz
@@ -1591,7 +1595,7 @@ fxgroup
                   mad r2.xyz, r2.wwww, r4.xyzx, r2.xyzx
                 endloop 
                 
-                #line 157 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 158 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -1611,7 +1615,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 163
+                #line 164
                 mov o3.xyzw, v2.xyzw
                 ret 
                 // Approximately 56 instruction slots used
@@ -1708,14 +1712,14 @@ fxgroup
                 //   o1.x <- <PSPositionNormalColor return value>.normal.x; o1.y <- <PSPositionNormalColor return value>.normal.y; o1.z <- <PSPositionNormalColor return value>.normal.z; o1.w <- <PSPositionNormalColor return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalColor return value>.color.x; o0.y <- <PSPositionNormalColor return value>.color.y; o0.z <- <PSPositionNormalColor return value>.color.z; o0.w <- <PSPositionNormalColor return value>.color.w
                 //
-                #line 198 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 199 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t0.xxxx, s0, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
@@ -1738,15 +1742,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
                 
-                #line 201 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 202 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
                   mov r0.x, l(1.000000)
                 endif 
                 
-                #line 207
+                #line 208
                 div o2.w, v0.z, v0.w
                 mov o0.xyzw, cb1[1].xyzw
                 mov r0.yzw, v2.xxyz
@@ -1909,7 +1913,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r4.xyzx, r1.xyzx
                 endloop 
                 
-                #line 181 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 182 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -1932,7 +1936,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 189
+                #line 190
                 mov o3.xyzw, v2.xyzw
                 ret 
                 // Approximately 59 instruction slots used
@@ -2029,14 +2033,14 @@ fxgroup
                 //   o1.x <- <PSPositionNormalColor return value>.normal.x; o1.y <- <PSPositionNormalColor return value>.normal.y; o1.z <- <PSPositionNormalColor return value>.normal.z; o1.w <- <PSPositionNormalColor return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalColor return value>.color.x; o0.y <- <PSPositionNormalColor return value>.color.y; o0.z <- <PSPositionNormalColor return value>.color.z; o0.w <- <PSPositionNormalColor return value>.color.w
                 //
-                #line 198 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 199 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t0.xxxx, s0, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
@@ -2059,15 +2063,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
                 
-                #line 201 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 202 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
                   mov r0.x, l(1.000000)
                 endif 
                 
-                #line 207
+                #line 208
                 div o2.w, v0.z, v0.w
                 mov o0.xyzw, cb1[1].xyzw
                 mov r0.yzw, v2.xxyz
@@ -2157,7 +2161,7 @@ fxgroup
                 //   o1.x <- <VSPositionTexture return value>.positionWorld.x; o1.y <- <VSPositionTexture return value>.positionWorld.y; o1.z <- <VSPositionTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionTexture return value>.positionHomogeneous.w
                 //
-                #line 219 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 220 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -2168,7 +2172,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 224
+                #line 225
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -2228,10 +2232,10 @@ fxgroup
                 //   o1.x <- <PSPositionTexture return value>.normal.x; o1.y <- <PSPositionTexture return value>.normal.y; o1.z <- <PSPositionTexture return value>.normal.z; o1.w <- <PSPositionTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionTexture return value>.color.x; o0.y <- <PSPositionTexture return value>.color.y; o0.z <- <PSPositionTexture return value>.color.z; o0.w <- <PSPositionTexture return value>.color.w
                 //
-                #line 286 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 287 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0
                 
-                #line 291
+                #line 292
                 mov o1.xyzw, l(0,0,0,0)
                 div o2.w, v0.z, v0.w
                 mov o2.xyz, v1.xyzx
@@ -2327,7 +2331,7 @@ fxgroup
                 //   o1.x <- <VSPositionTextureI return value>.positionWorld.x; o1.y <- <VSPositionTextureI return value>.positionWorld.y; o1.z <- <VSPositionTextureI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTextureI return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureI return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureI return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureI return value>.positionHomogeneous.w
                 //
-                #line 230 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 231 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -2340,7 +2344,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 237
+                #line 238
                 mov o2.xy, v1.xyxx
                 mov o2.z, v6.x
                 ret 
@@ -2400,10 +2404,10 @@ fxgroup
                 //   o1.x <- <PSPositionTexture return value>.normal.x; o1.y <- <PSPositionTexture return value>.normal.y; o1.z <- <PSPositionTexture return value>.normal.z; o1.w <- <PSPositionTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionTexture return value>.color.x; o0.y <- <PSPositionTexture return value>.color.y; o0.z <- <PSPositionTexture return value>.color.z; o0.w <- <PSPositionTexture return value>.color.w
                 //
-                #line 286 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 287 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0
                 
-                #line 291
+                #line 292
                 mov o1.xyzw, l(0,0,0,0)
                 div o2.w, v0.z, v0.w
                 mov o2.xyz, v1.xyzx
@@ -2545,7 +2549,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx
                 endloop 
                 
-                #line 252 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 253 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -2555,7 +2559,7 @@ fxgroup
                 dp4 o1.y, r1.xyzw, cb0[1].xyzw
                 dp4 o1.z, r1.xyzw, cb0[2].xyzw
                 
-                #line 257
+                #line 258
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -2615,10 +2619,10 @@ fxgroup
                 //   o1.x <- <PSPositionTexture return value>.normal.x; o1.y <- <PSPositionTexture return value>.normal.y; o1.z <- <PSPositionTexture return value>.normal.z; o1.w <- <PSPositionTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionTexture return value>.color.x; o0.y <- <PSPositionTexture return value>.color.y; o0.z <- <PSPositionTexture return value>.color.z; o0.w <- <PSPositionTexture return value>.color.w
                 //
-                #line 286 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 287 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0
                 
-                #line 291
+                #line 292
                 mov o1.xyzw, l(0,0,0,0)
                 div o2.w, v0.z, v0.w
                 mov o2.xyz, v1.xyzx
@@ -2768,7 +2772,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx
                 endloop 
                 
-                #line 272 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 273 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -2781,7 +2785,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 279
+                #line 280
                 mov o2.xy, v1.xyxx
                 mov o2.z, v8.x
                 ret 
@@ -2841,10 +2845,10 @@ fxgroup
                 //   o1.x <- <PSPositionTexture return value>.normal.x; o1.y <- <PSPositionTexture return value>.normal.y; o1.z <- <PSPositionTexture return value>.normal.z; o1.w <- <PSPositionTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionTexture return value>.color.x; o0.y <- <PSPositionTexture return value>.color.y; o0.z <- <PSPositionTexture return value>.color.z; o0.w <- <PSPositionTexture return value>.color.w
                 //
-                #line 286 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 287 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0
                 
-                #line 291
+                #line 292
                 mov o1.xyzw, l(0,0,0,0)
                 div o2.w, v0.z, v0.w
                 mov o2.xyz, v1.xyzx
@@ -2941,7 +2945,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTexture return value>.positionWorld.x; o1.y <- <VSPositionNormalTexture return value>.positionWorld.y; o1.z <- <VSPositionNormalTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTexture return value>.positionHomogeneous.w
                 //
-                #line 301 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 302 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -2958,17 +2962,17 @@ fxgroup
                 rsq r1.w, r1.w
                 mul o2.xyz, r1.wwww, r1.xyzx
                 
-                #line 308
+                #line 309
                 mov o3.xy, v2.xyxx
                 mov o3.z, cb3[0].x
                 
-                #line 302
+                #line 303
                 dp4 o4.x, r0.xyzw, cb0[12].xyzw
                 dp4 o4.y, r0.xyzw, cb0[13].xyzw
                 dp4 o4.z, r0.xyzw, cb0[14].xyzw
                 dp4 o4.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 308
+                #line 309
                 ret 
                 // Approximately 22 instruction slots used
                             
@@ -3054,15 +3058,15 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTexture return value>.normal.x; o1.y <- <PSPositionNormalTexture return value>.normal.y; o1.z <- <PSPositionNormalTexture return value>.normal.z; o1.w <- <PSPositionNormalTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTexture return value>.color.x; o0.y <- <PSPositionNormalTexture return value>.color.y; o0.z <- <PSPositionNormalTexture return value>.color.z; o0.w <- <PSPositionNormalTexture return value>.color.w
                 //
-                #line 382 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 383 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
@@ -3085,15 +3089,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
                 
-                #line 387 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 388 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
                   mov r0.x, l(1.000000)
                 endif 
                 
-                #line 393
+                #line 394
                 div o2.w, v0.z, v0.w
                 mov r0.yzw, v2.xxyz
                 mov o1.xyzw, r0.yzwx
@@ -3199,7 +3203,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureI return value>.positionHomogeneous.w
                 //
-                #line 314 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 315 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -3218,17 +3222,17 @@ fxgroup
                 rsq r1.w, r1.w
                 mul o2.xyz, r1.wwww, r1.xyzx
                 
-                #line 323
+                #line 324
                 mov o3.xy, v2.xyxx
                 mov o3.z, v7.x
                 
-                #line 317
+                #line 318
                 dp4 o4.x, r0.xyzw, cb0[12].xyzw
                 dp4 o4.y, r0.xyzw, cb0[13].xyzw
                 dp4 o4.z, r0.xyzw, cb0[14].xyzw
                 dp4 o4.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 323
+                #line 324
                 ret 
                 // Approximately 24 instruction slots used
                             
@@ -3314,15 +3318,15 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTexture return value>.normal.x; o1.y <- <PSPositionNormalTexture return value>.normal.y; o1.z <- <PSPositionNormalTexture return value>.normal.z; o1.w <- <PSPositionNormalTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTexture return value>.color.x; o0.y <- <PSPositionNormalTexture return value>.color.y; o0.z <- <PSPositionNormalTexture return value>.color.z; o0.w <- <PSPositionNormalTexture return value>.color.w
                 //
-                #line 382 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 383 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
@@ -3345,15 +3349,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
                 
-                #line 387 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 388 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
                   mov r0.x, l(1.000000)
                 endif 
                 
-                #line 393
+                #line 394
                 div o2.w, v0.z, v0.w
                 mov r0.yzw, v2.xxyz
                 mov o1.xyzw, r0.yzwx
@@ -3510,7 +3514,7 @@ fxgroup
                   mad r2.xyz, r2.wwww, r4.xyzx, r2.xyzx
                 endloop 
                 
-                #line 341 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 342 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -3530,7 +3534,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 348
+                #line 349
                 mov o3.xy, v2.xyxx
                 mov o3.z, cb3[0].x
                 ret 
@@ -3618,15 +3622,15 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTexture return value>.normal.x; o1.y <- <PSPositionNormalTexture return value>.normal.y; o1.z <- <PSPositionNormalTexture return value>.normal.z; o1.w <- <PSPositionNormalTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTexture return value>.color.x; o0.y <- <PSPositionNormalTexture return value>.color.y; o0.z <- <PSPositionNormalTexture return value>.color.z; o0.w <- <PSPositionNormalTexture return value>.color.w
                 //
-                #line 382 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 383 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
@@ -3649,15 +3653,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
                 
-                #line 387 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 388 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
                   mov r0.x, l(1.000000)
                 endif 
                 
-                #line 393
+                #line 394
                 div o2.w, v0.z, v0.w
                 mov r0.yzw, v2.xxyz
                 mov o1.xyzw, r0.yzwx
@@ -3822,7 +3826,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r4.xyzx, r1.xyzx
                 endloop 
                 
-                #line 366 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 367 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -3845,7 +3849,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 375
+                #line 376
                 mov o3.xy, v2.xyxx
                 mov o3.z, v9.x
                 ret 
@@ -3933,15 +3937,15 @@ fxgroup
                 //   o1.x <- <PSPositionNormalTexture return value>.normal.x; o1.y <- <PSPositionNormalTexture return value>.normal.y; o1.z <- <PSPositionNormalTexture return value>.normal.z; o1.w <- <PSPositionNormalTexture return value>.normal.w; 
                 //   o0.x <- <PSPositionNormalTexture return value>.color.x; o0.y <- <PSPositionNormalTexture return value>.color.y; o0.z <- <PSPositionNormalTexture return value>.color.z; o0.w <- <PSPositionNormalTexture return value>.color.w
                 //
-                #line 382 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 383 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
@@ -3964,15 +3968,15 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
                 
-                #line 387 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 388 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
                   mov r0.x, l(1.000000)
                 endif 
                 
-                #line 393
+                #line 394
                 div o2.w, v0.z, v0.w
                 mov r0.yzw, v2.xxyz
                 mov o1.xyzw, r0.yzwx
@@ -4076,7 +4080,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangent return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangent return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangent return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.w
                 //
-                #line 405 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 406 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -4096,17 +4100,17 @@ fxgroup
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx
                 
-                #line 413
+                #line 414
                 mov o4.xy, v3.xyxx
                 mov o4.z, cb3[0].x
                 
-                #line 406
+                #line 407
                 dp4 o5.x, r0.xyzw, cb0[12].xyzw
                 dp4 o5.y, r0.xyzw, cb0[13].xyzw
                 dp4 o5.z, r0.xyzw, cb0[14].xyzw
                 dp4 o5.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 413
+                #line 414
                 ret 
                 // Approximately 25 instruction slots used
                             
@@ -4135,10 +4139,12 @@ fxgroup
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
-                // SamplerAnisotropic                sampler      NA          NA    0        1
-                // SamplerShadow                   sampler_c      NA          NA    1        1
+                // SamplerLinear                     sampler      NA          NA    0        1
+                // SamplerAnisotropic                sampler      NA          NA    1        1
+                // SamplerShadow                   sampler_c      NA          NA    2        1
                 // gTextureArray                     texture  float4     2darray    0        1
-                // gShadowMap                        texture  float4          2d    1        1
+                // gNormalMap                        texture  float4          2d    1        1
+                // gShadowMap                        texture  float4          2d    2        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
                 //
                 //
@@ -4150,7 +4156,7 @@ fxgroup
                 // SV_POSITION              0   xyzw        0      POS   float     zw
                 // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
-                // TANGENT                  0   xyz         3     NONE   float       
+                // TANGENT                  0   xyz         3     NONE   float   xyz 
                 // TEXCOORD                 0   xy          4     NONE   float   xy  
                 // textureIndex             0     z         4     NONE   float     z 
                 // TEXCOORD                 1   xyzw        5     NONE   float   xyzw
@@ -4168,19 +4174,22 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[17], immediateIndexed
                 dcl_sampler s0, mode_default
-                dcl_sampler s1, mode_comparison
+                dcl_sampler s1, mode_default
+                dcl_sampler s2, mode_comparison
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_resource_texture2d (float,float,float,float) t1
+                dcl_resource_texture2d (float,float,float,float) t2
                 dcl_input_ps_siv linear noperspective v0.zw, position
                 dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
+                dcl_input_ps linear v3.xyz
                 dcl_input_ps linear v4.xy
                 dcl_input_ps linear v4.z
                 dcl_input_ps linear v5.xyzw
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
-                dcl_temps 2
+                dcl_temps 3
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -4191,55 +4200,77 @@ fxgroup
                 //   v5.x <- input.shadowHomogeneous.x; v5.y <- input.shadowHomogeneous.y; v5.z <- input.shadowHomogeneous.z; v5.w <- input.shadowHomogeneous.w; 
                 //   v4.z <- input.textureIndex; 
                 //   o2.x <- <PSPositionNormalTextureTangent return value>.depth.x; o2.y <- <PSPositionNormalTextureTangent return value>.depth.y; o2.z <- <PSPositionNormalTextureTangent return value>.depth.z; o2.w <- <PSPositionNormalTextureTangent return value>.depth.w; 
-                //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; o1.w <- <PSPositionNormalTextureTangent return value>.normal.w; 
-                //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w
+                //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; 
+                //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w; 
+                //   o1.w <- shadow
                 //
-                #line 496 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
-                sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s0
+                #line 497 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1
+                sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t1.xyzw, s0  // r0.x <- normalMapSample.x; r0.y <- normalMapSample.y; r0.z <- normalMapSample.z
+                
+                #line 140 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                mad r0.xyz, r0.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // r0.x <- normalT.x; r0.y <- normalT.y; r0.z <- normalT.z
+                
+                #line 144
+                dp3 r0.w, v3.xyzx, v2.xyzx
+                mad r1.xyz, -r0.wwww, v2.xyzx, v3.xyzx
+                dp3 r0.w, r1.xyzx, r1.xyzx
+                rsq r0.w, r0.w
+                mul r1.xyz, r0.wwww, r1.xyzx  // r1.x <- T.x; r1.y <- T.y; r1.z <- T.z
+                mul r2.xyz, r1.yzxy, v2.zxyz
+                mad r2.xyz, v2.yzxy, r1.zxyz, -r2.xyzx  // r2.x <- B.x; r2.y <- B.y; r2.z <- B.z
+                
+                #line 149
+                mul r2.xyz, r0.yyyy, r2.xyzx
+                mad r0.xyw, r0.xxxx, r1.xyxz, r2.xyxz
+                mad r0.xyz, r0.zzzz, v2.xyzx, r0.xywx
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul o1.xyz, r0.wwww, r0.xyzx
+                
+                #line 501 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v5.xyzx, v5.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t2.xxxx, s2, r0.z  // r0.w <- percentLit
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul o1.w, r0.x, l(0.111111)
                 
-                #line 501 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 504 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
-                  mov r0.x, l(1.000000)
+                  mov o1.w, l(1.000000)  // o1.w <- shadow
                 endif 
                 
-                #line 507
+                #line 510
                 div o2.w, v0.z, v0.w
-                mov r0.yzw, v2.xxyz
-                mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 47 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -4345,7 +4376,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.w
                 //
-                #line 419 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 420 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v5.xyzw
                 mad r0.xyzw, v0.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v6.xyzw, r0.xyzw
@@ -4367,17 +4398,17 @@ fxgroup
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx
                 
-                #line 429
+                #line 430
                 mov o4.xy, v3.xyxx
                 mov o4.z, v8.x
                 
-                #line 422
+                #line 423
                 dp4 o5.x, r0.xyzw, cb0[12].xyzw
                 dp4 o5.y, r0.xyzw, cb0[13].xyzw
                 dp4 o5.z, r0.xyzw, cb0[14].xyzw
                 dp4 o5.w, r0.xyzw, cb0[15].xyzw
                 
-                #line 429
+                #line 430
                 ret 
                 // Approximately 27 instruction slots used
                             
@@ -4406,10 +4437,12 @@ fxgroup
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
-                // SamplerAnisotropic                sampler      NA          NA    0        1
-                // SamplerShadow                   sampler_c      NA          NA    1        1
+                // SamplerLinear                     sampler      NA          NA    0        1
+                // SamplerAnisotropic                sampler      NA          NA    1        1
+                // SamplerShadow                   sampler_c      NA          NA    2        1
                 // gTextureArray                     texture  float4     2darray    0        1
-                // gShadowMap                        texture  float4          2d    1        1
+                // gNormalMap                        texture  float4          2d    1        1
+                // gShadowMap                        texture  float4          2d    2        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
                 //
                 //
@@ -4421,7 +4454,7 @@ fxgroup
                 // SV_POSITION              0   xyzw        0      POS   float     zw
                 // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
-                // TANGENT                  0   xyz         3     NONE   float       
+                // TANGENT                  0   xyz         3     NONE   float   xyz 
                 // TEXCOORD                 0   xy          4     NONE   float   xy  
                 // textureIndex             0     z         4     NONE   float     z 
                 // TEXCOORD                 1   xyzw        5     NONE   float   xyzw
@@ -4439,19 +4472,22 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[17], immediateIndexed
                 dcl_sampler s0, mode_default
-                dcl_sampler s1, mode_comparison
+                dcl_sampler s1, mode_default
+                dcl_sampler s2, mode_comparison
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_resource_texture2d (float,float,float,float) t1
+                dcl_resource_texture2d (float,float,float,float) t2
                 dcl_input_ps_siv linear noperspective v0.zw, position
                 dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
+                dcl_input_ps linear v3.xyz
                 dcl_input_ps linear v4.xy
                 dcl_input_ps linear v4.z
                 dcl_input_ps linear v5.xyzw
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
-                dcl_temps 2
+                dcl_temps 3
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -4462,55 +4498,77 @@ fxgroup
                 //   v5.x <- input.shadowHomogeneous.x; v5.y <- input.shadowHomogeneous.y; v5.z <- input.shadowHomogeneous.z; v5.w <- input.shadowHomogeneous.w; 
                 //   v4.z <- input.textureIndex; 
                 //   o2.x <- <PSPositionNormalTextureTangent return value>.depth.x; o2.y <- <PSPositionNormalTextureTangent return value>.depth.y; o2.z <- <PSPositionNormalTextureTangent return value>.depth.z; o2.w <- <PSPositionNormalTextureTangent return value>.depth.w; 
-                //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; o1.w <- <PSPositionNormalTextureTangent return value>.normal.w; 
-                //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w
+                //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; 
+                //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w; 
+                //   o1.w <- shadow
                 //
-                #line 496 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
-                sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s0
+                #line 497 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1
+                sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t1.xyzw, s0  // r0.x <- normalMapSample.x; r0.y <- normalMapSample.y; r0.z <- normalMapSample.z
+                
+                #line 140 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                mad r0.xyz, r0.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // r0.x <- normalT.x; r0.y <- normalT.y; r0.z <- normalT.z
+                
+                #line 144
+                dp3 r0.w, v3.xyzx, v2.xyzx
+                mad r1.xyz, -r0.wwww, v2.xyzx, v3.xyzx
+                dp3 r0.w, r1.xyzx, r1.xyzx
+                rsq r0.w, r0.w
+                mul r1.xyz, r0.wwww, r1.xyzx  // r1.x <- T.x; r1.y <- T.y; r1.z <- T.z
+                mul r2.xyz, r1.yzxy, v2.zxyz
+                mad r2.xyz, v2.yzxy, r1.zxyz, -r2.xyzx  // r2.x <- B.x; r2.y <- B.y; r2.z <- B.z
+                
+                #line 149
+                mul r2.xyz, r0.yyyy, r2.xyzx
+                mad r0.xyw, r0.xxxx, r1.xyxz, r2.xyxz
+                mad r0.xyz, r0.zzzz, v2.xyzx, r0.xywx
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul o1.xyz, r0.wwww, r0.xyzx
+                
+                #line 501 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v5.xyzx, v5.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t2.xxxx, s2, r0.z  // r0.w <- percentLit
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul o1.w, r0.x, l(0.111111)
                 
-                #line 501 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 504 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
-                  mov r0.x, l(1.000000)
+                  mov o1.w, l(1.000000)  // o1.w <- shadow
                 endif 
                 
-                #line 507
+                #line 510
                 div o2.w, v0.z, v0.w
-                mov r0.yzw, v2.xxyz
-                mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 47 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -4676,7 +4734,7 @@ fxgroup
                   mad r3.xyz, r2.wwww, r5.xyzx, r3.xyzx
                 endloop 
                 
-                #line 450 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 451 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -4699,7 +4757,7 @@ fxgroup
                 dp3 o3.y, r3.xyzx, cb0[1].xyzx
                 dp3 o3.z, r3.xyzx, cb0[2].xyzx
                 
-                #line 458
+                #line 459
                 mov o4.xy, v3.xyxx
                 mov o4.z, cb3[0].x
                 ret 
@@ -4730,10 +4788,12 @@ fxgroup
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
-                // SamplerAnisotropic                sampler      NA          NA    0        1
-                // SamplerShadow                   sampler_c      NA          NA    1        1
+                // SamplerLinear                     sampler      NA          NA    0        1
+                // SamplerAnisotropic                sampler      NA          NA    1        1
+                // SamplerShadow                   sampler_c      NA          NA    2        1
                 // gTextureArray                     texture  float4     2darray    0        1
-                // gShadowMap                        texture  float4          2d    1        1
+                // gNormalMap                        texture  float4          2d    1        1
+                // gShadowMap                        texture  float4          2d    2        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
                 //
                 //
@@ -4745,7 +4805,7 @@ fxgroup
                 // SV_POSITION              0   xyzw        0      POS   float     zw
                 // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
-                // TANGENT                  0   xyz         3     NONE   float       
+                // TANGENT                  0   xyz         3     NONE   float   xyz 
                 // TEXCOORD                 0   xy          4     NONE   float   xy  
                 // textureIndex             0     z         4     NONE   float     z 
                 // TEXCOORD                 1   xyzw        5     NONE   float   xyzw
@@ -4763,19 +4823,22 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[17], immediateIndexed
                 dcl_sampler s0, mode_default
-                dcl_sampler s1, mode_comparison
+                dcl_sampler s1, mode_default
+                dcl_sampler s2, mode_comparison
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_resource_texture2d (float,float,float,float) t1
+                dcl_resource_texture2d (float,float,float,float) t2
                 dcl_input_ps_siv linear noperspective v0.zw, position
                 dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
+                dcl_input_ps linear v3.xyz
                 dcl_input_ps linear v4.xy
                 dcl_input_ps linear v4.z
                 dcl_input_ps linear v5.xyzw
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
-                dcl_temps 2
+                dcl_temps 3
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -4786,55 +4849,77 @@ fxgroup
                 //   v5.x <- input.shadowHomogeneous.x; v5.y <- input.shadowHomogeneous.y; v5.z <- input.shadowHomogeneous.z; v5.w <- input.shadowHomogeneous.w; 
                 //   v4.z <- input.textureIndex; 
                 //   o2.x <- <PSPositionNormalTextureTangent return value>.depth.x; o2.y <- <PSPositionNormalTextureTangent return value>.depth.y; o2.z <- <PSPositionNormalTextureTangent return value>.depth.z; o2.w <- <PSPositionNormalTextureTangent return value>.depth.w; 
-                //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; o1.w <- <PSPositionNormalTextureTangent return value>.normal.w; 
-                //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w
+                //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; 
+                //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w; 
+                //   o1.w <- shadow
                 //
-                #line 496 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
-                sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s0
+                #line 497 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1
+                sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t1.xyzw, s0  // r0.x <- normalMapSample.x; r0.y <- normalMapSample.y; r0.z <- normalMapSample.z
+                
+                #line 140 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                mad r0.xyz, r0.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // r0.x <- normalT.x; r0.y <- normalT.y; r0.z <- normalT.z
+                
+                #line 144
+                dp3 r0.w, v3.xyzx, v2.xyzx
+                mad r1.xyz, -r0.wwww, v2.xyzx, v3.xyzx
+                dp3 r0.w, r1.xyzx, r1.xyzx
+                rsq r0.w, r0.w
+                mul r1.xyz, r0.wwww, r1.xyzx  // r1.x <- T.x; r1.y <- T.y; r1.z <- T.z
+                mul r2.xyz, r1.yzxy, v2.zxyz
+                mad r2.xyz, v2.yzxy, r1.zxyz, -r2.xyzx  // r2.x <- B.x; r2.y <- B.y; r2.z <- B.z
+                
+                #line 149
+                mul r2.xyz, r0.yyyy, r2.xyzx
+                mad r0.xyw, r0.xxxx, r1.xyxz, r2.xyxz
+                mad r0.xyz, r0.zzzz, v2.xyzx, r0.xywx
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul o1.xyz, r0.wwww, r0.xyzx
+                
+                #line 501 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v5.xyzx, v5.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t2.xxxx, s2, r0.z  // r0.w <- percentLit
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul o1.w, r0.x, l(0.111111)
                 
-                #line 501 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 504 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
-                  mov r0.x, l(1.000000)
+                  mov o1.w, l(1.000000)  // o1.w <- shadow
                 endif 
                 
-                #line 507
+                #line 510
                 div o2.w, v0.z, v0.w
-                mov r0.yzw, v2.xxyz
-                mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 47 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -5008,7 +5093,7 @@ fxgroup
                   mad r2.xyz, r1.wwww, r5.xyzx, r2.xyzx
                 endloop 
                 
-                #line 479 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 480 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r3.yyyy, v7.xyzw
                 mad r0.xyzw, r3.xxxx, v6.xyzw, r0.xyzw
                 mad r0.xyzw, r3.zzzz, v8.xyzw, r0.xyzw
@@ -5034,7 +5119,7 @@ fxgroup
                 dp3 o3.y, r2.xyzx, cb0[1].xyzx
                 dp3 o3.z, r2.xyzx, cb0[2].xyzx
                 
-                #line 489
+                #line 490
                 mov o4.xy, v3.xyxx
                 mov o4.z, v10.x
                 ret 
@@ -5065,10 +5150,12 @@ fxgroup
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
-                // SamplerAnisotropic                sampler      NA          NA    0        1
-                // SamplerShadow                   sampler_c      NA          NA    1        1
+                // SamplerLinear                     sampler      NA          NA    0        1
+                // SamplerAnisotropic                sampler      NA          NA    1        1
+                // SamplerShadow                   sampler_c      NA          NA    2        1
                 // gTextureArray                     texture  float4     2darray    0        1
-                // gShadowMap                        texture  float4          2d    1        1
+                // gNormalMap                        texture  float4          2d    1        1
+                // gShadowMap                        texture  float4          2d    2        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
                 //
                 //
@@ -5080,7 +5167,7 @@ fxgroup
                 // SV_POSITION              0   xyzw        0      POS   float     zw
                 // POSITION                 0   xyz         1     NONE   float   xyz 
                 // NORMAL                   0   xyz         2     NONE   float   xyz 
-                // TANGENT                  0   xyz         3     NONE   float       
+                // TANGENT                  0   xyz         3     NONE   float   xyz 
                 // TEXCOORD                 0   xy          4     NONE   float   xy  
                 // textureIndex             0     z         4     NONE   float     z 
                 // TEXCOORD                 1   xyzw        5     NONE   float   xyzw
@@ -5098,19 +5185,22 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[17], immediateIndexed
                 dcl_sampler s0, mode_default
-                dcl_sampler s1, mode_comparison
+                dcl_sampler s1, mode_default
+                dcl_sampler s2, mode_comparison
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_resource_texture2d (float,float,float,float) t1
+                dcl_resource_texture2d (float,float,float,float) t2
                 dcl_input_ps_siv linear noperspective v0.zw, position
                 dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
+                dcl_input_ps linear v3.xyz
                 dcl_input_ps linear v4.xy
                 dcl_input_ps linear v4.z
                 dcl_input_ps linear v5.xyzw
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
-                dcl_temps 2
+                dcl_temps 3
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -5121,55 +5211,77 @@ fxgroup
                 //   v5.x <- input.shadowHomogeneous.x; v5.y <- input.shadowHomogeneous.y; v5.z <- input.shadowHomogeneous.z; v5.w <- input.shadowHomogeneous.w; 
                 //   v4.z <- input.textureIndex; 
                 //   o2.x <- <PSPositionNormalTextureTangent return value>.depth.x; o2.y <- <PSPositionNormalTextureTangent return value>.depth.y; o2.z <- <PSPositionNormalTextureTangent return value>.depth.z; o2.w <- <PSPositionNormalTextureTangent return value>.depth.w; 
-                //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; o1.w <- <PSPositionNormalTextureTangent return value>.normal.w; 
-                //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w
+                //   o1.x <- <PSPositionNormalTextureTangent return value>.normal.x; o1.y <- <PSPositionNormalTextureTangent return value>.normal.y; o1.z <- <PSPositionNormalTextureTangent return value>.normal.z; 
+                //   o0.x <- <PSPositionNormalTextureTangent return value>.color.x; o0.y <- <PSPositionNormalTextureTangent return value>.color.y; o0.z <- <PSPositionNormalTextureTangent return value>.color.z; o0.w <- <PSPositionNormalTextureTangent return value>.color.w; 
+                //   o1.w <- shadow
                 //
-                #line 496 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
-                sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s0
+                #line 497 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1
+                sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t1.xyzw, s0  // r0.x <- normalMapSample.x; r0.y <- normalMapSample.y; r0.z <- normalMapSample.z
+                
+                #line 140 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                mad r0.xyz, r0.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // r0.x <- normalT.x; r0.y <- normalT.y; r0.z <- normalT.z
+                
+                #line 144
+                dp3 r0.w, v3.xyzx, v2.xyzx
+                mad r1.xyz, -r0.wwww, v2.xyzx, v3.xyzx
+                dp3 r0.w, r1.xyzx, r1.xyzx
+                rsq r0.w, r0.w
+                mul r1.xyz, r0.wwww, r1.xyzx  // r1.x <- T.x; r1.y <- T.y; r1.z <- T.z
+                mul r2.xyz, r1.yzxy, v2.zxyz
+                mad r2.xyz, v2.yzxy, r1.zxyz, -r2.xyzx  // r2.x <- B.x; r2.y <- B.y; r2.z <- B.z
+                
+                #line 149
+                mul r2.xyz, r0.yyyy, r2.xyzx
+                mad r0.xyw, r0.xxxx, r1.xyxz, r2.xyxz
+                mad r0.xyz, r0.zzzz, v2.xyzx, r0.xywx
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul o1.xyz, r0.wwww, r0.xyzx
+                
+                #line 501 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 369 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v5.xyzx, v5.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 379
+                #line 381
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t2.xxxx, s2, r0.z  // r0.w <- percentLit
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 383
-                  mul r0.x, r0.x, l(0.111111)
+                #line 385
+                  mul o1.w, r0.x, l(0.111111)
                 
-                #line 501 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 504 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
-                  mov r0.x, l(1.000000)
+                  mov o1.w, l(1.000000)  // o1.w <- shadow
                 endif 
                 
-                #line 507
+                #line 510
                 div o2.w, v0.z, v0.w
-                mov r0.yzw, v2.xxyz
-                mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 47 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
