@@ -180,14 +180,20 @@ namespace Engine
 #endif
             this.Camera.Update(gameTime);
 
+            Matrix viewProj = this.Camera.View * this.Camera.Projection;
+
             this.DrawContext.World = this.world;
-            this.DrawContext.ViewProjection = this.Camera.View * this.Camera.Projection;
+            this.DrawContext.ViewProjection = viewProj;
+            this.DrawContext.Frustum = new BoundingFrustum(viewProj);
             this.DrawContext.EyePosition = this.Camera.Position;
 
             if (this.Lights.EnableShadows)
             {
+                Matrix shadowViewProj = this.ShadowMap.View * this.ShadowMap.Projection;
+
                 this.DrawShadowsContext.World = Matrix.Identity;
-                this.DrawShadowsContext.ViewProjection = this.ShadowMap.View * this.ShadowMap.Projection;
+                this.DrawShadowsContext.ViewProjection = shadowViewProj;
+                this.DrawShadowsContext.Frustum = new BoundingFrustum(shadowViewProj);
             }
 
             //Update active components
@@ -730,7 +736,7 @@ namespace Engine
 
             for (int i = 0; i < components.Count; i++)
             {
-                components[i].FrustumCulling(this.Camera.Frustum);
+                components[i].FrustumCulling(context.Frustum);
 
                 if (!components[i].Cull) res = true;
             }

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -51,7 +52,7 @@ namespace Engine
 
             if (description != null && description.AddVegetation)
             {
-                this.vegetation = new Billboard[description.Vegetation.Length];
+                List<Billboard> vegetationList = new List<Billboard>();
 
                 for (int i = 0; i < description.Vegetation.Length; i++)
                 {
@@ -67,10 +68,19 @@ namespace Engine
                         vegetationDesc.MaxSize,
                         vegetationDesc.Seed);
 
-                    this.vegetation[i] = new Billboard(game, vegetationContent);
-                    this.vegetation[i].Radius = vegetationDesc.Radius;
-                    this.vegetation[i].Opaque = vegetationDesc.Opaque;
+                    if (vegetationContent != null)
+                    {
+                        var billboard = new Billboard(game, vegetationContent)
+                        {
+                            Radius = vegetationDesc.Radius,
+                            Opaque = vegetationDesc.Opaque,
+                        };
+
+                        vegetationList.Add(billboard);
+                    }
                 }
+
+                this.vegetation = vegetationList.ToArray();
             }
 
             if (description != null && description.AddSkydom)

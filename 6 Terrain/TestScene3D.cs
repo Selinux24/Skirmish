@@ -346,7 +346,7 @@ namespace TerrainTest
             this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
             this.Camera.LookTo(this.helicopter.Manipulator.Position);
 
-            this.Lights.EnableShadows = false;
+            this.Lights.EnableShadows = true;
             this.Lights.DirectionalLights[0].Enabled = true;
             this.Lights.DirectionalLights[1].Enabled = false;
             this.Lights.DirectionalLights[2].Enabled = false;
@@ -357,7 +357,7 @@ namespace TerrainTest
                 Specular = Color.Transparent,
                 Attenuation = new Vector3(),
                 Position = Vector3.Zero,
-                Range = 0.5f,
+                Range = 1f,
                 Enabled = true,
             });
             this.Lights.Add(new SceneLightPoint()
@@ -367,7 +367,7 @@ namespace TerrainTest
                 Specular = Color.Transparent,
                 Attenuation = new Vector3(),
                 Position = Vector3.Zero,
-                Range = 0.5f,
+                Range = 1f,
                 Enabled = true,
             });
         }

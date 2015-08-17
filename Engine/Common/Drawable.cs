@@ -46,7 +46,7 @@ namespace Engine.Common
         /// Gets or sets whether the object its opaque
         /// </summary>
         public bool Opaque { get; set; }
-        
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -113,6 +113,10 @@ namespace Engine.Common
         /// View * projection matrix
         /// </summary>
         public Matrix ViewProjection;
+        /// <summary>
+        /// Bounding frustum
+        /// </summary>
+        public BoundingFrustum Frustum;
         /// <summary>
         /// Eye position
         /// </summary>

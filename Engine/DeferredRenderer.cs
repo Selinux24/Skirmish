@@ -262,30 +262,33 @@ namespace Engine
                 {
                     var light = pointLights[i];
 
-                    float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
-                    if (cameraToCenter < light.Range)
+                    if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Range)) != ContainmentType.Disjoint)
                     {
-                        this.Game.Graphics.SetCullClockwiseFaceRasterizer();
-                    }
-                    else
-                    {
-                        this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
-                    }
+                        float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
+                        if (cameraToCenter < light.Range)
+                        {
+                            this.Game.Graphics.SetCullClockwiseFaceRasterizer();
+                        }
+                        else
+                        {
+                            this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+                        }
 
-                    Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
+                        Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
-                    effect.PointLight = new BufferPointLight(light);
-                    effect.World = world;
-                    effect.WorldViewProjection = world * context.ViewProjection;
+                        effect.PointLight = new BufferPointLight(light);
+                        effect.World = world;
+                        effect.WorldViewProjection = world * context.ViewProjection;
 
-                    for (int p = 0; p < effectTechnique.Description.PassCount; p++)
-                    {
-                        effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
+                        for (int p = 0; p < effectTechnique.Description.PassCount; p++)
+                        {
+                            effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
 
-                        deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
+                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
 
-                        Counters.DrawCallsPerFrame++;
-                        Counters.InstancesPerFrame++;
+                            Counters.DrawCallsPerFrame++;
+                            Counters.InstancesPerFrame++;
+                        }
                     }
                 }
             }
@@ -319,30 +322,33 @@ namespace Engine
                 {
                     var light = spotLights[i];
 
-                    float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
-                    if (cameraToCenter < light.Range)
+                    if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Range)) != ContainmentType.Disjoint)
                     {
-                        this.Game.Graphics.SetCullClockwiseFaceRasterizer();
-                    }
-                    else
-                    {
-                        this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
-                    }
+                        float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
+                        if (cameraToCenter < light.Range)
+                        {
+                            this.Game.Graphics.SetCullClockwiseFaceRasterizer();
+                        }
+                        else
+                        {
+                            this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+                        }
 
-                    Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
+                        Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
-                    effect.SpotLight = new BufferSpotLight(light);
-                    effect.World = world;
-                    effect.WorldViewProjection = world * context.ViewProjection;
+                        effect.SpotLight = new BufferSpotLight(light);
+                        effect.World = world;
+                        effect.WorldViewProjection = world * context.ViewProjection;
 
-                    for (int p = 0; p < effectTechnique.Description.PassCount; p++)
-                    {
-                        effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
+                        for (int p = 0; p < effectTechnique.Description.PassCount; p++)
+                        {
+                            effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
 
-                        deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
+                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
 
-                        Counters.DrawCallsPerFrame++;
-                        Counters.InstancesPerFrame++;
+                            Counters.DrawCallsPerFrame++;
+                            Counters.InstancesPerFrame++;
+                        }
                     }
                 }
             }

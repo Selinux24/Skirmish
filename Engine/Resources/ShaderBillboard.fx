@@ -41,6 +41,7 @@ GSVertexBillboard VSBillboard(VSVertexBillboard input)
 	GSVertexBillboard output;
 
 	output.centerWorld = input.positionWorld;
+	output.centerWorld.y -= 0.05f;
 	output.sizeWorld = input.sizeWorld;
 
 	return output;
@@ -75,7 +76,7 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 			gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
 			gout.positionWorld = v[i].xyz;
 			gout.shadowHomogeneous = mul(v[i], gShadowTransform);
-			gout.normalWorld = look;
+			gout.normalWorld = up;
 			gout.tex = gQuadTexC[i];
 			gout.primitiveID = primID;
 
@@ -160,8 +161,8 @@ GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 
 	output.color = textureColor;
 	output.normal.xyz = input.normalWorld;
-	output.normal.w = 0.0f;
-	output.depth.xyz = input.positionWorld;
+	output.normal.w = 1.0f;
+	output.depth.xyz = input.positionHomogeneous.xyz;
 	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;

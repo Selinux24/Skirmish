@@ -520,35 +520,42 @@ namespace Engine.Content
 
             #endregion
 
-            string imageName = "billboard";
-            string materialName = "billboardMaterial";
-            string geoName = "billboardGeometry";
-
-            ImageContent imageContent = new ImageContent()
+            if (vertices.Count > 0)
             {
-                Streams = ContentManager.FindContent(contentFolder, textures),
-            };
+                string imageName = "billboard";
+                string materialName = "billboardMaterial";
+                string geoName = "billboardGeometry";
 
-            modelContent.Images.Add(imageName, imageContent);
+                ImageContent imageContent = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(contentFolder, textures),
+                };
 
-            MaterialContent material = MaterialContent.Default;
-            material.DiffuseTexture = imageName;
+                modelContent.Images.Add(imageName, imageContent);
 
-            modelContent.Materials.Add(materialName, material);
+                MaterialContent material = MaterialContent.Default;
+                material.DiffuseTexture = imageName;
 
-            SubMeshContent geo = new SubMeshContent()
+                modelContent.Materials.Add(materialName, material);
+
+                SubMeshContent geo = new SubMeshContent()
+                {
+                    Topology = PrimitiveTopology.PointList,
+                    VertexType = VertexTypes.Billboard,
+                    Vertices = vertices.ToArray(),
+                    Indices = null,
+                    Material = materialName,
+                };
+
+                modelContent.Geometry.Add(geoName, materialName, geo);
+                modelContent.Optimize();
+
+                return modelContent;
+            }
+            else
             {
-                Topology = PrimitiveTopology.PointList,
-                VertexType = VertexTypes.Billboard,
-                Vertices = vertices.ToArray(),
-                Indices = null,
-                Material = materialName,
-            };
-
-            modelContent.Geometry.Add(geoName, materialName, geo);
-            modelContent.Optimize();
-
-            return modelContent;
+                return null;
+            }
         }
         /// <summary>
         /// Generate model content for sky dom
