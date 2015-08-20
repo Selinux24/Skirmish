@@ -219,6 +219,10 @@ namespace DeferredTest
 
             this.Lights.EnableShadows = true;
 
+            this.Lights.FogColor = Color.WhiteSmoke;
+            this.Lights.FogStart = 50f;
+            this.Lights.FogRange = 150f;
+
             this.Lights.DirectionalLights[0].Enabled = true;
             this.Lights.DirectionalLights[1].Enabled = false;
             this.Lights.DirectionalLights[2].Enabled = false;

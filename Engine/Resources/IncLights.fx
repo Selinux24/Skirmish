@@ -316,13 +316,15 @@ float4 ComputePointLight2(
 	{
 		return 0.0f;
 	}
+	else
+	{
+		//Normalize the light vector.
+		lightVec /= d;
 
-	//Normalize the light vector.
-	lightVec /= d;
-
-	float intensity = max(0, dot(normal, lightVec));
-	float4 light = intensity * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
-	return float4(light.rgb, 0.0f);
+		float intensity = max(0, dot(normal, lightVec));
+		float4 light = intensity * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
+		return float4(light.rgb, 0.0f);
+	}
 }
 
 float4 ComputeSpotLight2(
@@ -342,18 +344,20 @@ float4 ComputeSpotLight2(
 	{
 		return 0.0f;
 	}
+	else
+	{
+		//Normalize the light vector.
+		lightVec /= d;
 
-	//Normalize the light vector.
-	lightVec /= d;
+		//Add diffuse and specular term, provided the surface is in the line of site of the light.
+		float intensity = max(0, dot(normal, lightVec));
 
-	//Add diffuse and specular term, provided the surface is in the line of site of the light.
-	float intensity = max(0, dot(normal, lightVec));
+		//Scale by spotlight factor.
+		float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);
 
-	//Scale by spotlight factor.
-	float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);
-
-	float4 light = intensity * spot * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
-	return float4(light.rgb, 0.0f);
+		float4 light = intensity * spot * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
+		return float4(light.rgb, 0.0f);
+	}
 }
 
 static const float SHADOWMAPSIZE = 2048.0f;
@@ -376,13 +380,13 @@ float CalcShadowFactor(float4 shadowPosH, Texture2D shadowMap)
 	// 3×3 box filter pattern. Each sample does a 4-tap PCF.
 	float percentLit = 0.0f;
 	[unroll]
-	for(int i = 0; i < 9; ++i)
+	for(int i = 0; i < 4; ++i)
 	{
 		percentLit += shadowMap.SampleCmpLevelZero(SamplerShadow, shadowPosH.xy + SamplerShadowOffsets[i], depth).r;
 	}
 
 	// Average the samples.
-	return percentLit / 9.0f;
+	return percentLit / 4.0f;
 }
 
 LightOutput ComputeLights(LightInput input, Texture2D shadowMap)

@@ -10,6 +10,9 @@ cbuffer cbPerFrame : register (b0)
 	DirectionalLight gDirLight;
 	PointLight gPointLight;
 	SpotLight gSpotLight;
+	float gFogStart;
+	float gFogRange;
+	float4 gFogColor;
 };
 
 Texture2D gColorMap : register(t0);
@@ -102,7 +105,7 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 		gEyePositionWorld,
 		normal.xyz);
 
-	return color.r > 1 ? float4(10,0,0,0) : color;
+	return color;
 }
 float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 {
@@ -185,6 +188,14 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 		float4 lightColor = gLightMap.Sample(SamplerPoint, input.tex);
 		
 		color = float4(diffuseColor.rgb * (lightColor.rgb + normal.w), 1.0f);
+	}
+
+	if(gFogRange > 0)
+	{
+		float3 toEyeWorld = gEyePositionWorld - depth.xyz;
+		float distToEye = length(toEyeWorld);
+
+		color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 	
 	return color;

@@ -189,7 +189,7 @@ namespace Engine
             var deviceContext = this.Game.Graphics.DeviceContext;
             var effect = DrawerPool.EffectDeferred;
 
-            this.Game.Graphics.SetBlendAlphaToCoverage();
+            this.Game.Graphics.SetBlendAdditive();
 #if DEBUG
             Stopwatch swDirectional = Stopwatch.StartNew();
 #endif
@@ -235,7 +235,6 @@ namespace Engine
 #if DEBUG
             swDirectional.Stop();
 #endif
-            this.Game.Graphics.SetBlendAdditive();
 #if DEBUG
             Stopwatch swPoint = Stopwatch.StartNew();
 #endif
@@ -256,7 +255,6 @@ namespace Engine
                 effect.ColorMap = context.GeometryMap[0];
                 effect.NormalMap = context.GeometryMap[1];
                 effect.DepthMap = context.GeometryMap[2];
-                effect.LightMap = context.LightMap;
 
                 for (int i = 0; i < pointLights.Length; i++)
                 {
@@ -316,7 +314,6 @@ namespace Engine
                 effect.ColorMap = context.GeometryMap[0];
                 effect.NormalMap = context.GeometryMap[1];
                 effect.DepthMap = context.GeometryMap[2];
-                effect.LightMap = context.LightMap;
 
                 for (int i = 0; i < spotLights.Length; i++)
                 {
@@ -383,6 +380,9 @@ namespace Engine
                 effect.World = Matrix.Identity;
                 effect.WorldViewProjection = this.ViewProjection;
                 effect.EyePositionWorld = context.EyePosition;
+                effect.FogStart = context.Lights.FogStart;
+                effect.FogRange = context.Lights.FogRange;
+                effect.FogColor = context.Lights.FogColor;
                 effect.ColorMap = context.GeometryMap[0];
                 effect.NormalMap = context.GeometryMap[1];
                 effect.DepthMap = context.GeometryMap[2];

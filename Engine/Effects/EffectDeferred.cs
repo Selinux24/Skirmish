@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
+using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
 using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using EffectVariable = SharpDX.Direct3D11.EffectVariable;
@@ -34,6 +35,18 @@ namespace Engine.Effects
             public BufferDirectionalLight DirectionalLight;
             public BufferPointLight PointLight;
             public BufferSpotLight SpotLight;
+            /// <summary>
+            /// Fog start
+            /// </summary>
+            public float FogStart;
+            /// <summary>
+            /// Fog range
+            /// </summary>
+            public float FogRange;
+            /// <summary>
+            /// Fog color
+            /// </summary>
+            public Color4 FogColor;
 
             public static int Size
             {
@@ -87,6 +100,18 @@ namespace Engine.Effects
         /// Spot light effect variable
         /// </summary>
         private EffectVariable spotLight = null;
+        /// <summary>
+        /// Fog start effect variable
+        /// </summary>
+        private EffectScalarVariable fogStart = null;
+        /// <summary>
+        /// Fog range effect variable
+        /// </summary>
+        private EffectScalarVariable fogRange = null;
+        /// <summary>
+        /// Fog color effect variable
+        /// </summary>
+        private EffectVectorVariable fogColor = null;
         /// <summary>
         /// Color Map effect variable
         /// </summary>
@@ -223,6 +248,48 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Fog start distance
+        /// </summary>
+        public float FogStart
+        {
+            get
+            {
+                return this.fogStart.GetFloat();
+            }
+            set
+            {
+                this.fogStart.Set(value);
+            }
+        }
+        /// <summary>
+        /// Fog range distance
+        /// </summary>
+        public float FogRange
+        {
+            get
+            {
+                return this.fogRange.GetFloat();
+            }
+            set
+            {
+                this.fogRange.Set(value);
+            }
+        }
+        /// <summary>
+        /// Fog color
+        /// </summary>
+        public Color4 FogColor
+        {
+            get
+            {
+                return new Color4(this.fogColor.GetFloatVector());
+            }
+            set
+            {
+                this.fogColor.Set(value);
+            }
+        }
+        /// <summary>
         /// Color Map
         /// </summary>
         public ShaderResourceView ColorMap
@@ -304,6 +371,9 @@ namespace Engine.Effects
             this.directionalLight = this.Effect.GetVariableByName("gDirLight");
             this.pointLight = this.Effect.GetVariableByName("gPointLight");
             this.spotLight = this.Effect.GetVariableByName("gSpotLight");
+            this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
+            this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
+            this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
             this.colorMap = this.Effect.GetVariableByName("gColorMap").AsShaderResource();
             this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
             this.depthMap = this.Effect.GetVariableByName("gDepthMap").AsShaderResource();
