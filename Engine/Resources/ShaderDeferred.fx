@@ -174,28 +174,28 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 {
     float4 diffuseColor = gColorMap.Sample(SamplerPoint, input.tex);
-    float4 normal = gNormalMap.Sample(SamplerPoint, input.tex);
     float4 depth = gDepthMap.Sample(SamplerPoint, input.tex);
 
 	float4 color;
 
 	if(depth.w == 1.0f)
 	{
-		color = float4(diffuseColor.rgb * normal.w, 1.0f);
+		color = float4(diffuseColor.rgb, 1.0f);
 	}
 	else
 	{
+		float4 normal = gNormalMap.Sample(SamplerPoint, input.tex);
 		float4 lightColor = gLightMap.Sample(SamplerPoint, input.tex);
 		
 		color = float4(diffuseColor.rgb * (lightColor.rgb + normal.w), 1.0f);
-	}
 
-	if(gFogRange > 0)
-	{
-		float3 toEyeWorld = gEyePositionWorld - depth.xyz;
-		float distToEye = length(toEyeWorld);
+		if(gFogRange > 0)
+		{
+			float3 toEyeWorld = gEyePositionWorld - depth.xyz;
+			float distToEye = length(toEyeWorld);
 
-		color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
+			color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
+		}
 	}
 	
 	return color;

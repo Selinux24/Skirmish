@@ -143,7 +143,14 @@ namespace Engine
         /// <returns>Returns rotation quaternion</returns>
         public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, bool yAxisOnly = true)
         {
-            Quaternion q = Quaternion.Invert(Quaternion.LookAtLH(eyePosition, target, Vector3.Up));
+            Vector3 up = Vector3.Up;
+
+            if (Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target)) == 1f)
+            {
+                up = Vector3.Left;
+            }
+
+            Quaternion q = Quaternion.Invert(Quaternion.LookAtLH(eyePosition, target, up));
 
             if (yAxisOnly)
             {

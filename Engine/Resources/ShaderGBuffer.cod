@@ -1148,34 +1148,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t0.xxxx, s0, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t0.xxxx, s0, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
+                #line 389
+                  mul r0.x, r0.x, l(0.250000)  // r0.x <- <CalcShadowFactor return value>
                 
                 #line 202 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -1189,7 +1177,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 22 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -1414,34 +1402,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t0.xxxx, s0, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t0.xxxx, s0, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
+                #line 389
+                  mul r0.x, r0.x, l(0.250000)  // r0.x <- <CalcShadowFactor return value>
                 
                 #line 202 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -1455,7 +1431,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 22 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -1716,34 +1692,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t0.xxxx, s0, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t0.xxxx, s0, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
+                #line 389
+                  mul r0.x, r0.x, l(0.250000)  // r0.x <- <CalcShadowFactor return value>
                 
                 #line 202 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -1757,7 +1721,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 22 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -2037,34 +2001,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t0.xxxx, s0, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t0.xxxx, s0, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
+                #line 389
+                  mul r0.x, r0.x, l(0.250000)  // r0.x <- <CalcShadowFactor return value>
                 
                 #line 202 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -2078,7 +2030,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 22 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3063,34 +3015,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
+                #line 389
+                  mul r0.x, r0.x, l(0.250000)  // r0.x <- <CalcShadowFactor return value>
                 
                 #line 388 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -3103,7 +3043,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 22 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3323,34 +3263,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
+                #line 389
+                  mul r0.x, r0.x, l(0.250000)  // r0.x <- <CalcShadowFactor return value>
                 
                 #line 388 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -3363,7 +3291,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 22 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3627,34 +3555,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
+                #line 389
+                  mul r0.x, r0.x, l(0.250000)  // r0.x <- <CalcShadowFactor return value>
                 
                 #line 388 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -3667,7 +3583,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 22 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3942,34 +3858,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v4.xyzx, v4.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t1.xxxx, s1, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul r0.x, r0.x, l(0.111111)  // r0.x <- <CalcShadowFactor return value>
+                #line 389
+                  mul r0.x, r0.x, l(0.250000)  // r0.x <- <CalcShadowFactor return value>
                 
                 #line 388 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -3982,7 +3886,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 34 instruction slots used
+                // Approximately 22 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -4232,34 +4136,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v5.xyzx, v5.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t2.xxxx, s2, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul o1.w, r0.x, l(0.111111)
+                #line 389
+                  mul o1.w, r0.x, l(0.250000)
                 
                 #line 504 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -4270,7 +4162,7 @@ fxgroup
                 div o2.w, v0.z, v0.w
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 47 instruction slots used
+                // Approximately 35 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -4530,34 +4422,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v5.xyzx, v5.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t2.xxxx, s2, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul o1.w, r0.x, l(0.111111)
+                #line 389
+                  mul o1.w, r0.x, l(0.250000)
                 
                 #line 504 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -4568,7 +4448,7 @@ fxgroup
                 div o2.w, v0.z, v0.w
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 47 instruction slots used
+                // Approximately 35 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -4881,34 +4761,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v5.xyzx, v5.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t2.xxxx, s2, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul o1.w, r0.x, l(0.111111)
+                #line 389
+                  mul o1.w, r0.x, l(0.250000)
                 
                 #line 504 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -4919,7 +4787,7 @@ fxgroup
                 div o2.w, v0.z, v0.w
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 47 instruction slots used
+                // Approximately 35 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -5243,34 +5111,22 @@ fxgroup
                 eq r0.x, cb0[16].x, l(1.000000)
                 if_nz r0.x
                 
-                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 375 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                   div r0.xyz, v5.xyzx, v5.wwww  // r0.x <- shadowPosH.x; r0.y <- shadowPosH.y; r0.z <- shadowPosH.z
                 
-                #line 381
+                #line 385
                   add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.w, r1.xyxx, t2.xxxx, s2, r0.z  // r0.w <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.w, r0.w, r1.x
-                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
                   add r0.x, r0.x, r0.w  // r0.x <- percentLit
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.x, r0.y, r0.x
                 
-                #line 385
-                  mul o1.w, r0.x, l(0.111111)
+                #line 389
+                  mul o1.w, r0.x, l(0.250000)
                 
                 #line 504 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -5281,7 +5137,7 @@ fxgroup
                 div o2.w, v0.z, v0.w
                 mov o2.xyz, v1.xyzx
                 ret 
-                // Approximately 47 instruction slots used
+                // Approximately 35 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;

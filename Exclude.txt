@@ -1,6 +1,0 @@
-.nuget\
-packages\
-bin\
-obj\
-.gitattributes
-.gitignore

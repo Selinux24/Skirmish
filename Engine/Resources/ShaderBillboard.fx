@@ -162,7 +162,7 @@ GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 	output.color = textureColor;
 	output.normal.xyz = input.normalWorld;
 	output.normal.w = 1.0f;
-	output.depth.xyz = input.positionHomogeneous.xyz;
+	output.depth.xyz = input.positionWorld;
 	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;

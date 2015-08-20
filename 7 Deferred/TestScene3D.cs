@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Engine;
 using Engine.PathFinding;
 using SharpDX;
+using Engine.Common;
 
 namespace DeferredTest
 {
@@ -20,6 +21,8 @@ namespace DeferredTest
         private SpriteTexture bufferDrawer = null;
         private int textIntex = 0;
         private bool animateLights = false;
+
+        private LineListDrawer lineDrawer = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
@@ -210,7 +213,7 @@ namespace DeferredTest
             }
 
             cameraPosition /= (float)modelCount;
-            this.Camera.Goto(cameraPosition + (Vector3.One * 30f));
+            this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
             this.Camera.LookTo(cameraPosition + Vector3.Up);
 
             #endregion
@@ -265,16 +268,25 @@ namespace DeferredTest
             {
                 Enabled = true,
                 Ambient = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                Diffuse = new Color4(1.0f, 0.0f, 0.0f, 1.0f),
                 Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
                 Attenuation = new Vector3(1.0f, 0.0f, 0.1f),
-                Position = new Vector3(60, 15, 60),
-                Direction = Vector3.Normalize(-Vector3.One),
+                Position = new Vector3(0, 15, 0),
+                Direction = Vector3.Down,
                 Range = 30,
                 Spot = 20,
             };
 
             this.Lights.Add(spotLight);
+
+            #region Light Sphere Marker
+
+            Line[] axis = GeometryUtil.CreateAxis(Matrix.Identity, 5f);
+
+            this.lineDrawer = this.AddLineListDrawer(axis, Color.Red);
+            this.lineDrawer.Opaque = false;
+
+            #endregion
 
             #endregion
         }
@@ -493,49 +505,60 @@ namespace DeferredTest
 
             #region Lights
 
-            if (this.Game.Input.KeyPressed(Keys.Left))
-            {
-                this.Lights.PointLights[0].Position += (Vector3.Left) * 0.1f;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Right))
-            {
-                this.Lights.PointLights[0].Position += (Vector3.Right) * 0.1f;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Up))
-            {
-                this.Lights.PointLights[0].Position += (Vector3.ForwardLH) * 0.1f;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Down))
-            {
-                this.Lights.PointLights[0].Position += (Vector3.BackwardLH) * 0.1f;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.PageUp))
-            {
-                this.Lights.PointLights[0].Position += (Vector3.Up) * 0.1f;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.PageDown))
-            {
-                this.Lights.PointLights[0].Position += (Vector3.Down) * 0.1f;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Add))
-            {
-                this.Lights.PointLights[0].Range += 0.1f;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Subtract))
-            {
-                this.Lights.PointLights[0].Range -= 0.1f;
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 this.Lights.EnableShadows = !this.Lights.EnableShadows;
+            }
+
+            if (this.Lights.SpotLights.Length > 0)
+            {
+                if (this.Game.Input.KeyPressed(Keys.Left))
+                {
+                    this.Lights.SpotLights[0].Position += (Vector3.Left) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Right))
+                {
+                    this.Lights.SpotLights[0].Position += (Vector3.Right) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Up))
+                {
+                    this.Lights.SpotLights[0].Position += (Vector3.ForwardLH) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Down))
+                {
+                    this.Lights.SpotLights[0].Position += (Vector3.BackwardLH) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.PageUp))
+                {
+                    this.Lights.SpotLights[0].Position += (Vector3.Up) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.PageDown))
+                {
+                    this.Lights.SpotLights[0].Position += (Vector3.Down) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Add))
+                {
+                    this.Lights.SpotLights[0].Range += 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Subtract))
+                {
+                    this.Lights.SpotLights[0].Range -= 0.1f;
+                }
+
+                this.lineDrawer.Manipulator.SetPosition(this.Lights.SpotLights[0].Position);
+                this.lineDrawer.Manipulator.LookAt(this.Lights.SpotLights[0].Position + this.Lights.SpotLights[0].Direction, false);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.P))
+            {
+                this.animateLights = !this.animateLights;
             }
 
             if (animateLights)
@@ -559,11 +582,6 @@ namespace DeferredTest
                         l.Attenuation.X = -1;
                     }
                 }
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.P))
-            {
-                this.animateLights = !this.animateLights;
             }
 
             #endregion

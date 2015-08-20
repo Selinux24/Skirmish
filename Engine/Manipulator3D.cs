@@ -470,18 +470,19 @@ namespace Engine
         /// Look at target
         /// </summary>
         /// <param name="target">Target</param>
+        /// <param name="yAxisOnly">Rotate Y axis only</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        public void LookAt(Vector3 target, float interpolationAmount = 0)
+        public void LookAt(Vector3 target, bool yAxisOnly = true, float interpolationAmount = 0)
         {
             if (!Vector3.NearEqual(this.position, target, new Vector3(MathUtil.ZeroTolerance)))
             {
                 if (interpolationAmount == 0)
                 {
-                    this.rotation = Helper.LookAt(this.position, target);
+                    this.rotation = Helper.LookAt(this.position, target, yAxisOnly);
                 }
                 else
                 {
-                    this.rotation = Quaternion.Slerp(this.rotation, Helper.LookAt(this.position, target), interpolationAmount);
+                    this.rotation = Quaternion.Slerp(this.rotation, Helper.LookAt(this.position, target, yAxisOnly), interpolationAmount);
                 }
 
                 this.SetUpdateNeeded(true);
