@@ -356,7 +356,7 @@ namespace Engine
                                 DepthStencilClearFlags.Depth);
 
                             //Use z-buffer by default for opaque components
-                            this.Game.Graphics.EnableZBuffer();
+                            this.Game.Graphics.SetDepthStencilZEnabled();
 
                             //Draw scene using depth map
                             this.DrawComponents(gameTime, this.DrawShadowsContext, shadowComponents);
@@ -428,7 +428,7 @@ namespace Engine
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
                             //Use z-buffer by default for opaque components
-                            this.Game.Graphics.EnableZBuffer();
+                            this.Game.Graphics.SetDepthStencilZEnabled();
 
                             //Draw solid
                             this.DrawComponents(gameTime, this.DrawContext, solidComponents);
@@ -450,7 +450,7 @@ namespace Engine
                         Stopwatch swDraw = Stopwatch.StartNew();
 #endif
                         //Disable z-buffer by default for non-opaque components
-                        this.Game.Graphics.DisableZBuffer();
+                        this.Game.Graphics.SetDepthStencilZDisabled();
 
                         //Draw other
                         this.DrawComponents(gameTime, this.DrawContext, otherComponents);
@@ -510,7 +510,7 @@ namespace Engine
                                 true, Color.Black);
 
                             //Enable z-buffer by default for opaque components
-                            this.Game.Graphics.EnableZBuffer();
+                            this.Game.Graphics.SetDepthStencilZEnabled();
 #if DEBUG
                             swGeometryBufferPass1.Stop();
 #endif
@@ -552,7 +552,7 @@ namespace Engine
                                 this.deferredRenderer.LightBuffer.RenderTarget,
                                 true, Color.Transparent);
 
-                            this.Game.Graphics.DisableDepthStencil();
+                            this.Game.Graphics.SetDepthStencilNone();
                             this.Game.Graphics.SetBlendAlphaToCoverage();
 
                             //Draw scene lights on light buffer using g-buffer output
@@ -581,7 +581,7 @@ namespace Engine
                     this.Game.Graphics.SetDefaultRenderTarget(true);
 
                     //Disable z-buffer for deferred rendering
-                    this.Game.Graphics.DisableZBuffer();
+                    this.Game.Graphics.SetDepthStencilZDisabled();
 
                     //Draw scene result on screen using g-buffer and light buffer
                     this.deferredRenderer.DrawResult(this.DrawContext);
@@ -600,7 +600,7 @@ namespace Engine
                         Stopwatch swDraw = Stopwatch.StartNew();
 #endif
                         //Disable z-buffer by default for non-opaque components
-                        this.Game.Graphics.DisableZBuffer();
+                        this.Game.Graphics.SetDepthStencilZDisabled();
 
                         //Set forward mode
                         this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
@@ -755,7 +755,7 @@ namespace Engine
             {
                 if (!components[i].Cull)
                 {
-                    this.Game.Graphics.SetDefaultRasterizer();
+                    this.Game.Graphics.SetRasterizerDefault();
                     this.Game.Graphics.SetBlendAlphaToCoverage();
 
                     components[i].Draw(gameTime, context);

@@ -28,7 +28,20 @@ namespace Engine.Common
         /// <param name="position">Hit position</param>
         /// <param name="triangle">Hit triangle</param>
         /// <returns>Returns true if picked position found</returns>
+        /// <remarks>By default, result is constrained to front faces only</remarks>
         public bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
+        {
+            return this.PickNearest(ref ray, true, out position, out triangle);
+        }
+        /// <summary>
+        /// Pick nearest position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="position">Hit position</param>
+        /// <param name="triangle">Hit triangle</param>
+        /// <returns>Returns true if picked position found</returns>
+        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle)
         {
             position = Vector3.Zero;
             triangle = new Triangle();
@@ -46,7 +59,7 @@ namespace Engine.Common
 
                         Vector3 pos;
                         Triangle tri;
-                        if (Triangle.IntersectNearest(ref ray, this.Triangles, out pos, out tri))
+                        if (Triangle.IntersectNearest(ref ray, this.Triangles, facingOnly, out pos, out tri))
                         {
                             position = pos;
                             triangle = tri;
@@ -133,7 +146,20 @@ namespace Engine.Common
         /// <param name="position">Hit position</param>
         /// <param name="triangle">Hit triangle</param>
         /// <returns>Returns true if picked position found</returns>
+        /// <remarks>By default, result is constrained to front faces only</remarks>
         public bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
+        {
+            return this.PickFirst(ref ray, true, out position, out triangle);
+        }
+        /// <summary>
+        /// Pick first position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="position">Hit position</param>
+        /// <param name="triangle">Hit triangle</param>
+        /// <returns>Returns true if picked position found</returns>
+        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle)
         {
             position = Vector3.Zero;
             triangle = new Triangle();
@@ -151,7 +177,7 @@ namespace Engine.Common
 
                         Vector3 pos;
                         Triangle tri;
-                        if (Triangle.IntersectFirst(ref ray, this.Triangles, out pos, out tri))
+                        if (Triangle.IntersectFirst(ref ray, this.Triangles, facingOnly, out pos, out tri))
                         {
                             position = pos;
                             triangle = tri;
@@ -195,10 +221,23 @@ namespace Engine.Common
         /// Pick all position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="triangle">Hit triangle</param>
+        /// <param name="positions">Hit positions</param>
+        /// <param name="triangles">Hit triangles</param>
         /// <returns>Returns true if picked position found</returns>
+        /// <remarks>By default, result is constrained to front faces only</remarks>
         public bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
+        {
+            return this.PickAll(ref ray, true, out positions, out triangles);
+        }
+        /// <summary>
+        /// Pick all position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="positions">Hit positions</param>
+        /// <param name="triangles">Hit triangles</param>
+        /// <returns>Returns true if picked position found</returns>
+        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles)
         {
             positions = null;
             triangles = null;
@@ -216,7 +255,7 @@ namespace Engine.Common
 
                         Vector3[] pos;
                         Triangle[] tri;
-                        if (Triangle.IntersectAll(ref ray, this.Triangles, out pos, out tri))
+                        if (Triangle.IntersectAll(ref ray, this.Triangles, facingOnly, out pos, out tri))
                         {
                             positions = pos;
                             triangles = tri;

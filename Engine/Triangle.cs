@@ -191,10 +191,11 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="triangles">Triangle list</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="position">Result picked position</param>
         /// <param name="triangle">Result picked triangle</param>
         /// <returns>Returns first intersection if exists</returns>
-        public static bool IntersectFirst(ref Ray ray, Triangle[] triangles, out Vector3 position, out Triangle triangle)
+        public static bool IntersectFirst(ref Ray ray, Triangle[] triangles, bool facingOnly, out Vector3 position, out Triangle triangle)
         {
             position = Vector3.Zero;
             triangle = new Triangle();
@@ -203,13 +204,22 @@ namespace Engine
             {
                 Triangle tri = triangles[i];
 
-                Vector3 pos;
-                if (tri.Intersects(ref ray, out pos))
+                bool cull = false;
+                if (facingOnly == true)
                 {
-                    position = pos;
-                    triangle = tri;
+                    cull = Vector3.Dot(ray.Direction, tri.Normal) >= 0f;
+                }
 
-                    return true;
+                if (!cull)
+                {
+                    Vector3 pos;
+                    if (tri.Intersects(ref ray, out pos))
+                    {
+                        position = pos;
+                        triangle = tri;
+
+                        return true;
+                    }
                 }
             }
 
@@ -220,17 +230,18 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="triangles">Triangle list</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="position">Result picked position</param>
         /// <param name="triangle">Result picked triangle</param>
         /// <returns>Returns nearest intersection if exists</returns>
-        public static bool IntersectNearest(ref Ray ray, Triangle[] triangles, out Vector3 position, out Triangle triangle)
+        public static bool IntersectNearest(ref Ray ray, Triangle[] triangles, bool facingOnly, out Vector3 position, out Triangle triangle)
         {
             position = Vector3.Zero;
             triangle = new Triangle();
 
             Vector3[] pickedPositions;
             Triangle[] pickedTriangles;
-            if (IntersectAll(ref ray, triangles, out pickedPositions, out pickedTriangles))
+            if (IntersectAll(ref ray, triangles, facingOnly, out pickedPositions, out pickedTriangles))
             {
                 float distanceMin = float.MaxValue;
 
@@ -255,31 +266,41 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="triangles">Triangle list</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="pickedPositions">Picked position list</param>
         /// <param name="pickedTriangles">Picked triangle list</param>
         /// <returns>Returns all intersections if exists</returns>
-        public static bool IntersectAll(ref Ray ray, Triangle[] triangles, out Vector3[] pickedPositions, out Triangle[] pickedTriangles)
+        public static bool IntersectAll(ref Ray ray, Triangle[] triangles, bool facingOnly, out Vector3[] pickedPositions, out Triangle[] pickedTriangles)
         {
             SortedDictionary<float, Vector3> pickedPositionList = new SortedDictionary<float, Vector3>();
             SortedDictionary<float, Triangle> pickedTriangleList = new SortedDictionary<float, Triangle>();
 
             foreach (Triangle t in triangles)
             {
-                Vector3 pos;
-                if (t.Intersects(ref ray, out pos))
+                bool cull = false;
+                if (facingOnly == true)
                 {
-                    //Avoid duplicate picked positions
-                    if (!pickedPositionList.ContainsValue(pos))
-                    {
-                        float d = Vector3.DistanceSquared(ray.Position, pos);
-                        while (pickedPositionList.ContainsKey(d))
-                        {
-                            //Avoid duplicate distance keys
-                            d += 0.001f;
-                        }
+                    cull = Vector3.Dot(ray.Direction, t.Normal) >= 0f;
+                }
 
-                        pickedPositionList.Add(d, pos);
-                        pickedTriangleList.Add(d, t);
+                if (!cull)
+                {
+                    Vector3 pos;
+                    if (t.Intersects(ref ray, out pos))
+                    {
+                        //Avoid duplicate picked positions
+                        if (!pickedPositionList.ContainsValue(pos))
+                        {
+                            float d = Vector3.DistanceSquared(ray.Position, pos);
+                            while (pickedPositionList.ContainsKey(d))
+                            {
+                                //Avoid duplicate distance keys
+                                d += 0.001f;
+                            }
+
+                            pickedPositionList.Add(d, pos);
+                            pickedTriangleList.Add(d, t);
+                        }
                     }
                 }
             }

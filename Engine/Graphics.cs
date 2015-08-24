@@ -76,8 +76,17 @@ namespace Engine
         /// </summary>
         private DepthStencilView depthStencilView = null;
 
+        /// <summary>
+        /// Current depth-stencil state
+        /// </summary>
         private DepthStencilState currentDepthStencilState = null;
+        /// <summary>
+        /// Current blend state
+        /// </summary>
         private BlendState currentBlendState = null;
+        /// <summary>
+        /// Current rasterizer state
+        /// </summary>
         private RasterizerState currentRasterizerState = null;
 
         /// <summary>
@@ -116,10 +125,6 @@ namespace Engine
         /// No-cull rasterizer
         /// </summary>
         private RasterizerState rasterizerNoCull = null;
-        /// <summary>
-        /// Sets cull clockwise face rasterizer
-        /// </summary>
-        private RasterizerState rasterizerCullClockwiseFace = null;
         /// <summary>
         /// Sets cull counter-clockwise face rasterizer
         /// </summary>
@@ -398,8 +403,8 @@ namespace Engine
                     CullMode = CullMode.Back,
                     FillMode = FillMode.Solid,
                     IsFrontCounterClockwise = false,
-                    IsAntialiasedLineEnabled = true,
-                    IsMultisampleEnabled = true,
+                    IsAntialiasedLineEnabled = false,
+                    IsMultisampleEnabled = false,
                     IsScissorEnabled = false,
                     IsDepthClipEnabled = true,
                     DepthBias = 0,
@@ -430,24 +435,8 @@ namespace Engine
                     CullMode = CullMode.None,
                     FillMode = FillMode.Solid,
                     IsFrontCounterClockwise = false,
-                    IsAntialiasedLineEnabled = true,
-                    IsMultisampleEnabled = true,
-                    IsScissorEnabled = false,
-                    IsDepthClipEnabled = true,
-                    DepthBias = 0,
-                    DepthBiasClamp = 0.0f,
-                    SlopeScaledDepthBias = 0.0f,
-                });
-
-            this.rasterizerCullClockwiseFace = new RasterizerState(
-                this.Device,
-                new RasterizerStateDescription()
-                {
-                    CullMode = CullMode.Front,
-                    FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = false,
-                    IsAntialiasedLineEnabled = true,
-                    IsMultisampleEnabled = true,
+                    IsAntialiasedLineEnabled = false,
+                    IsMultisampleEnabled = false,
                     IsScissorEnabled = false,
                     IsDepthClipEnabled = true,
                     DepthBias = 0,
@@ -459,11 +448,11 @@ namespace Engine
                 this.Device,
                 new RasterizerStateDescription()
                 {
-                    CullMode = CullMode.Back,
+                    CullMode = CullMode.Front,
                     FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = true,
-                    IsAntialiasedLineEnabled = true,
-                    IsMultisampleEnabled = true,
+                    IsFrontCounterClockwise = false,
+                    IsAntialiasedLineEnabled = false,
+                    IsMultisampleEnabled = false,
                     IsScissorEnabled = false,
                     IsDepthClipEnabled = true,
                     DepthBias = 0,
@@ -737,21 +726,21 @@ namespace Engine
         /// <summary>
         /// Enables z-buffer
         /// </summary>
-        public void EnableZBuffer()
+        public void SetDepthStencilZEnabled()
         {
             this.SetDepthStencilState(this.depthStencilzBufferEnabled);
         }
         /// <summary>
         /// Disables z-buffer
         /// </summary>
-        public void DisableZBuffer()
+        public void SetDepthStencilZDisabled()
         {
             this.SetDepthStencilState(this.depthStencilzBufferDisabled);
         }
         /// <summary>
         /// Disables depth stencil
         /// </summary>
-        public void DisableDepthStencil()
+        public void SetDepthStencilNone()
         {
             this.SetDepthStencilState(this.depthStencilNone);
         }
@@ -779,35 +768,28 @@ namespace Engine
         /// <summary>
         /// Sets default rasterizer
         /// </summary>
-        public void SetDefaultRasterizer()
+        public void SetRasterizerDefault()
         {
             this.SetRasterizerState(this.rasterizerDefault);
         }
         /// <summary>
         /// Sets wireframe rasterizer
         /// </summary>
-        public void SetWireframeRasterizer()
+        public void SetRasterizerWireframe()
         {
             this.SetRasterizerState(this.rasterizerWireframe);
         }
         /// <summary>
         /// Sets no-cull rasterizer
         /// </summary>
-        public void SetNoCullRasterizer()
+        public void SetRasterizerCullNone()
         {
             this.SetRasterizerState(this.rasterizerNoCull);
         }
         /// <summary>
-        /// Sets cull clockwise face rasterizer
-        /// </summary>
-        public void SetCullClockwiseFaceRasterizer()
-        {
-            this.SetRasterizerState(this.rasterizerCullClockwiseFace);
-        }
-        /// <summary>
         /// Sets cull counter-clockwise face rasterizer
         /// </summary>
-        public void SetCullCounterClockwiseFaceRasterizer()
+        public void SetRasterizerCullFrontFace()
         {
             this.SetRasterizerState(this.rasterizerCullCounterClockwiseFace);
         }
@@ -1010,12 +992,6 @@ namespace Engine
             {
                 this.rasterizerNoCull.Dispose();
                 this.rasterizerNoCull = null;
-            }
-
-            if (this.rasterizerCullClockwiseFace != null)
-            {
-                this.rasterizerCullClockwiseFace.Dispose();
-                this.rasterizerCullClockwiseFace = null;
             }
 
             if (this.rasterizerCullCounterClockwiseFace != null)

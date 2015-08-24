@@ -265,11 +265,11 @@ namespace Engine
                         float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
                         if (cameraToCenter < light.Range)
                         {
-                            this.Game.Graphics.SetCullClockwiseFaceRasterizer();
+                            this.Game.Graphics.SetRasterizerDefault();
                         }
                         else
                         {
-                            this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+                            this.Game.Graphics.SetRasterizerCullFrontFace();
                         }
 
                         Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
@@ -324,11 +324,11 @@ namespace Engine
                         float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
                         if (cameraToCenter < light.Range)
                         {
-                            this.Game.Graphics.SetCullClockwiseFaceRasterizer();
+                            this.Game.Graphics.SetRasterizerDefault();
                         }
                         else
                         {
-                            this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+                            this.Game.Graphics.SetRasterizerCullFrontFace();
                         }
 
                         Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
@@ -356,7 +356,7 @@ namespace Engine
 #endif
             this.Game.Graphics.SetBlendAlphaToCoverage();
 
-            this.Game.Graphics.SetCullCounterClockwiseFaceRasterizer();
+            this.Game.Graphics.SetRasterizerCullFrontFace();
 #if DEBUG
             context.Tag = new[]
             {
