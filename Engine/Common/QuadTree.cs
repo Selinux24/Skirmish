@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using SharpDX;
 
 namespace Engine.Common
@@ -11,149 +9,24 @@ namespace Engine.Common
     public class QuadTree
     {
         /// <summary>
-        /// Maximum number of triangles per node (aprox)
-        /// </summary>
-        public const int TrianglesPerNode = 64;
-
-        /// <summary>
         /// Build quadtree
         /// </summary>
         /// <param name="triangles">Partitioning triangles</param>
+        /// <param name="maxTrianglesPerNode">Maximum triangle count by node tail node (1024 by default)</param>
+        /// <param name="maxDepth">Maximum depth for the quadtree (if zero there is no limit)</param>
         /// <returns>Returns generated quadtree</returns>
-        /// <remarks>Used partitioning depth was caculated from number of total triangles and TrianglesPerNode constant</remarks>
-        public static QuadTree Build(Triangle[] triangles)
+        public static QuadTree Build(Triangle[] triangles, int maxTrianglesPerNode = 1024, int maxDepth = 0)
         {
-            int depth = 0;
-            int triCount = triangles.Length;
-            while (triCount > 256)
-            {
-                depth++;
-                triCount = (int)Math.Sqrt(triCount);
-            }
-
-            return Build(triangles, depth);
-        }
-        /// <summary>
-        /// Build quadtree
-        /// </summary>
-        /// <param name="triangles">Partitioning triangles</param>
-        /// <param name="depth">Speciefied partition depth</param>
-        /// <returns>Returns generated quadtree</returns>
-        public static QuadTree Build(Triangle[] triangles, int depth)
-        {
-            BoundingBox bbox = new BoundingBox();
-
-            for (int i = 0; i < triangles.Length; i++)
-            {
-                BoundingBox tbox = BoundingBox.FromPoints(triangles[i].GetCorners());
-
-                if (i == 0)
-                {
-                    bbox = tbox;
-                }
-                else
-                {
-                    bbox = BoundingBox.Merge(bbox, tbox);
-                }
-            }
+            BoundingBox bbox = Helper.CreateBoundingBox(triangles);
 
             QuadTree q = new QuadTree()
             {
-                Depth = depth,
-                Root = CreatePartitions(bbox, 0, depth, triangles),
+                Root = QuadTreeNode.CreatePartitions(bbox, triangles, 0, maxTrianglesPerNode, maxDepth),
             };
 
             return q;
         }
-        /// <summary>
-        /// Recursive partition creation
-        /// </summary>
-        /// <param name="bbox">Parent bounding box</param>
-        /// <param name="depth">Current depth</param>
-        /// <param name="maxDepth">Maximum quadtree depth</param>
-        /// <param name="triangles">All triangles</param>
-        /// <returns></returns>
-        private static QuadTreeNode CreatePartitions(BoundingBox bbox, int depth, int maxDepth, Triangle[] triangles)
-        {
-            QuadTreeNode node = new QuadTreeNode()
-            {
-                BoundingBox = bbox,
-            };
 
-            if (depth < maxDepth)
-            {
-                Vector3 M = bbox.Maximum;
-                Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
-                Vector3 m = bbox.Minimum;
-
-                //-1-1-1   +0+1+0   -->   mmm    cMc
-                BoundingBox half0 = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-                //+0-1+0   +1+1+1   -->   cmc    MMM
-                BoundingBox half1 = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
-                //-1-1+0   +0+1+1   -->   mmc    cMM
-                BoundingBox half2 = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
-                //+0-1-1   +1+1+0   -->   cmm    MMc
-                BoundingBox half3 = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
-
-                node.Children = new QuadTreeNode[4];
-
-                node.Children[0] = CreatePartitions(half0, depth + 1, maxDepth, triangles);
-                node.Children[1] = CreatePartitions(half1, depth + 1, maxDepth, triangles);
-                node.Children[2] = CreatePartitions(half2, depth + 1, maxDepth, triangles);
-                node.Children[3] = CreatePartitions(half3, depth + 1, maxDepth, triangles);
-            }
-            else if (depth == maxDepth)
-            {
-                node.Triangles = Array.FindAll(triangles, t =>
-                {
-                    BoundingBox tbox = BoundingBox.FromPoints(t.GetCorners());
-
-                    return Collision.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
-                });
-            }
-
-            return node;
-        }
-        /// <summary>
-        /// Get bounding boxes of specified level
-        /// </summary>
-        /// <param name="node">Node</param>
-        /// <param name="depth">Current depth</param>
-        /// <param name="maxDepth">Specified depth</param>
-        /// <returns>Returns bounding boxes of specified depth</returns>
-        private static BoundingBox[] GetBoundingBoxes(QuadTreeNode node, int depth, int maxDepth)
-        {
-            List<BoundingBox> bboxes = new List<BoundingBox>();
-
-            if (node.Children != null)
-            {
-                if (depth == maxDepth)
-                {
-                    Array.ForEach(node.Children, (c) =>
-                    {
-                        bboxes.Add(c.BoundingBox);
-                    });
-                }
-                else
-                {
-                    Array.ForEach(node.Children, (c) =>
-                    {
-                        bboxes.AddRange(GetBoundingBoxes(c, depth + 1, maxDepth));
-                    });
-                }
-            }
-            else
-            {
-                bboxes.Add(node.BoundingBox);
-            }
-
-            return bboxes.ToArray();
-        }
-
-        /// <summary>
-        /// Partition depth
-        /// </summary>
-        public int Depth;
         /// <summary>
         /// Root node
         /// </summary>
@@ -234,11 +107,27 @@ namespace Engine.Common
         /// <summary>
         /// Gets bounding boxes of specified depth
         /// </summary>
-        /// <param name="depth">Depth</param>
+        /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
         /// <returns>Returns bounding boxes of specified depth</returns>
-        public BoundingBox[] GetBoundingBoxes(int depth)
+        public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
         {
-            return GetBoundingBoxes(this.Root, 0, depth > this.Depth ? this.Depth : depth);
+            return this.Root.GetBoundingBoxes(maxDepth);
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            if (this.Root != null)
+            {
+                return string.Format("QuadTree Levels {0}", this.Root.GetMaxLevel() + 1);
+            }
+            else
+            {
+                return "QuadTree Empty";
+            }
         }
     }
 }

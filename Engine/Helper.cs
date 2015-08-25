@@ -351,5 +351,55 @@ namespace Engine
                 return stream.WriteToMemory();
             }
         }
+        /// <summary>
+        /// Generates a bounding box from a triangle list
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Returns the minimum bounding box that contains all the specified triangles</returns>
+        public static BoundingBox CreateBoundingBox(Triangle[] triangles)
+        {
+            BoundingBox bbox = new BoundingBox();
+
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                BoundingBox tbox = BoundingBox.FromPoints(triangles[i].GetCorners());
+
+                if (i == 0)
+                {
+                    bbox = tbox;
+                }
+                else
+                {
+                    bbox = BoundingBox.Merge(bbox, tbox);
+                }
+            }
+
+            return bbox;
+        }
+        /// <summary>
+        /// Generates a bounding sphere from a triangle list
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Returns the minimum bounding sphere that contains all the specified triangles</returns>
+        public static BoundingSphere CreateBoundingSphere(Triangle[] triangles)
+        {
+            BoundingSphere bsph = new BoundingSphere();
+
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                BoundingSphere tsph = BoundingSphere.FromPoints(triangles[i].GetCorners());
+
+                if (i == 0)
+                {
+                    bsph = tsph;
+                }
+                else
+                {
+                    bsph = BoundingSphere.Merge(bsph, tsph);
+                }
+            }
+
+            return bsph;
+        }
     }
 }

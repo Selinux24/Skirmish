@@ -46,13 +46,35 @@ namespace Engine
             this.terrain = new Model(game, content);
             this.terrain.Opaque = this.Opaque = description.Opaque;
 
-            BoundingBox bbox = this.terrain.GetBoundingBox();
-            BoundingSphere bsph = this.terrain.GetBoundingSphere();
             Triangle[] triangles = this.terrain.GetTriangles();
+            
+            if (description != null && description.UseQuadtree)
+            {
+                this.pickingQuadtree = QuadTree.Build(triangles);
+            }
+
+            if (description != null && description.UsePathFinding)
+            {
+                this.grid = Grid.Build(this, description.PathNodeSize, description.PathNodeInclination);
+            }
+
+            if (description != null && description.AddSkydom)
+            {
+                BoundingSphere bsph = this.terrain.GetBoundingSphere();
+
+                ModelContent skydomContent = ModelContent.GenerateSkydom(
+                    contentFolder,
+                    description.SkydomTexture,
+                    bsph.Radius * 100f);
+
+                this.skydom = new Cubemap(game, skydomContent);
+            }
 
             if (description != null && description.AddVegetation)
             {
                 List<Billboard> vegetationList = new List<Billboard>();
+
+                BoundingBox bbox = this.terrain.GetBoundingBox();
 
                 for (int i = 0; i < description.Vegetation.Length; i++)
                 {
@@ -81,26 +103,6 @@ namespace Engine
                 }
 
                 this.vegetation = vegetationList.ToArray();
-            }
-
-            if (description != null && description.AddSkydom)
-            {
-                ModelContent skydomContent = ModelContent.GenerateSkydom(
-                    contentFolder,
-                    description.SkydomTexture,
-                    bsph.Radius * 10f);
-
-                this.skydom = new Cubemap(game, skydomContent);
-            }
-
-            if (description != null && description.UseQuadtree)
-            {
-                this.pickingQuadtree = QuadTree.Build(triangles);
-            }
-
-            if (description != null && description.UsePathFinding)
-            {
-                this.grid = Grid.Build(this, description.PathNodeSize, description.PathNodeInclination);
             }
         }
         /// <summary>

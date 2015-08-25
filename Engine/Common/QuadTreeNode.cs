@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SharpDX;
 
 namespace Engine.Common
@@ -8,6 +9,81 @@ namespace Engine.Common
     /// </summary>
     public class QuadTreeNode
     {
+        /// <summary>
+        /// Recursive partition creation
+        /// </summary>
+        /// <param name="bbox">Parent bounding box</param>
+        /// <param name="depth">Current depth</param>
+        /// <param name="maxDepth">Maximum quadtree depth</param>
+        /// <param name="triangles">All triangles</param>
+        /// <returns></returns>
+        public static QuadTreeNode CreatePartitions(BoundingBox bbox, Triangle[] triangles, int depth, int maxTrianglesPerNode, int maxDepth)
+        {
+            Triangle[] nodeTriangles = Array.FindAll(triangles, t =>
+            {
+                BoundingBox tbox = BoundingBox.FromPoints(t.GetCorners());
+
+                return Collision.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
+            });
+
+            if (nodeTriangles.Length > 0)
+            {
+                QuadTreeNode node = new QuadTreeNode()
+                {
+                    Level = depth,
+                    BoundingBox = bbox,
+                };
+
+                bool haltByDepth = maxDepth > 0 ? depth >= maxDepth : false;
+                bool haltByCount = nodeTriangles.Length < maxTrianglesPerNode;
+
+                if (haltByDepth || haltByCount)
+                {
+                    node.Triangles = nodeTriangles;
+                }
+                else
+                {
+                    Vector3 M = bbox.Maximum;
+                    Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
+                    Vector3 m = bbox.Minimum;
+
+                    //-1-1-1   +0+1+0   -->   mmm    cMc
+                    BoundingBox half0 = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+                    //+0-1+0   +1+1+1   -->   cmc    MMM
+                    BoundingBox half1 = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+                    //-1-1+0   +0+1+1   -->   mmc    cMM
+                    BoundingBox half2 = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+                    //+0-1-1   +1+1+0   -->   cmm    MMc
+                    BoundingBox half3 = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+
+                    QuadTreeNode child0 = CreatePartitions(half0, triangles, depth + 1, maxTrianglesPerNode, maxDepth);
+                    QuadTreeNode child1 = CreatePartitions(half1, triangles, depth + 1, maxTrianglesPerNode, maxDepth);
+                    QuadTreeNode child2 = CreatePartitions(half2, triangles, depth + 1, maxTrianglesPerNode, maxDepth);
+                    QuadTreeNode child3 = CreatePartitions(half3, triangles, depth + 1, maxTrianglesPerNode, maxDepth);
+
+                    List<QuadTreeNode> childList = new List<QuadTreeNode>();
+
+                    if (child0 != null) childList.Add(child0);
+                    if (child1 != null) childList.Add(child1);
+                    if (child2 != null) childList.Add(child2);
+                    if (child3 != null) childList.Add(child3);
+
+                    if (childList.Count > 0)
+                    {
+                        node.Children = childList.ToArray();
+                    }
+                }
+
+                return node;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Depth level
+        /// </summary>
+        public int Level;
         /// <summary>
         /// Bounding box
         /// </summary>
@@ -313,6 +389,83 @@ namespace Engine.Common
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Get bounding boxes of specified level
+        /// </summary>
+        /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
+        /// <returns>Returns bounding boxes of specified depth</returns>
+        public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
+        {
+            List<BoundingBox> bboxes = new List<BoundingBox>();
+
+            if (this.Children != null)
+            {
+                bool haltByDepth = maxDepth > 0 ? this.Level == maxDepth : false;
+                if (haltByDepth)
+                {
+                    Array.ForEach(this.Children, (c) =>
+                    {
+                        bboxes.Add(c.BoundingBox);
+                    });
+                }
+                else
+                {
+                    Array.ForEach(this.Children, (c) =>
+                    {
+                        bboxes.AddRange(c.GetBoundingBoxes(maxDepth));
+                    });
+                }
+            }
+            else
+            {
+                bboxes.Add(this.BoundingBox);
+            }
+
+            return bboxes.ToArray();
+        }
+        /// <summary>
+        /// Gets maximum level value
+        /// </summary>
+        /// <returns></returns>
+        public int GetMaxLevel()
+        {
+            int level = 0;
+
+            if (this.Children != null)
+            {
+                for (int i = 0; i < this.Children.Length; i++)
+                {
+                    int cLevel = this.Children[i].GetMaxLevel();
+
+                    if (cLevel > level) level = cLevel;
+                }
+            }
+            else
+            {
+                level = this.Level;
+            }
+
+            return level;
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            if (this.Children == null)
+            {
+                //Tail node
+                return string.Format("QuadTreeNode; Depth {0}; Triangles {1}", this.Level, this.Triangles.Length);
+            }
+            else
+            {
+                //Node
+                return string.Format("QuadTreeNode; Depth {0}; Childs {1}", this.Level, this.Children.Length);
+            }
         }
     }
 }
