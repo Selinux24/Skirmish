@@ -57,8 +57,9 @@ namespace Engine
 
                     #region Per frame update
 
-                    DrawerPool.EffectCubemap.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
-                    DrawerPool.EffectCubemap.UpdatePerFrame();
+                    DrawerPool.EffectCubemap.UpdatePerFrame(
+                        context.World * this.Manipulator.LocalTransform,
+                        context.ViewProjection);
 
                     #endregion
 

@@ -1,6 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using SharpDX;
+﻿using SharpDX;
+using System;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
@@ -16,27 +15,6 @@ namespace Engine.Effects
     /// </summary>
     public class EffectCubemap : Drawer
     {
-        #region Buffers
-
-        /// <summary>
-        /// Per frame update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerFrameBuffer
-        {
-            public Matrix WorldViewProjection;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerFrameBuffer));
-                }
-            }
-        }
-
-        #endregion
-
         /// <summary>
         /// Cubemap drawing technique
         /// </summary>
@@ -85,11 +63,6 @@ namespace Engine.Effects
         }
 
         /// <summary>
-        /// Per frame buffer structure
-        /// </summary>
-        public EffectCubemap.PerFrameBuffer FrameBuffer = new EffectCubemap.PerFrameBuffer();
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="device">Graphics device</param>
@@ -134,9 +107,13 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        public void UpdatePerFrame()
+        /// <param name="world">World matrix</param>
+        /// <param name="viewProjection">View * projection matrix</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection)
         {
-            this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
+            this.WorldViewProjection = world * viewProjection;
         }
         /// <summary>
         /// Update per model object data

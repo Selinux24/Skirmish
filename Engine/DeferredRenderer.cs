@@ -189,6 +189,14 @@ namespace Engine
             var deviceContext = this.Game.Graphics.DeviceContext;
             var effect = DrawerPool.EffectDeferred;
 
+            effect.UpdatePerFrame(
+                Matrix.Identity,
+                this.ViewProjection,
+                context.EyePosition,
+                context.GeometryMap[0],
+                context.GeometryMap[1],
+                context.GeometryMap[2]);
+
             this.Game.Graphics.SetBlendAdditive();
 #if DEBUG
             Stopwatch swDirectional = Stopwatch.StartNew();
@@ -206,18 +214,9 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                effect.World = Matrix.Identity;
-                effect.WorldViewProjection = this.ViewProjection;
-                effect.EyePositionWorld = context.EyePosition;
-                effect.ColorMap = context.GeometryMap[0];
-                effect.NormalMap = context.GeometryMap[1];
-                effect.DepthMap = context.GeometryMap[2];
-
                 for (int i = 0; i < directionalLights.Length; i++)
                 {
-                    var light = directionalLights[i];
-
-                    effect.DirectionalLight = new BufferDirectionalLight(light);
+                    effect.UpdatePerLight(directionalLights[i]);
 
                     for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                     {
@@ -251,11 +250,6 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                effect.EyePositionWorld = context.EyePosition;
-                effect.ColorMap = context.GeometryMap[0];
-                effect.NormalMap = context.GeometryMap[1];
-                effect.DepthMap = context.GeometryMap[2];
-
                 for (int i = 0; i < pointLights.Length; i++)
                 {
                     var light = pointLights[i];
@@ -263,7 +257,7 @@ namespace Engine
                     if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Range)) != ContainmentType.Disjoint)
                     {
                         float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
-                        if (cameraToCenter < light.Range)
+                        if (cameraToCenter > light.Range)
                         {
                             this.Game.Graphics.SetRasterizerDefault();
                         }
@@ -274,9 +268,7 @@ namespace Engine
 
                         Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
-                        effect.PointLight = new BufferPointLight(light);
-                        effect.World = world;
-                        effect.WorldViewProjection = world * context.ViewProjection;
+                        effect.UpdatePerLight(light, world, context.ViewProjection);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                         {
@@ -310,11 +302,6 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                effect.EyePositionWorld = context.EyePosition;
-                effect.ColorMap = context.GeometryMap[0];
-                effect.NormalMap = context.GeometryMap[1];
-                effect.DepthMap = context.GeometryMap[2];
-
                 for (int i = 0; i < spotLights.Length; i++)
                 {
                     var light = spotLights[i];
@@ -322,7 +309,7 @@ namespace Engine
                     if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Range)) != ContainmentType.Disjoint)
                     {
                         float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
-                        if (cameraToCenter < light.Range)
+                        if (cameraToCenter > light.Range)
                         {
                             this.Game.Graphics.SetRasterizerDefault();
                         }
@@ -333,9 +320,7 @@ namespace Engine
 
                         Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
-                        effect.SpotLight = new BufferSpotLight(light);
-                        effect.World = world;
-                        effect.WorldViewProjection = world * context.ViewProjection;
+                        effect.UpdatePerLight(light, world, context.ViewProjection);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                         {
@@ -377,16 +362,19 @@ namespace Engine
                 var effect = DrawerPool.EffectDeferred;
                 var effectTechnique = effect.DeferredCombineLights;
 
-                effect.World = Matrix.Identity;
-                effect.WorldViewProjection = this.ViewProjection;
-                effect.EyePositionWorld = context.EyePosition;
-                effect.FogStart = context.Lights.FogStart;
-                effect.FogRange = context.Lights.FogRange;
-                effect.FogColor = context.Lights.FogColor;
-                effect.ColorMap = context.GeometryMap[0];
-                effect.NormalMap = context.GeometryMap[1];
-                effect.DepthMap = context.GeometryMap[2];
-                effect.LightMap = context.LightMap;
+                effect.UpdatePerFrame(
+                    Matrix.Identity,
+                    this.ViewProjection,
+                    context.EyePosition,
+                    context.GeometryMap[0],
+                    context.GeometryMap[1],
+                    context.GeometryMap[2]);
+
+                effect.UpdateComposer(
+                    context.Lights.FogStart,
+                    context.Lights.FogRange,
+                    context.Lights.FogColor,
+                    context.LightMap);
 
                 var deviceContext = this.Game.Graphics.DeviceContext;
                 var geometry = this.lightGeometry[0];

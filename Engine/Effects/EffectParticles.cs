@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
@@ -18,35 +17,6 @@ namespace Engine.Effects
     /// </summary>
     public class EffectParticles : Drawer
     {
-        #region Buffers
-
-        /// <summary>
-        /// Per frame update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerFrameBuffer
-        {
-            public float MaxAge;
-            public float EmitAge;
-            public float GameTime;
-            public float TimeStep;
-            public Vector3 AccelerationWorld;
-            public Vector3 EyePositionWorld;
-            public Matrix World;
-            public Matrix WorldViewProjection;
-            public uint TextureCount;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerFrameBuffer));
-                }
-            }
-        }
-
-        #endregion
-
         /// <summary>
         /// Fire stream out technique
         /// </summary>
@@ -277,11 +247,6 @@ namespace Engine.Effects
         }
 
         /// <summary>
-        /// Per frame buffer structure
-        /// </summary>
-        public EffectParticles.PerFrameBuffer FrameBuffer = new EffectParticles.PerFrameBuffer();
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="device">Graphics device</param>
@@ -370,21 +335,44 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
+        /// <param name="world">World matrix</param>
+        /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="textureCount">Texture count</param>
+        /// <param name="textures">Textures</param>
         /// <param name="randomTexture">Texture with random numbers</param>
-        public void UpdatePerFrame(ShaderResourceView textures, ShaderResourceView randomTexture)
+        /// <param name="emitterAge">Emitter age</param>
+        /// <param name="maxAge">Max particle age</param>
+        /// <param name="gameTime">Game elapsed time</param>
+        /// <param name="timeStep">Time step</param>
+        /// <param name="accelerationWorld">Acceleration vector in world coordinates</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection,
+            Vector3 eyePositionWorld,
+            uint textureCount,
+            ShaderResourceView textures,
+            ShaderResourceView randomTexture,
+            float emitterAge,
+            float maxAge,
+            float gameTime,
+            float timeStep,
+            Vector3 accelerationWorld)
         {
-            this.EmitterAge = this.FrameBuffer.EmitAge;
-            this.MaximumAge = this.FrameBuffer.MaxAge;
-            this.TotalTime = this.FrameBuffer.GameTime;
-            this.ElapsedTime = this.FrameBuffer.TimeStep;
-            this.AccelerationWorld = this.FrameBuffer.AccelerationWorld;
-            this.EyePositionWorld = this.FrameBuffer.EyePositionWorld;
-            this.World = this.FrameBuffer.World;
-            this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
-            this.TextureCount = this.FrameBuffer.TextureCount;
+            this.World = world;
+            this.WorldViewProjection = world * viewProjection;
+            this.EyePositionWorld = eyePositionWorld;
 
+            this.TextureCount = textureCount;
             this.TextureArray = textures;
+
             this.TextureRandom = randomTexture;
+
+            this.EmitterAge = emitterAge;
+            this.MaximumAge = maxAge;
+            this.TotalTime = gameTime;
+            this.ElapsedTime = timeStep;
+            this.AccelerationWorld = accelerationWorld;
         }
     }
 }

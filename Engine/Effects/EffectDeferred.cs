@@ -1,6 +1,5 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using SharpDX;
+﻿using SharpDX;
+using System;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
@@ -19,46 +18,6 @@ namespace Engine.Effects
     /// </summary>
     public class EffectDeferred : Drawer
     {
-        #region Buffers
-
-        /// <summary>
-        /// Per frame update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerFrameBuffer
-        {
-            public Matrix World;
-            public Matrix WorldViewProjection;
-            public Matrix InvertViewProjection;
-            public Vector3 EyePositionWorld;
-            public float Padding;
-            public BufferDirectionalLight DirectionalLight;
-            public BufferPointLight PointLight;
-            public BufferSpotLight SpotLight;
-            /// <summary>
-            /// Fog start
-            /// </summary>
-            public float FogStart;
-            /// <summary>
-            /// Fog range
-            /// </summary>
-            public float FogRange;
-            /// <summary>
-            /// Fog color
-            /// </summary>
-            public Color4 FogColor;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerFrameBuffer));
-                }
-            }
-        }
-
-        #endregion
-
         /// <summary>
         /// Directional light technique
         /// </summary>
@@ -132,7 +91,7 @@ namespace Engine.Effects
         /// <summary>
         /// World matrix
         /// </summary>
-        public Matrix World
+        protected Matrix World
         {
             get
             {
@@ -146,7 +105,7 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection matrix
         /// </summary>
-        public Matrix WorldViewProjection
+        protected Matrix WorldViewProjection
         {
             get
             {
@@ -160,7 +119,7 @@ namespace Engine.Effects
         /// <summary>
         /// Camera eye position
         /// </summary>
-        public Vector3 EyePositionWorld
+        protected Vector3 EyePositionWorld
         {
             get
             {
@@ -178,7 +137,7 @@ namespace Engine.Effects
         /// <summary>
         /// Directional light
         /// </summary>
-        public BufferDirectionalLight DirectionalLight
+        protected BufferDirectionalLight DirectionalLight
         {
             get
             {
@@ -202,7 +161,7 @@ namespace Engine.Effects
         /// <summary>
         /// Point light
         /// </summary>
-        public BufferPointLight PointLight
+        protected BufferPointLight PointLight
         {
             get
             {
@@ -226,7 +185,7 @@ namespace Engine.Effects
         /// <summary>
         /// Spot light
         /// </summary>
-        public BufferSpotLight SpotLight
+        protected BufferSpotLight SpotLight
         {
             get
             {
@@ -250,7 +209,7 @@ namespace Engine.Effects
         /// <summary>
         /// Fog start distance
         /// </summary>
-        public float FogStart
+        protected float FogStart
         {
             get
             {
@@ -264,7 +223,7 @@ namespace Engine.Effects
         /// <summary>
         /// Fog range distance
         /// </summary>
-        public float FogRange
+        protected float FogRange
         {
             get
             {
@@ -278,7 +237,7 @@ namespace Engine.Effects
         /// <summary>
         /// Fog color
         /// </summary>
-        public Color4 FogColor
+        protected Color4 FogColor
         {
             get
             {
@@ -292,7 +251,7 @@ namespace Engine.Effects
         /// <summary>
         /// Color Map
         /// </summary>
-        public ShaderResourceView ColorMap
+        protected ShaderResourceView ColorMap
         {
             get
             {
@@ -306,7 +265,7 @@ namespace Engine.Effects
         /// <summary>
         /// Normal Map
         /// </summary>
-        public ShaderResourceView NormalMap
+        protected ShaderResourceView NormalMap
         {
             get
             {
@@ -320,7 +279,7 @@ namespace Engine.Effects
         /// <summary>
         /// Depth Map
         /// </summary>
-        public ShaderResourceView DepthMap
+        protected ShaderResourceView DepthMap
         {
             get
             {
@@ -334,7 +293,7 @@ namespace Engine.Effects
         /// <summary>
         /// Light Map
         /// </summary>
-        public ShaderResourceView LightMap
+        protected ShaderResourceView LightMap
         {
             get
             {
@@ -406,6 +365,77 @@ namespace Engine.Effects
             {
                 throw new Exception(string.Format("Bad stage for effect: {0}", stage));
             }
+        }
+
+        /// <summary>
+        /// Updates per frame variables
+        /// </summary>
+        /// <param name="world">World matrix</param>
+        /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="colorMap">Color map texture</param>
+        /// <param name="normalMap">Normal map texture</param>
+        /// <param name="depthMap">Depth map texture</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection,
+            Vector3 eyePositionWorld,
+            ShaderResourceView colorMap,
+            ShaderResourceView normalMap,
+            ShaderResourceView depthMap)
+        {
+            this.World = world;
+            this.WorldViewProjection = world * viewProjection;
+            this.EyePositionWorld = eyePositionWorld;
+            this.ColorMap = colorMap;
+            this.NormalMap = normalMap;
+            this.DepthMap = depthMap;
+        }
+        /// <summary>
+        /// Updates per directional light variables
+        /// </summary>
+        /// <param name="light">Light</param>
+        public void UpdatePerLight(SceneLightDirectional light)
+        {
+            this.DirectionalLight = new BufferDirectionalLight(light);
+        }
+        /// <summary>
+        /// Updates per spot light variables
+        /// </summary>
+        /// <param name="light">Light</param>
+        /// <param name="transform">Translation matrix</param>
+        /// <param name="viewProjection">View * projection matrix</param>
+        public void UpdatePerLight(SceneLightPoint light, Matrix transform, Matrix viewProjection)
+        {
+            this.PointLight = new BufferPointLight(light);
+            this.World = transform;
+            this.WorldViewProjection = transform * viewProjection;
+        }
+        /// <summary>
+        /// Updates per spot light variables
+        /// </summary>
+        /// <param name="light">Light</param>
+        /// <param name="transform">Translation and rotation matrix</param>
+        /// <param name="viewProjection">View * projection matrix</param>
+        public void UpdatePerLight(SceneLightSpot light, Matrix transform, Matrix viewProjection)
+        {
+            this.SpotLight = new BufferSpotLight(light);
+            this.World = transform;
+            this.WorldViewProjection = transform * viewProjection;
+        }
+        /// <summary>
+        /// Updates composer variables
+        /// </summary>
+        /// <param name="fogStart">Fog start</param>
+        /// <param name="fogRange">Fog range</param>
+        /// <param name="fogColor">Fog color</param>
+        /// <param name="lightMap">Light map</param>
+        public void UpdateComposer(float fogStart, float fogRange, Color4 fogColor, ShaderResourceView lightMap)
+        {
+            this.FogStart = fogStart;
+            this.FogRange = fogRange;
+            this.FogColor = fogColor;
+            this.LightMap = lightMap;
         }
     }
 }

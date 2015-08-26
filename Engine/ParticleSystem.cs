@@ -213,19 +213,18 @@ namespace Engine
 
             #region Per frame update
 
-            Matrix world = context.World * this.Manipulator.LocalTransform;
-            Matrix worldViewProjection = context.World * context.ViewProjection;
-
-            DrawerPool.EffectParticles.FrameBuffer.MaxAge = this.maximumAge;
-            DrawerPool.EffectParticles.FrameBuffer.EmitAge = this.emitterAge;
-            DrawerPool.EffectParticles.FrameBuffer.GameTime = gameTime.TotalSeconds;
-            DrawerPool.EffectParticles.FrameBuffer.TimeStep = gameTime.ElapsedSeconds;
-            DrawerPool.EffectParticles.FrameBuffer.AccelerationWorld = this.particleAcceleration;
-            DrawerPool.EffectParticles.FrameBuffer.World = world;
-            DrawerPool.EffectParticles.FrameBuffer.WorldViewProjection = worldViewProjection;
-            DrawerPool.EffectParticles.FrameBuffer.EyePositionWorld = context.EyePosition;
-            DrawerPool.EffectParticles.FrameBuffer.TextureCount = (uint)this.textureArray.Description.Texture2DArray.ArraySize;
-            DrawerPool.EffectParticles.UpdatePerFrame(this.textureArray, this.textureRandom);
+            DrawerPool.EffectParticles.UpdatePerFrame(
+                context.World * this.Manipulator.LocalTransform,
+                context.ViewProjection,
+                context.EyePosition,
+                (uint)this.textureArray.Description.Texture2DArray.ArraySize,
+                this.textureArray, 
+                this.textureRandom,
+                this.emitterAge,
+                this.maximumAge,
+                gameTime.TotalSeconds,
+                gameTime.ElapsedSeconds,
+                this.particleAcceleration);
 
             #endregion
 

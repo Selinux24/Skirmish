@@ -448,9 +448,9 @@ namespace Engine
                 this.Device,
                 new RasterizerStateDescription()
                 {
-                    CullMode = CullMode.Front,
+                    CullMode = CullMode.Back,
                     FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = false,
+                    IsFrontCounterClockwise = true,
                     IsAntialiasedLineEnabled = false,
                     IsMultisampleEnabled = false,
                     IsScissorEnabled = false,

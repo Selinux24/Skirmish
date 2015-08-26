@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SharpDX;
+using SharpDX.Direct3D;
+using SharpDX.DXGI;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
-using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.DXGI;
 using Bitmap = System.Drawing.Bitmap;
 using Brushes = System.Drawing.Brushes;
 using Buffer = SharpDX.Direct3D11.Buffer;
@@ -312,12 +312,12 @@ namespace Engine
             float y = -position.Y + this.Game.Form.RelativeCenter.Y;
 
             Matrix world = Matrix.Translation(x, y, 0f);
-            Matrix worldViewProjection = world * this.viewProjection;
 
-            DrawerPool.EffectFont.FrameBuffer.World = world;
-            DrawerPool.EffectFont.FrameBuffer.WorldViewProjection = worldViewProjection;
-            DrawerPool.EffectFont.FrameBuffer.Color = color;
-            DrawerPool.EffectFont.UpdatePerFrame(this.fontMap.Texture);
+            DrawerPool.EffectFont.UpdatePerFrame(
+                world,
+                this.viewProjection,
+                color,
+                this.fontMap.Texture);
 
             #endregion
 
