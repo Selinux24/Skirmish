@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
@@ -18,43 +17,6 @@ namespace Engine.Effects
         /// Maximum number of bones in a skeleton
         /// </summary>
         public const int MaxBoneTransforms = 96;
-
-        #region Buffers
-
-        /// <summary>
-        /// Per frame update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerFrameBuffer
-        {
-            public Matrix WorldViewProjection;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerFrameBuffer));
-                }
-            }
-        }
-        /// <summary>
-        /// Per model skin update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerSkinningBuffer
-        {
-            public Matrix[] FinalTransforms;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(Matrix)) * MaxBoneTransforms;
-                }
-            }
-        }
-
-        #endregion
 
         /// <summary>
         /// Position color drawing technique
@@ -119,7 +81,14 @@ namespace Engine.Effects
             {
                 if (value != null && value.Length > MaxBoneTransforms) throw new Exception(string.Format("Bonetransforms must set {0}. Has {1}", MaxBoneTransforms, value.Length));
 
-                this.boneTransforms.SetMatrix(value);
+                if (value == null)
+                {
+                    this.boneTransforms.SetMatrix(new Matrix[MaxBoneTransforms]);
+                }
+                else
+                {
+                    this.boneTransforms.SetMatrix(value);
+                }
             }
         }
         /// <summary>
@@ -136,15 +105,6 @@ namespace Engine.Effects
                 this.worldViewProjection.SetMatrix(value);
             }
         }
-
-        /// <summary>
-        /// Per frame buffer structure
-        /// </summary>
-        public EffectBasicShadow.PerFrameBuffer FrameBuffer = new EffectBasicShadow.PerFrameBuffer();
-        /// <summary>
-        /// Per skin buffer structure
-        /// </summary>
-        public EffectBasicShadow.PerSkinningBuffer SkinningBuffer = new EffectBasicShadow.PerSkinningBuffer();
 
         /// <summary>
         /// Constructor
@@ -243,19 +203,19 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        public void UpdatePerFrame()
+        /// <param name="world">World matrix</param>
+        /// <param name="viewProjection">View * projection matrix</param>
+        public void UpdatePerFrame(Matrix world, Matrix viewProjection)
         {
-            this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
+            this.WorldViewProjection = world * viewProjection;
         }
         /// <summary>
         /// Update per model skin data
         /// </summary>
-        public void UpdatePerSkinning()
+        /// <param name="finalTransforms">Skinning final transforms</param>
+        public void UpdatePerSkinning(Matrix[] finalTransforms)
         {
-            if (this.SkinningBuffer.FinalTransforms != null)
-            {
-                this.BoneTransforms = this.SkinningBuffer.FinalTransforms;
-            }
+            this.BoneTransforms = finalTransforms;
         }
     }
 }

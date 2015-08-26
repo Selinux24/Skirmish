@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
@@ -23,79 +22,6 @@ namespace Engine.Effects
         /// Maximum number of bones in a skeleton
         /// </summary>
         public const int MaxBoneTransforms = 96;
-
-        #region Buffers
-
-        /// <summary>
-        /// Per frame update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerFrameBuffer
-        {
-            public Matrix World;
-            public Matrix WorldInverse;
-            public Matrix WorldViewProjection;
-            public Matrix ShadowTransform;
-            public BufferLights Lights;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerFrameBuffer));
-                }
-            }
-        }
-        /// <summary>
-        /// Per model object update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerObjectBuffer
-        {
-            public BufferMaterials Material;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerObjectBuffer));
-                }
-            }
-        }
-        /// <summary>
-        /// Per model skin update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerSkinningBuffer
-        {
-            public Matrix[] FinalTransforms;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(Matrix)) * MaxBoneTransforms;
-                }
-            }
-        }
-        /// <summary>
-        /// Per model instance update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerInstanceBuffer
-        {
-            public float TextureIndex;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerInstanceBuffer));
-                }
-            }
-        }
-
-        #endregion
 
         /// <summary>
         /// Position color drawing technique
@@ -484,7 +410,14 @@ namespace Engine.Effects
             {
                 if (value != null && value.Length > MaxBoneTransforms) throw new Exception(string.Format("Bonetransforms must set {0}. Has {1}", MaxBoneTransforms, value.Length));
 
-                this.boneTransforms.SetMatrix(value);
+                if (value == null)
+                {
+                    this.boneTransforms.SetMatrix(new Matrix[MaxBoneTransforms]);
+                }
+                else
+                {
+                    this.boneTransforms.SetMatrix(value);
+                }
             }
         }
         /// <summary>
@@ -529,23 +462,6 @@ namespace Engine.Effects
                 this.shadowMap.SetResource(value);
             }
         }
-
-        /// <summary>
-        /// Per frame buffer structure
-        /// </summary>
-        public EffectBasic.PerFrameBuffer FrameBuffer = new EffectBasic.PerFrameBuffer();
-        /// <summary>
-        /// Per model object buffer structure
-        /// </summary>
-        public EffectBasic.PerObjectBuffer ObjectBuffer = new EffectBasic.PerObjectBuffer();
-        /// <summary>
-        /// Per skin buffer structure
-        /// </summary>
-        public EffectBasic.PerSkinningBuffer SkinningBuffer = new EffectBasic.PerSkinningBuffer();
-        /// <summary>
-        /// Per model instance buffer structure
-        /// </summary>
-        public EffectBasic.PerInstanceBuffer InstanceBuffer = new EffectBasic.PerInstanceBuffer();
 
         /// <summary>
         /// Constructor
@@ -667,61 +583,111 @@ namespace Engine.Effects
                 throw new Exception(string.Format("Bad stage for effect: {0}", stage));
             }
         }
+
         /// <summary>
         /// Update per frame data
         /// </summary>
-        /// <param name="shadowMap">Shadow map texture</param>
-        public void UpdatePerFrame(ShaderResourceView shadowMap)
+        /// <param name="world">World</param>
+        /// <param name="viewProjection">View * projection</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection)
         {
-            this.World = this.FrameBuffer.World;
-            this.WorldInverse = this.FrameBuffer.WorldInverse;
-            this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
-            this.ShadowTransform = this.FrameBuffer.ShadowTransform;
-            
-            this.DirLights = new BufferDirectionalLight[]
+            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, null, null, Matrix.Identity);
+        }
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="world">World</param>
+        /// <param name="viewProjection">View * projection</param>
+        /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="lights">Scene ligths</param>
+        /// <param name="shadowMap">Shadow map texture</param>
+        /// <param name="shadowTransform">Shadow transform</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection,
+            Vector3 eyePositionWorld,
+            SceneLight lights,
+            ShaderResourceView shadowMap,
+            Matrix shadowTransform)
+        {
+            this.World = world;
+            this.WorldInverse = Matrix.Invert(world);
+            this.WorldViewProjection = world * viewProjection;
+
+            if (lights != null)
             {
-                this.FrameBuffer.Lights.DirectionalLight1,
-                this.FrameBuffer.Lights.DirectionalLight2,
-                this.FrameBuffer.Lights.DirectionalLight3,
-            };
-            this.PointLight = this.FrameBuffer.Lights.PointLight;
-            this.SpotLight = this.FrameBuffer.Lights.SpotLight;
-            this.EyePositionWorld = this.FrameBuffer.Lights.EyePositionWorld;
-         
-            this.FogStart = this.FrameBuffer.Lights.FogStart;
-            this.FogRange = this.FrameBuffer.Lights.FogRange;
-            this.FogColor = this.FrameBuffer.Lights.FogColor;
-            this.EnableShadows = shadowMap != null ? this.FrameBuffer.Lights.EnableShadows : 0;
-          
-            this.ShadowMap = shadowMap;
+                this.EyePositionWorld = eyePositionWorld;
+
+                this.DirLights = new[]
+                {
+                    lights.DirectionalLights.Length > 0 ? new BufferDirectionalLight(lights.DirectionalLights[0]) : new BufferDirectionalLight(),
+                    lights.DirectionalLights.Length > 1 ? new BufferDirectionalLight(lights.DirectionalLights[1]) : new BufferDirectionalLight(),
+                    lights.DirectionalLights.Length > 2 ? new BufferDirectionalLight(lights.DirectionalLights[2]) : new BufferDirectionalLight(),
+                };
+                this.PointLight = lights.PointLights.Length > 0 ? new BufferPointLight(lights.PointLights[0]) : new BufferPointLight();
+                this.SpotLight = lights.SpotLights.Length > 0 ? new BufferSpotLight(lights.SpotLights[0]) : new BufferSpotLight();
+
+                this.FogStart = lights.FogStart;
+                this.FogRange = lights.FogRange;
+                this.FogColor = lights.FogColor;
+
+                if (lights.EnableShadows)
+                {
+                    this.EnableShadows = 1;
+                    this.ShadowTransform = shadowTransform;
+                    this.ShadowMap = shadowMap;
+                }
+                else
+                {
+                    this.EnableShadows = 0;
+                    this.ShadowTransform = Matrix.Identity;
+                    this.ShadowMap = null;
+                }
+            }
+            else
+            {
+                this.EyePositionWorld = Vector3.Zero;
+
+                this.DirLights = new BufferDirectionalLight[3];
+                this.PointLight = new BufferPointLight();
+                this.SpotLight = new BufferSpotLight();
+
+                this.FogStart = 0;
+                this.FogRange = 0;
+                this.FogColor = Color.Transparent;
+
+                this.EnableShadows = 0;
+                this.ShadowTransform = Matrix.Identity;
+                this.ShadowMap = null;
+            }
         }
         /// <summary>
         /// Update per model object data
         /// </summary>
+        /// <param name="material">Material</param>
         /// <param name="texture">Texture</param>
         /// <param name="normalMap">Normal map</param>
-        public void UpdatePerObject(ShaderResourceView texture, ShaderResourceView normalMap)
+        /// <param name="textureIndex">Texture index</param>
+        public void UpdatePerObject(
+            Material material,
+            ShaderResourceView texture,
+            ShaderResourceView normalMap,
+            int textureIndex)
         {
-            this.Material = this.ObjectBuffer.Material;
+            this.Material = new BufferMaterials(material);
             this.Textures = texture;
             this.NormalMap = normalMap;
+            this.TextureIndex = textureIndex;
         }
         /// <summary>
         /// Update per model skin data
         /// </summary>
-        public void UpdatePerSkinning()
+        /// <param name="finalTransforms">Skinning final transforms</param>
+        public void UpdatePerSkinning(Matrix[] finalTransforms)
         {
-            if (this.SkinningBuffer.FinalTransforms != null)
-            {
-                this.BoneTransforms = this.SkinningBuffer.FinalTransforms;
-            }
-        }
-        /// <summary>
-        /// Update per model instance data
-        /// </summary>
-        public void UpdatePerInstance()
-        {
-            this.TextureIndex = (int)this.InstanceBuffer.TextureIndex;
+            this.BoneTransforms = finalTransforms;
         }
     }
 }

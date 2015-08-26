@@ -150,9 +150,9 @@ namespace Engine
             base.Update(gameTime, context);
 
             this.Manipulator.Update(
-                gameTime, 
-                this.Game.Form.RelativeCenter, 
-                this.Width, 
+                gameTime,
+                this.Game.Form.RelativeCenter,
+                this.Width,
                 this.Height);
         }
         /// <summary>
@@ -166,14 +166,7 @@ namespace Engine
             {
                 #region Per frame update
 
-                Matrix world = this.Manipulator.LocalTransform;
-                Matrix worldInverse = Matrix.Invert(world);
-                Matrix worldViewProjection = world * this.viewProjection;
-
-                DrawerPool.EffectBasic.FrameBuffer.World = world;
-                DrawerPool.EffectBasic.FrameBuffer.WorldInverse = worldInverse;
-                DrawerPool.EffectBasic.FrameBuffer.WorldViewProjection = worldViewProjection;
-                DrawerPool.EffectBasic.UpdatePerFrame(null);
+                DrawerPool.EffectBasic.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
 
                 #endregion
 
@@ -185,8 +178,11 @@ namespace Engine
 
                     if (this.SkinningData != null)
                     {
-                        DrawerPool.EffectBasic.SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                        DrawerPool.EffectBasic.UpdatePerSkinning();
+                        DrawerPool.EffectBasic.UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
+                    }
+                    else
+                    {
+                        DrawerPool.EffectBasic.UpdatePerSkinning(null);
                     }
 
                     #endregion
@@ -201,21 +197,12 @@ namespace Engine
 
                         if (mat != null)
                         {
-                            DrawerPool.EffectBasic.ObjectBuffer.Material.SetMaterial(mat.Material);
-                            DrawerPool.EffectBasic.UpdatePerObject(mat.DiffuseTexture, mat.NormalMap);
+                            DrawerPool.EffectBasic.UpdatePerObject(mat.Material, mat.DiffuseTexture, mat.NormalMap, this.TextureIndex);
                         }
                         else
                         {
-                            DrawerPool.EffectBasic.ObjectBuffer.Material.SetMaterial(Material.Default);
-                            DrawerPool.EffectBasic.UpdatePerObject(null, null);
+                            DrawerPool.EffectBasic.UpdatePerObject(Material.Default, null, null, this.TextureIndex);
                         }
-
-                        #endregion
-
-                        #region Per instance update
-
-                        DrawerPool.EffectBasic.InstanceBuffer.TextureIndex = this.TextureIndex;
-                        DrawerPool.EffectBasic.UpdatePerInstance();
 
                         #endregion
 

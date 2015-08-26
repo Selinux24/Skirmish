@@ -135,25 +135,27 @@ namespace Engine
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        ((EffectInstancing)effect).FrameBuffer.World = context.World;
-                        ((EffectInstancing)effect).FrameBuffer.WorldInverse = Matrix.Invert(context.World);
-                        ((EffectInstancing)effect).FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
-                        ((EffectInstancing)effect).FrameBuffer.ShadowTransform = context.ShadowTransform;
-                        ((EffectInstancing)effect).FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
-                        ((EffectInstancing)effect).UpdatePerFrame(context.ShadowMap);
+                        ((EffectInstancing)effect).UpdatePerFrame(
+                            context.World,
+                            context.ViewProjection,
+                            context.EyePosition,
+                            context.Lights,
+                            context.ShadowMap,
+                            context.ShadowTransform);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        ((EffectInstancingGBuffer)effect).FrameBuffer.World = context.World;
-                        ((EffectInstancingGBuffer)effect).FrameBuffer.WorldInverse = Matrix.Invert(context.World);
-                        ((EffectInstancingGBuffer)effect).FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
-                        ((EffectInstancingGBuffer)effect).FrameBuffer.ShadowTransform = context.ShadowTransform;
-                        ((EffectInstancingGBuffer)effect).UpdatePerFrame(context.ShadowMap);
+                        ((EffectInstancingGBuffer)effect).UpdatePerFrame(
+                            context.World,
+                            context.ViewProjection,
+                            context.ShadowMap,
+                            context.ShadowTransform);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        ((EffectInstancingShadow)effect).FrameBuffer.WorldViewProjection = context.World * context.ViewProjection;
-                        ((EffectInstancingShadow)effect).UpdatePerFrame();
+                        ((EffectInstancingShadow)effect).UpdatePerFrame(
+                            context.World, 
+                            context.ViewProjection);
                     }
 
                     #endregion
@@ -166,18 +168,30 @@ namespace Engine
                         {
                             if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
-                                ((EffectInstancing)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                                ((EffectInstancing)effect).UpdatePerSkinning();
+                                ((EffectInstancing)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
                             }
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
-                                ((EffectInstancingGBuffer)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                                ((EffectInstancingGBuffer)effect).UpdatePerSkinning();
+                                ((EffectInstancingGBuffer)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
                             }
                             else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                             {
-                                ((EffectInstancingShadow)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                                ((EffectInstancingShadow)effect).UpdatePerSkinning();
+                                ((EffectInstancingShadow)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
+                            }
+                        }
+                        else
+                        {
+                            if (context.DrawerMode == DrawerModesEnum.Forward)
+                            {
+                                ((EffectInstancing)effect).UpdatePerSkinning(null);
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                            {
+                                ((EffectInstancingGBuffer)effect).UpdatePerSkinning(null);
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                            {
+                                ((EffectInstancingShadow)effect).UpdatePerSkinning(null);
                             }
                         }
 
@@ -198,13 +212,11 @@ namespace Engine
 
                             if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
-                                ((EffectInstancing)effect).ObjectBuffer.Material.SetMaterial(matdata);
-                                ((EffectInstancing)effect).UpdatePerObject(texture, normalMap);
+                                ((EffectInstancing)effect).UpdatePerObject(matdata, texture, normalMap);
                             }
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
-                                ((EffectInstancingGBuffer)effect).ObjectBuffer.Material.SetMaterial(matdata);
-                                ((EffectInstancingGBuffer)effect).UpdatePerObject(texture, normalMap);
+                                ((EffectInstancingGBuffer)effect).UpdatePerObject(matdata, texture, normalMap);
                             }
 
                             #endregion

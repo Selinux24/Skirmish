@@ -66,24 +66,29 @@ namespace Engine
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
-                        effect.FrameBuffer.ShadowTransform = context.ShadowTransform;
-                        effect.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
-                        effect.FrameBuffer.Radius = this.Radius;
-                        effect.UpdatePerFrame(context.ShadowMap);
+                        effect.UpdatePerFrame(
+                            context.World * this.Manipulator.LocalTransform,
+                            context.ViewProjection,
+                            context.EyePosition, //context.EyePosition - this.Manipulator.Position
+                            context.Lights,
+                            context.ShadowMap,
+                            context.ShadowTransform);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
-                        effect.FrameBuffer.Lights = new BufferLights(context.EyePosition - this.Manipulator.Position, context.Lights);
-                        effect.FrameBuffer.Radius = this.Radius;
-                        effect.UpdatePerFrame(null);
+                        effect.UpdatePerFrame(
+                            context.World * this.Manipulator.LocalTransform,
+                            context.ViewProjection,
+                            context.EyePosition, //context.EyePosition - this.Manipulator.Position
+                            context.Lights,
+                            context.ShadowMap,
+                            context.ShadowTransform);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        effect.FrameBuffer.WorldViewProjection = context.World * this.Manipulator.LocalTransform * context.ViewProjection;
-                        effect.FrameBuffer.Radius = this.Radius;
-                        effect.UpdatePerFrame(null);
+                        effect.UpdatePerFrame(
+                            context.World * this.Manipulator.LocalTransform,
+                            context.ViewProjection);
                     }
 
                     #endregion
@@ -103,15 +108,11 @@ namespace Engine
 
                             if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
-                                effect.ObjectBuffer.Material.SetMaterial(matData);
-                                effect.ObjectBuffer.TextureCount = textureCount;
-                                effect.UpdatePerObject(diffuseTexture);
+                                effect.UpdatePerObject(matData, this.Radius, textureCount, diffuseTexture);
                             }
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
-                                effect.ObjectBuffer.Material.SetMaterial(matData);
-                                effect.ObjectBuffer.TextureCount = textureCount;
-                                effect.UpdatePerObject(diffuseTexture);
+                                effect.UpdatePerObject(matData, this.Radius, textureCount, diffuseTexture);
                             }
 
                             #endregion

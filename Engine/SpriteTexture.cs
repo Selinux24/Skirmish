@@ -44,10 +44,6 @@ namespace Engine
         /// </summary>
         private Context drawContext;
         /// <summary>
-        /// View * ortho projection matrix
-        /// </summary>
-        private Matrix viewProjection;
-        /// <summary>
         /// Drawing channels
         /// </summary>
         private SpriteTextureChannelsEnum channels = SpriteTextureChannelsEnum.None;
@@ -127,13 +123,13 @@ namespace Engine
             man.SetPosition(left, top);
             man.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
 
-            this.viewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            Matrix viewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
 
             this.drawContext = new Context()
             {
                 EyePosition = new Vector3(0, 0, -1),
                 World = man.LocalTransform,
-                ViewProjection = this.viewProjection,
+                ViewProjection = viewProjection,
                 Lights = SceneLight.Default,
             };
         }
@@ -153,28 +149,14 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(GameTime gameTime, Context context)
         {
-            #region Effect update
-
             this.DeviceContext.InputAssembler.InputLayout = this.effect.GetInputLayout(effectTechnique);
             this.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
             this.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
             this.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
 
-            this.effect.FrameBuffer.World = this.drawContext.World;
-            this.effect.FrameBuffer.WorldInverse = Matrix.Invert(this.drawContext.World);
-            this.effect.FrameBuffer.WorldViewProjection = this.drawContext.World * this.drawContext.ViewProjection;
-            this.effect.UpdatePerFrame(null);
-
-            this.effect.ObjectBuffer.Material.SetMaterial(Material.Default);
-            this.effect.UpdatePerObject(this.Texture, null);
-
-            this.effect.SkinningBuffer.FinalTransforms = null;
-            this.effect.UpdatePerSkinning();
-
-            this.effect.InstanceBuffer.TextureIndex = 0;
-            this.effect.UpdatePerInstance();
-
-            #endregion
+            this.effect.UpdatePerFrame(this.drawContext.World, this.drawContext.ViewProjection);
+            this.effect.UpdatePerObject(Material.Default, this.Texture, null, 0);
+            this.effect.UpdatePerSkinning(null);
 
             for (int p = 0; p < this.effectTechnique.Description.PassCount; p++)
             {
@@ -188,7 +170,7 @@ namespace Engine
         /// </summary>
         public virtual void Resize()
         {
-            this.viewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            this.drawContext.ViewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
         }
         /// <summary>
         /// Dispose objects

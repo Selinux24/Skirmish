@@ -118,41 +118,27 @@ namespace Engine
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        Matrix local = this.Manipulator.LocalTransform;
-                        Matrix world = context.World * local;
-                        Matrix worldInverse = Matrix.Invert(world);
-                        Matrix worldViewProjection = world * context.ViewProjection;
-
-                        ((EffectBasic)effect).FrameBuffer.World = world;
-                        ((EffectBasic)effect).FrameBuffer.WorldInverse = worldInverse;
-                        ((EffectBasic)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
-                        ((EffectBasic)effect).FrameBuffer.ShadowTransform = context.ShadowTransform;
-                        ((EffectBasic)effect).FrameBuffer.Lights = new BufferLights(context.EyePosition, context.Lights);
-                        ((EffectBasic)effect).UpdatePerFrame(context.ShadowMap);
+                        ((EffectBasic)effect).UpdatePerFrame(
+                            context.World * this.Manipulator.LocalTransform,
+                            context.ViewProjection,
+                            context.EyePosition,
+                            context.Lights,
+                            context.ShadowMap,
+                            context.ShadowTransform);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        Matrix local = this.Manipulator.LocalTransform;
-                        Matrix world = context.World * local;
-                        Matrix worldInverse = Matrix.Invert(world);
-                        Matrix worldViewProjection = world * context.ViewProjection;
-                        Matrix shadowTransform = context.ShadowTransform;
-
-                        ((EffectBasicGBuffer)effect).FrameBuffer.World = world;
-                        ((EffectBasicGBuffer)effect).FrameBuffer.WorldInverse = worldInverse;
-                        ((EffectBasicGBuffer)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
-                        ((EffectBasicGBuffer)effect).FrameBuffer.ShadowTransform = context.ShadowTransform;
-                        ((EffectBasicGBuffer)effect).UpdatePerFrame(context.ShadowMap);
+                        ((EffectBasicGBuffer)effect).UpdatePerFrame(
+                            context.World * this.Manipulator.LocalTransform,
+                            context.ViewProjection,
+                            context.ShadowMap,
+                            context.ShadowTransform);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        Matrix local = this.Manipulator.LocalTransform;
-                        Matrix world = context.World * local;
-                        Matrix worldInverse = Matrix.Invert(world);
-                        Matrix worldViewProjection = world * context.ViewProjection;
-
-                        ((EffectBasicShadow)effect).FrameBuffer.WorldViewProjection = worldViewProjection;
-                        ((EffectBasicShadow)effect).UpdatePerFrame();
+                        ((EffectBasicShadow)effect).UpdatePerFrame(
+                            context.World * this.Manipulator.LocalTransform,
+                            context.ViewProjection);
                     }
 
                     #endregion
@@ -165,18 +151,30 @@ namespace Engine
                         {
                             if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
-                                ((EffectBasic)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                                ((EffectBasic)effect).UpdatePerSkinning();
+                                ((EffectBasic)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
                             }
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
-                                ((EffectBasicGBuffer)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                                ((EffectBasicGBuffer)effect).UpdatePerSkinning();
+                                ((EffectBasicGBuffer)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
                             }
                             else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                             {
-                                ((EffectBasicShadow)effect).SkinningBuffer.FinalTransforms = this.SkinningData.GetFinalTransforms(meshName);
-                                ((EffectBasicShadow)effect).UpdatePerSkinning();
+                                ((EffectBasicShadow)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
+                            }
+                        }
+                        else
+                        {
+                            if (context.DrawerMode == DrawerModesEnum.Forward)
+                            {
+                                ((EffectBasic)effect).UpdatePerSkinning(null);
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                            {
+                                ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                            {
+                                ((EffectBasicShadow)effect).UpdatePerSkinning(null);
                             }
                         }
 
@@ -197,28 +195,11 @@ namespace Engine
 
                             if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
-                                ((EffectBasic)effect).ObjectBuffer.Material.SetMaterial(matdata);
-                                ((EffectBasic)effect).UpdatePerObject(texture, normalMap);
+                                ((EffectBasic)effect).UpdatePerObject(matdata, texture, normalMap, this.TextureIndex);
                             }
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
-                                ((EffectBasicGBuffer)effect).ObjectBuffer.Material.SetMaterial(mat.Material);
-                                ((EffectBasicGBuffer)effect).UpdatePerObject(texture, normalMap);
-                            }
-
-                            #endregion
-
-                            #region Per instance update
-
-                            if (context.DrawerMode == DrawerModesEnum.Forward)
-                            {
-                                ((EffectBasic)effect).InstanceBuffer.TextureIndex = this.TextureIndex;
-                                ((EffectBasic)effect).UpdatePerInstance();
-                            }
-                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                            {
-                                ((EffectBasicGBuffer)effect).InstanceBuffer.TextureIndex = this.TextureIndex;
-                                ((EffectBasicGBuffer)effect).UpdatePerInstance();
+                                ((EffectBasicGBuffer)effect).UpdatePerObject(mat.Material, texture, normalMap, this.TextureIndex);
                             }
 
                             #endregion

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
@@ -22,79 +21,6 @@ namespace Engine.Effects
         /// Maximum number of bones in a skeleton
         /// </summary>
         public const int MaxBoneTransforms = 96;
-
-        #region Buffers
-
-        /// <summary>
-        /// Per frame update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerFrameBuffer
-        {
-            public Matrix World;
-            public Matrix WorldInverse;
-            public Matrix WorldViewProjection;
-            public Matrix ShadowTransform;
-            public float EnableShadows;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerFrameBuffer));
-                }
-            }
-        }
-        /// <summary>
-        /// Per model object update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerObjectBuffer
-        {
-            public BufferMaterials Material;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerObjectBuffer));
-                }
-            }
-        }
-        /// <summary>
-        /// Per model skin update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerSkinningBuffer
-        {
-            public Matrix[] FinalTransforms;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(Matrix)) * MaxBoneTransforms;
-                }
-            }
-        }
-        /// <summary>
-        /// Per model instance update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerInstanceBuffer
-        {
-            public float TextureIndex;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerInstanceBuffer));
-                }
-            }
-        }
-
-        #endregion
 
         /// <summary>
         /// Position color drawing technique
@@ -289,7 +215,14 @@ namespace Engine.Effects
             {
                 if (value != null && value.Length > MaxBoneTransforms) throw new Exception(string.Format("Bonetransforms must set {0}. Has {1}", MaxBoneTransforms, value.Length));
 
-                this.boneTransforms.SetMatrix(value);
+                if (value == null)
+                {
+                    this.boneTransforms.SetMatrix(new Matrix[MaxBoneTransforms]);
+                }
+                else
+                {
+                    this.boneTransforms.SetMatrix(value);
+                }
             }
         }
         /// <summary>
@@ -348,23 +281,6 @@ namespace Engine.Effects
                 this.shadowMap.SetResource(value);
             }
         }
-
-        /// <summary>
-        /// Per frame buffer structure
-        /// </summary>
-        public EffectBasicGBuffer.PerFrameBuffer FrameBuffer = new EffectBasicGBuffer.PerFrameBuffer();
-        /// <summary>
-        /// Per model object buffer structure
-        /// </summary>
-        public EffectBasicGBuffer.PerObjectBuffer ObjectBuffer = new EffectBasicGBuffer.PerObjectBuffer();
-        /// <summary>
-        /// Per skin buffer structure
-        /// </summary>
-        public EffectBasicGBuffer.PerSkinningBuffer SkinningBuffer = new EffectBasicGBuffer.PerSkinningBuffer();
-        /// <summary>
-        /// Per model instance buffer structure
-        /// </summary>
-        public EffectBasicGBuffer.PerInstanceBuffer InstanceBuffer = new EffectBasicGBuffer.PerInstanceBuffer();
 
         /// <summary>
         /// Constructor
@@ -472,43 +388,58 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
+        /// <param name="world">World Matrix</param>
+        /// <param name="viewProjection">View * projection</param>
         /// <param name="shadowMap">Shadow map texture</param>
-        public void UpdatePerFrame(ShaderResourceView shadowMap)
+        /// <param name="shadowTransform">Shadow transform</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection,
+            ShaderResourceView shadowMap,
+            Matrix shadowTransform)
         {
-            this.World = this.FrameBuffer.World;
-            this.WorldInverse = this.FrameBuffer.WorldInverse;
-            this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
-            this.ShadowTransform = this.FrameBuffer.ShadowTransform;
-            this.EnableShadows = shadowMap != null ? 1.0f : 0.0f;
-            this.ShadowMap = shadowMap;
+            this.World = world;
+            this.WorldInverse = Matrix.Invert(world);
+            this.WorldViewProjection = world * viewProjection;
+
+            if (shadowMap != null)
+            {
+                this.EnableShadows = 1.0f;
+                this.ShadowMap = shadowMap;
+                this.ShadowTransform = shadowTransform;
+            }
+            else
+            {
+                this.EnableShadows = 0.0f;
+                this.ShadowMap = null;
+                this.ShadowTransform = Matrix.Identity;
+            }
         }
         /// <summary>
         /// Update per model object data
         /// </summary>
+        /// <param name="material">Material</param>
         /// <param name="texture">Texture</param>
         /// <param name="normalMap">Normal map</param>
-        public void UpdatePerObject(ShaderResourceView texture, ShaderResourceView normalMap)
+        /// <param name="textureIndex">Texture index</param>
+        public void UpdatePerObject(
+            Material material,
+            ShaderResourceView texture,
+            ShaderResourceView normalMap,
+            int textureIndex)
         {
-            this.Material = this.ObjectBuffer.Material;
+            this.Material = new BufferMaterials(material);
             this.Textures = texture;
             this.NormalMap = normalMap;
+            this.TextureIndex = textureIndex;
         }
         /// <summary>
         /// Update per model skin data
         /// </summary>
-        public void UpdatePerSkinning()
+        /// <param name="finalTransforms">Skinning final transform</param>
+        public void UpdatePerSkinning(Matrix[] finalTransforms)
         {
-            if (this.SkinningBuffer.FinalTransforms != null)
-            {
-                this.BoneTransforms = this.SkinningBuffer.FinalTransforms;
-            }
-        }
-        /// <summary>
-        /// Update per model instance data
-        /// </summary>
-        public void UpdatePerInstance()
-        {
-            this.TextureIndex = (int)this.InstanceBuffer.TextureIndex;
+            this.BoneTransforms = finalTransforms;
         }
     }
 }

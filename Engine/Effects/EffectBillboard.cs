@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using SharpDX;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
@@ -19,47 +18,6 @@ namespace Engine.Effects
     /// </summary>
     public class EffectBillboard : Drawer
     {
-        #region Buffers
-
-        /// <summary>
-        /// Per frame update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerFrameBuffer
-        {
-            public Matrix WorldViewProjection;
-            public Matrix ShadowTransform;
-            public BufferLights Lights;
-            public float Radius;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerFrameBuffer));
-                }
-            }
-        }
-        /// <summary>
-        /// Per model object update buffer
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct PerObjectBuffer
-        {
-            public BufferMaterials Material;
-            public uint TextureCount;
-
-            public static int Size
-            {
-                get
-                {
-                    return Marshal.SizeOf(typeof(PerObjectBuffer));
-                }
-            }
-        }
-
-        #endregion
-
         /// <summary>
         /// Billboard drawing technique
         /// </summary>
@@ -390,15 +348,6 @@ namespace Engine.Effects
         }
 
         /// <summary>
-        /// Per frame buffer structure
-        /// </summary>
-        public EffectBillboard.PerFrameBuffer FrameBuffer = new EffectBillboard.PerFrameBuffer();
-        /// <summary>
-        /// Per model object buffer structure
-        /// </summary>
-        public EffectBillboard.PerObjectBuffer ObjectBuffer = new EffectBillboard.PerObjectBuffer();
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="device">Graphics device</param>
@@ -458,39 +407,96 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        /// <param name="shadowMap">Shadow map texture</param>
-        public void UpdatePerFrame(ShaderResourceView shadowMap)
+        /// <param name="world">World</param>
+        /// <param name="viewProjection">View * projection</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection)
         {
-            this.WorldViewProjection = this.FrameBuffer.WorldViewProjection;
-            this.ShadowTransform = this.FrameBuffer.ShadowTransform;
+            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, null, null, Matrix.Identity);
+        }
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="world">World</param>
+        /// <param name="viewProjection">View * projection</param>
+        /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="lights">Scene ligths</param>
+        /// <param name="shadowMap">Shadow map texture</param>
+        /// <param name="shadowTransform">Shadow transform</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection,
+            Vector3 eyePositionWorld,
+            SceneLight lights,
+            ShaderResourceView shadowMap,
+            Matrix shadowTransform)
+        {
+            this.WorldViewProjection = world * viewProjection;
 
-            this.DirLights = new BufferDirectionalLight[]
+            if (lights != null)
             {
-                this.FrameBuffer.Lights.DirectionalLight1,
-                this.FrameBuffer.Lights.DirectionalLight2,
-                this.FrameBuffer.Lights.DirectionalLight3,
-            };
-            this.PointLight = this.FrameBuffer.Lights.PointLight;
-            this.SpotLight = this.FrameBuffer.Lights.SpotLight;
-            this.EyePositionWorld = this.FrameBuffer.Lights.EyePositionWorld;
+                this.EyePositionWorld = eyePositionWorld;
 
-            this.FogStart = this.FrameBuffer.Lights.FogStart;
-            this.FogRange = this.FrameBuffer.Lights.FogRange;
-            this.FogColor = this.FrameBuffer.Lights.FogColor;
-            this.EnableShadows = shadowMap != null ? this.FrameBuffer.Lights.EnableShadows : 0;
-            
-            this.Radius = this.FrameBuffer.Radius;
+                this.DirLights = new[]
+                {
+                    lights.DirectionalLights.Length > 0 ? new BufferDirectionalLight(lights.DirectionalLights[0]) : new BufferDirectionalLight(),
+                    lights.DirectionalLights.Length > 1 ? new BufferDirectionalLight(lights.DirectionalLights[1]) : new BufferDirectionalLight(),
+                    lights.DirectionalLights.Length > 2 ? new BufferDirectionalLight(lights.DirectionalLights[2]) : new BufferDirectionalLight(),
+                };
+                this.PointLight = lights.PointLights.Length > 0 ? new BufferPointLight(lights.PointLights[0]) : new BufferPointLight();
+                this.SpotLight = lights.SpotLights.Length > 0 ? new BufferSpotLight(lights.SpotLights[0]) : new BufferSpotLight();
 
-            this.ShadowMap = shadowMap;
+                this.FogStart = lights.FogStart;
+                this.FogRange = lights.FogRange;
+                this.FogColor = lights.FogColor;
+
+                if (lights.EnableShadows)
+                {
+                    this.EnableShadows = 1;
+                    this.ShadowTransform = shadowTransform;
+                    this.ShadowMap = shadowMap;
+                }
+                else
+                {
+                    this.EnableShadows = 0;
+                    this.ShadowTransform = Matrix.Identity;
+                    this.ShadowMap = null;
+                }
+            }
+            else
+            {
+                this.EyePositionWorld = Vector3.Zero;
+
+                this.DirLights = new BufferDirectionalLight[3];
+                this.PointLight = new BufferPointLight();
+                this.SpotLight = new BufferSpotLight();
+
+                this.FogStart = 0;
+                this.FogRange = 0;
+                this.FogColor = Color.Transparent;
+
+                this.EnableShadows = 0;
+                this.ShadowTransform = Matrix.Identity;
+                this.ShadowMap = null;
+            }
         }
         /// <summary>
         /// Update per model object data
         /// </summary>
+        /// <param name="material">Material</param>
+        /// <param name="radius">Drawing radius</param>
+        /// <param name="textureCount">Texture count</param>
         /// <param name="texture">Texture</param>
-        public void UpdatePerObject(ShaderResourceView texture)
+        public void UpdatePerObject(
+            Material material,
+            float radius,
+            uint textureCount,
+            ShaderResourceView texture)
         {
-            this.Material = this.ObjectBuffer.Material;
-            this.TextureCount = this.ObjectBuffer.TextureCount;
+            this.Material = new BufferMaterials(material);
+            this.Radius = radius;
+            this.TextureCount = textureCount;
             this.Textures = texture;
         }
     }

@@ -43,6 +43,20 @@ namespace Engine.Effects
         }
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="material">Material</param>
+        public BufferMaterials(Material material)
+        {
+            this.Ambient = material.AmbientColor;
+            this.Diffuse = material.DiffuseColor;
+            this.Specular = material.SpecularColor;
+            this.Specular.Alpha = material.Shininess;
+            this.Reflect = material.ReflectiveColor;
+            this.Padding = 1000f;
+        }
+
+        /// <summary>
         /// Sets material data
         /// </summary>
         /// <param name="material">Material</param>
