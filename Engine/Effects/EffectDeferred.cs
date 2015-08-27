@@ -48,6 +48,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectVectorVariable eyePositionWorld = null;
         /// <summary>
+        /// Ambient light color
+        /// </summary>
+        private EffectVectorVariable ambientColor = null;
+        /// <summary>
         /// Directional light effect variable
         /// </summary>
         private EffectVariable directionalLight = null;
@@ -132,6 +136,20 @@ namespace Engine.Effects
                 Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
 
                 this.eyePositionWorld.Set(v4);
+            }
+        }
+        /// <summary>
+        /// Ambient light color
+        /// </summary>
+        protected Color4 AmbientColor
+        {
+            get
+            {
+                return new Color4(this.ambientColor.GetFloatVector());
+            }
+            set
+            {
+                this.ambientColor.Set(value);
             }
         }
         /// <summary>
@@ -327,6 +345,7 @@ namespace Engine.Effects
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
+            this.ambientColor = this.Effect.GetVariableByName("gAmbientColor").AsVector();
             this.directionalLight = this.Effect.GetVariableByName("gDirLight");
             this.pointLight = this.Effect.GetVariableByName("gPointLight");
             this.spotLight = this.Effect.GetVariableByName("gSpotLight");
@@ -426,15 +445,19 @@ namespace Engine.Effects
         /// <summary>
         /// Updates composer variables
         /// </summary>
+        /// <param name="ambientColor">Ambient color</param>
         /// <param name="fogStart">Fog start</param>
         /// <param name="fogRange">Fog range</param>
         /// <param name="fogColor">Fog color</param>
         /// <param name="lightMap">Light map</param>
-        public void UpdateComposer(float fogStart, float fogRange, Color4 fogColor, ShaderResourceView lightMap)
+        public void UpdateComposer(Color4 ambientColor, float fogStart, float fogRange, Color4 fogColor, ShaderResourceView lightMap)
         {
+            this.AmbientColor = ambientColor;
+
             this.FogStart = fogStart;
             this.FogRange = fogRange;
             this.FogColor = fogColor;
+
             this.LightMap = lightMap;
         }
     }

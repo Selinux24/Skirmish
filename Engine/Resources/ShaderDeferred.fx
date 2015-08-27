@@ -6,7 +6,7 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
 	float3 gEyePositionWorld;
-	float gPadding;
+	float4 gAmbientColor;
 	DirectionalLight gDirLight;
 	PointLight gPointLight;
 	SpotLight gSpotLight;
@@ -100,9 +100,14 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 		return float4(1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
+	//Get point to eye vector
+	float3 toEyeWorld = gEyePositionWorld - depth.xyz;
+	float distToEye = length(toEyeWorld);
+	toEyeWorld /= distToEye;
+
 	float4 color = ComputeDirectionalLight2(
 		gDirLight,
-		gEyePositionWorld,
+		toEyeWorld,
 		normal.xyz);
 
 	return color;
@@ -131,9 +136,14 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 		return float4(1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
+	//Get point to eye vector
+	float3 toEyeWorld = gEyePositionWorld - depth.xyz;
+	float distToEye = length(toEyeWorld);
+	toEyeWorld /= distToEye;
+
 	float4 color = ComputePointLight2(
 		gPointLight,
-		gEyePositionWorld,
+		toEyeWorld,
 		depth.xyz,
 		normal.xyz);
 
@@ -163,9 +173,14 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 		return float4(1.0f, 1.0f, 1.0f, 0.0f);
 	}
 
+	//Get point to eye vector
+	float3 toEyeWorld = gEyePositionWorld - depth.xyz;
+	float distToEye = length(toEyeWorld);
+	toEyeWorld /= distToEye;
+
 	float4 color = ComputeSpotLight2(
 		gSpotLight,
-		gEyePositionWorld,
+		toEyeWorld,
 		depth.xyz,
 		normal.xyz);
 
@@ -180,14 +195,17 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 
 	if(depth.w == 1.0f)
 	{
-		color = float4(diffuseColor.rgb, 1.0f);
+		color = float4(diffuseColor.rgb, 1.0f) * gAmbientColor;
 	}
 	else
 	{
 		float4 normal = gNormalMap.Sample(SamplerPoint, input.tex);
 		float4 lightColor = gLightMap.Sample(SamplerPoint, input.tex);
 		
-		color = float4(diffuseColor.rgb * (lightColor.rgb + normal.w), 1.0f);
+		float specularFactor = lightColor.a;
+		float shadowFactor = normal.w;
+
+		color = float4(diffuseColor.rgb * gAmbientColor.rgb * (lightColor.rgb + specularFactor + shadowFactor), 1.0f);
 
 		if(gFogRange > 0)
 		{
@@ -197,6 +215,8 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 			color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
 		}
 	}
+	
+	color = saturate(color);
 	
 	return color;
 }

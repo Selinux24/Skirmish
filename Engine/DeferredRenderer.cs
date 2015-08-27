@@ -197,6 +197,7 @@ namespace Engine
                 context.GeometryMap[1],
                 context.GeometryMap[2]);
 
+            this.Game.Graphics.SetDepthStencilNone();
             this.Game.Graphics.SetBlendAdditive();
 #if DEBUG
             Stopwatch swDirectional = Stopwatch.StartNew();
@@ -339,9 +340,6 @@ namespace Engine
 #if DEBUG
             swSpot.Stop();
 #endif
-            this.Game.Graphics.SetBlendAlphaToCoverage();
-
-            this.Game.Graphics.SetRasterizerCullFrontFace();
 #if DEBUG
             context.Tag = new[]
             {
@@ -371,6 +369,7 @@ namespace Engine
                     context.GeometryMap[2]);
 
                 effect.UpdateComposer(
+                    context.Lights.AmbientColor,
                     context.Lights.FogStart,
                     context.Lights.FogRange,
                     context.Lights.FogColor,
@@ -383,6 +382,9 @@ namespace Engine
                 deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+
+                this.Game.Graphics.SetRasterizerDefault();
+                this.Game.Graphics.SetBlendDefault();
 
                 for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                 {

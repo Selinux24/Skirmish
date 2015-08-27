@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SharpDX;
 
 namespace Engine
@@ -29,27 +30,9 @@ namespace Engine
             {
                 DirectionalLights = new[]
                 {
-                    new SceneLightDirectional()
-                    {
-                        Ambient = new Color4(0.8f, 0.8f, 0.8f, 1.0f),
-                        Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                        Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                        Direction = Vector3.Normalize(new Vector3(0.57735f, -0.57735f, 0.57735f)),
-                    },
-                    new SceneLightDirectional()
-                    {
-                        Ambient = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                        Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                        Specular = new Color4(0.25f, 0.25f, 0.25f, 1.0f),
-                        Direction = Vector3.Normalize(new Vector3(-0.57735f, -0.57735f, 0.57735f)),
-                    },
-                    new SceneLightDirectional()
-                    {
-                        Ambient = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                        Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                        Specular = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
-                        Direction = Vector3.Normalize(new Vector3(0.0f, -0.707f, -0.707f)),
-                    },
+                    SceneLightDirectional.Primary,
+                    SceneLightDirectional.Secondary,
+                    SceneLightDirectional.Tertiary,
                 },
             };
         }
@@ -126,6 +109,40 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Gets enabled directional lights
+        /// </summary>
+        public SceneLightDirectional[] EnabledDirectionalLights
+        {
+            get
+            {
+                return this.directionalLights.FindAll(l => l.Enabled == true).ToArray();
+            }
+        }
+        /// <summary>
+        /// Gets enabled point lights
+        /// </summary>
+        public SceneLightPoint[] EnabledPointLights
+        {
+            get
+            {
+                return this.pointLights.FindAll(l => l.Enabled == true).ToArray();
+            }
+        }
+        /// <summary>
+        /// Gets enabled spot lights
+        /// </summary>
+        public SceneLightSpot[] EnabledSpotLights
+        {
+            get
+            {
+                return this.spotLights.FindAll(l => l.Enabled == true).ToArray();
+            }
+        }
+        /// <summary>
+        /// Ambient color
+        /// </summary>
+        public Color4 AmbientColor = Color.Gray;
         /// <summary>
         /// Fog start value
         /// </summary>

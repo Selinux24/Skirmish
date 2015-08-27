@@ -43,20 +43,35 @@ namespace Engine.Common
 
         public static float PickingAverageTime = 0f;
 
+        public static int RasterizerStateChanges = 0;
+
+        public static int BlendStateChanges = 0;
+
+        public static int DepthStencilStateChanges = 0;
+
         /// <summary>
         /// Clear counters
         /// </summary>
         public static void ClearAll()
         {
             FrameCount = 0;
+            
             DrawCallsPerFrame = 0;
+            
             InstancesPerFrame = 0;
+            
             UpdatesPerFrame = 0;
             UpdatesPerObject = 0;
             UpdatesPerInstance = 0;
+            
             TextureUpdates = 0;
+
             PicksPerFrame = 0;
             PickingAverageTime = 0f;
+
+            RasterizerStateChanges = 0;
+            BlendStateChanges = 0;
+            DepthStencilStateChanges = 0;
         }
         /// <summary>
         /// Clear per frame counters
@@ -64,13 +79,21 @@ namespace Engine.Common
         public static void ClearFrame()
         {
             DrawCallsPerFrame = 0;
+            
             InstancesPerFrame = 0;
+
             UpdatesPerFrame = 0;
             UpdatesPerObject = 0;
             UpdatesPerInstance = 0;
+
             TextureUpdates = 0;
+
             PicksPerFrame = 0;
             PickingAverageTime = 0f;
+
+            RasterizerStateChanges = 0;
+            BlendStateChanges = 0;
+            DepthStencilStateChanges = 0;
         }
     }
 }

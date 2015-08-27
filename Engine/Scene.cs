@@ -295,7 +295,7 @@ namespace Engine
 
                 #region Shadow mapping
 
-                if (this.Lights.EnableShadows && this.Lights.DirectionalLights.Length > 0)
+                if (this.Lights.EnableShadows && this.Lights.EnabledDirectionalLights.Length > 0)
                 {
                     #region Preparation
 #if DEBUG
@@ -306,7 +306,7 @@ namespace Engine
                     this.DrawShadowsContext.ShadowTransform = Matrix.Identity;
 
                     //Update shadow transform using first ligth direction
-                    this.ShadowMap.Update(this.Lights.DirectionalLights[0].Direction, this.SceneVolume);
+                    this.ShadowMap.Update(this.Lights.EnabledDirectionalLights[0].Direction, this.SceneVolume);
 #if DEBUG
                     swShadowsPreparation.Stop();
 
@@ -552,9 +552,6 @@ namespace Engine
                                 this.deferredRenderer.LightBuffer.RenderTarget,
                                 true, Color.Transparent);
 
-                            this.Game.Graphics.SetDepthStencilNone();
-                            this.Game.Graphics.SetBlendAlphaToCoverage();
-
                             //Draw scene lights on light buffer using g-buffer output
                             this.deferredRenderer.DrawLights(this.DrawContext);
 
@@ -596,6 +593,7 @@ namespace Engine
                     List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.Opaque);
                     if (otherComponents.Count > 0)
                     {
+                        #region Draw other
 #if DEBUG
                         Stopwatch swDraw = Stopwatch.StartNew();
 #endif
@@ -615,6 +613,7 @@ namespace Engine
 
                         deferred_draw2D = swDraw.ElapsedTicks;
 #endif
+                        #endregion
                     }
 
                     #endregion
@@ -756,7 +755,7 @@ namespace Engine
                 if (!components[i].Cull)
                 {
                     this.Game.Graphics.SetRasterizerDefault();
-                    this.Game.Graphics.SetBlendAlphaToCoverage();
+                    this.Game.Graphics.SetBlendDefault();
 
                     components[i].Draw(gameTime, context);
                 }

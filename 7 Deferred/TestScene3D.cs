@@ -9,6 +9,8 @@ namespace DeferredTest
 {
     public class TestScene3D : Scene
     {
+        private string titleMask = "Deferred Ligthning test: {0} directionals, {1} points and {2} spots";
+
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer help = null;
@@ -590,6 +592,12 @@ namespace DeferredTest
             {
                 this.load.Text = this.Game.RuntimeText;
             }
+
+            this.title.Text = string.Format(
+                this.titleMask, 
+                this.Lights.EnabledDirectionalLights.Length,
+                this.Lights.EnabledPointLights.Length,
+                this.Lights.EnabledSpotLights.Length);
         }
     }
 }

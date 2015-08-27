@@ -53,8 +53,6 @@ namespace Engine
 
                 if (technique != null)
                 {
-                    this.Game.Graphics.SetBlendAlphaToCoverage();
-
                     #region Per frame update
 
                     DrawerPool.EffectCubemap.UpdatePerFrame(

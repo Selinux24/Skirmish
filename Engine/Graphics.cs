@@ -1,7 +1,7 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
+using System;
 using BindFlags = SharpDX.Direct3D11.BindFlags;
 using BlendOperation = SharpDX.Direct3D11.BlendOperation;
 using BlendOption = SharpDX.Direct3D11.BlendOption;
@@ -102,9 +102,13 @@ namespace Engine
         /// </summary>
         private DepthStencilState depthStencilNone = null;
         /// <summary>
+        /// Default blend state
+        /// </summary>
+        private BlendState blendDefault = null;
+        /// <summary>
         /// Blend state for alpha blending
         /// </summary>
-        private BlendState blendAlphaToCoverage = null;
+        private BlendState blendAlphaEnabled = null;
         /// <summary>
         /// Blend state for transparent blending
         /// </summary>
@@ -325,6 +329,7 @@ namespace Engine
 
             #region Depth Stencil States
 
+            //Z-buffer enabled depth-stencil state
             this.depthStencilzBufferEnabled = new DepthStencilState(
                 this.Device,
                 new DepthStencilStateDescription()
@@ -354,6 +359,7 @@ namespace Engine
                     },
                 });
 
+            //Z-buffer disabled depth-stencil state
             this.depthStencilzBufferDisabled = new DepthStencilState(
                 this.Device,
                 new DepthStencilStateDescription()
@@ -383,6 +389,7 @@ namespace Engine
                     },
                 });
 
+            //No depth-stencil state
             this.depthStencilNone = new DepthStencilState(
                 this.Device,
                 new DepthStencilStateDescription()
@@ -396,6 +403,7 @@ namespace Engine
 
             #region Rasterizers
 
+            //Default rasterizer state
             this.rasterizerDefault = new RasterizerState(
                 this.Device,
                 new RasterizerStateDescription()
@@ -412,6 +420,7 @@ namespace Engine
                     SlopeScaledDepthBias = 0.0f,
                 });
 
+            //Wireframe rasterizer state
             this.rasterizerWireframe = new RasterizerState(
                 this.Device,
                 new RasterizerStateDescription()
@@ -428,6 +437,7 @@ namespace Engine
                     SlopeScaledDepthBias = 0.0f,
                 });
 
+            //No cull rasterizer state
             this.rasterizerNoCull = new RasterizerState(
                 this.Device,
                 new RasterizerStateDescription()
@@ -444,6 +454,7 @@ namespace Engine
                     SlopeScaledDepthBias = 0.0f,
                 });
 
+            //Counter clockwise cull rasterizer state
             this.rasterizerCullCounterClockwiseFace = new RasterizerState(
                 this.Device,
                 new RasterizerStateDescription()
@@ -465,6 +476,7 @@ namespace Engine
             #region Blend states
 
             {
+                //Default blend state (No alpha)
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = false;
@@ -477,12 +489,30 @@ namespace Engine
                 desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
 
-                this.blendAlphaToCoverage = new BlendState(this.Device, desc);
+                this.blendDefault = new BlendState(this.Device, desc);
             }
 
             {
+                //Alpha blend state
                 BlendStateDescription desc = new BlendStateDescription();
-                desc.AlphaToCoverageEnable = false;
+                desc.AlphaToCoverageEnable = true;
+                desc.IndependentBlendEnable = false;
+                desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].SourceBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+                this.blendAlphaEnabled = new BlendState(this.Device, desc);
+            }
+
+            {
+                //Transparent blend state
+                BlendStateDescription desc = new BlendStateDescription();
+                desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = false;
                 desc.RenderTarget[0].IsBlendEnabled = true;
                 desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
@@ -497,6 +527,7 @@ namespace Engine
             }
 
             {
+                //Additive blend state
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = false;
                 desc.IndependentBlendEnable = false;
@@ -532,7 +563,7 @@ namespace Engine
 
             this.DeviceContext.OutputMerger.SetDepthStencilState(this.depthStencilzBufferEnabled);
             this.DeviceContext.OutputMerger.SetTargets(this.depthStencilView, this.renderTargetView);
-            this.DeviceContext.OutputMerger.SetBlendState(this.blendAlphaToCoverage, Color.Transparent, -1);
+            this.DeviceContext.OutputMerger.SetBlendState(this.blendDefault, Color.Transparent, -1);
 
             this.DeviceContext.Rasterizer.State = this.rasterizerDefault;
             this.DeviceContext.Rasterizer.SetViewport(this.Viewport);
@@ -745,11 +776,18 @@ namespace Engine
             this.SetDepthStencilState(this.depthStencilNone);
         }
         /// <summary>
+        /// Sets default blend state
+        /// </summary>
+        public void SetBlendDefault()
+        {
+            this.SetBlendState(this.blendDefault, Color.Transparent, -1);
+        }
+        /// <summary>
         /// Sets alpha rendering blend state
         /// </summary>
-        public void SetBlendAlphaToCoverage()
+        public void SetBlendAlphaEnabled()
         {
-            this.SetBlendState(this.blendAlphaToCoverage, Color.Transparent, -1);
+            this.SetBlendState(this.blendAlphaEnabled, Color.Transparent, -1);
         }
         /// <summary>
         /// Sets transparent blend state
@@ -825,6 +863,8 @@ namespace Engine
                 this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(state);
 
                 this.currentDepthStencilState = state;
+
+                Common.Counters.DepthStencilStateChanges++;
             }
         }
         /// <summary>
@@ -840,6 +880,8 @@ namespace Engine
                 this.Device.ImmediateContext.OutputMerger.SetBlendState(state, blendFactor, sampleMask);
 
                 this.currentBlendState = state;
+
+                Common.Counters.BlendStateChanges++;
             }
         }
         /// <summary>
@@ -853,6 +895,8 @@ namespace Engine
                 this.Device.ImmediateContext.Rasterizer.State = state;
 
                 this.currentRasterizerState = state;
+
+                Common.Counters.RasterizerStateChanges++;
             }
         }
 
@@ -1000,10 +1044,16 @@ namespace Engine
                 this.rasterizerCullCounterClockwiseFace = null;
             }
 
-            if (this.blendAlphaToCoverage != null)
+            if (this.blendDefault != null)
             {
-                this.blendAlphaToCoverage.Dispose();
-                this.blendAlphaToCoverage = null;
+                this.blendDefault.Dispose();
+                this.blendDefault = null;
+            }
+
+            if (this.blendAlphaEnabled != null)
+            {
+                this.blendAlphaEnabled.Dispose();
+                this.blendAlphaEnabled = null;
             }
 
             if (this.blendTransparent != null)

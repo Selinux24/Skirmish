@@ -34,13 +34,19 @@ namespace Skybox
         //private LineListDrawer bboxMeshesDrawer = null;
         //private LineListDrawer bsphMeshesDrawer = null;
 
-        private ModelInstanced torchs = null;
         private ParticleSystem rain = null;
-        private ParticleSystem fire = null;
+
+        private ModelInstanced torchs = null;
+        private ParticleSystem torchFire = null;
+        private SceneLightPoint[] torchLights = null;
+
         private ParticleSystem movingfire = null;
+        private SceneLightPoint movingFireLight = null;
+
+        private int directionalLightCount = 3;
 
         public TestScene3D(Game game)
-            : base(game)
+            : base(game, SceneModesEnum.DeferredLightning)
         {
 
         }
@@ -48,6 +54,11 @@ namespace Skybox
         public override void Initialize()
         {
             base.Initialize();
+
+            this.Lights.EnableShadows = false;
+            this.Lights.Add(SceneLightDirectional.Primary);
+            this.Lights.Add(SceneLightDirectional.Secondary);
+            this.Lights.Add(SceneLightDirectional.Tertiary);
 
             #region Cursor
 
@@ -104,9 +115,24 @@ namespace Skybox
 
             #endregion
 
-            #region Lights
+            #region Moving fire
 
-            Vector3[] firePositions3D = new Vector3[this.firePositions.Length];
+            this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { Vector3.Zero }, 0.5f, "flare2.png"));
+
+            this.movingFireLight = new SceneLightPoint()
+            {
+                Enabled = true,
+                Position = Vector3.Zero,
+                Diffuse = Color.White,
+                Specular = Color.Blue,
+                Range = 10f,
+            };
+
+            this.Lights.Add(this.movingFireLight);
+
+            #endregion
+
+            #region Torchs
 
             this.torchs = this.AddInstancingModel(new ModelInstancedDescription()
             {
@@ -115,6 +141,10 @@ namespace Skybox
                 Instances = this.firePositions.Length,
                 Opaque = true,
             });
+
+            Vector3[] firePositions3D = new Vector3[this.firePositions.Length];
+            this.torchLights = new SceneLightPoint[this.firePositions.Length];
+
             for (int i = 0; i < this.firePositions.Length; i++)
             {
                 this.ruins.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i]);
@@ -125,35 +155,28 @@ namespace Skybox
                 BoundingBox bbox = this.torchs.Instances[i].GetBoundingBox();
 
                 firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.9f;
+
+                this.torchLights[i] = new SceneLightPoint()
+                {
+                    Enabled = true,
+                    Position = firePositions3D[i],
+                    Range = 5f,
+                    Diffuse = Color.Yellow,
+                    Specular = Color.Red,
+                };
+
+                this.Lights.Add(this.torchLights[i]);
             }
 
-            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions3D, 0.5f, "flare1.png"));
+            this.torchFire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions3D, 0.5f, "flare1.png"));
 
             #endregion
 
-            #region Particles
+            #region Rain
 
             this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, "raindrop.dds"));
-            this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { Vector3.Zero }, 0.5f, "flare2.png"));
 
             #endregion
-
-            SceneLightPoint pointLight = new SceneLightPoint()
-            {
-                Ambient = new Color4(1f, 0.5f, 0.5f, 1.0f),
-                Diffuse = new Color4(1f, 0.8f, 0.8f, 1.0f),
-                Specular = new Color4(1f, 0.8f, 0.8f, 1.0f),
-                Attenuation = new Vector3(1.0f, 0.0f, 0.0f),
-                Range = 20.0f,
-                Enabled = true,
-            };
-
-            this.Lights.PointLights = new []
-            {
-                pointLight,
-            };
-
-            this.Lights.EnableShadows = true;
 
             this.SceneVolume = this.ruins.GetBoundingSphere();
 
@@ -181,15 +204,18 @@ namespace Skybox
 
             #region Light
 
-            float d = 0.5f;
+            if (this.movingfire.Visible)
+            {
+                float d = 0.5f;
 
-            Vector3 position = Vector3.Zero;
-            position.X = 3.0f * d * (float)Math.Cos(0.4f * this.Game.GameTime.TotalSeconds);
-            position.Y = 1f;
-            position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
+                Vector3 position = Vector3.Zero;
+                position.X = 3.0f * d * (float)Math.Cos(0.4f * this.Game.GameTime.TotalSeconds);
+                position.Y = 1f;
+                position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
 
-            this.Lights.PointLights[0].Position = position;
-            this.movingfire.Manipulator.SetPosition(position);
+                this.movingfire.Manipulator.SetPosition(position);
+                this.movingFireLight.Position = this.movingfire.Manipulator.Position;
+            }
 
             #endregion
 
@@ -246,6 +272,10 @@ namespace Skybox
 
             #endregion
         }
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
+        }
         private void UpdateInput()
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
@@ -295,6 +325,28 @@ namespace Skybox
                 this.Camera.MoveBackward(this.Game.GameTime, slow);
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.Add))
+            {
+                this.directionalLightCount++;
+                if (this.directionalLightCount > 3)
+                {
+                    this.directionalLightCount = 0;
+                }
+
+                this.UpdateLights();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
+            {
+                this.directionalLightCount--;
+                if (this.directionalLightCount < 0)
+                {
+                    this.directionalLightCount = 3;
+                }
+
+                this.UpdateLights();
+            }
+
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
             {
@@ -335,6 +387,13 @@ namespace Skybox
 #else
             this.fps.Text = this.Game.RuntimeText;
 #endif
+        }
+
+        private void UpdateLights()
+        {
+            this.Lights.DirectionalLights[0].Enabled = this.directionalLightCount > 0;
+            this.Lights.DirectionalLights[1].Enabled = this.directionalLightCount > 1;
+            this.Lights.DirectionalLights[2].Enabled = this.directionalLightCount > 2;
         }
     }
 }

@@ -107,11 +107,7 @@ namespace Engine
                 {
                     if (this.EnableAlphaBlending)
                     {
-                        this.Game.Graphics.SetBlendTransparent();
-                    }
-                    else
-                    {
-                        this.Game.Graphics.SetBlendAlphaToCoverage();
+                        this.Game.Graphics.SetBlendAlphaEnabled();
                     }
 
                     #region Per frame update

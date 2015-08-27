@@ -287,21 +287,34 @@ void ComputeSpotLight(
 
 float4 ComputeDirectionalLight2(
 	DirectionalLight L,
-	float3 eyePosition,
+	float3 toEye,
 	float3 normal)
 {
 	//The light vector aims opposite the direction the light rays travel.
 	float3 lightVec = -L.Direction;
 
-	float brightness = max(0, dot(normal, lightVec)) / (length(lightVec) * length(normal));
-    brightness = clamp(brightness, 0, 1);
+	float intensity = max(0, dot(normal, lightVec)) / (length(lightVec) * length(normal));
+    intensity = clamp(intensity, 0, 1);
 
-    return float4(brightness * L.Diffuse.rgb, 0.0f);
+	//Flatten to avoid dynamic branching.
+	[flatten]
+	if(intensity > 0.0f)
+	{
+		//Specular reflection
+		float3 v = reflect(-lightVec, normal);
+		float specFactor = pow(max(dot(v, toEye), 0.0f), 0.5f);
+	
+		return float4(intensity * L.Diffuse.rgb, specFactor);
+	}
+	else
+	{
+		return 0.0f;
+	}
 }
 
 float4 ComputePointLight2(
 	PointLight L,
-	float3 eyePosition,
+	float3 toEye,
 	float3 pos,
 	float3 normal)
 {
@@ -312,6 +325,7 @@ float4 ComputePointLight2(
 	float d = length(lightVec);
 
 	//Range test.
+	[flatten]
 	if(d > L.Range)
 	{
 		return 0.0f;
@@ -322,14 +336,30 @@ float4 ComputePointLight2(
 		lightVec /= d;
 
 		float intensity = max(0, dot(normal, lightVec));
-		float4 light = intensity * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
-		return float4(light.rgb, 0.0f);
+
+		//Flatten to avoid dynamic branching.
+		[flatten]
+		if(intensity > 0.0f)
+		{
+			//Light color
+			float4 light = intensity * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
+
+			//Specular reflection
+			float3 v = reflect(-lightVec, normal);
+			float specFactor = pow(max(dot(v, toEye), 0.0f), 0.5f);
+
+			return float4(light.rgb, specFactor);
+		}
+		else
+		{
+			return 0.0f;
+		}
 	}
 }
 
 float4 ComputeSpotLight2(
 	SpotLight L,
-	float3 eyePosition,
+	float3 toEye,
 	float3 pos, 
 	float3 normal)
 {
@@ -340,6 +370,7 @@ float4 ComputeSpotLight2(
 	float d = length(lightVec);
 
 	//Range test.
+	[flatten]
 	if( d > L.Range )
 	{
 		return 0.0f;
@@ -352,11 +383,26 @@ float4 ComputeSpotLight2(
 		//Add diffuse and specular term, provided the surface is in the line of site of the light.
 		float intensity = max(0, dot(normal, lightVec));
 
-		//Scale by spotlight factor.
-		float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);
+		//Flatten to avoid dynamic branching.
+		[flatten]
+		if(intensity > 0.0f)
+		{
+			//Scale by spotlight factor.
+			float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);
 
-		float4 light = intensity * spot * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
-		return float4(light.rgb, 0.0f);
+			//Light color
+			float4 light = intensity * spot * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
+
+			//Specular reflection
+			float3 v = reflect(-lightVec, normal);
+			float specFactor = pow(max(dot(v, toEye), 0.0f), 0.5f);
+
+			return float4(light.rgb, specFactor);
+		}
+		else
+		{
+			return 0.0f;
+		}
 	}
 }
 

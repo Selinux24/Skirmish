@@ -109,11 +109,7 @@ namespace Engine
                 {
                     if (this.EnableAlphaBlending)
                     {
-                        this.Game.Graphics.SetBlendTransparent();
-                    }
-                    else
-                    {
-                        this.Game.Graphics.SetBlendAlphaToCoverage();
+                        this.Game.Graphics.SetBlendAlphaEnabled();
                     }
 
                     if (this.instances != null && this.instances.Length > 0)
