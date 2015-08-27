@@ -1228,10 +1228,12 @@ fxgroup
                 else 
                 
                 #line 202
-                  sample_indexable(texture2d)(float,float,float,float) r0.w, v1.xyxx, t1.xyzw, s0  // normal<0:Inf,1:Inf,2:Inf,3:Inf>
-                  sample_indexable(texture2d)(float,float,float,float) r3.xyzw, v1.xyxx, t3.xyzw, s0  // lightColor<0:Inf,1:Inf,2:Inf,3:Inf>
+                  sample_indexable(texture2d)(float,float,float,float) r0.w, v1.xyxx, t1.xyzw, s0  // normals<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 208
+                #line 205
+                  sample_indexable(texture2d)(float,float,float,float) r3.xyzw, v1.xyxx, t3.xyzw, s0  // lights<0:Inf,1:Inf,2:Inf,3:Inf>
+                
+                #line 209
                   mul r0.xyz, r0.xyzx, cb0[9].xyzx
                   add r3.xyz, r3.wwww, r3.xyzx
                   add r3.xyz, r0.wwww, r3.xyzx
@@ -1248,13 +1250,13 @@ fxgroup
                   add r3.xyzw, -r0.xyzw, cb0[26].xyzw
                   mad r3.xyzw, r1.xxxx, r3.xyzw, r0.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3>
                 
-                #line 210 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 211 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                   movc r2.xyzw, r1.wwww, r3.xyzw, r0.xyzw  // color<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3>
                 
                 #line 196
                 endif 
                 
-                #line 219
+                #line 220
                 mov_sat o0.xyzw, r2.xyzw  // PSCombineLights<0:NaN,1:NaN,2:NaN,3:[0f,1f]>
                 ret 
                 // Approximately 26 instruction slots used

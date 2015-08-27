@@ -116,6 +116,8 @@ namespace Engine
         public ParticleSystem(Game game, ParticleSystemDescription description)
             : base(game)
         {
+            this.Opaque = description.Opaque;
+
             this.maximumParticles = description.MaximumParticles;
             this.maximumAge = description.MaximumAge;
             this.emitterAge = description.EmitterAge;
@@ -354,6 +356,10 @@ namespace Engine
         /// Content path
         /// </summary>
         public string ContentPath = "Resources";
+        /// <summary>
+        /// Is opaque object
+        /// </summary>
+        public bool Opaque = true;
 
         /// <summary>
         /// Creates a fire particle system

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Engine;
+﻿using Engine;
 using Engine.Common;
 using Engine.PathFinding;
 using SharpDX;
+using System;
+using System.Collections.Generic;
 
 namespace GameLogic
 {
@@ -28,6 +28,8 @@ namespace GameLogic
         private SpriteButton butNextAction = null;
 
         private Model cursor3D = null;
+
+        private SceneLightPoint pointLight = null;
 
         private ModelInstanced model = null;
         private Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
@@ -106,7 +108,21 @@ namespace GameLogic
             this.NewGame();
 
             this.Lights.EnableShadows = true;
-            this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.AmbientColor = Color.Gray;
+            this.Lights.Add(SceneLightDirectional.Primary);
+            this.Lights.Add(SceneLightDirectional.Secondary);
+            this.Lights.Add(SceneLightDirectional.Tertiary);
+
+            this.pointLight = new SceneLightPoint()
+            {
+                Enabled = true,
+                Diffuse = Color.White,
+                Specular = Color.Gray,
+                Position = Vector3.Zero,
+                Range = 10f,
+            };
+
+            this.Lights.Add(this.pointLight);
 
             #region 3D models
 
@@ -115,7 +131,6 @@ namespace GameLogic
                 ContentPath = "Resources3D",
                 ModelFileName = "cursor.dae",
             });
-
             this.terrain = this.AddTerrain(new TerrainDescription()
             {
                 ModelFileName = "terrain.dae",
@@ -397,6 +412,8 @@ namespace GameLogic
                 {
                     this.GoToSoldier(this.skirmishGame.CurrentSoldier);
                 }
+
+                this.pointLight.Position = this.soldierModels[this.skirmishGame.CurrentSoldier].Manipulator.Position;
 
                 #endregion
 

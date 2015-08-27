@@ -199,13 +199,14 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 	}
 	else
 	{
-		float4 normal = gNormalMap.Sample(SamplerPoint, input.tex);
-		float4 lightColor = gLightMap.Sample(SamplerPoint, input.tex);
-		
-		float specularFactor = lightColor.a;
-		float shadowFactor = normal.w;
+		float4 normals = gNormalMap.Sample(SamplerPoint, input.tex);
+		float shadowFactor = normals.w;
 
-		color = float4(diffuseColor.rgb * gAmbientColor.rgb * (lightColor.rgb + specularFactor + shadowFactor), 1.0f);
+		float4 lights = gLightMap.Sample(SamplerPoint, input.tex);
+		float3 lightColor = lights.rgb;
+		float specularFactor = lights.a;
+
+		color = float4(diffuseColor.rgb * gAmbientColor.rgb * (lightColor + specularFactor + shadowFactor), 1.0f);
 
 		if(gFogRange > 0)
 		{
@@ -216,9 +217,7 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 		}
 	}
 	
-	color = saturate(color);
-	
-	return color;
+	return saturate(color);
 }
 
 technique11 DeferredDirectionalLight
