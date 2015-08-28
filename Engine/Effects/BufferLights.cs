@@ -85,11 +85,11 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
         /// <param name="lights">Lights configuration</param>
-        public BufferLights(Vector3 eyePosition, SceneLight lights)
+        public BufferLights(Vector3 eyePosition, SceneLights lights)
         {
             this.EyePositionWorld = eyePosition;
 
-            SceneLight setLights = lights != null ? lights : SceneLight.Empty;
+            SceneLights setLights = lights != null ? lights : SceneLights.Empty;
 
             this.DirectionalLight1 = new BufferDirectionalLight();
             this.DirectionalLight2 = new BufferDirectionalLight();

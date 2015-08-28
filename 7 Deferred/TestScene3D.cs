@@ -23,8 +23,11 @@ namespace DeferredTest
         private SpriteTexture bufferDrawer = null;
         private int textIntex = 0;
         private bool animateLights = false;
+        private SceneLightSpot spotLight = null;
 
         private LineListDrawer lineDrawer = null;
+
+        private Random rnd = new Random(0);
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
@@ -228,71 +231,19 @@ namespace DeferredTest
             this.Lights.FogStart = 50f;
             this.Lights.FogRange = 150f;
 
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = false;
-            this.Lights.DirectionalLights[2].Enabled = false;
-
-            int f = 12;
-            int l = (f - 1) * 5;
-
-            Random rnd = new Random(0);
-
-            for (int i = 0; i < f; i++)
-            {
-                for (int x = 0; x < f; x++)
-                {
-                    Vector3 lightPosition;
-                    if (!this.terrain.FindTopGroundPosition((i * 10) - l, (x * 10) - l, out lightPosition))
-                    {
-                        lightPosition = new Vector3((i * 10) - l, 1f, (x * 10) - l);
-                    }
-                    else
-                    {
-                        lightPosition.Y += 1f;
-                    }
-
-                    SceneLightPoint pointLight = new SceneLightPoint()
-                    {
-                        Enabled = true,
-                        Ambient = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                        Diffuse = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f),
-                        Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                        Attenuation = new Vector3(rnd.NextFloat(0, 1) > 0.5f ? 1 : -1, 0.0f, 0.0f),
-                        Range = rnd.NextFloat(1, 25),
-                        Position = lightPosition,
-                    };
-
-                    this.Lights.Add(pointLight);
-                }
-            }
-
-            SceneLightSpot spotLight = new SceneLightSpot()
-            {
-                Enabled = true,
-                Ambient = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                Diffuse = new Color4(1.0f, 0.0f, 0.0f, 1.0f),
-                Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                Attenuation = new Vector3(1.0f, 0.0f, 0.1f),
-                Position = new Vector3(0, 15, 0),
-                Direction = Vector3.Down,
-                Range = 30,
-                Spot = 20,
-            };
-
-            this.Lights.Add(spotLight);
-
             #region Light Sphere Marker
 
             Line[] axis = GeometryUtil.CreateAxis(Matrix.Identity, 5f);
 
             this.lineDrawer = this.AddLineListDrawer(axis, Color.Red);
             this.lineDrawer.Opaque = false;
+            this.lineDrawer.Active = false;
+            this.lineDrawer.Visible = false;
 
             #endregion
 
             #endregion
         }
-
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -411,22 +362,22 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F7))
             {
-                this.terrain.Visible = !this.terrain.Visible;
+                this.terrain.Active = this.terrain.Visible = !this.terrain.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F8))
             {
-                this.tank.Visible = !this.tank.Visible;
+                this.tank.Active = this.tank.Visible = !this.tank.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F9))
             {
-                this.helicopter.Visible = !this.helicopter.Visible;
+                this.helicopter.Active = this.helicopter.Visible = !this.helicopter.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F10))
             {
-                this.helicopters.Visible = !this.helicopters.Visible;
+                this.helicopters.Active = this.helicopters.Visible = !this.helicopters.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.D1))
@@ -512,50 +463,28 @@ namespace DeferredTest
                 this.Lights.EnableShadows = !this.Lights.EnableShadows;
             }
 
-            if (this.Lights.SpotLights.Length > 0)
+            if (this.Game.Input.KeyJustReleased(Keys.K))
             {
-                if (this.Game.Input.KeyPressed(Keys.Left))
+                if (this.spotLight == null)
                 {
-                    this.Lights.SpotLights[0].Position += (Vector3.Left) * 0.1f;
+                    this.CreateSpotLights();
                 }
-
-                if (this.Game.Input.KeyPressed(Keys.Right))
+                else
                 {
-                    this.Lights.SpotLights[0].Position += (Vector3.Right) * 0.1f;
+                    this.ClearSpotLights();
                 }
+            }
 
-                if (this.Game.Input.KeyPressed(Keys.Up))
+            if (this.Game.Input.KeyJustReleased(Keys.L))
+            {
+                if (this.Lights.EnabledPointLights.Length > 0)
                 {
-                    this.Lights.SpotLights[0].Position += (Vector3.ForwardLH) * 0.1f;
+                    this.ClearPointLigths();
                 }
-
-                if (this.Game.Input.KeyPressed(Keys.Down))
+                else
                 {
-                    this.Lights.SpotLights[0].Position += (Vector3.BackwardLH) * 0.1f;
+                    this.CreatePointLigths();
                 }
-
-                if (this.Game.Input.KeyPressed(Keys.PageUp))
-                {
-                    this.Lights.SpotLights[0].Position += (Vector3.Up) * 0.1f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.PageDown))
-                {
-                    this.Lights.SpotLights[0].Position += (Vector3.Down) * 0.1f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Add))
-                {
-                    this.Lights.SpotLights[0].Range += 0.1f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Subtract))
-                {
-                    this.Lights.SpotLights[0].Range -= 0.1f;
-                }
-
-                this.lineDrawer.Manipulator.SetPosition(this.Lights.SpotLights[0].Position);
-                this.lineDrawer.Manipulator.LookAt(this.Lights.SpotLights[0].Position + this.Lights.SpotLights[0].Direction, false);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.P))
@@ -563,25 +492,78 @@ namespace DeferredTest
                 this.animateLights = !this.animateLights;
             }
 
+            if (this.spotLight != null)
+            {
+                if (this.Game.Input.KeyPressed(Keys.Left))
+                {
+                    this.spotLight.Position += (Vector3.Left) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Right))
+                {
+                    this.spotLight.Position += (Vector3.Right) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Up))
+                {
+                    this.spotLight.Position += (Vector3.ForwardLH) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Down))
+                {
+                    this.spotLight.Position += (Vector3.BackwardLH) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.PageUp))
+                {
+                    this.spotLight.Position += (Vector3.Up) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.PageDown))
+                {
+                    this.spotLight.Position += (Vector3.Down) * 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Add))
+                {
+                    this.spotLight.Range += 0.1f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Subtract))
+                {
+                    this.spotLight.Range -= 0.1f;
+                }
+
+                this.lineDrawer.Manipulator.SetPosition(this.spotLight.Position);
+                this.lineDrawer.Manipulator.LookAt(this.spotLight.Position + this.spotLight.Direction, false);
+            }
+            else
+            {
+                this.lineDrawer.Visible = false;
+            }
+
             if (animateLights)
             {
-                for (int i = 1; i < this.Lights.PointLights.Length; i++)
+                if (this.Lights.EnabledPointLights.Length > 0)
                 {
-                    var l = this.Lights.PointLights[i];
-
-                    if (l.Attenuation.X == 1) l.Range += 0.5f;
-                    if (l.Attenuation.X == -1) l.Range -= 2f;
-
-                    if (l.Range <= 0)
+                    for (int i = 1; i < this.Lights.EnabledPointLights.Length; i++)
                     {
-                        l.Range = 0;
-                        l.Attenuation.X = 1;
-                    }
+                        var l = this.Lights.EnabledPointLights[i];
 
-                    if (l.Range >= 25)
-                    {
-                        l.Range = 25;
-                        l.Attenuation.X = -1;
+                        if (l.Attenuation.X == 1) l.Range += 0.5f;
+                        if (l.Attenuation.X == -1) l.Range -= 2f;
+
+                        if (l.Range <= 0)
+                        {
+                            l.Range = 0;
+                            l.Attenuation.X = 1;
+                        }
+
+                        if (l.Range >= 25)
+                        {
+                            l.Range = 25;
+                            l.Attenuation.X = -1;
+                        }
                     }
                 }
             }
@@ -598,6 +580,77 @@ namespace DeferredTest
                 this.Lights.EnabledDirectionalLights.Length,
                 this.Lights.EnabledPointLights.Length,
                 this.Lights.EnabledSpotLights.Length);
+        }
+
+        private void CreateSpotLights()
+        {
+            this.Lights.ClearSpotLights();
+
+            this.spotLight = new SceneLightSpot()
+            {
+                Enabled = true,
+                Ambient = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                Diffuse = new Color4(1.0f, 0.0f, 0.0f, 1.0f),
+                Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                Attenuation = new Vector3(1.0f, 0.0f, 0.1f),
+                Position = new Vector3(0, 15, 0),
+                Direction = Vector3.Down,
+                Range = 30,
+                Spot = 20,
+            };
+
+            this.Lights.Add(this.spotLight);
+
+            this.lineDrawer.Active = true;
+            this.lineDrawer.Visible = true;
+        }
+        private void ClearSpotLights()
+        {
+            this.Lights.ClearSpotLights();
+
+            this.lineDrawer.Active = false;
+            this.lineDrawer.Visible = false;
+        }
+
+        private void CreatePointLigths()
+        {
+            this.Lights.ClearPointLights();
+
+            int f = 12;
+            int l = (f - 1) * 5;
+
+            for (int i = 0; i < f; i++)
+            {
+                for (int x = 0; x < f; x++)
+                {
+                    Vector3 lightPosition;
+                    if (!this.terrain.FindTopGroundPosition((i * 10) - l, (x * 10) - l, out lightPosition))
+                    {
+                        lightPosition = new Vector3((i * 10) - l, 1f, (x * 10) - l);
+                    }
+                    else
+                    {
+                        lightPosition.Y += 1f;
+                    }
+
+                    SceneLightPoint pointLight = new SceneLightPoint()
+                    {
+                        Enabled = true,
+                        Ambient = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                        Diffuse = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f),
+                        Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                        Attenuation = new Vector3(rnd.NextFloat(0, 1) > 0.5f ? 1 : -1, 0.0f, 0.0f),
+                        Range = rnd.NextFloat(1, 25),
+                        Position = lightPosition,
+                    };
+
+                    this.Lights.Add(pointLight);
+                }
+            }
+        }
+        private void ClearPointLigths()
+        {
+            this.Lights.ClearPointLights();
         }
     }
 }

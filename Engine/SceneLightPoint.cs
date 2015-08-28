@@ -5,20 +5,8 @@ namespace Engine
     /// <summary>
     /// Point light
     /// </summary>
-    public class SceneLightPoint
+    public class SceneLightPoint : SceneLight
     {
-        /// <summary>
-        /// Ambient light
-        /// </summary>
-        public Color4 Ambient = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
-        /// <summary>
-        /// Diffuse absorption light
-        /// </summary>
-        public Color4 Diffuse = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
-        /// <summary>
-        /// Refraction light
-        /// </summary>
-        public Color4 Specular = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
         /// Ligth position
         /// </summary>
@@ -36,9 +24,5 @@ namespace Engine
         /// Inverse square law (0,0,1)
         /// </remarks>
         public Vector3 Attenuation = Vector3.Zero;
-        /// <summary>
-        /// Enables or disables the light
-        /// </summary>
-        public bool Enabled = false;
     }
 }

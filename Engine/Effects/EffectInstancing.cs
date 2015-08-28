@@ -559,7 +559,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
-            SceneLight lights,
+            SceneLights lights,
             ShaderResourceView shadowMap,
             Matrix shadowTransform)
         {

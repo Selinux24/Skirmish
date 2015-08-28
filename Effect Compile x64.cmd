@@ -1,4 +1,6 @@
 cd Engine\Resources
+del *.fxo
+del *.cod
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderBasic.fxo ShaderBasic.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadow.fxo ShaderShadow.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderFont.fxo ShaderFont.fx

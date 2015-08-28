@@ -327,6 +327,7 @@
     <Compile Include="Effects\EffectInstancingShadow.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LightBuffer.cs" />
+    <Compile Include="SceneLight.cs" />
     <Compile Include="SceneModesEnum.cs" />
     <Compile Include="SpriteTexture.cs" />
     <Compile Include="Curve.cs" />
@@ -408,7 +409,7 @@
     <Compile Include="Graphics.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="Scene.cs" />
-    <Compile Include="SceneLight.cs" />
+    <Compile Include="SceneLights.cs" />
     <Compile Include="TextDrawer.cs" />
     <Compile Include="Common\Joint.cs" />
     <Compile Include="Common\Mesh.cs" />

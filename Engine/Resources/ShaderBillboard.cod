@@ -600,13 +600,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t1.xxxx, s1, r1.z
                   add r1.w, r1.w, r2.x  // percentLit<0:[0f,2f]>
                   add r2.xyzw, r1.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.xyxx, t1.xxxx, s1, r1.z
+                  add r1.w, r1.w, r2.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t1.xxxx, s1, r1.z
+                  add r1.w, r1.w, r2.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r1.xyxx, t1.xxxx, s1, r1.z
+                  add r1.w, r1.w, r2.x  // percentLit<0:[0f,5f]>
+                  add r2.xyzw, r1.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.xyxx, t1.xxxx, s1, r1.z
+                  add r1.w, r1.w, r2.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, r2.zwzz, t1.xxxx, s1, r1.z
+                  add r1.w, r1.w, r2.x  // percentLit<0:[0f,7f]>
+                  add r2.xyzw, r1.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r2.xyxx, t1.xxxx, s1, r1.z
-                  add r1.x, r1.x, r1.w  // percentLit<0:[0f,3f]>
+                  add r1.x, r1.x, r1.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r2.zwzz, t1.xxxx, s1, r1.z
-                  add r1.x, r1.y, r1.x  // percentLit<0:[0f,4f]>
+                  add r1.x, r1.y, r1.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul r1.x, r1.x, l(0.250000)  // CalcShadowFactor<0:[0f,1f]>
+                  mul r1.x, r1.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
                 #line 447
                 else 
@@ -869,7 +881,7 @@ fxgroup
                 #line 150
                 mul o0.w, r4.w, cb1[1].w  // PSForwardBillboard<3:NaN:Inf>
                 ret 
-                // Approximately 187 instruction slots used
+                // Approximately 199 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;

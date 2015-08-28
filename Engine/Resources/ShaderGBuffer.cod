@@ -1059,13 +1059,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul r0.x, r0.x, l(0.250000)  // CalcShadowFactor<0:[0f,1f]>
+                  mul r0.x, r0.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
                 #line 199 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -1079,7 +1091,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx  // PSPositionNormalColor<4,5,6,7:[0f,1f]>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalColor<8,9,10>
                 ret 
-                // Approximately 22 instruction slots used
+                // Approximately 34 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -1287,13 +1299,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul r0.x, r0.x, l(0.250000)  // CalcShadowFactor<0:[0f,1f]>
+                  mul r0.x, r0.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
                 #line 199 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -1307,7 +1331,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx  // PSPositionNormalColor<4,5,6,7:[0f,1f]>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalColor<8,9,10>
                 ret 
-                // Approximately 22 instruction slots used
+                // Approximately 34 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -1556,13 +1580,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul r0.x, r0.x, l(0.250000)  // CalcShadowFactor<0:[0f,1f]>
+                  mul r0.x, r0.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
                 #line 199 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -1576,7 +1612,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx  // PSPositionNormalColor<4,5,6,7:[0f,1f]>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalColor<8,9,10>
                 ret 
-                // Approximately 22 instruction slots used
+                // Approximately 34 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -1838,13 +1874,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t0.xxxx, s0, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t0.xxxx, s0, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t0.xxxx, s0, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul r0.x, r0.x, l(0.250000)  // CalcShadowFactor<0:[0f,1f]>
+                  mul r0.x, r0.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
                 #line 199 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -1858,7 +1906,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx  // PSPositionNormalColor<4,5,6,7:[0f,1f]>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalColor<8,9,10>
                 ret 
-                // Approximately 22 instruction slots used
+                // Approximately 34 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -2753,13 +2801,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul r0.x, r0.x, l(0.250000)  // CalcShadowFactor<0:[0f,1f]>
+                  mul r0.x, r0.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
                 #line 385 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -2772,7 +2832,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx  // PSPositionNormalTexture<4,5,6,7:[0f,1f]>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTexture<8,9,10>
                 ret 
-                // Approximately 22 instruction slots used
+                // Approximately 34 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -2974,13 +3034,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul r0.x, r0.x, l(0.250000)  // CalcShadowFactor<0:[0f,1f]>
+                  mul r0.x, r0.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
                 #line 385 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -2993,7 +3065,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx  // PSPositionNormalTexture<4,5,6,7:[0f,1f]>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTexture<8,9,10>
                 ret 
-                // Approximately 22 instruction slots used
+                // Approximately 34 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3244,13 +3316,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul r0.x, r0.x, l(0.250000)  // CalcShadowFactor<0:[0f,1f]>
+                  mul r0.x, r0.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
                 #line 385 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -3263,7 +3347,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx  // PSPositionNormalTexture<4,5,6,7:[0f,1f]>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTexture<8,9,10>
                 ret 
-                // Approximately 22 instruction slots used
+                // Approximately 34 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3519,13 +3603,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t1.xxxx, s1, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t1.xxxx, s1, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t1.xxxx, s1, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul r0.x, r0.x, l(0.250000)  // CalcShadowFactor<0:[0f,1f]>
+                  mul r0.x, r0.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
                 #line 385 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -3538,7 +3634,7 @@ fxgroup
                 mov o1.xyzw, r0.yzwx  // PSPositionNormalTexture<4,5,6,7:[0f,1f]>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTexture<8,9,10>
                 ret 
-                // Approximately 22 instruction slots used
+                // Approximately 34 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -3772,13 +3868,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul o1.w, r0.x, l(0.250000)  // shadow<0:[0f,1f]>
+                  mul o1.w, r0.x, l(0.111111)  // shadow<0:[0f,1f]>
                 
                 #line 501 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -3789,7 +3897,7 @@ fxgroup
                 div o2.w, v0.z, v0.w  // PSPositionNormalTextureTangent<11:NaN:Inf>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTextureTangent<8,9,10>
                 ret 
-                // Approximately 35 instruction slots used
+                // Approximately 47 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -4027,13 +4135,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul o1.w, r0.x, l(0.250000)  // shadow<0:[0f,1f]>
+                  mul o1.w, r0.x, l(0.111111)  // shadow<0:[0f,1f]>
                 
                 #line 501 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -4044,7 +4164,7 @@ fxgroup
                 div o2.w, v0.z, v0.w  // PSPositionNormalTextureTangent<11:NaN:Inf>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTextureTangent<8,9,10>
                 ret 
-                // Approximately 35 instruction slots used
+                // Approximately 47 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -4336,13 +4456,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul o1.w, r0.x, l(0.250000)  // shadow<0:[0f,1f]>
+                  mul o1.w, r0.x, l(0.111111)  // shadow<0:[0f,1f]>
                 
                 #line 501 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -4353,7 +4485,7 @@ fxgroup
                 div o2.w, v0.z, v0.w  // PSPositionNormalTextureTangent<11:NaN:Inf>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTextureTangent<8,9,10>
                 ret 
-                // Approximately 35 instruction slots used
+                // Approximately 47 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;
@@ -4650,13 +4782,25 @@ fxgroup
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
                   add r0.w, r0.w, r1.x  // percentLit<0:[0f,2f]>
                   add r1.xyzw, r0.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,5f]>
+                  add r1.xyzw, r0.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.zwzz, t2.xxxx, s2, r0.z
+                  add r0.w, r0.w, r1.x  // percentLit<0:[0f,7f]>
+                  add r1.xyzw, r0.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.x, r1.xyxx, t2.xxxx, s2, r0.z
-                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,3f]>
+                  add r0.x, r0.x, r0.w  // percentLit<0:[0f,8f]>
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r0.y, r1.zwzz, t2.xxxx, s2, r0.z
-                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,4f]>
+                  add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
                 #line 435
-                  mul o1.w, r0.x, l(0.250000)  // shadow<0:[0f,1f]>
+                  mul o1.w, r0.x, l(0.111111)  // shadow<0:[0f,1f]>
                 
                 #line 501 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 else 
@@ -4667,7 +4811,7 @@ fxgroup
                 div o2.w, v0.z, v0.w  // PSPositionNormalTextureTangent<11:NaN:Inf>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTextureTangent<8,9,10>
                 ret 
-                // Approximately 35 instruction slots used
+                // Approximately 47 instruction slots used
                             
             };
             RasterizerState = RasterizerSolid;

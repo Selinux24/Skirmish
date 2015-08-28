@@ -109,9 +109,6 @@ namespace GameLogic
 
             this.Lights.EnableShadows = true;
             this.Lights.AmbientColor = Color.Gray;
-            this.Lights.Add(SceneLightDirectional.Primary);
-            this.Lights.Add(SceneLightDirectional.Secondary);
-            this.Lights.Add(SceneLightDirectional.Tertiary);
 
             this.pointLight = new SceneLightPoint()
             {

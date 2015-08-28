@@ -104,7 +104,7 @@ namespace Engine
                 World = Matrix.Identity,
                 ViewProjection = view * proj,
                 EyePosition = eyePos,
-                Lights = SceneLight.Default,
+                Lights = SceneLights.Default,
             };
         }
         /// <summary>

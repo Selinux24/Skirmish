@@ -426,13 +426,13 @@ float CalcShadowFactor(float4 shadowPosH, Texture2D shadowMap)
 	// 3×3 box filter pattern. Each sample does a 4-tap PCF.
 	float percentLit = 0.0f;
 	[unroll]
-	for(int i = 0; i < 4; ++i)
+	for(int i = 0; i < 9; ++i)
 	{
 		percentLit += shadowMap.SampleCmpLevelZero(SamplerShadow, shadowPosH.xy + SamplerShadowOffsets[i], depth).r;
 	}
 
 	// Average the samples.
-	return percentLit / 4.0f;
+	return percentLit / 9.0f;
 }
 
 LightOutput ComputeLights(LightInput input, Texture2D shadowMap)

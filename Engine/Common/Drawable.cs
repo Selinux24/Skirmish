@@ -124,7 +124,7 @@ namespace Engine.Common
         /// <summary>
         /// Lights
         /// </summary>
-        public SceneLight Lights;
+        public SceneLights Lights;
         /// <summary>
         /// Shadow map
         /// </summary>

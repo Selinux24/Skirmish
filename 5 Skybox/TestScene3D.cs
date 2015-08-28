@@ -56,9 +56,6 @@ namespace Skybox
             base.Initialize();
 
             this.Lights.EnableShadows = false;
-            this.Lights.Add(SceneLightDirectional.Primary);
-            this.Lights.Add(SceneLightDirectional.Secondary);
-            this.Lights.Add(SceneLightDirectional.Tertiary);
 
             #region Cursor
 
@@ -276,6 +273,7 @@ namespace Skybox
         {
             base.Draw(gameTime);
         }
+
         private void UpdateInput()
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
@@ -388,7 +386,6 @@ namespace Skybox
             this.fps.Text = this.Game.RuntimeText;
 #endif
         }
-
         private void UpdateLights()
         {
             this.Lights.DirectionalLights[0].Enabled = this.directionalLightCount > 0;

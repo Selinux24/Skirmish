@@ -113,7 +113,7 @@ namespace Engine
         /// <summary>
         /// Scene lights
         /// </summary>
-        public SceneLight Lights { get; private set; }
+        public SceneLights Lights { get; private set; }
         /// <summary>
         /// Scene volume
         /// </summary>
@@ -141,7 +141,7 @@ namespace Engine
                 this.Game.Form.RenderWidth,
                 this.Game.Form.RenderHeight);
 
-            this.Lights = SceneLight.Default;
+            this.Lights = SceneLights.Default;
 
             this.SceneVolume = new BoundingSphere(Vector3.Zero, 1000);
 

@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Directional light
     /// </summary>
-    public class SceneLightDirectional
+    public class SceneLightDirectional : SceneLight
     {
         /// <summary>
         /// Primary default light source
@@ -16,6 +16,7 @@ namespace Engine
             {
                 return new SceneLightDirectional()
                 {
+                    Name = "Primary",
                     Ambient = new Color4(0.8f, 0.8f, 0.8f, 1.0f),
                     Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
                     Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
@@ -33,6 +34,7 @@ namespace Engine
             {
                 return new SceneLightDirectional()
                 {
+                    Name = "Secondary",
                     Ambient = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
                     Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
                     Specular = new Color4(0.25f, 0.25f, 0.25f, 1.0f),
@@ -50,6 +52,7 @@ namespace Engine
             {
                 return new SceneLightDirectional()
                 {
+                    Name = "Tertiary",
                     Ambient = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
                     Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
                     Specular = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
@@ -60,24 +63,8 @@ namespace Engine
         }
 
         /// <summary>
-        /// Ambient light
-        /// </summary>
-        public Color4 Ambient = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
-        /// <summary>
-        /// Diffuse absorption light
-        /// </summary>
-        public Color4 Diffuse = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
-        /// <summary>
-        /// Refraction light
-        /// </summary>
-        public Color4 Specular = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
-        /// <summary>
         /// Light direction
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
-        /// <summary>
-        /// Enables or disables the light
-        /// </summary>
-        public bool Enabled = false;
     }
 }

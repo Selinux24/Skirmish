@@ -54,13 +54,18 @@ namespace ModelDrawing
                 range = Vector3.Distance(this.Camera.Position, p);
             }
 
-            SceneLightSpot spotLight = new SceneLightSpot();
-            spotLight.SetDefault();
-            spotLight.Position = this.Camera.Position;
-            spotLight.Direction = this.Camera.Direction;
-            spotLight.Range = range;
-            spotLight.Spot = 0f;
-            spotLight.Enabled = true;
+            SceneLightSpot spotLight = new SceneLightSpot()
+            {
+                Ambient = Color.Yellow,
+                Diffuse = Color.White,
+                Specular = Color.LightBlue,
+                Range = range,
+                Spot = 0f,
+                Attenuation = new Vector3(1f, 0f, 0f),
+                Position = this.Camera.Position,
+                Direction = this.Camera.Direction,
+                Enabled = true,
+            };
 
             this.Lights.SpotLights = new[]
             {

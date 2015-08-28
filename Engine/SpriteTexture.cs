@@ -130,7 +130,7 @@ namespace Engine
                 EyePosition = new Vector3(0, 0, -1),
                 World = man.LocalTransform,
                 ViewProjection = viewProjection,
-                Lights = SceneLight.Default,
+                Lights = SceneLights.Default,
             };
         }
         /// <summary>
