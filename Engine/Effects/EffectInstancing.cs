@@ -71,11 +71,11 @@ namespace Engine.Effects
         /// <summary>
         /// Point lights effect variable
         /// </summary>
-        private EffectVariable pointLight = null;
+        private EffectVariable pointLights = null;
         /// <summary>
         /// Spot light effect variable
         /// </summary>
-        private EffectVariable spotLight = null;
+        private EffectVariable spotLights = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
@@ -160,48 +160,48 @@ namespace Engine.Effects
         /// <summary>
         /// Point light
         /// </summary>
-        protected BufferPointLight PointLight
+        protected BufferPointLight[] PointLights
         {
             get
             {
-                using (DataStream ds = this.pointLight.GetRawValue(default(BufferPointLight).Stride))
+                using (DataStream ds = this.pointLights.GetRawValue(default(BufferPointLight).Stride * 4))
                 {
                     ds.Position = 0;
 
-                    return ds.Read<BufferPointLight>();
+                    return ds.ReadRange<BufferPointLight>(4);
                 }
             }
             set
             {
-                using (DataStream ds = DataStream.Create<BufferPointLight>(new BufferPointLight[] { value }, true, false))
+                using (DataStream ds = DataStream.Create<BufferPointLight>(value, true, false))
                 {
                     ds.Position = 0;
 
-                    this.pointLight.SetRawValue(ds, default(BufferPointLight).Stride);
+                    this.pointLights.SetRawValue(ds, default(BufferPointLight).Stride * 4);
                 }
             }
         }
         /// <summary>
         /// Spot light
         /// </summary>
-        protected BufferSpotLight SpotLight
+        protected BufferSpotLight[] SpotLights
         {
             get
             {
-                using (DataStream ds = this.spotLight.GetRawValue(default(BufferSpotLight).Stride))
+                using (DataStream ds = this.spotLights.GetRawValue(default(BufferSpotLight).Stride * 4))
                 {
                     ds.Position = 0;
 
-                    return ds.Read<BufferSpotLight>();
+                    return ds.ReadRange<BufferSpotLight>(4);
                 }
             }
             set
             {
-                using (DataStream ds = DataStream.Create<BufferSpotLight>(new BufferSpotLight[] { value }, true, false))
+                using (DataStream ds = DataStream.Create<BufferSpotLight>(value, true, false))
                 {
                     ds.Position = 0;
 
-                    this.spotLight.SetRawValue(ds, default(BufferSpotLight).Stride);
+                    this.spotLights.SetRawValue(ds, default(BufferSpotLight).Stride * 4);
                 }
             }
         }
@@ -462,8 +462,8 @@ namespace Engine.Effects
             this.shadowTransform = this.Effect.GetVariableByName("gShadowTransform").AsMatrix();
             this.material = this.Effect.GetVariableByName("gMaterial");
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
-            this.pointLight = this.Effect.GetVariableByName("gPointLight");
-            this.spotLight = this.Effect.GetVariableByName("gSpotLight");
+            this.pointLights = this.Effect.GetVariableByName("gPointLights");
+            this.spotLights = this.Effect.GetVariableByName("gSpotLights");
             this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
@@ -577,8 +577,20 @@ namespace Engine.Effects
                     lights.DirectionalLights.Length > 1 ? new BufferDirectionalLight(lights.DirectionalLights[1]) : new BufferDirectionalLight(),
                     lights.DirectionalLights.Length > 2 ? new BufferDirectionalLight(lights.DirectionalLights[2]) : new BufferDirectionalLight(),
                 };
-                this.PointLight = lights.PointLights.Length > 0 ? new BufferPointLight(lights.PointLights[0]) : new BufferPointLight();
-                this.SpotLight = lights.SpotLights.Length > 0 ? new BufferSpotLight(lights.SpotLights[0]) : new BufferSpotLight();
+                this.PointLights = new[]
+                {
+                    lights.PointLights.Length > 0 ? new BufferPointLight(lights.PointLights[0]) : new BufferPointLight(),
+                    lights.PointLights.Length > 1 ? new BufferPointLight(lights.PointLights[1]) : new BufferPointLight(),
+                    lights.PointLights.Length > 2 ? new BufferPointLight(lights.PointLights[2]) : new BufferPointLight(),
+                    lights.PointLights.Length > 3 ? new BufferPointLight(lights.PointLights[3]) : new BufferPointLight(),
+                };
+                this.SpotLights = new[]
+                {
+                    lights.SpotLights.Length > 0 ? new BufferSpotLight(lights.SpotLights[0]) : new BufferSpotLight(),
+                    lights.SpotLights.Length > 1 ? new BufferSpotLight(lights.SpotLights[1]) : new BufferSpotLight(),
+                    lights.SpotLights.Length > 2 ? new BufferSpotLight(lights.SpotLights[2]) : new BufferSpotLight(),
+                    lights.SpotLights.Length > 3 ? new BufferSpotLight(lights.SpotLights[3]) : new BufferSpotLight(),
+                };
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;
@@ -602,8 +614,8 @@ namespace Engine.Effects
                 this.EyePositionWorld = Vector3.Zero;
 
                 this.DirLights = new BufferDirectionalLight[3];
-                this.PointLight = new BufferPointLight();
-                this.SpotLight = new BufferSpotLight();
+                this.PointLights = new BufferPointLight[4];
+                this.SpotLights = new BufferSpotLight[4];
 
                 this.FogStart = 0;
                 this.FogRange = 0;
