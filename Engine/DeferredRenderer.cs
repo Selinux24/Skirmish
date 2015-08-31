@@ -251,25 +251,20 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
+                this.Game.Graphics.SetRasterizerCullFrontFace();
+
                 for (int i = 0; i < pointLights.Length; i++)
                 {
                     var light = pointLights[i];
 
                     if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Range)) != ContainmentType.Disjoint)
                     {
-                        float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
-                        if (cameraToCenter > light.Range)
-                        {
-                            this.Game.Graphics.SetRasterizerDefault();
-                        }
-                        else
-                        {
-                            this.Game.Graphics.SetRasterizerCullFrontFace();
-                        }
+                        Matrix local = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
-                        Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
-
-                        effect.UpdatePerLight(light, world, context.ViewProjection);
+                        effect.UpdatePerLight(
+                            light, 
+                            context.World * local, 
+                            context.ViewProjection);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                         {
@@ -303,25 +298,20 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
+                this.Game.Graphics.SetRasterizerCullFrontFace();
+
                 for (int i = 0; i < spotLights.Length; i++)
                 {
                     var light = spotLights[i];
 
                     if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Range)) != ContainmentType.Disjoint)
                     {
-                        float cameraToCenter = Vector3.Distance(context.EyePosition, light.Position);
-                        if (cameraToCenter > light.Range)
-                        {
-                            this.Game.Graphics.SetRasterizerDefault();
-                        }
-                        else
-                        {
-                            this.Game.Graphics.SetRasterizerCullFrontFace();
-                        }
+                        Matrix local = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
-                        Matrix world = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
-
-                        effect.UpdatePerLight(light, world, context.ViewProjection);
+                        effect.UpdatePerLight(
+                            light, 
+                            context.World * local, 
+                            context.ViewProjection);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                         {
