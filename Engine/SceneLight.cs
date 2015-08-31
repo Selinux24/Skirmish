@@ -16,17 +16,17 @@ namespace Engine
         /// </summary>
         public bool Enabled = false;
         /// <summary>
-        /// Ambient light
+        /// Light color
         /// </summary>
-        public Color4 Ambient = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+        public Color4 LightColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
-        /// Diffuse absorption light
+        /// Ambient intensity
         /// </summary>
-        public Color4 Diffuse = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+        public float AmbientIntensity = 1f;
         /// <summary>
-        /// Refraction light
+        /// Diffuse intensity
         /// </summary>
-        public Color4 Specular = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+        public float DiffuseIntensity = 1f;
 
         /// <summary>
         /// Gets the text representation of the light

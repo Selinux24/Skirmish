@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using Engine;
+using Engine.Common;
 using Engine.PathFinding;
 using SharpDX;
-using Engine.Common;
 
 namespace DeferredTest
 {
@@ -230,6 +230,9 @@ namespace DeferredTest
             this.Lights.FogColor = Color.WhiteSmoke;
             this.Lights.FogStart = 50f;
             this.Lights.FogRange = 150f;
+
+            this.Lights.ClearDirectionalLights();
+            this.Lights.Add(SceneLightDirectional.Primary);
 
             #region Light Sphere Marker
 
@@ -526,12 +529,12 @@ namespace DeferredTest
 
                 if (this.Game.Input.KeyPressed(Keys.Add))
                 {
-                    this.spotLight.Range += 0.1f;
+                    //this.spotLight.Range += 0.1f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.Subtract))
                 {
-                    this.spotLight.Range -= 0.1f;
+                    //this.spotLight.Range -= 0.1f;
                 }
 
                 this.lineDrawer.Manipulator.SetPosition(this.spotLight.Position);
@@ -548,22 +551,22 @@ namespace DeferredTest
                 {
                     for (int i = 1; i < this.Lights.EnabledPointLights.Length; i++)
                     {
-                        var l = this.Lights.EnabledPointLights[i];
+                        //var l = this.Lights.EnabledPointLights[i];
 
-                        if (l.Attenuation.X == 1) l.Range += 0.5f;
-                        if (l.Attenuation.X == -1) l.Range -= 2f;
+                        //if (l.Attenuation.X == 1) l.Range += 0.5f;
+                        //if (l.Attenuation.X == -1) l.Range -= 2f;
 
-                        if (l.Range <= 0)
-                        {
-                            l.Range = 0;
-                            l.Attenuation.X = 1;
-                        }
+                        //if (l.Range <= 0)
+                        //{
+                        //    l.Range = 0;
+                        //    l.Attenuation.X = 1;
+                        //}
 
-                        if (l.Range >= 25)
-                        {
-                            l.Range = 25;
-                            l.Attenuation.X = -1;
-                        }
+                        //if (l.Range >= 25)
+                        //{
+                        //    l.Range = 25;
+                        //    l.Attenuation.X = -1;
+                        //}
                     }
                 }
             }
@@ -576,7 +579,7 @@ namespace DeferredTest
             }
 
             this.title.Text = string.Format(
-                this.titleMask, 
+                this.titleMask,
                 this.Lights.EnabledDirectionalLights.Length,
                 this.Lights.EnabledPointLights.Length,
                 this.Lights.EnabledSpotLights.Length);
@@ -589,13 +592,10 @@ namespace DeferredTest
             this.spotLight = new SceneLightSpot()
             {
                 Enabled = true,
-                Ambient = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                Diffuse = new Color4(1.0f, 0.0f, 0.0f, 1.0f),
-                Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                LightColor = Color.Yellow,
                 Attenuation = new Vector3(1.0f, 0.0f, 0.1f),
                 Position = new Vector3(0, 15, 0),
                 Direction = Vector3.Down,
-                Range = 30,
                 Spot = 20,
             };
 
@@ -636,11 +636,10 @@ namespace DeferredTest
                     SceneLightPoint pointLight = new SceneLightPoint()
                     {
                         Enabled = true,
-                        Ambient = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                        Diffuse = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f),
-                        Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                        LightColor = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f),
+                        AmbientIntensity = rnd.NextFloat(0, 1),
+                        DiffuseIntensity = rnd.NextFloat(0, 1),
                         Attenuation = new Vector3(rnd.NextFloat(0, 1) > 0.5f ? 1 : -1, 0.0f, 0.0f),
-                        Range = rnd.NextFloat(1, 25),
                         Position = lightPosition,
                     };
 

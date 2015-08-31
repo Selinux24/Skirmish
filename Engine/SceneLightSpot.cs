@@ -12,10 +12,6 @@ namespace Engine
         /// </summary>
         public Vector3 Position = Vector3.Zero;
         /// <summary>
-        /// Light range
-        /// </summary>
-        public float Range = 0.0f;
-        /// <summary>
         /// Ligth direction
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
@@ -32,5 +28,10 @@ namespace Engine
         /// Inverse square law (0,0,1)
         /// </remarks>
         public Vector3 Attenuation = Vector3.Zero;
+
+        public float GetRange()
+        {
+            return 0f;
+        }
     }
 }

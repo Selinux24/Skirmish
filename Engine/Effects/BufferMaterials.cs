@@ -12,25 +12,17 @@ namespace Engine.Effects
     public struct BufferMaterials : IBufferData
     {
         /// <summary>
-        /// Ambien color
-        /// </summary>
-        public Color4 Ambient;
-        /// <summary>
         /// Diffuse color
         /// </summary>
         public Color4 Diffuse;
         /// <summary>
-        /// Specular color
+        /// Specular intensity
         /// </summary>
-        public Color4 Specular;
+        public float SpecularIntensity;
         /// <summary>
-        /// Reflect color
+        /// Specular power
         /// </summary>
-        public Color4 Reflect;
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public float Padding;
+        public float SpecularPower;
         /// <summary>
         /// Size in bytes
         /// </summary>
@@ -48,12 +40,9 @@ namespace Engine.Effects
         /// <param name="material">Material</param>
         public BufferMaterials(Material material)
         {
-            this.Ambient = material.AmbientColor;
             this.Diffuse = material.DiffuseColor;
-            this.Specular = material.SpecularColor;
-            this.Specular.Alpha = material.Shininess;
-            this.Reflect = material.ReflectiveColor;
-            this.Padding = 1000f;
+            this.SpecularIntensity = material.SpecularIntensity;
+            this.SpecularPower = material.SpecularPower;
         }
 
         /// <summary>
@@ -62,12 +51,9 @@ namespace Engine.Effects
         /// <param name="material">Material</param>
         public void SetMaterial(Material material)
         {
-            this.Ambient = material.AmbientColor;
             this.Diffuse = material.DiffuseColor;
-            this.Specular = material.SpecularColor;
-            this.Specular.Alpha = material.Shininess;
-            this.Reflect = material.ReflectiveColor;
-            this.Padding = 1000f;
+            this.SpecularIntensity = material.SpecularIntensity;
+            this.SpecularPower = material.SpecularPower;
         }
     };
 }

@@ -5,9 +5,9 @@ cbuffer cbPerFrame : register (b0)
 {
 	float4x4 gWorldViewProjection;
 	float4x4 gShadowTransform; 
-	DirectionalLight gDirLights[3];
-	PointLight gPointLight;
-	SpotLight gSpotLight;
+	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
+	PointLight gPointLights[MAX_LIGHTS_POINT];
+	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
 	float3 gEyePositionWorld;
 	float gFogStart;
 	float gFogRange;
@@ -119,31 +119,29 @@ void GSSMBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveI
 
 float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 {
-	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
-	float distToEye = length(toEyeWorld);
-	toEyeWorld /= distToEye;
-
-	LightInput lInput = (LightInput)0;
-	lInput.toEyeWorld = toEyeWorld;
-	lInput.positionWorld = input.positionWorld;
-	lInput.normalWorld = input.normalWorld;
-	lInput.material = gMaterial;
-	lInput.dirLights = gDirLights;
-	lInput.pointLight = gPointLight;
-	lInput.spotLight = gSpotLight;
-	lInput.enableShadows = gEnableShadows;
-	lInput.shadowPosition = input.shadowHomogeneous;
-
-	LightOutput lOutput = ComputeLights(lInput, gShadowMap);
-
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
 	clip(textureColor.a - 0.05f);
 
-	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
+	float4 litColor = ComputeLights(
+		gDirLights, 
+		gPointLights, 
+		gSpotLights,
+		textureColor.rgb,
+		gEyePositionWorld,
+		input.positionWorld,
+		input.normalWorld,
+		gMaterial.SpecularIntensity,
+		gMaterial.SpecularPower,
+		gEnableShadows,
+		input.shadowHomogeneous,
+		gShadowMap);
 
 	if(gFogRange > 0)
 	{
+		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+		float distToEye = length(toEyeWorld);
+
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 

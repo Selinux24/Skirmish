@@ -56,10 +56,7 @@ namespace ModelDrawing
 
             SceneLightSpot spotLight = new SceneLightSpot()
             {
-                Ambient = Color.Yellow,
-                Diffuse = Color.White,
-                Specular = Color.LightBlue,
-                Range = range,
+                LightColor = Color.Yellow,
                 Spot = 0f,
                 Attenuation = new Vector3(1f, 0f, 0f),
                 Position = this.Camera.Position,

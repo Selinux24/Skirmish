@@ -147,27 +147,25 @@ namespace Collada
 
             SceneLightPoint pointLight = new SceneLightPoint()
             {
-                Ambient = new Color4(0.3f, 0.3f, 0.3f, 1.0f),
-                Diffuse = new Color4(0.7f, 0.7f, 0.7f, 1.0f),
-                Specular = new Color4(0.7f, 0.7f, 0.7f, 1.0f),
+                LightColor = Color.White,
+                AmbientIntensity = 0.3f,
+                DiffuseIntensity = 0.7f,
                 Attenuation = new Vector3(0.1f, 0.0f, 0.0f),
-                Range = 80.0f,
                 Enabled = true,
             };
 
             SceneLightSpot spotLight = new SceneLightSpot()
             {
                 Direction = Vector3.Down,
-                Ambient = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
-                Diffuse = new Color4(1.0f, 1.0f, 0.0f, 1.0f),
-                Specular = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                LightColor = Color.White,
+                AmbientIntensity = 0.0f,
+                DiffuseIntensity = 1.0f,
                 Attenuation = new Vector3(0.15f, 0.0f, 0.0f),
                 Spot = 16f,
-                Range = 100.0f,
                 Enabled = true,
             };
 
-            this.Lights.PointLights = new []
+            this.Lights.PointLights = new[]
             {
                 pointLight,  
             };

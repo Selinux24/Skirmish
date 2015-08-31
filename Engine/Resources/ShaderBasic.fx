@@ -10,9 +10,9 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorldInverse;
 	float4x4 gWorldViewProjection;
 	float4x4 gShadowTransform; 
-	DirectionalLight gDirLights[3];
-	PointLight gPointLight;
-	SpotLight gSpotLight;
+	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
+	PointLight gPointLights[MAX_LIGHTS_POINT];
+	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
 	float3 gEyePositionWorld;
 	float gFogStart;
 	float gFogRange;
@@ -202,31 +202,29 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinnedI(VSVertexPositionNormal
 
 float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 {
-	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
-	float distToEye = length(toEyeWorld);
-	toEyeWorld /= distToEye;
-
-	LightInput lInput = (LightInput)0;
-	lInput.toEyeWorld = toEyeWorld;
-	lInput.positionWorld = input.positionWorld;
-	lInput.normalWorld = input.normalWorld;
-	lInput.material = gMaterial;
-	lInput.dirLights = gDirLights;
-	lInput.pointLight = gPointLight;
-	lInput.spotLight = gSpotLight;
-	lInput.enableShadows = gEnableShadows;
-	lInput.shadowPosition = input.shadowHomogeneous;
-
-	LightOutput lOutput = ComputeLights(lInput, gShadowMap);
-
-	float4 litColor = input.color * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
+	float4 litColor = ComputeLights(
+		gDirLights, 
+		gPointLights, 
+		gSpotLights,
+		input.color.rgb,
+		gEyePositionWorld,
+		input.positionWorld,
+		input.normalWorld,
+		gMaterial.SpecularIntensity,
+		gMaterial.SpecularPower,
+		gEnableShadows,
+		input.shadowHomogeneous,
+		gShadowMap);
 
 	if(gFogRange > 0)
 	{
+		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+		float distToEye = length(toEyeWorld);
+
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 
-	litColor.a = gMaterial.Diffuse.a * input.color.a;
+	litColor.a = input.color.a;
 
 	return litColor;
 }
@@ -438,33 +436,31 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinnedI(VSVertexPositionNo
 
 float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 {
-	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
-	float distToEye = length(toEyeWorld);
-	toEyeWorld /= distToEye;
-
-	LightInput lInput = (LightInput)0;
-	lInput.toEyeWorld = toEyeWorld;
-	lInput.positionWorld = input.positionWorld;
-	lInput.normalWorld = input.normalWorld;
-	lInput.material = gMaterial;
-	lInput.dirLights = gDirLights;
-	lInput.pointLight = gPointLight;
-	lInput.spotLight = gSpotLight;
-	lInput.enableShadows = gEnableShadows;
-	lInput.shadowPosition = input.shadowHomogeneous;
-
-	LightOutput lOutput = ComputeLights(lInput, gShadowMap);
-
     float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
-	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
+	float4 litColor = ComputeLights(
+		gDirLights, 
+		gPointLights, 
+		gSpotLights,
+		textureColor.rgb,
+		gEyePositionWorld,
+		input.positionWorld,
+		input.normalWorld,
+		gMaterial.SpecularIntensity,
+		gMaterial.SpecularPower,
+		gEnableShadows,
+		input.shadowHomogeneous,
+		gShadowMap);
 
 	if(gFogRange > 0)
 	{
+		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+		float distToEye = length(toEyeWorld);
+
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 
-	litColor.a = gMaterial.Diffuse.a * textureColor.a;
+	litColor.a = textureColor.a;
 
 	return litColor;
 }
@@ -567,34 +563,35 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 {
 	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 	float distToEye = length(toEyeWorld);
-	toEyeWorld /= distToEye;
 
 	float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
 	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
-	LightInput lInput = (LightInput)0;
-	lInput.toEyeWorld = toEyeWorld;
-	lInput.positionWorld = input.positionWorld;
-	lInput.normalWorld = bumpedNormalW;
-	lInput.material = gMaterial;
-	lInput.dirLights = gDirLights;
-	lInput.pointLight = gPointLight;
-	lInput.spotLight = gSpotLight;
-	lInput.enableShadows = gEnableShadows;
-	lInput.shadowPosition = input.shadowHomogeneous;
+	float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
-	LightOutput lOutput = ComputeLights(lInput, gShadowMap);
-
-    float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
-
-	float4 litColor = textureColor * (lOutput.ambient + lOutput.diffuse) + lOutput.specular;
+	float4 litColor = ComputeLights(
+		gDirLights, 
+		gPointLights, 
+		gSpotLights,
+		textureColor.rgb,
+		gEyePositionWorld,
+		input.positionWorld,
+		bumpedNormalW,
+		gMaterial.SpecularIntensity,
+		gMaterial.SpecularPower,
+		gEnableShadows,
+		input.shadowHomogeneous,
+		gShadowMap);
 
 	if(gFogRange > 0)
 	{
+		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+		float distToEye = length(toEyeWorld);
+
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 
-	litColor.a = gMaterial.Diffuse.a * textureColor.a;
+	litColor.a = textureColor.a;
 
 	return litColor;
 }

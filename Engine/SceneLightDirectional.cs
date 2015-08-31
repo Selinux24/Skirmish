@@ -17,9 +17,9 @@ namespace Engine
                 return new SceneLightDirectional()
                 {
                     Name = "Primary",
-                    Ambient = new Color4(0.8f, 0.8f, 0.8f, 1.0f),
-                    Diffuse = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                    Specular = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
+                    LightColor = Color.White,
+                    AmbientIntensity = 0.7f,
+                    DiffuseIntensity = 0.5f,
                     Direction = Vector3.Normalize(new Vector3(0.57735f, -0.57735f, 0.57735f)),
                     Enabled = true,
                 };
@@ -35,9 +35,9 @@ namespace Engine
                 return new SceneLightDirectional()
                 {
                     Name = "Secondary",
-                    Ambient = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                    Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                    Specular = new Color4(0.25f, 0.25f, 0.25f, 1.0f),
+                    LightColor = Color.Yellow,
+                    AmbientIntensity = 0.15f,
+                    DiffuseIntensity = 0.25f,
                     Direction = Vector3.Normalize(new Vector3(-0.57735f, -0.57735f, 0.57735f)),
                     Enabled = true,
                 };
@@ -53,9 +53,9 @@ namespace Engine
                 return new SceneLightDirectional()
                 {
                     Name = "Tertiary",
-                    Ambient = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                    Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
-                    Specular = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
+                    LightColor = Color.Yellow,
+                    AmbientIntensity = 0.15f,
+                    DiffuseIntensity = 0.25f,
                     Direction = Vector3.Normalize(new Vector3(0.0f, -0.707f, -0.707f)),
                     Enabled = true,
                 };

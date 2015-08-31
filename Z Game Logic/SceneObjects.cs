@@ -113,10 +113,9 @@ namespace GameLogic
             this.pointLight = new SceneLightPoint()
             {
                 Enabled = true,
-                Diffuse = Color.White,
-                Specular = Color.Gray,
-                Position = Vector3.Zero,
-                Range = 10f,
+                LightColor = Color.White,
+                Position = Vector3.Zero, 
+                Attenuation = Vector3.UnitX,
             };
 
             this.Lights.Add(this.pointLight);

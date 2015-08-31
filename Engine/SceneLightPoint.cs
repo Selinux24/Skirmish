@@ -12,10 +12,6 @@ namespace Engine
         /// </summary>
         public Vector3 Position = Vector3.Zero;
         /// <summary>
-        /// Light range
-        /// </summary>
-        public float Range = 0.0f;
-        /// <summary>
         /// Stores the three attenuation constants in the format (a0, a1, a2) that control how light intensity falls off with distance
         /// </summary>
         /// <remarks>
@@ -24,5 +20,10 @@ namespace Engine
         /// Inverse square law (0,0,1)
         /// </remarks>
         public Vector3 Attenuation = Vector3.Zero;
+
+        public float GetRange()
+        {
+            return 0f;
+        }
     }
 }

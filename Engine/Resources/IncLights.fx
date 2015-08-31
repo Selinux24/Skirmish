@@ -77,61 +77,46 @@ SamplerComparisonState SamplerShadow
 
 struct Material
 {
-	float4 Ambient;
 	float4 Diffuse;
-	float4 Specular;
-	float4 Reflect;
-	float Padding;
+	float SpecularIntensity;
+	float SpecularPower;
 };
+
+static const int MAX_LIGHTS_DIRECTIONAL = 3;
+static const int MAX_LIGHTS_POINT = 4;
+static const int MAX_LIGHTS_SPOT = 4;
 
 struct DirectionalLight
 {
-	float4 Ambient;
-	float4 Diffuse;
-	float4 Specular;
+	float3 Color;
+	float Ambient;
+	float Diffuse;
 	float3 Direction;
-	float Padding;
+	float Enabled;
 };
 struct PointLight
 {
-	float4 Ambient;
-	float4 Diffuse;
-	float4 Specular;
+	float3 Color;
+	float Ambient;
+	float Diffuse;
 	float3 Position;
-	float Range;
-	float3 Attenuation;
-	float Padding;
+    float AttenuationConstant;                                                                 
+    float AttenuationLinear;                                                                   
+    float AttenuationExp;                                                                      
+	float Enabled;
 };
 struct SpotLight
 {
-	float4 Ambient;
-	float4 Diffuse;
-	float4 Specular;
+	float3 Color;
+	float Ambient;
+	float Diffuse;
 	float3 Position;
-	float Range;
 	float3 Direction;
 	float Spot;
-	float3 Attenuation;
-	float Padding;
-};
-
-struct LightInput
-{
-	float3 toEyeWorld;
-	float3 positionWorld;
-	float3 normalWorld;
-	Material material;
-	DirectionalLight dirLights[3];
-	PointLight pointLight;
-	SpotLight spotLight;
-	float enableShadows;
-	float4 shadowPosition;
-};
-struct LightOutput
-{
-	float4 ambient;
-	float4 diffuse;
-	float4 specular;
+    float AttenuationConstant;                                                                 
+    float AttenuationLinear;                                                                   
+    float AttenuationExp;                                                                      
+	float Enabled;
 };
 
 float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, float3 tangentW)
@@ -149,260 +134,134 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, floa
 	return normalize(mul(normalT, TBN));
 }
 
-void ComputeDirectionalLight(
-	Material mat, 
-	DirectionalLight L,
-	float3 normal, 
-	float3 toEye,
-	out float4 ambient,
-	out float4 diffuse,
-	out float4 spec)
-{
-	ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
+float4 ComputeLight(
+	float3 color,
+	float ambient,
+	float diffuse,
+	float3 direction,
+	float3 eyePositionWorld,
+	float3 position,
+	float3 normal,
+	float specularIntensity,
+	float specularPower)
+{                                                                                           
+    float4 ambientColor = float4(color * ambient, 1.0f);
 
-	//The light vector aims opposite the direction the light rays travel.
-	float3 lightVec = -L.Direction;
+	float4 diffuseColor  = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 specularColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	//Add ambient term.
-	ambient = mat.Ambient * L.Ambient;
+	float diffuseFactor = dot(normal, -direction);
 
-	//Add diffuse and specular term, provided the surface is in the line of site of the light.
-	float diffuseFactor = dot(lightVec, normal);
-
-	//Flatten to avoid dynamic branching.
-	[flatten]
-	if(diffuseFactor > 0.0f)
+    if (diffuseFactor > 0) 
 	{
-		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
-	
-		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
-		spec = specFactor * mat.Specular * L.Specular;
+		diffuseColor = float4(color * diffuse * diffuseFactor, 1.0f);
+
+		float3 toEye = normalize(eyePositionWorld - position);
+        float3 reflectLight = normalize(reflect(direction, normal));
+        
+		float specFactor = dot(toEye, reflectLight);
+		if (specFactor > 0)
+		{
+			specFactor = pow(specFactor, specularPower);
+            specularColor = float4(color * specularIntensity * specFactor, 1.0f);
+        }
 	}
+
+    return (ambientColor + diffuseColor + specularColor);
 }
 
-void ComputePointLight(
-	Material mat, 
+float4 ComputeDirectionalLight(
+	DirectionalLight L,
+	float3 eyePositionWorld,
+	float3 position,
+	float3 normal,
+	float specularIntensity,
+	float specularPower)
+{
+	return ComputeLight(
+		L.Color,
+		L.Ambient,
+		L.Diffuse,
+		L.Direction,
+		eyePositionWorld,
+		position,
+		normal,
+		specularIntensity,
+		specularPower);
+}
+
+float4 ComputePointLight(
 	PointLight L, 
-	float3 pos,
+	float3 eyePositionWorld,
+	float3 position,
 	float3 normal, 
-	float3 toEye,
-	out float4 ambient, 
-	out float4 diffuse, 
-	out float4 spec)
+	float specularIntensity,
+	float specularPower)
 {
-	ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    float3 lightDirection = position - L.Position;
+	float distance = length(lightDirection);
+	lightDirection /= distance;
 
-	//The vector from the surface to the light.
-	float3 lightVec = L.Position - pos;
+    float attenuation =
+		L.AttenuationConstant +
+		L.AttenuationLinear * distance +
+		L.AttenuationExp * distance * distance;
 
-	//The distance from surface to light.
-	float d = length(lightVec);
+	attenuation = max(1.0f, attenuation);
 
-	//Range test.
-	if(d > L.Range)
-		return;
+	float4 litColor = ComputeLight(
+		L.Color,
+		L.Ambient,
+		L.Diffuse,
+		lightDirection,
+		eyePositionWorld,
+		position,
+		normal,
+		specularIntensity,
+		specularPower);
 
-	//Normalize the light vector.
-	lightVec /= d;
-
-	//Add diffuse and specular term, provided the surface is in the line of site of the light.
-	float diffuseFactor = dot(lightVec, normal);
-
-	//Flatten to avoid dynamic branching.
-	[flatten]
-	if(diffuseFactor > 0.0f)
-	{
-		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
-		
-		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
-		spec = specFactor * mat.Specular * L.Specular;
-	}
-
-	//Attenuate
-	float attenuation = 1.0f / dot(L.Attenuation, float3(1.0f, d, d*d));
-
-	ambient = (mat.Ambient * L.Ambient) * attenuation;
-	diffuse *= attenuation;
-	spec *= attenuation;
+	return litColor / attenuation;
 }
 
-void ComputeSpotLight(
-	Material mat, 
+float4 ComputeSpotLight(
 	SpotLight L,
-	float3 pos, 
+	float3 eyePositionWorld,
+	float3 position,
 	float3 normal, 
-	float3 toEye,
-	out float4 ambient, 
-	out float4 diffuse, 
-	out float4 spec)
+	float specularIntensity,
+	float specularPower)
 {
-	ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float3 lightDirection = position - L.Position;
+	float spot = dot(lightDirection, L.Direction);   
 
-	//The vector from the surface to the light.
-	float3 lightVec = L.Position - pos;
-
-	//The distance from surface to light.
-	float d = length(lightVec);
-
-	//Range test.
-	if( d > L.Range )
-		return;
-
-	//Normalize the light vector.
-	lightVec /= d;
-
-	//Add diffuse and specular term, provided the surface is in the line of site of the light.
-	float diffuseFactor = dot(lightVec, normal);
-
-	//Flatten to avoid dynamic branching.
-	[flatten]
-	if(diffuseFactor > 0.0f)
+	if (spot > L.Spot)
 	{
-		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
-		
-		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
-		spec = specFactor * mat.Specular * L.Specular;
-	}
+		float distance = length(lightDirection);
+		lightDirection /= distance;
 
-	//Scale by spotlight factor.
-	float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);
+		float attenuation =
+			L.AttenuationConstant +
+			L.AttenuationLinear * distance +
+			L.AttenuationExp * distance * distance;
 
-	//Attenuate.
-	float attenuation = spot / dot(L.Attenuation, float3(1.0f, d, d*d));
+		attenuation = max(1.0f, attenuation);
 
-	//Ambient term.
-	ambient = (mat.Ambient * L.Ambient) * attenuation * spot;
-	diffuse *= attenuation;
-	spec *= attenuation;
-}
+		float4 litColor = ComputeLight(
+			L.Color,
+			L.Ambient,
+			L.Diffuse,
+			L.Direction,
+			eyePositionWorld,
+			position,
+			normal,
+			specularIntensity,
+			specularPower);
 
-float4 ComputeDirectionalLight2(
-	DirectionalLight L,
-	float3 toEye,
-	float3 normal)
-{
-	//The light vector aims opposite the direction the light rays travel.
-	float3 lightVec = -L.Direction;
-
-	float intensity = max(0, dot(normal, lightVec)) / (length(lightVec) * length(normal));
-    intensity = clamp(intensity, 0, 1);
-
-	//Flatten to avoid dynamic branching.
-	[flatten]
-	if(intensity > 0.0f)
-	{
-		//Specular reflection
-		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toEye), 0.0f), 0.5f);
-	
-		return float4(intensity * L.Diffuse.rgb, specFactor);
+		return litColor / attenuation;
 	}
 	else
 	{
-		return 0.0f;
-	}
-}
-
-float4 ComputePointLight2(
-	PointLight L,
-	float3 toEye,
-	float3 pos,
-	float3 normal)
-{
-	//The vector from the surface to the light.
-	float3 lightVec = L.Position - pos;
-
-	//The distance from surface to light.
-	float d = length(lightVec);
-
-	//Range test.
-	[flatten]
-	if(d > L.Range)
-	{
-		return 0.0f;
-	}
-	else
-	{
-		//Normalize the light vector.
-		lightVec /= d;
-
-		float intensity = max(0, dot(normal, lightVec));
-
-		//Flatten to avoid dynamic branching.
-		[flatten]
-		if(intensity > 0.0f)
-		{
-			//Light color
-			float4 light = intensity * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
-
-			//Specular reflection
-			float3 v = reflect(-lightVec, normal);
-			float specFactor = pow(max(dot(v, toEye), 0.0f), 0.5f);
-
-			return float4(light.rgb, specFactor);
-		}
-		else
-		{
-			return 0.0f;
-		}
-	}
-}
-
-float4 ComputeSpotLight2(
-	SpotLight L,
-	float3 toEye,
-	float3 pos, 
-	float3 normal)
-{
-	//The vector from the surface to the light.
-	float3 lightVec = L.Position - pos;
-
-	//The distance from surface to light.
-	float d = length(lightVec);
-
-	//Range test.
-	[flatten]
-	if( d > L.Range )
-	{
-		return 0.0f;
-	}
-	else
-	{
-		//Normalize the light vector.
-		lightVec /= d;
-
-		//Add diffuse and specular term, provided the surface is in the line of site of the light.
-		float intensity = max(0, dot(normal, lightVec));
-
-		//Flatten to avoid dynamic branching.
-		[flatten]
-		if(intensity > 0.0f)
-		{
-			//Scale by spotlight factor.
-			float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);
-
-			//Light color
-			float4 light = intensity * spot * (L.Diffuse * (1.0f - (d / L.Range)) * (L.Range / 10.0f));
-
-			//Specular reflection
-			float3 v = reflect(-lightVec, normal);
-			float specFactor = pow(max(dot(v, toEye), 0.0f), 0.5f);
-
-			return float4(light.rgb, specFactor);
-		}
-		else
-		{
-			return 0.0f;
-		}
+		return float4(0.0f, 0.0f, 0.0f, 0.0f);
 	}
 }
 
@@ -435,82 +294,77 @@ float CalcShadowFactor(float4 shadowPosH, Texture2D shadowMap)
 	return percentLit / 9.0f;
 }
 
-LightOutput ComputeLights(LightInput input, Texture2D shadowMap)
+float4 ComputeLights(
+	DirectionalLight dirLights[MAX_LIGHTS_DIRECTIONAL],
+	PointLight pointLights[MAX_LIGHTS_POINT],
+	SpotLight spotLights[MAX_LIGHTS_SPOT],
+	float3 color,
+	float3 eyePositionWorld,
+	float3 position,
+	float3 normal,
+	float specularIntensity,
+	float specularPower,
+	float enableShadows,
+	float4 shadowPosition,
+	Texture2D shadowMap)
 {
-	LightOutput output = (LightOutput)0;
-
-	float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 litColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	float3 shadow = float3(1.0f, 1.0f, 1.0f);
-	if(input.enableShadows == 1)
+	if(enableShadows == 1)
 	{
 		// Only the first light casts a shadow.
-		shadow[0] = CalcShadowFactor(input.shadowPosition, shadowMap);
+		shadow[0] = CalcShadowFactor(shadowPosition, shadowMap);
 	}
 
-	float4 A, D, S;
+	int i;
 
 	[unroll]
-	for(int i = 0; i < 3; ++i)
+	for(i = 0; i < MAX_LIGHTS_DIRECTIONAL; ++i)
 	{
-		if(input.dirLights[i].Padding == 1.0f)
+		if(dirLights[i].Enabled == 1.0f)
 		{
-			ComputeDirectionalLight(
-				input.material, 
-				input.dirLights[i],
-				input.normalWorld, 
-				input.toEyeWorld, 
-				A, 
-				D, 
-				S);
-
-			ambient += A;
-			diffuse += shadow[i] * D;
-			specular += shadow[i] * S;
+			litColor += ComputeDirectionalLight(
+				dirLights[i],
+				eyePositionWorld,
+				position,
+				normal,
+				specularIntensity,
+				specularPower);
 		}
 	}
 
-	if(input.pointLight.Padding == 1.0f)
+	[unroll]
+	for(i = 0; i < MAX_LIGHTS_POINT; ++i)
 	{
-		ComputePointLight(
-			input.material, 
-			input.pointLight,
-			input.positionWorld, 
-			input.normalWorld, 
-			input.toEyeWorld, 
-			A, 
-			D, 
-			S);
-
-		ambient += A;
-		diffuse += D;
-		specular += S;
+		if(pointLights[i].Enabled == 1.0f)
+		{
+			litColor += ComputePointLight(
+				pointLights[i],
+				eyePositionWorld,
+				position,
+				normal,
+				specularIntensity,
+				specularPower);
+		}
 	}
 
-	if(input.spotLight.Padding == 1.0f)
+	[unroll]
+	for(i = 0; i < MAX_LIGHTS_SPOT; ++i)
 	{
-		ComputeSpotLight(
-			input.material, 
-			input.spotLight,
-			input.positionWorld, 
-			input.normalWorld, 
-			input.toEyeWorld, 
-			A, 
-			D, 
-			S);
-
-		ambient += A;
-		diffuse += D;
-		specular += S;
+		if(spotLights[i].Enabled == 1.0f)
+		{
+			litColor += ComputeSpotLight(
+				spotLights[i],
+				eyePositionWorld,
+				position,
+				normal,
+				specularIntensity,
+				specularPower);
+		}
 	}
 
-	output.ambient = ambient;
-	output.diffuse = diffuse;
-	output.specular = specular;
-
-	return output;
+	return litColor;
 }
 
 float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRange, float4 fogColor)

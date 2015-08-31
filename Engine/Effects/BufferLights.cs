@@ -24,13 +24,37 @@ namespace Engine.Effects
         /// </summary>
         public BufferDirectionalLight DirectionalLight3;
         /// <summary>
-        /// Point light
+        /// Point light 1
         /// </summary>
-        public BufferPointLight PointLight;
+        public BufferPointLight PointLight1;
         /// <summary>
-        /// Spot light
+        /// Point light 2
         /// </summary>
-        public BufferSpotLight SpotLight;
+        public BufferPointLight PointLight2;
+        /// <summary>
+        /// Point light 3
+        /// </summary>
+        public BufferPointLight PointLight3;
+        /// <summary>
+        /// Point light 4
+        /// </summary>
+        public BufferPointLight PointLight4;
+        /// <summary>
+        /// Spot light 1
+        /// </summary>
+        public BufferSpotLight SpotLight1;
+        /// <summary>
+        /// Spot light 2
+        /// </summary>
+        public BufferSpotLight SpotLight2;
+        /// <summary>
+        /// Spot light 3
+        /// </summary>
+        public BufferSpotLight SpotLight3;
+        /// <summary>
+        /// Spot light 4
+        /// </summary>
+        public BufferSpotLight SpotLight4;
         /// <summary>
         /// Eye position world
         /// </summary>
@@ -73,8 +97,14 @@ namespace Engine.Effects
             this.DirectionalLight1 = new BufferDirectionalLight();
             this.DirectionalLight2 = new BufferDirectionalLight();
             this.DirectionalLight3 = new BufferDirectionalLight();
-            this.PointLight = new BufferPointLight();
-            this.SpotLight = new BufferSpotLight();
+            this.PointLight1 = new BufferPointLight();
+            this.PointLight2 = new BufferPointLight();
+            this.PointLight3 = new BufferPointLight();
+            this.PointLight4 = new BufferPointLight();
+            this.SpotLight1 = new BufferSpotLight();
+            this.SpotLight2 = new BufferSpotLight();
+            this.SpotLight3 = new BufferSpotLight();
+            this.SpotLight4 = new BufferSpotLight();
             this.FogColor = Color.White;
             this.FogStart = 0;
             this.FogRange = 0;
@@ -94,15 +124,27 @@ namespace Engine.Effects
             this.DirectionalLight1 = new BufferDirectionalLight();
             this.DirectionalLight2 = new BufferDirectionalLight();
             this.DirectionalLight3 = new BufferDirectionalLight();
-            this.PointLight = new BufferPointLight();
-            this.SpotLight = new BufferSpotLight();
+            this.PointLight1 = new BufferPointLight();
+            this.PointLight2 = new BufferPointLight();
+            this.PointLight3 = new BufferPointLight();
+            this.PointLight4 = new BufferPointLight();
+            this.SpotLight1 = new BufferSpotLight();
+            this.SpotLight2 = new BufferSpotLight();
+            this.SpotLight3 = new BufferSpotLight();
+            this.SpotLight4 = new BufferSpotLight();
 
             if (setLights.DirectionalLights.Length > 0) this.DirectionalLight1 = new BufferDirectionalLight(setLights.DirectionalLights[0]);
             if (setLights.DirectionalLights.Length > 1) this.DirectionalLight2 = new BufferDirectionalLight(setLights.DirectionalLights[1]);
             if (setLights.DirectionalLights.Length > 2) this.DirectionalLight3 = new BufferDirectionalLight(setLights.DirectionalLights[2]);
-            if (setLights.PointLights.Length > 0) this.PointLight = new BufferPointLight(setLights.PointLights[0]);
-            if (setLights.SpotLights.Length > 0) this.SpotLight = new BufferSpotLight(setLights.SpotLights[0]);
-           
+            if (setLights.PointLights.Length > 0) this.PointLight1 = new BufferPointLight(setLights.PointLights[0]);
+            if (setLights.PointLights.Length > 1) this.PointLight2 = new BufferPointLight(setLights.PointLights[1]);
+            if (setLights.PointLights.Length > 2) this.PointLight3 = new BufferPointLight(setLights.PointLights[2]);
+            if (setLights.PointLights.Length > 3) this.PointLight4 = new BufferPointLight(setLights.PointLights[3]);
+            if (setLights.SpotLights.Length > 0) this.SpotLight1 = new BufferSpotLight(setLights.SpotLights[0]);
+            if (setLights.SpotLights.Length > 1) this.SpotLight2 = new BufferSpotLight(setLights.SpotLights[1]);
+            if (setLights.SpotLights.Length > 2) this.SpotLight3 = new BufferSpotLight(setLights.SpotLights[2]);
+            if (setLights.SpotLights.Length > 3) this.SpotLight4 = new BufferSpotLight(setLights.SpotLights[3]);
+
             this.FogColor = setLights.FogColor;
             this.FogStart = setLights.FogStart;
             this.FogRange = setLights.FogRange;
@@ -117,17 +159,17 @@ namespace Engine.Effects
     public struct BufferDirectionalLight : IBufferData
     {
         /// <summary>
-        /// Ambient color
+        /// Light color
         /// </summary>
-        public Color4 Ambient;
+        public Color3 LightColor;
         /// <summary>
-        /// Diffuse color
+        /// Ambient intensity
         /// </summary>
-        public Color4 Diffuse;
+        public float AmbientIntensity;
         /// <summary>
-        /// Specular color
+        /// Diffuse intensity
         /// </summary>
-        public Color4 Specular;
+        public float DiffuseIntensity;
         /// <summary>
         /// Light direction vector
         /// </summary>
@@ -135,7 +177,7 @@ namespace Engine.Effects
         /// <summary>
         /// Padding
         /// </summary>
-        public float Padding;
+        public float Enabled;
         /// <summary>
         /// Size in bytes
         /// </summary>
@@ -153,11 +195,11 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferDirectionalLight(SceneLightDirectional light)
         {
-            this.Ambient = light.Ambient;
-            this.Diffuse = light.Diffuse;
-            this.Specular = light.Specular;
+            this.LightColor = light.LightColor.ToVector3();
+            this.AmbientIntensity = light.AmbientIntensity;
+            this.DiffuseIntensity = light.DiffuseIntensity;
             this.Direction = light.Direction;
-            this.Padding = light.Enabled ? 1f : 0f;
+            this.Enabled = light.Enabled ? 1f : 0f;
         }
     }
 
@@ -168,33 +210,29 @@ namespace Engine.Effects
     public struct BufferPointLight : IBufferData
     {
         /// <summary>
-        /// Ambient color
+        /// Light color
         /// </summary>
-        public Color4 Ambient;
+        public Color3 LightColor;
         /// <summary>
-        /// Diffuse color
+        /// Ambient intensity
         /// </summary>
-        public Color4 Diffuse;
+        public float AmbientIntensity;
         /// <summary>
-        /// Specular color
+        /// Diffuse intensity
         /// </summary>
-        public Color4 Specular;
+        public float DiffuseIntensity;
         /// <summary>
         /// Light position
         /// </summary>
         public Vector3 Position;
         /// <summary>
-        /// Light range
-        /// </summary>
-        public float Range;
-        /// <summary>
-        /// Attenuation
+        /// Attenuation (constant, linear, exponential)
         /// </summary>
         public Vector3 Attenuation;
         /// <summary>
         /// Padding
         /// </summary>
-        public float Padding;
+        public float Enabled;
         /// <summary>
         /// Size in bytes
         /// </summary>
@@ -212,13 +250,12 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferPointLight(SceneLightPoint light)
         {
-            this.Ambient = light.Ambient;
-            this.Diffuse = light.Diffuse;
-            this.Specular = light.Specular;
+            this.LightColor = light.LightColor.ToVector3();
+            this.AmbientIntensity = light.AmbientIntensity;
+            this.DiffuseIntensity = light.DiffuseIntensity;
             this.Position = light.Position;
-            this.Range = light.Range;
             this.Attenuation = light.Attenuation;
-            this.Padding = light.Enabled ? 1f : 0f;
+            this.Enabled = light.Enabled ? 1f : 0f;
         }
     }
 
@@ -229,25 +266,21 @@ namespace Engine.Effects
     public struct BufferSpotLight : IBufferData
     {
         /// <summary>
-        /// Ambient color
+        /// Light color
         /// </summary>
-        public Color4 Ambient;
+        public Color3 LightColor;
         /// <summary>
-        /// Diffuse color
+        /// Ambient intensity
         /// </summary>
-        public Color4 Diffuse;
+        public float AmbientIntensity;
         /// <summary>
-        /// Specular color
+        /// Diffuse intensity
         /// </summary>
-        public Color4 Specular;
+        public float DiffuseIntensity;
         /// <summary>
         /// Light position
         /// </summary>
         public Vector3 Position;
-        /// <summary>
-        /// Light range
-        /// </summary>
-        public float Range;
         /// <summary>
         /// Light direction
         /// </summary>
@@ -263,7 +296,7 @@ namespace Engine.Effects
         /// <summary>
         /// Padding
         /// </summary>
-        public float Padding;
+        public float Enabled;
         /// <summary>
         /// Size in bytes
         /// </summary>
@@ -281,15 +314,14 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferSpotLight(SceneLightSpot light)
         {
-            this.Ambient = light.Ambient;
-            this.Diffuse = light.Diffuse;
-            this.Specular = light.Specular;
+            this.LightColor = light.LightColor.ToVector3();
+            this.AmbientIntensity = light.AmbientIntensity;
+            this.DiffuseIntensity = light.DiffuseIntensity;
             this.Position = light.Position;
-            this.Range = light.Range;
             this.Direction = light.Direction;
             this.Spot = light.Spot;
             this.Attenuation = light.Attenuation;
-            this.Padding = light.Enabled ? 1f : 0f;
+            this.Enabled = light.Enabled ? 1f : 0f;
         }
     }
 }

@@ -193,6 +193,9 @@ namespace Engine
                 Matrix.Identity,
                 this.ViewProjection,
                 context.EyePosition,
+                context.Lights.FogStart,
+                context.Lights.FogRange,
+                context.Lights.FogColor,
                 context.GeometryMap[0],
                 context.GeometryMap[1],
                 context.GeometryMap[2]);
@@ -257,13 +260,15 @@ namespace Engine
                 {
                     var light = pointLights[i];
 
-                    if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Range)) != ContainmentType.Disjoint)
+                    float range = light.GetRange();
+
+                    if (context.Frustum.Contains(new BoundingSphere(light.Position, range)) != ContainmentType.Disjoint)
                     {
-                        Matrix local = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
+                        Matrix local = Matrix.Scaling(range) * Matrix.Translation(light.Position);
 
                         effect.UpdatePerLight(
-                            light, 
-                            context.World * local, 
+                            light,
+                            context.World * local,
                             context.ViewProjection);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
@@ -304,13 +309,15 @@ namespace Engine
                 {
                     var light = spotLights[i];
 
-                    if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Range)) != ContainmentType.Disjoint)
+                    float range = light.GetRange();
+
+                    if (context.Frustum.Contains(new BoundingSphere(light.Position, range)) != ContainmentType.Disjoint)
                     {
-                        Matrix local = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
+                        Matrix local = Matrix.Scaling(range) * Matrix.Translation(light.Position);
 
                         effect.UpdatePerLight(
-                            light, 
-                            context.World * local, 
+                            light,
+                            context.World * local,
                             context.ViewProjection);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
@@ -354,16 +361,14 @@ namespace Engine
                     Matrix.Identity,
                     this.ViewProjection,
                     context.EyePosition,
+                    context.Lights.FogStart,
+                    context.Lights.FogRange,
+                    context.Lights.FogColor,
                     context.GeometryMap[0],
                     context.GeometryMap[1],
                     context.GeometryMap[2]);
 
-                effect.UpdateComposer(
-                    context.Lights.AmbientColor,
-                    context.Lights.FogStart,
-                    context.Lights.FogRange,
-                    context.Lights.FogColor,
-                    context.LightMap);
+                effect.UpdateComposer(context.LightMap);
 
                 var deviceContext = this.Game.Graphics.DeviceContext;
                 var geometry = this.lightGeometry[0];

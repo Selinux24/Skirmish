@@ -120,9 +120,10 @@ namespace Skybox
             {
                 Enabled = true,
                 Position = Vector3.Zero,
-                Diffuse = Color.White,
-                Specular = Color.Blue,
-                Range = 10f,
+                LightColor = Color.White,
+                AmbientIntensity = 1f,
+                DiffuseIntensity = 1f,
+                Attenuation = new Vector3(1f, 0f, 0f),
             };
 
             this.Lights.Add(this.movingFireLight);
@@ -157,9 +158,10 @@ namespace Skybox
                 {
                     Enabled = true,
                     Position = firePositions3D[i],
-                    Range = 5f,
-                    Diffuse = Color.Yellow,
-                    Specular = Color.Red,
+                    LightColor = Color.Yellow,
+                    AmbientIntensity = 1f,
+                    DiffuseIntensity = 1f,
+                    Attenuation = Vector3.UnitX,
                 };
 
                 this.Lights.Add(this.torchLights[i]);

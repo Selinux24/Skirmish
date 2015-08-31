@@ -352,22 +352,20 @@ namespace TerrainTest
             this.Lights.DirectionalLights[2].Enabled = false;
             this.Lights.Add(new SceneLightPoint()
             {
-                Ambient = Color.White,
-                Diffuse = Color.Blue,
-                Specular = Color.Transparent,
-                Attenuation = new Vector3(),
+                LightColor = Color.White,
+                AmbientIntensity = 1,
+                DiffuseIntensity = 1,
+                Attenuation = Vector3.UnitX,
                 Position = Vector3.Zero,
-                Range = 1f,
                 Enabled = true,
             });
             this.Lights.Add(new SceneLightPoint()
             {
-                Ambient = Color.White,
-                Diffuse = Color.Red,
-                Specular = Color.Transparent,
-                Attenuation = new Vector3(),
+                LightColor = Color.White,
+                AmbientIntensity = 1,
+                DiffuseIntensity = 1,
+                Attenuation = Vector3.UnitX,
                 Position = Vector3.Zero,
-                Range = 1f,
                 Enabled = true,
             });
         }
