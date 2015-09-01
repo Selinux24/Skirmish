@@ -15,13 +15,11 @@ cbuffer cbPerFrame : register (b0)
 	float gEnableShadows;
 	float gRadius;
 };
-
 cbuffer cbPerObject : register (b1)
 {
 	Material gMaterial;
 	uint gTextureCount;
 };
-
 cbuffer cbFixed : register (b2)
 {
 	float2 gQuadTexC[4] = 
@@ -123,12 +121,14 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
 	clip(textureColor.a - 0.05f);
 
+	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
+
 	float4 litColor = ComputeLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
 		textureColor.rgb,
-		gEyePositionWorld,
+		toEye,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
@@ -158,10 +158,10 @@ GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 	clip(textureColor.a - 0.05f);
 
 	output.color = textureColor;
-	output.normal.xyz = input.normalWorld;
-	output.normal.w = 1.0f;
 	output.depth.xyz = input.positionWorld;
 	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.normal.xyz = input.normalWorld;
+	output.normal.w = gMaterial.SpecularPower;
 
     return output;
 }

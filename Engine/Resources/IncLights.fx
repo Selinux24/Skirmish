@@ -139,7 +139,7 @@ float4 ComputeLight(
 	float ambient,
 	float diffuse,
 	float3 direction,
-	float3 eyePositionWorld,
+	float3 toEye,
 	float3 position,
 	float3 normal,
 	float specularIntensity,
@@ -156,13 +156,12 @@ float4 ComputeLight(
 	{
 		diffuseColor = float4(color * diffuse * diffuseFactor, 1.0f);
 
-		float3 toEye = normalize(eyePositionWorld - position);
         float3 reflectLight = normalize(reflect(direction, normal));
         
 		float specFactor = dot(toEye, reflectLight);
 		if (specFactor > 0)
 		{
-			specFactor = pow(specFactor, specularPower);
+			specFactor = pow(abs(specFactor), max(1, specularPower));
             specularColor = float4(color * specularIntensity * specFactor, 1.0f);
         }
 	}
@@ -172,7 +171,7 @@ float4 ComputeLight(
 
 float4 ComputeDirectionalLight(
 	DirectionalLight L,
-	float3 eyePositionWorld,
+	float3 toEye,
 	float3 position,
 	float3 normal,
 	float specularIntensity,
@@ -183,7 +182,7 @@ float4 ComputeDirectionalLight(
 		L.Ambient,
 		L.Diffuse,
 		L.Direction,
-		eyePositionWorld,
+		toEye,
 		position,
 		normal,
 		specularIntensity,
@@ -192,7 +191,7 @@ float4 ComputeDirectionalLight(
 
 float4 ComputePointLight(
 	PointLight L, 
-	float3 eyePositionWorld,
+	float3 toEye,
 	float3 position,
 	float3 normal, 
 	float specularIntensity,
@@ -214,7 +213,7 @@ float4 ComputePointLight(
 		L.Ambient,
 		L.Diffuse,
 		lightDirection,
-		eyePositionWorld,
+		toEye,
 		position,
 		normal,
 		specularIntensity,
@@ -225,7 +224,7 @@ float4 ComputePointLight(
 
 float4 ComputeSpotLight(
 	SpotLight L,
-	float3 eyePositionWorld,
+	float3 toEye,
 	float3 position,
 	float3 normal, 
 	float specularIntensity,
@@ -251,7 +250,7 @@ float4 ComputeSpotLight(
 			L.Ambient,
 			L.Diffuse,
 			L.Direction,
-			eyePositionWorld,
+			toEye,
 			position,
 			normal,
 			specularIntensity,
@@ -299,7 +298,7 @@ float4 ComputeLights(
 	PointLight pointLights[MAX_LIGHTS_POINT],
 	SpotLight spotLights[MAX_LIGHTS_SPOT],
 	float3 color,
-	float3 eyePositionWorld,
+	float3 toEye,
 	float3 position,
 	float3 normal,
 	float specularIntensity,
@@ -326,7 +325,7 @@ float4 ComputeLights(
 		{
 			litColor += ComputeDirectionalLight(
 				dirLights[i],
-				eyePositionWorld,
+				toEye,
 				position,
 				normal,
 				specularIntensity,
@@ -341,7 +340,7 @@ float4 ComputeLights(
 		{
 			litColor += ComputePointLight(
 				pointLights[i],
-				eyePositionWorld,
+				toEye,
 				position,
 				normal,
 				specularIntensity,
@@ -356,7 +355,7 @@ float4 ComputeLights(
 		{
 			litColor += ComputeSpotLight(
 				spotLights[i],
-				eyePositionWorld,
+				toEye,
 				position,
 				normal,
 				specularIntensity,

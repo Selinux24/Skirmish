@@ -254,7 +254,7 @@ namespace Engine.Effects
             this.AmbientIntensity = light.AmbientIntensity;
             this.DiffuseIntensity = light.DiffuseIntensity;
             this.Position = light.Position;
-            this.Attenuation = light.Attenuation;
+            this.Attenuation = new Vector3(light.Constant, light.Linear, light.Exponential);
             this.Enabled = light.Enabled ? 1f : 0f;
         }
     }

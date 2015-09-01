@@ -150,7 +150,7 @@ namespace Collada
                 LightColor = Color.White,
                 AmbientIntensity = 0.3f,
                 DiffuseIntensity = 0.7f,
-                Attenuation = new Vector3(0.1f, 0.0f, 0.0f),
+                Constant = 0.1f,
                 Enabled = true,
             };
 

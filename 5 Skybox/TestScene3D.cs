@@ -123,7 +123,7 @@ namespace Skybox
                 LightColor = Color.White,
                 AmbientIntensity = 1f,
                 DiffuseIntensity = 1f,
-                Attenuation = new Vector3(1f, 0f, 0f),
+                Constant = 1f,
             };
 
             this.Lights.Add(this.movingFireLight);
@@ -161,7 +161,7 @@ namespace Skybox
                     LightColor = Color.Yellow,
                     AmbientIntensity = 1f,
                     DiffuseIntensity = 1f,
-                    Attenuation = Vector3.UnitX,
+                    Constant = 1f,
                 };
 
                 this.Lights.Add(this.torchLights[i]);

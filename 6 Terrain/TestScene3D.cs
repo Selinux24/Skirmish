@@ -355,7 +355,7 @@ namespace TerrainTest
                 LightColor = Color.White,
                 AmbientIntensity = 1,
                 DiffuseIntensity = 1,
-                Attenuation = Vector3.UnitX,
+                Constant = 1,
                 Position = Vector3.Zero,
                 Enabled = true,
             });
@@ -364,7 +364,7 @@ namespace TerrainTest
                 LightColor = Color.White,
                 AmbientIntensity = 1,
                 DiffuseIntensity = 1,
-                Attenuation = Vector3.UnitX,
+                Constant = 1,
                 Position = Vector3.Zero,
                 Enabled = true,
             });

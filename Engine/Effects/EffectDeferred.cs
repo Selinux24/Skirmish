@@ -437,9 +437,15 @@ namespace Engine.Effects
         /// <summary>
         /// Updates composer variables
         /// </summary>
+        /// <param name="world">World matrix</param>
+        /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="lightMap">Light map</param>
-        public void UpdateComposer(ShaderResourceView lightMap)
+        public void UpdateComposer(
+            Matrix world,
+            Matrix viewProjection,
+            ShaderResourceView lightMap)
         {
+            this.WorldViewProjection = world * viewProjection;
             this.LightMap = lightMap;
         }
     }

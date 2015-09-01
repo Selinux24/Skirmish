@@ -32,7 +32,19 @@ namespace DeferredTest
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
         {
+            var light = new SceneLightPoint()
+            {
+                Constant = 0f,
+                Linear = 0f,
+                Exponential = 1f,
+            };
 
+            var res = SceneLightPoint.Test(light, 1000f, 0.1f);
+
+            if (res.Length > 0)
+            {
+
+            }
         }
 
         public override void Initialize()
@@ -639,7 +651,7 @@ namespace DeferredTest
                         LightColor = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f),
                         AmbientIntensity = rnd.NextFloat(0, 1),
                         DiffuseIntensity = rnd.NextFloat(0, 1),
-                        Attenuation = new Vector3(rnd.NextFloat(0, 1) > 0.5f ? 1 : -1, 0.0f, 0.0f),
+                        Constant = rnd.NextFloat(0, 1),
                         Position = lightPosition,
                     };
 

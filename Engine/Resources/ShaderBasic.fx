@@ -19,17 +19,14 @@ cbuffer cbPerFrame : register (b0)
 	float4 gFogColor;
 	float gEnableShadows;
 };
-
 cbuffer cbPerObject : register (b1)
 {
 	Material gMaterial;
 };
-
 cbuffer cbSkinned : register (b2)
 {
 	float4x4 gBoneTransforms[MAXBONETRANSFORMS];
 };
-
 cbuffer cbPerInstance : register (b3)
 {
 	float gTextureIndex;
@@ -202,12 +199,14 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinnedI(VSVertexPositionNormal
 
 float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 {
+	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
+
 	float4 litColor = ComputeLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
 		input.color.rgb,
-		gEyePositionWorld,
+		toEye,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
@@ -438,12 +437,14 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 {
     float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
+	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
+
 	float4 litColor = ComputeLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
 		textureColor.rgb,
-		gEyePositionWorld,
+		toEye,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
@@ -561,20 +562,19 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinnedI(VSVe
 
 float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input) : SV_TARGET
 {
-	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
-	float distToEye = length(toEyeWorld);
-
 	float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
 	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
 	float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+
+	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
 
 	float4 litColor = ComputeLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
 		textureColor.rgb,
-		gEyePositionWorld,
+		toEye,
 		input.positionWorld,
 		bumpedNormalW,
 		gMaterial.SpecularIntensity,

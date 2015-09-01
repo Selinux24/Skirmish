@@ -115,7 +115,7 @@ namespace GameLogic
                 Enabled = true,
                 LightColor = Color.White,
                 Position = Vector3.Zero, 
-                Attenuation = Vector3.UnitX,
+                Constant = 1,
             };
 
             this.Lights.Add(this.pointLight);

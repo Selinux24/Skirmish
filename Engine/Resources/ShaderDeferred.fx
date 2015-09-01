@@ -102,13 +102,15 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 		return diffuseColor;
 	}
 
+	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
+
 	float4 color = ComputeDirectionalLight(
 		gDirLight,
-		gEyePositionWorld,
+		toEye,
 		depth.xyz,
 		normal.xyz,
 		1,
-		1);
+		normal.w);
 
 	color = diffuseColor * color;
 
@@ -151,13 +153,15 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 		return diffuseColor;
 	}
 
+	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
+
 	float4 color = ComputePointLight(
 		gPointLight,
-		gEyePositionWorld,
+		toEye,
 		depth.xyz,
 		normal.xyz,
 		1,
-		1);
+		normal.w);
 
 	color = diffuseColor * color;
 
@@ -200,13 +204,15 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 		return diffuseColor;
 	}
 
+	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
+
 	float4 color = ComputeSpotLight(
 		gSpotLight,
-		gEyePositionWorld,
+		toEye,
 		depth.xyz,
 		normal.xyz,
 		1,
-		1);
+		normal.w);
 
 	color = diffuseColor * color;
 

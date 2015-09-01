@@ -190,7 +190,7 @@ namespace Engine
             var effect = DrawerPool.EffectDeferred;
 
             effect.UpdatePerFrame(
-                Matrix.Identity,
+                context.World,
                 this.ViewProjection,
                 context.EyePosition,
                 context.Lights.FogStart,
@@ -260,11 +260,9 @@ namespace Engine
                 {
                     var light = pointLights[i];
 
-                    float range = light.GetRange();
-
-                    if (context.Frustum.Contains(new BoundingSphere(light.Position, range)) != ContainmentType.Disjoint)
+                    if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Range)) != ContainmentType.Disjoint)
                     {
-                        Matrix local = Matrix.Scaling(range) * Matrix.Translation(light.Position);
+                        Matrix local = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
 
                         effect.UpdatePerLight(
                             light,
@@ -357,18 +355,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDeferred;
                 var effectTechnique = effect.DeferredCombineLights;
 
-                effect.UpdatePerFrame(
-                    Matrix.Identity,
-                    this.ViewProjection,
-                    context.EyePosition,
-                    context.Lights.FogStart,
-                    context.Lights.FogRange,
-                    context.Lights.FogColor,
-                    context.GeometryMap[0],
-                    context.GeometryMap[1],
-                    context.GeometryMap[2]);
-
-                effect.UpdateComposer(context.LightMap);
+                effect.UpdateComposer(context.World, this.ViewProjection, context.LightMap);
 
                 var deviceContext = this.Game.Graphics.DeviceContext;
                 var geometry = this.lightGeometry[0];
