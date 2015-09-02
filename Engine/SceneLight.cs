@@ -27,6 +27,10 @@ namespace Engine
         /// Diffuse intensity
         /// </summary>
         public float DiffuseIntensity = 1f;
+        /// <summary>
+        /// Free use variable
+        /// </summary>
+        public object State = null;
 
         /// <summary>
         /// Gets the text representation of the light

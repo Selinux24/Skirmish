@@ -32,7 +32,7 @@ namespace DeferredTest
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
         {
-            
+
         }
 
         public override void Initialize()
@@ -228,11 +228,19 @@ namespace DeferredTest
             this.Lights.EnableShadows = true;
 
             this.Lights.FogColor = Color.WhiteSmoke;
-            this.Lights.FogStart = 50f;
-            this.Lights.FogRange = 150f;
+            this.Lights.FogStart = 0f;
+            this.Lights.FogRange = 0f;
 
             this.Lights.ClearDirectionalLights();
-            this.Lights.Add(SceneLightDirectional.Primary);
+            this.Lights.Add(new SceneLightDirectional()
+            {
+                AmbientIntensity = 0f,
+                DiffuseIntensity = 0f,
+                Direction = -Vector3.UnitY,
+                LightColor = Color.Black,
+                Enabled = true,
+                Name = "night has come"
+            });
 
             #region Light Sphere Marker
 
@@ -551,22 +559,24 @@ namespace DeferredTest
                 {
                     for (int i = 1; i < this.Lights.EnabledPointLights.Length; i++)
                     {
-                        //var l = this.Lights.EnabledPointLights[i];
+                        var l = this.Lights.EnabledPointLights[i];
 
-                        //if (l.Attenuation.X == 1) l.Range += 0.5f;
-                        //if (l.Attenuation.X == -1) l.Range -= 2f;
+                        if ((int)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds);
+                        if ((int)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds);
 
-                        //if (l.Range <= 0)
-                        //{
-                        //    l.Range = 0;
-                        //    l.Attenuation.X = 1;
-                        //}
+                        if (l.Radius <= 0)
+                        {
+                            l.Radius = 0;
+                            l.State = 1;
+                        }
 
-                        //if (l.Range >= 25)
-                        //{
-                        //    l.Range = 25;
-                        //    l.Attenuation.X = -1;
-                        //}
+                        if (l.Radius >= 50)
+                        {
+                            l.Radius = 50;
+                            l.State = -1;
+                        }
+
+                        l.DiffuseIntensity = l.Radius * 0.1f;
                     }
                 }
             }
@@ -641,7 +651,8 @@ namespace DeferredTest
                         AmbientIntensity = rnd.NextFloat(0, 1),
                         DiffuseIntensity = rnd.NextFloat(0, 1),
                         Position = lightPosition,
-                        Radius = rnd.NextFloat(1, 5),
+                        Radius = rnd.NextFloat(1, 25),
+                        State = rnd.NextFloat(0, 1) >= 0.5f ? 1 : -1,
                     };
 
                     this.Lights.Add(pointLight);
