@@ -1,3 +1,4 @@
+RasterizerState RasterizerDefault;
 RasterizerState RasterizerSolid
 {
 	FillMode = SOLID;
@@ -19,6 +20,7 @@ RasterizerState RasterizerNoCull
     CullMode = None;
 };
 
+DepthStencilState StencilDefault;
 DepthStencilState StencilEnableDepth
 {
     DepthEnable = TRUE;
@@ -34,6 +36,7 @@ DepthStencilState StencilLessEqualDSS
     DepthFunc = LESS_EQUAL;
 };
 
+BlendState BlendDefault;
 BlendState BlendAdditive
 {
     AlphaToCoverageEnable = FALSE;

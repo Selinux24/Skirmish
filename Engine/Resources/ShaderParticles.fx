@@ -82,7 +82,6 @@ void GSStreamOutFire(point VSVertexParticle input[1], inout PointStream<VSVertex
 		}
 	}
 }
-
 [maxvertexcount(50)]
 void GSStreamOutSmoke(point VSVertexParticle input[1], inout PointStream<VSVertexParticle> ptStream)
 {
@@ -121,7 +120,6 @@ void GSStreamOutSmoke(point VSVertexParticle input[1], inout PointStream<VSVerte
 		}
 	}
 }
-
 [maxvertexcount(6)]
 void GSStreamOutRain(point VSVertexParticle input[1], inout PointStream<VSVertexParticle> ptStream)
 {
@@ -175,7 +173,6 @@ GSParticleSolid VSDrawSolid(VSVertexParticle input)
 	
 	return output;
 }
-
 GSParticleLine VSDrawLine(VSVertexParticle input)
 {
 	float t = input.age;
@@ -222,7 +219,6 @@ void GSDrawSolid(point GSParticleSolid input[1], uint primID : SV_PrimitiveID, i
 		}
 	}
 }
-
 [maxvertexcount(2)]
 void GSDrawLine(point GSParticleLine input[1], uint primID : SV_PrimitiveID, inout LineStream<PSParticleLine> lineStream)
 {
@@ -251,7 +247,6 @@ float4 PSDrawSolid(PSParticleSolid input) : SV_TARGET
 
 	return gTextureArray.Sample(SamplerLinear, uvw) * input.color;
 }
-
 float4 PSDrawLine(PSParticleLine input) : SV_TARGET
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
@@ -260,6 +255,8 @@ float4 PSDrawLine(PSParticleLine input) : SV_TARGET
 }
 
 GeometryShader gsStreamOutFire = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutFire()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
+GeometryShader gsStreamOutSmoke = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutSmoke()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
+GeometryShader gsStreamOutRain = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutRain()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
 
 technique11 FireStreamOut
 {
@@ -273,9 +270,6 @@ technique11 FireStreamOut
         SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
-
-GeometryShader gsStreamOutSmoke = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutSmoke()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
-
 technique11 SmokeStreamOut
 {
     pass P0
@@ -288,9 +282,6 @@ technique11 SmokeStreamOut
         SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
-
-GeometryShader gsStreamOutRain = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutRain()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
-
 technique11 RainStreamOut
 {
     pass P0
@@ -317,7 +308,6 @@ technique11 SolidDraw
         SetDepthStencilState(StencilEnableDepth, 0);
     }
 }
-
 technique11 LineDraw
 {
     pass P0

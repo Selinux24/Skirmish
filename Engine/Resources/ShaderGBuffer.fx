@@ -103,10 +103,10 @@ GBufferPSOutput PSPositionColor(PSVertexPositionColor input)
     GBufferPSOutput output = (GBufferPSOutput)0;
 
 	output.color = gMaterial.Diffuse;
+	output.normal.xyz = float3(0.0f, 0.0f, 0.0f);
+	output.normal.w = 1.0f;
 	output.depth.xyz = input.positionWorld;
 	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	output.normal.xyz = float3(0.0f, 0.0f, 0.0f);
-	output.normal.w = gMaterial.SpecularPower;
 
     return output;
 }
@@ -196,10 +196,10 @@ GBufferPSOutput PSPositionNormalColor(PSVertexPositionNormalColor input)
     GBufferPSOutput output = (GBufferPSOutput)0;
 
 	output.color = gMaterial.Diffuse;
-	output.depth.xyz = input.positionWorld;
-	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 	output.normal.xyz = input.normalWorld;
 	output.normal.w = gMaterial.SpecularPower;
+	output.depth.xyz = input.positionWorld;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;
 }
@@ -279,10 +279,10 @@ GBufferPSOutput PSPositionTexture(PSVertexPositionTexture input)
     GBufferPSOutput output = (GBufferPSOutput)0;
 
 	output.color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+	output.normal.xyz = float3(0.0f, 0.0f, 0.0f);
+	output.normal.w = 1.0f;
 	output.depth.xyz = input.positionWorld;
 	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	output.normal.xyz = float3(0.0f, 0.0f, 0.0f);
-	output.normal.w = gMaterial.SpecularPower;
 
     return output;
 }
@@ -376,10 +376,10 @@ GBufferPSOutput PSPositionNormalTexture(PSVertexPositionNormalTexture input)
     GBufferPSOutput output = (GBufferPSOutput)0;
 
 	output.color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
-	output.depth.xyz = input.positionWorld;
-	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 	output.normal.xyz = input.normalWorld;
 	output.normal.w = gMaterial.SpecularPower;
+	output.depth.xyz = input.positionWorld;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;
 }
@@ -487,10 +487,10 @@ GBufferPSOutput PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTang
 	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
 	output.color = color;
-	output.depth.xyz = input.positionWorld;
-	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 	output.normal.xyz = bumpedNormalW.xyz;
 	output.normal.w = gMaterial.SpecularPower;
+	output.depth.xyz = input.positionWorld;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
 
     return output;
 }

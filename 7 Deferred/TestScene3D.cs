@@ -19,6 +19,7 @@ namespace DeferredTest
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
         private Terrain terrain = null;
+        private ParticleSystem fire = null;
 
         private SpriteTexture bufferDrawer = null;
         private int textIntex = 0;
@@ -30,7 +31,7 @@ namespace DeferredTest
         private Random rnd = new Random(0);
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.DeferredLightning)
+            : base(game, SceneModesEnum.ForwardLigthning)
         {
 
         }
@@ -156,6 +157,13 @@ namespace DeferredTest
 
             #endregion
 
+            #region Moving fire
+
+            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { Vector3.Zero }, 0.5f, "flare2.png"));
+            this.fire.Active = this.fire.Visible = false;
+
+            #endregion
+
             this.load.Text = loadingText;
 
             #endregion
@@ -234,12 +242,12 @@ namespace DeferredTest
             this.Lights.ClearDirectionalLights();
             this.Lights.Add(new SceneLightDirectional()
             {
-                AmbientIntensity = 0f,
-                DiffuseIntensity = 0f,
-                Direction = -Vector3.UnitY,
-                LightColor = Color.Black,
+                Name = "night has come",
                 Enabled = true,
-                Name = "night has come"
+                LightColor = Color.LightBlue,
+                AmbientIntensity = 0.1f,
+                DiffuseIntensity = 0.1f,
+                Direction = -Vector3.UnitY,
             });
 
             #region Light Sphere Marker

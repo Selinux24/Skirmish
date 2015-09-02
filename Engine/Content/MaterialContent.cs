@@ -25,7 +25,7 @@ namespace Engine.Content
 
                     IndexOfRefraction = 0.0f,
                     Reflectivity = 0.0f,
-                    Shininess = 0.0f,
+                    Shininess = 1.0f,
                     Transparency = 0.0f,
                 };
             }

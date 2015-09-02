@@ -36,8 +36,8 @@ namespace Engine.Common
         public Material(MaterialContent effect)
         {
             this.DiffuseColor = effect.DiffuseColor;
-            this.SpecularIntensity = 0;
-            this.SpecularPower = 0;
+            this.SpecularIntensity = effect.SpecularColor.ToVector3().Length() * 2f;
+            this.SpecularPower = effect.Shininess;
         }
     };
 }

@@ -91,7 +91,7 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 	[flatten]
 	if(depth.w == 1.0f)
 	{
-		return diffuseColor;
+		return float4(diffuseColor.rgb * gDirLight.Color * gDirLight.Ambient, diffuseColor.a);
 	}
 
     //Normal
@@ -99,7 +99,7 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
-		return diffuseColor;
+		return float4(diffuseColor.rgb * gDirLight.Color * gDirLight.Ambient, diffuseColor.a);
 	}
 
 	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
@@ -142,7 +142,7 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	[flatten]
 	if(depth.w == 1.0f)
 	{
-		return diffuseColor;
+		return float4(diffuseColor.rgb * gPointLight.Color * gPointLight.Ambient, diffuseColor.a);
 	}
 
     //Normal
@@ -150,7 +150,7 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
-		return diffuseColor;
+		return float4(diffuseColor.rgb * gPointLight.Color * gPointLight.Ambient, diffuseColor.a);
 	}
 
 	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
@@ -193,7 +193,7 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	[flatten]
 	if(depth.w == 1.0f)
 	{
-		return diffuseColor;
+		return float4(diffuseColor.rgb * gSpotLight.Color * gSpotLight.Ambient, diffuseColor.a);
 	}
 
     //Normal
@@ -201,7 +201,7 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
-		return diffuseColor;
+		return float4(diffuseColor.rgb * gSpotLight.Color * gSpotLight.Ambient, diffuseColor.a);
 	}
 
 	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
