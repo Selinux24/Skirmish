@@ -226,9 +226,9 @@ namespace Engine.Effects
         /// </summary>
         public Vector3 Position;
         /// <summary>
-        /// Attenuation (constant, linear, exponential)
+        /// Light radius
         /// </summary>
-        public Vector3 Attenuation;
+        public float Radius;
         /// <summary>
         /// Padding
         /// </summary>
@@ -254,7 +254,7 @@ namespace Engine.Effects
             this.AmbientIntensity = light.AmbientIntensity;
             this.DiffuseIntensity = light.DiffuseIntensity;
             this.Position = light.Position;
-            this.Attenuation = new Vector3(light.Constant, light.Linear, light.Exponential);
+            this.Radius = light.Radius;
             this.Enabled = light.Enabled ? 1f : 0f;
         }
     }

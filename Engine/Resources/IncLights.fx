@@ -100,9 +100,7 @@ struct PointLight
 	float Ambient;
 	float Diffuse;
 	float3 Position;
-    float AttenuationConstant;                                                                 
-    float AttenuationLinear;                                                                   
-    float AttenuationExp;                                                                      
+    float Radius;
 	float Enabled;
 };
 struct SpotLight
@@ -113,9 +111,9 @@ struct SpotLight
 	float3 Position;
 	float3 Direction;
 	float Spot;
-    float AttenuationConstant;                                                                 
-    float AttenuationLinear;                                                                   
-    float AttenuationExp;                                                                      
+    float AttenuationConstant;
+	float AttenuationLinear;
+	float AttenuationExp;
 	float Enabled;
 };
 
@@ -169,6 +167,23 @@ float4 ComputeLight(
     return (ambientColor + diffuseColor + specularColor);
 }
 
+float CalcSphericAttenuation(float radius, float intensity, float maxDistance, float distance)
+{
+    float f = distance / maxDistance;
+    float denom = 1.0f - (f * f);
+    if (denom > 0.0f)
+    {
+        float d = distance / (1.0f - (f * f));
+        float dn = (d / radius) + 1.0f;
+        
+		return intensity / (dn * dn);
+    }
+    else
+    {
+        return 0.0f;
+    }
+}
+
 float4 ComputeDirectionalLight(
 	DirectionalLight L,
 	float3 toEye,
@@ -201,13 +216,6 @@ float4 ComputePointLight(
 	float distance = length(lightDirection);
 	lightDirection /= distance;
 
-    float attenuation =
-		L.AttenuationConstant +
-		L.AttenuationLinear * distance +
-		L.AttenuationExp * distance * distance;
-
-	attenuation = max(1.0f, attenuation);
-
 	float4 litColor = ComputeLight(
 		L.Color,
 		L.Ambient,
@@ -219,7 +227,9 @@ float4 ComputePointLight(
 		specularIntensity,
 		specularPower);
 
-	return litColor / attenuation;
+    float attenuation = CalcSphericAttenuation(1, L.Diffuse, L.Radius, distance);
+
+	return litColor * attenuation;
 }
 
 float4 ComputeSpotLight(

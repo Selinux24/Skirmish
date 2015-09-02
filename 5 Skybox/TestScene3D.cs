@@ -118,12 +118,13 @@ namespace Skybox
 
             this.movingFireLight = new SceneLightPoint()
             {
+                Name = "Moving fire light",
                 Enabled = true,
-                Position = Vector3.Zero,
                 LightColor = Color.White,
                 AmbientIntensity = 1f,
                 DiffuseIntensity = 1f,
-                Constant = 1f,
+                Position = Vector3.Zero,
+                Radius = 1f,
             };
 
             this.Lights.Add(this.movingFireLight);
@@ -156,12 +157,13 @@ namespace Skybox
 
                 this.torchLights[i] = new SceneLightPoint()
                 {
+                    Name = string.Format("Torch {0}", i),
                     Enabled = true,
-                    Position = firePositions3D[i],
                     LightColor = Color.Yellow,
                     AmbientIntensity = 1f,
                     DiffuseIntensity = 1f,
-                    Constant = 1f,
+                    Position = firePositions3D[i],
+                    Radius = 1f,
                 };
 
                 this.Lights.Add(this.torchLights[i]);

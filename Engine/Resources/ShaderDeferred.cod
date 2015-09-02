@@ -9,7 +9,7 @@ cbuffer cbPerFrame : register(b0)
     float4x4 gWorldViewProjection;      // Offset:   64, size:   64
     float3  gEyePositionWorld;          // Offset:  128, size:   12
     DirectionalLight gDirLight;         // Offset:  144, size:   36
-    PointLight gPointLight;             // Offset:  192, size:   48
+    PointLight gPointLight;             // Offset:  192, size:   40
     SpotLight gSpotLight;               // Offset:  240, size:   64
     float   gFogStart;                  // Offset:  304, size:    4
     float   gFogRange;                  // Offset:  308, size:    4
@@ -184,12 +184,10 @@ fxgroup
                 //       float Ambient;                 // Offset:  204
                 //       float Diffuse;                 // Offset:  208
                 //       float3 Position;               // Offset:  212
-                //       float AttenuationConstant;     // Offset:  224
-                //       float AttenuationLinear;       // Offset:  228
-                //       float AttenuationExp;          // Offset:  232
-                //       float Enabled;                 // Offset:  236
+                //       float Radius;                  // Offset:  224
+                //       float Enabled;                 // Offset:  228
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    40 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -292,12 +290,10 @@ fxgroup
                 //       float Ambient;                 // Offset:  204
                 //       float Diffuse;                 // Offset:  208
                 //       float3 Position;               // Offset:  212
-                //       float AttenuationConstant;     // Offset:  224
-                //       float AttenuationLinear;       // Offset:  228
-                //       float AttenuationExp;          // Offset:  232
-                //       float Enabled;                 // Offset:  236
+                //       float Radius;                  // Offset:  224
+                //       float Enabled;                 // Offset:  228
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    40 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -381,7 +377,7 @@ fxgroup
                 rsq r3.x, r1.w
                 mul r1.xyz, r1.xyzx, r3.xxxx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 153 "IncLights.fx"
+                #line 151 "IncLights.fx"
                 dp3 r3.x, r2.xyzx, -cb0[10].yzwy  // diffuseFactor<0:NaN:Inf>
                 lt r3.y, l(0.000000), r3.x
                 mul r4.xyz, cb0[9].xyzx, cb0[10].xxxx
@@ -395,21 +391,21 @@ fxgroup
                 dp3 r1.x, r1.xyzx, r2.xyzx  // specFactor<0:NaN:Inf>
                 lt r1.y, l(0.000000), r1.x
                 
-                #line 164
+                #line 162
                 max r1.z, r2.w, l(1.000000)
                 log r1.x, |r1.x|
                 mul r1.x, r1.x, r1.z
                 exp r1.x, r1.x  // specFactor<0:NaN:Inf>
                 mul r2.xyz, r1.xxxx, cb0[9].xyzx  // specularColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 162
+                #line 160
                 and r1.xyz, r1.yyyy, r2.xyzx  // specularColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 155
+                #line 153
                 and r2.xyz, r3.xzwx, r3.yyyy  // diffuseColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 and r1.xyz, r1.xyzx, r3.yyyy  // specularColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 169
+                #line 167
                 mad r2.xyz, cb0[9].xyzx, cb0[9].wwww, r2.xyzx
                 add r1.xyz, r1.xyzx, r2.xyzx  // ComputeLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
@@ -420,7 +416,7 @@ fxgroup
                 #line 120
                 sqrt r1.w, r1.w  // distToEye<0:NaN:Inf>
                 
-                #line 371 "IncLights.fx"
+                #line 381 "IncLights.fx"
                 add r1.w, r1.w, -cb0[19].x
                 div_sat r1.w, r1.w, cb0[19].y  // fogLerp<0:[0f,1f]>
                 mad r0.xyz, -r0.xyzx, r1.xyzx, cb0[20].xyzx
@@ -476,12 +472,10 @@ fxgroup
                 //       float Ambient;                 // Offset:  204
                 //       float Diffuse;                 // Offset:  208
                 //       float3 Position;               // Offset:  212
-                //       float AttenuationConstant;     // Offset:  224
-                //       float AttenuationLinear;       // Offset:  228
-                //       float AttenuationExp;          // Offset:  232
-                //       float Enabled;                 // Offset:  236
+                //       float Radius;                  // Offset:  224
+                //       float Enabled;                 // Offset:  228
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    40 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -592,12 +586,10 @@ fxgroup
                 //       float Ambient;                 // Offset:  204
                 //       float Diffuse;                 // Offset:  208
                 //       float3 Position;               // Offset:  212
-                //       float AttenuationConstant;     // Offset:  224
-                //       float AttenuationLinear;       // Offset:  228
-                //       float AttenuationExp;          // Offset:  232
-                //       float Enabled;                 // Offset:  236
+                //       float Radius;                  // Offset:  224
+                //       float Enabled;                 // Offset:  228
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    48
+                //   } gPointLight;                     // Offset:  192 Size:    40
                 //   
                 //   struct SpotLight
                 //   {
@@ -690,18 +682,13 @@ fxgroup
                 rsq r3.w, r2.w
                 mul r3.xyz, r3.wwww, r3.xyzx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 200 "IncLights.fx"
+                #line 215 "IncLights.fx"
                 add r2.xyz, r2.xyzx, -cb0[13].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                 dp3 r3.w, r2.xyzx, r2.xyzx
-                sqrt r4.x, r3.w  // distance<0:NaN:Inf>
-                div r2.xyz, r2.xyzx, r4.xxxx  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                sqrt r3.w, r3.w  // distance<0:NaN:Inf>
+                div r2.xyz, r2.xyzx, r3.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 207
-                mad r4.x, cb0[14].y, r4.x, cb0[14].x
-                mad r3.w, r3.w, cb0[14].z, r4.x  // attenuation<0:NaN:Inf>
-                max r3.w, r3.w, l(1.000000)  // attenuation<0:Inf:[1f,1.#INFf]>
-                
-                #line 153
+                #line 151
                 dp3 r4.x, r0.xyzx, -r2.xyzx  // diffuseFactor<0:NaN:Inf>
                 lt r4.y, l(0.000000), r4.x
                 mul r5.xyz, cb0[12].xyzx, cb0[13].xxxx
@@ -715,26 +702,38 @@ fxgroup
                 dp3 r0.x, r3.xyzx, r0.xyzx  // specFactor<0:NaN:Inf>
                 lt r0.y, l(0.000000), r0.x
                 
-                #line 164
+                #line 162
                 max r0.z, r0.w, l(1.000000)
                 log r0.x, |r0.x|
                 mul r0.x, r0.x, r0.z
                 exp r0.x, r0.x  // specFactor<0:NaN:Inf>
                 mul r0.xzw, r0.xxxx, cb0[12].xxyz  // specularColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 162
+                #line 160
                 and r0.xyz, r0.xzwx, r0.yyyy  // specularColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 155
+                #line 153
                 and r2.xyz, r4.xzwx, r4.yyyy  // diffuseColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 and r0.xyz, r0.xyzx, r4.yyyy  // specularColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 169
+                #line 167
                 mad r2.xyz, cb0[12].xyzx, cb0[12].wwww, r2.xyzx
                 add r0.xyz, r0.xyzx, r2.xyzx  // ComputeLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 222
-                div r0.xyz, r0.xyzx, r3.wwww  // ComputePointLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 172
+                div r0.w, r3.w, cb0[14].x  // f<0:NaN:Inf>
+                mad r0.w, -r0.w, r0.w, l(1.000000)  // denom<0:NaN:Inf>
+                lt r2.x, l(0.000000), r0.w
+                div r0.w, r3.w, r0.w  // d<0:NaN:Inf>
+                add r0.w, r0.w, l(1.000000)  // dn<0:NaN:Inf>
+                mul r0.w, r0.w, r0.w
+                div r0.w, cb0[13].x, r0.w  // CalcSphericAttenuation<0:NaN:Inf>
+                
+                #line 174
+                and r0.w, r0.w, r2.x  // CalcSphericAttenuation<0:NaN:Inf>
+                
+                #line 232
+                mul r0.xyz, r0.wwww, r0.xyzx  // ComputePointLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 166 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 mul r2.xyz, r0.xyzx, r1.xyzx  // color<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -743,7 +742,7 @@ fxgroup
                 #line 171
                 sqrt r2.w, r2.w  // distToEye<0:NaN:Inf>
                 
-                #line 371 "IncLights.fx"
+                #line 381 "IncLights.fx"
                 add r2.w, r2.w, -cb0[19].x
                 div_sat r2.w, r2.w, cb0[19].y  // fogLerp<0:[0f,1f]>
                 mad r0.xyz, -r1.xyzx, r0.xyzx, cb0[20].xyzx
@@ -755,7 +754,7 @@ fxgroup
                 #line 178
                 mov o0.w, r1.w  // PSPointLight<3:Inf>
                 ret 
-                // Approximately 59 instruction slots used
+                // Approximately 64 instruction slots used
                             
             };
         }
@@ -798,12 +797,10 @@ fxgroup
                 //       float Ambient;                 // Offset:  204
                 //       float Diffuse;                 // Offset:  208
                 //       float3 Position;               // Offset:  212
-                //       float AttenuationConstant;     // Offset:  224
-                //       float AttenuationLinear;       // Offset:  228
-                //       float AttenuationExp;          // Offset:  232
-                //       float Enabled;                 // Offset:  236
+                //       float Radius;                  // Offset:  224
+                //       float Enabled;                 // Offset:  228
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    40 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -914,12 +911,10 @@ fxgroup
                 //       float Ambient;                 // Offset:  204
                 //       float Diffuse;                 // Offset:  208
                 //       float3 Position;               // Offset:  212
-                //       float AttenuationConstant;     // Offset:  224
-                //       float AttenuationLinear;       // Offset:  228
-                //       float AttenuationExp;          // Offset:  232
-                //       float Enabled;                 // Offset:  236
+                //       float Radius;                  // Offset:  224
+                //       float Enabled;                 // Offset:  228
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    40 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -1012,7 +1007,7 @@ fxgroup
                 rsq r3.w, r2.w
                 mul r3.xyz, r3.wwww, r3.xyzx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 233 "IncLights.fx"
+                #line 243 "IncLights.fx"
                 add r2.xyz, r2.xyzx, -cb0[16].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                 dp3 r3.w, r2.xyzx, cb0[17].xyzx  // spot<0:NaN:Inf>
                 lt r3.w, cb0[17].w, r3.w
@@ -1021,12 +1016,12 @@ fxgroup
                 #line 222 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sqrt r2.yw, r2.xxxw  // distance<0:NaN:Inf>, distToEye<0:NaN:Inf>
                 
-                #line 244 "IncLights.fx"
+                #line 254 "IncLights.fx"
                 mad r2.y, cb0[18].y, r2.y, cb0[18].x
                 mad r2.x, r2.x, cb0[18].z, r2.y  // attenuation<0:NaN:Inf>
                 max r2.x, r2.x, l(1.000000)  // attenuation<0:Inf:[1f,1.#INFf]>
                 
-                #line 153
+                #line 151
                 dp3 r2.y, r0.xyzx, -cb0[17].xyzx  // diffuseFactor<0:NaN:Inf>
                 lt r2.z, l(0.000000), r2.y
                 mul r4.xyz, cb0[15].xyzx, cb0[16].xxxx
@@ -1040,35 +1035,35 @@ fxgroup
                 dp3 r0.x, r3.xyzx, r0.xyzx  // specFactor<0:NaN:Inf>
                 lt r0.y, l(0.000000), r0.x
                 
-                #line 164
+                #line 162
                 max r0.z, r0.w, l(1.000000)
                 log r0.x, |r0.x|
                 mul r0.x, r0.x, r0.z
                 exp r0.x, r0.x  // specFactor<0:NaN:Inf>
                 mul r0.xzw, r0.xxxx, cb0[15].xxyz  // specularColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 162
+                #line 160
                 and r0.xyz, r0.xzwx, r0.yyyy  // specularColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 155
+                #line 153
                 and r3.xyz, r2.zzzz, r4.xyzx  // diffuseColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 and r0.xyz, r0.xyzx, r2.zzzz  // specularColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 169
+                #line 167
                 mad r3.xyz, cb0[15].xyzx, cb0[15].wwww, r3.xyzx
                 add r0.xyz, r0.xyzx, r3.xyzx  // ComputeLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 259
+                #line 269
                 div r0.xyz, r0.xyzx, r2.xxxx  // ComputeSpotLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 236
+                #line 246
                 and r0.xyz, r0.xyzx, r3.wwww  // ComputeSpotLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 217 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 mul r2.xyz, r0.xyzx, r1.xyzx  // color<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 lt r0.w, l(0.000000), cb0[19].y
                 
-                #line 371 "IncLights.fx"
+                #line 381 "IncLights.fx"
                 add r2.w, r2.w, -cb0[19].x
                 div_sat r2.w, r2.w, cb0[19].y  // fogLerp<0:[0f,1f]>
                 mad r0.xyz, -r1.xyzx, r0.xyzx, cb0[20].xyzx
@@ -1123,12 +1118,10 @@ fxgroup
                 //       float Ambient;                 // Offset:  204
                 //       float Diffuse;                 // Offset:  208
                 //       float3 Position;               // Offset:  212
-                //       float AttenuationConstant;     // Offset:  224
-                //       float AttenuationLinear;       // Offset:  228
-                //       float AttenuationExp;          // Offset:  232
-                //       float Enabled;                 // Offset:  236
+                //       float Radius;                  // Offset:  224
+                //       float Enabled;                 // Offset:  228
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    40 [unused]
                 //   
                 //   struct SpotLight
                 //   {

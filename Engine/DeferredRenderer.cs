@@ -260,9 +260,9 @@ namespace Engine
                 {
                     var light = pointLights[i];
 
-                    if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Range)) != ContainmentType.Disjoint)
+                    if (context.Frustum.Contains(new BoundingSphere(light.Position, light.Radius)) != ContainmentType.Disjoint)
                     {
-                        Matrix local = Matrix.Scaling(light.Range) * Matrix.Translation(light.Position);
+                        Matrix local = Matrix.Scaling(light.Radius) * Matrix.Translation(light.Position);
 
                         effect.UpdatePerLight(
                             light,

@@ -147,10 +147,12 @@ namespace Collada
 
             SceneLightPoint pointLight = new SceneLightPoint()
             {
+                Name = "Point light",
                 LightColor = Color.White,
                 AmbientIntensity = 0.3f,
                 DiffuseIntensity = 0.7f,
-                Constant = 0.1f,
+                Position = Vector3.Zero,
+                Radius = 5f,
                 Enabled = true,
             };
 

@@ -9,121 +9,83 @@ namespace Engine
     /// </summary>
     public class SceneLightPoint : SceneLight
     {
-        private float constant = 0f;
-        private float linear = 0f;
-        private float exponential = 0f;
-
         /// <summary>
         /// Ligth position
         /// </summary>
         public Vector3 Position = Vector3.Zero;
         /// <summary>
-        /// Stores the three attenuation constants in the format (a0, a1, a2) that control how light intensity falls off with distance
+        /// Light radius
         /// </summary>
-        /// <remarks>
-        /// Constant weaken (1,0,0)
-        /// Inverse distance weaken (0,1,0)
-        /// Inverse square law (0,0,1)
-        /// </remarks>
-        public float Constant
-        {
-            get
-            {
-                return this.constant;
-            }
-            set
-            {
-                this.constant = value;
-
-                this.UpdateRange();
-            }
-        }
-
-        public float Linear
-        {
-            get
-            {
-                return this.linear;
-            }
-            set
-            {
-                this.linear = value;
-
-                this.UpdateRange();
-            }
-        }
-
-        public float Exponential
-        {
-            get
-            {
-                return this.exponential;
-            }
-            set
-            {
-                this.exponential = value;
-
-                this.UpdateRange();
-            }
-        }
-
-        public float Range { get; private set; }
+        public float Radius = 1f;
 
         public SceneLightPoint()
             : base()
         {
-            this.UpdateRange();
+            
         }
 
-        public static Tuple<float, float>[] Test(SceneLightPoint light, float limit, float pass)
+        public static float OneTestDistance(float radius, float intensity, float cutoff, float distance)
+        {
+            float dn = (distance / radius) + 1f;
+            float attenuation = intensity / (dn * dn);
+
+            attenuation -= cutoff;
+            attenuation *= 1f / (1f - cutoff);
+            attenuation = Math.Max(attenuation, 0f);
+
+            return attenuation;
+        }
+        public static float OneGetMaxDistance(float radius, float intensity, float cutoff)
+        {
+            float res = 0f;
+
+            res = radius * ((float)Math.Sqrt(intensity / cutoff) - 1f);
+
+            return res;
+        }
+        public static Tuple<float, float>[] OneTestComplete(float radius, float intensity, float cutoff, float pass)
         {
             List<Tuple<float, float>> values = new List<Tuple<float, float>>();
 
-            for (float distance = 0; distance < limit; distance += pass)
+            for (float distance = 0; distance < 1000f; distance += pass)
             {
-                float attenuation =
-                    light.Constant +
-                    light.Linear * distance +
-                    light.Exponential * distance * distance;
-
-                attenuation = 1f / Math.Max(1f, attenuation);
+                float attenuation = OneTestDistance(radius, intensity, cutoff, distance);
 
                 values.Add(new Tuple<float, float>(distance, attenuation));
 
-                if (attenuation == 0f)
-                {
-                    break;
-                }
+                if (attenuation == 0f) break;
             }
 
             return values.ToArray();
         }
 
-        public void UpdateRange()
+        public static float TwoTestDistance(float radius, float intensity, float maxDistance, float distance)
         {
-            float a = this.exponential;
-            float b = this.linear;
-            float c = this.constant;
-
-            if (a != 0)
+            float f = distance / maxDistance;
+            float denom = 1 - (f * f);
+            if (denom > 0)
             {
-                //ax^2 + bx + c = 0
-                float discriminant = (b * b) - (4f * a * c);
-
-                float x1 = (-b + (float)(Math.Sqrt(discriminant))) / (2f * a);
-                float x2 = (-b - (float)(Math.Sqrt(discriminant))) / (2f * a);
-
-                this.Range = Math.Max(x1, x2);
-            }
-            else if (b != 0)
-            {
-                //bx + c = 0
-                this.Range = -c / b;
+                float d = distance / (1 - (f * f));
+                float dn = (d / radius) + 1f;
+                return intensity / (dn * dn);
             }
             else
             {
-                this.Range = c;
+                return 0f;
             }
+        }
+        public static Tuple<float, float>[] TwoTestComplete(float radius, float intensity, float maxDistance, float pass)
+        {
+            List<Tuple<float, float>> values = new List<Tuple<float, float>>();
+
+            for (float distance = 0; distance < maxDistance * 2f; distance += pass)
+            {
+                float attenuation = TwoTestDistance(radius, intensity, maxDistance, distance);
+
+                values.Add(new Tuple<float, float>(distance, attenuation));
+            }
+
+            return values.ToArray();
         }
     }
 }

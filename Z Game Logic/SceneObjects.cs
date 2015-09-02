@@ -112,10 +112,13 @@ namespace GameLogic
 
             this.pointLight = new SceneLightPoint()
             {
+                Name = "Current soldier",
                 Enabled = true,
                 LightColor = Color.White,
-                Position = Vector3.Zero, 
-                Constant = 1,
+                Position = Vector3.Zero,
+                AmbientIntensity = 0f,
+                DiffuseIntensity = 1f,
+                Radius = 3f,
             };
 
             this.Lights.Add(this.pointLight);

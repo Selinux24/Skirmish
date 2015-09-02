@@ -32,19 +32,7 @@ namespace DeferredTest
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
         {
-            var light = new SceneLightPoint()
-            {
-                Constant = 0f,
-                Linear = 0f,
-                Exponential = 1f,
-            };
-
-            var res = SceneLightPoint.Test(light, 1000f, 0.1f);
-
-            if (res.Length > 0)
-            {
-
-            }
+            
         }
 
         public override void Initialize()
@@ -647,12 +635,13 @@ namespace DeferredTest
 
                     SceneLightPoint pointLight = new SceneLightPoint()
                     {
+                        Name = string.Format("Point {0}", this.Lights.PointLights.Length),
                         Enabled = true,
                         LightColor = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f),
                         AmbientIntensity = rnd.NextFloat(0, 1),
                         DiffuseIntensity = rnd.NextFloat(0, 1),
-                        Constant = rnd.NextFloat(0, 1),
                         Position = lightPosition,
+                        Radius = rnd.NextFloat(1, 5),
                     };
 
                     this.Lights.Add(pointLight);

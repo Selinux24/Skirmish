@@ -3580,7 +3580,7 @@ fxgroup
                 #line 485 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 129 "IncLights.fx"
+                #line 127 "IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -3592,10 +3592,10 @@ fxgroup
                 #line 486 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
-                #line 125 "IncLights.fx"
+                #line 123 "IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // normalT<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 134
+                #line 132
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx
@@ -3814,7 +3814,7 @@ fxgroup
                 #line 485 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 129 "IncLights.fx"
+                #line 127 "IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -3826,10 +3826,10 @@ fxgroup
                 #line 486 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
-                #line 125 "IncLights.fx"
+                #line 123 "IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // normalT<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 134
+                #line 132
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx
@@ -4102,7 +4102,7 @@ fxgroup
                 #line 485 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 129 "IncLights.fx"
+                #line 127 "IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -4114,10 +4114,10 @@ fxgroup
                 #line 486 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
-                #line 125 "IncLights.fx"
+                #line 123 "IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // normalT<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 134
+                #line 132
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx
@@ -4395,7 +4395,7 @@ fxgroup
                 #line 485 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 129 "IncLights.fx"
+                #line 127 "IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -4407,10 +4407,10 @@ fxgroup
                 #line 486 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
-                #line 125 "IncLights.fx"
+                #line 123 "IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // normalT<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 134
+                #line 132
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx

@@ -352,21 +352,23 @@ namespace TerrainTest
             this.Lights.DirectionalLights[2].Enabled = false;
             this.Lights.Add(new SceneLightPoint()
             {
+                Name = "One point",
+                Enabled = true,
                 LightColor = Color.White,
                 AmbientIntensity = 1,
                 DiffuseIntensity = 1,
-                Constant = 1,
                 Position = Vector3.Zero,
-                Enabled = true,
+                Radius = 1f,
             });
             this.Lights.Add(new SceneLightPoint()
             {
+                Name = "Another point",
+                Enabled = true,
                 LightColor = Color.White,
                 AmbientIntensity = 1,
                 DiffuseIntensity = 1,
-                Constant = 1,
                 Position = Vector3.Zero,
-                Enabled = true,
+                Radius = 1f,
             });
         }
 
