@@ -373,7 +373,7 @@ namespace Engine
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
                 this.Game.Graphics.SetRasterizerDefault();
-                this.Game.Graphics.SetBlendComposition();
+                this.Game.Graphics.SetBlendDefault();
 
                 for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                 {

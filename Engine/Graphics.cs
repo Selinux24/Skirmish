@@ -577,18 +577,43 @@ namespace Engine
                 //Composition blend state
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = false;
-                desc.IndependentBlendEnable = false;
+                desc.IndependentBlendEnable = true;
 
-                desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].IsBlendEnabled = false;
                 desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-
                 desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Maximum;
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[1].IsBlendEnabled = false;
+                desc.RenderTarget[1].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[1].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[1].SourceBlend = BlendOption.One;
+                desc.RenderTarget[1].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[1].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[1].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[1].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[2].IsBlendEnabled = false;
+                desc.RenderTarget[2].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[2].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[2].SourceBlend = BlendOption.One;
+                desc.RenderTarget[2].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[3].IsBlendEnabled = false;
+                desc.RenderTarget[3].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[3].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[3].SourceBlend = BlendOption.One;
+                desc.RenderTarget[3].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[3].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[3].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[3].DestinationAlphaBlend = BlendOption.Zero;
 
                 this.blendComposition = new BlendState(this.Device, desc);
             }
@@ -902,7 +927,7 @@ namespace Engine
         /// <param name="state">Depth stencil state</param>
         private void SetDepthStencilState(DepthStencilState state)
         {
-            if (this.currentDepthStencilState != state)
+            //if (this.currentDepthStencilState != state)
             {
                 this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(state);
 
@@ -919,7 +944,7 @@ namespace Engine
         /// <param name="sampleMask">Sample mask</param>
         private void SetBlendState(BlendState state, Color4? blendFactor = null, int sampleMask = -1)
         {
-            if (this.currentBlendState != state)
+            //if (this.currentBlendState != state)
             {
                 this.Device.ImmediateContext.OutputMerger.SetBlendState(state, blendFactor, sampleMask);
 
@@ -934,7 +959,7 @@ namespace Engine
         /// <param name="state">Rasterizer state</param>
         private void SetRasterizerState(RasterizerState state)
         {
-            if (this.currentRasterizerState != state)
+            //if (this.currentRasterizerState != state)
             {
                 this.Device.ImmediateContext.Rasterizer.State = state;
 

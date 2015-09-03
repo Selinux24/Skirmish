@@ -236,18 +236,18 @@ namespace DeferredTest
             this.Lights.FogStart = 0f;
             this.Lights.FogRange = 0f;
 
-            //this.Lights.ClearDirectionalLights();
+            this.Lights.ClearDirectionalLights();
             //this.Lights.Add(SceneLightDirectional.Primary);
-            //this.Lights.Add(new SceneLightDirectional()
-            //{
-            //    Name = "night has come",
-            //    Enabled = true,
-            //    LightColor = Color.LightBlue,
-            //    AmbientIntensity = 0.5f,
-            //    DiffuseIntensity = 0.5f,
-            //    Direction = -Vector3.UnitY,
-            //    CastShadow = true,
-            //});
+            this.Lights.Add(new SceneLightDirectional()
+            {
+                Name = "night has come",
+                Enabled = true,
+                LightColor = Color.LightBlue,
+                AmbientIntensity = 0.25f,
+                DiffuseIntensity = 0.25f,
+                Direction = SceneLightDirectional.Primary.Direction,
+                CastShadow = false,
+            });
 
             #region Light Sphere Marker
 
@@ -351,11 +351,11 @@ namespace DeferredTest
                     if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[3] &&
                         this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
                     {
-                        //Shadow positions w
+                        //Specular intensity
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[3];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
                         this.bufferDrawer.Visible = true;
-                        this.help.Text = "Shadow Positions W";
+                        this.help.Text = "Specular Intensity";
                     }
                     else
                     {
@@ -386,7 +386,7 @@ namespace DeferredTest
                 {
                     //Result
                     this.bufferDrawer.Texture = this.DrawContext.LightMap;
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.All;
+                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                     this.bufferDrawer.Visible = true;
                     this.help.Text = "Result";
                 }
@@ -588,8 +588,8 @@ namespace DeferredTest
                     {
                         var l = this.Lights.EnabledPointLights[i];
 
-                        if ((int)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds);
-                        if ((int)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds);
+                        if ((int)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds * 50f);
+                        if ((int)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds * 50f);
 
                         if (l.Radius <= 0)
                         {

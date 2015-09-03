@@ -40,14 +40,17 @@ BlendState BlendDefault;
 BlendState BlendAdditive
 {
     AlphaToCoverageEnable = FALSE;
+
     BlendEnable[0] = TRUE;
+    RenderTargetWriteMask[0] = 0x0F;
+
+    BlendOp = ADD;
     SrcBlend = SRC_ALPHA;
     DestBlend = ONE;
-    BlendOp = ADD;
-    SrcBlendAlpha = ZERO;
-    DestBlendAlpha = ZERO;
+    
     BlendOpAlpha = ADD;
-    RenderTargetWriteMask[0] = 0x0F;
+	SrcBlendAlpha = ZERO;
+    DestBlendAlpha = ZERO;
 };
 
 SamplerState SamplerLinear

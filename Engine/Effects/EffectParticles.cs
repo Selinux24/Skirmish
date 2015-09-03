@@ -331,7 +331,7 @@ namespace Engine.Effects
         {
             if (vertexType == VertexTypes.Particle)
             {
-                if (drawerMode == DrawerModesEnum.Forward)
+                if (drawerMode == DrawerModesEnum.Forward || drawerMode == DrawerModesEnum.ShadowMap)
                 {
                     if (particleClass == ParticleClasses.Fire) return this.SolidDraw;
                     else if (particleClass == ParticleClasses.Smoke) return this.SolidDraw;

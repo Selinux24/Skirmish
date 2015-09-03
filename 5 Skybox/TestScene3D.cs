@@ -46,7 +46,7 @@ namespace Skybox
         private int directionalLightCount = 3;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.DeferredLightning)
+            : base(game, SceneModesEnum.ForwardLigthning)
         {
 
         }
@@ -119,8 +119,8 @@ namespace Skybox
                 Name = "Moving fire light",
                 Enabled = true,
                 LightColor = Color.White,
-                AmbientIntensity = 1f,
-                DiffuseIntensity = 1f,
+                AmbientIntensity = 10f,
+                DiffuseIntensity = 10f,
                 Position = Vector3.Zero,
                 Radius = 1f,
             };
@@ -163,10 +163,10 @@ namespace Skybox
                     Name = string.Format("Torch {0}", i),
                     Enabled = true,
                     LightColor = color,
-                    AmbientIntensity = 1f,
-                    DiffuseIntensity = 1f,
+                    AmbientIntensity = 10f,
+                    DiffuseIntensity = 5f,
                     Position = firePositions3D[i],
-                    Radius = 1f,
+                    Radius = 2f,
                 };
 
                 this.Lights.Add(this.torchLights[i]);

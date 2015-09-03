@@ -141,10 +141,10 @@
               <texture texture="terrain_png-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.04 0.03531751 0.03531751 1</color>
+              <color sid="specular">0 0 0 1</color>
             </specular>
             <shininess>
-              <float sid="shininess">50</float>
+              <float sid="shininess">1</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>

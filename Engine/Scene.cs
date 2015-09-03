@@ -757,7 +757,15 @@ namespace Engine
                 if (!components[i].Cull)
                 {
                     this.Game.Graphics.SetRasterizerDefault();
-                    this.Game.Graphics.SetBlendDefault();
+
+                    if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        this.Game.Graphics.SetBlendComposition();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetBlendDefault();
+                    }
 
                     components[i].Draw(gameTime, context);
                 }
