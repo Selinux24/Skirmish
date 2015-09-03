@@ -9,15 +9,14 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorld;
 	float4x4 gWorldInverse;
 	float4x4 gWorldViewProjection;
-	float4x4 gShadowTransform; 
+	float3 gEyePositionWorld;
 	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
-	float3 gEyePositionWorld;
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
-	float gEnableShadows;
+	float4x4 gShadowTransform;
 };
 cbuffer cbPerObject : register (b1)
 {
@@ -104,7 +103,7 @@ PSVertexPositionColor VSPositionColorSkinnedI(VSVertexPositionColorSkinnedI inpu
 
 float4 PSPositionColor(PSVertexPositionColor input) : SV_TARGET
 {
-	float4 litColor = input.color;
+	float4 litColor = gMaterial.Diffuse;
 
 	if(gFogRange > 0)
 	{
@@ -205,15 +204,16 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
-		input.color.rgb,
 		toEye,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
-		gEnableShadows,
 		input.shadowHomogeneous,
 		gShadowMap);
+
+	litColor *= gMaterial.Diffuse;
+	litColor.a = gMaterial.Diffuse.a;
 
 	if(gFogRange > 0)
 	{
@@ -222,8 +222,6 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
-
-	litColor.a = input.color.a;
 
 	return litColor;
 }
@@ -443,15 +441,16 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
-		textureColor.rgb,
 		toEye,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
-		gEnableShadows,
 		input.shadowHomogeneous,
 		gShadowMap);
+
+	litColor *= textureColor;
+	litColor.a = textureColor.a;
 
 	if(gFogRange > 0)
 	{
@@ -460,8 +459,6 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
-
-	litColor.a = textureColor.a;
 
 	return litColor;
 }
@@ -573,15 +570,16 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
-		textureColor.rgb,
 		toEye,
 		input.positionWorld,
 		bumpedNormalW,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
-		gEnableShadows,
 		input.shadowHomogeneous,
 		gShadowMap);
+
+	litColor *= textureColor;
+	litColor.a = textureColor.a;
 
 	if(gFogRange > 0)
 	{
@@ -590,8 +588,6 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
-
-	litColor.a = textureColor.a;
 
 	return litColor;
 }

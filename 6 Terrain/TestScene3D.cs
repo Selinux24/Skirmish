@@ -346,7 +346,6 @@ namespace TerrainTest
             this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
             this.Camera.LookTo(this.helicopter.Manipulator.Position);
 
-            this.Lights.EnableShadows = true;
             this.Lights.DirectionalLights[0].Enabled = true;
             this.Lights.DirectionalLights[1].Enabled = false;
             this.Lights.DirectionalLights[2].Enabled = false;
@@ -430,9 +429,10 @@ namespace TerrainTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                this.Lights.EnableShadows = !this.Lights.EnableShadows;
+                var cast = this.Lights.DirectionalLights[0].CastShadow;
 
-                this.shadowMapDrawer.Visible = this.Lights.EnableShadows;
+                this.Lights.DirectionalLights[0].CastShadow = !cast;
+                this.shadowMapDrawer.Visible = !cast;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))

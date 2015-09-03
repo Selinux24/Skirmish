@@ -74,15 +74,23 @@ namespace Engine.Effects
         /// <summary>
         /// Color Map effect variable
         /// </summary>
-        private EffectShaderResourceVariable colorMap = null;
+        private EffectShaderResourceVariable tg1Map = null;
         /// <summary>
         /// Normal Map effect variable
         /// </summary>
-        private EffectShaderResourceVariable normalMap = null;
+        private EffectShaderResourceVariable tg2Map = null;
         /// <summary>
         /// Depth Map effect variable
         /// </summary>
-        private EffectShaderResourceVariable depthMap = null;
+        private EffectShaderResourceVariable tg3Map = null;
+        /// <summary>
+        /// Shadow Positions Map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable tg4Map = null;
+        /// <summary>
+        /// Shadow map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable shadowMap = null;
         /// <summary>
         /// Light Map effect variable
         /// </summary>
@@ -251,43 +259,71 @@ namespace Engine.Effects
         /// <summary>
         /// Color Map
         /// </summary>
-        protected ShaderResourceView ColorMap
+        protected ShaderResourceView TG1Map
         {
             get
             {
-                return this.colorMap.GetResource();
+                return this.tg1Map.GetResource();
             }
             set
             {
-                this.colorMap.SetResource(value);
+                this.tg1Map.SetResource(value);
             }
         }
         /// <summary>
         /// Normal Map
         /// </summary>
-        protected ShaderResourceView NormalMap
+        protected ShaderResourceView TG2Map
         {
             get
             {
-                return this.normalMap.GetResource();
+                return this.tg2Map.GetResource();
             }
             set
             {
-                this.normalMap.SetResource(value);
+                this.tg2Map.SetResource(value);
             }
         }
         /// <summary>
         /// Depth Map
         /// </summary>
-        protected ShaderResourceView DepthMap
+        protected ShaderResourceView TG3Map
         {
             get
             {
-                return this.depthMap.GetResource();
+                return this.tg3Map.GetResource();
             }
             set
             {
-                this.depthMap.SetResource(value);
+                this.tg3Map.SetResource(value);
+            }
+        }
+        /// <summary>
+        /// Shadow Positions Map
+        /// </summary>
+        protected ShaderResourceView TG4Map
+        {
+            get
+            {
+                return this.tg4Map.GetResource();
+            }
+            set
+            {
+                this.tg4Map.SetResource(value);
+            }
+        }
+        /// <summary>
+        /// Shadow map
+        /// </summary>
+        protected ShaderResourceView ShadowMap
+        {
+            get
+            {
+                return this.shadowMap.GetResource();
+            }
+            set
+            {
+                this.shadowMap.SetResource(value);
             }
         }
         /// <summary>
@@ -333,9 +369,11 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
-            this.colorMap = this.Effect.GetVariableByName("gColorMap").AsShaderResource();
-            this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
-            this.depthMap = this.Effect.GetVariableByName("gDepthMap").AsShaderResource();
+            this.tg1Map = this.Effect.GetVariableByName("gTG1Map").AsShaderResource();
+            this.tg2Map = this.Effect.GetVariableByName("gTG2Map").AsShaderResource();
+            this.tg3Map = this.Effect.GetVariableByName("gTG3Map").AsShaderResource();
+            this.tg4Map = this.Effect.GetVariableByName("gTG4Map").AsShaderResource();
+            this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
             this.lightMap = this.Effect.GetVariableByName("gLightMap").AsShaderResource();
         }
         /// <summary>
@@ -379,16 +417,20 @@ namespace Engine.Effects
         /// <param name="colorMap">Color map texture</param>
         /// <param name="normalMap">Normal map texture</param>
         /// <param name="depthMap">Depth map texture</param>
+        /// <param name="shadowPositionsMap">Shadow positions map texture</param>
+        /// <param name="shadowMap">Shadow map</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld, 
             float fogStart, 
             float fogRange, 
-            Color4 fogColor, 
+            Color4 fogColor,
             ShaderResourceView colorMap,
             ShaderResourceView normalMap,
-            ShaderResourceView depthMap)
+            ShaderResourceView depthMap,
+            ShaderResourceView shadowPositionsMap,
+            ShaderResourceView shadowMap)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
@@ -398,9 +440,12 @@ namespace Engine.Effects
             this.FogRange = fogRange;
             this.FogColor = fogColor;
 
-            this.ColorMap = colorMap;
-            this.NormalMap = normalMap;
-            this.DepthMap = depthMap;
+            this.TG1Map = colorMap;
+            this.TG2Map = normalMap;
+            this.TG3Map = depthMap;
+            this.TG4Map = shadowPositionsMap;
+
+            this.ShadowMap = shadowMap;
         }
         /// <summary>
         /// Updates per directional light variables
@@ -439,13 +484,19 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="world">World matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="depthMap">Depth map texture</param>
         /// <param name="lightMap">Light map</param>
         public void UpdateComposer(
             Matrix world,
             Matrix viewProjection,
+            Vector3 eyePositionWorld,
+            ShaderResourceView depthMap,
             ShaderResourceView lightMap)
         {
             this.WorldViewProjection = world * viewProjection;
+            this.EyePositionWorld = eyePositionWorld;
+            this.TG3Map = depthMap;
             this.LightMap = lightMap;
         }
     }

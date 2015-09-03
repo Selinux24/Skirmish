@@ -198,7 +198,9 @@ namespace Engine
                 context.Lights.FogColor,
                 context.GeometryMap[0],
                 context.GeometryMap[1],
-                context.GeometryMap[2]);
+                context.GeometryMap[2],
+                context.GeometryMap[3],
+                context.ShadowMap);
 
             this.Game.Graphics.SetDepthStencilNone();
             this.Game.Graphics.SetBlendAdditive();
@@ -355,7 +357,12 @@ namespace Engine
                 var effect = DrawerPool.EffectDeferred;
                 var effectTechnique = effect.DeferredCombineLights;
 
-                effect.UpdateComposer(context.World, this.ViewProjection, context.LightMap);
+                effect.UpdateComposer(
+                    context.World,
+                    this.ViewProjection,
+                    context.EyePosition,
+                    context.GeometryMap[2],
+                    context.LightMap);
 
                 var deviceContext = this.Game.Graphics.DeviceContext;
                 var geometry = this.lightGeometry[0];
@@ -366,7 +373,7 @@ namespace Engine
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
                 this.Game.Graphics.SetRasterizerDefault();
-                this.Game.Graphics.SetBlendDefault();
+                this.Game.Graphics.SetBlendComposition();
 
                 for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                 {

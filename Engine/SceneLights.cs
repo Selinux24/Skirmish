@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine
 {
@@ -140,10 +140,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Ambient color
-        /// </summary>
-        public Color4 AmbientColor = Color.Gray;
-        /// <summary>
         /// Fog start value
         /// </summary>
         public float FogStart = 0f;
@@ -155,10 +151,6 @@ namespace Engine
         /// Fog color
         /// </summary>
         public Color4 FogColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
-        /// <summary>
-        /// Enable shadows
-        /// </summary>
-        public bool EnableShadows = false;
         /// <summary>
         /// Gets light by name
         /// </summary>
@@ -187,6 +179,16 @@ namespace Engine
                 if (light != null) return light;
 
                 return null;
+            }
+        }
+        /// <summary>
+        /// Gets a collection of light that cast shadow
+        /// </summary>
+        public SceneLightDirectional[] ShadowCastingLights
+        {
+            get
+            {
+                return this.directionalLights.FindAll(l => l.CastShadow).ToArray();
             }
         }
 

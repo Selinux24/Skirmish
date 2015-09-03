@@ -19,7 +19,6 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorldViewProjection;
 	uint gTextureCount;
 };
-
 cbuffer cbFixed : register (b1)
 {
 	float2 gQuadTexC[4] = 
@@ -254,6 +253,37 @@ float4 PSDrawLine(PSParticleLine input) : SV_TARGET
 	return gTextureArray.Sample(SamplerLinear, uvw);
 }
 
+GBufferPSOutput PSDeferredDrawSolid(PSParticleSolid input)
+{
+	GBufferPSOutput output = (GBufferPSOutput)0;
+
+	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
+	float4 color = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
+	
+	output.color = color;
+	output.normal = 0;
+	output.depth.xyz = input.positionHomogeneous.xyz;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.shadow = 0;
+	
+	return output;
+}
+GBufferPSOutput PSDeferredDrawLine(PSParticleLine input)
+{
+	GBufferPSOutput output = (GBufferPSOutput)0;
+
+	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
+	float4 color = gTextureArray.Sample(SamplerLinear, uvw);
+
+	output.color = color;
+	output.normal = 0;
+	output.depth.xyz = input.positionHomogeneous.xyz;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.shadow = 0;
+	
+	return output;
+}
+
 GeometryShader gsStreamOutFire = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutFire()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
 GeometryShader gsStreamOutSmoke = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutSmoke()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
 GeometryShader gsStreamOutRain = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutRain()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
@@ -315,6 +345,32 @@ technique11 LineDraw
         SetVertexShader(CompileShader(vs_5_0, VSDrawLine()));
         SetGeometryShader(CompileShader(gs_5_0, GSDrawLine()));
         SetPixelShader(CompileShader(ps_5_0, PSDrawLine()));
+
+		SetRasterizerState(RasterizerSolid);
+        SetDepthStencilState(StencilEnableDepth, 0);
+    }
+}
+
+technique11 DeferredSolidDraw
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSDrawSolid()));
+        SetGeometryShader(CompileShader(gs_5_0, GSDrawSolid()));
+        SetPixelShader(CompileShader(ps_5_0, PSDeferredDrawSolid()));
+
+		SetRasterizerState(RasterizerSolid);
+        SetBlendState(BlendAdditive, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xffffffff);
+        SetDepthStencilState(StencilEnableDepth, 0);
+    }
+}
+technique11 DeferredLineDraw
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSDrawLine()));
+        SetGeometryShader(CompileShader(gs_5_0, GSDrawLine()));
+        SetPixelShader(CompileShader(ps_5_0, PSDeferredDrawLine()));
 
 		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilEnableDepth, 0);

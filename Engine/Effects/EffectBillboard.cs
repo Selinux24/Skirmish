@@ -1,5 +1,5 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
@@ -59,10 +59,6 @@ namespace Engine.Effects
         /// Fog color effect variable
         /// </summary>
         private EffectVectorVariable fogColor = null;
-        /// <summary>
-        /// Enable shadows effect variable
-        /// </summary>
-        private EffectScalarVariable enableShadows = null;
         /// <summary>
         /// Bounding sphere
         /// </summary>
@@ -225,20 +221,6 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Enable shadows
-        /// </summary>
-        protected float EnableShadows
-        {
-            get
-            {
-                return this.enableShadows.GetFloat();
-            }
-            set
-            {
-                this.enableShadows.Set(value);
-            }
-        }
-        /// <summary>
         /// Bounding sphere
         /// </summary>
         protected float Radius
@@ -374,7 +356,6 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
-            this.enableShadows = this.Effect.GetVariableByName("gEnableShadows").AsScalar();
             this.radius = this.Effect.GetVariableByName("gRadius").AsScalar();
             this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
@@ -463,18 +444,8 @@ namespace Engine.Effects
                 this.FogRange = lights.FogRange;
                 this.FogColor = lights.FogColor;
 
-                if (lights.EnableShadows)
-                {
-                    this.EnableShadows = 1;
-                    this.ShadowTransform = shadowTransform;
-                    this.ShadowMap = shadowMap;
-                }
-                else
-                {
-                    this.EnableShadows = 0;
-                    this.ShadowTransform = Matrix.Identity;
-                    this.ShadowMap = null;
-                }
+                this.ShadowTransform = shadowTransform;
+                this.ShadowMap = shadowMap;
             }
             else
             {
@@ -488,7 +459,6 @@ namespace Engine.Effects
                 this.FogRange = 0;
                 this.FogColor = Color.Transparent;
 
-                this.EnableShadows = 0;
                 this.ShadowTransform = Matrix.Identity;
                 this.ShadowMap = null;
             }

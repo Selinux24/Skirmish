@@ -14,10 +14,12 @@ cbuffer cbPerFrame : register (b0)
 	float4 gFogColor;
 };
 
-Texture2D gColorMap : register(t0);
-Texture2D gNormalMap : register(t1);
-Texture2D gDepthMap : register(t2);
-Texture2D gLightMap : register(t3);
+Texture2D gTG1Map : register(t0);
+Texture2D gTG2Map : register(t1);
+Texture2D gTG3Map : register(t2);
+Texture2D gTG4Map : register(t3);
+Texture2D gShadowMap : register(t4);
+Texture2D gLightMap : register(t5);
 
 struct PSDirectionalLightInput
 {
@@ -83,48 +85,29 @@ PSCombineLightsInput VSCombineLights(VSVertexPositionTexture input)
 
 float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 {
-	//Color
-    float4 diffuseColor = gColorMap.Sample(SamplerPoint, input.tex);
+	float4 litColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	//Depth
-    float4 depth = gDepthMap.Sample(SamplerPoint, input.tex);
-	[flatten]
-	if(depth.w == 1.0f)
-	{
-		return float4(diffuseColor.rgb * gDirLight.Color * gDirLight.Ambient, diffuseColor.a);
-	}
-
-    //Normal
-    float4 normal = gNormalMap.Sample(SamplerPoint, input.tex);
-	[flatten]
-	if(length(normal.xyz) == 0.0f)
-	{
-		return float4(diffuseColor.rgb * gDirLight.Color * gDirLight.Ambient, diffuseColor.a);
-	}
+    float4 diffuseColor = gTG1Map.Sample(SamplerPoint, input.tex); //Color
+    float4 depth = gTG3Map.Sample(SamplerPoint, input.tex); //Depth
+    float4 normal = gTG2Map.Sample(SamplerPoint, input.tex); //Normal
+    float4 shadow = gTG4Map.Sample(SamplerPoint, input.tex); //Shadow positions
 
 	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
 
-	float4 color = ComputeDirectionalLight(
+	litColor = ComputeDirectionalLight(
 		gDirLight,
 		toEye,
 		depth.xyz,
 		normal.xyz,
-		1,
-		normal.w);
+		shadow.w,
+		normal.w,
+		float4(shadow.xyz, 1),
+		gShadowMap);
 
-	color = diffuseColor * color;
+	litColor *= diffuseColor;
+	litColor.a = diffuseColor.a;
 
-	if(gFogRange > 0)
-	{
-		float3 toEyeWorld = gEyePositionWorld - depth.xyz;
-		float distToEye = length(toEyeWorld);
-
-		color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
-	}
-
-	color.a = diffuseColor.a;
-
-	return color;
+	return litColor;
 }
 float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 {
@@ -135,10 +118,10 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	float2 tex = 0.5f * (float2(position.x, -position.y) + 1);
 
 	//Color
-    float4 diffuseColor = gColorMap.Sample(SamplerPoint, tex);
+    float4 diffuseColor = gTG1Map.Sample(SamplerPoint, tex);
 
 	//Depth
-    float4 depth = gDepthMap.Sample(SamplerPoint, tex);
+    float4 depth = gTG3Map.Sample(SamplerPoint, tex);
 	[flatten]
 	if(depth.w == 1.0f)
 	{
@@ -146,7 +129,7 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	}
 
     //Normal
-    float4 normal = gNormalMap.Sample(SamplerPoint, tex);
+    float4 normal = gTG2Map.Sample(SamplerPoint, tex);
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
@@ -164,15 +147,6 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 		normal.w);
 
 	color = diffuseColor * color;
-
-	if(gFogRange > 0)
-	{
-		float3 toEyeWorld = gEyePositionWorld - depth.xyz;
-		float distToEye = length(toEyeWorld);
-
-		color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
-	}
-
 	color.a = diffuseColor.a;
 
 	return color;
@@ -186,10 +160,10 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	float2 tex = 0.5f * (float2(position.x, -position.y) + 1);
 
 	//Color
-    float4 diffuseColor = gColorMap.Sample(SamplerPoint, tex);
+    float4 diffuseColor = gTG1Map.Sample(SamplerPoint, tex);
 
 	//Depth
-    float4 depth = gDepthMap.Sample(SamplerPoint, tex);
+    float4 depth = gTG3Map.Sample(SamplerPoint, tex);
 	[flatten]
 	if(depth.w == 1.0f)
 	{
@@ -197,7 +171,7 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	}
 
     //Normal
-    float4 normal = gNormalMap.Sample(SamplerPoint, tex);
+    float4 normal = gTG2Map.Sample(SamplerPoint, tex);
 	[flatten]
 	if(length(normal.xyz) == 0.0f)
 	{
@@ -215,22 +189,24 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 		normal.w);
 
 	color = diffuseColor * color;
-
-	if(gFogRange > 0)
-	{
-		float3 toEyeWorld = gEyePositionWorld - depth.xyz;
-		float distToEye = length(toEyeWorld);
-
-		color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
-	}
-
 	color.a = diffuseColor.a;
 
 	return color;
 }
 float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 {
-	return gLightMap.Sample(SamplerPoint, input.tex);
+    float4 depth = gTG3Map.Sample(SamplerPoint, input.tex);
+	float4 litColor = gLightMap.Sample(SamplerPoint, input.tex);
+
+	if(gFogRange > 0)
+	{
+		float3 toEyeWorld = gEyePositionWorld - depth.xyz;
+		float distToEye = length(toEyeWorld);
+
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+	}
+
+	return litColor;
 }
 
 technique11 DeferredDirectionalLight

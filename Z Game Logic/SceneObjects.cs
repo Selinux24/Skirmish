@@ -107,9 +107,6 @@ namespace GameLogic
 
             this.NewGame();
 
-            this.Lights.EnableShadows = true;
-            this.Lights.AmbientColor = Color.Gray;
-
             this.pointLight = new SceneLightPoint()
             {
                 Name = "Current soldier",

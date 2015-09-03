@@ -1,15 +1,15 @@
-﻿using System;
-using System.Diagnostics;
-using Engine;
+﻿using Engine;
 using Engine.Common;
 using Engine.PathFinding;
 using SharpDX;
+using System;
+using System.Diagnostics;
 
 namespace DeferredTest
 {
     public class TestScene3D : Scene
     {
-        private string titleMask = "Deferred Ligthning test: {0} directionals, {1} points and {2} spots";
+        private string titleMask = "DL test: {0} directionals, {1} points and {2} spots. Shadows {3}";
 
         private TextDrawer title = null;
         private TextDrawer load = null;
@@ -31,7 +31,7 @@ namespace DeferredTest
         private Random rnd = new Random(0);
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.ForwardLigthning)
+            : base(game, SceneModesEnum.DeferredLightning)
         {
 
         }
@@ -159,8 +159,7 @@ namespace DeferredTest
 
             #region Moving fire
 
-            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { Vector3.Zero }, 0.5f, "flare2.png"));
-            this.fire.Active = this.fire.Visible = false;
+            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { new Vector3(0, 10, 0) }, 0.5f, "flare2.png"));
 
             #endregion
 
@@ -233,22 +232,22 @@ namespace DeferredTest
 
             #region Lights
 
-            this.Lights.EnableShadows = true;
-
             this.Lights.FogColor = Color.WhiteSmoke;
             this.Lights.FogStart = 0f;
             this.Lights.FogRange = 0f;
 
-            this.Lights.ClearDirectionalLights();
-            this.Lights.Add(new SceneLightDirectional()
-            {
-                Name = "night has come",
-                Enabled = true,
-                LightColor = Color.LightBlue,
-                AmbientIntensity = 0.1f,
-                DiffuseIntensity = 0.1f,
-                Direction = -Vector3.UnitY,
-            });
+            //this.Lights.ClearDirectionalLights();
+            //this.Lights.Add(SceneLightDirectional.Primary);
+            //this.Lights.Add(new SceneLightDirectional()
+            //{
+            //    Name = "night has come",
+            //    Enabled = true,
+            //    LightColor = Color.LightBlue,
+            //    AmbientIntensity = 0.5f,
+            //    DiffuseIntensity = 0.5f,
+            //    Direction = -Vector3.UnitY,
+            //    CastShadow = true,
+            //});
 
             #region Light Sphere Marker
 
@@ -288,11 +287,22 @@ namespace DeferredTest
             {
                 if (this.Game.Input.KeyJustReleased(Keys.F1))
                 {
-                    //Colors
-                    this.bufferDrawer.Texture = this.DrawContext.GeometryMap[0];
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.All;
+                    if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[0] &&
+                        this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
+                    {
+                        //Specular Factor
+                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[0];
+                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
+                        this.help.Text = "Specular Factor";
+                    }
+                    else
+                    {
+                        //Colors
+                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[0];
+                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                        this.help.Text = "Colors";
+                    }
                     this.bufferDrawer.Visible = true;
-                    this.help.Text = "Colors";
                 }
 
                 if (this.Game.Input.KeyJustReleased(Keys.F2))
@@ -300,10 +310,10 @@ namespace DeferredTest
                     if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[1] &&
                         this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
                     {
-                        //Shadow factor map
+                        //Specular Power
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
-                        this.help.Text = "Shadow factor map";
+                        this.help.Text = "Specular Power";
                     }
                     else
                     {
@@ -335,28 +345,25 @@ namespace DeferredTest
                         this.help.Text = "Position";
                     }
                 }
-            }
 
-            if (this.DrawContext.LightMap != null)
-            {
                 if (this.Game.Input.KeyJustReleased(Keys.F4))
                 {
-                    if (this.bufferDrawer.Texture == this.DrawContext.LightMap &&
+                    if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[3] &&
                         this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
                     {
-                        //Specular map
-                        this.bufferDrawer.Texture = this.DrawContext.LightMap;
+                        //Shadow positions w
+                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[3];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
                         this.bufferDrawer.Visible = true;
-                        this.help.Text = "Specular map";
+                        this.help.Text = "Shadow Positions W";
                     }
                     else
                     {
-                        //Light map
-                        this.bufferDrawer.Texture = this.DrawContext.LightMap;
+                        //Shadow positions
+                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[3];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                         this.bufferDrawer.Visible = true;
-                        this.help.Text = "Light map";
+                        this.help.Text = "Shadow Positions";
                     }
                 }
             }
@@ -373,28 +380,40 @@ namespace DeferredTest
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            if (this.DrawContext.LightMap != null)
+            {
+                if (this.Game.Input.KeyJustReleased(Keys.F6))
+                {
+                    //Result
+                    this.bufferDrawer.Texture = this.DrawContext.LightMap;
+                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.All;
+                    this.bufferDrawer.Visible = true;
+                    this.help.Text = "Result";
+                }
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F7))
             {
                 this.bufferDrawer.Visible = !this.bufferDrawer.Visible;
                 this.help.Visible = this.bufferDrawer.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F7))
+            if (this.Game.Input.KeyJustReleased(Keys.F8))
             {
                 this.terrain.Active = this.terrain.Visible = !this.terrain.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F8))
+            if (this.Game.Input.KeyJustReleased(Keys.F9))
             {
                 this.tank.Active = this.tank.Visible = !this.tank.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F9))
+            if (this.Game.Input.KeyJustReleased(Keys.F10))
             {
                 this.helicopter.Active = this.helicopter.Visible = !this.helicopter.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F10))
+            if (this.Game.Input.KeyJustReleased(Keys.F11))
             {
                 this.helicopters.Active = this.helicopters.Visible = !this.helicopters.Visible;
             }
@@ -479,7 +498,7 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                this.Lights.EnableShadows = !this.Lights.EnableShadows;
+                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.K))
@@ -600,7 +619,8 @@ namespace DeferredTest
                 this.titleMask,
                 this.Lights.EnabledDirectionalLights.Length,
                 this.Lights.EnabledPointLights.Length,
-                this.Lights.EnabledSpotLights.Length);
+                this.Lights.EnabledSpotLights.Length,
+                this.Lights.ShadowCastingLights.Length);
         }
 
         private void CreateSpotLights()

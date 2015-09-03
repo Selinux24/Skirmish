@@ -16,6 +16,10 @@ namespace Engine
         /// </summary>
         public bool Enabled = false;
         /// <summary>
+        /// Gets or stes wheter the light casts shadow
+        /// </summary>
+        public bool CastShadow = false;
+        /// <summary>
         /// Light color
         /// </summary>
         public Color4 LightColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);

@@ -1,5 +1,5 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
@@ -127,7 +127,6 @@ namespace Engine
                         ((EffectBasicGBuffer)effect).UpdatePerFrame(
                             context.World * this.Manipulator.LocalTransform,
                             context.ViewProjection,
-                            context.ShadowMap,
                             context.ShadowTransform);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)

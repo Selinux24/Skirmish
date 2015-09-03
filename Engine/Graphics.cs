@@ -118,6 +118,10 @@ namespace Engine
         /// </summary>
         private BlendState blendAdditive = null;
         /// <summary>
+        /// Blend state for composition blending
+        /// </summary>
+        private BlendState blendComposition = null;
+        /// <summary>
         /// Default rasterizer
         /// </summary>
         private RasterizerState rasterizerDefault = null;
@@ -285,6 +289,20 @@ namespace Engine
                 this.swapChain.ResizeBuffers(2, width, height, this.BufferFormat, SwapChainFlags.None);
             }
 
+            #region Viewport
+
+            this.Viewport = new ViewportF()
+            {
+                X = 0,
+                Y = 0,
+                Width = width,
+                Height = height,
+                MinDepth = 0.0f,
+                MaxDepth = 1.0f,
+            };
+
+            #endregion
+
             #region Render Target
 
             using (Resource backBuffer = Resource.FromSwapChain<Texture2D>(swapChain, 0))
@@ -401,7 +419,7 @@ namespace Engine
 
             #endregion
 
-            #region Rasterizers
+            #region Rasterizer States
 
             //Default rasterizer state
             this.rasterizerDefault = new RasterizerState(
@@ -473,21 +491,24 @@ namespace Engine
 
             #endregion
 
-            #region Blend states
+            #region Blend States
 
             {
                 //Default blend state (No alpha)
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = false;
+
                 desc.RenderTarget[0].IsBlendEnabled = false;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
 
                 this.blendDefault = new BlendState(this.Device, desc);
             }
@@ -497,14 +518,17 @@ namespace Engine
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = false;
+
                 desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
 
                 this.blendAlphaEnabled = new BlendState(this.Device, desc);
             }
@@ -514,14 +538,17 @@ namespace Engine
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = false;
+
                 desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
                 desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
 
                 this.blendTransparent = new BlendState(this.Device, desc);
             }
@@ -531,42 +558,50 @@ namespace Engine
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = false;
                 desc.IndependentBlendEnable = false;
+
                 desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.One;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Maximum;
+                desc.RenderTarget[0].SourceBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.One;
+
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Maximum;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
 
                 this.blendAdditive = new BlendState(this.Device, desc);
             }
 
-            #endregion
-
-            #region Viewport
-
-            this.Viewport = new ViewportF()
             {
-                X = 0,
-                Y = 0,
-                Width = width,
-                Height = height,
-                MinDepth = 0.0f,
-                MaxDepth = 1.0f,
-            };
+                //Composition blend state
+                BlendStateDescription desc = new BlendStateDescription();
+                desc.AlphaToCoverageEnable = false;
+                desc.IndependentBlendEnable = false;
+
+                desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Maximum;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+                this.blendComposition = new BlendState(this.Device, desc);
+            }
 
             #endregion
 
-            #region Attach to Inmmediate Context
+            #region Set Defaults
 
-            this.DeviceContext.OutputMerger.SetDepthStencilState(this.depthStencilzBufferEnabled);
-            this.DeviceContext.OutputMerger.SetTargets(this.depthStencilView, this.renderTargetView);
-            this.DeviceContext.OutputMerger.SetBlendState(this.blendDefault, Color.Transparent, -1);
+            this.SetDefaultRenderTarget();
 
-            this.DeviceContext.Rasterizer.State = this.rasterizerDefault;
-            this.DeviceContext.Rasterizer.SetViewport(this.Viewport);
+            this.SetDepthStencilZEnabled();
+            this.SetRasterizerDefault();
+            this.SetBlendDefault();
 
             #endregion
 
@@ -574,10 +609,12 @@ namespace Engine
             {
                 if (this.Resized != null)
                 {
+                    //Launch the "reized" event
                     this.Resized(this, new EventArgs());
                 }
             }
         }
+
         /// <summary>
         /// Begin frame
         /// </summary>
@@ -607,11 +644,12 @@ namespace Engine
                 this.swapChain.Present(0, PresentFlags.None);
             }
         }
+
         /// <summary>
         /// Sets default render target
         /// </summary>
         /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
-        public void SetDefaultRenderTarget(bool clear)
+        public void SetDefaultRenderTarget(bool clear = true)
         {
             this.SetRenderTarget(this.Viewport, this.depthStencilView, this.renderTargetView, clear, GameEnvironment.Background);
         }
@@ -753,7 +791,6 @@ namespace Engine
                 }
             }
         }
-
         /// <summary>
         /// Enables z-buffer
         /// </summary>
@@ -802,6 +839,13 @@ namespace Engine
         public void SetBlendAdditive()
         {
             this.SetBlendState(this.blendAdditive, Color.Transparent, -1);
+        }
+        /// <summary>
+        /// Sets composition blend state
+        /// </summary>
+        public void SetBlendComposition()
+        {
+            this.SetBlendState(this.blendComposition, Color.Transparent, -1);
         }
         /// <summary>
         /// Sets default rasterizer
@@ -1066,6 +1110,12 @@ namespace Engine
             {
                 this.blendAdditive.Dispose();
                 this.blendAdditive = null;
+            }
+
+            if (this.blendComposition != null)
+            {
+                this.blendComposition.Dispose();
+                this.blendComposition = null;
             }
         }
     }

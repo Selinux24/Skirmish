@@ -5,14 +5,13 @@ cbuffer cbPerFrame : register (b0)
 {
 	float4x4 gWorldViewProjection;
 	float4x4 gShadowTransform; 
+	float3 gEyePositionWorld;
 	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
-	float3 gEyePositionWorld;
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
-	float gEnableShadows;
 	float gRadius;
 };
 cbuffer cbPerObject : register (b1)
@@ -127,15 +126,16 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
-		textureColor.rgb,
 		toEye,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
-		gEnableShadows,
 		input.shadowHomogeneous,
 		gShadowMap);
+
+	litColor *= textureColor;
+	litColor.a = textureColor.a;
 
 	if(gFogRange > 0)
 	{
@@ -144,8 +144,6 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
-
-	litColor.a = gMaterial.Diffuse.a * textureColor.a;
 
 	return litColor;
 }
@@ -162,6 +160,8 @@ GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 	output.normal.w = gMaterial.SpecularPower;
 	output.depth.xyz = input.positionWorld;
 	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.shadow.xyz = input.shadowHomogeneous.xyz;
+	output.shadow.w = gMaterial.SpecularIntensity;
 
     return output;
 }

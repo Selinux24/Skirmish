@@ -77,7 +77,7 @@ namespace Engine
             Format rtFormat = Format.R32G32B32A32_Float;
             Format dbFormat = Format.D24_UNorm_S8_UInt;
 
-            int buffers = 3;
+            int buffers = 4;
             this.Textures = new ShaderResourceView[buffers];
             this.RenderTargets = new RenderTargetView[buffers];
 

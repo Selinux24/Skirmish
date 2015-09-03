@@ -187,7 +187,8 @@ namespace Engine
             this.DrawContext.Frustum = new BoundingFrustum(viewProj);
             this.DrawContext.EyePosition = this.Camera.Position;
 
-            if (this.Lights.EnableShadows)
+            var shadowCastingLights = this.Lights.ShadowCastingLights;
+            if (shadowCastingLights.Length > 0)
             {
                 Matrix shadowViewProj = this.ShadowMap.View * this.ShadowMap.Projection;
 
@@ -295,7 +296,8 @@ namespace Engine
 
                 #region Shadow mapping
 
-                if (this.Lights.EnableShadows && this.Lights.EnabledDirectionalLights.Length > 0)
+                var shadowCastingLights = this.Lights.ShadowCastingLights;
+                if (shadowCastingLights.Length > 0)
                 {
                     #region Preparation
 #if DEBUG
@@ -306,7 +308,7 @@ namespace Engine
                     this.DrawShadowsContext.ShadowTransform = Matrix.Identity;
 
                     //Update shadow transform using first ligth direction
-                    this.ShadowMap.Update(this.Lights.EnabledDirectionalLights[0].Direction, this.SceneVolume);
+                    this.ShadowMap.Update(shadowCastingLights[0].Direction, this.SceneVolume);
 #if DEBUG
                     swShadowsPreparation.Stop();
 

@@ -1,5 +1,5 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
@@ -80,10 +80,6 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable shadowTransform = null;
         /// <summary>
-        /// Enable shados effect variable
-        /// </summary>
-        private EffectScalarVariable enableShadows = null;
-        /// <summary>
         /// Material effect variable
         /// </summary>
         private EffectVariable material = null;
@@ -103,10 +99,6 @@ namespace Engine.Effects
         /// Normal map effect variable
         /// </summary>
         private EffectShaderResourceVariable normalMap = null;
-        /// <summary>
-        /// Shadow map effect variable
-        /// </summary>
-        private EffectShaderResourceVariable shadowMap = null;
 
         /// <summary>
         /// World matrix
@@ -162,20 +154,6 @@ namespace Engine.Effects
             set
             {
                 this.shadowTransform.SetMatrix(value);
-            }
-        }
-        /// <summary>
-        /// Enable shadows
-        /// </summary>
-        protected float EnableShadows
-        {
-            get
-            {
-                return this.enableShadows.GetFloat();
-            }
-            set
-            {
-                this.enableShadows.Set(value);
             }
         }
         /// <summary>
@@ -267,20 +245,6 @@ namespace Engine.Effects
                 this.normalMap.SetResource(value);
             }
         }
-        /// <summary>
-        /// Shadow map
-        /// </summary>
-        protected ShaderResourceView ShadowMap
-        {
-            get
-            {
-                return this.shadowMap.GetResource();
-            }
-            set
-            {
-                this.shadowMap.SetResource(value);
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -317,13 +281,11 @@ namespace Engine.Effects
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.shadowTransform = this.Effect.GetVariableByName("gShadowTransform").AsMatrix();
-            this.enableShadows = this.Effect.GetVariableByName("gEnableShadows").AsScalar();
             this.material = this.Effect.GetVariableByName("gMaterial");
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
-            this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -390,30 +352,16 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="world">World Matrix</param>
         /// <param name="viewProjection">View * projection</param>
-        /// <param name="shadowMap">Shadow map texture</param>
         /// <param name="shadowTransform">Shadow transform</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
-            ShaderResourceView shadowMap,
             Matrix shadowTransform)
         {
             this.World = world;
             this.WorldInverse = Matrix.Invert(world);
             this.WorldViewProjection = world * viewProjection;
-
-            if (shadowMap != null)
-            {
-                this.EnableShadows = 1.0f;
-                this.ShadowMap = shadowMap;
-                this.ShadowTransform = shadowTransform;
-            }
-            else
-            {
-                this.EnableShadows = 0.0f;
-                this.ShadowMap = null;
-                this.ShadowTransform = Matrix.Identity;
-            }
+            this.ShadowTransform = shadowTransform;
         }
         /// <summary>
         /// Update per model object data

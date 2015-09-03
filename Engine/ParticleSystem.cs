@@ -45,6 +45,10 @@ namespace Engine
         private bool firstRun = true;
 
         /// <summary>
+        /// Particle class
+        /// </summary>
+        private ParticleClasses particleClass = ParticleClasses.Unknown;
+        /// <summary>
         /// Initial particles
         /// </summary>
         private int initialParticles = 0;
@@ -66,17 +70,13 @@ namespace Engine
         private Vector3 particleAcceleration;
 
         /// <summary>
-        /// Selected stream out technique
-        /// </summary>
-        private EffectTechnique techniqueForStreamOut = null;
-        /// <summary>
-        /// Selected drawing technique
-        /// </summary>
-        private EffectTechnique techniqueForDrawing = null;
-        /// <summary>
         /// Input layout
         /// </summary>
         private InputLayout inputLayout = null;
+        /// <summary>
+        /// Selected stream out technique
+        /// </summary>
+        private EffectTechnique techniqueForStreamOut = null;
 
         /// <summary>
         /// Emitter initialization buffer
@@ -118,6 +118,7 @@ namespace Engine
         {
             this.Opaque = description.Opaque;
 
+            this.particleClass = description.ParticleClass;
             this.maximumParticles = description.MaximumParticles;
             this.maximumAge = description.MaximumAge;
             this.emitterAge = description.EmitterAge;
@@ -164,8 +165,7 @@ namespace Engine
                 throw new Exception(string.Format("Bad emitter type: {0}", description.EmitterType));
             }
 
-            this.techniqueForStreamOut = DrawerPool.EffectParticles.GetTechnique(VertexTypes.Particle, DrawingStages.StreamOut, description.ParticleClass);
-            this.techniqueForDrawing = DrawerPool.EffectParticles.GetTechnique(VertexTypes.Particle, DrawingStages.Drawing, description.ParticleClass);
+            this.techniqueForStreamOut = DrawerPool.EffectParticles.GetTechniqueForStreamOut(VertexTypes.Particle, description.ParticleClass);
             this.inputLayout = DrawerPool.EffectParticles.GetInputLayout(this.techniqueForStreamOut);
 
             this.emittersBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
@@ -220,7 +220,7 @@ namespace Engine
                 context.ViewProjection,
                 context.EyePosition,
                 (uint)this.textureArray.Description.Texture2DArray.ArraySize,
-                this.textureArray, 
+                this.textureArray,
                 this.textureRandom,
                 this.emitterAge,
                 this.maximumAge,
@@ -270,11 +270,13 @@ namespace Engine
             {
                 VertexBufferBinding iaBinding = new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0);
 
+                var technique = DrawerPool.EffectParticles.GetTechniqueForDrawing(VertexTypes.Particle, this.particleClass, context.DrawerMode);
+
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
 
-                for (int p = 0; p < this.techniqueForDrawing.Description.PassCount; p++)
+                for (int p = 0; p < technique.Description.PassCount; p++)
                 {
-                    this.techniqueForDrawing.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
                     this.Game.Graphics.DeviceContext.DrawAuto();
 

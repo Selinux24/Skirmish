@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using Engine;
+﻿using Engine;
 using Engine.Common;
 using SharpDX;
+using System;
+using System.Collections.Generic;
 
 namespace Collada
 {
@@ -177,7 +177,6 @@ namespace Collada
                 spotLight,  
             };
 
-            this.Lights.EnableShadows = false;
             this.SceneVolume = this.ground.GetBoundingSphere();
         }
         private void InitializeHelicopters()
@@ -306,7 +305,7 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.F3))
             {
-                this.Lights.EnableShadows = !this.Lights.EnableShadows;
+                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
             }
 
             #endregion

@@ -55,8 +55,6 @@ namespace Skybox
         {
             base.Initialize();
 
-            this.Lights.EnableShadows = false;
-
             #region Cursor
 
             SpriteDescription cursorDesc = new SpriteDescription()
@@ -155,11 +153,16 @@ namespace Skybox
 
                 firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.9f;
 
+                Color color = Color.White;
+                if (i == 1) color = Color.Red;
+                if (i == 2) color = Color.Green;
+                if (i == 3) color = Color.Blue;
+
                 this.torchLights[i] = new SceneLightPoint()
                 {
                     Name = string.Format("Torch {0}", i),
                     Enabled = true,
-                    LightColor = Color.Yellow,
+                    LightColor = color,
                     AmbientIntensity = 1f,
                     DiffuseIntensity = 1f,
                     Position = firePositions3D[i],

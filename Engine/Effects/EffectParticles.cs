@@ -37,6 +37,14 @@ namespace Engine.Effects
         /// Line drawing technique
         /// </summary>
         public readonly EffectTechnique LineDraw = null;
+        /// <summary>
+        /// Solid deferred drawing technique
+        /// </summary>
+        public readonly EffectTechnique DeferredSolidDraw = null;
+        /// <summary>
+        /// Line deferred drawing technique
+        /// </summary>
+        public readonly EffectTechnique DeferredLineDraw = null;
 
         /// <summary>
         /// Eye position effect variable
@@ -260,6 +268,8 @@ namespace Engine.Effects
             this.SmokeStreamOut = this.Effect.GetTechniqueByName("SmokeStreamOut");
             this.SolidDraw = this.Effect.GetTechniqueByName("SolidDraw");
             this.LineDraw = this.Effect.GetTechniqueByName("LineDraw");
+            this.DeferredSolidDraw = this.Effect.GetTechniqueByName("DeferredSolidDraw");
+            this.DeferredLineDraw = this.Effect.GetTechniqueByName("DeferredLineDraw");
 
             this.AddInputLayout(this.FireStreamOut, VertexParticle.GetInput());
             this.AddInputLayout(this.RainStreamOut, VertexParticle.GetInput());
@@ -294,42 +304,55 @@ namespace Engine.Effects
         /// Get technique by vertex type
         /// </summary>
         /// <param name="vertexType">VertexType</param>
-        /// <param name="stage">Stage</param>
         /// <param name="particleClass">Particle class</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage, ParticleClasses particleClass)
+        public EffectTechnique GetTechniqueForStreamOut(VertexTypes vertexType, ParticleClasses particleClass)
         {
-            if (stage == DrawingStages.StreamOut)
+            if (vertexType == VertexTypes.Particle)
             {
-                if (vertexType == VertexTypes.Particle)
-                {
-                    if (particleClass == ParticleClasses.Fire) return this.FireStreamOut;
-                    else if (particleClass == ParticleClasses.Smoke) return this.SmokeStreamOut;
-                    else if (particleClass == ParticleClasses.Rain) return this.RainStreamOut;
-                    else throw new Exception(string.Format("Bad particle class: {0}", particleClass));
-                }
-                else
-                {
-                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
-                }
+                if (particleClass == ParticleClasses.Fire) return this.FireStreamOut;
+                else if (particleClass == ParticleClasses.Smoke) return this.SmokeStreamOut;
+                else if (particleClass == ParticleClasses.Rain) return this.RainStreamOut;
+                else throw new Exception(string.Format("Bad particle class: {0}", particleClass));
             }
-            else if (stage == DrawingStages.Drawing)
+            else
             {
-                if (vertexType == VertexTypes.Particle)
+                throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, DrawingStages.StreamOut));
+            }
+        }
+        /// <summary>
+        /// Get technique by vertex type
+        /// </summary>
+        /// <param name="vertexType">VertexType</param>
+        /// <param name="particleClass">Particle class</param>
+        /// <param name="drawerMode">Drawer mode</param>
+        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
+        public EffectTechnique GetTechniqueForDrawing(VertexTypes vertexType, ParticleClasses particleClass, DrawerModesEnum drawerMode)
+        {
+            if (vertexType == VertexTypes.Particle)
+            {
+                if (drawerMode == DrawerModesEnum.Forward)
                 {
                     if (particleClass == ParticleClasses.Fire) return this.SolidDraw;
                     else if (particleClass == ParticleClasses.Smoke) return this.SolidDraw;
                     else if (particleClass == ParticleClasses.Rain) return this.LineDraw;
                     else throw new Exception(string.Format("Bad particle class: {0}", particleClass));
                 }
+                else if (drawerMode == DrawerModesEnum.Deferred)
+                {
+                    if (particleClass == ParticleClasses.Fire) return this.DeferredSolidDraw;
+                    else if (particleClass == ParticleClasses.Smoke) return this.DeferredSolidDraw;
+                    else if (particleClass == ParticleClasses.Rain) return this.DeferredLineDraw;
+                    else throw new Exception(string.Format("Bad particle class: {0}", particleClass));
+                }
                 else
                 {
-                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    throw new Exception(string.Format("Bad drawer mode for effect and stage: {0} - {1}", vertexType, DrawingStages.Drawing));
                 }
             }
             else
             {
-                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
+                throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, DrawingStages.Drawing));
             }
         }
         /// <summary>
