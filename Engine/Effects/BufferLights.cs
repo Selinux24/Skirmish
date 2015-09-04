@@ -12,6 +12,11 @@ namespace Engine.Effects
     public struct BufferDirectionalLight : IBufferData
     {
         /// <summary>
+        /// Maximum light count
+        /// </summary>
+        public const int MAX = 3;
+
+        /// <summary>
         /// Light color
         /// </summary>
         public Color3 LightColor;
@@ -67,6 +72,11 @@ namespace Engine.Effects
     [StructLayout(LayoutKind.Sequential)]
     public struct BufferPointLight : IBufferData
     {
+        /// <summary>
+        /// Maximum light count
+        /// </summary>
+        public const int MAX = 4;
+
         /// <summary>
         /// Light color
         /// </summary>
@@ -128,6 +138,11 @@ namespace Engine.Effects
     [StructLayout(LayoutKind.Sequential)]
     public struct BufferSpotLight : IBufferData
     {
+        /// <summary>
+        /// Maximum light count
+        /// </summary>
+        public const int MAX = 4;
+
         /// <summary>
         /// Light color
         /// </summary>

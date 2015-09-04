@@ -27,11 +27,8 @@ cbuffer cbPerInstance : register(b3)
 }
 
 //
-// 18 local object(s)
+// 14 local object(s)
 //
-RasterizerState RasterizerDefault
-{
-};
 RasterizerState RasterizerSolid
 {
     FillMode = uint(SOLID /* 3 */);
@@ -52,9 +49,6 @@ RasterizerState RasterizerNoCull
 {
     CullMode = uint(NONE /* 1 */);
 };
-DepthStencilState StencilDefault
-{
-};
 DepthStencilState StencilEnableDepth
 {
     DepthEnable = bool(TRUE /* 1 */);
@@ -68,63 +62,6 @@ DepthStencilState StencilDisableDepth
 DepthStencilState StencilLessEqualDSS
 {
     DepthFunc = uint(LESS_EQUAL /* 4 */);
-};
-BlendState BlendDefault
-{
-};
-BlendState BlendAdditive
-{
-    AlphaToCoverageEnable = bool(FALSE /* 0 */);
-    BlendEnable[0] = bool(TRUE /* 1 */);
-    SrcBlend[0] = uint(SRC_ALPHA /* 5 */);
-    SrcBlend[1] = uint(SRC_ALPHA /* 5 */);
-    SrcBlend[2] = uint(SRC_ALPHA /* 5 */);
-    SrcBlend[3] = uint(SRC_ALPHA /* 5 */);
-    SrcBlend[4] = uint(SRC_ALPHA /* 5 */);
-    SrcBlend[5] = uint(SRC_ALPHA /* 5 */);
-    SrcBlend[6] = uint(SRC_ALPHA /* 5 */);
-    SrcBlend[7] = uint(SRC_ALPHA /* 5 */);
-    DestBlend[0] = uint(ONE /* 2 */);
-    DestBlend[1] = uint(ONE /* 2 */);
-    DestBlend[2] = uint(ONE /* 2 */);
-    DestBlend[3] = uint(ONE /* 2 */);
-    DestBlend[4] = uint(ONE /* 2 */);
-    DestBlend[5] = uint(ONE /* 2 */);
-    DestBlend[6] = uint(ONE /* 2 */);
-    DestBlend[7] = uint(ONE /* 2 */);
-    BlendOp[0] = uint(ADD /* 1 */);
-    BlendOp[1] = uint(ADD /* 1 */);
-    BlendOp[2] = uint(ADD /* 1 */);
-    BlendOp[3] = uint(ADD /* 1 */);
-    BlendOp[4] = uint(ADD /* 1 */);
-    BlendOp[5] = uint(ADD /* 1 */);
-    BlendOp[6] = uint(ADD /* 1 */);
-    BlendOp[7] = uint(ADD /* 1 */);
-    SrcBlendAlpha[0] = uint(ZERO /* 1 */);
-    SrcBlendAlpha[1] = uint(ZERO /* 1 */);
-    SrcBlendAlpha[2] = uint(ZERO /* 1 */);
-    SrcBlendAlpha[3] = uint(ZERO /* 1 */);
-    SrcBlendAlpha[4] = uint(ZERO /* 1 */);
-    SrcBlendAlpha[5] = uint(ZERO /* 1 */);
-    SrcBlendAlpha[6] = uint(ZERO /* 1 */);
-    SrcBlendAlpha[7] = uint(ZERO /* 1 */);
-    DestBlendAlpha[0] = uint(ZERO /* 1 */);
-    DestBlendAlpha[1] = uint(ZERO /* 1 */);
-    DestBlendAlpha[2] = uint(ZERO /* 1 */);
-    DestBlendAlpha[3] = uint(ZERO /* 1 */);
-    DestBlendAlpha[4] = uint(ZERO /* 1 */);
-    DestBlendAlpha[5] = uint(ZERO /* 1 */);
-    DestBlendAlpha[6] = uint(ZERO /* 1 */);
-    DestBlendAlpha[7] = uint(ZERO /* 1 */);
-    BlendOpAlpha[0] = uint(ADD /* 1 */);
-    BlendOpAlpha[1] = uint(ADD /* 1 */);
-    BlendOpAlpha[2] = uint(ADD /* 1 */);
-    BlendOpAlpha[3] = uint(ADD /* 1 */);
-    BlendOpAlpha[4] = uint(ADD /* 1 */);
-    BlendOpAlpha[5] = uint(ADD /* 1 */);
-    BlendOpAlpha[6] = uint(ADD /* 1 */);
-    BlendOpAlpha[7] = uint(ADD /* 1 */);
-    RenderTargetWriteMask[0] = byte(0x0f);
 };
 SamplerState SamplerLinear
 {
@@ -3553,7 +3490,7 @@ fxgroup
                 #line 484 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 142 "IncLights.fx"
+                #line 126 "IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -3565,10 +3502,10 @@ fxgroup
                 #line 485 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
-                #line 138 "IncLights.fx"
+                #line 122 "IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // normalT<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 147
+                #line 131
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx
@@ -3791,7 +3728,7 @@ fxgroup
                 #line 484 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 142 "IncLights.fx"
+                #line 126 "IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -3803,10 +3740,10 @@ fxgroup
                 #line 485 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
-                #line 138 "IncLights.fx"
+                #line 122 "IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // normalT<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 147
+                #line 131
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx
@@ -4083,7 +4020,7 @@ fxgroup
                 #line 484 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 142 "IncLights.fx"
+                #line 126 "IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -4095,10 +4032,10 @@ fxgroup
                 #line 485 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
-                #line 138 "IncLights.fx"
+                #line 122 "IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // normalT<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 147
+                #line 131
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx
@@ -4380,7 +4317,7 @@ fxgroup
                 #line 484 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 142 "IncLights.fx"
+                #line 126 "IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -4392,10 +4329,10 @@ fxgroup
                 #line 485 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
-                #line 138 "IncLights.fx"
+                #line 122 "IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // normalT<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 147
+                #line 131
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx

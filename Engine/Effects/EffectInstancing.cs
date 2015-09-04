@@ -584,9 +584,9 @@ namespace Engine.Effects
             {
                 this.EyePositionWorld = Vector3.Zero;
 
-                this.DirLights = new BufferDirectionalLight[3];
-                this.PointLights = new BufferPointLight[4];
-                this.SpotLights = new BufferSpotLight[4];
+                this.DirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
+                this.PointLights = new BufferPointLight[BufferPointLight.MAX];
+                this.SpotLights = new BufferSpotLight[BufferSpotLight.MAX];
 
                 this.FogStart = 0;
                 this.FogRange = 0;

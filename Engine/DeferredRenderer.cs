@@ -203,7 +203,7 @@ namespace Engine
                 context.ShadowMap);
 
             this.Game.Graphics.SetDepthStencilNone();
-            this.Game.Graphics.SetBlendAdditive();
+            this.Game.Graphics.SetBlendDeferredLighting();
 #if DEBUG
             Stopwatch swDirectional = Stopwatch.StartNew();
 #endif

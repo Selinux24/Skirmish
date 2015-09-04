@@ -114,13 +114,17 @@ namespace Engine
         /// </summary>
         private BlendState blendTransparent = null;
         /// <summary>
-        /// Blend state for additive blending
+        /// Additive blend state
         /// </summary>
         private BlendState blendAdditive = null;
         /// <summary>
-        /// Blend state for composition blending
+        /// Blend state for deferred lighting blending
         /// </summary>
-        private BlendState blendComposition = null;
+        private BlendState blendDeferredLighting = null;
+        /// <summary>
+        /// Blend state for defered composer blending
+        /// </summary>
+        private BlendState blendDeferredComposer = null;
         /// <summary>
         /// Default rasterizer
         /// </summary>
@@ -493,18 +497,18 @@ namespace Engine
 
             #region Blend States
 
+            #region Default blend state (No alpha)
             {
-                //Default blend state (No alpha)
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = false;
 
-                desc.RenderTarget[0].IsBlendEnabled = false;
+                desc.RenderTarget[0].IsBlendEnabled = true;
                 desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
 
                 desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.Zero;
 
                 desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
@@ -512,9 +516,10 @@ namespace Engine
 
                 this.blendDefault = new BlendState(this.Device, desc);
             }
+            #endregion
 
+            #region Alpha blend state
             {
-                //Alpha blend state
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = false;
@@ -532,9 +537,10 @@ namespace Engine
 
                 this.blendAlphaEnabled = new BlendState(this.Device, desc);
             }
+            #endregion
 
+            #region Transparent blend state
             {
-                //Transparent blend state
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = false;
@@ -552,11 +558,33 @@ namespace Engine
 
                 this.blendTransparent = new BlendState(this.Device, desc);
             }
+            #endregion
 
+            #region Additive blend state
             {
-                //Additive blend state
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = false;
+                desc.IndependentBlendEnable = false;
+
+                desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.One;
+
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+                this.blendAdditive = new BlendState(this.Device, desc);
+            }
+            #endregion
+
+            #region Deferred lighting blend state
+            {
+                BlendStateDescription desc = new BlendStateDescription();
+                desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = false;
 
                 desc.RenderTarget[0].IsBlendEnabled = true;
@@ -570,53 +598,55 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
 
-                this.blendAdditive = new BlendState(this.Device, desc);
+                this.blendDeferredLighting = new BlendState(this.Device, desc);
             }
+            #endregion
 
+            #region Deferred composer blend state
             {
-                //Composition blend state
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = false;
                 desc.IndependentBlendEnable = true;
 
-                desc.RenderTarget[0].IsBlendEnabled = false;
+                desc.RenderTarget[0].IsBlendEnabled = true;
                 desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
                 desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.Zero;
                 desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-                desc.RenderTarget[1].IsBlendEnabled = false;
+                desc.RenderTarget[1].IsBlendEnabled = true;
                 desc.RenderTarget[1].RenderTargetWriteMask = ColorWriteMaskFlags.All;
                 desc.RenderTarget[1].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[1].SourceBlend = BlendOption.One;
-                desc.RenderTarget[1].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[1].DestinationBlend = BlendOption.Zero;
                 desc.RenderTarget[1].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[1].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[1].DestinationAlphaBlend = BlendOption.Zero;
 
-                desc.RenderTarget[2].IsBlendEnabled = false;
+                desc.RenderTarget[2].IsBlendEnabled = true;
                 desc.RenderTarget[2].RenderTargetWriteMask = ColorWriteMaskFlags.All;
                 desc.RenderTarget[2].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[2].SourceBlend = BlendOption.One;
-                desc.RenderTarget[2].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[2].DestinationBlend = BlendOption.Zero;
                 desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
 
-                desc.RenderTarget[3].IsBlendEnabled = false;
+                desc.RenderTarget[3].IsBlendEnabled = true;
                 desc.RenderTarget[3].RenderTargetWriteMask = ColorWriteMaskFlags.All;
                 desc.RenderTarget[3].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[3].SourceBlend = BlendOption.One;
-                desc.RenderTarget[3].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[3].DestinationBlend = BlendOption.Zero;
                 desc.RenderTarget[3].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[3].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[3].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendComposition = new BlendState(this.Device, desc);
+                this.blendDeferredComposer = new BlendState(this.Device, desc);
             }
+            #endregion
 
             #endregion
 
@@ -866,11 +896,18 @@ namespace Engine
             this.SetBlendState(this.blendAdditive, Color.Transparent, -1);
         }
         /// <summary>
-        /// Sets composition blend state
+        /// Sets deferred lighting blend state
         /// </summary>
-        public void SetBlendComposition()
+        public void SetBlendDeferredLighting()
         {
-            this.SetBlendState(this.blendComposition, Color.Transparent, -1);
+            this.SetBlendState(this.blendDeferredLighting, Color.Transparent, -1);
+        }
+        /// <summary>
+        /// Sets deferred composer blend state
+        /// </summary>
+        public void SetBlendDeferredComposer()
+        {
+            this.SetBlendState(this.blendDeferredComposer, Color.Transparent, -1);
         }
         /// <summary>
         /// Sets default rasterizer
@@ -908,17 +945,13 @@ namespace Engine
             if (this.swapChain != null)
             {
                 if (this.swapChain.IsFullScreen) this.swapChain.IsFullScreen = false;
-                this.swapChain.Dispose();
-                this.swapChain = null;
+
+                Helper.Dispose(this.swapChain);
             }
 
             this.DisposeResources();
 
-            if (this.Device != null)
-            {
-                this.Device.Dispose();
-                this.Device = null;
-            }
+            Helper.Dispose(this.Device);
         }
 
         /// <summary>
@@ -944,7 +977,7 @@ namespace Engine
         /// <param name="sampleMask">Sample mask</param>
         private void SetBlendState(BlendState state, Color4? blendFactor = null, int sampleMask = -1)
         {
-            //if (this.currentBlendState != state)
+            if (this.currentBlendState != state)
             {
                 this.Device.ImmediateContext.OutputMerger.SetBlendState(state, blendFactor, sampleMask);
 
@@ -1053,95 +1086,25 @@ namespace Engine
         /// </summary>
         private void DisposeResources()
         {
-            if (this.renderTargetView != null)
-            {
-                this.renderTargetView.Dispose();
-                this.renderTargetView = null;
-            }
+            Helper.Dispose(this.renderTargetView);
+            Helper.Dispose(this.depthStencilBuffer);
+            Helper.Dispose(this.depthStencilView);
 
-            if (this.depthStencilBuffer != null)
-            {
-                this.depthStencilBuffer.Dispose();
-                this.depthStencilBuffer = null;
-            }
+            Helper.Dispose(this.depthStencilzBufferEnabled);
+            Helper.Dispose(this.depthStencilzBufferDisabled);
+            Helper.Dispose(this.depthStencilNone);
 
-            if (this.depthStencilView != null)
-            {
-                this.depthStencilView.Dispose();
-                this.depthStencilView = null;
-            }
+            Helper.Dispose(this.rasterizerDefault);
+            Helper.Dispose(this.rasterizerWireframe);
+            Helper.Dispose(this.rasterizerNoCull);
+            Helper.Dispose(this.rasterizerCullCounterClockwiseFace);
 
-            if (this.depthStencilzBufferEnabled != null)
-            {
-                this.depthStencilzBufferEnabled.Dispose();
-                this.depthStencilzBufferEnabled = null;
-            }
-
-            if (this.depthStencilzBufferDisabled != null)
-            {
-                this.depthStencilzBufferDisabled.Dispose();
-                this.depthStencilzBufferDisabled = null;
-            }
-
-            if (this.depthStencilNone != null)
-            {
-                this.depthStencilNone.Dispose();
-                this.depthStencilNone = null;
-            }
-
-            if (this.rasterizerDefault != null)
-            {
-                this.rasterizerDefault.Dispose();
-                this.rasterizerDefault = null;
-            }
-
-            if (this.rasterizerWireframe != null)
-            {
-                this.rasterizerWireframe.Dispose();
-                this.rasterizerWireframe = null;
-            }
-
-            if (this.rasterizerNoCull != null)
-            {
-                this.rasterizerNoCull.Dispose();
-                this.rasterizerNoCull = null;
-            }
-
-            if (this.rasterizerCullCounterClockwiseFace != null)
-            {
-                this.rasterizerCullCounterClockwiseFace.Dispose();
-                this.rasterizerCullCounterClockwiseFace = null;
-            }
-
-            if (this.blendDefault != null)
-            {
-                this.blendDefault.Dispose();
-                this.blendDefault = null;
-            }
-
-            if (this.blendAlphaEnabled != null)
-            {
-                this.blendAlphaEnabled.Dispose();
-                this.blendAlphaEnabled = null;
-            }
-
-            if (this.blendTransparent != null)
-            {
-                this.blendTransparent.Dispose();
-                this.blendTransparent = null;
-            }
-
-            if (this.blendAdditive != null)
-            {
-                this.blendAdditive.Dispose();
-                this.blendAdditive = null;
-            }
-
-            if (this.blendComposition != null)
-            {
-                this.blendComposition.Dispose();
-                this.blendComposition = null;
-            }
+            Helper.Dispose(this.blendDefault);
+            Helper.Dispose(this.blendAlphaEnabled);
+            Helper.Dispose(this.blendTransparent);
+            Helper.Dispose(this.blendAdditive);
+            Helper.Dispose(this.blendDeferredLighting);
+            Helper.Dispose(this.blendDeferredComposer);
         }
     }
 }

@@ -760,7 +760,7 @@ namespace Engine
 
                     if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        this.Game.Graphics.SetBlendComposition();
+                        this.Game.Graphics.SetBlendDeferredComposer();
                     }
                     else
                     {

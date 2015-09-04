@@ -273,6 +273,7 @@ namespace Engine
                 var technique = DrawerPool.EffectParticles.GetTechniqueForDrawing(VertexTypes.Particle, this.particleClass, context.DrawerMode);
 
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
+                this.Game.Graphics.SetBlendAdditive();
 
                 for (int p = 0; p < technique.Description.PassCount; p++)
                 {

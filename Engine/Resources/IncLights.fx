@@ -1,4 +1,3 @@
-RasterizerState RasterizerDefault;
 RasterizerState RasterizerSolid
 {
 	FillMode = SOLID;
@@ -20,7 +19,6 @@ RasterizerState RasterizerNoCull
     CullMode = None;
 };
 
-DepthStencilState StencilDefault;
 DepthStencilState StencilEnableDepth
 {
     DepthEnable = TRUE;
@@ -34,23 +32,6 @@ DepthStencilState StencilDisableDepth
 DepthStencilState StencilLessEqualDSS
 {
     DepthFunc = LESS_EQUAL;
-};
-
-BlendState BlendDefault;
-BlendState BlendAdditive
-{
-    AlphaToCoverageEnable = FALSE;
-
-    BlendEnable[0] = TRUE;
-    RenderTargetWriteMask[0] = 0x0F;
-
-    BlendOp = ADD;
-    SrcBlend = SRC_ALPHA;
-    DestBlend = ONE;
-    
-    BlendOpAlpha = ADD;
-	SrcBlendAlpha = ZERO;
-    DestBlendAlpha = ZERO;
 };
 
 SamplerState SamplerLinear

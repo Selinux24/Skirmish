@@ -334,7 +334,6 @@ technique11 SolidDraw
         SetPixelShader(CompileShader(ps_5_0, PSDrawSolid()));
 
 		SetRasterizerState(RasterizerSolid);
-        SetBlendState(BlendAdditive, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xffffffff);
         SetDepthStencilState(StencilEnableDepth, 0);
     }
 }
@@ -360,7 +359,6 @@ technique11 DeferredSolidDraw
         SetPixelShader(CompileShader(ps_5_0, PSDeferredDrawSolid()));
 
 		SetRasterizerState(RasterizerSolid);
-        SetBlendState(BlendAdditive, float4(0.0f, 0.0f, 0.0f, 0.0f), 0xffffffff);
         SetDepthStencilState(StencilEnableDepth, 0);
     }
 }
