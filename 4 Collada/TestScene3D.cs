@@ -108,7 +108,7 @@ namespace Collada
                 ModelFileName = "Poly.dae",
                 Instances = 2
             });
-            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, "raindrop.dds"));
+            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, Color.White, "raindrop.dds"));
 
             BoundingBox[] bboxes = this.ground.pickingQuadtree.GetBoundingBoxes(5);
             Line[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);

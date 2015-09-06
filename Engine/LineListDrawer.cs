@@ -68,6 +68,8 @@ namespace Engine
             {
                 this.WriteDataInBuffer();
 
+                this.Game.Graphics.SetRasterizerWireframe();
+
                 base.Draw(gameTime, context);
             }
         }

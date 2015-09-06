@@ -64,6 +64,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectScalarVariable radius = null;
         /// <summary>
+        /// World effect variable
+        /// </summary>
+        private EffectMatrixVariable world = null;
+        /// <summary>
         /// World view projection effect variable
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
@@ -235,6 +239,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// World matrix
+        /// </summary>
+        protected Matrix World
+        {
+            get
+            {
+                return this.world.GetMatrix();
+            }
+            set
+            {
+                this.world.SetMatrix(value);
+            }
+        }
+        /// <summary>
         /// World view projection matrix
         /// </summary>
         protected Matrix WorldViewProjection
@@ -346,6 +364,7 @@ namespace Engine.Effects
             this.AddInputLayout(this.DeferredBillboard, VertexBillboard.GetInput());
             this.AddInputLayout(this.ShadowMapBillboard, VertexBillboard.GetInput());
 
+            this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.shadowTransform = this.Effect.GetVariableByName("gShadowTransform").AsMatrix();
             this.material = this.Effect.GetVariableByName("gMaterial");
@@ -413,6 +432,7 @@ namespace Engine.Effects
             ShaderResourceView shadowMap,
             Matrix shadowTransform)
         {
+            this.World = world;
             this.WorldViewProjection = world * viewProjection;
 
             if (lights != null)

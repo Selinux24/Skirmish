@@ -23,7 +23,7 @@ PSVertexPositionTexture VSFont(VSVertexPositionTexture input)
 
 float4 PSFont(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 litColor = gTexture.Sample(SamplerFont, input.tex);
+    float4 litColor = gTexture.Sample(SamplerPoint, input.tex);
 
 	if(litColor.a != 0.0f)
 	{
@@ -40,7 +40,5 @@ technique11 FontDrawer
 		SetVertexShader(CompileShader(vs_5_0, VSFont()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSFont()));
-	
-		SetRasterizerState(RasterizerSolid);
 	}
 }

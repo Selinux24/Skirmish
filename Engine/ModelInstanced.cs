@@ -68,7 +68,6 @@ namespace Engine
             : base(game, content, true, instances, true, true)
         {
             this.instancingData = new VertexInstancingData[instances];
-
             this.instances = Helper.CreateArray(instances, () => new ModelInstance(this));
         }
         /// <summary>
@@ -270,9 +269,13 @@ namespace Engine
         /// </summary>
         public int Instances = 1;
         /// <summary>
-        /// Drops shadow
+        /// Is opaque
         /// </summary>
-        public bool Opaque = false;
+        public bool Opaque = true;
+        /// <summary>
+        /// Can be renderer by the deferred renderer
+        /// </summary>
+        public bool DeferredEnabled = true;
     }
 
     /// <summary>

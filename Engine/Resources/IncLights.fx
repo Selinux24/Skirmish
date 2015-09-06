@@ -1,23 +1,3 @@
-RasterizerState RasterizerSolid
-{
-	FillMode = SOLID;
-	CullMode = BACK;
-};
-RasterizerState RasterizerWireFrame
-{
-	FillMode = WIREFRAME;
-	CullMode = NONE;
-};
-RasterizerState RasterizerDepth
-{
-	DepthBias = 100000;
-    DepthBiasClamp = 0.0f;
-	SlopeScaledDepthBias = 1.0f;
-};
-RasterizerState RasterizerNoCull
-{
-    CullMode = None;
-};
 
 DepthStencilState StencilEnableDepth
 {
@@ -34,6 +14,7 @@ DepthStencilState StencilLessEqualDSS
     DepthFunc = LESS_EQUAL;
 };
 
+SamplerState SamplerPoint;
 SamplerState SamplerLinear
 {
 	Filter = MIN_MAG_MIP_LINEAR;
@@ -48,10 +29,8 @@ SamplerState SamplerAnisotropic
 	AddressU = WRAP;
 	AddressV = WRAP;
 };
-SamplerState SamplerFont;
-SamplerState SamplerPoint;
 
-SamplerComparisonState SamplerShadow
+SamplerComparisonState SamplerComparisonShadow
 {
 	Filter   = COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
 	AddressU = BORDER;
@@ -62,17 +41,25 @@ SamplerComparisonState SamplerShadow
     ComparisonFunc = LESS;
 };
 
+static const int MAX_LIGHTS_DIRECTIONAL = 3;
+static const int MAX_LIGHTS_POINT = 4;
+static const int MAX_LIGHTS_SPOT = 4;
+
+static const float SHADOWMAPSIZE = 2048.0f;
+static const float SHADOWMAPDX = 1.0f / SHADOWMAPSIZE;
+static const float2 SamplerShadowOffsets[9] =
+{
+	float2(-SHADOWMAPDX, -SHADOWMAPDX),		float2(0.0f, -SHADOWMAPDX),		float2(SHADOWMAPDX, -SHADOWMAPDX),
+	float2(-SHADOWMAPDX, 0.0f),				float2(0.0f, 0.0f),				float2(SHADOWMAPDX, 0.0f),
+	float2(-SHADOWMAPDX, +SHADOWMAPDX),		float2(0.0f, +SHADOWMAPDX),		float2(SHADOWMAPDX, +SHADOWMAPDX)
+};
+
 struct Material
 {
 	float4 Diffuse;
 	float SpecularIntensity;
 	float SpecularPower;
 };
-
-static const int MAX_LIGHTS_DIRECTIONAL = 3;
-static const int MAX_LIGHTS_POINT = 4;
-static const int MAX_LIGHTS_SPOT = 4;
-
 struct DirectionalLight
 {
 	float3 Color;
@@ -105,15 +92,6 @@ struct SpotLight
 	float AttenuationExp;
 	float CastShadow;
 	float Enabled;
-};
-
-static const float SHADOWMAPSIZE = 2048.0f;
-static const float SHADOWMAPDX = 1.0f / SHADOWMAPSIZE;
-static const float2 SamplerShadowOffsets[9] =
-{
-	float2(-SHADOWMAPDX, -SHADOWMAPDX),		float2(0.0f, -SHADOWMAPDX),		float2(SHADOWMAPDX, -SHADOWMAPDX),
-	float2(-SHADOWMAPDX, 0.0f),				float2(0.0f, 0.0f),				float2(SHADOWMAPDX, 0.0f),
-	float2(-SHADOWMAPDX, +SHADOWMAPDX),		float2(0.0f, +SHADOWMAPDX),		float2(SHADOWMAPDX, +SHADOWMAPDX)
 };
 
 float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, float3 tangentW)
@@ -159,7 +137,7 @@ float CalcShadowFactor(float4 shadowPosH, Texture2D shadowMap)
 	[unroll]
 	for(int i = 0; i < 9; ++i)
 	{
-		percentLit += shadowMap.SampleCmpLevelZero(SamplerShadow, shadowPosH.xy + SamplerShadowOffsets[i], depth).r;
+		percentLit += shadowMap.SampleCmpLevelZero(SamplerComparisonShadow, shadowPosH.xy + SamplerShadowOffsets[i], depth).r;
 	}
 
 	// Average the samples.
@@ -230,7 +208,9 @@ float4 ComputeDirectionalLight(
 
 	if(L.CastShadow == 1)
 	{
-		float shadowFactor = CalcShadowFactor(shadowPosition, shadowMap);
+		float diffuseFactor = dot(normal, -L.Direction);
+
+		float shadowFactor = diffuseFactor * CalcShadowFactor(shadowPosition, shadowMap);
 
 		litColor *= shadowFactor;
 	}
@@ -308,7 +288,7 @@ float4 ComputeSpotLight(
 	}
 }
 
-float4 ComputeLights(
+float4 ComputeAllLights(
 	DirectionalLight dirLights[MAX_LIGHTS_DIRECTIONAL],
 	PointLight pointLights[MAX_LIGHTS_POINT],
 	SpotLight spotLights[MAX_LIGHTS_SPOT],

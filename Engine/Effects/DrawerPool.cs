@@ -143,71 +143,17 @@ namespace Engine.Effects
         /// </summary>
         public static void Dispose()
         {
-            if (EffectBasic != null)
-            {
-                EffectBasic.Dispose();
-                EffectBasic = null;
-            }
-
-            if (EffectBillboard != null)
-            {
-                EffectBillboard.Dispose();
-                EffectBillboard = null;
-            }
-
-            if (EffectCubemap != null)
-            {
-                EffectCubemap.Dispose();
-                EffectCubemap = null;
-            }
-
-            if (EffectFont != null)
-            {
-                EffectFont.Dispose();
-                EffectFont = null;
-            }
-
-            if (EffectInstancing != null)
-            {
-                EffectInstancing.Dispose();
-                EffectInstancing = null;
-            }
-
-            if (EffectParticles != null)
-            {
-                EffectParticles.Dispose();
-                EffectParticles = null;
-            }
-
-            if (EffectShadow != null)
-            {
-                EffectShadow.Dispose();
-                EffectShadow = null;
-            }
-
-            if (EffectInstancingShadow != null)
-            {
-                EffectInstancingShadow.Dispose();
-                EffectInstancingShadow = null;
-            }
-
-            if (EffectGBuffer != null)
-            {
-                EffectGBuffer.Dispose();
-                EffectGBuffer = null;
-            }
-
-            if (EffectInstancingGBuffer != null)
-            {
-                EffectInstancingGBuffer.Dispose();
-                EffectInstancingGBuffer = null;
-            }
-
-            if (EffectDeferred != null)
-            {
-                EffectDeferred.Dispose();
-                EffectDeferred = null;
-            }
+            Helper.Dispose(EffectBasic);
+            Helper.Dispose(EffectBillboard);
+            Helper.Dispose(EffectCubemap);
+            Helper.Dispose(EffectFont);
+            Helper.Dispose(EffectInstancing);
+            Helper.Dispose(EffectParticles);
+            Helper.Dispose(EffectShadow);
+            Helper.Dispose(EffectInstancingShadow);
+            Helper.Dispose(EffectGBuffer);
+            Helper.Dispose(EffectInstancingGBuffer);
+            Helper.Dispose(EffectDeferred);
         }
     }
 }

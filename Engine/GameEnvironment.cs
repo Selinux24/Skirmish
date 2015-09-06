@@ -10,7 +10,7 @@ namespace Engine
         /// <summary>
         /// Background color
         /// </summary>
-        public static Color4 Background = Color.CornflowerBlue.ToColor4();
+        public static Color4 Background = Color.Black.ToColor4();
         /// <summary>
         /// Gravity
         /// </summary>

@@ -43,9 +43,13 @@ namespace Engine.Common
         /// <remarks>True if passes culling test</remarks>
         public bool Cull { get; set; }
         /// <summary>
-        /// Gets or sets whether the object its opaque
+        /// Gets or sets whether the object is opaque
         /// </summary>
         public bool Opaque { get; set; }
+        /// <summary>
+        /// Gets or sets whether the object is enabled to draw with the deferred renderer
+        /// </summary>
+        public bool DeferredEnabled { get; set; }
 
         /// <summary>
         /// Constructor
@@ -56,6 +60,8 @@ namespace Engine.Common
             this.Game = game;
             this.Active = true;
             this.Visible = true;
+            this.Opaque = false;
+            this.DeferredEnabled = false;
             this.Order = 0;
         }
 

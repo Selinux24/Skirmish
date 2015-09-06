@@ -190,8 +190,6 @@ technique11 DeferredDirectionalLight
 		SetVertexShader(CompileShader(vs_5_0, VSDirectionalLight()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDirectionalLight()));
-
-		SetRasterizerState(RasterizerSolid);
     }
 }
 technique11 DeferredPointLight
@@ -219,7 +217,5 @@ technique11 DeferredCombineLights
 		SetVertexShader(CompileShader(vs_5_0, VSCombineLights()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSCombineLights()));
-
-		SetRasterizerState(RasterizerSolid);
     }
 }

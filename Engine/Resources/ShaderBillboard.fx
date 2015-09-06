@@ -3,6 +3,7 @@
 
 cbuffer cbPerFrame : register (b0)
 {
+	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
 	float4x4 gShadowTransform; 
 	float3 gEyePositionWorld;
@@ -38,7 +39,7 @@ GSVertexBillboard VSBillboard(VSVertexBillboard input)
 	GSVertexBillboard output;
 
 	output.centerWorld = input.positionWorld;
-	output.centerWorld.y -= 0.05f;
+	output.centerWorld.y -= (input.sizeWorld * 0.1f);
 	output.sizeWorld = input.sizeWorld;
 
 	return output;
@@ -71,7 +72,7 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 		for(int i = 0; i < 4; ++i)
 		{
 			gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
-			gout.positionWorld = v[i].xyz;
+			gout.positionWorld = mul(v[i], gWorld).xyz;
 			gout.shadowHomogeneous = mul(v[i], gShadowTransform);
 			gout.normalWorld = up;
 			gout.tex = gQuadTexC[i];
@@ -122,7 +123,7 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 
 	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
 
-	float4 litColor = ComputeLights(
+	float4 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
@@ -173,8 +174,6 @@ technique11 ForwardBillboard
 		SetVertexShader(CompileShader(vs_5_0, VSBillboard()));
 		SetGeometryShader(CompileShader(gs_5_0, GSBillboard()));
 		SetPixelShader(CompileShader(ps_5_0, PSForwardBillboard()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 DeferredBillboard
@@ -184,8 +183,6 @@ technique11 DeferredBillboard
 		SetVertexShader(CompileShader(vs_5_0, VSBillboard()));
 		SetGeometryShader(CompileShader(gs_5_0, GSBillboard()));
 		SetPixelShader(CompileShader(ps_5_0, PSDeferredBillboard()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 ShadowMapBillboard
@@ -195,7 +192,5 @@ technique11 ShadowMapBillboard
 		SetVertexShader(CompileShader(vs_5_0, VSBillboard()));
 		SetGeometryShader(CompileShader(gs_5_0, GSSMBillboard()));
 		SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
 	}
 }

@@ -31,8 +31,8 @@ GBufferPSOutput PSDeferredCubic(PSVertexPosition input)
 	output.color = color;
 	output.normal = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	output.depth.xyz = input.positionLocal;
-	output.depth.w = 1.0f;
-	output.shadow = 0.0f;
+	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	output.shadow = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
     return output;
 }
@@ -45,7 +45,6 @@ technique11 ForwardCubemap
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PSForwardCubic()));
         
-        SetRasterizerState(RasterizerNoCull);
         SetDepthStencilState(StencilLessEqualDSS, 0);
     }
 }
@@ -57,7 +56,6 @@ technique11 DeferredCubemap
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PSDeferredCubic()));
         
-        SetRasterizerState(RasterizerNoCull);
         SetDepthStencilState(StencilLessEqualDSS, 0);
     }
 }

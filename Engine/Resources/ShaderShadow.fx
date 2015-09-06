@@ -293,8 +293,6 @@ technique11 ShadowMapPositionColor
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionColor()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionColorI
@@ -304,8 +302,6 @@ technique11 ShadowMapPositionColorI
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorI()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionColorSkinned
@@ -315,8 +311,6 @@ technique11 ShadowMapPositionColorSkinned
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorSkinned()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionColorSkinnedI
@@ -326,8 +320,6 @@ technique11 ShadowMapPositionColorSkinnedI
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorSkinnedI()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 
@@ -338,8 +330,6 @@ technique11 ShadowMapPositionNormalColor
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColor()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionNormalColorI
@@ -349,8 +339,6 @@ technique11 ShadowMapPositionNormalColorI
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorI()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionNormalColorSkinned
@@ -360,8 +348,6 @@ technique11 ShadowMapPositionNormalColorSkinned
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorSkinned()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionNormalColorSkinnedI
@@ -371,8 +357,6 @@ technique11 ShadowMapPositionNormalColorSkinnedI
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorSkinnedI()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 
@@ -383,8 +367,6 @@ technique11 ShadowMapPositionTexture
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionTexture()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionTextureI
@@ -394,8 +376,6 @@ technique11 ShadowMapPositionTextureI
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureI()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionTextureSkinned
@@ -405,8 +385,6 @@ technique11 ShadowMapPositionTextureSkinned
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinned()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionTextureSkinnedI
@@ -416,8 +394,6 @@ technique11 ShadowMapPositionTextureSkinnedI
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinnedI()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 
@@ -428,8 +404,6 @@ technique11 ShadowMapPositionNormalTexture
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTexture()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionNormalTextureI
@@ -439,8 +413,6 @@ technique11 ShadowMapPositionNormalTextureI
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureI()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionNormalTextureSkinned
@@ -450,8 +422,6 @@ technique11 ShadowMapPositionNormalTextureSkinned
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinned()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionNormalTextureSkinnedI
@@ -461,8 +431,6 @@ technique11 ShadowMapPositionNormalTextureSkinnedI
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinnedI()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 
@@ -473,8 +441,6 @@ technique11 ShadowMapPositionNormalTextureTangent
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangent()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionNormalTextureTangentI
@@ -484,8 +450,6 @@ technique11 ShadowMapPositionNormalTextureTangentI
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentI()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionNormalTextureTangentSkinned
@@ -495,8 +459,6 @@ technique11 ShadowMapPositionNormalTextureTangentSkinned
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinned()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }
 technique11 ShadowMapPositionNormalTextureTangentSkinnedI
@@ -506,7 +468,5 @@ technique11 ShadowMapPositionNormalTextureTangentSkinnedI
         SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinnedI()));
 		SetGeometryShader(NULL);
         SetPixelShader(NULL);
-
-		SetRasterizerState(RasterizerDepth);
     }
 }

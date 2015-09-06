@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
+using System;
+using System.Collections.Generic;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
@@ -48,6 +48,10 @@ namespace Engine
         /// </summary>
         private SpriteTextureChannelsEnum channels = SpriteTextureChannelsEnum.None;
 
+        /// <summary>
+        /// Manipulator
+        /// </summary>
+        public Manipulator2D Manipulator = new Manipulator2D();
         /// <summary>
         /// Texture
         /// </summary>
@@ -119,16 +123,15 @@ namespace Engine
         /// <param name="height">Height</param>
         private void InitializeContext(int left, int top, int width, int height)
         {
-            Manipulator2D man = new Manipulator2D();
-            man.SetPosition(left, top);
-            man.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
+            this.Manipulator.SetPosition(left, top);
+            this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
 
             Matrix viewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
 
             this.drawContext = new Context()
             {
                 EyePosition = new Vector3(0, 0, -1),
-                World = man.LocalTransform,
+                World = this.Manipulator.LocalTransform,
                 ViewProjection = viewProjection,
                 Lights = SceneLights.Default,
             };
@@ -140,7 +143,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(GameTime gameTime, Context context)
         {
-
+            this.drawContext.World = this.Manipulator.LocalTransform;
         }
         /// <summary>
         /// Draw objects
@@ -171,6 +174,15 @@ namespace Engine
         public virtual void Resize()
         {
             this.drawContext.ViewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+        }
+        /// <summary>
+        /// Resize
+        /// </summary>
+        /// <param name="width">New width</param>
+        /// <param name="height">New height</param>
+        public virtual void Resize(float width, float height)
+        {
+            this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
         }
         /// <summary>
         /// Dispose objects

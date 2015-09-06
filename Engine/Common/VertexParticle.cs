@@ -20,10 +20,11 @@ namespace Engine.Common
             return new InputElement[]
             {
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
-                new InputElement("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, 0, InputClassification.PerVertexData, 0),
-                new InputElement("SIZE", 0, SharpDX.DXGI.Format.R32G32_Float, 24, 0, InputClassification.PerVertexData, 0),
-                new InputElement("AGE", 0, SharpDX.DXGI.Format.R32_Float, 32, 0, InputClassification.PerVertexData, 0),
-                new InputElement("TYPE", 0, SharpDX.DXGI.Format.R32_UInt, 36, 0, InputClassification.PerVertexData, 0),
+                new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 12, 0, InputClassification.PerVertexData, 0),
+                new InputElement("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 28, 0, InputClassification.PerVertexData, 0),
+                new InputElement("SIZE", 0, SharpDX.DXGI.Format.R32G32_Float, 40, 0, InputClassification.PerVertexData, 0),
+                new InputElement("AGE", 0, SharpDX.DXGI.Format.R32_Float, 48, 0, InputClassification.PerVertexData, 0),
+                new InputElement("TYPE", 0, SharpDX.DXGI.Format.R32_UInt, 52, 0, InputClassification.PerVertexData, 0),
             };
         }
 
@@ -31,6 +32,10 @@ namespace Engine.Common
         /// Initial position
         /// </summary>
         public Vector3 Position;
+        /// <summary>
+        /// Particle color
+        /// </summary>
+        public Color4 Color;
         /// <summary>
         /// Initial velocity
         /// </summary>
@@ -76,6 +81,7 @@ namespace Engine.Common
         public bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
+            if (channel == VertexDataChannels.Color) return true;
             else if (channel == VertexDataChannels.Size) return true;
             else return false;
         }
@@ -88,6 +94,7 @@ namespace Engine.Common
         public T GetChannelValue<T>(VertexDataChannels channel) where T : struct
         {
             if (channel == VertexDataChannels.Position) return (T)Convert.ChangeType(this.Position, typeof(T));
+            else if (channel == VertexDataChannels.Color) return (T)Convert.ChangeType(this.Color, typeof(T));
             else if (channel == VertexDataChannels.Size) return (T)Convert.ChangeType(this.Size, typeof(T));
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
@@ -98,7 +105,7 @@ namespace Engine.Common
         /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
-            return string.Format("Position: {0}; Size: {1}", this.Position, this.Size);
+            return string.Format("Position: {0}; Color: {1}; Size: {2}", this.Position, this.Color, this.Size);
         }
     }
 }

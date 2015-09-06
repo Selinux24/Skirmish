@@ -471,7 +471,7 @@ namespace Engine
                     #region Deferred rendering
 
                     //Render to G-Buffer only opaque objects
-                    List<Drawable> solidComponents = visibleComponents.FindAll(c => c.Opaque);
+                    List<Drawable> solidComponents = visibleComponents.FindAll(c => c.DeferredEnabled);
                     if (solidComponents.Count > 0)
                     {
                         #region Cull
@@ -507,7 +507,7 @@ namespace Engine
                             //Set g-buffer render targets
                             this.Game.Graphics.SetRenderTargets(
                                 this.deferredRenderer.Viewport,
-                                this.deferredRenderer.GeometryBuffer.DepthMap,
+                                this.Game.Graphics.DefaultDepthStencil,
                                 this.deferredRenderer.GeometryBuffer.RenderTargets,
                                 true, Color.Black);
 
@@ -577,7 +577,7 @@ namespace Engine
                     Stopwatch swComponsition = Stopwatch.StartNew();
 #endif
                     //Restore backbuffer as render target and clear it
-                    this.Game.Graphics.SetDefaultRenderTarget(true);
+                    this.Game.Graphics.SetDefaultRenderTarget(false);
 
                     //Disable z-buffer for deferred rendering
                     this.Game.Graphics.SetDepthStencilZDisabled();
@@ -592,7 +592,7 @@ namespace Engine
                     #endregion
 
                     //Render to screen the rest of objects
-                    List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.Opaque);
+                    List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.DeferredEnabled);
                     if (otherComponents.Count > 0)
                     {
                         #region Draw other
@@ -756,14 +756,19 @@ namespace Engine
             {
                 if (!components[i].Cull)
                 {
-                    this.Game.Graphics.SetRasterizerDefault();
-
-                    if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
+                        this.Game.Graphics.SetRasterizerDefault();
+                        this.Game.Graphics.SetBlendDefault();
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        this.Game.Graphics.SetRasterizerDefault();
                         this.Game.Graphics.SetBlendDeferredComposer();
                     }
-                    else
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
+                        this.Game.Graphics.SetRasterizerShadows();
                         this.Game.Graphics.SetBlendDefault();
                     }
 
@@ -852,6 +857,7 @@ namespace Engine
             Model newModel = new Model(this.Game, geo);
 
             newModel.Opaque = description.Opaque;
+            newModel.DeferredEnabled = description.DeferredEnabled;
             newModel.TextureIndex = description.TextureIndex;
 
             this.AddComponent(newModel, order);
@@ -902,6 +908,7 @@ namespace Engine
             ModelInstanced newModel = new ModelInstanced(this.Game, geo, description.Instances);
 
             newModel.Opaque = description.Opaque;
+            newModel.DeferredEnabled = description.DeferredEnabled;
 
             this.AddComponent(newModel, order);
 

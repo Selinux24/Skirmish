@@ -11,6 +11,11 @@ namespace DeferredTest
     {
         private string titleMask = "DL test: {0} directionals, {1} points and {2} spots. Shadows {3}";
 
+        private const float near = 0.1f;
+        private const float far = 1000f;
+        private const float fogStart = 10f;
+        private const float fogRange = 100f;
+
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer help = null;
@@ -40,24 +45,8 @@ namespace DeferredTest
         {
             base.Initialize();
 
-            this.Camera.NearPlaneDistance = 0.5f;
-            this.Camera.FarPlaneDistance = 5000f;
-
-            #region Texts
-
-            this.title = this.AddText("Tahoma", 18, Color.White);
-            this.load = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.help = this.AddText("Lucida Casual", 12, Color.Yellow);
-
-            this.title.Text = "Deferred Ligthning test";
-            this.load.Text = "";
-            this.help.Text = "";
-
-            this.title.Position = Vector2.Zero;
-            this.load.Position = new Vector2(0, 24);
-            this.help.Position = new Vector2(0, 48);
-
-            #endregion
+            this.Camera.NearPlaneDistance = near;
+            this.Camera.FarPlaneDistance = far;
 
             #region Models
 
@@ -80,7 +69,6 @@ namespace DeferredTest
                 PathNodeInclination = MathUtil.DegreesToRadians(35),
                 AddSkydom = true,
                 SkydomTexture = "sunset.dds",
-                Opaque = true,
                 AddVegetation = true,
                 Vegetation = new[]
                 {
@@ -89,9 +77,8 @@ namespace DeferredTest
                         VegetarionTextures = new[] { "tree0.dds", "tree1.dds" },
                         Saturation = 0.15f,
                         Radius = 300f,
-                        MinSize = Vector2.One * 2.50f,
-                        MaxSize = Vector2.One * 3.50f,
-                        Opaque = true,
+                        MinSize = Vector2.One * 5f,
+                        MaxSize = Vector2.One * 10f,
                     },
                     new TerrainDescription.VegetationDescription()
                     {
@@ -100,7 +87,6 @@ namespace DeferredTest
                         Radius = 50f,
                         MinSize = Vector2.One * 0.20f,
                         MaxSize = Vector2.One * 0.25f,
-                        Opaque = false,
                     }
                 },
             });
@@ -159,11 +145,9 @@ namespace DeferredTest
 
             #region Moving fire
 
-            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { new Vector3(0, 10, 0) }, 0.5f, "flare2.png"));
+            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { new Vector3(0, 10, 0) }, 0.5f, Color.Yellow, "flare2.png"));
 
             #endregion
-
-            this.load.Text = loadingText;
 
             #endregion
 
@@ -184,6 +168,22 @@ namespace DeferredTest
             });
 
             this.bufferDrawer.Visible = false;
+
+            #endregion
+
+            #region Texts
+
+            this.title = this.AddText("Tahoma", 18, Color.White);
+            this.load = this.AddText("Lucida Casual", 12, Color.Yellow);
+            this.help = this.AddText("Lucida Casual", 12, Color.Yellow);
+
+            this.title.Text = "Deferred Ligthning test";
+            this.load.Text = loadingText;
+            this.help.Text = "";
+
+            this.title.Position = Vector2.Zero;
+            this.load.Position = new Vector2(0, 24);
+            this.help.Position = new Vector2(0, 48);
 
             #endregion
 
@@ -232,13 +232,8 @@ namespace DeferredTest
 
             #region Lights
 
-            this.Lights.FogColor = Color.WhiteSmoke;
-            this.Lights.FogStart = 0f;
-            this.Lights.FogRange = 0f;
-
-            this.Lights.ClearDirectionalLights();
-            //this.Lights.Add(SceneLightDirectional.Primary);
-            this.Lights.Add(new SceneLightDirectional()
+            //SceneLightDirectional primary = SceneLightDirectional.Primary;
+            SceneLightDirectional primary = new SceneLightDirectional()
             {
                 Name = "night has come",
                 Enabled = true,
@@ -247,7 +242,14 @@ namespace DeferredTest
                 DiffuseIntensity = 0.25f,
                 Direction = SceneLightDirectional.Primary.Direction,
                 CastShadow = false,
-            });
+            };
+
+            this.Lights.ClearDirectionalLights();
+            this.Lights.Add(primary);
+
+            this.Lights.FogColor = Color.LightGray;
+            this.Lights.FogStart = fogStart;
+            this.Lights.FogRange = fogRange;
 
             #region Light Sphere Marker
 
@@ -282,6 +284,25 @@ namespace DeferredTest
             #endregion
 
             #region Debug
+
+            if (this.Game.Input.KeyJustReleased(Keys.F12))
+            {
+                if (this.bufferDrawer.Manipulator.Position == Vector2.Zero)
+                {
+                    int width = (int)(this.Game.Form.RenderWidth * 0.33f);
+                    int height = (int)(this.Game.Form.RenderHeight * 0.33f);
+                    int smLeft = this.Game.Form.RenderWidth - width;
+                    int smTop = this.Game.Form.RenderHeight - height;
+
+                    this.bufferDrawer.Manipulator.SetPosition(smLeft, smTop);
+                    this.bufferDrawer.Resize(width, height);
+                }
+                else
+                {
+                    this.bufferDrawer.Manipulator.SetPosition(Vector2.Zero);
+                    this.bufferDrawer.Resize(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+                }
+            }
 
             if (this.DrawContext.GeometryMap != null && this.DrawContext.GeometryMap.Length > 0)
             {
@@ -333,7 +354,6 @@ namespace DeferredTest
                         //Depth
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
-                        this.bufferDrawer.Visible = true;
                         this.help.Text = "Depth";
                     }
                     else
@@ -341,9 +361,9 @@ namespace DeferredTest
                         //Position
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
-                        this.bufferDrawer.Visible = true;
                         this.help.Text = "Position";
                     }
+                    this.bufferDrawer.Visible = true;
                 }
 
                 if (this.Game.Input.KeyJustReleased(Keys.F4))
@@ -354,7 +374,6 @@ namespace DeferredTest
                         //Specular intensity
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[3];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
-                        this.bufferDrawer.Visible = true;
                         this.help.Text = "Specular Intensity";
                     }
                     else
@@ -362,15 +381,15 @@ namespace DeferredTest
                         //Shadow positions
                         this.bufferDrawer.Texture = this.DrawContext.GeometryMap[3];
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
-                        this.bufferDrawer.Visible = true;
                         this.help.Text = "Shadow Positions";
                     }
+                    this.bufferDrawer.Visible = true;
                 }
             }
 
-            if (this.DrawContext.ShadowMap != null)
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                if (this.Game.Input.KeyJustReleased(Keys.F5))
+                if (this.DrawContext.ShadowMap != null)
                 {
                     //Shadow map
                     this.bufferDrawer.Texture = this.DrawContext.ShadowMap;
@@ -378,17 +397,25 @@ namespace DeferredTest
                     this.bufferDrawer.Visible = true;
                     this.help.Text = "Shadow map";
                 }
+                else
+                {
+                    this.help.Text = "The Shadow map is empty";
+                }
             }
 
-            if (this.DrawContext.LightMap != null)
+            if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
-                if (this.Game.Input.KeyJustReleased(Keys.F6))
+                if (this.DrawContext.LightMap != null)
                 {
-                    //Result
+                    //Light map
                     this.bufferDrawer.Texture = this.DrawContext.LightMap;
                     this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                     this.bufferDrawer.Visible = true;
-                    this.help.Text = "Result";
+                    this.help.Text = "Light map";
+                }
+                else
+                {
+                    this.help.Text = "The Light map is empty";
                 }
             }
 
@@ -428,6 +455,13 @@ namespace DeferredTest
                 int max = (this.Statistics != null ? this.Statistics.Length : 0) - 1;
 
                 this.textIntex = this.textIntex < max ? this.textIntex + 1 : max;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.T))
+            {
+                this.helicopter.TextureIndex++;
+
+                if (this.helicopter.TextureIndex > 2) this.helicopter.TextureIndex = 0;
             }
 
             #endregion
@@ -496,7 +530,12 @@ namespace DeferredTest
 
             #region Lights
 
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            if (this.Game.Input.KeyJustReleased(Keys.F))
+            {
+                this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.G))
             {
                 this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
             }

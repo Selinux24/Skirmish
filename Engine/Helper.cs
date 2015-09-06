@@ -401,5 +401,24 @@ namespace Engine
 
             return bsph;
         }
+        /// <summary>
+        /// Toggle coordinates from left-handed to right-handed and vice versa
+        /// </summary>
+        /// <typeparam name="T">Index type</typeparam>
+        /// <param name="indices">Indices in a triangle list topology</param>
+        /// <returns>Returns a new array</returns>
+        public static T[] ChangeCoordinate<T>(T[] indices)
+        {
+            T[] res = new T[indices.Length];
+
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                res[i + 0] = indices[i + 0];
+                res[i + 1] = indices[i + 2];
+                res[i + 2] = indices[i + 1];
+            }
+
+            return res;
+        }
     }
 }

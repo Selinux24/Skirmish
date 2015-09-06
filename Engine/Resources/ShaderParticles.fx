@@ -18,6 +18,9 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
 	uint gTextureCount;
+	float gFogStart;
+	float gFogRange;
+	float4 gFogColor;
 };
 cbuffer cbFixed : register (b1)
 {
@@ -61,8 +64,9 @@ void GSStreamOutFire(point VSVertexParticle input[1], inout PointStream<VSVertex
 
 			VSVertexParticle p;
 			p.positionWorld = input[0].positionWorld;
-			p.velocityWorld = vRandom * 1.5f * input[0].sizeWorld.x;
+			p.velocityWorld = vRandom * input[0].sizeWorld.x;
 			p.sizeWorld = input[0].sizeWorld;
+			p.color = input[0].color;
 			p.age = 0.0f;
 			p.type = PT_FLARE;
 
@@ -100,6 +104,7 @@ void GSStreamOutSmoke(point VSVertexParticle input[1], inout PointStream<VSVerte
 				p.positionWorld = input[0].positionWorld;
 				p.velocityWorld = vRandom * input[0].sizeWorld.x * 0.5f;
 				p.sizeWorld = input[0].sizeWorld;
+				p.color = input[0].color;
 				p.age = 0.0f;
 				p.type = PT_FLARE;
 
@@ -136,6 +141,7 @@ void GSStreamOutRain(point VSVertexParticle input[1], inout PointStream<VSVertex
 				VSVertexParticle p;
 				p.positionWorld = gEyePositionWorld.xyz + vRandom;
 				p.velocityWorld = gAccelerationWorld;
+				p.color = input[0].color;
 				p.sizeWorld = input[0].sizeWorld;
 				p.age = 0.0f;
 				p.type = PT_FLARE;
@@ -165,8 +171,8 @@ GSParticleSolid VSDrawSolid(VSVertexParticle input)
 	float3 pos = 0.5f * t * t * gAccelerationWorld + t * input.velocityWorld + input.positionWorld;
 
 	GSParticleSolid output;
-	output.positionWorld = mul(float4(pos, 1), gWorld).xyz;
-	output.color = float4(1.0f, 1.0f, 1.0f, opacity);
+	output.positionWorld = pos;
+	output.color = float4(input.color.rgb, opacity);
 	output.sizeWorld = input.sizeWorld;
 	output.type  = input.type;
 	
@@ -179,7 +185,8 @@ GSParticleLine VSDrawLine(VSVertexParticle input)
 	float3 pos = 0.5f * t * t * gAccelerationWorld + t * input.velocityWorld + input.positionWorld;
 
 	GSParticleLine output;
-	output.positionWorld = mul(float4(pos, 1), gWorld).xyz;
+	output.positionWorld = pos;
+	output.color = input.color;
 	output.type  = input.type;
 	
 	return output;
@@ -210,6 +217,7 @@ void GSDrawSolid(point GSParticleSolid input[1], uint primID : SV_PrimitiveID, i
 			v[i].y += halfHeight;
 
 			output.positionHomogeneous = mul(v[i], gWorldViewProjection);
+			output.positionWorld = mul(v[i], gWorld).xyz;
 			output.tex = gQuadTexC[i];
 			output.color = input[0].color;
 			output.primitiveID = primID;
@@ -228,12 +236,16 @@ void GSDrawLine(point GSParticleLine input[1], uint primID : SV_PrimitiveID, ino
 		
 		PSParticleLine v0;
 		v0.positionHomogeneous = mul(float4(p0, 1.0f), gWorldViewProjection);
+		v0.positionWorld = mul(float4(p0, 1), gWorld).xyz;
+		v0.color = input[0].color;
 		v0.tex = float2(0.0f, 0.0f);
 		v0.primitiveID = primID;
 		lineStream.Append(v0);
 		
 		PSParticleLine v1;
 		v1.positionHomogeneous = mul(float4(p1, 1.0f), gWorldViewProjection);
+		v1.positionWorld = mul(float4(p1, 1), gWorld).xyz;
+		v1.color = input[0].color;
 		v1.tex  = float2(1.0f, 1.0f);
 		v1.primitiveID = primID;
 		lineStream.Append(v1);
@@ -244,13 +256,37 @@ float4 PSDrawSolid(PSParticleSolid input) : SV_TARGET
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
-	return gTextureArray.Sample(SamplerLinear, uvw) * input.color;
+	float4 litColor = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
+
+	if(gFogRange > 0)
+	{
+		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+		float distToEye = length(toEyeWorld);
+
+		float4 fog = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+
+		litColor = float4(fog.rgb, litColor.a);
+	}
+
+	return litColor;
 }
 float4 PSDrawLine(PSParticleLine input) : SV_TARGET
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
-	return gTextureArray.Sample(SamplerLinear, uvw);
+	float4 litColor = gTextureArray.Sample(SamplerLinear, uvw);
+
+	if(gFogRange > 0)
+	{
+		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+		float distToEye = length(toEyeWorld);
+
+		float4 fog = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+
+		litColor = float4(fog.rgb, litColor.a);
+	}
+
+	return litColor;
 }
 
 GBufferPSOutput PSDeferredDrawSolid(PSParticleSolid input)
@@ -273,7 +309,7 @@ GBufferPSOutput PSDeferredDrawLine(PSParticleLine input)
 	GBufferPSOutput output = (GBufferPSOutput)0;
 
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
-	float4 color = gTextureArray.Sample(SamplerLinear, uvw);
+	float4 color = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
 
 	output.color = color;
 	output.normal = 0;
@@ -284,9 +320,9 @@ GBufferPSOutput PSDeferredDrawLine(PSParticleLine input)
 	return output;
 }
 
-GeometryShader gsStreamOutFire = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutFire()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
-GeometryShader gsStreamOutSmoke = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutSmoke()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
-GeometryShader gsStreamOutRain = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutRain()), "POSITION.xyz; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
+GeometryShader gsStreamOutFire = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutFire()), "POSITION.xyz; COLOR.rgba; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
+GeometryShader gsStreamOutSmoke = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutSmoke()), "POSITION.xyz; COLOR.rgba; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
+GeometryShader gsStreamOutRain = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutRain()), "POSITION.xyz; COLOR.rgba; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
 
 technique11 FireStreamOut
 {
@@ -296,7 +332,6 @@ technique11 FireStreamOut
         SetGeometryShader(gsStreamOutFire);
         SetPixelShader(NULL);
 
-		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
@@ -308,7 +343,6 @@ technique11 SmokeStreamOut
         SetGeometryShader(gsStreamOutSmoke);
         SetPixelShader(NULL);
 
-		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
@@ -320,7 +354,6 @@ technique11 RainStreamOut
         SetGeometryShader(gsStreamOutRain);
         SetPixelShader(NULL);
 
-		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
@@ -333,7 +366,6 @@ technique11 SolidDraw
         SetGeometryShader(CompileShader(gs_5_0, GSDrawSolid()));
         SetPixelShader(CompileShader(ps_5_0, PSDrawSolid()));
 
-		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilEnableDepth, 0);
     }
 }
@@ -345,7 +377,6 @@ technique11 LineDraw
         SetGeometryShader(CompileShader(gs_5_0, GSDrawLine()));
         SetPixelShader(CompileShader(ps_5_0, PSDrawLine()));
 
-		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilEnableDepth, 0);
     }
 }
@@ -358,7 +389,6 @@ technique11 DeferredSolidDraw
         SetGeometryShader(CompileShader(gs_5_0, GSDrawSolid()));
         SetPixelShader(CompileShader(ps_5_0, PSDeferredDrawSolid()));
 
-		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilEnableDepth, 0);
     }
 }
@@ -370,7 +400,6 @@ technique11 DeferredLineDraw
         SetGeometryShader(CompileShader(gs_5_0, GSDrawLine()));
         SetPixelShader(CompileShader(ps_5_0, PSDeferredDrawLine()));
 
-		SetRasterizerState(RasterizerSolid);
         SetDepthStencilState(StencilEnableDepth, 0);
     }
 }

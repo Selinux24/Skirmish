@@ -584,6 +584,8 @@ namespace Engine.Content
             uint[] indices = null;
             VertexData.CreateSphere(radius, 20, 20, out verts, out indices);
 
+            indices = Helper.ChangeCoordinate(indices);
+
             SubMeshContent geo = new SubMeshContent()
             {
                 Topology = PrimitiveTopology.TriangleList,

@@ -60,7 +60,14 @@ namespace Engine
 
                 if (technique != null)
                 {
-                    this.Game.Graphics.SetBlendTransparent();
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    {
+                        this.Game.Graphics.SetBlendTransparent();
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                    }
 
                     #region Per frame update
 
@@ -69,7 +76,7 @@ namespace Engine
                         effect.UpdatePerFrame(
                             context.World * this.Manipulator.LocalTransform,
                             context.ViewProjection,
-                            context.EyePosition, //context.EyePosition - this.Manipulator.Position
+                            context.EyePosition,
                             context.Lights,
                             context.ShadowMap,
                             context.ShadowTransform);
@@ -79,7 +86,7 @@ namespace Engine
                         effect.UpdatePerFrame(
                             context.World * this.Manipulator.LocalTransform,
                             context.ViewProjection,
-                            context.EyePosition, //context.EyePosition - this.Manipulator.Position
+                            context.EyePosition,
                             context.Lights,
                             context.ShadowMap,
                             context.ShadowTransform);

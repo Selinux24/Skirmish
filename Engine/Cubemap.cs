@@ -55,7 +55,7 @@ namespace Engine
                 {
                     #region Per frame update
 
-                    DrawerPool.EffectCubemap.UpdatePerFrame(
+                    effect.UpdatePerFrame(
                         context.World * this.Manipulator.LocalTransform,
                         context.ViewProjection);
 
@@ -70,11 +70,11 @@ namespace Engine
 
                             #region Per object update
 
-                            DrawerPool.EffectCubemap.UpdatePerObject(mat.DiffuseTexture);
+                            effect.UpdatePerObject(mat.DiffuseTexture);
 
                             #endregion
 
-                            mesh.SetInputAssembler(this.DeviceContext, DrawerPool.EffectCubemap.GetInputLayout(technique));
+                            mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 
                             for (int p = 0; p < technique.Description.PassCount; p++)
                             {

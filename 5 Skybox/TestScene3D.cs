@@ -18,9 +18,9 @@ namespace Skybox
         private float walkerClimb = MathUtil.DegreesToRadians(45);
         private Color globalColor = Color.Green;
         private Color bboxColor = Color.GreenYellow;
-        private Color bsphColor = Color.LightYellow;
-        //private int bsphSlices = 20;
-        //private int bsphStacks = 10;
+        //private Color bsphColor = Color.LightYellow;
+        private int bsphSlices = 20;
+        private int bsphStacks = 10;
 
         private Cursor cursor;
 
@@ -31,6 +31,7 @@ namespace Skybox
         private Terrain ruins = null;
         private TriangleListDrawer pickedTri = null;
         private LineListDrawer bboxGlobalDrawer = null;
+        private LineListDrawer bsphLightsDrawer = null;
         //private LineListDrawer bboxMeshesDrawer = null;
         //private LineListDrawer bsphMeshesDrawer = null;
 
@@ -46,7 +47,7 @@ namespace Skybox
         private int directionalLightCount = 3;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.ForwardLigthning)
+            : base(game, SceneModesEnum.DeferredLightning)
         {
 
         }
@@ -112,17 +113,17 @@ namespace Skybox
 
             #region Moving fire
 
-            this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { Vector3.Zero }, 0.5f, "flare2.png"));
+            this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { Vector3.Zero }, 0.5f, Color.Orange, "flare2.png"));
 
             this.movingFireLight = new SceneLightPoint()
             {
                 Name = "Moving fire light",
                 Enabled = true,
-                LightColor = Color.White,
+                LightColor = Color.Orange,
                 AmbientIntensity = 10f,
-                DiffuseIntensity = 10f,
+                DiffuseIntensity = 5f,
                 Position = Vector3.Zero,
-                Radius = 1f,
+                Radius = 10f,
             };
 
             this.Lights.Add(this.movingFireLight);
@@ -153,7 +154,7 @@ namespace Skybox
 
                 firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.9f;
 
-                Color color = Color.White;
+                Color color = Color.Yellow;
                 if (i == 1) color = Color.Red;
                 if (i == 2) color = Color.Green;
                 if (i == 3) color = Color.Blue;
@@ -163,24 +164,27 @@ namespace Skybox
                     Name = string.Format("Torch {0}", i),
                     Enabled = true,
                     LightColor = color,
-                    AmbientIntensity = 10f,
-                    DiffuseIntensity = 5f,
+                    AmbientIntensity = 5f,
+                    DiffuseIntensity = 2f,
                     Position = firePositions3D[i],
-                    Radius = 2f,
+                    Radius = 5f,
                 };
 
                 this.Lights.Add(this.torchLights[i]);
             }
 
-            this.torchFire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions3D, 0.5f, "flare1.png"));
+            this.torchFire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions3D, 0.5f, Color.Green, "flare1.png"));
 
             #endregion
 
             #region Rain
 
-            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, "raindrop.dds"));
+            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, Color.White, "raindrop.dds"));
 
             #endregion
+
+            Line[] sphereLines = GeometryUtil.CreateWiredSphere(new BoundingSphere(), this.bsphSlices, this.bsphStacks);
+            this.bsphLightsDrawer = this.AddLineListDrawer(sphereLines.Length * 5);
 
             this.SceneVolume = this.ruins.GetBoundingSphere();
 
@@ -219,6 +223,13 @@ namespace Skybox
 
                 this.movingfire.Manipulator.SetPosition(position);
                 this.movingFireLight.Position = this.movingfire.Manipulator.Position;
+            }
+
+            foreach (var light in this.Lights.PointLights)
+            {
+                this.bsphLightsDrawer.SetLines(
+                    light.LightColor,
+                    GeometryUtil.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
             }
 
             #endregion
@@ -296,6 +307,7 @@ namespace Skybox
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
                 this.bboxGlobalDrawer.Visible = !this.bboxGlobalDrawer.Visible;
+                this.bsphLightsDrawer.Visible = !this.bsphLightsDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F2))

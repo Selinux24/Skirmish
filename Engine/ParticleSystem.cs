@@ -139,6 +139,7 @@ namespace Engine
                         Position = description.EmitterPositions[i],
                         Velocity = description.Acceleration,
                         Size = new Vector2(description.ParticleSize),
+                        Color = description.Color,
                         Age = 0,
                         Type = (uint)ParticleTypes.Emitter,
                     };
@@ -154,6 +155,7 @@ namespace Engine
                     Position = Vector3.Zero,
                     Velocity = description.Acceleration,
                     Size = new Vector2(description.ParticleSize),
+                    Color = description.Color,
                     Age = 0,
                     Type = (uint)ParticleTypes.Emitter,
                 };
@@ -219,6 +221,7 @@ namespace Engine
                 context.World * this.Manipulator.LocalTransform,
                 context.ViewProjection,
                 context.EyePosition,
+                context.Lights,
                 (uint)this.textureArray.Description.Texture2DArray.ArraySize,
                 this.textureArray,
                 this.textureRandom,
@@ -273,7 +276,30 @@ namespace Engine
                 var technique = DrawerPool.EffectParticles.GetTechniqueForDrawing(VertexTypes.Particle, this.particleClass, context.DrawerMode);
 
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
-                this.Game.Graphics.SetBlendAdditive();
+
+                if (context.DrawerMode == DrawerModesEnum.Forward)
+                {
+                    if (this.particleClass != ParticleClasses.Rain)
+                    {
+                        this.Game.Graphics.SetBlendAdditive();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetBlendDefault();
+                    }
+                }
+
+                if (context.DrawerMode == DrawerModesEnum.Deferred)
+                {
+                    if (this.particleClass != ParticleClasses.Rain)
+                    {
+                        this.Game.Graphics.SetBlendDeferredComposerAdditive();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetBlendDeferredComposer();
+                    }
+                }
 
                 for (int p = 0; p < technique.Description.PassCount; p++)
                 {
@@ -340,6 +366,10 @@ namespace Engine
         /// </summary>
         public float ParticleSize = 1f;
         /// <summary>
+        /// Particle color
+        /// </summary>
+        public Color Color = Color.White;
+        /// <summary>
         /// Acceleration vector
         /// </summary>
         public Vector3 Acceleration = GameEnvironment.Gravity;
@@ -371,7 +401,7 @@ namespace Engine
         /// <param name="particleSize">Particle size</param>
         /// <param name="textures">Texture list</param>
         /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Fire(Vector3[] positions, float particleSize, params string[] textures)
+        public static ParticleSystemDescription Fire(Vector3[] positions, float particleSize, Color color, params string[] textures)
         {
             return new ParticleSystemDescription()
             {
@@ -384,6 +414,7 @@ namespace Engine
                 EmitterType = EmitterTypes.FixedPosition,
                 EmitterPositions = positions,
                 Textures = textures,
+                Color = color,
             };
         }
         /// <summary>
@@ -393,7 +424,7 @@ namespace Engine
         /// <param name="particleSize">Particle size</param>
         /// <param name="textures">Texture list</param>
         /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Smoke(Vector3[] positions, float particleSize, params string[] textures)
+        public static ParticleSystemDescription Smoke(Vector3[] positions, float particleSize, Color color, params string[] textures)
         {
             return new ParticleSystemDescription()
             {
@@ -406,6 +437,7 @@ namespace Engine
                 EmitterType = EmitterTypes.FixedPosition,
                 EmitterPositions = positions,
                 Textures = textures,
+                Color = color,
             };
         }
         /// <summary>
@@ -414,7 +446,7 @@ namespace Engine
         /// <param name="particleSize">Particle size</param>
         /// <param name="textures">Texture list</param>
         /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Rain(float particleSize, params string[] textures)
+        public static ParticleSystemDescription Rain(float particleSize, Color color, params string[] textures)
         {
             return new ParticleSystemDescription()
             {
@@ -426,6 +458,7 @@ namespace Engine
                 Acceleration = (GameEnvironment.Gravity + Vector3.UnitX),
                 EmitterType = EmitterTypes.FromCamera,
                 Textures = textures,
+                Color = color,
             };
         }
     }

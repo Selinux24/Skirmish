@@ -9,6 +9,7 @@ struct VSVertexBillboard
 struct VSVertexParticle
 {
 	float3 positionWorld : POSITION;
+	float4 color: COLOR0;
 	float3 velocityWorld : VELOCITY;
 	float2 sizeWorld : SIZE;
 	float age : AGE;
@@ -237,6 +238,7 @@ struct GSParticleSolid
 struct GSParticleLine
 {
 	float3 positionWorld : POSITION;
+	float4 color : COLOR;
 	uint type : TYPE;
 };
 
@@ -255,13 +257,16 @@ struct PSVertexBillboard
 struct PSParticleSolid
 {
 	float4 positionHomogeneous : SV_POSITION;
-	float4 color : COLOR;
+	float3 positionWorld : POSITION;
+	float4 color : COLOR0;
 	float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PrimitiveID;
 };
 struct PSParticleLine
 {
 	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float4 color : COLOR0;
 	float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PrimitiveID;
 };

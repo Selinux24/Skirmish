@@ -126,6 +126,14 @@ namespace Engine
         /// </summary>
         private BlendState blendDeferredComposer = null;
         /// <summary>
+        /// Blend state for transparent defered composer blending
+        /// </summary>
+        private BlendState blendDeferredComposerTransparent = null;
+        /// <summary>
+        /// Blend state for additive defered composer blending
+        /// </summary>
+        private BlendState blendDeferredComposerAdditive = null;
+        /// <summary>
         /// Default rasterizer
         /// </summary>
         private RasterizerState rasterizerDefault = null;
@@ -140,7 +148,11 @@ namespace Engine
         /// <summary>
         /// Sets cull counter-clockwise face rasterizer
         /// </summary>
-        private RasterizerState rasterizerCullCounterClockwiseFace = null;
+        private RasterizerState rasterizerCullFrontFace = null;
+        /// <summary>
+        /// Sets shadow mapping rasterizer
+        /// </summary>
+        private RasterizerState rasterizerShadows = null;
 
         /// <summary>
         /// Back buffer format
@@ -167,6 +179,26 @@ namespace Engine
         /// Screen viewport
         /// </summary>
         public ViewportF Viewport { get; private set; }
+        /// <summary>
+        /// Gets the default render target
+        /// </summary>
+        public RenderTargetView DefaultRenderTarget
+        {
+            get
+            {
+                return this.renderTargetView;
+            }
+        }
+        /// <summary>
+        /// Gets the default depth stencil buffer
+        /// </summary>
+        public DepthStencilView DefaultDepthStencil
+        {
+            get
+            {
+                return this.depthStencilView;
+            }
+        }
 
         /// <summary>
         /// Gets desktop mode description
@@ -477,7 +509,7 @@ namespace Engine
                 });
 
             //Counter clockwise cull rasterizer state
-            this.rasterizerCullCounterClockwiseFace = new RasterizerState(
+            this.rasterizerCullFrontFace = new RasterizerState(
                 this.Device,
                 new RasterizerStateDescription()
                 {
@@ -491,6 +523,23 @@ namespace Engine
                     DepthBias = 0,
                     DepthBiasClamp = 0.0f,
                     SlopeScaledDepthBias = 0.0f,
+                });
+
+            //Shadows rasterizer state
+            this.rasterizerShadows = new RasterizerState(
+                this.Device,
+                new RasterizerStateDescription()
+                {
+                    CullMode = CullMode.Back,
+                    FillMode = FillMode.Solid,
+                    IsFrontCounterClockwise = false,
+                    IsAntialiasedLineEnabled = false,
+                    IsMultisampleEnabled = false,
+                    IsScissorEnabled = false,
+                    IsDepthClipEnabled = true,
+                    DepthBias = 100000,
+                    DepthBiasClamp = 0.0f,
+                    SlopeScaledDepthBias = 1.0f,
                 });
 
             #endregion
@@ -645,6 +694,100 @@ namespace Engine
                 desc.RenderTarget[3].DestinationAlphaBlend = BlendOption.Zero;
 
                 this.blendDeferredComposer = new BlendState(this.Device, desc);
+            }
+            #endregion
+
+            #region Deferred composer transparent blend state
+            {
+                BlendStateDescription desc = new BlendStateDescription();
+                desc.AlphaToCoverageEnable = true;
+                desc.IndependentBlendEnable = true;
+
+                //Transparent blending only in first buffer
+                desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[1].IsBlendEnabled = true;
+                desc.RenderTarget[1].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[1].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[1].SourceBlend = BlendOption.One;
+                desc.RenderTarget[1].DestinationBlend = BlendOption.Zero;
+                desc.RenderTarget[1].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[1].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[1].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[2].IsBlendEnabled = true;
+                desc.RenderTarget[2].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[2].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[2].SourceBlend = BlendOption.One;
+                desc.RenderTarget[2].DestinationBlend = BlendOption.Zero;
+                desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[3].IsBlendEnabled = true;
+                desc.RenderTarget[3].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[3].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[3].SourceBlend = BlendOption.One;
+                desc.RenderTarget[3].DestinationBlend = BlendOption.Zero;
+                desc.RenderTarget[3].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[3].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[3].DestinationAlphaBlend = BlendOption.Zero;
+
+                this.blendDeferredComposerTransparent = new BlendState(this.Device, desc);
+            }
+            #endregion
+
+            #region Deferred composer additive blend state
+            {
+                BlendStateDescription desc = new BlendStateDescription();
+                desc.AlphaToCoverageEnable = false;
+                desc.IndependentBlendEnable = true;
+
+                //Additive blending only in first buffer
+                desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.One;
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[1].IsBlendEnabled = true;
+                desc.RenderTarget[1].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[1].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[1].SourceBlend = BlendOption.One;
+                desc.RenderTarget[1].DestinationBlend = BlendOption.Zero;
+                desc.RenderTarget[1].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[1].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[1].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[2].IsBlendEnabled = true;
+                desc.RenderTarget[2].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[2].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[2].SourceBlend = BlendOption.One;
+                desc.RenderTarget[2].DestinationBlend = BlendOption.Zero;
+                desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[3].IsBlendEnabled = true;
+                desc.RenderTarget[3].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[3].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[3].SourceBlend = BlendOption.One;
+                desc.RenderTarget[3].DestinationBlend = BlendOption.Zero;
+                desc.RenderTarget[3].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[3].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[3].DestinationAlphaBlend = BlendOption.Zero;
+
+                this.blendDeferredComposerAdditive = new BlendState(this.Device, desc);
             }
             #endregion
 
@@ -910,6 +1053,20 @@ namespace Engine
             this.SetBlendState(this.blendDeferredComposer, Color.Transparent, -1);
         }
         /// <summary>
+        /// Sets transparent deferred composer blend state
+        /// </summary>
+        public void SetBlendDeferredComposerTransparent()
+        {
+            this.SetBlendState(this.blendDeferredComposerTransparent, Color.Transparent, -1);
+        }
+        /// <summary>
+        /// Sets additive deferred composer blend state
+        /// </summary>
+        public void SetBlendDeferredComposerAdditive()
+        {
+            this.SetBlendState(this.blendDeferredComposerAdditive, Color.Transparent, -1);
+        }
+        /// <summary>
         /// Sets default rasterizer
         /// </summary>
         public void SetRasterizerDefault()
@@ -935,7 +1092,14 @@ namespace Engine
         /// </summary>
         public void SetRasterizerCullFrontFace()
         {
-            this.SetRasterizerState(this.rasterizerCullCounterClockwiseFace);
+            this.SetRasterizerState(this.rasterizerCullFrontFace);
+        }
+        /// <summary>
+        /// Sets shadow mapping rasterizer
+        /// </summary>
+        public void SetRasterizerShadows()
+        {
+            this.SetRasterizerState(this.rasterizerShadows);
         }
         /// <summary>
         /// Dispose created resources
@@ -992,7 +1156,7 @@ namespace Engine
         /// <param name="state">Rasterizer state</param>
         private void SetRasterizerState(RasterizerState state)
         {
-            //if (this.currentRasterizerState != state)
+            if (this.currentRasterizerState != state)
             {
                 this.Device.ImmediateContext.Rasterizer.State = state;
 
@@ -1097,7 +1261,8 @@ namespace Engine
             Helper.Dispose(this.rasterizerDefault);
             Helper.Dispose(this.rasterizerWireframe);
             Helper.Dispose(this.rasterizerNoCull);
-            Helper.Dispose(this.rasterizerCullCounterClockwiseFace);
+            Helper.Dispose(this.rasterizerCullFrontFace);
+            Helper.Dispose(this.rasterizerShadows);
 
             Helper.Dispose(this.blendDefault);
             Helper.Dispose(this.blendAlphaEnabled);
@@ -1105,6 +1270,8 @@ namespace Engine
             Helper.Dispose(this.blendAdditive);
             Helper.Dispose(this.blendDeferredLighting);
             Helper.Dispose(this.blendDeferredComposer);
+            Helper.Dispose(this.blendDeferredComposerTransparent);
+            Helper.Dispose(this.blendDeferredComposerAdditive);
         }
     }
 }

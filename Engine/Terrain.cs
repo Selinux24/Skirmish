@@ -43,8 +43,11 @@ namespace Engine
         public Terrain(Game game, ModelContent content, string contentFolder, TerrainDescription description)
             : base(game)
         {
+            this.DeferredEnabled = description.DeferredEnabled;
+
             this.terrain = new Model(game, content);
             this.terrain.Opaque = this.Opaque = description.Opaque;
+            this.terrain.DeferredEnabled = description.DeferredEnabled;
 
             Triangle[] triangles = this.terrain.GetTriangles();
             
@@ -67,7 +70,11 @@ namespace Engine
                     description.SkydomTexture,
                     bsph.Radius * 100f);
 
-                this.skydom = new Cubemap(game, skydomContent);
+                this.skydom = new Cubemap(game, skydomContent)
+                {
+                    Opaque = description.Opaque,
+                    DeferredEnabled = description.DeferredEnabled,
+                };
             }
 
             if (description != null && description.AddVegetation)
@@ -96,6 +103,7 @@ namespace Engine
                         {
                             Radius = vegetationDesc.Radius,
                             Opaque = vegetationDesc.Opaque,
+                            DeferredEnabled = vegetationDesc.DeferredEnabled,
                         };
 
                         vegetationList.Add(billboard);
@@ -407,9 +415,13 @@ namespace Engine
             /// </summary>
             public int Seed = 0;
             /// <summary>
-            /// Drops shadow
+            /// Is opaque
             /// </summary>
-            public bool Opaque = false;
+            public bool Opaque = true;
+            /// <summary>
+            /// Can be renderer by the deferred renderer
+            /// </summary>
+            public bool DeferredEnabled = true;
         }
 
         /// <summary>
@@ -440,9 +452,13 @@ namespace Engine
         public string SkydomTexture = null;
 
         /// <summary>
-        /// Drops shadow
+        /// Is Opaque
         /// </summary>
-        public bool Opaque = false;
+        public bool Opaque = true;
+        /// <summary>
+        /// Can be renderer by the deferred renderer
+        /// </summary>
+        public bool DeferredEnabled = true;
 
         /// <summary>
         /// Use quadtree for picking

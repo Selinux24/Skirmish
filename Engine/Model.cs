@@ -478,8 +478,12 @@ namespace Engine
         /// </summary>
         public int TextureIndex = 0;
         /// <summary>
-        /// Drops shadow
+        /// Is opaque
         /// </summary>
-        public bool Opaque = false;
+        public bool Opaque = true;
+        /// <summary>
+        /// Can be renderer by the deferred renderer
+        /// </summary>
+        public bool DeferredEnabled = true;
     }
 }

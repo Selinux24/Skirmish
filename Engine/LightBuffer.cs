@@ -1,12 +1,8 @@
-﻿using System;
-using SharpDX.Direct3D;
+﻿using SharpDX.Direct3D;
 using SharpDX.DXGI;
+using System;
 using BindFlags = SharpDX.Direct3D11.BindFlags;
 using CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags;
-using DepthStencilView = SharpDX.Direct3D11.DepthStencilView;
-using DepthStencilViewDescription = SharpDX.Direct3D11.DepthStencilViewDescription;
-using DepthStencilViewDimension = SharpDX.Direct3D11.DepthStencilViewDimension;
-using DepthStencilViewFlags = SharpDX.Direct3D11.DepthStencilViewFlags;
 using RenderTargetView = SharpDX.Direct3D11.RenderTargetView;
 using RenderTargetViewDescription = SharpDX.Direct3D11.RenderTargetViewDescription;
 using ResourceOptionFlags = SharpDX.Direct3D11.ResourceOptionFlags;
@@ -36,10 +32,6 @@ namespace Engine
         /// Render target
         /// </summary>
         public RenderTargetView RenderTarget { get; protected set; }
-        /// <summary>
-        /// Depth map
-        /// </summary>
-        public DepthStencilView DepthMap { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -75,7 +67,6 @@ namespace Engine
             int width = this.Game.Form.RenderWidth;
             int height = this.Game.Form.RenderHeight;
             Format rtFormat = Format.R32G32B32A32_Float;
-            Format dbFormat = Format.D24_UNorm_S8_UInt;
 
             Texture2DDescription txDesc = new Texture2DDescription()
             {
@@ -147,62 +138,14 @@ namespace Engine
                         },
                     });
             }
-
-            Texture2D depthMap = new Texture2D(
-                this.Game.Graphics.Device,
-                new Texture2DDescription
-                {
-                    Width = width,
-                    Height = height,
-                    MipLevels = 1,
-                    ArraySize = 1,
-                    Format = dbFormat,
-                    SampleDescription = new SampleDescription(1, 0),
-                    Usage = ResourceUsage.Default,
-                    BindFlags = BindFlags.DepthStencil,
-                    CpuAccessFlags = CpuAccessFlags.None,
-                    OptionFlags = ResourceOptionFlags.None
-                });
-
-            using (depthMap)
-            {
-                this.DepthMap = new DepthStencilView(
-                    this.Game.Graphics.Device,
-                    depthMap,
-                    new DepthStencilViewDescription
-                    {
-                        Flags = DepthStencilViewFlags.None,
-                        Format = dbFormat,
-                        Dimension = DepthStencilViewDimension.Texture2D,
-                        Texture2D = new DepthStencilViewDescription.Texture2DResource()
-                        {
-                            MipSlice = 0,
-                        },
-                    });
-            }
         }
         /// <summary>
         /// Disposes all targets and depth buffer
         /// </summary>
         private void DisposeTargets()
         {
-            if (this.RenderTarget != null)
-            {
-                this.RenderTarget.Dispose();
-                this.RenderTarget = null;
-            }
-
-            if (this.Texture != null)
-            {
-                this.Texture.Dispose();
-                this.Texture = null;
-            }
-
-            if (this.DepthMap != null)
-            {
-                this.DepthMap.Dispose();
-                this.DepthMap = null;
-            }
+            Helper.Dispose(this.RenderTarget);
+            Helper.Dispose(this.Texture);
         }
     }
 }

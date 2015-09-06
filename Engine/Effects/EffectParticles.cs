@@ -90,6 +90,18 @@ namespace Engine.Effects
         /// Random texture effect variable
         /// </summary>
         private EffectShaderResourceVariable textureRandom = null;
+        /// <summary>
+        /// Fog start effect variable
+        /// </summary>
+        private EffectScalarVariable fogStart = null;
+        /// <summary>
+        /// Fog range effect variable
+        /// </summary>
+        private EffectScalarVariable fogRange = null;
+        /// <summary>
+        /// Fog color effect variable
+        /// </summary>
+        private EffectVectorVariable fogColor = null;
 
         /// <summary>
         /// Camera eye position
@@ -253,6 +265,48 @@ namespace Engine.Effects
                 this.textureRandom.SetResource(value);
             }
         }
+        /// <summary>
+        /// Fog start distance
+        /// </summary>
+        protected float FogStart
+        {
+            get
+            {
+                return this.fogStart.GetFloat();
+            }
+            set
+            {
+                this.fogStart.Set(value);
+            }
+        }
+        /// <summary>
+        /// Fog range distance
+        /// </summary>
+        protected float FogRange
+        {
+            get
+            {
+                return this.fogRange.GetFloat();
+            }
+            set
+            {
+                this.fogRange.Set(value);
+            }
+        }
+        /// <summary>
+        /// Fog color
+        /// </summary>
+        protected Color4 FogColor
+        {
+            get
+            {
+                return new Color4(this.fogColor.GetFloatVector());
+            }
+            set
+            {
+                this.fogColor.Set(value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -286,9 +340,11 @@ namespace Engine.Effects
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
-
             this.textureArray = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.textureRandom = this.Effect.GetVariableByName("gTextureRandom").AsShaderResource();
+            this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
+            this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
+            this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -373,6 +429,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
+            SceneLights lights,
             uint textureCount,
             ShaderResourceView textures,
             ShaderResourceView randomTexture,
@@ -396,6 +453,19 @@ namespace Engine.Effects
             this.TotalTime = gameTime;
             this.ElapsedTime = timeStep;
             this.AccelerationWorld = accelerationWorld;
+
+            if (lights != null)
+            {
+                this.FogStart = lights.FogStart;
+                this.FogRange = lights.FogRange;
+                this.FogColor = lights.FogColor;
+            }
+            else
+            {
+                this.FogStart = 0;
+                this.FogRange = 0;
+                this.FogColor = Color.Transparent;
+            }
         }
     }
 }

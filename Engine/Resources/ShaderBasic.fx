@@ -103,7 +103,7 @@ PSVertexPositionColor VSPositionColorSkinnedI(VSVertexPositionColorSkinnedI inpu
 
 float4 PSPositionColor(PSVertexPositionColor input) : SV_TARGET
 {
-	float4 litColor = gMaterial.Diffuse;
+	float4 litColor = input.color * gMaterial.Diffuse;
 
 	if(gFogRange > 0)
 	{
@@ -200,7 +200,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 {
 	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
 
-	float4 litColor = ComputeLights(
+	float4 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
@@ -212,8 +212,10 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 		input.shadowHomogeneous,
 		gShadowMap);
 
-	litColor *= gMaterial.Diffuse;
-	litColor.a = gMaterial.Diffuse.a;
+	float4 matColor = input.color * gMaterial.Diffuse;
+
+	litColor *= matColor;
+	litColor.a = matColor.a;
 
 	if(gFogRange > 0)
 	{
@@ -437,7 +439,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 
 	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
 
-	float4 litColor = ComputeLights(
+	float4 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
@@ -566,7 +568,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 
 	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
 
-	float4 litColor = ComputeLights(
+	float4 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
@@ -602,8 +604,6 @@ technique11 PositionColor
 		SetVertexShader(CompileShader(vs_5_0, VSPositionColor()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionColor()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionColorI
@@ -613,8 +613,6 @@ technique11 PositionColorI
 		SetVertexShader(CompileShader(vs_5_0, VSPositionColorI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionColor()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionColorSkinned
@@ -624,8 +622,6 @@ technique11 PositionColorSkinned
 		SetVertexShader(CompileShader(vs_5_0, VSPositionColorSkinned()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionColor()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionColorSkinnedI
@@ -635,8 +631,6 @@ technique11 PositionColorSkinnedI
 		SetVertexShader(CompileShader(vs_5_0, VSPositionColorSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionColor()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 
@@ -647,8 +641,6 @@ technique11 PositionNormalColor
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalColor()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalColor()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionNormalColorI
@@ -658,8 +650,6 @@ technique11 PositionNormalColorI
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalColorI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalColor()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionNormalColorSkinned
@@ -669,8 +659,6 @@ technique11 PositionNormalColorSkinned
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalColorSkinned()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalColor()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionNormalColorSkinnedI
@@ -680,8 +668,6 @@ technique11 PositionNormalColorSkinnedI
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalColorSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalColor()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 
@@ -692,8 +678,6 @@ technique11 PositionTexture
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTexture()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionTextureRED
@@ -703,8 +687,6 @@ technique11 PositionTextureRED
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureRED()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionTextureGREEN
@@ -714,8 +696,6 @@ technique11 PositionTextureGREEN
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureGREEN()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionTextureBLUE
@@ -725,8 +705,6 @@ technique11 PositionTextureBLUE
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureBLUE()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionTextureALPHA
@@ -736,8 +714,6 @@ technique11 PositionTextureALPHA
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureALPHA()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionTextureNOALPHA
@@ -747,8 +723,6 @@ technique11 PositionTextureNOALPHA
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureNOALPHA()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionTextureI
@@ -758,8 +732,6 @@ technique11 PositionTextureI
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTexture()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionTextureSkinned
@@ -769,8 +741,6 @@ technique11 PositionTextureSkinned
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureSkinned()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTexture()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionTextureSkinnedI
@@ -780,8 +750,6 @@ technique11 PositionTextureSkinnedI
 		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTexture()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 
@@ -792,8 +760,6 @@ technique11 PositionNormalTexture
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTexture()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionNormalTextureI
@@ -803,8 +769,6 @@ technique11 PositionNormalTextureI
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTexture()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionNormalTextureSkinned
@@ -814,8 +778,6 @@ technique11 PositionNormalTextureSkinned
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureSkinned()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTexture()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionNormalTextureSkinnedI
@@ -825,8 +787,6 @@ technique11 PositionNormalTextureSkinnedI
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTexture()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 
@@ -837,8 +797,6 @@ technique11 PositionNormalTextureTangent
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureTangent()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTextureTangent()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionNormalTextureTangentI
@@ -848,8 +806,6 @@ technique11 PositionNormalTextureTangentI
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureTangentI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTextureTangent()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionNormalTextureTangentSkinned
@@ -859,8 +815,6 @@ technique11 PositionNormalTextureTangentSkinned
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureTangentSkinned()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTextureTangent()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
 technique11 PositionNormalTextureTangentSkinnedI
@@ -870,7 +824,5 @@ technique11 PositionNormalTextureTangentSkinnedI
 		SetVertexShader(CompileShader(vs_5_0, VSPositionNormalTextureTangentSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPositionNormalTextureTangent()));
-
-		SetRasterizerState(RasterizerSolid);
 	}
 }
