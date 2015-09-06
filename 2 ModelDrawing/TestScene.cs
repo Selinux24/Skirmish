@@ -56,12 +56,12 @@ namespace ModelDrawing
 
             SceneLightSpot spotLight = new SceneLightSpot()
             {
-                LightColor = Color.Yellow,
-                Spot = 0f,
+                LightColor = Color.Red,
+                Spot = 10f,
                 Attenuation = new Vector3(1f, 0f, 0f),
                 Position = this.Camera.Position,
                 Direction = this.Camera.Direction,
-                Enabled = true,
+                Enabled = false,
             };
 
             this.Lights.SpotLights = new[]

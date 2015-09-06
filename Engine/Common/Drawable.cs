@@ -42,6 +42,7 @@ namespace Engine.Common
         /// </summary>
         /// <remarks>True if passes culling test</remarks>
         public bool Cull { get; set; }
+
         /// <summary>
         /// Gets or sets whether the object is opaque
         /// </summary>

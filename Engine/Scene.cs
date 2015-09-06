@@ -759,12 +759,26 @@ namespace Engine
                     if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
                         this.Game.Graphics.SetRasterizerDefault();
-                        this.Game.Graphics.SetBlendDefault();
+                        if (components[i].Opaque)
+                        {
+                            this.Game.Graphics.SetBlendDefault();
+                        }
+                        else
+                        {
+                            this.Game.Graphics.SetBlendTransparent();
+                        }
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
                         this.Game.Graphics.SetRasterizerDefault();
-                        this.Game.Graphics.SetBlendDeferredComposer();
+                        if (components[i].Opaque)
+                        {
+                            this.Game.Graphics.SetBlendDeferredComposer();
+                        }
+                        else
+                        {
+                            this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                        }
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {

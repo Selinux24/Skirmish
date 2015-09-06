@@ -8,8 +8,8 @@ namespace Collada
 {
     public class TestScene3D : Scene
     {
-        private const float fogStartRel = 0.25f;
-        private const float fogRangeRel = 0.75f;
+        private const float fogStartRel = 0.15f;
+        private const float fogRangeRel = 0.45f;
 
         private readonly Vector3 minScaleSize = new Vector3(0.5f);
         private readonly Vector3 maxScaleSize = new Vector3(2f);
@@ -60,7 +60,7 @@ namespace Collada
 
             this.picks = this.AddText("Lucida Casual", 12, Color.Yellow);
             this.picks.Text = null;
-            this.picks.Position = new Vector2(0, 36);
+            this.picks.Position = new Vector2(0, 48);
 
             TerrainDescription terrainDescription = new TerrainDescription()
             {
@@ -74,15 +74,15 @@ namespace Collada
                         VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
                         Saturation = 0.05f,
                         Radius = 300f,
-                        MinSize = Vector2.One * 2f,
-                        MaxSize = Vector2.One * 4f,
+                        MinSize = Vector2.One * 10f,
+                        MaxSize = Vector2.One * 15f,
                         Seed = 1024,
                         Opaque = true,
                     },
                     new TerrainDescription.VegetationDescription()
                     {
                         VegetarionTextures = new[] { "grass2.png" },
-                        Saturation = 10f,
+                        Saturation = 1f,
                         Opaque = false,
                         Radius = 50f,
                         MinSize = Vector2.One * 0.20f,
@@ -94,13 +94,12 @@ namespace Collada
                 Opaque = true,
             };
 
-            this.ground = this.AddTerrain(terrainDescription, Matrix.Scaling(20, 20, 20));
+            this.ground = this.AddTerrain(terrainDescription, Matrix.Scaling(20, 10, 20));
             this.helicoptersModel = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = "Resources",
                 ModelFileName = "Helicopter.dae",
                 Instances = 15,
-                Opaque = true,
             });
             this.lampsModel = this.AddInstancingModel(new ModelInstancedDescription()
             {
@@ -115,6 +114,8 @@ namespace Collada
 
             this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
             this.bboxesDrawer.Visible = false;
+            this.bboxesDrawer.Opaque = false;
+            this.bboxesDrawer.EnableAlphaBlending = true;
 
             List<Line> squares = new List<Line>();
 
@@ -125,6 +126,7 @@ namespace Collada
 
             this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));
             this.terrainGridDrawer.Visible = false;
+            this.terrainGridDrawer.Opaque = false;
             this.terrainGridDrawer.EnableAlphaBlending = true;
 
             this.InitializeCamera();
@@ -139,13 +141,13 @@ namespace Collada
         }
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = Color.WhiteSmoke;
 
             this.Lights.FogStart = this.Camera.FarPlaneDistance * fogStartRel;
             this.Lights.FogRange = this.Camera.FarPlaneDistance * fogRangeRel;
-            this.Lights.FogColor = Color.CornflowerBlue;
+            this.Lights.FogColor = Color.WhiteSmoke;
 
-            SceneLightPoint pointLight = new SceneLightPoint()
+            this.Lights.Add(new SceneLightPoint()
             {
                 Name = "Point light",
                 LightColor = Color.White,
@@ -154,9 +156,9 @@ namespace Collada
                 Position = Vector3.Zero,
                 Radius = 5f,
                 Enabled = true,
-            };
+            });
 
-            SceneLightSpot spotLight = new SceneLightSpot()
+            this.Lights.Add(new SceneLightSpot()
             {
                 Direction = Vector3.Down,
                 LightColor = Color.White,
@@ -164,18 +166,8 @@ namespace Collada
                 DiffuseIntensity = 1.0f,
                 Attenuation = new Vector3(0.15f, 0.0f, 0.0f),
                 Spot = 16f,
-                Enabled = true,
-            };
-
-            this.Lights.PointLights = new[]
-            {
-                pointLight,  
-            };
-
-            this.Lights.SpotLights = new[]
-            {
-                spotLight,  
-            };
+                Enabled = false,
+            });
 
             this.SceneVolume = this.ground.GetBoundingSphere();
         }
