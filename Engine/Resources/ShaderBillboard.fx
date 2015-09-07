@@ -39,7 +39,7 @@ GSVertexBillboard VSBillboard(VSVertexBillboard input)
 	GSVertexBillboard output;
 
 	output.centerWorld = input.positionWorld;
-	output.centerWorld.y -= (input.sizeWorld * 0.1f);
+	output.centerWorld.y -= (input.sizeWorld.y * 0.1f);
 	output.sizeWorld = input.sizeWorld;
 
 	return output;
@@ -128,15 +128,13 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 		gPointLights, 
 		gSpotLights,
 		toEye,
+		textureColor,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		input.shadowHomogeneous,
 		gShadowMap);
-
-	litColor *= textureColor;
-	litColor.a = textureColor.a;
 
 	if(gFogRange > 0)
 	{

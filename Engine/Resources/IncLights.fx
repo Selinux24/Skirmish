@@ -41,6 +41,8 @@ SamplerComparisonState SamplerComparisonShadow
     ComparisonFunc = LESS;
 };
 
+static const float3 GAMMA = float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f);
+
 static const int MAX_LIGHTS_DIRECTIONAL = 3;
 static const int MAX_LIGHTS_POINT = 4;
 static const int MAX_LIGHTS_SPOT = 4;
@@ -86,10 +88,8 @@ struct SpotLight
 	float Diffuse;
 	float3 Position;
 	float3 Direction;
-	float Spot;
-    float AttenuationConstant;
-	float AttenuationLinear;
-	float AttenuationExp;
+	float Angle;
+    float Radius;
 	float CastShadow;
 	float Enabled;
 };
@@ -151,43 +151,48 @@ float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRan
 }
 
 float4 ComputeBaseLight(
-	float3 color,
-	float ambient,
-	float diffuse,
-	float3 direction,
+	float3 lightColor,
+	float lightAmbient,
+	float lightDiffuse,
+	float3 lightDirection,
 	float3 toEye,
-	float3 position,
-	float3 normal,
+	float4 modelColor,
+	float3 modelPosition,
+	float3 modelNormal,
 	float specularIntensity,
 	float specularPower)
 {                                                                                           
-    float4 ambientColor = float4(color * ambient, 1.0f);
+    float ambient = lightAmbient;
+	float diffuse  = 0.0f;
+	float specular = 0.0f;
 
-	float4 diffuseColor  = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 specularColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	float diffuseFactor = dot(normal, -direction);
-
+	float diffuseFactor = max(0, dot(modelNormal, -lightDirection));
+	[flatten]
     if (diffuseFactor > 0) 
 	{
-		diffuseColor = float4(color * diffuse * diffuseFactor, 1.0f);
+		diffuse = lightDiffuse * diffuseFactor;
 
-        float3 reflectLight = normalize(reflect(direction, normal));
+        float3 lightReflection = normalize(reflect(lightDirection, modelNormal));
         
-		float specFactor = dot(toEye, reflectLight);
-		if (specFactor > 0)
+		float specularFactor = max(0, dot(toEye, lightReflection));
+		[flatten]
+		if (specularFactor > 0)
 		{
-			specFactor = pow(abs(specFactor), max(1, specularPower));
-            specularColor = float4(color * specularIntensity * specFactor, 1.0f);
+			specularFactor = pow(specularFactor, max(1, specularPower));
+            specular = specularIntensity * specularFactor;
         }
 	}
 
-    return (ambientColor + diffuseColor + specularColor);
+    float3 litColor = lightColor * ((modelColor.rgb * ambient) + (modelColor.rgb * diffuse) + specular);
+	litColor = pow(litColor, GAMMA);
+
+	return float4(litColor, modelColor.a);
 }
 
 float4 ComputeDirectionalLight(
 	DirectionalLight L,
 	float3 toEye,
+	float4 color,
 	float3 position,
 	float3 normal,
 	float specularIntensity,
@@ -201,11 +206,13 @@ float4 ComputeDirectionalLight(
 		L.Diffuse,
 		L.Direction,
 		toEye,
+		color,
 		position,
 		normal,
 		specularIntensity,
 		specularPower);
 
+	[flatten]
 	if(L.CastShadow == 1)
 	{
 		float diffuseFactor = dot(normal, -L.Direction);
@@ -221,6 +228,7 @@ float4 ComputeDirectionalLight(
 float4 ComputePointLight(
 	PointLight L, 
 	float3 toEye,
+	float4 color,
 	float3 position,
 	float3 normal, 
 	float specularIntensity,
@@ -236,6 +244,7 @@ float4 ComputePointLight(
 		L.Diffuse,
 		lightDirection,
 		toEye,
+		color,
 		position,
 		normal,
 		specularIntensity,
@@ -249,43 +258,40 @@ float4 ComputePointLight(
 float4 ComputeSpotLight(
 	SpotLight L,
 	float3 toEye,
+	float4 color,
 	float3 position,
 	float3 normal, 
 	float specularIntensity,
 	float specularPower)
 {
-	float3 lightDirection = position - L.Position;
-	float spot = dot(lightDirection, L.Direction);   
+	float4 litColor = 0;
 
-	if (spot > L.Spot)
+	float3 lightDirection = position - L.Position;
+	float lightToSurfaceAngle = degrees(acos(dot(lightDirection, L.Direction)));
+	[flatten]
+	if(lightToSurfaceAngle <= L.Angle)
 	{
 		float distance = length(lightDirection);
 		lightDirection /= distance;
 
-		float attenuation =
-			L.AttenuationConstant +
-			L.AttenuationLinear * distance +
-			L.AttenuationExp * distance * distance;
-
-		attenuation = max(1.0f, attenuation);
-
-		float4 litColor = ComputeBaseLight(
+		litColor = ComputeBaseLight(
 			L.Color,
 			L.Ambient,
 			L.Diffuse,
 			L.Direction,
 			toEye,
+			color,
 			position,
 			normal,
 			specularIntensity,
 			specularPower);
 
-		return litColor / attenuation;
+		float attenuation = CalcSphericAttenuation(1, L.Diffuse, L.Radius, distance);
+
+		litColor * attenuation;
 	}
-	else
-	{
-		return float4(0.0f, 0.0f, 0.0f, 0.0f);
-	}
+	
+	return litColor;
 }
 
 float4 ComputeAllLights(
@@ -293,6 +299,7 @@ float4 ComputeAllLights(
 	PointLight pointLights[MAX_LIGHTS_POINT],
 	SpotLight spotLights[MAX_LIGHTS_SPOT],
 	float3 toEye,
+	float4 color,
 	float3 position,
 	float3 normal,
 	float specularIntensity,
@@ -312,6 +319,7 @@ float4 ComputeAllLights(
 			litColor += ComputeDirectionalLight(
 				dirLights[i],
 				toEye,
+				color,
 				position,
 				normal,
 				specularIntensity,
@@ -329,6 +337,7 @@ float4 ComputeAllLights(
 			litColor += ComputePointLight(
 				pointLights[i],
 				toEye,
+				color,
 				position,
 				normal,
 				specularIntensity,
@@ -344,6 +353,7 @@ float4 ComputeAllLights(
 			litColor += ComputeSpotLight(
 				spotLights[i],
 				toEye,
+				color,
 				position,
 				normal,
 				specularIntensity,

@@ -155,18 +155,22 @@ namespace Collada
                 DiffuseIntensity = 0.7f,
                 Position = Vector3.Zero,
                 Radius = 5f,
-                Enabled = true,
+                Enabled = true, 
+                CastShadow = false,
             });
 
             this.Lights.Add(new SceneLightSpot()
             {
-                Direction = Vector3.Down,
+                Name = "Helilight",
                 LightColor = Color.White,
-                AmbientIntensity = 0.0f,
+                AmbientIntensity = 1.0f,
                 DiffuseIntensity = 1.0f,
-                Attenuation = new Vector3(0.15f, 0.0f, 0.0f),
-                Spot = 16f,
-                Enabled = false,
+                Direction = Vector3.Down,
+                Position = Vector3.Zero,
+                Radius = 10f,
+                Angle = 15f,
+                Enabled = true,
+                CastShadow = false,
             });
 
             this.SceneVolume = this.ground.GetBoundingSphere();

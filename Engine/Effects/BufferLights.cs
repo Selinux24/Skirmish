@@ -166,11 +166,11 @@ namespace Engine.Effects
         /// <summary>
         /// Spot radius
         /// </summary>
-        public float Spot;
+        public float Angle;
         /// <summary>
-        /// Attenuation
+        /// Radius
         /// </summary>
-        public Vector3 Attenuation;
+        public float Radius;
         /// <summary>
         /// Cast shadow
         /// </summary>
@@ -201,8 +201,8 @@ namespace Engine.Effects
             this.DiffuseIntensity = light.DiffuseIntensity;
             this.Position = light.Position;
             this.Direction = light.Direction;
-            this.Spot = light.Spot;
-            this.Attenuation = light.Attenuation;
+            this.Angle = light.Angle;
+            this.Radius = light.Radius;
             this.CastShadow = light.CastShadow ? 1f : 0f;
             this.Enabled = light.Enabled ? 1f : 0f;
         }

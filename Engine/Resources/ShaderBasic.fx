@@ -200,22 +200,20 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 {
 	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
 
+	float4 matColor = input.color * gMaterial.Diffuse;
+
 	float4 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
 		toEye,
+		matColor,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		input.shadowHomogeneous,
 		gShadowMap);
-
-	float4 matColor = input.color * gMaterial.Diffuse;
-
-	litColor *= matColor;
-	litColor.a = matColor.a;
 
 	if(gFogRange > 0)
 	{
@@ -444,15 +442,13 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		gPointLights, 
 		gSpotLights,
 		toEye,
+		textureColor,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		input.shadowHomogeneous,
 		gShadowMap);
-
-	litColor *= textureColor;
-	litColor.a = textureColor.a;
 
 	if(gFogRange > 0)
 	{
@@ -562,7 +558,7 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinnedI(VSVe
 float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input) : SV_TARGET
 {
 	float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
-	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
+	float3 normalWorld = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
 	float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
@@ -573,15 +569,13 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 		gPointLights, 
 		gSpotLights,
 		toEye,
+		textureColor,
 		input.positionWorld,
-		bumpedNormalW,
+		normalWorld,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		input.shadowHomogeneous,
 		gShadowMap);
-
-	litColor *= textureColor;
-	litColor.a = textureColor.a;
 
 	if(gFogRange > 0)
 	{

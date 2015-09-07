@@ -242,8 +242,8 @@ namespace DeferredTest
                 Name = "night has come",
                 Enabled = true,
                 LightColor = Color.LightBlue,
-                AmbientIntensity = 0.25f,
-                DiffuseIntensity = 0.25f,
+                AmbientIntensity = 0.1f,
+                DiffuseIntensity = 0.1f,
                 Direction = SceneLightDirectional.Primary.Direction,
                 CastShadow = false,
             };
@@ -697,12 +697,16 @@ namespace DeferredTest
 
             this.spotLight = new SceneLightSpot()
             {
-                Enabled = true,
+                Name = "Spot the dog",
                 LightColor = Color.Yellow,
-                Attenuation = new Vector3(1.0f, 0.0f, 0.1f),
+                AmbientIntensity = 1,
+                DiffuseIntensity = 1,
                 Position = new Vector3(0, 15, 0),
                 Direction = Vector3.Down,
-                Spot = 20,
+                Angle = 30,
+                Radius = 50,
+                Enabled = true,
+                CastShadow = false,
             };
 
             this.Lights.Add(this.spotLight);

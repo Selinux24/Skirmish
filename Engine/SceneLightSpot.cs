@@ -18,20 +18,20 @@ namespace Engine
         /// <summary>
         /// Spot exponent used in the spotlight calculation to control the cone
         /// </summary>
-        public float Spot = 0.0f;
+        public float Angle = 0.0f;
         /// <summary>
-        /// Stores the three attenuation constants in the format (a0, a1, a2) that control how light intensity falls off with distance
+        /// Light radius
         /// </summary>
-        /// <remarks>
-        /// Constant weaken (1,0,0)
-        /// Inverse distance weaken (0,1,0)
-        /// Inverse square law (0,0,1)
-        /// </remarks>
-        public Vector3 Attenuation = Vector3.Zero;
-
-        public float GetRange()
+        public float Radius = 1f;
+        /// <summary>
+        /// Gets the bounding sphere of the active light
+        /// </summary>
+        public BoundingSphere BoundingSphere
         {
-            return 0f;
+            get
+            {
+                return new BoundingSphere(this.Position, this.Radius);
+            }
         }
     }
 }

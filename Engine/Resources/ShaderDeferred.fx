@@ -97,15 +97,13 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 	litColor = ComputeDirectionalLight(
 		gDirLight,
 		toEye,
+		diffuseColor,
 		depth.xyz,
 		normal.xyz,
 		shadow.w,
 		normal.w,
 		float4(shadow.xyz, 1),
 		gShadowMap);
-
-	litColor *= diffuseColor;
-	litColor.a = 1;
 
 	return litColor;
 }
@@ -128,13 +126,11 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	litColor = ComputePointLight(
 		gPointLight,
 		toEye,
+		diffuseColor,
 		depth.xyz,
 		normal.xyz,
 		1,
 		normal.w);
-
-	litColor *= diffuseColor;
-	litColor.a = 1;
 
 	return litColor;
 }
@@ -157,13 +153,11 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	litColor = ComputeSpotLight(
 		gSpotLight,
 		toEye,
+		diffuseColor,
 		depth.xyz,
 		normal.xyz,
 		1,
 		normal.w);
-
-	litColor *= diffuseColor;
-	litColor.a = 1;
 
 	return litColor;
 }

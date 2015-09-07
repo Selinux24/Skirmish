@@ -25,14 +25,5 @@ namespace Engine
                 return new BoundingSphere(this.Position, this.Radius);
             }
         }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public SceneLightPoint()
-            : base()
-        {
-            
-        }
     }
 }

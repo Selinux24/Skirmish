@@ -19,9 +19,8 @@ namespace ModelDrawing
         private Model[] models = null;
 
         private int selected = 0;
-        private float spot = 0f;
-        private Vector3 attenuation = new Vector3(1, 0, 0);
-        private int selectedAttenuation = 0;
+        private float angle = 30f;
+        private float radius = 1f;
 
         public TestScene(Game game)
             : base(game)
@@ -54,20 +53,19 @@ namespace ModelDrawing
                 range = Vector3.Distance(this.Camera.Position, p);
             }
 
-            SceneLightSpot spotLight = new SceneLightSpot()
+            this.Lights.Add(new SceneLightSpot()
             {
-                LightColor = Color.Red,
-                Spot = 10f,
-                Attenuation = new Vector3(1f, 0f, 0f),
+                Name = "Red Spot",
+                LightColor = new Color4(1f, 0.2f, 0.2f, 1f),
+                AmbientIntensity = 1f,
+                DiffuseIntensity = 1f,
+                Angle = 10f,
+                Radius = 1f,
                 Position = this.Camera.Position,
                 Direction = this.Camera.Direction,
                 Enabled = false,
-            };
-
-            this.Lights.SpotLights = new[]
-            {
-                spotLight,
-            };
+                CastShadow = false,
+            });
 
             this.InitializePositions();
         }
@@ -156,7 +154,6 @@ namespace ModelDrawing
             if (this.Game.Input.KeyJustReleased(Keys.Escape)) { this.Game.Exit(); }
             if (this.Game.Input.KeyJustReleased(Keys.Home)) { this.InitializePositions(); }
             if (this.Game.Input.KeyJustReleased(Keys.Tab)) { this.NextModel(); }
-            if (this.Game.Input.KeyJustReleased(Keys.Space)) { this.NextAttenuation(); }
 
             if (this.Game.Input.KeyJustReleased(Keys.L)) { this.Lights.SpotLights[0].Enabled = !this.Lights.SpotLights[0].Enabled; }
 
@@ -175,18 +172,18 @@ namespace ModelDrawing
 
             if (this.Game.Input.KeyPressed(Keys.Add))
             {
-                spot += 0.01f;
+                this.angle += 0.01f;
             }
             if (this.Game.Input.KeyPressed(Keys.Subtract))
             {
-                spot -= 0.01f;
+                this.angle -= 0.01f;
             }
-            if (spot < 0f) spot = 0f;
+            if (this.angle < 0f) this.angle = 0f;
 
-            this.Lights.SpotLights[0].Spot = spot;
-            this.Lights.SpotLights[0].Attenuation = this.attenuation;
+            this.Lights.SpotLights[0].Angle = this.angle;
+            this.Lights.SpotLights[0].Radius = this.radius;
 
-            this.text.Text = string.Format("Spot {0:0.00}; Attenuation {1}", spot, this.attenuation);
+            this.text.Text = string.Format("Angle {0:0.00}; Radius {1}", this.angle, this.radius);
         }
         private void NextModel()
         {
@@ -198,21 +195,6 @@ namespace ModelDrawing
             {
                 this.selected++;
             }
-        }
-        private void NextAttenuation()
-        {
-            if (this.selectedAttenuation >= 3 - 1)
-            {
-                this.selectedAttenuation = 0;
-            }
-            else
-            {
-                this.selectedAttenuation++;
-            }
-
-            if (this.selectedAttenuation == 0) this.attenuation = new Vector3(1, 0, 0);
-            else if (this.selectedAttenuation == 1) this.attenuation = new Vector3(0, 1, 0);
-            else if (this.selectedAttenuation == 2) this.attenuation = new Vector3(0, 0, 1);
         }
     }
 }
