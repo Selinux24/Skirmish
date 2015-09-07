@@ -18,7 +18,6 @@ namespace Skybox
         private float walkerClimb = MathUtil.DegreesToRadians(45);
         private Color globalColor = Color.Green;
         private Color bboxColor = Color.GreenYellow;
-        //private Color bsphColor = Color.LightYellow;
         private int bsphSlices = 20;
         private int bsphStacks = 10;
 
@@ -32,8 +31,6 @@ namespace Skybox
         private TriangleListDrawer pickedTri = null;
         private LineListDrawer bboxGlobalDrawer = null;
         private LineListDrawer bsphLightsDrawer = null;
-        //private LineListDrawer bboxMeshesDrawer = null;
-        //private LineListDrawer bsphMeshesDrawer = null;
 
         private ParticleSystem rain = null;
 
@@ -44,10 +41,10 @@ namespace Skybox
         private ParticleSystem movingfire = null;
         private SceneLightPoint movingFireLight = null;
 
-        private int directionalLightCount = 3;
+        private int directionalLightCount = 0;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.DeferredLightning)
+            : base(game, SceneModesEnum.ForwardLigthning)
         {
 
         }
@@ -102,10 +99,7 @@ namespace Skybox
             this.ruins = this.AddTerrain(desc, false);
 
             this.bboxGlobalDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
-            //this.bboxMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.StaticBoundingBoxes), this.bboxColor);
-            //this.bsphMeshesDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredSphere(this.ruins.StaticBoundingSpheres, this.bsphSlices, this.bsphStacks), this.bsphColor);
-            //this.bboxMeshesDrawer.UseZBuffer = true;
-            //this.bsphMeshesDrawer.UseZBuffer = true;
+            this.bboxGlobalDrawer.Visible = false;
 
             this.pickedTri = this.AddTriangleListDrawer(1);
 
@@ -118,12 +112,13 @@ namespace Skybox
             this.movingFireLight = new SceneLightPoint()
             {
                 Name = "Moving fire light",
-                Enabled = true,
                 LightColor = Color.Orange,
                 AmbientIntensity = 10f,
                 DiffuseIntensity = 5f,
                 Position = Vector3.Zero,
                 Radius = 10f,
+                Enabled = true,
+                CastShadow = false,
             };
 
             this.Lights.Add(this.movingFireLight);
@@ -162,12 +157,13 @@ namespace Skybox
                 this.torchLights[i] = new SceneLightPoint()
                 {
                     Name = string.Format("Torch {0}", i),
-                    Enabled = true,
                     LightColor = color,
-                    AmbientIntensity = 5f,
-                    DiffuseIntensity = 2f,
+                    AmbientIntensity = 20f,
+                    DiffuseIntensity = 10f,
                     Position = firePositions3D[i],
-                    Radius = 5f,
+                    Radius = 10f,
+                    Enabled = true,
+                    CastShadow = false,
                 };
 
                 this.Lights.Add(this.torchLights[i]);
@@ -185,6 +181,13 @@ namespace Skybox
 
             Line[] sphereLines = GeometryUtil.CreateWiredSphere(new BoundingSphere(), this.bsphSlices, this.bsphStacks);
             this.bsphLightsDrawer = this.AddLineListDrawer(sphereLines.Length * 5);
+            this.bsphLightsDrawer.Visible = false;
+
+            this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[1].Enabled = true;
+            this.Lights.DirectionalLights[2].Enabled = false;
+
+            this.directionalLightCount = this.Lights.EnabledDirectionalLights.Length;
 
             this.SceneVolume = this.ruins.GetBoundingSphere();
 
@@ -194,7 +197,7 @@ namespace Skybox
         {
             this.Camera.NearPlaneDistance = 0.5f;
             this.Camera.FarPlaneDistance = 50.0f;
-            this.Camera.Goto(this.walkerHeight);
+            this.Camera.Goto(this.walkerHeight + new Vector3(-6, 0, 5));
             this.Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
             this.Camera.MovementDelta = 8f;
             this.Camera.SlowMovementDelta = 4f;
@@ -308,16 +311,6 @@ namespace Skybox
             {
                 this.bboxGlobalDrawer.Visible = !this.bboxGlobalDrawer.Visible;
                 this.bsphLightsDrawer.Visible = !this.bsphLightsDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
-            {
-                //this.bboxMeshesDrawer.Visible = !this.bboxMeshesDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F3))
-            {
-                //this.bsphMeshesDrawer.Visible = !this.bsphMeshesDrawer.Visible;
             }
 
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);

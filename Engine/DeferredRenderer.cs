@@ -182,7 +182,7 @@ namespace Engine
                 context.GeometryMap[3],
                 context.ShadowMap);
 
-            this.Game.Graphics.SetDepthStencilNone();
+            this.Game.Graphics.SetDepthStencilDeferredLighting();
             this.Game.Graphics.SetBlendDeferredLighting();
 #if DEBUG
             swPrepare.Stop();
@@ -239,7 +239,7 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                this.Game.Graphics.SetRasterizerCullFrontFace();
+                this.Game.Graphics.SetRasterizerCullNone();
 
                 for (int i = 0; i < pointLights.Length; i++)
                 {
@@ -286,7 +286,7 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                this.Game.Graphics.SetRasterizerCullFrontFace();
+                this.Game.Graphics.SetRasterizerCullNone();
 
                 for (int i = 0; i < spotLights.Length; i++)
                 {

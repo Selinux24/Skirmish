@@ -345,13 +345,15 @@ namespace Engine
 #if DEBUG
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
+                            this.Game.Graphics.SetViewport(this.ShadowMap.Viewport);
+
                             //Set shadow map depth map without render target
                             this.Game.Graphics.SetRenderTarget(
-                                this.ShadowMap.Viewport,
-                                this.ShadowMap.DepthMap,
                                 null,
+                                false,
+                                Color.Transparent,
+                                this.ShadowMap.DepthMap,
                                 true,
-                                Color.Silver,
                                 DepthStencilClearFlags.Depth);
 
                             //Use z-buffer by default for opaque components
@@ -387,6 +389,7 @@ namespace Engine
                     Stopwatch swPreparation = Stopwatch.StartNew();
 #endif
                     //Set default render target and depth buffer, and clear it
+                    this.Game.Graphics.SetDefaultViewport();
                     this.Game.Graphics.SetDefaultRenderTarget(true);
 #if DEBUG
                     swPreparation.Stop();
@@ -501,12 +504,12 @@ namespace Engine
 #if DEBUG
                             Stopwatch swGeometryBufferInit = Stopwatch.StartNew();
 #endif
+                            this.Game.Graphics.SetViewport(this.deferredRenderer.Viewport);
+
                             //Set g-buffer render targets
                             this.Game.Graphics.SetRenderTargets(
-                                this.deferredRenderer.Viewport,
-                                this.Game.Graphics.DefaultDepthStencil,
-                                this.deferredRenderer.GeometryBuffer.RenderTargets,
-                                true, Color.Black);
+                                this.deferredRenderer.GeometryBuffer.RenderTargets, true, Color.Black,
+                                this.Game.Graphics.DefaultDepthStencil, true);
 
                             //Enable z-buffer by default for opaque components
                             this.Game.Graphics.SetDepthStencilZEnabled();
@@ -544,12 +547,12 @@ namespace Engine
 #if DEBUG
                             Stopwatch swLightBuffer = Stopwatch.StartNew();
 #endif
+                            this.Game.Graphics.SetViewport(this.deferredRenderer.Viewport);
+
                             //Set light buffer to draw lights
                             this.Game.Graphics.SetRenderTarget(
-                                this.deferredRenderer.Viewport,
-                                null,
-                                this.deferredRenderer.LightBuffer.RenderTarget,
-                                true, Color.Transparent);
+                                this.deferredRenderer.LightBuffer.RenderTarget, true, Color.Black,
+                                this.Game.Graphics.DefaultDepthStencil, false);
 
                             //Draw scene lights on light buffer using g-buffer output
                             this.deferredRenderer.DrawLights(this.DrawContext);
@@ -580,6 +583,7 @@ namespace Engine
                     Stopwatch swComponsition = Stopwatch.StartNew();
 #endif
                     //Restore backbuffer as render target and clear it
+                    this.Game.Graphics.SetDefaultViewport();
                     this.Game.Graphics.SetDefaultRenderTarget(false);
 
                     //Disable z-buffer for deferred rendering

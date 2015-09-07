@@ -118,8 +118,9 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	float2 tex = 0.5f * (float2(position.x, -position.y) + 1);
 
     float4 diffuseColor = gTG1Map.Sample(SamplerPoint, tex); //Color
-    float4 depth = gTG3Map.Sample(SamplerPoint, tex); //Depth
     float4 normal = gTG2Map.Sample(SamplerPoint, tex); //Normal
+    float4 depth = gTG3Map.Sample(SamplerPoint, tex); //Depth
+    float4 shadow = gTG4Map.Sample(SamplerPoint, tex); //Shadow positions
 	
 	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
 
@@ -129,7 +130,7 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 		diffuseColor,
 		depth.xyz,
 		normal.xyz,
-		1,
+		shadow.w,
 		normal.w);
 
 	return litColor;
@@ -145,8 +146,9 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	float2 tex = 0.5f * (float2(position.x, -position.y) + 1);
 
     float4 diffuseColor = gTG1Map.Sample(SamplerPoint, tex); //Color
-    float4 depth = gTG3Map.Sample(SamplerPoint, tex); //Depth
     float4 normal = gTG2Map.Sample(SamplerPoint, tex); //Normal
+    float4 depth = gTG3Map.Sample(SamplerPoint, tex); //Depth
+    float4 shadow = gTG4Map.Sample(SamplerPoint, tex); //Shadow positions
 	
 	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
 
@@ -156,7 +158,7 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 		diffuseColor,
 		depth.xyz,
 		normal.xyz,
-		1,
+		shadow.w,
 		normal.w);
 
 	return litColor;

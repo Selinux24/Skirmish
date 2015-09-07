@@ -183,8 +183,8 @@ float4 ComputeBaseLight(
         }
 	}
 
-    float3 litColor = lightColor * ((modelColor.rgb * ambient) + (modelColor.rgb * diffuse) + specular);
-	litColor = pow(litColor, GAMMA);
+    float3 litColor = modelColor.rgb * lightColor * (ambient + diffuse + specular);
+	litColor = saturate(pow(litColor, GAMMA));
 
 	return float4(litColor, modelColor.a);
 }
@@ -312,7 +312,7 @@ float4 ComputeAllLights(
 	int i;
 
 	[unroll]
-	for(i = 0; i < MAX_LIGHTS_DIRECTIONAL; ++i)
+	for(i = 0; i < MAX_LIGHTS_DIRECTIONAL; i++)
 	{
 		if(dirLights[i].Enabled == 1.0f)
 		{
@@ -330,7 +330,7 @@ float4 ComputeAllLights(
 	}
 
 	[unroll]
-	for(i = 0; i < MAX_LIGHTS_POINT; ++i)
+	for(i = 0; i < MAX_LIGHTS_POINT; i++)
 	{
 		if(pointLights[i].Enabled == 1.0f)
 		{
@@ -346,7 +346,7 @@ float4 ComputeAllLights(
 	}
 
 	[unroll]
-	for(i = 0; i < MAX_LIGHTS_SPOT; ++i)
+	for(i = 0; i < MAX_LIGHTS_SPOT; i++)
 	{
 		if(spotLights[i].Enabled == 1.0f)
 		{

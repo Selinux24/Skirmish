@@ -125,13 +125,15 @@ namespace Engine
         {
             if (this.Drawables != null && this.Drawables.Length > 0)
             {
-                this.Game.Graphics.SetRenderTarget(this.viewport, null, this.renderTarget, true, Color.Silver);
+                this.Game.Graphics.SetViewport(this.viewport);
+                this.Game.Graphics.SetRenderTarget(this.renderTarget, true, Color.Silver, null, false);
 
                 for (int i = 0; i < this.Drawables.Length; i++)
                 {
                     this.Drawables[i].Draw(gameTime, this.drawContext);
                 }
 
+                this.Game.Graphics.SetDefaultViewport();
                 this.Game.Graphics.SetDefaultRenderTarget(false);
             }
 

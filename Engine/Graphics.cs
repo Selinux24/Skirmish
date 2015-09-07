@@ -101,6 +101,8 @@ namespace Engine
         /// No depth stencil
         /// </summary>
         private DepthStencilState depthStencilNone = null;
+
+        private DepthStencilState depthStencilDeferredLighting = null;
         /// <summary>
         /// Default blend state
         /// </summary>
@@ -389,8 +391,8 @@ namespace Engine
                 new DepthStencilStateDescription()
                 {
                     IsDepthEnabled = true,
-                    DepthWriteMask = DepthWriteMask.All,
-                    DepthComparison = Comparison.Less,
+                    DepthWriteMask = DepthWriteMask.Zero,
+                    DepthComparison = Comparison.Always,
 
                     IsStencilEnabled = true,
                     StencilReadMask = 0xFF,
@@ -451,6 +453,17 @@ namespace Engine
                     IsDepthEnabled = false,
                     DepthWriteMask = DepthWriteMask.Zero,
                     DepthComparison = Comparison.Always,
+                });
+
+            //Deferred lighting depth-stencil state
+            this.depthStencilDeferredLighting = new DepthStencilState(
+                this.Device,
+                new DepthStencilStateDescription()
+                {
+                    IsDepthEnabled = false,
+                    DepthWriteMask = DepthWriteMask.All,
+                    DepthComparison = Comparison.Less,
+
                 });
 
             #endregion
@@ -795,6 +808,7 @@ namespace Engine
 
             #region Set Defaults
 
+            this.SetDefaultViewport();
             this.SetDefaultRenderTarget();
 
             this.SetDepthStencilZEnabled();
@@ -842,14 +856,30 @@ namespace Engine
                 this.swapChain.Present(0, PresentFlags.None);
             }
         }
-
+        /// <summary>
+        /// Sets the default viewport
+        /// </summary>
+        public void SetDefaultViewport()
+        {
+            this.SetViewport(this.Viewport);
+        }
         /// <summary>
         /// Sets default render target
         /// </summary>
         /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
         public void SetDefaultRenderTarget(bool clear = true)
         {
-            this.SetRenderTarget(this.Viewport, this.depthStencilView, this.renderTargetView, clear, GameEnvironment.Background);
+            this.SetRenderTarget(this.renderTargetView, clear, GameEnvironment.Background, this.depthStencilView, clear);
+        }
+
+        public void SetViewport(Viewport viewport)
+        {
+            this.DeviceContext.Rasterizer.SetViewport(viewport);
+        }
+
+        public void SetViewport(ViewportF viewport)
+        {
+            this.DeviceContext.Rasterizer.SetViewport(viewport);
         }
         /// <summary>
         /// Set render target
@@ -861,27 +891,23 @@ namespace Engine
         /// <param name="clearColor">Clear color</param>
         /// <param name="depthClearFlags">Depth cleraring flags</param>
         /// <remarks>By default, depth clearing flags were "Depth" and "Stencil"</remarks>
-        public void SetRenderTarget(Viewport viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear, Color4 clearColor, DepthStencilClearFlags depthClearFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
+        public void SetRenderTarget(RenderTargetView renderTarget, bool clearRT, Color4 clearRTColor, DepthStencilView depthMap, bool clearDS, DepthStencilClearFlags clearDSFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
         {
-            this.DeviceContext.Rasterizer.SetViewport(viewport);
             this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTarget);
 
-            if (clear)
+            if (renderTarget != null && clearRT)
             {
-                if (renderTarget != null)
-                {
-                    this.DeviceContext.ClearRenderTargetView(
-                        renderTarget,
-                        clearColor);
-                }
+                this.DeviceContext.ClearRenderTargetView(
+                    renderTarget,
+                    clearRTColor);
+            }
 
-                if (depthMap != null)
-                {
-                    this.DeviceContext.ClearDepthStencilView(
-                        depthMap,
-                        depthClearFlags,
-                        1.0f, 0);
-                }
+            if (depthMap != null && clearDS)
+            {
+                this.DeviceContext.ClearDepthStencilView(
+                    depthMap,
+                    clearDSFlags,
+                    1.0f, 0);
             }
         }
         /// <summary>
@@ -894,99 +920,26 @@ namespace Engine
         /// <param name="clearColor">Clear color</param>
         /// <param name="depthClearFlags">Depth cleraring flags</param>
         /// <remarks>By default, depth clearing flags were "Depth" and "Stencil"</remarks>
-        public void SetRenderTargets(Viewport viewport, DepthStencilView depthMap, RenderTargetView[] renderTargets, bool clear, Color4 clearColor, DepthStencilClearFlags depthClearFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
+        public void SetRenderTargets(RenderTargetView[] renderTargets, bool clearRT, Color4 clearRTColor, DepthStencilView depthMap, bool clearDS, DepthStencilClearFlags clearDSFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
         {
-            this.DeviceContext.Rasterizer.SetViewport(viewport);
             this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTargets.Length, renderTargets);
 
-            if (clear)
+            if (clearRT && renderTargets != null && renderTargets.Length > 0)
             {
-                if (renderTargets != null && renderTargets.Length > 0)
-                {
-                    for (int i = 0; i < renderTargets.Length; i++)
-                    {
-                        this.DeviceContext.ClearRenderTargetView(
-                            renderTargets[i],
-                            clearColor);
-                    }
-                }
-
-                if (depthMap != null)
-                {
-                    this.DeviceContext.ClearDepthStencilView(
-                        depthMap,
-                        depthClearFlags,
-                        1.0f, 0);
-                }
-            }
-        }
-        /// <summary>
-        /// Set render target
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
-        /// <param name="depthMap">Depth map</param>
-        /// <param name="renderTarget">Render target</param>
-        /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
-        /// <param name="clearColor">Clear color</param>
-        /// <param name="depthClearFlags">Depth cleraring flags</param>
-        /// <remarks>By default, depth clearing flags were "Depth" and "Stencil"</remarks>
-        public void SetRenderTarget(ViewportF viewport, DepthStencilView depthMap, RenderTargetView renderTarget, bool clear, Color4 clearColor, DepthStencilClearFlags depthClearFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
-        {
-            this.DeviceContext.Rasterizer.SetViewport(viewport);
-            this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTarget);
-
-            if (clear)
-            {
-                if (renderTarget != null)
+                for (int i = 0; i < renderTargets.Length; i++)
                 {
                     this.DeviceContext.ClearRenderTargetView(
-                        renderTarget,
-                        clearColor);
-                }
-
-                if (depthMap != null)
-                {
-                    this.DeviceContext.ClearDepthStencilView(
-                        depthMap,
-                        depthClearFlags,
-                        1.0f, 0);
+                        renderTargets[i],
+                        clearRTColor);
                 }
             }
-        }
-        /// <summary>
-        /// Set render targets
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
-        /// <param name="depthMap">Depth map</param>
-        /// <param name="renderTargets">Render targets</param>
-        /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
-        /// <param name="clearColor">Clear color</param>
-        /// <param name="depthClearFlags">Depth cleraring flags</param>
-        /// <remarks>By default, depth clearing flags were "Depth" and "Stencil"</remarks>
-        public void SetRenderTargets(ViewportF viewport, DepthStencilView depthMap, RenderTargetView[] renderTargets, bool clear, Color4 clearColor, DepthStencilClearFlags depthClearFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
-        {
-            this.DeviceContext.Rasterizer.SetViewport(viewport);
-            this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTargets.Length, renderTargets);
 
-            if (clear)
+            if (clearDS && depthMap != null)
             {
-                if (renderTargets != null && renderTargets.Length > 0)
-                {
-                    for (int i = 0; i < renderTargets.Length; i++)
-                    {
-                        this.DeviceContext.ClearRenderTargetView(
-                            renderTargets[i],
-                            clearColor);
-                    }
-                }
-
-                if (depthMap != null)
-                {
-                    this.DeviceContext.ClearDepthStencilView(
-                        depthMap,
-                        depthClearFlags,
-                        1.0f, 0);
-                }
+                this.DeviceContext.ClearDepthStencilView(
+                    depthMap,
+                    clearDSFlags,
+                    1.0f, 0);
             }
         }
         /// <summary>
@@ -1009,6 +962,13 @@ namespace Engine
         public void SetDepthStencilNone()
         {
             this.SetDepthStencilState(this.depthStencilNone);
+        }
+        /// <summary>
+        /// Sets depth stencil for deferred lighting
+        /// </summary>
+        public void SetDepthStencilDeferredLighting()
+        {
+            this.SetDepthStencilState(this.depthStencilDeferredLighting);
         }
         /// <summary>
         /// Sets default blend state
@@ -1257,6 +1217,7 @@ namespace Engine
             Helper.Dispose(this.depthStencilzBufferEnabled);
             Helper.Dispose(this.depthStencilzBufferDisabled);
             Helper.Dispose(this.depthStencilNone);
+            Helper.Dispose(this.depthStencilDeferredLighting);
 
             Helper.Dispose(this.rasterizerDefault);
             Helper.Dispose(this.rasterizerWireframe);
