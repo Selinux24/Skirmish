@@ -47,17 +47,8 @@ namespace Engine
             /// </summary>
             public void Dispose()
             {
-                if (this.VertexBuffer != null)
-                {
-                    this.VertexBuffer.Dispose();
-                    this.VertexBuffer = null;
-                }
-
-                if (this.IndexBuffer != null)
-                {
-                    this.IndexBuffer.Dispose();
-                    this.IndexBuffer = null;
-                }
+                Helper.Dispose(this.VertexBuffer);
+                Helper.Dispose(this.IndexBuffer);
             }
         }
 
@@ -141,27 +132,9 @@ namespace Engine
         /// </summary>
         public virtual void Dispose()
         {
-            if (this.geometryBuffer != null)
-            {
-                this.geometryBuffer.Dispose();
-                this.geometryBuffer = null;
-            }
-
-            if (this.lightBuffer != null)
-            {
-                this.lightBuffer.Dispose();
-                this.lightBuffer = null;
-            }
-
-            if (this.lightGeometry != null && this.lightGeometry.Length > 0)
-            {
-                for (int i = 0; i < this.lightGeometry.Length; i++)
-                {
-                    this.lightGeometry[i].Dispose();
-                }
-            }
-
-            this.lightGeometry = null;
+            Helper.Dispose(this.geometryBuffer);
+            Helper.Dispose(this.lightBuffer);
+            Helper.Dispose(this.lightGeometry);
         }
         /// <summary>
         /// Resizes buffers
@@ -186,6 +159,13 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public void DrawLights(Context context)
         {
+#if DEBUG
+            Stopwatch swTotal = Stopwatch.StartNew();
+#endif
+            #region Initialization
+#if DEBUG
+            Stopwatch swPrepare = Stopwatch.StartNew();
+#endif
             var deviceContext = this.Game.Graphics.DeviceContext;
             var effect = DrawerPool.EffectDeferred;
 
@@ -205,11 +185,15 @@ namespace Engine
             this.Game.Graphics.SetDepthStencilNone();
             this.Game.Graphics.SetBlendDeferredLighting();
 #if DEBUG
+            swPrepare.Stop();
+#endif
+            #endregion
+
+            #region Directional Lights
+#if DEBUG
             Stopwatch swDirectional = Stopwatch.StartNew();
 #endif
-            #region Directional Lights
-
-            SceneLightDirectional[] directionalLights = Array.FindAll(context.Lights.DirectionalLights, l => l.Enabled);
+            SceneLightDirectional[] directionalLights = context.Lights.EnabledDirectionalLights;
             if (directionalLights != null && directionalLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredDirectionalLight;
@@ -235,17 +219,16 @@ namespace Engine
                     }
                 }
             }
-
-            #endregion
 #if DEBUG
             swDirectional.Stop();
 #endif
+            #endregion
+
+            #region Point Lights
 #if DEBUG
             Stopwatch swPoint = Stopwatch.StartNew();
 #endif
-            #region Point Lights
-
-            SceneLightPoint[] pointLights = Array.FindAll(context.Lights.PointLights, l => l.Enabled);
+            SceneLightPoint[] pointLights = context.Lights.EnabledPointLights;
             if (pointLights != null && pointLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredPointLight;
@@ -283,16 +266,16 @@ namespace Engine
                     }
                 }
             }
-
-            #endregion
 #if DEBUG
             swPoint.Stop();
+#endif
+            #endregion
 
+            #region Spot Lights
+#if DEBUG
             Stopwatch swSpot = Stopwatch.StartNew();
 #endif
-            #region Spot Lights
-
-            SceneLightSpot[] spotLights = Array.FindAll(context.Lights.SpotLights, l => l.Enabled);
+            SceneLightSpot[] spotLights = context.Lights.EnabledSpotLights;
             if (spotLights != null && spotLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredSpotLight;
@@ -332,18 +315,77 @@ namespace Engine
                     }
                 }
             }
-
-            #endregion
 #if DEBUG
             swSpot.Stop();
 #endif
+            #endregion
 #if DEBUG
-            context.Tag = new[]
+            swTotal.Stop();
+#endif
+#if DEBUG
+            long total = swPrepare.ElapsedTicks + swDirectional.ElapsedTicks + swPoint.ElapsedTicks + swSpot.ElapsedTicks;
+            if (total > 0)
             {
+                float prcPrepare = (float)swPrepare.ElapsedTicks / (float)total;
+                float prcDirectional = (float)swDirectional.ElapsedTicks / (float)total;
+                float prcPoint = (float)swPoint.ElapsedTicks / (float)total;
+                float prcSpot = (float)swSpot.ElapsedTicks / (float)total;
+                float prcWasted = (float)(swTotal.ElapsedTicks - total) / (float)total;
+
+                Counters.SetStatistics("DeferredRenderer.DrawLights", string.Format(
+                    "{0:000000}; Init {1:00}%; Directional {2:00}%; Point {3:00}%; Spot {4:00}%; Other {5:00}%",
+                    swTotal.ElapsedTicks,
+                    prcPrepare * 100f,
+                    prcDirectional * 100f,
+                    prcPoint * 100f,
+                    prcSpot * 100f,
+                    prcWasted * 100f));
+            }
+
+            float perDirectionalLight = 0f;
+            float perPointLight = 0f;
+            float perSpotLight = 0f;
+
+            if (directionalLights != null && directionalLights.Length > 0)
+            {
+                long totalDirectional = swDirectional.ElapsedTicks;
+                if (totalDirectional > 0)
+                {
+                    perDirectionalLight = (float)totalDirectional / (float)directionalLights.Length;
+                }
+            }
+
+            if (pointLights != null && pointLights.Length > 0)
+            {
+                long totalPoint = swPoint.ElapsedTicks;
+                if (totalPoint > 0)
+                {
+                    perPointLight = (float)totalPoint / (float)pointLights.Length;
+                }
+            }
+
+            if (spotLights != null && spotLights.Length > 0)
+            {
+                long totalSpot = swSpot.ElapsedTicks;
+                if (totalSpot > 0)
+                {
+                    perSpotLight = (float)totalSpot / (float)spotLights.Length;
+                }
+            }
+
+            Counters.SetStatistics("DeferredRenderer.DrawLights.Types", string.Format(
+                "Directional {0:000000}; Point {1:000000}; Spot {2:000000}",
+                perDirectionalLight,
+                perPointLight,
+                perSpotLight));
+
+            Counters.SetStatistics("DEFERRED_LIGHTING", new[]
+            {
+                swPrepare.ElapsedTicks,
                 swDirectional.ElapsedTicks,
                 swPoint.ElapsedTicks,
                 swSpot.ElapsedTicks,
-            };
+            });
 #endif
         }
         /// <summary>
@@ -352,8 +394,18 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public void DrawResult(Context context)
         {
+#if DEBUG
+            long total = 0;
+            long init = 0;
+            long draw = 0;
+
+            Stopwatch swTotal = Stopwatch.StartNew();
+#endif
             if (context.GeometryMap != null && context.LightMap != null)
             {
+#if DEBUG
+                Stopwatch swInit = Stopwatch.StartNew();
+#endif
                 var effect = DrawerPool.EffectDeferred;
                 var effectTechnique = effect.DeferredCombineLights;
 
@@ -374,7 +426,14 @@ namespace Engine
 
                 this.Game.Graphics.SetRasterizerDefault();
                 this.Game.Graphics.SetBlendDefault();
+#if DEBUG
+                swInit.Stop();
 
+                init = swInit.ElapsedTicks;
+#endif
+#if DEBUG
+                Stopwatch swDraw = Stopwatch.StartNew();
+#endif
                 for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                 {
                     effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
@@ -384,7 +443,24 @@ namespace Engine
                     Counters.DrawCallsPerFrame++;
                     Counters.InstancesPerFrame++;
                 }
+#if DEBUG
+                swDraw.Stop();
+
+                draw = swDraw.ElapsedTicks;
+#endif
             }
+#if DEBUG
+            swTotal.Stop();
+
+            total = swTotal.ElapsedTicks;
+#endif
+#if DEBUG
+            Counters.SetStatistics("DEFERRED_COMPOSITION", new[]
+            {
+                init,
+                draw,
+            });
+#endif
         }
         /// <summary>
         /// Updates renderer parameters

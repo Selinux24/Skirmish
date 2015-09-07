@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Engine.Common
 {
     /// <summary>
@@ -6,6 +7,15 @@ namespace Engine.Common
     /// </summary>
     public static class Counters
     {
+        /// <summary>
+        /// Data dictionary
+        /// </summary>
+        private static readonly Dictionary<string, object> gData = new Dictionary<string, object>();
+        /// <summary>
+        /// Data keys list
+        /// </summary>
+        private static readonly List<string> gDataKeys = new List<string>();
+
         /// <summary>
         /// Frame count
         /// </summary>
@@ -38,16 +48,52 @@ namespace Engine.Common
         /// Texture updates
         /// </summary>
         public static int TextureUpdates = 0;
-
+        /// <summary>
+        /// Picking test per frame
+        /// </summary>
         public static int PicksPerFrame = 0;
-
+        /// <summary>
+        /// Average picking time cost
+        /// </summary>
         public static float PickingAverageTime = 0f;
-
+        /// <summary>
+        /// Rasterizer state changes count per frame
+        /// </summary>
         public static int RasterizerStateChanges = 0;
-
+        /// <summary>
+        /// Blend state changes count per frame
+        /// </summary>
         public static int BlendStateChanges = 0;
-
+        /// <summary>
+        /// Depth-Stencil state changes count per frame
+        /// </summary>
         public static int DepthStencilStateChanges = 0;
+        /// <summary>
+        /// Statistics keys
+        /// </summary>
+        /// <remarks>
+        /// The dictionary is complete at the end of the frame
+        /// </remarks>
+        public static string[] Statistics
+        {
+            get
+            {
+                return gDataKeys.ToArray();
+            }
+        }
+        /// <summary>
+        /// Statistics keys count
+        /// </summary>
+        /// <remarks>
+        /// The dictionary is complete at the end of the frame
+        /// </remarks>
+        public static int StatisticsCount
+        {
+            get
+            {
+                return gDataKeys.Count;
+            }
+        }
 
         /// <summary>
         /// Clear counters
@@ -55,15 +101,15 @@ namespace Engine.Common
         public static void ClearAll()
         {
             FrameCount = 0;
-            
+
             DrawCallsPerFrame = 0;
-            
+
             InstancesPerFrame = 0;
-            
+
             UpdatesPerFrame = 0;
             UpdatesPerObject = 0;
             UpdatesPerInstance = 0;
-            
+
             TextureUpdates = 0;
 
             PicksPerFrame = 0;
@@ -72,6 +118,9 @@ namespace Engine.Common
             RasterizerStateChanges = 0;
             BlendStateChanges = 0;
             DepthStencilStateChanges = 0;
+
+            gData.Clear();
+            gDataKeys.Clear();
         }
         /// <summary>
         /// Clear per frame counters
@@ -79,7 +128,7 @@ namespace Engine.Common
         public static void ClearFrame()
         {
             DrawCallsPerFrame = 0;
-            
+
             InstancesPerFrame = 0;
 
             UpdatesPerFrame = 0;
@@ -94,6 +143,68 @@ namespace Engine.Common
             RasterizerStateChanges = 0;
             BlendStateChanges = 0;
             DepthStencilStateChanges = 0;
+
+            gData.Clear();
+            gDataKeys.Clear();
+        }
+
+        /// <summary>
+        /// Gets statistic value by key
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <returns>Return statistic value by key</returns>
+        public static object GetStatistics(string key)
+        {
+            if (gData.ContainsKey(key))
+            {
+                return gData[key];
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Sets statistic value by key
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="value">Key value</param>
+        public static void SetStatistics(string key, object value)
+        {
+            if (gData.ContainsKey(key))
+            {
+                gData[key] = value;
+            }
+            else
+            {
+                gData.Add(key, value);
+            }
+
+            RefreshDataKeys();
+        }
+        /// <summary>
+        /// Gets statistic value by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Return statistic value by index</returns>
+        public static object GetStatistics(int index)
+        {
+            if (index >= 0 && index < gDataKeys.Count)
+            {
+                return gData[gDataKeys[index]];
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Refreshing of data keys
+        /// </summary>
+        private static void RefreshDataKeys()
+        {
+            gDataKeys.Clear();
+
+            foreach (var key in gData.Keys)
+            {
+                gDataKeys.Add(key);
+            }
         }
     }
 }

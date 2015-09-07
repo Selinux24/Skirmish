@@ -13,12 +13,13 @@ namespace DeferredTest
 
         private const float near = 0.1f;
         private const float far = 1000f;
-        private const float fogStart = 10f;
-        private const float fogRange = 100f;
+        private const float fogStart = 0.01f;
+        private const float fogRange = 0.10f;
 
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer help = null;
+        private TextDrawer statistics = null;
 
         private Model tank = null;
         private Model helicopter = null;
@@ -176,14 +177,17 @@ namespace DeferredTest
             this.title = this.AddText("Tahoma", 18, Color.White);
             this.load = this.AddText("Lucida Casual", 12, Color.Yellow);
             this.help = this.AddText("Lucida Casual", 12, Color.Yellow);
+            this.statistics = this.AddText("Lucida Casual", 10, Color.Red);
 
             this.title.Text = "Deferred Ligthning test";
             this.load.Text = loadingText;
             this.help.Text = "";
+            this.statistics.Text = "";
 
             this.title.Position = Vector2.Zero;
-            this.load.Position = new Vector2(0, 24);
-            this.help.Position = new Vector2(0, 48);
+            this.load.Position = new Vector2(0, this.title.Top + this.title.Height + 2);
+            this.help.Position = new Vector2(0, this.load.Top + this.load.Height + 2);
+            this.statistics.Position = new Vector2(0, this.help.Top + this.help.Height + 2);
 
             #endregion
 
@@ -248,8 +252,8 @@ namespace DeferredTest
             this.Lights.Add(primary);
 
             this.Lights.FogColor = Color.LightGray;
-            this.Lights.FogStart = fogStart;
-            this.Lights.FogRange = fogRange;
+            this.Lights.FogStart = far * fogStart;
+            this.Lights.FogRange = far * fogRange;
 
             #region Light Sphere Marker
 
@@ -445,16 +449,14 @@ namespace DeferredTest
                 this.helicopters.Active = this.helicopters.Visible = !this.helicopters.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.D1))
+            if (this.Game.Input.KeyJustReleased(Keys.Left))
             {
-                this.textIntex = this.textIntex > 0 ? this.textIntex - 1 : 0;
+                this.textIntex--;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.D2))
+            if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
-                int max = (this.Statistics != null ? this.Statistics.Length : 0) - 1;
-
-                this.textIntex = this.textIntex < max ? this.textIntex + 1 : max;
+                this.textIntex++;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.T))
@@ -532,7 +534,8 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F))
             {
-                this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
+                this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
+                this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.G))
@@ -648,6 +651,10 @@ namespace DeferredTest
             }
 
             #endregion
+        }
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
 
             if (this.Game.Form.IsFullscreen)
             {
@@ -660,6 +667,28 @@ namespace DeferredTest
                 this.Lights.EnabledPointLights.Length,
                 this.Lights.EnabledSpotLights.Length,
                 this.Lights.ShadowCastingLights.Length);
+
+            if (Counters.Statistics.Length == 0)
+            {
+                this.statistics.Text = "No statistics";
+            }
+            else if (this.textIntex < 0)
+            {
+                this.statistics.Text = "Press right arrow for more statistics";
+                this.textIntex = -1;
+            }
+            else if (this.textIntex >= Counters.Statistics.Length)
+            {
+                this.statistics.Text = "Press left arrow for more statistics";
+                this.textIntex = Counters.Statistics.Length;
+            }
+            else
+            {
+                this.statistics.Text = string.Format(
+                    "{0} - {1}",
+                    Counters.Statistics[this.textIntex],
+                    Counters.GetStatistics(this.textIntex));
+            }
         }
 
         private void CreateSpotLights()

@@ -7,7 +7,7 @@ namespace DeferredTest
         static void Main()
         {
 #if DEBUG
-            using (Game cl = new Game("7 Deferred", false, 801, 451, true))
+            using (Game cl = new Game("7 Deferred", false, 800, 450, true))
 #else
             using (Game cl = new Game("7 Deferred"))
 #endif

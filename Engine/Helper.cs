@@ -225,7 +225,22 @@ namespace Engine
             if (obj != null)
             {
                 obj.Dispose();
-                obj = null;
+            }
+        }
+        /// <summary>
+        /// Dispose disposable objects array
+        /// </summary>
+        /// <param name="array">Disposable objects array</param>
+        public static void Dispose(IDisposable[] array)
+        {
+            if (array != null && array.Length > 0)
+            {
+                for (int i = 0; i < array.Length; i++)
+                {
+                    IDisposable obj = array[i];
+
+                    Helper.Dispose(array[i]);
+                }
             }
         }
         /// <summary>

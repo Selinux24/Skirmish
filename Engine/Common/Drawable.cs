@@ -148,10 +148,6 @@ namespace Engine.Common
         /// Light map for deferred rendering
         /// </summary>
         public ShaderResourceView LightMap;
-        /// <summary>
-        /// Free use variable
-        /// </summary>
-        public object Tag;
     }
 
     /// <summary>

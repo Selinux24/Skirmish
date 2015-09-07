@@ -93,10 +93,6 @@ namespace Engine
                 return this.shadowMap;
             }
         }
-        /// <summary>
-        /// Scene debug text
-        /// </summary>
-        protected string[] Statistics = null;
 
         /// <summary>
         /// Indicates whether the current scene is active
@@ -158,8 +154,6 @@ namespace Engine
             };
 
             this.deferredRenderer = new DeferredRenderer(game);
-
-            this.Statistics = new string[15];
         }
 
         /// <summary>
@@ -238,7 +232,7 @@ namespace Engine
             swTotal.Stop();
 #endif
 #if DEBUG
-            this.Statistics[0] = string.Format("Update = {0:000000}", swTotal.ElapsedTicks);
+            Counters.SetStatistics("Scene.Update", string.Format("Update = {0:000000}", swTotal.ElapsedTicks));
 #endif
         }
         /// <summary>
@@ -259,14 +253,17 @@ namespace Engine
             long forward_draw2D = 0;
             long deferred_cull = 0;
             long deferred_gbuffer = 0;
-            long deferred_gbuffer1 = 0;
-            long deferred_gbuffer2 = 0;
-            long deferred_gbuffer3 = 0;
+            long deferred_gbufferInit = 0;
+            long deferred_gbufferDraw = 0;
+            long deferred_gbufferResolve = 0;
             long deferred_lbuffer = 0;
-            long deferred_lbuffer1 = 0;
-            long deferred_lbuffer2 = 0;
-            long deferred_lbuffer3 = 0;
+            long deferred_lbufferInit = 0;
+            long deferred_lbufferDir = 0;
+            long deferred_lbufferPoi = 0;
+            long deferred_lbufferSpo = 0;
             long deferred_compose = 0;
+            long deferred_composeInit = 0;
+            long deferred_composeDraw = 0;
             long deferred_draw2D = 0;
 #endif
 #if DEBUG
@@ -502,7 +499,7 @@ namespace Engine
                             Stopwatch swGeometryBuffer = Stopwatch.StartNew();
 #endif
 #if DEBUG
-                            Stopwatch swGeometryBufferPass1 = Stopwatch.StartNew();
+                            Stopwatch swGeometryBufferInit = Stopwatch.StartNew();
 #endif
                             //Set g-buffer render targets
                             this.Game.Graphics.SetRenderTargets(
@@ -514,32 +511,32 @@ namespace Engine
                             //Enable z-buffer by default for opaque components
                             this.Game.Graphics.SetDepthStencilZEnabled();
 #if DEBUG
-                            swGeometryBufferPass1.Stop();
+                            swGeometryBufferInit.Stop();
 #endif
 #if DEBUG
-                            Stopwatch swGeometryBufferPass2 = Stopwatch.StartNew();
+                            Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
                             //Draw scene on g-buffer render targets
                             this.DrawComponents(gameTime, this.DrawContext, solidComponents);
 #if DEBUG
-                            swGeometryBufferPass2.Stop();
+                            swGeometryBufferDraw.Stop();
 #endif
 #if DEBUG
-                            Stopwatch swGeometryBufferPass3 = Stopwatch.StartNew();
+                            Stopwatch swGeometryBufferResolve = Stopwatch.StartNew();
 #endif
                             //Assign result of render in drawing context
                             this.DrawContext.GeometryMap = this.deferredRenderer.GeometryBuffer.Textures;
 #if DEBUG
-                            swGeometryBufferPass3.Stop();
+                            swGeometryBufferResolve.Stop();
 #endif
 #if DEBUG
                             swGeometryBuffer.Stop();
 #endif
 #if DEBUG
                             deferred_gbuffer = swGeometryBuffer.ElapsedTicks;
-                            deferred_gbuffer1 = swGeometryBufferPass1.ElapsedTicks;
-                            deferred_gbuffer2 = swGeometryBufferPass2.ElapsedTicks;
-                            deferred_gbuffer3 = swGeometryBufferPass3.ElapsedTicks;
+                            deferred_gbufferInit = swGeometryBufferInit.ElapsedTicks;
+                            deferred_gbufferDraw = swGeometryBufferDraw.ElapsedTicks;
+                            deferred_gbufferResolve = swGeometryBufferResolve.ElapsedTicks;
 #endif
                             #endregion
 
@@ -564,9 +561,15 @@ namespace Engine
 #endif
 #if DEBUG
                             deferred_lbuffer = swLightBuffer.ElapsedTicks;
-                            deferred_lbuffer1 = ((long[])this.DrawContext.Tag)[0];
-                            deferred_lbuffer2 = ((long[])this.DrawContext.Tag)[1];
-                            deferred_lbuffer3 = ((long[])this.DrawContext.Tag)[2];
+
+                            long[] deferredCounters = Counters.GetStatistics("DEFERRED_LIGHTING") as long[];
+                            if (deferredCounters != null)
+                            {
+                                deferred_lbufferInit = deferredCounters[0];
+                                deferred_lbufferDir = deferredCounters[1];
+                                deferred_lbufferPoi = deferredCounters[2];
+                                deferred_lbufferSpo = deferredCounters[3];
+                            }
 #endif
                             #endregion
                         }
@@ -588,6 +591,13 @@ namespace Engine
                     swComponsition.Stop();
 
                     deferred_compose = swComponsition.ElapsedTicks;
+
+                    long[] deferredCompositionCounters = Counters.GetStatistics("DEFERRED_COMPOSITION") as long[];
+                    if (deferredCompositionCounters != null)
+                    {
+                        deferred_composeInit = deferredCompositionCounters[0];
+                        deferred_composeDraw = deferredCompositionCounters[1];
+                    }
 #endif
                     #endregion
 
@@ -636,12 +646,12 @@ namespace Engine
                 float prcCull = (float)shadowMap_cull / (float)totalShadowMap;
                 float prcDraw = (float)shadowMap_draw / (float)totalShadowMap;
 
-                this.Statistics[2] = string.Format(
+                Counters.SetStatistics("Scene.Draw.totalShadowMap", string.Format(
                     "SM = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%",
                     totalShadowMap,
                     prcStart * 100f,
                     prcCull * 100f,
-                    prcDraw * 100f);
+                    prcDraw * 100f));
             }
 
             long totalForward = forward_start + forward_cull + forward_draw + forward_draw2D;
@@ -652,13 +662,13 @@ namespace Engine
                 float prcDraw = (float)forward_draw / (float)totalForward;
                 float prcDraw2D = (float)forward_draw2D / (float)totalForward;
 
-                this.Statistics[3] = string.Format(
+                Counters.SetStatistics("Scene.Draw.totalForward", string.Format(
                     "FR = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%; Draw2D {4:00}%",
                     totalForward,
                     prcStart * 100f,
                     prcCull * 100f,
                     prcDraw * 100f,
-                    prcDraw2D * 100f);
+                    prcDraw2D * 100f));
             }
 
             long totalDeferred = deferred_cull + deferred_gbuffer + deferred_lbuffer + deferred_compose + deferred_draw2D;
@@ -670,41 +680,76 @@ namespace Engine
                 float prcCompose = (float)deferred_compose / (float)totalDeferred;
                 float prcDraw2D = (float)deferred_draw2D / (float)totalDeferred;
 
-                this.Statistics[4] = string.Format(
+                Counters.SetStatistics("Scene.Draw.totalDeferred", string.Format(
                     "DR = {0:000000}; Cull {1:00}%; GBuffer {2:00}%; LBuffer {3:00}%; Compose {4:00}%; Draw2D {5:00}%",
                     totalDeferred,
                     prcCull * 100f,
                     prcGBuffer * 100f,
                     prcLBuffer * 100f,
                     prcCompose * 100f,
-                    prcDraw2D * 100f);
+                    prcDraw2D * 100f));
 
                 if (deferred_gbuffer > 0)
                 {
-                    float prcPass1 = (float)deferred_gbuffer1 / (float)deferred_gbuffer;
-                    float prcPass2 = (float)deferred_gbuffer2 / (float)deferred_gbuffer;
-                    float prcPass3 = (float)deferred_gbuffer3 / (float)deferred_gbuffer;
+                    float prcPass1 = (float)deferred_gbufferInit / (float)deferred_gbuffer;
+                    float prcPass2 = (float)deferred_gbufferDraw / (float)deferred_gbuffer;
+                    float prcPass3 = (float)deferred_gbufferResolve / (float)deferred_gbuffer;
 
-                    this.Statistics[5] = string.Format(
-                        "GBuffer = {0:000000}; Pass1 {1:00}%; Pass2 {2:00}%; Pass3 {3:00}%",
+                    Counters.SetStatistics("Scene.Draw.deferred_gbuffer PRC", string.Format(
+                        "GBuffer = {0:000000}; Init {1:00}%; Draw {2:00}%; Resolve {3:00}%",
                         deferred_gbuffer,
                         prcPass1 * 100f,
                         prcPass2 * 100f,
-                        prcPass3 * 100f);
+                        prcPass3 * 100f));
+
+                    Counters.SetStatistics("Scene.Draw.deferred_gbuffer CNT", string.Format(
+                        "GBuffer = {0:000000}; Init {1:000000}; Draw {2:000000}; Resolve {3:000000}",
+                        deferred_gbuffer,
+                        deferred_gbufferInit,
+                        deferred_gbufferDraw,
+                        deferred_gbufferResolve));
                 }
 
                 if (deferred_lbuffer > 0)
                 {
-                    float prcPass1 = (float)deferred_lbuffer1 / (float)deferred_lbuffer;
-                    float prcPass2 = (float)deferred_lbuffer2 / (float)deferred_lbuffer;
-                    float prcPass3 = (float)deferred_lbuffer3 / (float)deferred_lbuffer;
+                    float prcPass1 = (float)deferred_lbufferInit / (float)deferred_lbuffer;
+                    float prcPass2 = (float)deferred_lbufferDir / (float)deferred_lbuffer;
+                    float prcPass3 = (float)deferred_lbufferPoi / (float)deferred_lbuffer;
+                    float prcPass4 = (float)deferred_lbufferSpo / (float)deferred_lbuffer;
 
-                    this.Statistics[6] = string.Format(
-                        "LBuffer = {0:000000}; Pass1 {1:00}%; Pass2 {2:00}%; Pass3 {3:00}%",
+                    Counters.SetStatistics("Scene.Draw.deferred_lbuffer PRC", string.Format(
+                        "LBuffer = {0:000000}; Init {1:00}%; Directionals {2:00}%; Points {3:00}%; Spots {4:00}%",
                         deferred_lbuffer,
                         prcPass1 * 100f,
                         prcPass2 * 100f,
-                        prcPass3 * 100f);
+                        prcPass3 * 100f,
+                        prcPass4 * 100f));
+
+                    Counters.SetStatistics("Scene.Draw.deferred_lbuffer CNT", string.Format(
+                        "LBuffer = {0:000000}; Init {1:000000}; Directionals {2:000000}; Points {3:000000}; Spots {4:000000}",
+                        deferred_lbuffer,
+                        deferred_lbufferInit,
+                        deferred_lbufferDir,
+                        deferred_lbufferPoi,
+                        deferred_lbufferSpo));
+                }
+
+                if (deferred_compose > 0)
+                {
+                    float prcPass1 = (float)deferred_composeInit / (float)deferred_compose;
+                    float prcPass2 = (float)deferred_composeDraw / (float)deferred_compose;
+
+                    Counters.SetStatistics("Scene.Draw.deferred_compose PRC", string.Format(
+                        "Compose = {0:000000}; Init {1:00}%; Draw {2:00}%",
+                        deferred_compose,
+                        prcPass1 * 100f,
+                        prcPass2 * 100f));
+
+                    Counters.SetStatistics("Scene.Draw.deferred_compose CNT", string.Format(
+                        "Compose = {0:000000}; Init {1:000000}; Draw {2:000000}",
+                        deferred_compose,
+                        deferred_composeInit,
+                        deferred_composeDraw));
                 }
             }
 
@@ -715,13 +760,13 @@ namespace Engine
             float prcDR = (float)totalDeferred / (float)total;
             float prcOther = (float)other / (float)total;
 
-            this.Statistics[1] = string.Format(
+            Counters.SetStatistics("Scene.Draw", string.Format(
                 "TOTAL = {0:000000}; Shadows {1:00}%; Forwars {2:00}%; Deferred {3:00}%; Other {4:00}%;",
                 total,
                 prcSM * 100f,
                 prcFR * 100f,
                 prcDR * 100f,
-                prcOther * 100f);
+                prcOther * 100f));
 #endif
         }
         /// <summary>
