@@ -601,29 +601,29 @@ namespace Engine.Effects
             {
                 this.EyePositionWorld = eyePositionWorld;
 
-                var directional = lights.EnabledDirectionalLights;
-                var point = lights.EnabledPointLights;
-                var spot = lights.EnabledSpotLights;
+                var dirLights = lights.EnabledDirectionalLights;
+                var pointLights = lights.EnabledPointLights;
+                var spotLights = lights.EnabledSpotLights;
 
                 this.DirLights = new[]
                 {
-                    directional.Length > 0 ? new BufferDirectionalLight(directional[0]) : new BufferDirectionalLight(),
-                    directional.Length > 1 ? new BufferDirectionalLight(directional[1]) : new BufferDirectionalLight(),
-                    directional.Length > 2 ? new BufferDirectionalLight(directional[2]) : new BufferDirectionalLight(),
+                    dirLights.Length > 0 ? new BufferDirectionalLight(dirLights[0]) : new BufferDirectionalLight(),
+                    dirLights.Length > 1 ? new BufferDirectionalLight(dirLights[1]) : new BufferDirectionalLight(),
+                    dirLights.Length > 2 ? new BufferDirectionalLight(dirLights[2]) : new BufferDirectionalLight(),
                 };
                 this.PointLights = new[]
                 {
-                    point.Length > 0 ? new BufferPointLight(point[0]) : new BufferPointLight(),
-                    point.Length > 1 ? new BufferPointLight(point[1]) : new BufferPointLight(),
-                    point.Length > 2 ? new BufferPointLight(point[2]) : new BufferPointLight(),
-                    point.Length > 3 ? new BufferPointLight(point[3]) : new BufferPointLight(),
+                    pointLights.Length > 0 ? new BufferPointLight(pointLights[0]) : new BufferPointLight(),
+                    pointLights.Length > 1 ? new BufferPointLight(pointLights[1]) : new BufferPointLight(),
+                    pointLights.Length > 2 ? new BufferPointLight(pointLights[2]) : new BufferPointLight(),
+                    pointLights.Length > 3 ? new BufferPointLight(pointLights[3]) : new BufferPointLight(),
                 };
                 this.SpotLights = new[]
                 {
-                    spot.Length > 0 ? new BufferSpotLight(spot[0]) : new BufferSpotLight(),
-                    spot.Length > 1 ? new BufferSpotLight(spot[1]) : new BufferSpotLight(),
-                    spot.Length > 2 ? new BufferSpotLight(spot[2]) : new BufferSpotLight(),
-                    spot.Length > 3 ? new BufferSpotLight(spot[3]) : new BufferSpotLight(),
+                    spotLights.Length > 0 ? new BufferSpotLight(spotLights[0]) : new BufferSpotLight(),
+                    spotLights.Length > 1 ? new BufferSpotLight(spotLights[1]) : new BufferSpotLight(),
+                    spotLights.Length > 2 ? new BufferSpotLight(spotLights[2]) : new BufferSpotLight(),
+                    spotLights.Length > 3 ? new BufferSpotLight(spotLights[3]) : new BufferSpotLight(),
                 };
 
                 this.FogStart = lights.FogStart;

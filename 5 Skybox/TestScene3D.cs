@@ -105,26 +105,6 @@ namespace Skybox
 
             #endregion
 
-            #region Moving fire
-
-            this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { Vector3.Zero }, 0.5f, Color.Orange, "flare2.png"));
-
-            this.movingFireLight = new SceneLightPoint()
-            {
-                Name = "Moving fire light",
-                LightColor = Color.Orange,
-                AmbientIntensity = 10f,
-                DiffuseIntensity = 5f,
-                Position = Vector3.Zero,
-                Radius = 10f,
-                Enabled = true,
-                CastShadow = false,
-            };
-
-            this.Lights.Add(this.movingFireLight);
-
-            #endregion
-
             #region Torchs
 
             this.torchs = this.AddInstancingModel(new ModelInstancedDescription()
@@ -158,10 +138,10 @@ namespace Skybox
                 {
                     Name = string.Format("Torch {0}", i),
                     LightColor = color,
-                    AmbientIntensity = 20f,
-                    DiffuseIntensity = 10f,
+                    AmbientIntensity = 0.1f,
+                    DiffuseIntensity = 5f,
                     Position = firePositions3D[i],
-                    Radius = 10f,
+                    Radius = 4f,
                     Enabled = true,
                     CastShadow = false,
                 };
@@ -170,6 +150,26 @@ namespace Skybox
             }
 
             this.torchFire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions3D, 0.5f, Color.Green, "flare1.png"));
+
+            #endregion
+
+            #region Moving fire
+
+            this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { Vector3.Zero }, 0.5f, Color.Orange, "flare2.png"));
+
+            this.movingFireLight = new SceneLightPoint()
+            {
+                Name = "Moving fire light",
+                LightColor = Color.Orange,
+                AmbientIntensity = 0.1f,
+                DiffuseIntensity = 1f,
+                Position = Vector3.Zero,
+                Radius = 5f,
+                Enabled = true,
+                CastShadow = false,
+            };
+
+            this.Lights.Add(this.movingFireLight);
 
             #endregion
 

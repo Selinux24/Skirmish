@@ -24,13 +24,28 @@ namespace Engine.Effects
         /// </summary>
         public float SpecularPower;
         /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad1;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad2;
+
+        /// <summary>
         /// Size in bytes
         /// </summary>
         public int Stride
         {
             get
             {
+#if DEBUG
+                int size = Marshal.SizeOf(typeof(BufferMaterials));
+                if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+                return size;
+#else
                 return Marshal.SizeOf(typeof(BufferMaterials));
+#endif
             }
         }
 
@@ -43,17 +58,9 @@ namespace Engine.Effects
             this.Diffuse = material.DiffuseColor;
             this.SpecularIntensity = material.SpecularIntensity;
             this.SpecularPower = material.SpecularPower;
-        }
 
-        /// <summary>
-        /// Sets material data
-        /// </summary>
-        /// <param name="material">Material</param>
-        public void SetMaterial(Material material)
-        {
-            this.Diffuse = material.DiffuseColor;
-            this.SpecularIntensity = material.SpecularIntensity;
-            this.SpecularPower = material.SpecularPower;
+            this.Pad1 = 1000;
+            this.Pad2 = 2000;
         }
     };
 }

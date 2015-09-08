@@ -99,11 +99,11 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.dirLights.GetRawValue(default(BufferDirectionalLight).Stride * 3))
+                using (DataStream ds = this.dirLights.GetRawValue(default(BufferDirectionalLight).Stride * BufferDirectionalLight.MAX))
                 {
                     ds.Position = 0;
 
-                    return ds.ReadRange<BufferDirectionalLight>(3);
+                    return ds.ReadRange<BufferDirectionalLight>(BufferDirectionalLight.MAX);
                 }
             }
             set
@@ -112,7 +112,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.dirLights.SetRawValue(ds, default(BufferDirectionalLight).Stride * 3);
+                    this.dirLights.SetRawValue(ds, default(BufferDirectionalLight).Stride * BufferDirectionalLight.MAX);
                 }
             }
         }
@@ -123,11 +123,11 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.pointLights.GetRawValue(default(BufferPointLight).Stride * 4))
+                using (DataStream ds = this.pointLights.GetRawValue(default(BufferPointLight).Stride * BufferPointLight.MAX))
                 {
                     ds.Position = 0;
 
-                    return ds.ReadRange<BufferPointLight>(4);
+                    return ds.ReadRange<BufferPointLight>(BufferPointLight.MAX);
                 }
             }
             set
@@ -136,7 +136,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.pointLights.SetRawValue(ds, default(BufferPointLight).Stride * 4);
+                    this.pointLights.SetRawValue(ds, default(BufferPointLight).Stride * BufferPointLight.MAX);
                 }
             }
         }
@@ -147,11 +147,11 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.spotLights.GetRawValue(default(BufferSpotLight).Stride * 4))
+                using (DataStream ds = this.spotLights.GetRawValue(default(BufferSpotLight).Stride * BufferSpotLight.MAX))
                 {
                     ds.Position = 0;
 
-                    return ds.ReadRange<BufferSpotLight>(4);
+                    return ds.ReadRange<BufferSpotLight>(BufferSpotLight.MAX);
                 }
             }
             set
@@ -160,7 +160,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.spotLights.SetRawValue(ds, default(BufferSpotLight).Stride * 4);
+                    this.spotLights.SetRawValue(ds, default(BufferSpotLight).Stride * BufferSpotLight.MAX);
                 }
             }
         }
@@ -439,25 +439,29 @@ namespace Engine.Effects
             {
                 this.EyePositionWorld = eyePositionWorld;
 
+                var dirLights = lights.EnabledDirectionalLights;
+                var pointLights = lights.EnabledPointLights;
+                var spotLights = lights.EnabledSpotLights;
+
                 this.DirLights = new[]
                 {
-                    lights.DirectionalLights.Length > 0 ? new BufferDirectionalLight(lights.DirectionalLights[0]) : new BufferDirectionalLight(),
-                    lights.DirectionalLights.Length > 1 ? new BufferDirectionalLight(lights.DirectionalLights[1]) : new BufferDirectionalLight(),
-                    lights.DirectionalLights.Length > 2 ? new BufferDirectionalLight(lights.DirectionalLights[2]) : new BufferDirectionalLight(),
+                    dirLights.Length > 0 ? new BufferDirectionalLight(dirLights[0]) : new BufferDirectionalLight(),
+                    dirLights.Length > 1 ? new BufferDirectionalLight(dirLights[1]) : new BufferDirectionalLight(),
+                    dirLights.Length > 2 ? new BufferDirectionalLight(dirLights[2]) : new BufferDirectionalLight(),
                 };
                 this.PointLights = new[]
                 {
-                    lights.PointLights.Length > 0 ? new BufferPointLight(lights.PointLights[0]) : new BufferPointLight(),
-                    lights.PointLights.Length > 1 ? new BufferPointLight(lights.PointLights[1]) : new BufferPointLight(),
-                    lights.PointLights.Length > 2 ? new BufferPointLight(lights.PointLights[2]) : new BufferPointLight(),
-                    lights.PointLights.Length > 3 ? new BufferPointLight(lights.PointLights[3]) : new BufferPointLight(),
+                    pointLights.Length > 0 ? new BufferPointLight(pointLights[0]) : new BufferPointLight(),
+                    pointLights.Length > 1 ? new BufferPointLight(pointLights[1]) : new BufferPointLight(),
+                    pointLights.Length > 2 ? new BufferPointLight(pointLights[2]) : new BufferPointLight(),
+                    pointLights.Length > 3 ? new BufferPointLight(pointLights[3]) : new BufferPointLight(),
                 };
                 this.SpotLights = new[]
                 {
-                    lights.SpotLights.Length > 0 ? new BufferSpotLight(lights.SpotLights[0]) : new BufferSpotLight(),
-                    lights.SpotLights.Length > 1 ? new BufferSpotLight(lights.SpotLights[1]) : new BufferSpotLight(),
-                    lights.SpotLights.Length > 2 ? new BufferSpotLight(lights.SpotLights[2]) : new BufferSpotLight(),
-                    lights.SpotLights.Length > 3 ? new BufferSpotLight(lights.SpotLights[3]) : new BufferSpotLight(),
+                    spotLights.Length > 0 ? new BufferSpotLight(spotLights[0]) : new BufferSpotLight(),
+                    spotLights.Length > 1 ? new BufferSpotLight(spotLights[1]) : new BufferSpotLight(),
+                    spotLights.Length > 2 ? new BufferSpotLight(spotLights[2]) : new BufferSpotLight(),
+                    spotLights.Length > 3 ? new BufferSpotLight(spotLights[3]) : new BufferSpotLight(),
                 };
 
                 this.FogStart = lights.FogStart;

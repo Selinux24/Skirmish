@@ -321,6 +321,7 @@
     <Compile Include="Content\CoordinateSystems.cs" />
     <Compile Include="Content\GeometryOrientations.cs" />
     <Compile Include="Effects\EffectDeferred.cs" />
+    <Compile Include="EngineException.cs" />
     <Compile Include="GBuffer.cs" />
     <Compile Include="Effects\EffectInstancingGBuffer.cs" />
     <Compile Include="Effects\EffectBasicGBuffer.cs" />

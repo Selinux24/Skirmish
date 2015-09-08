@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 namespace Engine.Effects
 {
     using Engine.Common;
+    using System;
 
     /// <summary>
     /// Directional light buffer
@@ -41,13 +42,28 @@ namespace Engine.Effects
         /// </summary>
         public float Enabled;
         /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad1;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad2;
+
+        /// <summary>
         /// Size in bytes
         /// </summary>
         public int Stride
         {
             get
             {
+#if DEBUG
+                int size = Marshal.SizeOf(typeof(BufferDirectionalLight));
+                if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+                return size;
+#else
                 return Marshal.SizeOf(typeof(BufferDirectionalLight));
+#endif
             }
         }
 
@@ -63,6 +79,9 @@ namespace Engine.Effects
             this.Direction = light.Direction;
             this.CastShadow = light.CastShadow ? 1f : 0f;
             this.Enabled = light.Enabled ? 1f : 0f;
+
+            this.Pad1 = 1000;
+            this.Pad2 = 2000;
         }
     }
 
@@ -106,13 +125,24 @@ namespace Engine.Effects
         /// </summary>
         public float Enabled;
         /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad1;
+
+        /// <summary>
         /// Size in bytes
         /// </summary>
         public int Stride
         {
             get
             {
+#if DEBUG
+                int size = Marshal.SizeOf(typeof(BufferPointLight));
+                if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+                return size;
+#else
                 return Marshal.SizeOf(typeof(BufferPointLight));
+#endif
             }
         }
 
@@ -129,6 +159,8 @@ namespace Engine.Effects
             this.Radius = light.Radius;
             this.CastShadow = light.CastShadow ? 1f : 0f;
             this.Enabled = light.Enabled ? 1f : 0f;
+
+            this.Pad1 = 1000;
         }
     }
 
@@ -180,13 +212,24 @@ namespace Engine.Effects
         /// </summary>
         public float Enabled;
         /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad1;
+
+        /// <summary>
         /// Size in bytes
         /// </summary>
         public int Stride
         {
             get
             {
+#if DEBUG
+                int size = Marshal.SizeOf(typeof(BufferSpotLight));
+                if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+                return size;
+#else
                 return Marshal.SizeOf(typeof(BufferSpotLight));
+#endif
             }
         }
 
@@ -205,6 +248,8 @@ namespace Engine.Effects
             this.Radius = light.Radius;
             this.CastShadow = light.CastShadow ? 1f : 0f;
             this.Enabled = light.Enabled ? 1f : 0f;
+
+            this.Pad1 = 1000;
         }
     }
 }
