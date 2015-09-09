@@ -107,7 +107,14 @@ namespace Collada
                 ModelFileName = "Poly.dae",
                 Instances = 2
             });
-            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(0.5f, Color.White, "raindrop.dds"));
+
+            var rainEmitter = new ParticleEmitter()
+            {
+                Color = Color.LightBlue,
+                Size = 0.5f,
+                Position = Vector3.Zero,
+            };
+            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(rainEmitter, "raindrop.dds"));
 
             BoundingBox[] bboxes = this.ground.pickingQuadtree.GetBoundingBoxes(5);
             Line[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
@@ -155,7 +162,7 @@ namespace Collada
                 DiffuseIntensity = 0.7f,
                 Position = Vector3.Zero,
                 Radius = 5f,
-                Enabled = true, 
+                Enabled = true,
                 CastShadow = false,
             });
 

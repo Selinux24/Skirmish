@@ -838,7 +838,7 @@ namespace Engine
                 this.GeometryMap[3],
                 context.ShadowMap);
 
-            this.Game.Graphics.SetDepthStencilDeferredLighting();
+            this.Game.Graphics.SetDepthStencilRDZDisabled();
             this.Game.Graphics.SetBlendDeferredLighting();
 #if DEBUG
             swPrepare.Stop();
@@ -895,7 +895,7 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                this.Game.Graphics.SetRasterizerCullNone();
+                this.Game.Graphics.SetRasterizerCullFrontFace();
 
                 for (int i = 0; i < pointLights.Length; i++)
                 {
@@ -903,11 +903,9 @@ namespace Engine
 
                     if (context.Frustum.Contains(light.BoundingSphere) != ContainmentType.Disjoint)
                     {
-                        Matrix local = Matrix.Scaling(light.Radius) * Matrix.Translation(light.Position);
-
                         effect.UpdatePerLight(
                             light,
-                            context.World * local,
+                            context.World * light.Transform,
                             context.ViewProjection);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)
@@ -942,7 +940,7 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                this.Game.Graphics.SetRasterizerCullNone();
+                this.Game.Graphics.SetRasterizerCullFrontFace();
 
                 for (int i = 0; i < spotLights.Length; i++)
                 {
@@ -950,11 +948,9 @@ namespace Engine
 
                     if (context.Frustum.Contains(light.BoundingSphere) != ContainmentType.Disjoint)
                     {
-                        Matrix local = Matrix.Scaling(light.Radius) * Matrix.Translation(light.Position);
-
                         effect.UpdatePerLight(
                             light,
-                            context.World * local,
+                            context.World * light.Transform,
                             context.ViewProjection);
 
                         for (int p = 0; p < effectTechnique.Description.PassCount; p++)

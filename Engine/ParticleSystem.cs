@@ -128,18 +128,20 @@ namespace Engine
 
             if (description.EmitterType == ParticleSystemDescription.EmitterTypes.FixedPosition)
             {
-                this.initialParticles = description.EmitterPositions.Length;
+                this.initialParticles = description.Emitters.Length;
 
                 data = new VertexParticle[this.initialParticles];
 
                 for (int i = 0; i < this.initialParticles; i++)
                 {
+                    var emitter = description.Emitters[i];
+
                     data[i] = new VertexParticle
                     {
-                        Position = description.EmitterPositions[i],
-                        Velocity = description.Acceleration,
-                        Size = new Vector2(description.ParticleSize),
-                        Color = description.Color,
+                        Position = emitter.Position,
+                        Velocity = description.ParticleClass == ParticleClasses.Rain ? description.Acceleration : description.Acceleration * emitter.Size,
+                        Size = new Vector2(emitter.Size),
+                        Color = emitter.Color,
                         Age = 0,
                         Type = (uint)ParticleTypes.Emitter,
                     };
@@ -149,13 +151,15 @@ namespace Engine
             {
                 this.initialParticles = 1;
 
+                var emitter = description.Emitters[0];
+
                 VertexParticle p = new VertexParticle
                 {
                     //REVISION: it was camera position
                     Position = Vector3.Zero,
-                    Velocity = description.Acceleration,
-                    Size = new Vector2(description.ParticleSize),
-                    Color = description.Color,
+                    Velocity = description.ParticleClass == ParticleClasses.Rain ? description.Acceleration : description.Acceleration * emitter.Size,
+                    Size = new Vector2(emitter.Size),
+                    Color = emitter.Color,
                     Age = 0,
                     Type = (uint)ParticleTypes.Emitter,
                 };
@@ -329,6 +333,25 @@ namespace Engine
     }
 
     /// <summary>
+    /// Particle emitter
+    /// </summary>
+    public class ParticleEmitter
+    {
+        /// <summary>
+        /// Particle size
+        /// </summary>
+        public float Size = 1f;
+        /// <summary>
+        /// Particle color
+        /// </summary>
+        public Color Color = Color.White;
+        /// <summary>
+        /// Position
+        /// </summary>
+        public Vector3 Position = Vector3.Zero;
+    }
+
+    /// <summary>
     /// Particle system description
     /// </summary>
     public class ParticleSystemDescription
@@ -365,14 +388,6 @@ namespace Engine
         /// </summary>
         public float EmitterAge = 0.001f;
         /// <summary>
-        /// Particle size
-        /// </summary>
-        public float ParticleSize = 1f;
-        /// <summary>
-        /// Particle color
-        /// </summary>
-        public Color Color = Color.White;
-        /// <summary>
         /// Acceleration vector
         /// </summary>
         public Vector3 Acceleration = GameEnvironment.Gravity;
@@ -380,10 +395,6 @@ namespace Engine
         /// Emitter type
         /// </summary>
         public EmitterTypes EmitterType = EmitterTypes.FromCamera;
-        /// <summary>
-        /// Emitter position list
-        /// </summary>
-        public Vector3[] EmitterPositions = null;
         /// <summary>
         /// Texture list
         /// </summary>
@@ -396,38 +407,58 @@ namespace Engine
         /// Is opaque object
         /// </summary>
         public bool Opaque = true;
+        /// <summary>
+        /// Emitters
+        /// </summary>
+        public ParticleEmitter[] Emitters = null;
 
         /// <summary>
         /// Creates a fire particle system
         /// </summary>
-        /// <param name="positions">Position list</param>
-        /// <param name="particleSize">Particle size</param>
+        /// <param name="emitter">Emitter</param>
         /// <param name="textures">Texture list</param>
         /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Fire(Vector3[] positions, float particleSize, Color color, params string[] textures)
+        public static ParticleSystemDescription Fire(ParticleEmitter emitter, params string[] textures)
+        {
+            return Fire(new[] { emitter }, textures);
+        }
+        /// <summary>
+        /// Creates a fire particle system
+        /// </summary>
+        /// <param name="emitters">Emitter list</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public static ParticleSystemDescription Fire(ParticleEmitter[] emitters, params string[] textures)
         {
             return new ParticleSystemDescription()
             {
                 ParticleClass = ParticleClasses.Fire,
                 MaximumParticles = 500,
-                MaximumAge = 1.0f,
+                MaximumAge = 0.5f,
                 EmitterAge = 0.005f,
-                ParticleSize = particleSize,
-                Acceleration = new Vector3(0.0f, 7.8f, 0.0f) * particleSize,
+                Acceleration = new Vector3(0.0f, 5.8f, 0.0f),
                 EmitterType = EmitterTypes.FixedPosition,
-                EmitterPositions = positions,
                 Textures = textures,
-                Color = color,
+                Emitters = emitters
             };
         }
         /// <summary>
         /// Creates a smoke particle system
         /// </summary>
-        /// <param name="positions">Position list</param>
-        /// <param name="particleSize">Particle size</param>
+        /// <param name="emitter">Emitter</param>
         /// <param name="textures">Texture list</param>
         /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Smoke(Vector3[] positions, float particleSize, Color color, params string[] textures)
+        public static ParticleSystemDescription Smoke(ParticleEmitter emitter, params string[] textures)
+        {
+            return Smoke(new[] { emitter }, textures);
+        }
+        /// <summary>
+        /// Creates a smoke particle system
+        /// </summary>
+        /// <param name="emitters">Emitter list</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public static ParticleSystemDescription Smoke(ParticleEmitter[] emitters, params string[] textures)
         {
             return new ParticleSystemDescription()
             {
@@ -435,21 +466,29 @@ namespace Engine
                 MaximumParticles = 500,
                 MaximumAge = 1.0f,
                 EmitterAge = 0.33f,
-                ParticleSize = particleSize,
-                Acceleration = new Vector3(0.0f, 2f, 0.0f) * particleSize,
+                Acceleration = new Vector3(0.0f, 2f, 0.0f),
                 EmitterType = EmitterTypes.FixedPosition,
-                EmitterPositions = positions,
                 Textures = textures,
-                Color = color,
+                Emitters = emitters
             };
         }
         /// <summary>
         /// Creates a rain particle system
         /// </summary>
-        /// <param name="particleSize">Particle size</param>
+        /// <param name="emitter">Emitter</param>
         /// <param name="textures">Texture list</param>
         /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Rain(float particleSize, Color color, params string[] textures)
+        public static ParticleSystemDescription Rain(ParticleEmitter emitter, params string[] textures)
+        {
+            return Rain(new[] { emitter }, textures);
+        }
+        /// <summary>
+        /// Creates a rain particle system
+        /// </summary>
+        /// <param name="emitters">Emitter list</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public static ParticleSystemDescription Rain(ParticleEmitter[] emitters, params string[] textures)
         {
             return new ParticleSystemDescription()
             {
@@ -457,11 +496,10 @@ namespace Engine
                 MaximumParticles = 10000,
                 MaximumAge = 3.0f,
                 EmitterAge = 0.002f,
-                ParticleSize = particleSize,
                 Acceleration = (GameEnvironment.Gravity + Vector3.UnitX),
                 EmitterType = EmitterTypes.FromCamera,
                 Textures = textures,
-                Color = color,
+                Emitters = emitters
             };
         }
     }

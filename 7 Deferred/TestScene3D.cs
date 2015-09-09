@@ -146,7 +146,13 @@ namespace DeferredTest
 
             #region Moving fire
 
-            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(new[] { new Vector3(0, 10, 0) }, 0.5f, Color.Yellow, "flare2.png"));
+            var fireEmitter = new ParticleEmitter()
+            {
+                Color = Color.Yellow,
+                Size = 0.5f,
+                Position = new Vector3(0, 10, 0),
+            };
+            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(fireEmitter, "flare2.png"));
 
             #endregion
 
@@ -714,28 +720,36 @@ namespace DeferredTest
         {
             this.Lights.ClearSpotLights();
 
-            this.spotLight = new SceneLightSpot()
+            Vector3 lightPosition;
+            if (this.terrain.FindTopGroundPosition(0, 0, out lightPosition))
             {
-                Name = "Spot the dog",
-                LightColor = Color.Yellow,
-                AmbientIntensity = 1,
-                DiffuseIntensity = 1,
-                Position = new Vector3(0, 15, 0),
-                Direction = Vector3.Down,
-                Angle = 30,
-                Radius = 50,
-                Enabled = true,
-                CastShadow = false,
-            };
+                lightPosition.Y += 2.5f;
 
-            this.Lights.Add(this.spotLight);
+                this.spotLight = new SceneLightSpot()
+                {
+                    Name = "Spot the dog",
+                    LightColor = Color.Yellow,
+                    AmbientIntensity = 0.2f,
+                    DiffuseIntensity = 1f,
+                    Position = lightPosition,
+                    Direction = Vector3.Down,
+                    Angle = 15,
+                    Radius = 5,
+                    Enabled = true,
+                    CastShadow = false,
+                };
 
-            this.lineDrawer.Active = true;
-            this.lineDrawer.Visible = true;
+                this.Lights.Add(this.spotLight);
+
+                this.lineDrawer.Active = true;
+                this.lineDrawer.Visible = true;
+            }
         }
         private void ClearSpotLights()
         {
             this.Lights.ClearSpotLights();
+
+            this.spotLight = null;
 
             this.lineDrawer.Active = false;
             this.lineDrawer.Visible = false;
@@ -745,17 +759,18 @@ namespace DeferredTest
         {
             this.Lights.ClearPointLights();
 
+            int sep = 2;
             int f = 12;
-            int l = (f - 1) * 5;
+            int l = (f - 1) * sep;
 
             for (int i = 0; i < f; i++)
             {
                 for (int x = 0; x < f; x++)
                 {
                     Vector3 lightPosition;
-                    if (!this.terrain.FindTopGroundPosition((i * 10) - l, (x * 10) - l, out lightPosition))
+                    if (!this.terrain.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out lightPosition))
                     {
-                        lightPosition = new Vector3((i * 10) - l, 1f, (x * 10) - l);
+                        lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
                     }
                     else
                     {
@@ -767,14 +782,16 @@ namespace DeferredTest
                         Name = string.Format("Point {0}", this.Lights.PointLights.Length),
                         Enabled = true,
                         LightColor = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f),
-                        AmbientIntensity = rnd.NextFloat(0, 1),
-                        DiffuseIntensity = rnd.NextFloat(0, 1),
+                        AmbientIntensity = 0.1f,
+                        DiffuseIntensity = 5f,
                         Position = lightPosition,
-                        Radius = rnd.NextFloat(1, 25),
+                        Radius = 5f,
                         State = rnd.NextFloat(0, 1) >= 0.5f ? 1 : -1,
                     };
 
                     this.Lights.Add(pointLight);
+
+                    //if (this.Lights.PointLights.Length >= 4) return;
                 }
             }
         }

@@ -487,8 +487,6 @@ namespace Engine
 
             #endregion
 
-
-
             #region No depth, no stencil state
 
             this.depthStencilNone = new DepthStencilState(
@@ -697,17 +695,17 @@ namespace Engine
             #region Deferred lighting blend state
             {
                 BlendStateDescription desc = new BlendStateDescription();
-                desc.AlphaToCoverageEnable = true;
+                desc.AlphaToCoverageEnable = false;
                 desc.IndependentBlendEnable = false;
 
                 desc.RenderTarget[0].IsBlendEnabled = true;
                 desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
 
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Maximum;
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationBlend = BlendOption.One;
 
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Maximum;
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
 

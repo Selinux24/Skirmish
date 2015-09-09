@@ -250,18 +250,18 @@ float4 ComputeSpotLight(
 	float4 litColor = 0;
 
 	float3 lightDirection = position - L.Position;
+	float distance = length(lightDirection);
+	lightDirection /= distance;
+
 	float lightToSurfaceAngle = degrees(acos(dot(lightDirection, L.Direction)));
 	[flatten]
 	if(lightToSurfaceAngle <= L.Angle)
 	{
-		float distance = length(lightDirection);
-		lightDirection /= distance;
-
 		litColor = ComputeBaseLight(
 			L.Color,
 			L.Ambient,
 			L.Diffuse,
-			L.Direction,
+			lightDirection,
 			toEye,
 			color,
 			position,
@@ -270,6 +270,8 @@ float4 ComputeSpotLight(
 			specularPower);
 
 		float attenuation = CalcSphericAttenuation(1, L.Diffuse, L.Radius, distance);
+
+		//attenuation *= CalcSphericAttenuation(1, L.Diffuse, L.Angle, lightToSurfaceAngle);
 
 		litColor * attenuation;
 	}
