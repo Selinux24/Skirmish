@@ -144,20 +144,19 @@ namespace Engine
         /// Objects updating
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="context">Context</param>
-        public override void Update(GameTime gameTime, Context context)
+        public override void Update(GameTime gameTime)
         {
-            this.terrain.Update(gameTime, context);
+            this.terrain.Update(gameTime);
 
             if (this.vegetation != null && this.vegetation.Length > 0)
             {
                 for (int i = 0; i < this.vegetation.Length; i++)
                 {
-                    this.vegetation[i].Update(gameTime, context);
+                    this.vegetation[i].Update(gameTime);
                 }
             }
 
-            if (this.skydom != null) this.skydom.Update(gameTime, context);
+            if (this.skydom != null) this.skydom.Update(gameTime);
         }
         /// <summary>
         /// Objects drawing

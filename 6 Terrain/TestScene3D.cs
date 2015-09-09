@@ -639,7 +639,7 @@ namespace TerrainTest
         {
             base.Draw(gameTime);
 
-            this.shadowMapDrawer.Texture = this.useDebugTex ? this.debugTex : this.DrawContext.ShadowMap;
+            this.shadowMapDrawer.Texture = this.useDebugTex ? this.debugTex : this.Renderer.GetResource(SceneRendererResultEnum.ShadowMap);
         }
 
         private void DEBUGComputePath()

@@ -37,7 +37,7 @@ namespace DeferredTest
         private Random rnd = new Random(0);
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.DeferredLightning)
+            : base(game)
         {
 
         }
@@ -270,12 +270,19 @@ namespace DeferredTest
         }
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
             }
+
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning;
+            }
+
+            base.Update(gameTime);
 
             Ray cursorRay = this.GetPickingRay();
 
@@ -308,22 +315,23 @@ namespace DeferredTest
                 }
             }
 
-            if (this.DrawContext.GeometryMap != null && this.DrawContext.GeometryMap.Length > 0)
             {
                 if (this.Game.Input.KeyJustReleased(Keys.F1))
                 {
-                    if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[0] &&
+                    var colorMap = this.Renderer.GetResource(SceneRendererResultEnum.ColorMap);
+
+                    if (this.bufferDrawer.Texture == colorMap &&
                         this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
                     {
                         //Specular Factor
-                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[0];
+                        this.bufferDrawer.Texture = colorMap;
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
                         this.help.Text = "Specular Factor";
                     }
                     else
                     {
                         //Colors
-                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[0];
+                        this.bufferDrawer.Texture = colorMap;
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                         this.help.Text = "Colors";
                     }
@@ -332,18 +340,20 @@ namespace DeferredTest
 
                 if (this.Game.Input.KeyJustReleased(Keys.F2))
                 {
-                    if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[1] &&
+                    var normalMap = this.Renderer.GetResource(SceneRendererResultEnum.NormalMap);
+
+                    if (this.bufferDrawer.Texture == normalMap &&
                         this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
                     {
                         //Specular Power
-                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
+                        this.bufferDrawer.Texture = normalMap;
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
                         this.help.Text = "Specular Power";
                     }
                     else
                     {
                         //Normals
-                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[1];
+                        this.bufferDrawer.Texture = normalMap;
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                         this.help.Text = "Normals";
                     }
@@ -352,18 +362,20 @@ namespace DeferredTest
 
                 if (this.Game.Input.KeyJustReleased(Keys.F3))
                 {
-                    if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[2] &&
+                    var depthMap = this.Renderer.GetResource(SceneRendererResultEnum.DepthMap);
+
+                    if (this.bufferDrawer.Texture == depthMap &&
                         this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
                     {
                         //Depth
-                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
+                        this.bufferDrawer.Texture = depthMap;
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
                         this.help.Text = "Depth";
                     }
                     else
                     {
                         //Position
-                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[2];
+                        this.bufferDrawer.Texture = depthMap;
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                         this.help.Text = "Position";
                     }
@@ -372,18 +384,20 @@ namespace DeferredTest
 
                 if (this.Game.Input.KeyJustReleased(Keys.F4))
                 {
-                    if (this.bufferDrawer.Texture == this.DrawContext.GeometryMap[3] &&
+                    var other = this.Renderer.GetResource(SceneRendererResultEnum.Other);
+
+                    if (this.bufferDrawer.Texture == other &&
                         this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
                     {
                         //Specular intensity
-                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[3];
+                        this.bufferDrawer.Texture = other;
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
                         this.help.Text = "Specular Intensity";
                     }
                     else
                     {
                         //Shadow positions
-                        this.bufferDrawer.Texture = this.DrawContext.GeometryMap[3];
+                        this.bufferDrawer.Texture = other;
                         this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                         this.help.Text = "Shadow Positions";
                     }
@@ -393,10 +407,12 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                if (this.DrawContext.ShadowMap != null)
+                var shadowMap = this.Renderer.GetResource(SceneRendererResultEnum.ShadowMap);
+
+                if (shadowMap != null)
                 {
                     //Shadow map
-                    this.bufferDrawer.Texture = this.DrawContext.ShadowMap;
+                    this.bufferDrawer.Texture = shadowMap;
                     this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Red;
                     this.bufferDrawer.Visible = true;
                     this.help.Text = "Shadow map";
@@ -409,10 +425,12 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
-                if (this.DrawContext.LightMap != null)
+                var lightMap = this.Renderer.GetResource(SceneRendererResultEnum.LightMap);
+
+                if (lightMap != null)
                 {
                     //Light map
-                    this.bufferDrawer.Texture = this.DrawContext.LightMap;
+                    this.bufferDrawer.Texture = lightMap;
                     this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
                     this.bufferDrawer.Visible = true;
                     this.help.Text = "Light map";

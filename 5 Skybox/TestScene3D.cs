@@ -206,7 +206,7 @@ namespace Skybox
         public override void Update(GameTime gameTime)
         {
             Vector3 previousPosition = this.Camera.Position;
-
+            
             this.UpdateInput();
 
             base.Update(gameTime);
@@ -300,6 +300,13 @@ namespace Skybox
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Home))

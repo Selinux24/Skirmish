@@ -111,8 +111,7 @@ namespace Engine
         /// Update state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="context">Context</param>
-        public override void Update(GameTime gameTime, Context context)
+        public override void Update(GameTime gameTime)
         {
 
         }

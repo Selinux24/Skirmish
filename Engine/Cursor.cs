@@ -65,8 +65,7 @@ namespace Engine
         /// Update cursor state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="context">Context</param>
-        public override void Update(GameTime gameTime, Context context)
+        public override void Update(GameTime gameTime)
         {
             float left = 0f;
             float top = 0f;
@@ -93,7 +92,7 @@ namespace Engine
                 this.Manipulator.SetPosition(this.CursorPosition);
             }
 
-            base.Update(gameTime, context);
+            base.Update(gameTime);
         }
     }
 }

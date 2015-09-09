@@ -30,10 +30,9 @@ namespace Engine
         /// Update
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="context">Context</param>
-        public override void Update(GameTime gameTime, Context context)
+        public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime, context);
+            base.Update(gameTime);
 
             this.Manipulator.Update(gameTime);
         }

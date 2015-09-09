@@ -70,8 +70,7 @@ namespace Engine.Common
         /// Update state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="context">Context</param>
-        public abstract void Update(GameTime gameTime, Context context);
+        public abstract void Update(GameTime gameTime);
         /// <summary>
         /// Draw
         /// </summary>

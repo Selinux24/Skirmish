@@ -1,11 +1,12 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
     /// <summary>
     /// Camera 3D
     /// </summary>
-    public class Camera
+    public class Camera : IDisposable
     {
         /// <summary>
         /// Creates an isometric camera

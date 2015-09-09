@@ -231,16 +231,11 @@ namespace Engine
         /// Dispose disposable objects array
         /// </summary>
         /// <param name="array">Disposable objects array</param>
-        public static void Dispose(IDisposable[] array)
+        public static void Dispose(IEnumerable<IDisposable> array)
         {
-            if (array != null && array.Length > 0)
+            foreach (var item in array)
             {
-                for (int i = 0; i < array.Length; i++)
-                {
-                    IDisposable obj = array[i];
-
-                    Helper.Dispose(array[i]);
-                }
+                Helper.Dispose(item);
             }
         }
         /// <summary>

@@ -168,8 +168,7 @@ namespace Engine
         /// Updates state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="context">Context</param>
-        public override void Update(GameTime gameTime, Context context)
+        public override void Update(GameTime gameTime)
         {
             this.button.Left = this.Left;
             this.button.Top = this.Top;
@@ -183,10 +182,10 @@ namespace Engine
                 this.text.Left = this.Left + (int)leftmove;
                 this.text.Top = this.Top + (int)topmove;
 
-                this.text.Update(gameTime, context);
+                this.text.Update(gameTime);
             }
 
-            this.button.Update(gameTime, context);
+            this.button.Update(gameTime);
         }
         /// <summary>
         /// Draws button

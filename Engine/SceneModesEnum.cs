@@ -7,6 +7,10 @@ namespace Engine
     public enum SceneModesEnum
     {
         /// <summary>
+        /// Unknown
+        /// </summary>
+        Unknown,
+        /// <summary>
         /// Forward rendering scene
         /// </summary>
         ForwardLigthning,

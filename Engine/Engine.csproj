@@ -311,11 +311,13 @@
     <Compile Include="Common\IBufferData.cs" />
     <Compile Include="Common\IControl.cs" />
     <Compile Include="Common\IPath.cs" />
+    <Compile Include="Common\ISceneRenderer.cs" />
     <Compile Include="Common\IScreenFitted.cs" />
     <Compile Include="Common\PriorityQueue.cs" />
     <Compile Include="Common\PriorityQueueItem.cs" />
     <Compile Include="Common\QuadTree.cs" />
     <Compile Include="Common\QuadTreeNode.cs" />
+    <Compile Include="SceneRendererResultEnum.cs" />
     <Compile Include="Common\Skeleton.cs" />
     <Compile Include="Content\LoaderConversion.cs" />
     <Compile Include="Content\CoordinateSystems.cs" />
@@ -330,6 +332,8 @@
     <Compile Include="LightBuffer.cs" />
     <Compile Include="SceneLight.cs" />
     <Compile Include="SceneModesEnum.cs" />
+    <Compile Include="SceneRendererDeferred.cs" />
+    <Compile Include="SceneRendererForward.cs" />
     <Compile Include="SpriteTexture.cs" />
     <Compile Include="Curve.cs" />
     <Compile Include="Effects\DrawerPool.cs" />
@@ -438,7 +442,6 @@
     <Compile Include="Common\VertexPositionTexture.cs" />
     <Compile Include="Common\VertexTypes.cs" />
     <Compile Include="Terrain.cs" />
-    <Compile Include="DeferredRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
