@@ -41,7 +41,7 @@ namespace Engine
             {
                 if (this.shadowMapper != null)
                 {
-                    return this.shadowMapper.ShadowMapTexture;
+                    return this.shadowMapper.Texture;
                 }
 
                 return null;
@@ -139,7 +139,6 @@ namespace Engine
                 this.DrawContext.Lights = scene.Lights;
 
                 //Clear data
-                this.DrawContext.GeometryMap = null;
                 this.DrawContext.ShadowMap = null;
                 this.DrawContext.ShadowTransform = Matrix.Identity;
 #if DEBUG
@@ -218,7 +217,7 @@ namespace Engine
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, shadowComponents);
 
                             //Set shadow map and transform to drawing context
-                            this.DrawContext.ShadowMap = this.shadowMapper.ShadowMapTexture;
+                            this.DrawContext.ShadowMap = this.shadowMapper.Texture;
                             this.DrawContext.ShadowTransform = this.shadowMapper.Transform;
 #if DEBUG
                             swDraw.Stop();
@@ -377,8 +376,12 @@ namespace Engine
             if (result == SceneRendererResultEnum.ShadowMap) return this.ShadowMap;
             return null;
         }
-
-
+        /// <summary>
+        /// Draw components for shadow mapping
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Context</param>
+        /// <param name="components">Components</param>
         private void DrawShadowComponents(GameTime gameTime, Context context, IList<Drawable> components)
         {
             for (int i = 0; i < components.Count; i++)
@@ -392,7 +395,12 @@ namespace Engine
                 }
             }
         }
-
+        /// <summary>
+        /// Draw components
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Context</param>
+        /// <param name="components">Components</param>
         private void DrawResultComponents(GameTime gameTime, Context context, IList<Drawable> components)
         {
             for (int i = 0; i < components.Count; i++)

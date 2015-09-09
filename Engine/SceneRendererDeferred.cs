@@ -108,7 +108,7 @@ namespace Engine
             {
                 if (this.shadowMapper != null)
                 {
-                    return this.shadowMapper.ShadowMapTexture;
+                    return this.shadowMapper.Texture;
                 }
 
                 return null;
@@ -263,7 +263,6 @@ namespace Engine
                 this.DrawContext.Lights = scene.Lights;
 
                 //Clear data
-                this.DrawContext.GeometryMap = null;
                 this.DrawContext.ShadowMap = null;
                 this.DrawContext.ShadowTransform = Matrix.Identity;
 #if DEBUG
@@ -333,7 +332,7 @@ namespace Engine
                             this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, shadowComponents);
 
                             //Set shadow map and transform to drawing context
-                            this.DrawContext.ShadowMap = this.shadowMapper.ShadowMapTexture;
+                            this.DrawContext.ShadowMap = this.shadowMapper.Texture;
                             this.DrawContext.ShadowTransform = this.shadowMapper.Transform;
 #if DEBUG
                             swDraw.Stop();
@@ -401,8 +400,6 @@ namespace Engine
 #if DEBUG
                         Stopwatch swGeometryBufferResolve = Stopwatch.StartNew();
 #endif
-                        //Assign result of render in drawing context
-                        this.DrawContext.GeometryMap = this.GeometryMap;
 #if DEBUG
                         swGeometryBufferResolve.Stop();
 #endif
@@ -425,9 +422,6 @@ namespace Engine
 
                         //Draw scene lights on light buffer using g-buffer output
                         this.DrawLights(this.DrawContext);
-
-                        //Assign result of render in drawing context
-                        this.DrawContext.LightMap = this.LightMap;
 #if DEBUG
                         swLightBuffer.Stop();
 #endif
@@ -838,10 +832,10 @@ namespace Engine
                 context.Lights.FogStart,
                 context.Lights.FogRange,
                 context.Lights.FogColor,
-                context.GeometryMap[0],
-                context.GeometryMap[1],
-                context.GeometryMap[2],
-                context.GeometryMap[3],
+                this.GeometryMap[0],
+                this.GeometryMap[1],
+                this.GeometryMap[2],
+                this.GeometryMap[3],
                 context.ShadowMap);
 
             this.Game.Graphics.SetDepthStencilDeferredLighting();
@@ -1061,7 +1055,7 @@ namespace Engine
 
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-            if (context.GeometryMap != null && context.LightMap != null)
+            if (this.GeometryMap != null && this.LightMap != null)
             {
 #if DEBUG
                 Stopwatch swInit = Stopwatch.StartNew();
@@ -1073,8 +1067,8 @@ namespace Engine
                     context.World,
                     this.ViewProjection,
                     context.EyePosition,
-                    context.GeometryMap[2],
-                    context.LightMap);
+                    this.GeometryMap[2],
+                    this.LightMap);
 
                 var deviceContext = this.Game.Graphics.DeviceContext;
                 var geometry = this.lightGeometry[0];
@@ -1123,8 +1117,12 @@ namespace Engine
             });
 #endif
         }
-
-
+        /// <summary>
+        /// Draw components for shadow mapping
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Context</param>
+        /// <param name="components">Components</param>
         private void DrawShadowsComponents(GameTime gameTime, Context context, IList<Drawable> components)
         {
             for (int i = 0; i < components.Count; i++)
@@ -1138,7 +1136,12 @@ namespace Engine
                 }
             }
         }
-
+        /// <summary>
+        /// Draw components
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Context</param>
+        /// <param name="components">Components</param>
         private void DrawResultComponents(GameTime gameTime, Context context, IList<Drawable> components)
         {
             for (int i = 0; i < components.Count; i++)

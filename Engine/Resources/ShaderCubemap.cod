@@ -231,7 +231,9 @@ fxgroup
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
                 // SamplerLinear                     sampler      NA          NA    0        1
+                // SamplerComparisonShadow         sampler_c      NA          NA    1        1
                 // gCubemap                          texture  float4        cube    0        1
+                // gShadowMap                        texture  float4          2d    1        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
                 //
                 //
@@ -254,7 +256,9 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[44], immediateIndexed
                 dcl_sampler s0, mode_default
+                dcl_sampler s1, mode_comparison
                 dcl_resource_texturecube (float,float,float,float) t0
+                dcl_resource_texture2d (float,float,float,float) t1
                 dcl_input_ps linear v1.xyz
                 dcl_output o0.xyzw
                 dcl_temps 4
@@ -267,7 +271,7 @@ fxgroup
                 #line 31 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 sample_indexable(texturecube)(float,float,float,float) r0.xyzw, v1.xyzx, t0.xyzw, s0  // r0.x <- textureColor.x; r0.y <- textureColor.y; r0.z <- textureColor.z; r0.w <- textureColor.w
                 
-                #line 302 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 300 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.x, cb0[7].y, l(1.000000)
                 if_nz r1.x
                 
@@ -280,18 +284,25 @@ fxgroup
                   min r1.xyz, r1.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z
                 
                 #line 201
-                  eq r2.x, cb0[7].x, l(1.000000)
+                  eq r1.w, cb0[7].x, l(1.000000)
                 
-                #line 208
+                #line 125
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, l(-1.#IND00, -1.#IND00, 0.000000, 0.000000), t1.xxxx, s1, l(-1.#IND00)  // r2.x <- percentLit
+                
+                #line 129
+                  mul r2.x, r2.x, l(1.000000)  // r2.x <- <CalcShadowFactor return value>
+                
+                #line 205
+                  mul r2.xyz, r1.xyzx, r2.xxxx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
+                  movc r1.xyz, r1.wwww, r2.xyzx, r1.xyzx  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z
+                
+                #line 312
                   mov r1.w, r0.w
-                  movc r1.xyzw, r2.xxxx, l(0,0,0,0), r1.xyzw  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
-                
-                #line 314
                 else 
                   mov r1.xyzw, l(0,0,0,0)
                 endif 
                 
-                #line 302
+                #line 300
                 eq r2.x, cb0[10].y, l(1.000000)
                 if_nz r2.x
                 
@@ -304,19 +315,26 @@ fxgroup
                   min r2.xyz, r2.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
                 #line 201
-                  eq r3.x, cb0[10].x, l(1.000000)
+                  eq r2.w, cb0[10].x, l(1.000000)
                 
-                #line 208
-                  mov r2.w, r0.w
-                  movc r2.xyzw, r3.xxxx, l(0,0,0,0), r2.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
+                #line 125
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(-1.#IND00, -1.#IND00, 0.000000, 0.000000), t1.xxxx, s1, l(-1.#IND00)  // r3.x <- percentLit
                 
-                #line 304
-                  add r1.xyzw, r1.xyzw, r2.xyzw  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
+                #line 129
+                  mul r3.x, r3.x, l(1.000000)  // r3.x <- <CalcShadowFactor return value>
                 
-                #line 314
-                endif 
+                #line 205
+                  mul r3.xyz, r2.xyzx, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                  movc r2.xyz, r2.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
                 #line 302
+                  mov r2.w, r0.w
+                  add r1.xyzw, r1.xyzw, r2.xyzw  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
+                
+                #line 312
+                endif 
+                
+                #line 300
                 eq r2.x, cb0[13].y, l(1.000000)
                 if_nz r2.x
                 
@@ -329,23 +347,30 @@ fxgroup
                   min r2.xyz, r2.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
                 #line 201
-                  eq r3.x, cb0[13].x, l(1.000000)
+                  eq r2.w, cb0[13].x, l(1.000000)
                 
-                #line 208
+                #line 125
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(-1.#IND00, -1.#IND00, 0.000000, 0.000000), t1.xxxx, s1, l(-1.#IND00)  // r3.x <- percentLit
+                
+                #line 129
+                  mul r3.x, r3.x, l(1.000000)  // r3.x <- <CalcShadowFactor return value>
+                
+                #line 205
+                  mul r3.xyz, r2.xyzx, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                  movc r2.xyz, r2.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
+                
+                #line 302
                   mov r2.w, r0.w
-                  movc r2.xyzw, r3.xxxx, l(0,0,0,0), r2.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
-                
-                #line 304
                   add r1.xyzw, r1.xyzw, r2.xyzw
                 
-                #line 314
+                #line 312
                 endif 
                 
-                #line 320
+                #line 318
                 eq r2.x, cb0[16].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 222
+                #line 220
                   add r2.xyz, v1.xyzx, -cb0[15].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, r2.xyzx
                   sqrt r2.x, r2.x  // r2.x <- distance
@@ -370,20 +395,20 @@ fxgroup
                 #line 110
                   and r2.x, r2.x, r2.z
                 
-                #line 240
+                #line 238
                   mov r3.w, r0.w
                 
-                #line 322
+                #line 320
                   mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw
                 
-                #line 330
+                #line 328
                 endif 
                 
-                #line 320
+                #line 318
                 eq r2.x, cb0[19].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 222
+                #line 220
                   add r2.xyz, v1.xyzx, -cb0[18].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, r2.xyzx
                   sqrt r2.x, r2.x  // r2.x <- distance
@@ -408,20 +433,20 @@ fxgroup
                 #line 110
                   and r2.x, r2.x, r2.z
                 
-                #line 240
+                #line 238
                   mov r3.w, r0.w
                 
-                #line 322
+                #line 320
                   mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw
                 
-                #line 330
+                #line 328
                 endif 
                 
-                #line 320
+                #line 318
                 eq r2.x, cb0[22].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 222
+                #line 220
                   add r2.xyz, v1.xyzx, -cb0[21].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, r2.xyzx
                   sqrt r2.x, r2.x  // r2.x <- distance
@@ -446,20 +471,20 @@ fxgroup
                 #line 110
                   and r2.x, r2.x, r2.z
                 
-                #line 240
+                #line 238
                   mov r3.w, r0.w
                 
-                #line 322
+                #line 320
                   mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw
                 
-                #line 330
+                #line 328
                 endif 
                 
-                #line 320
+                #line 318
                 eq r2.x, cb0[25].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 222
+                #line 220
                   add r2.xyz, v1.xyzx, -cb0[24].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, r2.xyzx
                   sqrt r2.x, r2.x  // r2.x <- distance
@@ -484,20 +509,20 @@ fxgroup
                 #line 110
                   and r2.x, r2.x, r2.z
                 
-                #line 240
+                #line 238
                   mov r3.w, r0.w
                 
-                #line 322
+                #line 320
                   mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw
                 
-                #line 330
+                #line 328
                 endif 
                 
-                #line 336
+                #line 334
                 eq r2.x, cb0[29].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 254
+                #line 252
                   add r2.xyz, v1.xyzx, -cb0[27].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, cb0[28].xyzx
                   add r2.y, -|r2.x|, l(1.000000)
@@ -521,21 +546,21 @@ fxgroup
                   exp r2.yzw, r2.yyzw
                   min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 277
+                #line 275
                   mov r3.w, r0.w
                   and r2.xyzw, r2.xxxx, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
                 
-                #line 338
+                #line 336
                   add r1.xyzw, r1.xyzw, r2.xyzw
                 
-                #line 346
+                #line 344
                 endif 
                 
-                #line 336
+                #line 334
                 eq r2.x, cb0[33].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 254
+                #line 252
                   add r2.xyz, v1.xyzx, -cb0[31].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, cb0[32].xyzx
                   add r2.y, -|r2.x|, l(1.000000)
@@ -559,21 +584,21 @@ fxgroup
                   exp r2.yzw, r2.yyzw
                   min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 277
+                #line 275
                   mov r3.w, r0.w
                   and r2.xyzw, r2.xxxx, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
                 
-                #line 338
+                #line 336
                   add r1.xyzw, r1.xyzw, r2.xyzw
                 
-                #line 346
+                #line 344
                 endif 
                 
-                #line 336
+                #line 334
                 eq r2.x, cb0[37].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 254
+                #line 252
                   add r2.xyz, v1.xyzx, -cb0[35].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, cb0[36].xyzx
                   add r2.y, -|r2.x|, l(1.000000)
@@ -597,21 +622,21 @@ fxgroup
                   exp r2.yzw, r2.yyzw
                   min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 277
+                #line 275
                   mov r3.w, r0.w
                   and r2.xyzw, r2.xxxx, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
                 
-                #line 338
+                #line 336
                   add r1.xyzw, r1.xyzw, r2.xyzw
                 
-                #line 346
+                #line 344
                 endif 
                 
-                #line 336
+                #line 334
                 eq r2.x, cb0[41].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 254
+                #line 252
                   add r2.xyz, v1.xyzx, -cb0[39].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, cb0[40].xyzx
                   add r2.y, -|r2.x|, l(1.000000)
@@ -635,13 +660,13 @@ fxgroup
                   exp r2.yzw, r2.yyzw
                   min r0.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 
-                #line 277
+                #line 275
                   and r0.xyzw, r0.xyzw, r2.xxxx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z; r0.w <- litColor.w
                 
-                #line 338
+                #line 336
                   add r1.xyzw, r0.xyzw, r1.xyzw
                 
-                #line 346
+                #line 344
                 endif 
                 
                 #line 48 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
@@ -659,7 +684,7 @@ fxgroup
                 #line 54 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 movc o0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw
                 ret 
-                // Approximately 242 instruction slots used
+                // Approximately 251 instruction slots used
                             
             };
         }

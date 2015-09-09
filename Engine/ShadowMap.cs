@@ -45,7 +45,7 @@ namespace Engine
         /// <summary>
         /// Deph map texture
         /// </summary>
-        public ShaderResourceView ShadowMapTexture { get; protected set; }
+        public ShaderResourceView Texture { get; protected set; }
         /// <summary>
         /// View matrix
         /// </summary>
@@ -106,7 +106,7 @@ namespace Engine
                         },
                     });
 
-                this.ShadowMapTexture = new ShaderResourceView(
+                this.Texture = new ShaderResourceView(
                     game.Graphics.Device,
                     depthMap,
                     new ShaderResourceViewDescription
@@ -129,7 +129,7 @@ namespace Engine
         public void Update(Vector3 lightDirection, BoundingSphere sceneVolume)
         {
             // Calc light position outside the scene volume
-            Vector3 lightPos = -2.0f * sceneVolume.Radius * lightDirection;
+            Vector3 lightPos = 2.0f * sceneVolume.Radius * -lightDirection;
 
             // View from light to scene center position
             this.View = Matrix.LookAtLH(lightPos, sceneVolume.Center, Vector3.Up);
@@ -163,10 +163,10 @@ namespace Engine
                 this.DepthMap = null;
             }
 
-            if (this.ShadowMapTexture != null)
+            if (this.Texture != null)
             {
-                this.ShadowMapTexture.Dispose();
-                this.ShadowMapTexture = null;
+                this.Texture.Dispose();
+                this.Texture = null;
             }
         }
     }

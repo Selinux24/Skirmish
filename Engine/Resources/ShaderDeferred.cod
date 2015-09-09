@@ -277,7 +277,7 @@ fxgroup
                 dcl_resource_texture2d (float,float,float,float) t4
                 dcl_input_ps linear v1.xy
                 dcl_output o0.xyzw
-                dcl_temps 3
+                dcl_temps 4
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -310,58 +310,49 @@ fxgroup
                 add r0.x, r0.x, r1.x  // r0.x <- percentLit
                 add r0.x, r0.y, r0.x
                 
-                #line 92 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t1.xyzw, s0  // r1.x <- normal.x; r1.y <- normal.y; r1.z <- normal.z; r1.w <- normal.w
-                
-                #line 154 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                dp3 r0.y, r1.xyzx, -cb0[10].yzwy
-                
-                #line 129
-                mul r0.x, r0.y, r0.x
-                
-                #line 154
-                max r0.y, r0.y, l(0.000000)  // r0.y <- diffuseFactor
-                
-                #line 160
-                dp3 r0.z, cb0[10].yzwy, r1.xyzx
-                add r0.z, r0.z, r0.z
-                mad r1.xyz, r1.xyzx, -r0.zzzz, cb0[10].yzwy
-                
-                #line 166
-                max r0.z, r1.w, l(1.000000)
-                
-                #line 160
-                dp3 r1.w, r1.xyzx, r1.xyzx
-                rsq r1.w, r1.w
-                mul r1.xyz, r1.wwww, r1.xyzx  // r1.x <- lightReflection.x; r1.y <- lightReflection.y; r1.z <- lightReflection.z
-                
                 #line 91 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                sample_indexable(texture2d)(float,float,float,float) r2.xyz, v1.xyxx, t2.xyzw, s0  // r2.x <- depth.x; r2.y <- depth.y; r2.z <- depth.z
+                sample_indexable(texture2d)(float,float,float,float) r1.xyz, v1.xyxx, t2.xyzw, s0  // r1.x <- depth.x; r1.y <- depth.y; r1.z <- depth.z
                 
                 #line 95
-                add r2.xyz, -r2.xyzx, cb0[8].xyzx
-                dp3 r1.w, r2.xyzx, r2.xyzx
-                rsq r1.w, r1.w
-                mul r2.xyz, r1.wwww, r2.xyzx  // r2.x <- toEye.x; r2.y <- toEye.y; r2.z <- toEye.z
+                add r1.xyz, -r1.xyzx, cb0[8].xyzx
+                dp3 r0.y, r1.xyzx, r1.xyzx
+                rsq r0.y, r0.y
+                mul r1.xyz, r0.yyyy, r1.xyzx  // r1.x <- toEye.x; r1.y <- toEye.y; r1.z <- toEye.z
                 
-                #line 162 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                dp3 r1.x, r2.xyzx, r1.xyzx
-                max r1.x, r1.x, l(0.000000)  // r1.x <- specularFactor
+                #line 92
+                sample_indexable(texture2d)(float,float,float,float) r2.xyzw, v1.xyxx, t1.xyzw, s0  // r2.x <- normal.x; r2.y <- normal.y; r2.z <- normal.z; r2.w <- normal.w
+                
+                #line 160 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                dp3 r0.y, cb0[10].yzwy, r2.xyzx
+                add r0.y, r0.y, r0.y
+                mad r3.xyz, r2.xyzx, -r0.yyyy, cb0[10].yzwy
+                dp3 r0.y, r3.xyzx, r3.xyzx
+                rsq r0.y, r0.y
+                mul r3.xyz, r0.yyyy, r3.xyzx  // r3.x <- lightReflection.x; r3.y <- lightReflection.y; r3.z <- lightReflection.z
+                dp3 r0.y, r1.xyzx, r3.xyzx
+                max r0.y, r0.y, l(0.000000)  // r0.y <- specularFactor
                 
                 #line 166
-                log r1.y, r1.x
-                lt r1.x, l(0.000000), r1.x
-                mul r0.z, r0.z, r1.y
+                log r0.z, r0.y
+                lt r0.y, l(0.000000), r0.y
+                max r1.x, r2.w, l(1.000000)
+                
+                #line 154
+                dp3 r1.y, r2.xyzx, -cb0[10].yzwy
+                max r1.y, r1.y, l(0.000000)  // r1.y <- diffuseFactor
+                
+                #line 166
+                mul r0.z, r0.z, r1.x
                 exp r0.z, r0.z  // r0.z <- specularFactor
                 mul r0.z, r0.z, r0.w  // r0.z <- specular
-                and r1.y, r0.z, r1.x  // r1.y <- specular
+                and r2.y, r0.z, r0.y  // r2.y <- specular
                 
                 #line 156
-                lt r0.z, l(0.000000), r0.y
-                mul r1.x, r0.y, cb0[10].x  // r1.x <- diffuse
+                lt r0.y, l(0.000000), r1.y
+                mul r2.x, r1.y, cb0[10].x  // r2.x <- diffuse
                 
                 #line 169
-                and r0.yz, r1.xxyx, r0.zzzz  // r0.y <- diffuse; r0.z <- specular
+                and r0.yz, r2.xxyx, r0.yyyy  // r0.y <- diffuse; r0.z <- specular
                 add r0.y, r0.y, cb0[9].w
                 add r0.y, r0.z, r0.y
                 
@@ -369,25 +360,30 @@ fxgroup
                 sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t0.xyzw, s0  // r1.x <- diffuseColor.x; r1.y <- diffuseColor.y; r1.z <- diffuseColor.z; r1.w <- diffuseColor.w
                 
                 #line 171 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                mul r2.xyz, r1.xyzx, cb0[9].xyzx
-                mul r0.yzw, r0.yyyy, r2.xxyz  // r0.y <- litColor.x; r0.z <- litColor.y; r0.w <- litColor.z
+                mul r1.xyz, r1.xyzx, cb0[9].xyzx
+                
+                #line 108 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                mov o0.w, r1.w
+                
+                #line 171 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                mul r0.yzw, r0.yyyy, r1.xxyz  // r0.y <- litColor.x; r0.z <- litColor.y; r0.w <- litColor.z
                 log r0.yzw, r0.yyzw
                 
-                #line 205
-                mul r0.xyzw, r0.xyzw, l(0.111111, 0.454545, 0.454545, 0.454545)  // r0.x <- shadowFactor
+                #line 129
+                mul r0.xyzw, r0.xyzw, l(0.111111, 0.454545, 0.454545, 0.454545)  // r0.x <- <CalcShadowFactor return value>
                 
                 #line 172
                 exp r0.yzw, r0.yyzw
-                min r1.xyz, r0.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z
+                min r0.yzw, r0.yyzw, l(0.000000, 1.000000, 1.000000, 1.000000)  // r0.y <- litColor.x; r0.z <- litColor.y; r0.w <- litColor.z
                 
-                #line 207
-                mul r0.xyzw, r0.xxxx, r1.xyzw  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z; r0.w <- litColor.w
+                #line 205
+                mul r1.xyz, r0.xxxx, r0.yzwy  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z
                 
                 #line 201
-                eq r2.x, cb0[11].x, l(1.000000)
+                eq r0.x, cb0[11].x, l(1.000000)
                 
-                #line 208
-                movc o0.xyzw, r2.xxxx, r0.xyzw, r1.xyzw
+                #line 206
+                movc o0.xyz, r0.xxxx, r1.xyzx, r0.yzwy
                 
                 #line 108 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 ret 
@@ -643,7 +639,7 @@ fxgroup
                 #line 125
                 add r2.xyz, -r1.xyzx, cb0[8].xyzx
                 
-                #line 222 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 220 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r1.xyz, r1.xyzx, -cb0[13].yzwy  // r1.x <- lightDirection.x; r1.y <- lightDirection.y; r1.z <- lightDirection.z
                 
                 #line 125 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
@@ -651,7 +647,7 @@ fxgroup
                 rsq r0.z, r0.z
                 mul r2.xyz, r0.zzzz, r2.xyzx  // r2.x <- toEye.x; r2.y <- toEye.y; r2.z <- toEye.z
                 
-                #line 223 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 221 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 dp3 r0.z, r1.xyzx, r1.xyzx
                 sqrt r0.z, r0.z  // r0.z <- distance
                 div r1.xyz, r1.xyzx, r0.zzzz
@@ -727,7 +723,7 @@ fxgroup
                 #line 110
                 and r0.x, r0.y, r0.x  // r0.x <- <CalcSphericAttenuation return value>
                 
-                #line 240
+                #line 238
                 mul o0.xyzw, r0.xxxx, r2.xyzw
                 
                 #line 136 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
@@ -984,7 +980,7 @@ fxgroup
                 #line 153
                 add r2.xyz, -r1.xyzx, cb0[8].xyzx
                 
-                #line 254 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 252 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r1.xyz, r1.xyzx, -cb0[16].yzwy  // r1.x <- lightDirection.x; r1.y <- lightDirection.y; r1.z <- lightDirection.z
                 dp3 r0.z, r1.xyzx, cb0[17].xyzx
                 
@@ -1044,7 +1040,7 @@ fxgroup
                 exp r0.xyw, r0.xyxw
                 min r2.xyz, r0.xywx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 255
+                #line 253
                 mad r0.x, |r0.z|, l(-0.018729), l(0.074261)
                 mad r0.x, r0.x, |r0.z|, l(-0.212114)
                 mad r0.x, r0.x, |r0.z|, l(1.570729)
@@ -1058,7 +1054,7 @@ fxgroup
                 mul r0.x, r0.x, l(57.295780)  // r0.x <- lightToSurfaceAngle
                 ge r0.x, cb0[17].w, r0.x
                 
-                #line 277
+                #line 275
                 and o0.xyzw, r2.xyzw, r0.xxxx
                 
                 #line 164 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"

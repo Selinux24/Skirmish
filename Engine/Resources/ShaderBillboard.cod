@@ -519,7 +519,7 @@ fxgroup
                 dcl_input_ps linear v4.xyzw
                 dcl_input_ps_sgv v5.x, primitive_id
                 dcl_output o0.xyzw
-                dcl_temps 7
+                dcl_temps 6
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -543,250 +543,247 @@ fxgroup
                 rsq r2.x, r1.w
                 mul r1.xyz, r1.xyzx, r2.xxxx  // r1.x <- toEye.x; r1.y <- toEye.y; r1.z <- toEye.z
                 
-                #line 302 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 300 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r2.x, cb0[15].y, l(1.000000)
                 if_nz r2.x
                 
                 #line 154
                   dp3 r2.x, v2.xyzx, -cb0[14].yzwy
-                  max r2.y, r2.x, l(0.000000)  // r2.y <- diffuseFactor
-                  lt r2.z, l(0.000000), r2.y
-                  mul r3.x, r2.y, cb0[14].x  // r3.x <- diffuse
-                  dp3 r2.y, cb0[14].yzwy, v2.xyzx
-                  add r2.y, r2.y, r2.y
-                  mad r4.xyz, v2.xyzx, -r2.yyyy, cb0[14].yzwy
-                  dp3 r2.y, r4.xyzx, r4.xyzx
-                  rsq r2.y, r2.y
-                  mul r4.xyz, r2.yyyy, r4.xyzx  // r4.x <- lightReflection.x; r4.y <- lightReflection.y; r4.z <- lightReflection.z
-                  dp3 r2.y, r1.xyzx, r4.xyzx
-                  max r2.y, r2.y, l(0.000000)  // r2.y <- specularFactor
-                  lt r2.w, l(0.000000), r2.y
+                  max r2.x, r2.x, l(0.000000)  // r2.x <- diffuseFactor
+                  lt r2.y, l(0.000000), r2.x
+                  mul r3.x, r2.x, cb0[14].x  // r3.x <- diffuse
+                  dp3 r2.x, cb0[14].yzwy, v2.xyzx
+                  add r2.x, r2.x, r2.x
+                  mad r2.xzw, v2.xxyz, -r2.xxxx, cb0[14].yyzw
+                  dp3 r3.z, r2.xzwx, r2.xzwx
+                  rsq r3.z, r3.z
+                  mul r2.xzw, r2.xxzw, r3.zzzz  // r2.x <- lightReflection.x; r2.z <- lightReflection.y; r2.w <- lightReflection.z
+                  dp3 r2.x, r1.xyzx, r2.xzwx
+                  max r2.x, r2.x, l(0.000000)  // r2.x <- specularFactor
+                  lt r2.z, l(0.000000), r2.x
                 
                 #line 166
-                  max r3.z, cb1[1].y, l(1.000000)
-                  log r2.y, r2.y
-                  mul r2.y, r2.y, r3.z
-                  exp r2.y, r2.y  // r2.y <- specularFactor
-                  mul r2.y, r2.y, cb1[1].x  // r2.y <- specular
-                  and r3.y, r2.y, r2.w  // r3.y <- specular
-                  and r2.yz, r2.zzzz, r3.xxyx  // r2.y <- diffuse; r2.z <- specular
+                  max r2.w, cb1[1].y, l(1.000000)
+                  log r2.x, r2.x
+                  mul r2.x, r2.x, r2.w
+                  exp r2.x, r2.x  // r2.x <- specularFactor
+                  mul r2.x, r2.x, cb1[1].x  // r2.x <- specular
+                  and r3.y, r2.x, r2.z  // r3.y <- specular
+                  and r2.xy, r2.yyyy, r3.xyxx  // r2.x <- diffuse; r2.y <- specular
                   mul r3.xyz, r0.xyzx, cb0[13].xyzx
-                  add r2.y, r2.y, cb0[13].w
-                  add r2.y, r2.z, r2.y
-                  mul r2.yzw, r2.yyyy, r3.xxyz  // r2.y <- litColor.x; r2.z <- litColor.y; r2.w <- litColor.z
-                  log r2.yzw, r2.yyzw
-                  mul r2.yzw, r2.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r2.yzw, r2.yyzw
-                  min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                  add r2.x, r2.x, cb0[13].w
+                  add r2.x, r2.y, r2.x
+                  mul r2.xyz, r2.xxxx, r3.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
+                  log r2.xyz, r2.xyzx
+                  mul r2.xyz, r2.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
+                  exp r2.xyz, r2.xyzx
+                  min r2.xyz, r2.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
                 #line 201
-                  eq r2.y, cb0[15].x, l(1.000000)
+                  eq r2.w, cb0[15].x, l(1.000000)
+                
+                #line 115
+                  div r3.xyz, v4.xyzx, v4.wwww  // r3.x <- shadowPosH.x; r3.y <- shadowPosH.y; r3.z <- shadowPosH.z
+                
+                #line 125
+                  add r4.xyzw, r3.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r4.xyxx, t1.xxxx, s1, r3.z  // r3.w <- percentLit
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r4.zwzz, t1.xxxx, s1, r3.z
+                  add r3.w, r3.w, r4.x
+                  add r4.xyzw, r3.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r4.xyxx, t1.xxxx, s1, r3.z
+                  add r3.w, r3.w, r4.x
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r4.zwzz, t1.xxxx, s1, r3.z
+                  add r3.w, r3.w, r4.x
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r3.xyxx, t1.xxxx, s1, r3.z
+                  add r3.w, r3.w, r4.x
+                  add r4.xyzw, r3.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r4.xyxx, t1.xxxx, s1, r3.z
+                  add r3.w, r3.w, r4.x
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r4.zwzz, t1.xxxx, s1, r3.z
+                  add r3.w, r3.w, r4.x
+                  add r4.xyzw, r3.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, r4.xyxx, t1.xxxx, s1, r3.z
+                  add r3.x, r3.x, r3.w  // r3.x <- percentLit
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.y, r4.zwzz, t1.xxxx, s1, r3.z
+                  add r3.x, r3.y, r3.x
+                
+                #line 129
+                  mul r3.x, r3.x, l(0.111111)  // r3.x <- <CalcShadowFactor return value>
+                
+                #line 205
+                  mul r3.xyz, r2.xyzx, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                  movc r2.xyz, r2.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
+                
+                #line 312
+                  mov r2.w, r0.w
+                else 
+                  mov r2.xyzw, l(0,0,0,0)
+                endif 
+                
+                #line 300
+                eq r3.x, cb0[18].y, l(1.000000)
+                if_nz r3.x
+                
+                #line 154
+                  dp3 r3.x, v2.xyzx, -cb0[17].yzwy
+                  max r3.x, r3.x, l(0.000000)  // r3.x <- diffuseFactor
+                  lt r3.y, l(0.000000), r3.x
+                  mul r4.x, r3.x, cb0[17].x  // r4.x <- diffuse
+                  dp3 r3.x, cb0[17].yzwy, v2.xyzx
+                  add r3.x, r3.x, r3.x
+                  mad r3.xzw, v2.xxyz, -r3.xxxx, cb0[17].yyzw
+                  dp3 r4.z, r3.xzwx, r3.xzwx
+                  rsq r4.z, r4.z
+                  mul r3.xzw, r3.xxzw, r4.zzzz  // r3.x <- lightReflection.x; r3.z <- lightReflection.y; r3.w <- lightReflection.z
+                  dp3 r3.x, r1.xyzx, r3.xzwx
+                  max r3.x, r3.x, l(0.000000)  // r3.x <- specularFactor
+                  lt r3.z, l(0.000000), r3.x
+                
+                #line 166
+                  max r3.w, cb1[1].y, l(1.000000)
+                  log r3.x, r3.x
+                  mul r3.x, r3.x, r3.w
+                  exp r3.x, r3.x  // r3.x <- specularFactor
+                  mul r3.x, r3.x, cb1[1].x  // r3.x <- specular
+                  and r4.y, r3.x, r3.z  // r4.y <- specular
+                  and r3.xy, r3.yyyy, r4.xyxx  // r3.x <- diffuse; r3.y <- specular
+                  mul r4.xyz, r0.xyzx, cb0[16].xyzx
+                  add r3.x, r3.x, cb0[16].w
+                  add r3.x, r3.y, r3.x
+                  mul r3.xyz, r3.xxxx, r4.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                  log r3.xyz, r3.xyzx
+                  mul r3.xyz, r3.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
+                  exp r3.xyz, r3.xyzx
+                  min r3.xyz, r3.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                
+                #line 201
+                  eq r3.w, cb0[18].x, l(1.000000)
                 
                 #line 115
                   div r4.xyz, v4.xyzx, v4.wwww  // r4.x <- shadowPosH.x; r4.y <- shadowPosH.y; r4.z <- shadowPosH.z
                 
                 #line 125
                   add r5.xyzw, r4.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.z, r5.xyxx, t1.xxxx, s1, r4.z  // r2.z <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r2.z, r2.w, r2.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.xyxx, t1.xxxx, s1, r4.z  // r4.w <- percentLit
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r5.zwzz, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
                   add r5.xyzw, r4.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r5.xyxx, t1.xxxx, s1, r4.z
-                  add r2.z, r2.w, r2.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r2.z, r2.w, r2.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r4.xyxx, t1.xxxx, s1, r4.z
-                  add r2.z, r2.w, r2.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r5.xyxx, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r5.zwzz, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r4.xyxx, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
                   add r5.xyzw, r4.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r5.xyxx, t1.xxxx, s1, r4.z
-                  add r2.z, r2.w, r2.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r2.z, r2.w, r2.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r5.xyxx, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r5.zwzz, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
                   add r5.xyzw, r4.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r5.xyxx, t1.xxxx, s1, r4.z
-                  add r2.z, r2.w, r2.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r2.z, r2.w, r2.z
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r5.xyxx, t1.xxxx, s1, r4.z
+                  add r4.x, r4.x, r4.w  // r4.x <- percentLit
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.y, r5.zwzz, t1.xxxx, s1, r4.z
+                  add r4.x, r4.y, r4.x
                 
                 #line 129
-                  mul r2.x, r2.x, r2.z
+                  mul r4.x, r4.x, l(0.111111)  // r4.x <- <CalcShadowFactor return value>
                 
                 #line 205
-                  mul r2.x, r2.x, l(0.111111)  // r2.x <- shadowFactor
-                  mov r3.w, r0.w
-                  mul r4.xyzw, r2.xxxx, r3.xyzw  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z; r4.w <- litColor.w
-                  movc r2.xyzw, r2.yyyy, r4.xyzw, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
-                
-                #line 314
-                else 
-                  mov r2.xyzw, l(0,0,0,0)
-                endif 
+                  mul r4.xyz, r3.xyzx, r4.xxxx  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
+                  movc r3.xyz, r3.wwww, r4.xyzx, r3.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
                 #line 302
-                eq r3.x, cb0[18].y, l(1.000000)
-                if_nz r3.x
-                
-                #line 154
-                  dp3 r3.x, v2.xyzx, -cb0[17].yzwy
-                  max r3.y, r3.x, l(0.000000)  // r3.y <- diffuseFactor
-                  lt r3.z, l(0.000000), r3.y
-                  mul r4.x, r3.y, cb0[17].x  // r4.x <- diffuse
-                  dp3 r3.y, cb0[17].yzwy, v2.xyzx
-                  add r3.y, r3.y, r3.y
-                  mad r5.xyz, v2.xyzx, -r3.yyyy, cb0[17].yzwy
-                  dp3 r3.y, r5.xyzx, r5.xyzx
-                  rsq r3.y, r3.y
-                  mul r5.xyz, r3.yyyy, r5.xyzx  // r5.x <- lightReflection.x; r5.y <- lightReflection.y; r5.z <- lightReflection.z
-                  dp3 r3.y, r1.xyzx, r5.xyzx
-                  max r3.y, r3.y, l(0.000000)  // r3.y <- specularFactor
-                  lt r3.w, l(0.000000), r3.y
-                
-                #line 166
-                  max r4.z, cb1[1].y, l(1.000000)
-                  log r3.y, r3.y
-                  mul r3.y, r3.y, r4.z
-                  exp r3.y, r3.y  // r3.y <- specularFactor
-                  mul r3.y, r3.y, cb1[1].x  // r3.y <- specular
-                  and r4.y, r3.y, r3.w  // r4.y <- specular
-                  and r3.yz, r3.zzzz, r4.xxyx  // r3.y <- diffuse; r3.z <- specular
-                  mul r4.xyz, r0.xyzx, cb0[16].xyzx
-                  add r3.y, r3.y, cb0[16].w
-                  add r3.y, r3.z, r3.y
-                  mul r3.yzw, r3.yyyy, r4.xxyz  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
-                  log r3.yzw, r3.yyzw
-                  mul r3.yzw, r3.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r3.yzw, r3.yyzw
-                  min r4.xyz, r3.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
-                
-                #line 201
-                  eq r3.y, cb0[18].x, l(1.000000)
-                
-                #line 115
-                  div r5.xyz, v4.xyzx, v4.wwww  // r5.x <- shadowPosH.x; r5.y <- shadowPosH.y; r5.z <- shadowPosH.z
-                
-                #line 125
-                  add r6.xyzw, r5.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.z, r6.xyxx, t1.xxxx, s1, r5.z  // r3.z <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.zwzz, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  add r6.xyzw, r5.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.xyxx, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.zwzz, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r5.xyxx, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  add r6.xyzw, r5.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.xyxx, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.zwzz, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  add r6.xyzw, r5.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.xyxx, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.zwzz, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                
-                #line 129
-                  mul r3.x, r3.x, r3.z
-                
-                #line 205
-                  mul r3.x, r3.x, l(0.111111)  // r3.x <- shadowFactor
-                  mov r4.w, r0.w
-                  mul r5.xyzw, r3.xxxx, r4.xyzw  // r5.x <- litColor.x; r5.y <- litColor.y; r5.z <- litColor.z; r5.w <- litColor.w
-                  movc r3.xyzw, r3.yyyy, r5.xyzw, r4.xyzw  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z; r3.w <- litColor.w
-                
-                #line 304
+                  mov r3.w, r0.w
                   add r2.xyzw, r2.xyzw, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
                 
-                #line 314
+                #line 312
                 endif 
                 
-                #line 302
+                #line 300
                 eq r3.x, cb0[21].y, l(1.000000)
                 if_nz r3.x
                 
                 #line 154
                   dp3 r3.x, v2.xyzx, -cb0[20].yzwy
-                  max r3.y, r3.x, l(0.000000)  // r3.y <- diffuseFactor
-                  lt r3.z, l(0.000000), r3.y
-                  mul r4.x, r3.y, cb0[20].x  // r4.x <- diffuse
-                  dp3 r3.y, cb0[20].yzwy, v2.xyzx
-                  add r3.y, r3.y, r3.y
-                  mad r5.xyz, v2.xyzx, -r3.yyyy, cb0[20].yzwy
-                  dp3 r3.y, r5.xyzx, r5.xyzx
-                  rsq r3.y, r3.y
-                  mul r5.xyz, r3.yyyy, r5.xyzx  // r5.x <- lightReflection.x; r5.y <- lightReflection.y; r5.z <- lightReflection.z
-                  dp3 r3.y, r1.xyzx, r5.xyzx
-                  max r3.y, r3.y, l(0.000000)  // r3.y <- specularFactor
-                  lt r3.w, l(0.000000), r3.y
+                  max r3.x, r3.x, l(0.000000)  // r3.x <- diffuseFactor
+                  lt r3.y, l(0.000000), r3.x
+                  mul r4.x, r3.x, cb0[20].x  // r4.x <- diffuse
+                  dp3 r3.x, cb0[20].yzwy, v2.xyzx
+                  add r3.x, r3.x, r3.x
+                  mad r3.xzw, v2.xxyz, -r3.xxxx, cb0[20].yyzw
+                  dp3 r4.z, r3.xzwx, r3.xzwx
+                  rsq r4.z, r4.z
+                  mul r3.xzw, r3.xxzw, r4.zzzz  // r3.x <- lightReflection.x; r3.z <- lightReflection.y; r3.w <- lightReflection.z
+                  dp3 r3.x, r1.xyzx, r3.xzwx
+                  max r3.x, r3.x, l(0.000000)  // r3.x <- specularFactor
+                  lt r3.z, l(0.000000), r3.x
                 
                 #line 166
-                  max r4.z, cb1[1].y, l(1.000000)
-                  log r3.y, r3.y
-                  mul r3.y, r3.y, r4.z
-                  exp r3.y, r3.y  // r3.y <- specularFactor
-                  mul r3.y, r3.y, cb1[1].x  // r3.y <- specular
-                  and r4.y, r3.y, r3.w  // r4.y <- specular
-                  and r3.yz, r3.zzzz, r4.xxyx  // r3.y <- diffuse; r3.z <- specular
+                  max r3.w, cb1[1].y, l(1.000000)
+                  log r3.x, r3.x
+                  mul r3.x, r3.x, r3.w
+                  exp r3.x, r3.x  // r3.x <- specularFactor
+                  mul r3.x, r3.x, cb1[1].x  // r3.x <- specular
+                  and r4.y, r3.x, r3.z  // r4.y <- specular
+                  and r3.xy, r3.yyyy, r4.xyxx  // r3.x <- diffuse; r3.y <- specular
                   mul r4.xyz, r0.xyzx, cb0[19].xyzx
-                  add r3.y, r3.y, cb0[19].w
-                  add r3.y, r3.z, r3.y
-                  mul r3.yzw, r3.yyyy, r4.xxyz  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
-                  log r3.yzw, r3.yyzw
-                  mul r3.yzw, r3.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r3.yzw, r3.yyzw
-                  min r4.xyz, r3.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
+                  add r3.x, r3.x, cb0[19].w
+                  add r3.x, r3.y, r3.x
+                  mul r3.xyz, r3.xxxx, r4.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                  log r3.xyz, r3.xyzx
+                  mul r3.xyz, r3.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
+                  exp r3.xyz, r3.xyzx
+                  min r3.xyz, r3.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
                 #line 201
-                  eq r3.y, cb0[21].x, l(1.000000)
+                  eq r3.w, cb0[21].x, l(1.000000)
                 
                 #line 115
-                  div r5.xyz, v4.xyzx, v4.wwww  // r5.x <- shadowPosH.x; r5.y <- shadowPosH.y; r5.z <- shadowPosH.z
+                  div r4.xyz, v4.xyzx, v4.wwww  // r4.x <- shadowPosH.x; r4.y <- shadowPosH.y; r4.z <- shadowPosH.z
                 
                 #line 125
-                  add r6.xyzw, r5.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.z, r6.xyxx, t1.xxxx, s1, r5.z  // r3.z <- percentLit
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.zwzz, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  add r6.xyzw, r5.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.xyxx, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.zwzz, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r5.xyxx, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  add r6.xyzw, r5.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.xyxx, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.zwzz, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  add r6.xyzw, r5.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.xyxx, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r6.zwzz, t1.xxxx, s1, r5.z
-                  add r3.z, r3.w, r3.z
+                  add r5.xyzw, r4.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.xyxx, t1.xxxx, s1, r4.z  // r4.w <- percentLit
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r5.zwzz, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
+                  add r5.xyzw, r4.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r5.xyxx, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r5.zwzz, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r4.xyxx, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
+                  add r5.xyzw, r4.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r5.xyxx, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r5.x, r5.zwzz, t1.xxxx, s1, r4.z
+                  add r4.w, r4.w, r5.x
+                  add r5.xyzw, r4.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r5.xyxx, t1.xxxx, s1, r4.z
+                  add r4.x, r4.x, r4.w  // r4.x <- percentLit
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.y, r5.zwzz, t1.xxxx, s1, r4.z
+                  add r4.x, r4.y, r4.x
                 
                 #line 129
-                  mul r3.x, r3.x, r3.z
+                  mul r4.x, r4.x, l(0.111111)  // r4.x <- <CalcShadowFactor return value>
                 
                 #line 205
-                  mul r3.x, r3.x, l(0.111111)  // r3.x <- shadowFactor
-                  mov r4.w, r0.w
-                  mul r5.xyzw, r3.xxxx, r4.xyzw  // r5.x <- litColor.x; r5.y <- litColor.y; r5.z <- litColor.z; r5.w <- litColor.w
-                  movc r3.xyzw, r3.yyyy, r5.xyzw, r4.xyzw  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z; r3.w <- litColor.w
+                  mul r4.xyz, r3.xyzx, r4.xxxx  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
+                  movc r3.xyz, r3.wwww, r4.xyzx, r3.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 304
+                #line 302
+                  mov r3.w, r0.w
                   add r2.xyzw, r2.xyzw, r3.xyzw
                 
-                #line 314
+                #line 312
                 endif 
                 
-                #line 320
+                #line 318
                 eq r3.x, cb0[24].z, l(1.000000)
                 if_nz r3.x
                 
-                #line 222
+                #line 220
                   add r3.xyz, v1.xyzx, -cb0[23].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r3.w, r3.xyzx, r3.xyzx
                   sqrt r3.w, r3.w  // r3.w <- distance
@@ -836,20 +833,20 @@ fxgroup
                 #line 110
                   and r3.x, r3.x, r3.y
                 
-                #line 240
+                #line 238
                   mov r4.w, r0.w
                 
-                #line 322
+                #line 320
                   mad r2.xyzw, r4.xyzw, r3.xxxx, r2.xyzw
                 
-                #line 330
+                #line 328
                 endif 
                 
-                #line 320
+                #line 318
                 eq r3.x, cb0[27].z, l(1.000000)
                 if_nz r3.x
                 
-                #line 222
+                #line 220
                   add r3.xyz, v1.xyzx, -cb0[26].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r3.w, r3.xyzx, r3.xyzx
                   sqrt r3.w, r3.w  // r3.w <- distance
@@ -899,20 +896,20 @@ fxgroup
                 #line 110
                   and r3.x, r3.x, r3.y
                 
-                #line 240
+                #line 238
                   mov r4.w, r0.w
                 
-                #line 322
+                #line 320
                   mad r2.xyzw, r4.xyzw, r3.xxxx, r2.xyzw
                 
-                #line 330
+                #line 328
                 endif 
                 
-                #line 320
+                #line 318
                 eq r3.x, cb0[30].z, l(1.000000)
                 if_nz r3.x
                 
-                #line 222
+                #line 220
                   add r3.xyz, v1.xyzx, -cb0[29].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r3.w, r3.xyzx, r3.xyzx
                   sqrt r3.w, r3.w  // r3.w <- distance
@@ -962,20 +959,20 @@ fxgroup
                 #line 110
                   and r3.x, r3.x, r3.y
                 
-                #line 240
+                #line 238
                   mov r4.w, r0.w
                 
-                #line 322
+                #line 320
                   mad r2.xyzw, r4.xyzw, r3.xxxx, r2.xyzw
                 
-                #line 330
+                #line 328
                 endif 
                 
-                #line 320
+                #line 318
                 eq r3.x, cb0[33].z, l(1.000000)
                 if_nz r3.x
                 
-                #line 222
+                #line 220
                   add r3.xyz, v1.xyzx, -cb0[32].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r3.w, r3.xyzx, r3.xyzx
                   sqrt r3.w, r3.w  // r3.w <- distance
@@ -1025,20 +1022,20 @@ fxgroup
                 #line 110
                   and r3.x, r3.x, r3.y
                 
-                #line 240
+                #line 238
                   mov r4.w, r0.w
                 
-                #line 322
+                #line 320
                   mad r2.xyzw, r4.xyzw, r3.xxxx, r2.xyzw
                 
-                #line 330
+                #line 328
                 endif 
                 
-                #line 336
+                #line 334
                 eq r3.x, cb0[37].z, l(1.000000)
                 if_nz r3.x
                 
-                #line 254
+                #line 252
                   add r3.xyz, v1.xyzx, -cb0[35].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r3.x, r3.xyzx, cb0[36].xyzx
                   add r3.y, -|r3.x|, l(1.000000)
@@ -1086,21 +1083,21 @@ fxgroup
                   exp r3.yzw, r3.yyzw
                   min r4.xyz, r3.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
                 
-                #line 277
+                #line 275
                   mov r4.w, r0.w
                   and r3.xyzw, r3.xxxx, r4.xyzw  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z; r3.w <- litColor.w
                 
-                #line 338
+                #line 336
                   add r2.xyzw, r2.xyzw, r3.xyzw
                 
-                #line 346
+                #line 344
                 endif 
                 
-                #line 336
+                #line 334
                 eq r3.x, cb0[41].z, l(1.000000)
                 if_nz r3.x
                 
-                #line 254
+                #line 252
                   add r3.xyz, v1.xyzx, -cb0[39].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r3.x, r3.xyzx, cb0[40].xyzx
                   add r3.y, -|r3.x|, l(1.000000)
@@ -1148,21 +1145,21 @@ fxgroup
                   exp r3.yzw, r3.yyzw
                   min r4.xyz, r3.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
                 
-                #line 277
+                #line 275
                   mov r4.w, r0.w
                   and r3.xyzw, r3.xxxx, r4.xyzw  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z; r3.w <- litColor.w
                 
-                #line 338
+                #line 336
                   add r2.xyzw, r2.xyzw, r3.xyzw
                 
-                #line 346
+                #line 344
                 endif 
                 
-                #line 336
+                #line 334
                 eq r3.x, cb0[45].z, l(1.000000)
                 if_nz r3.x
                 
-                #line 254
+                #line 252
                   add r3.xyz, v1.xyzx, -cb0[43].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r3.x, r3.xyzx, cb0[44].xyzx
                   add r3.y, -|r3.x|, l(1.000000)
@@ -1210,21 +1207,21 @@ fxgroup
                   exp r3.yzw, r3.yyzw
                   min r4.xyz, r3.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
                 
-                #line 277
+                #line 275
                   mov r4.w, r0.w
                   and r3.xyzw, r3.xxxx, r4.xyzw  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z; r3.w <- litColor.w
                 
-                #line 338
+                #line 336
                   add r2.xyzw, r2.xyzw, r3.xyzw
                 
-                #line 346
+                #line 344
                 endif 
                 
-                #line 336
+                #line 334
                 eq r3.x, cb0[49].z, l(1.000000)
                 if_nz r3.x
                 
-                #line 254
+                #line 252
                   add r3.xyz, v1.xyzx, -cb0[47].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r3.x, r3.xyzx, cb0[48].xyzx
                   add r3.y, -|r3.x|, l(1.000000)
@@ -1272,13 +1269,13 @@ fxgroup
                   exp r1.xyz, r1.xyzx
                   min r0.xyz, r1.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 
-                #line 277
+                #line 275
                   and r0.xyzw, r0.xyzw, r3.xxxx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z; r0.w <- litColor.w
                 
-                #line 338
+                #line 336
                   add r2.xyzw, r0.xyzw, r2.xyzw
                 
-                #line 346
+                #line 344
                 endif 
                 
                 #line 139 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
@@ -1296,7 +1293,7 @@ fxgroup
                 #line 145 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 movc o0.xyzw, r0.xxxx, r1.xyzw, r2.xyzw
                 ret 
-                // Approximately 571 instruction slots used
+                // Approximately 568 instruction slots used
                             
             };
         }

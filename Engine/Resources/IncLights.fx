@@ -200,11 +200,9 @@ float4 ComputeDirectionalLight(
 	[flatten]
 	if(L.CastShadow == 1)
 	{
-		float diffuseFactor = dot(normal, -L.Direction);
+		float shadowFactor = CalcShadowFactor(shadowPosition, shadowMap);
 
-		float shadowFactor = diffuseFactor * CalcShadowFactor(shadowPosition, shadowMap);
-
-		litColor *= shadowFactor;
+		litColor = float4(litColor.rgb * shadowFactor, litColor.a);
 	}
 
 	return litColor;

@@ -9,7 +9,7 @@ namespace DeferredTest
 {
     public class TestScene3D : Scene
     {
-        private string titleMask = "DL test: {0} directionals, {1} points and {2} spots. Shadows {3}";
+        private string titleMask = "{0}: {1} directionals, {2} points and {3} spots. Shadows {4}";
 
         private const float near = 0.1f;
         private const float far = 1000f;
@@ -681,6 +681,7 @@ namespace DeferredTest
 
             this.title.Text = string.Format(
                 this.titleMask,
+                this.RenderMode,
                 this.Lights.EnabledDirectionalLights.Length,
                 this.Lights.EnabledPointLights.Length,
                 this.Lights.EnabledSpotLights.Length,
