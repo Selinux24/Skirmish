@@ -266,52 +266,6 @@ namespace Engine
             return res;
         }
         /// <summary>
-        /// Drawing of scene components
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="context">Drawing context</param>
-        /// <param name="components">Components</param>
-        public virtual void DrawComponents(GameTime gameTime, Context context, IList<Drawable> components)
-        {
-            for (int i = 0; i < components.Count; i++)
-            {
-                if (!components[i].Cull)
-                {
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        this.Game.Graphics.SetRasterizerDefault();
-                        if (components[i].Opaque)
-                        {
-                            this.Game.Graphics.SetBlendDefault();
-                        }
-                        else
-                        {
-                            this.Game.Graphics.SetBlendTransparent();
-                        }
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        this.Game.Graphics.SetRasterizerDefault();
-                        if (components[i].Opaque)
-                        {
-                            this.Game.Graphics.SetBlendDeferredComposer();
-                        }
-                        else
-                        {
-                            this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                        }
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        this.Game.Graphics.SetRasterizerShadows();
-                        this.Game.Graphics.SetBlendDefault();
-                    }
-
-                    components[i].Draw(gameTime, context);
-                }
-            }
-        }
-        /// <summary>
         /// Dispose scene objects
         /// </summary>
         public virtual void Dispose()

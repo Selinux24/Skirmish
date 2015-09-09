@@ -104,11 +104,6 @@ namespace Engine
 
                 if (effect != null)
                 {
-                    if (this.EnableAlphaBlending)
-                    {
-                        this.Game.Graphics.SetBlendAlphaEnabled();
-                    }
-
                     #region Per frame update
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)
@@ -136,6 +131,13 @@ namespace Engine
                     }
 
                     #endregion
+
+                    this.Game.Graphics.SetDepthStencilZEnabled();
+
+                    if (this.EnableAlphaBlending)
+                    {
+                        this.Game.Graphics.SetBlendAlphaEnabled();
+                    }
 
                     foreach (string meshName in this.Meshes.Keys)
                     {

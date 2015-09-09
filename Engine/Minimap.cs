@@ -127,6 +127,8 @@ namespace Engine
                 this.Game.Graphics.SetViewport(this.viewport);
                 this.Game.Graphics.SetRenderTarget(this.renderTarget, true, Color.Silver, null, false);
 
+                this.Game.Graphics.SetDepthStencilZDisabled();
+
                 for (int i = 0; i < this.Drawables.Length; i++)
                 {
                     this.Drawables[i].Draw(gameTime, this.drawContext);

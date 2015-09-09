@@ -59,15 +59,6 @@ namespace Engine
 
                 if (technique != null)
                 {
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        this.Game.Graphics.SetBlendTransparent();
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                    }
-
                     #region Per frame update
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)
@@ -98,6 +89,17 @@ namespace Engine
                     }
 
                     #endregion
+
+                    this.Game.Graphics.SetDepthStencilZEnabled();
+
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    {
+                        this.Game.Graphics.SetBlendTransparent();
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                    }
 
                     foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
                     {

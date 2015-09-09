@@ -105,11 +105,6 @@ namespace Engine
 
                 if (effect != null)
                 {
-                    if (this.EnableAlphaBlending)
-                    {
-                        this.Game.Graphics.SetBlendAlphaEnabled();
-                    }
-
                     if (this.instances != null && this.instances.Length > 0)
                     {
                         int instanceIndex = 0;
@@ -152,6 +147,13 @@ namespace Engine
                     }
 
                     #endregion
+
+                    this.Game.Graphics.SetDepthStencilZEnabled();
+
+                    if (this.EnableAlphaBlending)
+                    {
+                        this.Game.Graphics.SetBlendAlphaEnabled();
+                    }
 
                     foreach (string meshName in this.Meshes.Keys)
                     {

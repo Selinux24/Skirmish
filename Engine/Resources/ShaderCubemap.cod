@@ -9,22 +9,8 @@ cbuffer cbPerFrame : register(b0)
 }
 
 //
-// 8 local object(s)
+// 5 local object(s)
 //
-DepthStencilState StencilEnableDepth
-{
-    DepthEnable = bool(TRUE /* 1 */);
-    DepthWriteMask = uint(ZERO /* 0 */);
-};
-DepthStencilState StencilDisableDepth
-{
-    DepthEnable = bool(FALSE /* 0 */);
-    DepthWriteMask = uint(ZERO /* 0 */);
-};
-DepthStencilState StencilLessEqualDSS
-{
-    DepthFunc = uint(LESS_EQUAL /* 4 */);
-};
 SamplerState SamplerPoint
 {
 };
@@ -165,8 +151,6 @@ fxgroup
                 // Approximately 2 instruction slots used
                             
             };
-            DS_StencilRef = uint(0);
-            DepthStencilState = StencilLessEqualDSS;
         }
 
     }
@@ -293,8 +277,6 @@ fxgroup
                 // Approximately 6 instruction slots used
                             
             };
-            DS_StencilRef = uint(0);
-            DepthStencilState = StencilLessEqualDSS;
         }
 
     }

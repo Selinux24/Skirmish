@@ -327,22 +327,10 @@ namespace Engine
 #if DEBUG
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                            this.Game.Graphics.SetViewport(this.shadowMapper.Viewport);
-
-                            //Set shadow map depth map without render target
-                            this.Game.Graphics.SetRenderTarget(
-                                null,
-                                false,
-                                Color.Transparent,
-                                this.shadowMapper.DepthMap,
-                                true,
-                                DepthStencilClearFlags.Depth);
-
-                            //Use z-buffer by default for opaque components
-                            this.Game.Graphics.SetDepthStencilZEnabled();
+                            this.BindShadowMap();
 
                             //Draw scene using depth map
-                            scene.DrawComponents(gameTime, this.DrawShadowsContext, shadowComponents);
+                            this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, shadowComponents);
 
                             //Set shadow map and transform to drawing context
                             this.DrawContext.ShadowMap = this.shadowMapper.ShadowMapTexture;
@@ -406,7 +394,7 @@ namespace Engine
                         Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
                         //Draw scene on g-buffer render targets
-                        scene.DrawComponents(gameTime, this.DrawContext, solidComponents);
+                        this.DrawResultComponents(gameTime, this.DrawContext, solidComponents);
 #if DEBUG
                         swGeometryBufferDraw.Stop();
 #endif
@@ -489,14 +477,11 @@ namespace Engine
 #if DEBUG
                     Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                    //Disable z-buffer by default for non-opaque components
-                    this.Game.Graphics.SetDepthStencilZDisabled();
-
                     //Set forward mode
                     this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
 
                     //Draw scene
-                    scene.DrawComponents(gameTime, this.DrawContext, otherComponents);
+                    this.DrawResultComponents(gameTime, this.DrawContext, otherComponents);
 
                     //Set deferred mode
                     this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
@@ -779,25 +764,41 @@ namespace Engine
             geometry.IndexCount = ci.Length;
         }
         /// <summary>
+        /// Binds graphics for shadow mapping pass
+        /// </summary>
+        private void BindShadowMap()
+        {
+            //Set shadow mapper viewport
+            this.Game.Graphics.SetViewport(this.shadowMapper.Viewport);
+            
+            //Set shadow map depth map without render target
+            this.Game.Graphics.SetRenderTarget(
+                null,
+                false,
+                Color.Transparent,
+                this.shadowMapper.DepthMap,
+                true,
+                DepthStencilClearFlags.Depth);
+        }
+        /// <summary>
         /// Binds graphics for g-buffer pass
         /// </summary>
         private void BindGBuffer()
         {
+            //Set local viewport
             this.Game.Graphics.SetViewport(this.viewport);
 
             //Set g-buffer render targets
             this.Game.Graphics.SetRenderTargets(
                 this.geometryBuffer.RenderTargets, true, Color.Black,
                 this.Game.Graphics.DefaultDepthStencil, true);
-
-            //Enable z-buffer by default for opaque components
-            this.Game.Graphics.SetDepthStencilZEnabled();
         }
         /// <summary>
         /// Binds graphics for light acummulation pass
         /// </summary>
         private void BindLights()
         {
+            //Set local viewport
             this.Game.Graphics.SetViewport(this.viewport);
 
             //Set light buffer to draw lights
@@ -813,9 +814,6 @@ namespace Engine
             //Restore backbuffer as render target and clear it
             this.Game.Graphics.SetDefaultViewport();
             this.Game.Graphics.SetDefaultRenderTarget(false);
-
-            //Disable z-buffer for deferred rendering
-            this.Game.Graphics.SetDepthStencilZDisabled();
         }
         /// <summary>
         /// Draw lights
@@ -1086,6 +1084,7 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
+                this.Game.Graphics.SetDepthStencilZDisabled();
                 this.Game.Graphics.SetRasterizerDefault();
                 this.Game.Graphics.SetBlendDefault();
 #if DEBUG
@@ -1123,6 +1122,42 @@ namespace Engine
                 draw,
             });
 #endif
+        }
+
+
+        private void DrawShadowsComponents(GameTime gameTime, Context context, IList<Drawable> components)
+        {
+            for (int i = 0; i < components.Count; i++)
+            {
+                if (!components[i].Cull)
+                {
+                    this.Game.Graphics.SetRasterizerShadows();
+                    this.Game.Graphics.SetBlendDefault();
+
+                    components[i].Draw(gameTime, context);
+                }
+            }
+        }
+
+        private void DrawResultComponents(GameTime gameTime, Context context, IList<Drawable> components)
+        {
+            for (int i = 0; i < components.Count; i++)
+            {
+                if (!components[i].Cull)
+                {
+                    this.Game.Graphics.SetRasterizerDefault();
+                    if (components[i].Opaque)
+                    {
+                        this.Game.Graphics.SetBlendDeferredComposer();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                    }
+
+                    components[i].Draw(gameTime, context);
+                }
+            }
         }
     }
 }

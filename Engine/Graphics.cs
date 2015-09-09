@@ -90,18 +90,28 @@ namespace Engine
         private RasterizerState currentRasterizerState = null;
 
         /// <summary>
-        /// Depth stencil state with z-buffer enabled
+        /// Depth stencil state with z-buffer enabled for write
         /// </summary>
         private DepthStencilState depthStencilzBufferEnabled = null;
         /// <summary>
-        /// Depth stencil state with z-buffer disabled
+        /// Depth stencil state with z-buffer disabled for write
         /// </summary>
         private DepthStencilState depthStencilzBufferDisabled = null;
         /// <summary>
-        /// No depth stencil
+        /// Depth stencil state with z-buffer enabled for read
+        /// </summary>
+        private DepthStencilState depthStencilRDzBufferEnabled = null;
+        /// <summary>
+        /// Depth stencil state with z-buffer disabled for read
+        /// </summary>
+        private DepthStencilState depthStencilRDzBufferDisabled = null;
+        /// <summary>
+        /// No depth, no stencil
         /// </summary>
         private DepthStencilState depthStencilNone = null;
-
+        /// <summary>
+        /// Depth stencil state for deferred lighting
+        /// </summary>
         private DepthStencilState depthStencilDeferredLighting = null;
         /// <summary>
         /// Default blend state
@@ -385,14 +395,15 @@ namespace Engine
 
             #region Depth Stencil States
 
-            //Z-buffer enabled depth-stencil state
+            #region Z-buffer enabled for write depth-stencil state
+
             this.depthStencilzBufferEnabled = new DepthStencilState(
                 this.Device,
                 new DepthStencilStateDescription()
                 {
                     IsDepthEnabled = true,
-                    DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.Always,
+                    DepthWriteMask = DepthWriteMask.All,
+                    DepthComparison = Comparison.Less,
 
                     IsStencilEnabled = true,
                     StencilReadMask = 0xFF,
@@ -415,7 +426,10 @@ namespace Engine
                     },
                 });
 
-            //Z-buffer disabled depth-stencil state
+            #endregion
+
+            #region Z-buffer disabled for write depth-stencil state
+
             this.depthStencilzBufferDisabled = new DepthStencilState(
                 this.Device,
                 new DepthStencilStateDescription()
@@ -445,7 +459,38 @@ namespace Engine
                     },
                 });
 
-            //No depth-stencil state
+            #endregion
+
+            #region Z-buffer enabled for read depth-stencil state
+
+            this.depthStencilRDzBufferEnabled = new DepthStencilState(
+                this.Device,
+                new DepthStencilStateDescription()
+                {
+                    IsDepthEnabled = true,
+                    DepthWriteMask = DepthWriteMask.Zero,
+                    DepthComparison = Comparison.Less,
+                });
+
+            #endregion
+
+            #region Z-buffer disabled for read depth-stencil state
+
+            this.depthStencilRDzBufferDisabled = new DepthStencilState(
+                this.Device,
+                new DepthStencilStateDescription()
+                {
+                    IsDepthEnabled = false,
+                    DepthWriteMask = DepthWriteMask.Zero,
+                    DepthComparison = Comparison.Less,
+                });
+
+            #endregion
+
+
+
+            #region No depth, no stencil state
+
             this.depthStencilNone = new DepthStencilState(
                 this.Device,
                 new DepthStencilStateDescription()
@@ -453,18 +498,24 @@ namespace Engine
                     IsDepthEnabled = false,
                     DepthWriteMask = DepthWriteMask.Zero,
                     DepthComparison = Comparison.Always,
+
+                    IsStencilEnabled = false,
+                    StencilReadMask = 0xFF,
+                    StencilWriteMask = 0xFF,
                 });
 
-            //Deferred lighting depth-stencil state
+            #endregion
+
+            #region Deferred lighting depth-stencil state
+
             this.depthStencilDeferredLighting = new DepthStencilState(
                 this.Device,
                 new DepthStencilStateDescription()
                 {
-                    IsDepthEnabled = false,
-                    DepthWriteMask = DepthWriteMask.All,
-                    DepthComparison = Comparison.Less,
-
+                    
                 });
+
+            #endregion
 
             #endregion
 
@@ -871,12 +922,18 @@ namespace Engine
         {
             this.SetRenderTarget(this.renderTargetView, clear, GameEnvironment.Background, this.depthStencilView, clear);
         }
-
+        /// <summary>
+        /// Sets viewport
+        /// </summary>
+        /// <param name="viewport">Viewport</param>
         public void SetViewport(Viewport viewport)
         {
             this.DeviceContext.Rasterizer.SetViewport(viewport);
         }
-
+        /// <summary>
+        /// Sets viewport
+        /// </summary>
+        /// <param name="viewport">Viewport</param>
         public void SetViewport(ViewportF viewport)
         {
             this.DeviceContext.Rasterizer.SetViewport(viewport);
@@ -884,13 +941,12 @@ namespace Engine
         /// <summary>
         /// Set render target
         /// </summary>
-        /// <param name="viewport">Viewport</param>
-        /// <param name="depthMap">Depth map</param>
         /// <param name="renderTarget">Render target</param>
-        /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
-        /// <param name="clearColor">Clear color</param>
-        /// <param name="depthClearFlags">Depth cleraring flags</param>
-        /// <remarks>By default, depth clearing flags were "Depth" and "Stencil"</remarks>
+        /// <param name="clearRT">Indicates whether the target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="depthMap">Depth map</param>
+        /// <param name="clearDS">Indicates whether the stencil buffer must be cleared</param>
+        /// <param name="clearDSFlags">Stencil cleraring flags</param>
         public void SetRenderTarget(RenderTargetView renderTarget, bool clearRT, Color4 clearRTColor, DepthStencilView depthMap, bool clearDS, DepthStencilClearFlags clearDSFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
         {
             this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTarget);
@@ -913,13 +969,13 @@ namespace Engine
         /// <summary>
         /// Set render targets
         /// </summary>
-        /// <param name="viewport">Viewport</param>
-        /// <param name="depthMap">Depth map</param>
+        /// <param name="renderTarget">Render target</param>
         /// <param name="renderTargets">Render targets</param>
-        /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
-        /// <param name="clearColor">Clear color</param>
-        /// <param name="depthClearFlags">Depth cleraring flags</param>
-        /// <remarks>By default, depth clearing flags were "Depth" and "Stencil"</remarks>
+        /// <param name="clearRT">Indicates whether the target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="depthMap">Depth map</param>
+        /// <param name="clearDS">Indicates whether the stencil buffer must be cleared</param>
+        /// <param name="clearDSFlags">Stencil cleraring flags</param>
         public void SetRenderTargets(RenderTargetView[] renderTargets, bool clearRT, Color4 clearRTColor, DepthStencilView depthMap, bool clearDS, DepthStencilClearFlags clearDSFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
         {
             this.DeviceContext.OutputMerger.SetTargets(depthMap, renderTargets.Length, renderTargets);
@@ -943,18 +999,32 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Enables z-buffer
+        /// Enables z-buffer for write
         /// </summary>
         public void SetDepthStencilZEnabled()
         {
             this.SetDepthStencilState(this.depthStencilzBufferEnabled);
         }
         /// <summary>
-        /// Disables z-buffer
+        /// Disables z-buffer for write
         /// </summary>
         public void SetDepthStencilZDisabled()
         {
             this.SetDepthStencilState(this.depthStencilzBufferDisabled);
+        }
+        /// <summary>
+        /// Enables z-buffer for read
+        /// </summary>
+        public void SetDepthStencilRDZEnabled()
+        {
+            this.SetDepthStencilState(this.depthStencilRDzBufferEnabled);
+        }
+        /// <summary>
+        /// Disables z-buffer for read
+        /// </summary>
+        public void SetDepthStencilRDZDisabled()
+        {
+            this.SetDepthStencilState(this.depthStencilRDzBufferDisabled);
         }
         /// <summary>
         /// Disables depth stencil
@@ -1084,7 +1154,7 @@ namespace Engine
         /// <param name="state">Depth stencil state</param>
         private void SetDepthStencilState(DepthStencilState state)
         {
-            //if (this.currentDepthStencilState != state)
+            if (this.currentDepthStencilState != state)
             {
                 this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(state);
 
@@ -1216,6 +1286,8 @@ namespace Engine
 
             Helper.Dispose(this.depthStencilzBufferEnabled);
             Helper.Dispose(this.depthStencilzBufferDisabled);
+            Helper.Dispose(this.depthStencilRDzBufferEnabled);
+            Helper.Dispose(this.depthStencilRDzBufferDisabled);
             Helper.Dispose(this.depthStencilNone);
             Helper.Dispose(this.depthStencilDeferredLighting);
 

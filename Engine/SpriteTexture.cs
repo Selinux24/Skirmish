@@ -151,6 +151,8 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(GameTime gameTime, Context context)
         {
+            this.Game.Graphics.SetDepthStencilZDisabled();
+
             this.DeviceContext.InputAssembler.InputLayout = this.effect.GetInputLayout(effectTechnique);
             this.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
             this.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);

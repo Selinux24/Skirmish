@@ -272,6 +272,8 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
+                this.Game.Graphics.SetDepthStencilZDisabled();
+
                 this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                 this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);

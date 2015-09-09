@@ -25,22 +25,8 @@ cbuffer cbFixed : register(b1)
 }
 
 //
-// 12 local object(s)
+// 9 local object(s)
 //
-DepthStencilState StencilEnableDepth
-{
-    DepthEnable = bool(TRUE /* 1 */);
-    DepthWriteMask = uint(ZERO /* 0 */);
-};
-DepthStencilState StencilDisableDepth
-{
-    DepthEnable = bool(FALSE /* 0 */);
-    DepthWriteMask = uint(ZERO /* 0 */);
-};
-DepthStencilState StencilLessEqualDSS
-{
-    DepthFunc = uint(LESS_EQUAL /* 4 */);
-};
 SamplerState SamplerPoint
 {
 };
@@ -600,8 +586,6 @@ fxgroup
             };
             GeometryShader = gsStreamOutFire;
             PixelShader = NULL;
-            DS_StencilRef = uint(0);
-            DepthStencilState = StencilDisableDepth;
         }
 
     }
@@ -667,8 +651,6 @@ fxgroup
             };
             GeometryShader = gsStreamOutSmoke;
             PixelShader = NULL;
-            DS_StencilRef = uint(0);
-            DepthStencilState = StencilDisableDepth;
         }
 
     }
@@ -734,8 +716,6 @@ fxgroup
             };
             GeometryShader = gsStreamOutRain;
             PixelShader = NULL;
-            DS_StencilRef = uint(0);
-            DepthStencilState = StencilDisableDepth;
         }
 
     }
@@ -1121,7 +1101,7 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
                 
-                #line 148 "IncLights.fx"
+                #line 133 "IncLights.fx"
                 add r0.x, r0.x, -cb0[11].y
                 div_sat r0.x, r0.x, cb0[11].z  // fogLerp<0:[0f,1f]>
                 
@@ -1131,13 +1111,13 @@ fxgroup
                 mov r1.xy, v3.xyxx
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, r1.xyzx, t0.xyzw, s0
                 
-                #line 150 "IncLights.fx"
+                #line 135 "IncLights.fx"
                 mad r0.yzw, -r1.xxyz, v2.xxyz, cb0[12].xxyz
                 
                 #line 259 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 mul r1.xyzw, r1.xyzw, v2.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
-                #line 150 "IncLights.fx"
+                #line 135 "IncLights.fx"
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 261 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
@@ -1150,8 +1130,6 @@ fxgroup
                 // Approximately 16 instruction slots used
                             
             };
-            DS_StencilRef = uint(0);
-            DepthStencilState = StencilEnableDepth;
         }
 
     }
@@ -1441,7 +1419,7 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
                 
-                #line 148 "IncLights.fx"
+                #line 133 "IncLights.fx"
                 add r0.x, r0.x, -cb0[11].y
                 div_sat r0.x, r0.x, cb0[11].z  // fogLerp<0:[0f,1f]>
                 
@@ -1451,7 +1429,7 @@ fxgroup
                 mov r1.xy, v3.xyxx
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, r1.xyzx, t0.xyzw, s0  // litColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 150 "IncLights.fx"
+                #line 135 "IncLights.fx"
                 add r0.yzw, -r1.xxyz, cb0[12].xxyz
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
@@ -1465,8 +1443,6 @@ fxgroup
                 // Approximately 15 instruction slots used
                             
             };
-            DS_StencilRef = uint(0);
-            DepthStencilState = StencilEnableDepth;
         }
 
     }
@@ -1873,8 +1849,6 @@ fxgroup
                 // Approximately 10 instruction slots used
                             
             };
-            DS_StencilRef = uint(0);
-            DepthStencilState = StencilEnableDepth;
         }
 
     }
@@ -2186,8 +2160,6 @@ fxgroup
                 // Approximately 10 instruction slots used
                             
             };
-            DS_StencilRef = uint(0);
-            DepthStencilState = StencilEnableDepth;
         }
 
     }

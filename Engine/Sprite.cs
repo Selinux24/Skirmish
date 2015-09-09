@@ -169,6 +169,8 @@ namespace Engine
 
                 #endregion
 
+                this.Game.Graphics.SetDepthStencilZDisabled();
+
                 foreach (string meshName in this.Meshes.Keys)
                 {
                     MeshMaterialsDictionary dictionary = this.Meshes[meshName];

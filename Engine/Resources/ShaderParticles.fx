@@ -331,8 +331,6 @@ technique11 FireStreamOut
         SetVertexShader(CompileShader(vs_5_0, VSStreamOut()));
         SetGeometryShader(gsStreamOutFire);
         SetPixelShader(NULL);
-
-        SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
 technique11 SmokeStreamOut
@@ -342,8 +340,6 @@ technique11 SmokeStreamOut
         SetVertexShader(CompileShader(vs_5_0, VSStreamOut()));
         SetGeometryShader(gsStreamOutSmoke);
         SetPixelShader(NULL);
-
-        SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
 technique11 RainStreamOut
@@ -353,8 +349,6 @@ technique11 RainStreamOut
         SetVertexShader(CompileShader(vs_5_0, VSStreamOut()));
         SetGeometryShader(gsStreamOutRain);
         SetPixelShader(NULL);
-
-        SetDepthStencilState(StencilDisableDepth, 0);
     }
 }
 
@@ -365,8 +359,6 @@ technique11 SolidDraw
         SetVertexShader(CompileShader(vs_5_0, VSDrawSolid()));
         SetGeometryShader(CompileShader(gs_5_0, GSDrawSolid()));
         SetPixelShader(CompileShader(ps_5_0, PSDrawSolid()));
-
-        SetDepthStencilState(StencilEnableDepth, 0);
     }
 }
 technique11 LineDraw
@@ -376,8 +368,6 @@ technique11 LineDraw
         SetVertexShader(CompileShader(vs_5_0, VSDrawLine()));
         SetGeometryShader(CompileShader(gs_5_0, GSDrawLine()));
         SetPixelShader(CompileShader(ps_5_0, PSDrawLine()));
-
-        SetDepthStencilState(StencilEnableDepth, 0);
     }
 }
 
@@ -388,8 +378,6 @@ technique11 DeferredSolidDraw
         SetVertexShader(CompileShader(vs_5_0, VSDrawSolid()));
         SetGeometryShader(CompileShader(gs_5_0, GSDrawSolid()));
         SetPixelShader(CompileShader(ps_5_0, PSDeferredDrawSolid()));
-
-        SetDepthStencilState(StencilEnableDepth, 0);
     }
 }
 technique11 DeferredLineDraw
@@ -399,7 +387,5 @@ technique11 DeferredLineDraw
         SetVertexShader(CompileShader(vs_5_0, VSDrawLine()));
         SetGeometryShader(CompileShader(gs_5_0, GSDrawLine()));
         SetPixelShader(CompileShader(ps_5_0, PSDeferredDrawLine()));
-
-        SetDepthStencilState(StencilEnableDepth, 0);
     }
 }

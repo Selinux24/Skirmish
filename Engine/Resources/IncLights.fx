@@ -1,19 +1,4 @@
 
-DepthStencilState StencilEnableDepth
-{
-    DepthEnable = TRUE;
-    DepthWriteMask = ZERO;
-};
-DepthStencilState StencilDisableDepth
-{
-    DepthEnable = FALSE;
-    DepthWriteMask = ZERO;
-};
-DepthStencilState StencilLessEqualDSS
-{
-    DepthFunc = LESS_EQUAL;
-};
-
 SamplerState SamplerPoint;
 SamplerState SamplerLinear
 {

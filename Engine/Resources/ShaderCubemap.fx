@@ -44,8 +44,6 @@ technique11 ForwardCubemap
         SetVertexShader(CompileShader(vs_5_0, VSCubic()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PSForwardCubic()));
-        
-        SetDepthStencilState(StencilLessEqualDSS, 0);
     }
 }
 technique11 DeferredCubemap
@@ -55,7 +53,5 @@ technique11 DeferredCubemap
         SetVertexShader(CompileShader(vs_5_0, VSCubic()));
         SetGeometryShader(NULL);
         SetPixelShader(CompileShader(ps_5_0, PSDeferredCubic()));
-        
-        SetDepthStencilState(StencilLessEqualDSS, 0);
     }
 }

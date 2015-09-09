@@ -1,7 +1,7 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
+using System;
 using BindFlags = SharpDX.Direct3D11.BindFlags;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags;
@@ -241,6 +241,8 @@ namespace Engine
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
                 this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(new[] { soBinding });
 
+                this.Game.Graphics.SetDepthStencilRDZDisabled();
+
                 for (int p = 0; p < this.techniqueForStreamOut.Description.PassCount; p++)
                 {
                     this.techniqueForStreamOut.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
@@ -275,6 +277,8 @@ namespace Engine
                 var technique = DrawerPool.EffectParticles.GetTechniqueForDrawing(VertexTypes.Particle, this.particleClass, context.DrawerMode);
 
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
+
+                this.Game.Graphics.SetDepthStencilRDZEnabled();
 
                 if (context.DrawerMode == DrawerModesEnum.Forward)
                 {

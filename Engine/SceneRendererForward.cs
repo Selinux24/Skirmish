@@ -214,11 +214,8 @@ namespace Engine
                                 true,
                                 DepthStencilClearFlags.Depth);
 
-                            //Use z-buffer by default for opaque components
-                            this.Game.Graphics.SetDepthStencilZEnabled();
-
                             //Draw scene using depth map
-                            scene.DrawComponents(gameTime, this.DrawShadowsContext, shadowComponents);
+                            this.DrawShadowComponents(gameTime, this.DrawShadowsContext, shadowComponents);
 
                             //Set shadow map and transform to drawing context
                             this.DrawContext.ShadowMap = this.shadowMapper.ShadowMapTexture;
@@ -285,11 +282,8 @@ namespace Engine
 #if DEBUG
                         Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                        //Use z-buffer by default for opaque components
-                        this.Game.Graphics.SetDepthStencilZEnabled();
-
                         //Draw solid
-                        scene.DrawComponents(gameTime, this.DrawContext, solidComponents);
+                        this.DrawResultComponents(gameTime, this.DrawContext, solidComponents);
 #if DEBUG
                         swDraw.Stop();
 
@@ -307,11 +301,8 @@ namespace Engine
 #if DEBUG
                     Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                    //Disable z-buffer by default for non-opaque components
-                    this.Game.Graphics.SetDepthStencilZDisabled();
-
                     //Draw other
-                    scene.DrawComponents(gameTime, this.DrawContext, otherComponents);
+                    this.DrawResultComponents(gameTime, this.DrawContext, otherComponents);
 #if DEBUG
                     swDraw.Stop();
 
@@ -385,6 +376,42 @@ namespace Engine
         {
             if (result == SceneRendererResultEnum.ShadowMap) return this.ShadowMap;
             return null;
+        }
+
+
+        private void DrawShadowComponents(GameTime gameTime, Context context, IList<Drawable> components)
+        {
+            for (int i = 0; i < components.Count; i++)
+            {
+                if (!components[i].Cull)
+                {
+                    this.Game.Graphics.SetRasterizerShadows();
+                    this.Game.Graphics.SetBlendDefault();
+
+                    components[i].Draw(gameTime, context);
+                }
+            }
+        }
+
+        private void DrawResultComponents(GameTime gameTime, Context context, IList<Drawable> components)
+        {
+            for (int i = 0; i < components.Count; i++)
+            {
+                if (!components[i].Cull)
+                {
+                    this.Game.Graphics.SetRasterizerDefault();
+                    if (components[i].Opaque)
+                    {
+                        this.Game.Graphics.SetBlendDefault();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetBlendTransparent();
+                    }
+
+                    components[i].Draw(gameTime, context);
+                }
+            }
         }
     }
 }
