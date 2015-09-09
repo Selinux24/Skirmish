@@ -4,9 +4,17 @@
 cbuffer cbPerFrame : register (b0)
 {
 	float4x4 gWorldViewProjection;
+	float3 gEyePositionWorld;
+	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
+	PointLight gPointLights[MAX_LIGHTS_POINT];
+	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
+	float gFogStart;
+	float gFogRange;
+	float4 gFogColor;
 };
 
 TextureCube gCubemap;
+Texture2D gShadowMap;
 
 PSVertexPosition VSCubic(VSVertexPosition input)
 {
@@ -20,7 +28,33 @@ PSVertexPosition VSCubic(VSVertexPosition input)
 
 float4 PSForwardCubic(PSVertexPosition input) : SV_Target
 {
-	return gCubemap.Sample(SamplerLinear, input.positionLocal);
+    float4 textureColor = gCubemap.Sample(SamplerLinear, input.positionLocal);
+
+	float3 toEye = normalize(gEyePositionWorld - input.positionLocal);
+
+	float4 litColor = ComputeAllLights(
+		gDirLights, 
+		gPointLights, 
+		gSpotLights,
+		toEye,
+		textureColor,
+		input.positionLocal,
+		float3(0.0f, 0.0f, 0.0f),
+		0.0f,
+		0.0f,
+		float4(0.0f, 0.0f, 0.0f, 0.0f),
+		gShadowMap);
+
+	if(gFogRange > 0)
+	{
+		float3 toEyeWorld = gEyePositionWorld - input.positionLocal;
+		float distToEye = length(toEyeWorld);
+
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+	}
+
+	return litColor;
+
 }
 GBufferPSOutput PSDeferredCubic(PSVertexPosition input)
 {

@@ -56,7 +56,9 @@ namespace Engine
 
                     effect.UpdatePerFrame(
                         context.World * this.Manipulator.LocalTransform,
-                        context.ViewProjection);
+                        context.ViewProjection,
+                        context.EyePosition,
+                        context.Lights);
 
                     #endregion
 
