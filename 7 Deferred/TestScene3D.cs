@@ -254,8 +254,8 @@ namespace DeferredTest
                 CastShadow = false,
             };
 
-            this.Lights.ClearDirectionalLights();
-            this.Lights.Add(primary);
+            //this.Lights.ClearDirectionalLights();
+            //this.Lights.Add(primary);
 
             this.Lights.FogColor = Color.LightGray;
             this.Lights.FogStart = far * fogStart;
