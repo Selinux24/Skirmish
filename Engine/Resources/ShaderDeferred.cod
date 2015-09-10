@@ -8,11 +8,11 @@ cbuffer cbPerFrame : register(b0)
     float4x4 gWorld;                    // Offset:    0, size:   64
     float4x4 gWorldViewProjection;      // Offset:   64, size:   64
     float3  gEyePositionWorld;          // Offset:  128, size:   12
-    DirectionalLight gDirLight;         // Offset:  144, size:   40
-    PointLight gPointLight;             // Offset:  192, size:   44
-    SpotLight gSpotLight;               // Offset:  240, size:   60
-    float   gFogStart;                  // Offset:  300, size:    4
-    float   gFogRange;                  // Offset:  304, size:    4
+    DirectionalLight gDirLight;         // Offset:  144, size:   48
+    PointLight gPointLight;             // Offset:  192, size:   48
+    SpotLight gSpotLight;               // Offset:  240, size:   64
+    float   gFogStart;                  // Offset:  304, size:    4
+    float   gFogRange;                  // Offset:  308, size:    4
     float4  gFogColor;                  // Offset:  320, size:   16
 }
 
@@ -86,8 +86,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -99,8 +101,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -114,10 +117,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -199,8 +203,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40
+                //   } gDirLight;                       // Offset:  144 Size:    48
                 //   
                 //   struct PointLight
                 //   {
@@ -212,8 +218,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -227,10 +234,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -287,7 +295,7 @@ fxgroup
                 #line 93 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r0.xyzw, v1.xyxx, t3.xyzw, s0  // r0.x <- shadow.x; r0.y <- shadow.y; r0.z <- shadow.z; r0.w <- shadow.w
                 
-                #line 125 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 129 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                 sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t4.xxxx, s1, r0.z  // r1.x <- percentLit
                 sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r1.zwzz, t4.xxxx, s1, r0.z
@@ -322,7 +330,7 @@ fxgroup
                 #line 92
                 sample_indexable(texture2d)(float,float,float,float) r2.xyzw, v1.xyxx, t1.xyzw, s0  // r2.x <- normal.x; r2.y <- normal.y; r2.z <- normal.z; r2.w <- normal.w
                 
-                #line 160 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 164 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 dp3 r0.y, cb0[10].yzwy, r2.xyzx
                 add r0.y, r0.y, r0.y
                 mad r3.xyz, r2.xyzx, -r0.yyyy, cb0[10].yzwy
@@ -332,26 +340,26 @@ fxgroup
                 dp3 r0.y, r1.xyzx, r3.xyzx
                 max r0.y, r0.y, l(0.000000)  // r0.y <- specularFactor
                 
-                #line 166
+                #line 170
                 log r0.z, r0.y
                 lt r0.y, l(0.000000), r0.y
                 max r1.x, r2.w, l(1.000000)
                 
-                #line 154
+                #line 158
                 dp3 r1.y, r2.xyzx, -cb0[10].yzwy
                 max r1.y, r1.y, l(0.000000)  // r1.y <- diffuseFactor
                 
-                #line 166
+                #line 170
                 mul r0.z, r0.z, r1.x
                 exp r0.z, r0.z  // r0.z <- specularFactor
                 mul r0.z, r0.z, r0.w  // r0.z <- specular
                 and r2.y, r0.z, r0.y  // r2.y <- specular
                 
-                #line 156
+                #line 160
                 lt r0.y, l(0.000000), r1.y
                 mul r2.x, r1.y, cb0[10].x  // r2.x <- diffuse
                 
-                #line 169
+                #line 173
                 and r0.yz, r2.xxyx, r0.yyyy  // r0.y <- diffuse; r0.z <- specular
                 add r0.y, r0.y, cb0[9].w
                 add r0.y, r0.z, r0.y
@@ -359,30 +367,30 @@ fxgroup
                 #line 90 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t0.xyzw, s0  // r1.x <- diffuseColor.x; r1.y <- diffuseColor.y; r1.z <- diffuseColor.z; r1.w <- diffuseColor.w
                 
-                #line 171 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 175 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mul r1.xyz, r1.xyzx, cb0[9].xyzx
                 
                 #line 108 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 mov o0.w, r1.w
                 
-                #line 171 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 175 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mul r0.yzw, r0.yyyy, r1.xxyz  // r0.y <- litColor.x; r0.z <- litColor.y; r0.w <- litColor.z
                 log r0.yzw, r0.yyzw
                 
-                #line 129
+                #line 133
                 mul r0.xyzw, r0.xyzw, l(0.111111, 0.454545, 0.454545, 0.454545)  // r0.x <- <CalcShadowFactor return value>
                 
-                #line 172
+                #line 176
                 exp r0.yzw, r0.yyzw
                 min r0.yzw, r0.yyzw, l(0.000000, 1.000000, 1.000000, 1.000000)  // r0.y <- litColor.x; r0.z <- litColor.y; r0.w <- litColor.z
                 
-                #line 205
+                #line 209
                 mul r1.xyz, r0.xxxx, r0.yzwy  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z
                 
-                #line 201
+                #line 205
                 eq r0.x, cb0[11].x, l(1.000000)
                 
-                #line 206
+                #line 210
                 movc o0.xyz, r0.xxxx, r1.xyzx, r0.yzwy
                 
                 #line 108 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
@@ -421,8 +429,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -434,8 +444,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -449,10 +460,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -542,8 +554,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -555,8 +569,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44
+                //   } gPointLight;                     // Offset:  192 Size:    48
                 //   
                 //   struct SpotLight
                 //   {
@@ -570,10 +585,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -639,7 +655,7 @@ fxgroup
                 #line 125
                 add r2.xyz, -r1.xyzx, cb0[8].xyzx
                 
-                #line 220 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 224 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r1.xyz, r1.xyzx, -cb0[13].yzwy  // r1.x <- lightDirection.x; r1.y <- lightDirection.y; r1.z <- lightDirection.z
                 
                 #line 125 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
@@ -647,7 +663,7 @@ fxgroup
                 rsq r0.z, r0.z
                 mul r2.xyz, r0.zzzz, r2.xyzx  // r2.x <- toEye.x; r2.y <- toEye.y; r2.z <- toEye.z
                 
-                #line 221 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 225 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 dp3 r0.z, r1.xyzx, r1.xyzx
                 sqrt r0.z, r0.z  // r0.z <- distance
                 div r1.xyz, r1.xyzx, r0.zzzz
@@ -655,28 +671,28 @@ fxgroup
                 #line 121 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r3.xyzw, r0.xyxx, t1.xyzw, s0  // r3.x <- normal.x; r3.y <- normal.y; r3.z <- normal.z; r3.w <- normal.w
                 
-                #line 160 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 164 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 dp3 r0.w, r1.xyzx, r3.xyzx
                 add r0.w, r0.w, r0.w
                 mad r4.xyz, r3.xyzx, -r0.wwww, r1.xyzx
                 
-                #line 154
+                #line 158
                 dp3 r0.w, r3.xyzx, -r1.xyzx
                 
-                #line 166
+                #line 170
                 max r1.x, r3.w, l(1.000000)
                 
-                #line 154
+                #line 158
                 max r0.w, r0.w, l(0.000000)  // r0.w <- diffuseFactor
                 
-                #line 160
+                #line 164
                 dp3 r1.y, r4.xyzx, r4.xyzx
                 rsq r1.y, r1.y
                 mul r1.yzw, r1.yyyy, r4.xxyz  // r1.y <- lightReflection.x; r1.z <- lightReflection.y; r1.w <- lightReflection.z
                 dp3 r1.y, r2.xyzx, r1.yzwy
                 max r1.y, r1.y, l(0.000000)  // r1.y <- specularFactor
                 
-                #line 166
+                #line 170
                 log r1.z, r1.y
                 lt r1.y, l(0.000000), r1.y
                 mul r1.x, r1.z, r1.x
@@ -688,15 +704,15 @@ fxgroup
                 #line 120
                 sample_indexable(texture2d)(float,float,float,float) r2.xyzw, r0.xyxx, t0.xyzw, s0  // r2.x <- diffuseColor.x; r2.y <- diffuseColor.y; r2.z <- diffuseColor.z; r2.w <- diffuseColor.w
                 
-                #line 167 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 171 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mul r0.x, r1.x, r1.z  // r0.x <- specular
                 and r0.y, r0.x, r1.y  // r0.y <- specular
                 
-                #line 156
+                #line 160
                 lt r1.x, l(0.000000), r0.w
                 mul r0.x, r0.w, cb0[13].x  // r0.x <- diffuse
                 
-                #line 169
+                #line 173
                 and r0.xy, r0.xyxx, r1.xxxx
                 add r0.x, r0.x, cb0[12].w
                 add r0.x, r0.y, r0.x
@@ -707,23 +723,23 @@ fxgroup
                 exp r0.xyw, r0.xyxw
                 min r2.xyz, r0.xywx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 98
+                #line 102
                 div r0.x, r0.z, cb0[14].x  // r0.x <- f
                 mad r0.x, -r0.x, r0.x, l(1.000000)  // r0.x <- denom
                 
-                #line 102
+                #line 106
                 div r0.y, r0.z, r0.x  // r0.y <- d
                 lt r0.x, l(0.000000), r0.x
                 
-                #line 103
+                #line 107
                 add r0.y, r0.y, l(1.000000)  // r0.y <- dn
                 mul r0.y, r0.y, r0.y
                 div r0.y, cb0[13].x, r0.y  // r0.y <- <CalcSphericAttenuation return value>
                 
-                #line 110
+                #line 114
                 and r0.x, r0.y, r0.x  // r0.x <- <CalcSphericAttenuation return value>
                 
-                #line 238
+                #line 242
                 mul o0.xyzw, r0.xxxx, r2.xyzw
                 
                 #line 136 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
@@ -762,8 +778,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -775,8 +793,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -790,10 +809,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -883,8 +903,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -896,8 +918,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -911,10 +934,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -950,7 +974,7 @@ fxgroup
                 //
                 ps_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[18], immediateIndexed
+                dcl_constantbuffer cb0[19], immediateIndexed
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2d (float,float,float,float) t0
                 dcl_resource_texture2d (float,float,float,float) t1
@@ -977,100 +1001,124 @@ fxgroup
                 #line 150
                 sample_indexable(texture2d)(float,float,float,float) r1.xyz, r0.xyxx, t2.xyzw, s0  // r1.x <- depth.x; r1.y <- depth.y; r1.z <- depth.z
                 
-                #line 252 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                add r2.xyz, r1.xyzx, -cb0[16].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
+                #line 153
+                add r2.xyz, -r1.xyzx, cb0[8].xyzx
+                
+                #line 256 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                add r1.xyz, r1.xyzx, -cb0[16].yzwy  // r1.x <- lightDirection.x; r1.y <- lightDirection.y; r1.z <- lightDirection.z
                 
                 #line 153 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                add r1.xyz, -r1.xyzx, cb0[8].xyzx
-                
-                #line 253 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 dp3 r0.z, r2.xyzx, r2.xyzx
+                rsq r0.z, r0.z
+                mul r2.xyz, r0.zzzz, r2.xyzx  // r2.x <- toEye.x; r2.y <- toEye.y; r2.z <- toEye.z
+                
+                #line 257 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                dp3 r0.z, r1.xyzx, r1.xyzx
                 sqrt r0.z, r0.z  // r0.z <- distance
-                div r2.xyz, r2.xyzx, r0.zzzz
+                div r1.xyz, r1.xyzx, r0.zzzz
                 
                 #line 149 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r3.xyzw, r0.xyxx, t1.xyzw, s0  // r3.x <- normal.x; r3.y <- normal.y; r3.z <- normal.z; r3.w <- normal.w
                 
-                #line 160 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                dp3 r0.z, r2.xyzx, r3.xyzx
-                add r0.z, r0.z, r0.z
-                mad r4.xyz, r3.xyzx, -r0.zzzz, r2.xyzx
-                dp3 r0.z, r4.xyzx, r4.xyzx
-                rsq r0.z, r0.z
-                mul r4.xyz, r0.zzzz, r4.xyzx  // r4.x <- lightReflection.x; r4.y <- lightReflection.y; r4.z <- lightReflection.z
+                #line 164 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                dp3 r0.w, r1.xyzx, r3.xyzx
+                add r0.w, r0.w, r0.w
+                mad r4.xyz, r3.xyzx, -r0.wwww, r1.xyzx
+                dp3 r0.w, r4.xyzx, r4.xyzx
+                rsq r0.w, r0.w
+                mul r4.xyz, r0.wwww, r4.xyzx  // r4.x <- lightReflection.x; r4.y <- lightReflection.y; r4.z <- lightReflection.z
+                dp3 r0.w, r2.xyzx, r4.xyzx
+                max r0.w, r0.w, l(0.000000)  // r0.w <- specularFactor
                 
-                #line 153 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                dp3 r0.z, r1.xyzx, r1.xyzx
-                rsq r0.z, r0.z
-                mul r1.xyz, r0.zzzz, r1.xyzx  // r1.x <- toEye.x; r1.y <- toEye.y; r1.z <- toEye.z
+                #line 170
+                log r1.w, r0.w
+                lt r0.w, l(0.000000), r0.w
+                max r2.x, r3.w, l(1.000000)
                 
-                #line 162 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                dp3 r0.z, r1.xyzx, r4.xyzx
-                max r0.z, r0.z, l(0.000000)  // r0.z <- specularFactor
+                #line 158
+                dp3 r2.y, r3.xyzx, -r1.xyzx
                 
-                #line 166
-                log r0.w, r0.z
-                lt r0.z, l(0.000000), r0.z
-                max r1.x, r3.w, l(1.000000)
+                #line 260
+                dp3 r1.x, r1.xyzx, cb0[17].xyzx  // r1.x <- spotFactor
                 
-                #line 154
-                dp3 r1.y, r3.xyzx, -r2.xyzx
+                #line 158
+                max r1.y, r2.y, l(0.000000)  // r1.y <- diffuseFactor
                 
-                #line 256
-                dp3 r1.z, r2.xyzx, cb0[17].xyzx
-                
-                #line 154
-                max r1.y, r1.y, l(0.000000)  // r1.y <- diffuseFactor
-                
-                #line 166
-                mul r0.w, r0.w, r1.x
-                exp r0.w, r0.w  // r0.w <- specularFactor
+                #line 170
+                mul r1.z, r1.w, r2.x
+                exp r1.z, r1.z  // r1.z <- specularFactor
                 
                 #line 151 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                sample_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t3.wxyz, s0  // r1.x <- shadow.w
+                sample_indexable(texture2d)(float,float,float,float) r1.w, r0.xyxx, t3.xyzw, s0  // r1.w <- shadow.w
                 
                 #line 148
                 sample_indexable(texture2d)(float,float,float,float) r2.xyzw, r0.xyxx, t0.xyzw, s0  // r2.x <- diffuseColor.x; r2.y <- diffuseColor.y; r2.z <- diffuseColor.z; r2.w <- diffuseColor.w
                 
-                #line 167 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                mul r0.x, r0.w, r1.x  // r0.x <- specular
-                and r0.y, r0.x, r0.z  // r0.y <- specular
+                #line 171 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                mul r0.x, r1.z, r1.w  // r0.x <- specular
+                and r0.y, r0.x, r0.w  // r0.y <- specular
                 
-                #line 156
-                lt r0.z, l(0.000000), r1.y
+                #line 160
+                lt r0.w, l(0.000000), r1.y
                 mul r0.x, r1.y, cb0[16].x  // r0.x <- diffuse
                 
-                #line 169
-                and r0.xy, r0.xyxx, r0.zzzz
+                #line 173
+                and r0.xy, r0.xyxx, r0.wwww
                 add r0.x, r0.x, cb0[15].w
                 add r0.x, r0.y, r0.x
-                mul r0.yzw, r2.xxyz, cb0[15].xxyz
-                mul r0.xyz, r0.xxxx, r0.yzwy  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
-                log r0.xyz, r0.xyzx
-                mul r0.xyz, r0.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
-                exp r0.xyz, r0.xyzx
-                min r2.xyz, r0.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
+                mul r1.yzw, r2.xxyz, cb0[15].xxyz
+                mul r0.xyw, r0.xxxx, r1.yzyw  // r0.x <- litColor.x; r0.y <- litColor.y; r0.w <- litColor.z
+                log r0.xyw, r0.xyxw
+                mul r0.xyw, r0.xyxw, l(0.454545, 0.454545, 0.000000, 0.454545)
+                exp r0.xyw, r0.xyxw
+                min r2.xyz, r0.xywx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 256
-                mad r0.x, |r1.z|, l(-0.018729), l(0.074261)
-                mad r0.x, r0.x, |r1.z|, l(-0.212114)
-                mad r0.x, r0.x, |r1.z|, l(1.570729)
-                add r0.y, -|r1.z|, l(1.000000)
-                lt r0.z, r1.z, -r1.z
-                sqrt r0.y, r0.y
-                mul r0.w, r0.y, r0.x
-                mad r0.w, r0.w, l(-2.000000), l(3.141593)
-                and r0.z, r0.z, r0.w
-                mad r0.x, r0.x, r0.y, r0.z
-                mul r0.x, r0.x, l(57.295780)  // r0.x <- lightToSurfaceAngle
-                ge r0.x, cb0[17].w, r0.x
+                #line 102
+                div r0.x, r0.z, cb0[18].x  // r0.x <- f
+                mad r0.x, -r0.x, r0.x, l(1.000000)  // r0.x <- denom
                 
-                #line 277
-                and o0.xyzw, r2.xyzw, r0.xxxx
+                #line 106
+                div r0.y, r0.z, r0.x  // r0.y <- d
+                lt r0.x, l(0.000000), r0.x
+                
+                #line 107
+                add r0.y, r0.y, l(1.000000)  // r0.y <- dn
+                mul r0.y, r0.y, r0.y
+                div r0.y, cb0[16].x, r0.y  // r0.y <- <CalcSphericAttenuation return value>
+                
+                #line 114
+                and r0.x, r0.y, r0.x  // r0.x <- <CalcSphericAttenuation return value>
+                
+                #line 261
+                mad r0.y, |r1.x|, l(-0.018729), l(0.074261)
+                mad r0.y, r0.y, |r1.x|, l(-0.212114)
+                mad r0.y, r0.y, |r1.x|, l(1.570729)
+                add r0.z, -|r1.x|, l(1.000000)
+                lt r0.w, r1.x, -r1.x
+                sqrt r0.z, r0.z
+                mul r1.x, r0.z, r0.y
+                mad r1.x, r1.x, l(-2.000000), l(3.141593)
+                and r0.w, r0.w, r1.x
+                mad r0.y, r0.y, r0.z, r0.w
+                
+                #line 279
+                mad r0.z, -r0.y, l(57.295780), l(1.000000)
+                
+                #line 261
+                mul r0.y, r0.y, l(57.295780)  // r0.y <- lightToSurfaceAngle
+                ge r0.y, cb0[17].w, r0.y
+                
+                #line 279
+                add r0.w, -cb0[17].w, l(1.000000)
+                div r0.z, r0.z, r0.w
+                add r0.z, -r0.z, l(1.000000)  // r0.z <- attenuationS
+                mul r0.x, r0.z, r0.x
+                mul r1.xyzw, r0.xxxx, r2.xyzw  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
+                and o0.xyzw, r0.yyyy, r1.xyzw
                 
                 #line 164 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 ret 
-                // Approximately 59 instruction slots used
+                // Approximately 73 instruction slots used
                             
             };
         }
@@ -1104,8 +1152,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -1117,8 +1167,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -1132,10 +1183,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -1217,8 +1269,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -1230,8 +1284,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -1245,10 +1300,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4
-                //   float gFogRange;                   // Offset:  304 Size:     4
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4
+                //   float gFogRange;                   // Offset:  308 Size:     4
                 //   float4 gFogColor;                  // Offset:  320 Size:    16
                 //
                 // }
@@ -1302,19 +1358,19 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 133 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                add r0.x, r0.x, -cb0[18].w
-                div_sat r0.x, r0.x, cb0[19].x  // r0.x <- fogLerp
+                #line 137 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                add r0.x, r0.x, -cb0[19].x
+                div_sat r0.x, r0.x, cb0[19].y  // r0.x <- fogLerp
                 
                 #line 169 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t5.xyzw, s0  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
                 
-                #line 135 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 139 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r2.xyzw, -r1.xyzw, cb0[20].xyzw
                 mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z; r0.w <- <ComputeFog return value>.w
                 
                 #line 171 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                lt r2.x, l(0.000000), cb0[19].x
+                lt r2.x, l(0.000000), cb0[19].y
                 
                 #line 177
                 movc o0.xyzw, r2.xxxx, r0.xyzw, r1.xyzw

@@ -7,11 +7,11 @@ cbuffer cbPerFrame : register(b0)
 {
     float4x4 gWorldViewProjection;      // Offset:    0, size:   64
     float3  gEyePositionWorld;          // Offset:   64, size:   12
-    DirectionalLight gDirLights[3];     // Offset:   80, size:  136
-    PointLight gPointLights[4];         // Offset:  224, size:  188
-    SpotLight gSpotLights[4];           // Offset:  416, size:  252
-    float   gFogStart;                  // Offset:  668, size:    4
-    float   gFogRange;                  // Offset:  672, size:    4
+    DirectionalLight gDirLights[3];     // Offset:   80, size:  144
+    PointLight gPointLights[4];         // Offset:  224, size:  192
+    SpotLight gSpotLights[4];           // Offset:  416, size:  256
+    float   gFogStart;                  // Offset:  672, size:    4
+    float   gFogRange;                  // Offset:  676, size:    4
     float4  gFogColor;                  // Offset:  688, size:   16
 }
 
@@ -80,8 +80,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  100
                 //       float CastShadow;              // Offset:  112
                 //       float Enabled;                 // Offset:  116
+                //       float Pad1;                    // Offset:  120
+                //       float Pad2;                    // Offset:  124
                 //
-                //   } gDirLights[3];                   // Offset:   80 Size:   136 [unused]
+                //   } gDirLights[3];                   // Offset:   80 Size:   144 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -93,8 +95,9 @@ fxgroup
                 //       float Radius;                  // Offset:  256
                 //       float CastShadow;              // Offset:  260
                 //       float Enabled;                 // Offset:  264
+                //       float Pad1;                    // Offset:  268
                 //
-                //   } gPointLights[4];                 // Offset:  224 Size:   188 [unused]
+                //   } gPointLights[4];                 // Offset:  224 Size:   192 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -108,10 +111,11 @@ fxgroup
                 //       float Radius;                  // Offset:  464
                 //       float CastShadow;              // Offset:  468
                 //       float Enabled;                 // Offset:  472
+                //       float Pad1;                    // Offset:  476
                 //
-                //   } gSpotLights[4];                  // Offset:  416 Size:   252 [unused]
-                //   float gFogStart;                   // Offset:  668 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  672 Size:     4 [unused]
+                //   } gSpotLights[4];                  // Offset:  416 Size:   256 [unused]
+                //   float gFogStart;                   // Offset:  672 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  676 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  688 Size:    16 [unused]
                 //
                 // }
@@ -189,8 +193,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  100
                 //       float CastShadow;              // Offset:  112
                 //       float Enabled;                 // Offset:  116
+                //       float Pad1;                    // Offset:  120
+                //       float Pad2;                    // Offset:  124
                 //
-                //   } gDirLights[3];                   // Offset:   80 Size:   136
+                //   } gDirLights[3];                   // Offset:   80 Size:   144
                 //   
                 //   struct PointLight
                 //   {
@@ -202,8 +208,9 @@ fxgroup
                 //       float Radius;                  // Offset:  256
                 //       float CastShadow;              // Offset:  260
                 //       float Enabled;                 // Offset:  264
+                //       float Pad1;                    // Offset:  268
                 //
-                //   } gPointLights[4];                 // Offset:  224 Size:   188
+                //   } gPointLights[4];                 // Offset:  224 Size:   192
                 //   
                 //   struct SpotLight
                 //   {
@@ -217,10 +224,11 @@ fxgroup
                 //       float Radius;                  // Offset:  464
                 //       float CastShadow;              // Offset:  468
                 //       float Enabled;                 // Offset:  472
+                //       float Pad1;                    // Offset:  476
                 //
-                //   } gSpotLights[4];                  // Offset:  416 Size:   252
-                //   float gFogStart;                   // Offset:  668 Size:     4
-                //   float gFogRange;                   // Offset:  672 Size:     4
+                //   } gSpotLights[4];                  // Offset:  416 Size:   256
+                //   float gFogStart;                   // Offset:  672 Size:     4
+                //   float gFogRange;                   // Offset:  676 Size:     4
                 //   float4 gFogColor;                  // Offset:  688 Size:    16
                 //
                 // }
@@ -261,7 +269,7 @@ fxgroup
                 dcl_resource_texture2d (float,float,float,float) t1
                 dcl_input_ps linear v1.xyz
                 dcl_output o0.xyzw
-                dcl_temps 4
+                dcl_temps 5
                 //
                 // Initial variable locations:
                 //   v0.x <- input.positionHomogeneous.x; v0.y <- input.positionHomogeneous.y; v0.z <- input.positionHomogeneous.z; v0.w <- input.positionHomogeneous.w; 
@@ -271,11 +279,11 @@ fxgroup
                 #line 31 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 sample_indexable(texturecube)(float,float,float,float) r0.xyzw, v1.xyzx, t0.xyzw, s0  // r0.x <- textureColor.x; r0.y <- textureColor.y; r0.z <- textureColor.z; r0.w <- textureColor.w
                 
-                #line 302 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 307 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.x, cb0[7].y, l(1.000000)
                 if_nz r1.x
                 
-                #line 171
+                #line 175
                   mul r1.xyz, r0.xyzx, cb0[5].xyzx
                   mul r1.xyz, r1.xyzx, cb0[5].wwww  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z
                   log r1.xyz, r1.xyzx
@@ -283,30 +291,30 @@ fxgroup
                   exp r1.xyz, r1.xyzx
                   min r1.xyz, r1.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z
                 
-                #line 201
+                #line 205
                   eq r1.w, cb0[7].x, l(1.000000)
                 
-                #line 125
+                #line 129
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, l(-1.#IND00, -1.#IND00, 0.000000, 0.000000), t1.xxxx, s1, l(-1.#IND00)  // r2.x <- percentLit
                 
-                #line 129
+                #line 133
                   mul r2.x, r2.x, l(1.000000)  // r2.x <- <CalcShadowFactor return value>
                 
-                #line 205
+                #line 209
                   mul r2.xyz, r1.xyzx, r2.xxxx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                   movc r1.xyz, r1.wwww, r2.xyzx, r1.xyzx  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z
                 
-                #line 314
+                #line 319
                   mov r1.w, r0.w
                 else 
                   mov r1.xyzw, l(0,0,0,0)
                 endif 
                 
-                #line 302
+                #line 307
                 eq r2.x, cb0[10].y, l(1.000000)
                 if_nz r2.x
                 
-                #line 171
+                #line 175
                   mul r2.xyz, r0.xyzx, cb0[8].xyzx
                   mul r2.xyz, r2.xyzx, cb0[8].wwww  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                   log r2.xyz, r2.xyzx
@@ -314,31 +322,31 @@ fxgroup
                   exp r2.xyz, r2.xyzx
                   min r2.xyz, r2.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 201
+                #line 205
                   eq r2.w, cb0[10].x, l(1.000000)
                 
-                #line 125
+                #line 129
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(-1.#IND00, -1.#IND00, 0.000000, 0.000000), t1.xxxx, s1, l(-1.#IND00)  // r3.x <- percentLit
                 
-                #line 129
+                #line 133
                   mul r3.x, r3.x, l(1.000000)  // r3.x <- <CalcShadowFactor return value>
                 
-                #line 205
+                #line 209
                   mul r3.xyz, r2.xyzx, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                   movc r2.xyz, r2.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 304
+                #line 309
                   mov r2.w, r0.w
                   add r1.xyzw, r1.xyzw, r2.xyzw  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
                 
-                #line 314
+                #line 319
                 endif 
                 
-                #line 302
+                #line 307
                 eq r2.x, cb0[13].y, l(1.000000)
                 if_nz r2.x
                 
-                #line 171
+                #line 175
                   mul r2.xyz, r0.xyzx, cb0[11].xyzx
                   mul r2.xyz, r2.xyzx, cb0[11].wwww  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                   log r2.xyz, r2.xyzx
@@ -346,36 +354,36 @@ fxgroup
                   exp r2.xyz, r2.xyzx
                   min r2.xyz, r2.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 201
+                #line 205
                   eq r2.w, cb0[13].x, l(1.000000)
                 
-                #line 125
+                #line 129
                   sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(-1.#IND00, -1.#IND00, 0.000000, 0.000000), t1.xxxx, s1, l(-1.#IND00)  // r3.x <- percentLit
                 
-                #line 129
+                #line 133
                   mul r3.x, r3.x, l(1.000000)  // r3.x <- <CalcShadowFactor return value>
                 
-                #line 205
+                #line 209
                   mul r3.xyz, r2.xyzx, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                   movc r2.xyz, r2.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 304
+                #line 309
                   mov r2.w, r0.w
                   add r1.xyzw, r1.xyzw, r2.xyzw
                 
-                #line 314
+                #line 319
                 endif 
                 
-                #line 320
+                #line 325
                 eq r2.x, cb0[16].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 220
+                #line 224
                   add r2.xyz, v1.xyzx, -cb0[15].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, r2.xyzx
                   sqrt r2.x, r2.x  // r2.x <- distance
                 
-                #line 171
+                #line 175
                   mul r2.yzw, r0.xxyz, cb0[14].xxyz
                   mul r2.yzw, r2.yyzw, cb0[14].wwww  // r2.y <- litColor.x; r2.z <- litColor.y; r2.w <- litColor.z
                   log r2.yzw, r2.yyzw
@@ -383,7 +391,7 @@ fxgroup
                   exp r2.yzw, r2.yyzw
                   min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 98
+                #line 102
                   div r2.y, r2.x, cb0[16].x  // r2.y <- f
                   mad r2.y, -r2.y, r2.y, l(1.000000)  // r2.y <- denom
                   lt r2.z, l(0.000000), r2.y
@@ -392,28 +400,28 @@ fxgroup
                   mul r2.x, r2.x, r2.x
                   div r2.x, cb0[15].x, r2.x  // r2.x <- <CalcSphericAttenuation return value>
                 
-                #line 110
+                #line 114
                   and r2.x, r2.x, r2.z
                 
-                #line 238
+                #line 242
                   mov r3.w, r0.w
                 
-                #line 322
+                #line 327
                   mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw
                 
-                #line 330
+                #line 335
                 endif 
                 
-                #line 320
+                #line 325
                 eq r2.x, cb0[19].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 220
+                #line 224
                   add r2.xyz, v1.xyzx, -cb0[18].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, r2.xyzx
                   sqrt r2.x, r2.x  // r2.x <- distance
                 
-                #line 171
+                #line 175
                   mul r2.yzw, r0.xxyz, cb0[17].xxyz
                   mul r2.yzw, r2.yyzw, cb0[17].wwww  // r2.y <- litColor.x; r2.z <- litColor.y; r2.w <- litColor.z
                   log r2.yzw, r2.yyzw
@@ -421,7 +429,7 @@ fxgroup
                   exp r2.yzw, r2.yyzw
                   min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 98
+                #line 102
                   div r2.y, r2.x, cb0[19].x  // r2.y <- f
                   mad r2.y, -r2.y, r2.y, l(1.000000)  // r2.y <- denom
                   lt r2.z, l(0.000000), r2.y
@@ -430,28 +438,28 @@ fxgroup
                   mul r2.x, r2.x, r2.x
                   div r2.x, cb0[18].x, r2.x  // r2.x <- <CalcSphericAttenuation return value>
                 
-                #line 110
+                #line 114
                   and r2.x, r2.x, r2.z
                 
-                #line 238
+                #line 242
                   mov r3.w, r0.w
                 
-                #line 322
+                #line 327
                   mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw
                 
-                #line 330
+                #line 335
                 endif 
                 
-                #line 320
+                #line 325
                 eq r2.x, cb0[22].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 220
+                #line 224
                   add r2.xyz, v1.xyzx, -cb0[21].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, r2.xyzx
                   sqrt r2.x, r2.x  // r2.x <- distance
                 
-                #line 171
+                #line 175
                   mul r2.yzw, r0.xxyz, cb0[20].xxyz
                   mul r2.yzw, r2.yyzw, cb0[20].wwww  // r2.y <- litColor.x; r2.z <- litColor.y; r2.w <- litColor.z
                   log r2.yzw, r2.yyzw
@@ -459,7 +467,7 @@ fxgroup
                   exp r2.yzw, r2.yyzw
                   min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 98
+                #line 102
                   div r2.y, r2.x, cb0[22].x  // r2.y <- f
                   mad r2.y, -r2.y, r2.y, l(1.000000)  // r2.y <- denom
                   lt r2.z, l(0.000000), r2.y
@@ -468,28 +476,28 @@ fxgroup
                   mul r2.x, r2.x, r2.x
                   div r2.x, cb0[21].x, r2.x  // r2.x <- <CalcSphericAttenuation return value>
                 
-                #line 110
+                #line 114
                   and r2.x, r2.x, r2.z
                 
-                #line 238
+                #line 242
                   mov r3.w, r0.w
                 
-                #line 322
+                #line 327
                   mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw
                 
-                #line 330
+                #line 335
                 endif 
                 
-                #line 320
+                #line 325
                 eq r2.x, cb0[25].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 220
+                #line 224
                   add r2.xyz, v1.xyzx, -cb0[24].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.x, r2.xyzx, r2.xyzx
                   sqrt r2.x, r2.x  // r2.x <- distance
                 
-                #line 171
+                #line 175
                   mul r2.yzw, r0.xxyz, cb0[23].xxyz
                   mul r2.yzw, r2.yyzw, cb0[23].wwww  // r2.y <- litColor.x; r2.z <- litColor.y; r2.w <- litColor.z
                   log r2.yzw, r2.yyzw
@@ -497,7 +505,7 @@ fxgroup
                   exp r2.yzw, r2.yyzw
                   min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 98
+                #line 102
                   div r2.y, r2.x, cb0[25].x  // r2.y <- f
                   mad r2.y, -r2.y, r2.y, l(1.000000)  // r2.y <- denom
                   lt r2.z, l(0.000000), r2.y
@@ -506,197 +514,269 @@ fxgroup
                   mul r2.x, r2.x, r2.x
                   div r2.x, cb0[24].x, r2.x  // r2.x <- <CalcSphericAttenuation return value>
                 
-                #line 110
+                #line 114
                   and r2.x, r2.x, r2.z
                 
-                #line 238
+                #line 242
                   mov r3.w, r0.w
                 
-                #line 322
+                #line 327
                   mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw
                 
-                #line 330
+                #line 335
                 endif 
                 
-                #line 336
+                #line 341
                 eq r2.x, cb0[29].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 252
+                #line 256
                   add r2.xyz, v1.xyzx, -cb0[27].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.w, r2.xyzx, r2.xyzx
                   sqrt r2.w, r2.w  // r2.w <- distance
                   div r2.xyz, r2.xyzx, r2.wwww
-                  dp3 r2.x, r2.xyzx, cb0[28].xyzx
+                  dp3 r2.x, r2.xyzx, cb0[28].xyzx  // r2.x <- spotFactor
                   add r2.y, -|r2.x|, l(1.000000)
                   sqrt r2.y, r2.y
                   mad r2.z, |r2.x|, l(-0.018729), l(0.074261)
                   mad r2.z, r2.z, |r2.x|, l(-0.212114)
                   mad r2.z, r2.z, |r2.x|, l(1.570729)
-                  mul r2.w, r2.y, r2.z
-                  mad r2.w, r2.w, l(-2.000000), l(3.141593)
+                  mul r3.x, r2.y, r2.z
+                  mad r3.x, r3.x, l(-2.000000), l(3.141593)
                   lt r2.x, r2.x, -r2.x
-                  and r2.x, r2.x, r2.w
+                  and r2.x, r2.x, r3.x
                   mad r2.x, r2.z, r2.y, r2.x
-                  mul r2.x, r2.x, l(57.295780)  // r2.x <- lightToSurfaceAngle
-                  ge r2.x, cb0[28].w, r2.x
+                  mul r2.y, r2.x, l(57.295780)  // r2.y <- lightToSurfaceAngle
+                  ge r2.y, cb0[28].w, r2.y
                 
-                #line 171
-                  mul r2.yzw, r0.xxyz, cb0[26].xxyz
-                  mul r2.yzw, r2.yyzw, cb0[26].wwww  // r2.y <- litColor.x; r2.z <- litColor.y; r2.w <- litColor.z
-                  log r2.yzw, r2.yyzw
-                  mul r2.yzw, r2.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r2.yzw, r2.yyzw
-                  min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                #line 175
+                  mul r3.xyz, r0.xyzx, cb0[26].xyzx
+                  mul r3.xyz, r3.xyzx, cb0[26].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                  log r3.xyz, r3.xyzx
+                  mul r3.xyz, r3.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
+                  exp r3.xyz, r3.xyzx
+                  min r3.xyz, r3.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 277
+                #line 102
+                  div r2.z, r2.w, cb0[29].x  // r2.z <- f
+                  mad r2.z, -r2.z, r2.z, l(1.000000)  // r2.z <- denom
+                  lt r4.x, l(0.000000), r2.z
+                  div r2.z, r2.w, r2.z  // r2.z <- d
+                  add r2.z, r2.z, l(1.000000)  // r2.z <- dn
+                  mul r2.z, r2.z, r2.z
+                  div r2.z, cb0[27].x, r2.z  // r2.z <- <CalcSphericAttenuation return value>
+                
+                #line 114
+                  and r2.z, r2.z, r4.x
+                
+                #line 279
+                  mad r2.x, -r2.x, l(57.295780), l(1.000000)
+                  add r2.w, -cb0[28].w, l(1.000000)
+                  div r2.x, r2.x, r2.w
+                  add r2.x, -r2.x, l(1.000000)  // r2.x <- attenuationS
+                  mul r2.x, r2.x, r2.z
                   mov r3.w, r0.w
-                  and r2.xyzw, r2.xxxx, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
+                  mul r3.xyzw, r2.xxxx, r3.xyzw  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z; r3.w <- litColor.w
+                  and r2.xyzw, r2.yyyy, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
                 
-                #line 338
+                #line 343
                   add r1.xyzw, r1.xyzw, r2.xyzw
                 
-                #line 346
+                #line 351
                 endif 
                 
-                #line 336
+                #line 341
                 eq r2.x, cb0[33].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 252
+                #line 256
                   add r2.xyz, v1.xyzx, -cb0[31].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.w, r2.xyzx, r2.xyzx
                   sqrt r2.w, r2.w  // r2.w <- distance
                   div r2.xyz, r2.xyzx, r2.wwww
-                  dp3 r2.x, r2.xyzx, cb0[32].xyzx
+                  dp3 r2.x, r2.xyzx, cb0[32].xyzx  // r2.x <- spotFactor
                   add r2.y, -|r2.x|, l(1.000000)
                   sqrt r2.y, r2.y
                   mad r2.z, |r2.x|, l(-0.018729), l(0.074261)
                   mad r2.z, r2.z, |r2.x|, l(-0.212114)
                   mad r2.z, r2.z, |r2.x|, l(1.570729)
-                  mul r2.w, r2.y, r2.z
-                  mad r2.w, r2.w, l(-2.000000), l(3.141593)
+                  mul r3.x, r2.y, r2.z
+                  mad r3.x, r3.x, l(-2.000000), l(3.141593)
                   lt r2.x, r2.x, -r2.x
-                  and r2.x, r2.x, r2.w
+                  and r2.x, r2.x, r3.x
                   mad r2.x, r2.z, r2.y, r2.x
-                  mul r2.x, r2.x, l(57.295780)  // r2.x <- lightToSurfaceAngle
-                  ge r2.x, cb0[32].w, r2.x
+                  mul r2.y, r2.x, l(57.295780)  // r2.y <- lightToSurfaceAngle
+                  ge r2.y, cb0[32].w, r2.y
                 
-                #line 171
-                  mul r2.yzw, r0.xxyz, cb0[30].xxyz
-                  mul r2.yzw, r2.yyzw, cb0[30].wwww  // r2.y <- litColor.x; r2.z <- litColor.y; r2.w <- litColor.z
-                  log r2.yzw, r2.yyzw
-                  mul r2.yzw, r2.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r2.yzw, r2.yyzw
-                  min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                #line 175
+                  mul r3.xyz, r0.xyzx, cb0[30].xyzx
+                  mul r3.xyz, r3.xyzx, cb0[30].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                  log r3.xyz, r3.xyzx
+                  mul r3.xyz, r3.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
+                  exp r3.xyz, r3.xyzx
+                  min r3.xyz, r3.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 277
+                #line 102
+                  div r2.z, r2.w, cb0[33].x  // r2.z <- f
+                  mad r2.z, -r2.z, r2.z, l(1.000000)  // r2.z <- denom
+                  lt r4.x, l(0.000000), r2.z
+                  div r2.z, r2.w, r2.z  // r2.z <- d
+                  add r2.z, r2.z, l(1.000000)  // r2.z <- dn
+                  mul r2.z, r2.z, r2.z
+                  div r2.z, cb0[31].x, r2.z  // r2.z <- <CalcSphericAttenuation return value>
+                
+                #line 114
+                  and r2.z, r2.z, r4.x
+                
+                #line 279
+                  mad r2.x, -r2.x, l(57.295780), l(1.000000)
+                  add r2.w, -cb0[32].w, l(1.000000)
+                  div r2.x, r2.x, r2.w
+                  add r2.x, -r2.x, l(1.000000)  // r2.x <- attenuationS
+                  mul r2.x, r2.x, r2.z
                   mov r3.w, r0.w
-                  and r2.xyzw, r2.xxxx, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
+                  mul r3.xyzw, r2.xxxx, r3.xyzw  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z; r3.w <- litColor.w
+                  and r2.xyzw, r2.yyyy, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
                 
-                #line 338
+                #line 343
                   add r1.xyzw, r1.xyzw, r2.xyzw
                 
-                #line 346
+                #line 351
                 endif 
                 
-                #line 336
+                #line 341
                 eq r2.x, cb0[37].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 252
+                #line 256
                   add r2.xyz, v1.xyzx, -cb0[35].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.w, r2.xyzx, r2.xyzx
                   sqrt r2.w, r2.w  // r2.w <- distance
                   div r2.xyz, r2.xyzx, r2.wwww
-                  dp3 r2.x, r2.xyzx, cb0[36].xyzx
+                  dp3 r2.x, r2.xyzx, cb0[36].xyzx  // r2.x <- spotFactor
                   add r2.y, -|r2.x|, l(1.000000)
                   sqrt r2.y, r2.y
                   mad r2.z, |r2.x|, l(-0.018729), l(0.074261)
                   mad r2.z, r2.z, |r2.x|, l(-0.212114)
                   mad r2.z, r2.z, |r2.x|, l(1.570729)
-                  mul r2.w, r2.y, r2.z
-                  mad r2.w, r2.w, l(-2.000000), l(3.141593)
+                  mul r3.x, r2.y, r2.z
+                  mad r3.x, r3.x, l(-2.000000), l(3.141593)
                   lt r2.x, r2.x, -r2.x
-                  and r2.x, r2.x, r2.w
+                  and r2.x, r2.x, r3.x
                   mad r2.x, r2.z, r2.y, r2.x
-                  mul r2.x, r2.x, l(57.295780)  // r2.x <- lightToSurfaceAngle
-                  ge r2.x, cb0[36].w, r2.x
+                  mul r2.y, r2.x, l(57.295780)  // r2.y <- lightToSurfaceAngle
+                  ge r2.y, cb0[36].w, r2.y
                 
-                #line 171
-                  mul r2.yzw, r0.xxyz, cb0[34].xxyz
-                  mul r2.yzw, r2.yyzw, cb0[34].wwww  // r2.y <- litColor.x; r2.z <- litColor.y; r2.w <- litColor.z
-                  log r2.yzw, r2.yyzw
-                  mul r2.yzw, r2.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r2.yzw, r2.yyzw
-                  min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                #line 175
+                  mul r3.xyz, r0.xyzx, cb0[34].xyzx
+                  mul r3.xyz, r3.xyzx, cb0[34].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                  log r3.xyz, r3.xyzx
+                  mul r3.xyz, r3.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
+                  exp r3.xyz, r3.xyzx
+                  min r3.xyz, r3.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 277
+                #line 102
+                  div r2.z, r2.w, cb0[37].x  // r2.z <- f
+                  mad r2.z, -r2.z, r2.z, l(1.000000)  // r2.z <- denom
+                  lt r4.x, l(0.000000), r2.z
+                  div r2.z, r2.w, r2.z  // r2.z <- d
+                  add r2.z, r2.z, l(1.000000)  // r2.z <- dn
+                  mul r2.z, r2.z, r2.z
+                  div r2.z, cb0[35].x, r2.z  // r2.z <- <CalcSphericAttenuation return value>
+                
+                #line 114
+                  and r2.z, r2.z, r4.x
+                
+                #line 279
+                  mad r2.x, -r2.x, l(57.295780), l(1.000000)
+                  add r2.w, -cb0[36].w, l(1.000000)
+                  div r2.x, r2.x, r2.w
+                  add r2.x, -r2.x, l(1.000000)  // r2.x <- attenuationS
+                  mul r2.x, r2.x, r2.z
                   mov r3.w, r0.w
-                  and r2.xyzw, r2.xxxx, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
+                  mul r3.xyzw, r2.xxxx, r3.xyzw  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z; r3.w <- litColor.w
+                  and r2.xyzw, r2.yyyy, r3.xyzw  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z; r2.w <- litColor.w
                 
-                #line 338
+                #line 343
                   add r1.xyzw, r1.xyzw, r2.xyzw
                 
-                #line 346
+                #line 351
                 endif 
                 
-                #line 336
+                #line 341
                 eq r2.x, cb0[41].z, l(1.000000)
                 if_nz r2.x
                 
-                #line 252
+                #line 256
                   add r2.xyz, v1.xyzx, -cb0[39].yzwy  // r2.x <- lightDirection.x; r2.y <- lightDirection.y; r2.z <- lightDirection.z
                   dp3 r2.w, r2.xyzx, r2.xyzx
                   sqrt r2.w, r2.w  // r2.w <- distance
                   div r2.xyz, r2.xyzx, r2.wwww
-                  dp3 r2.x, r2.xyzx, cb0[40].xyzx
+                  dp3 r2.x, r2.xyzx, cb0[40].xyzx  // r2.x <- spotFactor
                   add r2.y, -|r2.x|, l(1.000000)
                   sqrt r2.y, r2.y
                   mad r2.z, |r2.x|, l(-0.018729), l(0.074261)
                   mad r2.z, r2.z, |r2.x|, l(-0.212114)
                   mad r2.z, r2.z, |r2.x|, l(1.570729)
-                  mul r2.w, r2.y, r2.z
-                  mad r2.w, r2.w, l(-2.000000), l(3.141593)
+                  mul r3.x, r2.y, r2.z
+                  mad r3.x, r3.x, l(-2.000000), l(3.141593)
                   lt r2.x, r2.x, -r2.x
-                  and r2.x, r2.x, r2.w
+                  and r2.x, r2.x, r3.x
                   mad r2.x, r2.z, r2.y, r2.x
-                  mul r2.x, r2.x, l(57.295780)  // r2.x <- lightToSurfaceAngle
-                  ge r2.x, cb0[40].w, r2.x
+                  mul r2.y, r2.x, l(57.295780)  // r2.y <- lightToSurfaceAngle
+                  ge r2.y, cb0[40].w, r2.y
                 
-                #line 171
-                  mul r2.yzw, r0.xxyz, cb0[38].xxyz
-                  mul r2.yzw, r2.yyzw, cb0[38].wwww  // r2.y <- litColor.x; r2.z <- litColor.y; r2.w <- litColor.z
-                  log r2.yzw, r2.yyzw
-                  mul r2.yzw, r2.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r2.yzw, r2.yyzw
-                  min r0.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
+                #line 175
+                  mul r3.xyz, r0.xyzx, cb0[38].xyzx
+                  mul r3.xyz, r3.xyzx, cb0[38].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                  log r3.xyz, r3.xyzx
+                  mul r3.xyz, r3.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
+                  exp r3.xyz, r3.xyzx
+                  min r0.xyz, r3.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 
-                #line 277
-                  and r0.xyzw, r0.xyzw, r2.xxxx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z; r0.w <- litColor.w
+                #line 102
+                  div r2.z, r2.w, cb0[41].x  // r2.z <- f
+                  mad r2.z, -r2.z, r2.z, l(1.000000)  // r2.z <- denom
+                  lt r3.x, l(0.000000), r2.z
+                  div r2.z, r2.w, r2.z  // r2.z <- d
+                  add r2.z, r2.z, l(1.000000)  // r2.z <- dn
+                  mul r2.z, r2.z, r2.z
+                  div r2.z, cb0[39].x, r2.z  // r2.z <- <CalcSphericAttenuation return value>
                 
-                #line 338
+                #line 114
+                  and r2.z, r2.z, r3.x
+                
+                #line 279
+                  mad r2.x, -r2.x, l(57.295780), l(1.000000)
+                  add r2.w, -cb0[40].w, l(1.000000)
+                  div r2.x, r2.x, r2.w
+                  add r2.x, -r2.x, l(1.000000)  // r2.x <- attenuationS
+                  mul r2.x, r2.x, r2.z
+                  mul r0.xyzw, r0.xyzw, r2.xxxx  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z; r0.w <- litColor.w
+                  and r0.xyzw, r0.xyzw, r2.yyyy
+                
+                #line 343
                   add r1.xyzw, r0.xyzw, r1.xyzw
                 
-                #line 346
+                #line 351
                 endif 
                 
                 #line 48 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
-                lt r0.x, l(0.000000), cb0[42].x
+                lt r0.x, l(0.000000), cb0[42].y
                 add r0.yzw, -v1.xxyz, cb0[4].xxyz  // r0.y <- toEyeWorld.x; r0.z <- toEyeWorld.y; r0.w <- toEyeWorld.z
                 dp3 r0.y, r0.yzwy, r0.yzwy
                 sqrt r0.y, r0.y  // r0.y <- distToEye
                 
-                #line 133 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
-                add r0.y, r0.y, -cb0[41].w
-                div_sat r0.y, r0.y, cb0[42].x  // r0.y <- fogLerp
+                #line 137 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                add r0.y, r0.y, -cb0[42].x
+                div_sat r0.y, r0.y, cb0[42].y  // r0.y <- fogLerp
                 add r2.xyzw, -r1.xyzw, cb0[43].xyzw
                 mad r2.xyzw, r0.yyyy, r2.xyzw, r1.xyzw  // r2.x <- <ComputeFog return value>.x; r2.y <- <ComputeFog return value>.y; r2.z <- <ComputeFog return value>.z; r2.w <- <ComputeFog return value>.w
                 
                 #line 54 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 movc o0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw
                 ret 
-                // Approximately 263 instruction slots used
+                // Approximately 319 instruction slots used
                             
             };
         }
@@ -729,8 +809,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  100
                 //       float CastShadow;              // Offset:  112
                 //       float Enabled;                 // Offset:  116
+                //       float Pad1;                    // Offset:  120
+                //       float Pad2;                    // Offset:  124
                 //
-                //   } gDirLights[3];                   // Offset:   80 Size:   136 [unused]
+                //   } gDirLights[3];                   // Offset:   80 Size:   144 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -742,8 +824,9 @@ fxgroup
                 //       float Radius;                  // Offset:  256
                 //       float CastShadow;              // Offset:  260
                 //       float Enabled;                 // Offset:  264
+                //       float Pad1;                    // Offset:  268
                 //
-                //   } gPointLights[4];                 // Offset:  224 Size:   188 [unused]
+                //   } gPointLights[4];                 // Offset:  224 Size:   192 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -757,10 +840,11 @@ fxgroup
                 //       float Radius;                  // Offset:  464
                 //       float CastShadow;              // Offset:  468
                 //       float Enabled;                 // Offset:  472
+                //       float Pad1;                    // Offset:  476
                 //
-                //   } gSpotLights[4];                  // Offset:  416 Size:   252 [unused]
-                //   float gFogStart;                   // Offset:  668 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  672 Size:     4 [unused]
+                //   } gSpotLights[4];                  // Offset:  416 Size:   256 [unused]
+                //   float gFogStart;                   // Offset:  672 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  676 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  688 Size:    16 [unused]
                 //
                 // }
