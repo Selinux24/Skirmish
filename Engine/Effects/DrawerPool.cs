@@ -10,6 +10,10 @@ namespace Engine.Effects
     static class DrawerPool
     {
         /// <summary>
+        /// Null effect
+        /// </summary>
+        public static EffectNull EffectNull { get; private set; }
+        /// <summary>
         /// Basic effect
         /// </summary>
         public static EffectBasic EffectBasic { get; private set; }
@@ -60,6 +64,15 @@ namespace Engine.Effects
         /// <param name="device">Device</param>
         public static void Initialize(Device device)
         {
+            if (Resources.ShaderNullFxo != null)
+            {
+                EffectNull = new EffectNull(device, Resources.ShaderNullFxo, false);
+            }
+            else
+            {
+                EffectNull = new EffectNull(device, Resources.ShaderNullFx, true);
+            }
+
             if (Resources.ShaderBasicFxo != null)
             {
                 EffectBasic = new EffectBasic(device, Resources.ShaderBasicFxo, false);
@@ -143,6 +156,7 @@ namespace Engine.Effects
         /// </summary>
         public static void Dispose()
         {
+            Helper.Dispose(EffectNull);
             Helper.Dispose(EffectBasic);
             Helper.Dispose(EffectBillboard);
             Helper.Dispose(EffectCubemap);

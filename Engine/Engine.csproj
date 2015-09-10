@@ -317,6 +317,7 @@
     <Compile Include="Common\PriorityQueueItem.cs" />
     <Compile Include="Common\QuadTree.cs" />
     <Compile Include="Common\QuadTreeNode.cs" />
+    <Compile Include="Effects\EffectNull.cs" />
     <Compile Include="SceneRendererResultEnum.cs" />
     <Compile Include="Common\Skeleton.cs" />
     <Compile Include="Content\LoaderConversion.cs" />
@@ -461,6 +462,7 @@
     <None Include="Resources\ShaderCubemap.fxo" />
     <None Include="Resources\ShaderFont.fxo" />
     <None Include="Resources\ShaderGBuffer.fxo" />
+    <None Include="Resources\ShaderNull.fxo" />
     <None Include="Resources\ShaderParticles.fxo" />
     <None Include="Resources\ShaderShadow.fx" />
     <None Include="Resources\IncVertexFormats.fx" />
@@ -476,7 +478,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="engine.ico" />
-    <Content Include="Resources\ShaderDeferred.fx" />
+    <None Include="Resources\ShaderDeferred.fx" />
+    <None Include="Resources\ShaderNull.fx" />
     <Content Include="sharpdx_direct3d11_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

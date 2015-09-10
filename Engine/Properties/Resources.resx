@@ -160,6 +160,12 @@
   <data name="ShaderGBufferFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shadergbuffer.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="ShaderNullFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadernull.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderNullFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ShaderNull.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="ShaderParticlesFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
