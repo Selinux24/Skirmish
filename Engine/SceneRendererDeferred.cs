@@ -878,14 +878,35 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                this.Game.Graphics.SetRasterizerCullFrontFace();
-
                 for (int i = 0; i < spotLights.Length; i++)
                 {
                     var light = spotLights[i];
 
                     if (context.Frustum.Contains(light.BoundingSphere) != ContainmentType.Disjoint)
                     {
+                        this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
+                        this.Game.Graphics.SetRasterizerCullNone();
+                        this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
+
+                        //Stencil Pass
+                        DrawerPool.EffectNull.UpdatePerFrame(
+                            context.World * light.Transform,
+                            context.ViewProjection);
+
+                        for (int p = 0; p < DrawerPool.EffectNull.Null.Description.PassCount; p++)
+                        {
+                            DrawerPool.EffectNull.Null.GetPassByIndex(p).Apply(deviceContext, 0);
+
+                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
+
+                            Counters.DrawCallsPerFrame++;
+                            Counters.InstancesPerFrame++;
+                        }
+
+                        this.Game.Graphics.SetRasterizerCullFrontFace();
+                        this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
+
+                        //Draw Pass
                         effect.UpdatePerLight(
                             light,
                             context.World * light.Transform,
@@ -923,14 +944,35 @@ namespace Engine
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
 
-                this.Game.Graphics.SetRasterizerCullFrontFace();
-
                 for (int i = 0; i < pointLights.Length; i++)
                 {
                     var light = pointLights[i];
 
                     if (context.Frustum.Contains(light.BoundingSphere) != ContainmentType.Disjoint)
                     {
+                        this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
+                        this.Game.Graphics.SetRasterizerCullNone();
+                        this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
+
+                        //Stencil Pass
+                        DrawerPool.EffectNull.UpdatePerFrame(
+                            context.World * light.Transform,
+                            context.ViewProjection);
+
+                        for (int p = 0; p < DrawerPool.EffectNull.Null.Description.PassCount; p++)
+                        {
+                            DrawerPool.EffectNull.Null.GetPassByIndex(p).Apply(deviceContext, 0);
+
+                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
+
+                            Counters.DrawCallsPerFrame++;
+                            Counters.InstancesPerFrame++;
+                        }
+
+                        this.Game.Graphics.SetRasterizerCullFrontFace();
+                        this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
+
+                        //Draw Pass
                         effect.UpdatePerLight(
                             light,
                             context.World * light.Transform,
