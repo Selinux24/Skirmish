@@ -55,6 +55,8 @@ struct DirectionalLight
 	float3 Direction;
 	float CastShadow;
 	float Enabled;
+	float Pad1;
+	float Pad2;
 };
 struct PointLight
 {
@@ -65,6 +67,7 @@ struct PointLight
     float Radius;
 	float CastShadow;
 	float Enabled;
+	float Pad1;
 };
 struct SpotLight
 {
@@ -77,6 +80,7 @@ struct SpotLight
     float Radius;
 	float CastShadow;
 	float Enabled;
+	float Pad1;
 };
 
 float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, float3 tangentW)
@@ -253,7 +257,8 @@ float4 ComputeSpotLight(
 	float distance = length(lightDirection);
 	lightDirection /= distance;
 
-	float lightToSurfaceAngle = degrees(acos(dot(lightDirection, L.Direction)));
+	float spotFactor = dot(lightDirection, L.Direction);
+	float lightToSurfaceAngle = degrees(acos(spotFactor));
 	[flatten]
 	if(lightToSurfaceAngle <= L.Angle)
 	{
@@ -269,11 +274,11 @@ float4 ComputeSpotLight(
 			specularIntensity,
 			specularPower);
 
-		float attenuation = CalcSphericAttenuation(1, L.Diffuse, L.Radius, distance);
+		float attenuationD = CalcSphericAttenuation(1, L.Diffuse, L.Radius, distance);
 
-		//attenuation *= CalcSphericAttenuation(1, L.Diffuse, L.Angle, lightToSurfaceAngle);
+		float attenuationS =  (1.0f - (1.0f - lightToSurfaceAngle) * 1.0f / (1.0f - L.Angle));
 
-		litColor * attenuation;
+		litColor *= attenuationD * attenuationS;
 	}
 	
 	return litColor;

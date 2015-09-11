@@ -880,51 +880,6 @@ namespace Engine
 #endif
             #endregion
 
-            #region Point Lights
-#if DEBUG
-            Stopwatch swPoint = Stopwatch.StartNew();
-#endif
-            SceneLightPoint[] pointLights = context.Lights.EnabledPointLights;
-            if (pointLights != null && pointLights.Length > 0)
-            {
-                var effectTechnique = effect.DeferredPointLight;
-                var geometry = this.lightGeometry[1];
-
-                deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
-                deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
-                deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
-
-                this.Game.Graphics.SetRasterizerCullFrontFace();
-
-                for (int i = 0; i < pointLights.Length; i++)
-                {
-                    var light = pointLights[i];
-
-                    if (context.Frustum.Contains(light.BoundingSphere) != ContainmentType.Disjoint)
-                    {
-                        effect.UpdatePerLight(
-                            light,
-                            context.World * light.Transform,
-                            context.ViewProjection);
-
-                        for (int p = 0; p < effectTechnique.Description.PassCount; p++)
-                        {
-                            effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
-
-                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
-
-                            Counters.DrawCallsPerFrame++;
-                            Counters.InstancesPerFrame++;
-                        }
-                    }
-                }
-            }
-#if DEBUG
-            swPoint.Stop();
-#endif
-            #endregion
-
             #region Spot Lights
 #if DEBUG
             Stopwatch swSpot = Stopwatch.StartNew();
@@ -967,6 +922,51 @@ namespace Engine
             }
 #if DEBUG
             swSpot.Stop();
+#endif
+            #endregion
+
+            #region Point Lights
+#if DEBUG
+            Stopwatch swPoint = Stopwatch.StartNew();
+#endif
+            SceneLightPoint[] pointLights = context.Lights.EnabledPointLights;
+            if (pointLights != null && pointLights.Length > 0)
+            {
+                var effectTechnique = effect.DeferredPointLight;
+                var geometry = this.lightGeometry[1];
+
+                deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
+                deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
+                deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+
+                this.Game.Graphics.SetRasterizerCullFrontFace();
+
+                for (int i = 0; i < pointLights.Length; i++)
+                {
+                    var light = pointLights[i];
+
+                    if (context.Frustum.Contains(light.BoundingSphere) != ContainmentType.Disjoint)
+                    {
+                        effect.UpdatePerLight(
+                            light,
+                            context.World * light.Transform,
+                            context.ViewProjection);
+
+                        for (int p = 0; p < effectTechnique.Description.PassCount; p++)
+                        {
+                            effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
+
+                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
+
+                            Counters.DrawCallsPerFrame++;
+                            Counters.InstancesPerFrame++;
+                        }
+                    }
+                }
+            }
+#if DEBUG
+            swPoint.Stop();
 #endif
             #endregion
 #if DEBUG

@@ -1166,7 +1166,7 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 133 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 137 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.x, r0.x, -cb0[11].y
                 div_sat r0.x, r0.x, cb0[11].z  // r0.x <- fogLerp
                 
@@ -1176,13 +1176,13 @@ fxgroup
                 mov r1.xy, v3.xyxx
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, r1.xyzx, t0.xyzw, s0
                 
-                #line 135 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 139 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mad r0.yzw, -r1.xxyz, v2.xxyz, cb0[12].xxyz
                 
                 #line 259 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
                 mul r1.xyzw, r1.xyzw, v2.xyzw  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
                 
-                #line 135 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 139 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z
                 
                 #line 261 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderParticles.fx"
@@ -1508,7 +1508,7 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
                 
-                #line 133 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 137 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.x, r0.x, -cb0[11].y
                 div_sat r0.x, r0.x, cb0[11].z  // r0.x <- fogLerp
                 
@@ -1518,7 +1518,7 @@ fxgroup
                 mov r1.xy, v3.xyxx
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, r1.xyzx, t0.xyzw, s0  // r1.x <- litColor.x; r1.y <- litColor.y; r1.z <- litColor.z; r1.w <- litColor.w
                 
-                #line 135 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 139 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.yzw, -r1.xxyz, cb0[12].xxyz
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z
                 

@@ -37,7 +37,7 @@ namespace DeferredTest
         private Random rnd = new Random(0);
 
         public TestScene3D(Game game)
-            : base(game)
+            : base(game, SceneModesEnum.DeferredLightning)
         {
 
         }
@@ -254,8 +254,8 @@ namespace DeferredTest
                 CastShadow = false,
             };
 
-            this.Lights.ClearDirectionalLights();
-            this.Lights.Add(primary);
+            //this.Lights.ClearDirectionalLights();
+            //this.Lights.Add(primary);
 
             this.Lights.FogColor = Color.LightGray;
             this.Lights.FogStart = far * fogStart;
@@ -473,12 +473,12 @@ namespace DeferredTest
                 this.helicopters.Active = this.helicopters.Visible = !this.helicopters.Visible;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            if (this.Game.Input.KeyJustReleased(Keys.Oemcomma))
             {
                 this.textIntex--;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Right))
+            if (this.Game.Input.KeyJustReleased(Keys.OemPeriod))
             {
                 this.textIntex++;
             }
@@ -600,42 +600,44 @@ namespace DeferredTest
             {
                 if (this.Game.Input.KeyPressed(Keys.Left))
                 {
-                    this.spotLight.Position += (Vector3.Left) * 0.1f;
+                    this.spotLight.Position += (Vector3.Left) * gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.Right))
                 {
-                    this.spotLight.Position += (Vector3.Right) * 0.1f;
+                    this.spotLight.Position += (Vector3.Right) * gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.Up))
                 {
-                    this.spotLight.Position += (Vector3.ForwardLH) * 0.1f;
+                    this.spotLight.Position += (Vector3.ForwardLH) * gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.Down))
                 {
-                    this.spotLight.Position += (Vector3.BackwardLH) * 0.1f;
+                    this.spotLight.Position += (Vector3.BackwardLH) * gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.PageUp))
                 {
-                    this.spotLight.Position += (Vector3.Up) * 0.1f;
+                    this.spotLight.Position += (Vector3.Up) * gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.PageDown))
                 {
-                    this.spotLight.Position += (Vector3.Down) * 0.1f;
+                    this.spotLight.Position += (Vector3.Down) * gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.Add))
                 {
-                    //this.spotLight.Range += 0.1f;
+                    this.spotLight.DiffuseIntensity += gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.Subtract))
                 {
-                    //this.spotLight.Range -= 0.1f;
+                    this.spotLight.DiffuseIntensity -= gameTime.ElapsedSeconds * 10f;
+
+                    this.spotLight.DiffuseIntensity = Math.Max(0f, this.spotLight.DiffuseIntensity);
                 }
 
                 this.lineDrawer.Manipulator.SetPosition(this.spotLight.Position);
@@ -699,12 +701,12 @@ namespace DeferredTest
             }
             else if (this.textIntex < 0)
             {
-                this.statistics.Text = "Press right arrow for more statistics";
+                this.statistics.Text = "Press . for more statistics";
                 this.textIntex = -1;
             }
             else if (this.textIntex >= Counters.Statistics.Length)
             {
-                this.statistics.Text = "Press left arrow for more statistics";
+                this.statistics.Text = "Press , for more statistics";
                 this.textIntex = Counters.Statistics.Length;
             }
             else
@@ -721,20 +723,22 @@ namespace DeferredTest
             this.Lights.ClearSpotLights();
 
             Vector3 lightPosition;
-            if (this.terrain.FindTopGroundPosition(0, 0, out lightPosition))
+            if (this.terrain.FindTopGroundPosition(0, 1, out lightPosition))
             {
-                lightPosition.Y += 2.5f;
+                lightPosition.Y += 10f;
+
+                Vector3 direction = -Vector3.Normalize(lightPosition);
 
                 this.spotLight = new SceneLightSpot()
                 {
                     Name = "Spot the dog",
                     LightColor = Color.Yellow,
                     AmbientIntensity = 0.2f,
-                    DiffuseIntensity = 1f,
+                    DiffuseIntensity = 25f,
                     Position = lightPosition,
-                    Direction = Vector3.Down,
-                    Angle = 15,
-                    Radius = 5,
+                    Direction = direction,
+                    Angle = 25,
+                    Radius = 25,
                     Enabled = true,
                     CastShadow = false,
                 };
