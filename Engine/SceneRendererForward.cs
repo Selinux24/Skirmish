@@ -83,30 +83,6 @@ namespace Engine
 
         }
         /// <summary>
-        /// Updates renderer parameters
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        public virtual void Update(GameTime gameTime, Scene scene)
-        {
-            Matrix viewProj = scene.Camera.View * scene.Camera.Projection;
-
-            this.DrawContext.World = scene.World;
-            this.DrawContext.ViewProjection = viewProj;
-            this.DrawContext.Frustum = new BoundingFrustum(viewProj);
-            this.DrawContext.EyePosition = scene.Camera.Position;
-
-            var shadowCastingLights = scene.Lights.ShadowCastingLights;
-            if (shadowCastingLights.Length > 0)
-            {
-                Matrix shadowViewProj = this.shadowMapper.View * this.shadowMapper.Projection;
-
-                this.DrawShadowsContext.World = Matrix.Identity;
-                this.DrawShadowsContext.ViewProjection = shadowViewProj;
-                this.DrawShadowsContext.Frustum = new BoundingFrustum(shadowViewProj);
-            }
-        }
-        /// <summary>
         /// Draws scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>
@@ -135,10 +111,14 @@ namespace Engine
 #if DEBUG
                 Stopwatch swStartup = Stopwatch.StartNew();
 #endif
-                //Set lights
-                this.DrawContext.Lights = scene.Lights;
+                //Initialize context data
+                Matrix viewProj = scene.Camera.View * scene.Camera.Projection;
 
-                //Clear data
+                this.DrawContext.World = scene.World;
+                this.DrawContext.ViewProjection = viewProj;
+                this.DrawContext.Frustum = new BoundingFrustum(viewProj);
+                this.DrawContext.EyePosition = scene.Camera.Position;
+                this.DrawContext.Lights = scene.Lights;
                 this.DrawContext.ShadowMap = null;
                 this.DrawContext.ShadowTransform = Matrix.Identity;
 #if DEBUG
@@ -157,9 +137,12 @@ namespace Engine
 #if DEBUG
                     Stopwatch swShadowsPreparation = Stopwatch.StartNew();
 #endif
-                    //Clear context data
-                    this.DrawShadowsContext.ShadowMap = null;
-                    this.DrawShadowsContext.ShadowTransform = Matrix.Identity;
+                    Matrix shadowViewProj = this.shadowMapper.View * this.shadowMapper.Projection;
+
+                    this.DrawShadowsContext.World = Matrix.Identity;
+                    this.DrawShadowsContext.ViewProjection = shadowViewProj;
+                    this.DrawShadowsContext.Frustum = new BoundingFrustum(shadowViewProj);
+                    this.DrawShadowsContext.EyePosition = scene.Camera.Position;
 
                     //Update shadow transform using first ligth direction
                     this.shadowMapper.Update(shadowCastingLights[0].Direction, scene.SceneVolume);

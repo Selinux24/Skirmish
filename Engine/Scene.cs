@@ -190,9 +190,6 @@ namespace Engine
 #endif
             this.camera.Update(gameTime);
 
-            //Update renderer
-            this.Renderer.Update(gameTime, this);
-
             //Update active components
             List<Drawable> activeComponents = this.components.FindAll(c => c.Active);
             for (int i = 0; i < activeComponents.Count; i++)

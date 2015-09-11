@@ -409,11 +409,13 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
+        /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         public void UpdatePerFrame(
             Matrix world,
-            Matrix viewProjection)
+            Matrix viewProjection,
+            Vector3 eyePositionWorld)
         {
-            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, null, null, Matrix.Identity);
+            this.UpdatePerFrame(world, viewProjection, eyePositionWorld, null, null, Matrix.Identity);
         }
         /// <summary>
         /// Update per frame data
