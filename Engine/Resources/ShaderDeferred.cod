@@ -8,11 +8,11 @@ cbuffer cbPerFrame : register(b0)
     float4x4 gWorld;                    // Offset:    0, size:   64
     float4x4 gWorldViewProjection;      // Offset:   64, size:   64
     float3  gEyePositionWorld;          // Offset:  128, size:   12
-    DirectionalLight gDirLight;         // Offset:  144, size:   40
-    PointLight gPointLight;             // Offset:  192, size:   44
-    SpotLight gSpotLight;               // Offset:  240, size:   60
-    float   gFogStart;                  // Offset:  300, size:    4
-    float   gFogRange;                  // Offset:  304, size:    4
+    DirectionalLight gDirLight;         // Offset:  144, size:   48
+    PointLight gPointLight;             // Offset:  192, size:   48
+    SpotLight gSpotLight;               // Offset:  240, size:   64
+    float   gFogStart;                  // Offset:  304, size:    4
+    float   gFogRange;                  // Offset:  308, size:    4
     float4  gFogColor;                  // Offset:  320, size:   16
 }
 
@@ -57,7 +57,7 @@ Texture2D gLightMap;
 fxgroup
 {
     //
-    // 5 technique(s)
+    // 4 technique(s)
     //
     technique11 DeferredDirectionalLight
     {
@@ -86,8 +86,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -99,8 +101,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -114,10 +117,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -193,8 +197,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40
+                //   } gDirLight;                       // Offset:  144 Size:    48
                 //   
                 //   struct PointLight
                 //   {
@@ -206,8 +212,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -221,10 +228,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -276,7 +284,7 @@ fxgroup
                 #line 93 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r0.xyzw, v1.xyxx, t3.xyzw, s0  // shadow<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 125 "IncLights.fx"
+                #line 129 "IncLights.fx"
                 add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                 sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t4.xxxx, s1, r0.z  // percentLit<0:[0f,1f]>
                 sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r1.zwzz, t4.xxxx, s1, r0.z
@@ -311,7 +319,7 @@ fxgroup
                 #line 92
                 sample_indexable(texture2d)(float,float,float,float) r2.xyzw, v1.xyxx, t1.xyzw, s0  // normal<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 160 "IncLights.fx"
+                #line 164 "IncLights.fx"
                 dp3 r0.y, cb0[10].yzwy, r2.xyzx
                 add r0.y, r0.y, r0.y
                 mad r3.xyz, r2.xyzx, -r0.yyyy, cb0[10].yzwy
@@ -321,56 +329,56 @@ fxgroup
                 dp3 r0.y, r1.xyzx, r3.xyzx
                 max r0.y, r0.y, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 166
+                #line 170
                 log r0.z, r0.y
                 lt r0.y, l(0.000000), r0.y
                 max r1.x, r2.w, l(1.000000)
                 
-                #line 154
+                #line 158
                 dp3 r1.y, r2.xyzx, -cb0[10].yzwy
                 max r1.y, r1.y, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 166
+                #line 170
                 mul r0.z, r0.z, r1.x
                 exp r0.z, r0.z  // specularFactor<0:NaN:Inf>
                 mul r0.z, r0.z, r0.w  // specular<0:NaN:Inf>
                 
-                #line 164
+                #line 168
                 and r2.y, r0.z, r0.y  // specular<0:NaN:Inf>
                 
-                #line 156
+                #line 160
                 lt r0.y, l(0.000000), r1.y
                 mul r2.x, r1.y, cb0[10].x  // diffuse<0:NaN:Inf>
                 and r0.yz, r2.xxyx, r0.yyyy  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 171
+                #line 175
                 add r0.y, r0.y, cb0[9].w
                 add r0.y, r0.z, r0.y
                 
                 #line 90 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t0.xyzw, s0  // diffuseColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 171 "IncLights.fx"
+                #line 175 "IncLights.fx"
                 mul r1.xyz, r1.xyzx, cb0[9].xyzx
                 
                 #line 108 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 mov o0.w, r1.w  // PSDirectionalLight<3:Inf>
                 
-                #line 171 "IncLights.fx"
+                #line 175 "IncLights.fx"
                 mul r0.yzw, r0.yyyy, r1.xxyz  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 log r0.yzw, r0.yyzw
                 
-                #line 129
+                #line 133
                 mul r0.xyzw, r0.xyzw, l(0.111111, 0.454545, 0.454545, 0.454545)  // CalcShadowFactor<0:[0f,1f]>
                 
-                #line 172
+                #line 176
                 exp r0.yzw, r0.yyzw
                 min r0.yzw, r0.yyzw, l(0.000000, 1.000000, 1.000000, 1.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
                 
-                #line 205
+                #line 209
                 mul r1.xyz, r0.xxxx, r0.yzwy  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
                 
-                #line 201
+                #line 205
                 eq r0.x, cb0[11].x, l(1.000000)
                 movc o0.xyz, r0.xxxx, r1.xyzx, r0.yzwy  // PSDirectionalLight<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
                 
@@ -410,8 +418,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -423,8 +433,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -438,10 +449,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -525,8 +537,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -538,8 +552,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44
+                //   } gPointLight;                     // Offset:  192 Size:    48
                 //   
                 //   struct SpotLight
                 //   {
@@ -553,10 +568,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -616,7 +632,7 @@ fxgroup
                 #line 125
                 add r2.xyz, -r1.xyzx, cb0[8].xyzx
                 
-                #line 220 "IncLights.fx"
+                #line 224 "IncLights.fx"
                 add r1.xyz, r1.xyzx, -cb0[13].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                 
                 #line 125 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
@@ -624,7 +640,7 @@ fxgroup
                 rsq r0.z, r0.z
                 mul r2.xyz, r0.zzzz, r2.xyzx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 221 "IncLights.fx"
+                #line 225 "IncLights.fx"
                 dp3 r0.z, r1.xyzx, r1.xyzx
                 sqrt r0.z, r0.z  // distance<0:NaN:Inf>
                 div r1.xyz, r1.xyzx, r0.zzzz  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -632,28 +648,28 @@ fxgroup
                 #line 121 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r3.xyzw, r0.xyxx, t1.xyzw, s0  // normal<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 160 "IncLights.fx"
+                #line 164 "IncLights.fx"
                 dp3 r0.w, r1.xyzx, r3.xyzx
                 add r0.w, r0.w, r0.w
                 mad r4.xyz, r3.xyzx, -r0.wwww, r1.xyzx
                 
-                #line 154
+                #line 158
                 dp3 r0.w, r3.xyzx, -r1.xyzx
                 
-                #line 166
+                #line 170
                 max r1.x, r3.w, l(1.000000)
                 
-                #line 154
+                #line 158
                 max r0.w, r0.w, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 160
+                #line 164
                 dp3 r1.y, r4.xyzx, r4.xyzx
                 rsq r1.y, r1.y
                 mul r1.yzw, r1.yyyy, r4.xxyz  // lightReflection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 dp3 r1.y, r2.xyzx, r1.yzwy
                 max r1.y, r1.y, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 166
+                #line 170
                 log r1.z, r1.y
                 lt r1.y, l(0.000000), r1.y
                 mul r1.x, r1.z, r1.x
@@ -665,18 +681,18 @@ fxgroup
                 #line 120
                 sample_indexable(texture2d)(float,float,float,float) r2.xyzw, r0.xyxx, t0.xyzw, s0  // diffuseColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 167 "IncLights.fx"
+                #line 171 "IncLights.fx"
                 mul r0.x, r1.x, r1.z  // specular<0:NaN:Inf>
                 
-                #line 164
+                #line 168
                 and r0.y, r0.x, r1.y  // specular<0:NaN:Inf>
                 
-                #line 156
+                #line 160
                 lt r1.x, l(0.000000), r0.w
                 mul r0.x, r0.w, cb0[13].x  // diffuse<0:NaN:Inf>
                 and r0.xy, r0.xyxx, r1.xxxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 171
+                #line 175
                 add r0.x, r0.x, cb0[12].w
                 add r0.x, r0.y, r0.x
                 mul r1.xyz, r2.xyzx, cb0[12].xyzx
@@ -686,23 +702,23 @@ fxgroup
                 exp r0.xyw, r0.xyxw
                 min r2.xyz, r0.xywx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
                 
-                #line 98
+                #line 102
                 div r0.x, r0.z, cb0[14].x  // f<0:NaN:Inf>
                 mad r0.x, -r0.x, r0.x, l(1.000000)  // denom<0:NaN:Inf>
                 
-                #line 102
+                #line 106
                 div r0.y, r0.z, r0.x  // d<0:NaN:Inf>
                 lt r0.x, l(0.000000), r0.x
                 
-                #line 103
+                #line 107
                 add r0.y, r0.y, l(1.000000)  // dn<0:NaN:Inf>
                 mul r0.y, r0.y, r0.y
                 div r0.y, cb0[13].x, r0.y  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 100
+                #line 104
                 and r0.x, r0.y, r0.x  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 238
+                #line 242
                 mul o0.xyzw, r0.xxxx, r2.xyzw  // PSPointLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
                 #line 136 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
@@ -741,8 +757,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -754,8 +772,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -769,10 +788,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -856,8 +876,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -869,8 +891,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -884,10 +907,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -923,7 +947,7 @@ fxgroup
                 //
                 ps_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[18], immediateIndexed
+                dcl_constantbuffer cb0[19], immediateIndexed
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2d (float,float,float,float) t0
                 dcl_resource_texture2d (float,float,float,float) t1
@@ -944,100 +968,128 @@ fxgroup
                 #line 150
                 sample_indexable(texture2d)(float,float,float,float) r1.xyz, r0.xyxx, t2.xyzw, s0  // depth<0:Inf,1:Inf,2:Inf>
                 
-                #line 252 "IncLights.fx"
-                add r2.xyz, r1.xyzx, -cb0[16].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
+                #line 153
+                add r2.xyz, -r1.xyzx, cb0[8].xyzx
+                
+                #line 256 "IncLights.fx"
+                add r1.xyz, r1.xyzx, -cb0[16].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                 
                 #line 153 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                add r1.xyz, -r1.xyzx, cb0[8].xyzx
-                
-                #line 253 "IncLights.fx"
                 dp3 r0.z, r2.xyzx, r2.xyzx
+                rsq r0.z, r0.z
+                mul r2.xyz, r0.zzzz, r2.xyzx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 257 "IncLights.fx"
+                dp3 r0.z, r1.xyzx, r1.xyzx
                 sqrt r0.z, r0.z  // distance<0:NaN:Inf>
-                div r2.xyz, r2.xyzx, r0.zzzz  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                div r1.xyz, r1.xyzx, r0.zzzz  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 149 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r3.xyzw, r0.xyxx, t1.xyzw, s0  // normal<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 160 "IncLights.fx"
-                dp3 r0.z, r2.xyzx, r3.xyzx
-                add r0.z, r0.z, r0.z
-                mad r4.xyz, r3.xyzx, -r0.zzzz, r2.xyzx
-                dp3 r0.z, r4.xyzx, r4.xyzx
-                rsq r0.z, r0.z
-                mul r4.xyz, r0.zzzz, r4.xyzx  // lightReflection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 164 "IncLights.fx"
+                dp3 r0.w, r1.xyzx, r3.xyzx
+                add r0.w, r0.w, r0.w
+                mad r4.xyz, r3.xyzx, -r0.wwww, r1.xyzx
+                dp3 r0.w, r4.xyzx, r4.xyzx
+                rsq r0.w, r0.w
+                mul r4.xyz, r0.wwww, r4.xyzx  // lightReflection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                dp3 r0.w, r2.xyzx, r4.xyzx
+                max r0.w, r0.w, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 153 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                dp3 r0.z, r1.xyzx, r1.xyzx
-                rsq r0.z, r0.z
-                mul r1.xyz, r0.zzzz, r1.xyzx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 170
+                log r1.w, r0.w
+                lt r0.w, l(0.000000), r0.w
+                max r2.x, r3.w, l(1.000000)
                 
-                #line 162 "IncLights.fx"
-                dp3 r0.z, r1.xyzx, r4.xyzx
-                max r0.z, r0.z, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
+                #line 158
+                dp3 r2.y, r3.xyzx, -r1.xyzx
                 
-                #line 166
-                log r0.w, r0.z
-                lt r0.z, l(0.000000), r0.z
-                max r1.x, r3.w, l(1.000000)
+                #line 260
+                dp3 r1.x, r1.xyzx, cb0[17].xyzx  // spotFactor<0:NaN:Inf>
                 
-                #line 154
-                dp3 r1.y, r3.xyzx, -r2.xyzx
+                #line 158
+                max r1.y, r2.y, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 256
-                dp3 r1.z, r2.xyzx, cb0[17].xyzx
-                
-                #line 154
-                max r1.y, r1.y, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
-                
-                #line 166
-                mul r0.w, r0.w, r1.x
-                exp r0.w, r0.w  // specularFactor<0:NaN:Inf>
+                #line 170
+                mul r1.z, r1.w, r2.x
+                exp r1.z, r1.z  // specularFactor<0:NaN:Inf>
                 
                 #line 151 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                sample_indexable(texture2d)(float,float,float,float) r1.x, r0.xyxx, t3.wxyz, s0  // shadow<3:Inf>
+                sample_indexable(texture2d)(float,float,float,float) r1.w, r0.xyxx, t3.xyzw, s0  // shadow<3:Inf>
                 
                 #line 148
                 sample_indexable(texture2d)(float,float,float,float) r2.xyzw, r0.xyxx, t0.xyzw, s0  // diffuseColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 167 "IncLights.fx"
-                mul r0.x, r0.w, r1.x  // specular<0:NaN:Inf>
+                #line 171 "IncLights.fx"
+                mul r0.x, r1.z, r1.w  // specular<0:NaN:Inf>
                 
-                #line 164
-                and r0.y, r0.x, r0.z  // specular<0:NaN:Inf>
+                #line 168
+                and r0.y, r0.x, r0.w  // specular<0:NaN:Inf>
                 
-                #line 156
-                lt r0.z, l(0.000000), r1.y
+                #line 160
+                lt r0.w, l(0.000000), r1.y
                 mul r0.x, r1.y, cb0[16].x  // diffuse<0:NaN:Inf>
-                and r0.xy, r0.xyxx, r0.zzzz  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
+                and r0.xy, r0.xyxx, r0.wwww  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 171
+                #line 175
                 add r0.x, r0.x, cb0[15].w
                 add r0.x, r0.y, r0.x
-                mul r0.yzw, r2.xxyz, cb0[15].xxyz
-                mul r0.xyz, r0.xxxx, r0.yzwy  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                log r0.xyz, r0.xyzx
-                mul r0.xyz, r0.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
-                exp r0.xyz, r0.xyzx
-                min r2.xyz, r0.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                mul r1.yzw, r2.xxyz, cb0[15].xxyz
+                mul r0.xyw, r0.xxxx, r1.yzyw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                log r0.xyw, r0.xyxw
+                mul r0.xyw, r0.xyxw, l(0.454545, 0.454545, 0.000000, 0.454545)
+                exp r0.xyw, r0.xyxw
+                min r2.xyz, r0.xywx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
                 
-                #line 256
-                mad r0.x, |r1.z|, l(-0.018729), l(0.074261)
-                mad r0.x, r0.x, |r1.z|, l(-0.212114)
-                mad r0.x, r0.x, |r1.z|, l(1.570729)
-                add r0.y, -|r1.z|, l(1.000000)
-                lt r0.z, r1.z, -r1.z
-                sqrt r0.y, r0.y
-                mul r0.w, r0.y, r0.x
-                mad r0.w, r0.w, l(-2.000000), l(3.141593)
-                and r0.z, r0.z, r0.w
-                mad r0.x, r0.x, r0.y, r0.z
-                mul r0.x, r0.x, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
-                ge r0.x, cb0[17].w, r0.x
-                and o0.xyzw, r2.xyzw, r0.xxxx  // PSSpotLight<0:[-0f,1f],1:[-0f,1f],2:[-0f,1f],3:Inf>
+                #line 102
+                div r0.x, r0.z, cb0[18].x  // f<0:NaN:Inf>
+                mad r0.x, -r0.x, r0.x, l(1.000000)  // denom<0:NaN:Inf>
+                
+                #line 106
+                div r0.y, r0.z, r0.x  // d<0:NaN:Inf>
+                lt r0.x, l(0.000000), r0.x
+                
+                #line 107
+                add r0.y, r0.y, l(1.000000)  // dn<0:NaN:Inf>
+                mul r0.y, r0.y, r0.y
+                div r0.y, cb0[16].x, r0.y  // CalcSphericAttenuation<0:NaN:Inf>
+                
+                #line 104
+                and r0.x, r0.y, r0.x  // CalcSphericAttenuation<0:NaN:Inf>
+                
+                #line 261
+                mad r0.y, |r1.x|, l(-0.018729), l(0.074261)
+                mad r0.y, r0.y, |r1.x|, l(-0.212114)
+                mad r0.y, r0.y, |r1.x|, l(1.570729)
+                add r0.z, -|r1.x|, l(1.000000)
+                lt r0.w, r1.x, -r1.x
+                sqrt r0.z, r0.z
+                mul r1.x, r0.z, r0.y
+                mad r1.x, r1.x, l(-2.000000), l(3.141593)
+                and r0.w, r0.w, r1.x
+                mad r0.y, r0.y, r0.z, r0.w
+                
+                #line 279
+                mad r0.z, -r0.y, l(57.295780), l(1.000000)
+                
+                #line 261
+                mul r0.y, r0.y, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
+                ge r0.y, cb0[17].w, r0.y
+                
+                #line 279
+                add r0.w, -cb0[17].w, l(1.000000)
+                div r0.z, r0.z, r0.w
+                add r0.z, -r0.z, l(1.000000)  // attenuationS<0:NaN:Inf>
+                mul r0.x, r0.z, r0.x
+                mul r1.xyzw, r0.xxxx, r2.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                
+                #line 263
+                and o0.xyzw, r0.yyyy, r1.xyzw  // PSSpotLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
                 #line 164 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 ret 
-                // Approximately 59 instruction slots used
+                // Approximately 73 instruction slots used
                             
             };
         }
@@ -1071,8 +1123,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -1084,8 +1138,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -1099,10 +1154,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4 [unused]
+                //   float gFogRange;                   // Offset:  308 Size:     4 [unused]
                 //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
                 //
                 // }
@@ -1178,8 +1234,10 @@ fxgroup
                 //       float3 Direction;              // Offset:  164
                 //       float CastShadow;              // Offset:  176
                 //       float Enabled;                 // Offset:  180
+                //       float Pad1;                    // Offset:  184
+                //       float Pad2;                    // Offset:  188
                 //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
+                //   } gDirLight;                       // Offset:  144 Size:    48 [unused]
                 //   
                 //   struct PointLight
                 //   {
@@ -1191,8 +1249,9 @@ fxgroup
                 //       float Radius;                  // Offset:  224
                 //       float CastShadow;              // Offset:  228
                 //       float Enabled;                 // Offset:  232
+                //       float Pad1;                    // Offset:  236
                 //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
+                //   } gPointLight;                     // Offset:  192 Size:    48 [unused]
                 //   
                 //   struct SpotLight
                 //   {
@@ -1206,10 +1265,11 @@ fxgroup
                 //       float Radius;                  // Offset:  288
                 //       float CastShadow;              // Offset:  292
                 //       float Enabled;                 // Offset:  296
+                //       float Pad1;                    // Offset:  300
                 //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4
-                //   float gFogRange;                   // Offset:  304 Size:     4
+                //   } gSpotLight;                      // Offset:  240 Size:    64 [unused]
+                //   float gFogStart;                   // Offset:  304 Size:     4
+                //   float gFogRange;                   // Offset:  308 Size:     4
                 //   float4 gFogColor;                  // Offset:  320 Size:    16
                 //
                 // }
@@ -1258,19 +1318,19 @@ fxgroup
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
                 
-                #line 133 "IncLights.fx"
-                add r0.x, r0.x, -cb0[18].w
-                div_sat r0.x, r0.x, cb0[19].x  // fogLerp<0:[0f,1f]>
+                #line 137 "IncLights.fx"
+                add r0.x, r0.x, -cb0[19].x
+                div_sat r0.x, r0.x, cb0[19].y  // fogLerp<0:[0f,1f]>
                 
                 #line 169 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t5.xyzw, s0  // litColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 135 "IncLights.fx"
+                #line 139 "IncLights.fx"
                 add r2.xyzw, -r1.xyzw, cb0[20].xyzw
                 mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
                 #line 171 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                lt r2.x, l(0.000000), cb0[19].x
+                lt r2.x, l(0.000000), cb0[19].y
                 movc o0.xyzw, r2.xxxx, r0.xyzw, r1.xyzw  // PSCombineLights<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
                 
                 #line 179
@@ -1278,115 +1338,6 @@ fxgroup
                 // Approximately 12 instruction slots used
                             
             };
-        }
-
-    }
-
-    technique11 StencilPass
-    {
-        pass P0
-        {
-            VertexShader = asm {
-                //
-                // Generated by Microsoft (R) HLSL Shader Compiler 9.29.952.3111
-                //
-                //
-                // Buffer Definitions: 
-                //
-                // cbuffer cbPerFrame
-                // {
-                //
-                //   float4x4 gWorld;                   // Offset:    0 Size:    64 [unused]
-                //   float4x4 gWorldViewProjection;     // Offset:   64 Size:    64
-                //   float3 gEyePositionWorld;          // Offset:  128 Size:    12 [unused]
-                //   
-                //   struct DirectionalLight
-                //   {
-                //       
-                //       float3 Color;                  // Offset:  144
-                //       float Ambient;                 // Offset:  156
-                //       float Diffuse;                 // Offset:  160
-                //       float3 Direction;              // Offset:  164
-                //       float CastShadow;              // Offset:  176
-                //       float Enabled;                 // Offset:  180
-                //
-                //   } gDirLight;                       // Offset:  144 Size:    40 [unused]
-                //   
-                //   struct PointLight
-                //   {
-                //       
-                //       float3 Color;                  // Offset:  192
-                //       float Ambient;                 // Offset:  204
-                //       float Diffuse;                 // Offset:  208
-                //       float3 Position;               // Offset:  212
-                //       float Radius;                  // Offset:  224
-                //       float CastShadow;              // Offset:  228
-                //       float Enabled;                 // Offset:  232
-                //
-                //   } gPointLight;                     // Offset:  192 Size:    44 [unused]
-                //   
-                //   struct SpotLight
-                //   {
-                //       
-                //       float3 Color;                  // Offset:  240
-                //       float Ambient;                 // Offset:  252
-                //       float Diffuse;                 // Offset:  256
-                //       float3 Position;               // Offset:  260
-                //       float3 Direction;              // Offset:  272
-                //       float Angle;                   // Offset:  284
-                //       float Radius;                  // Offset:  288
-                //       float CastShadow;              // Offset:  292
-                //       float Enabled;                 // Offset:  296
-                //
-                //   } gSpotLight;                      // Offset:  240 Size:    60 [unused]
-                //   float gFogStart;                   // Offset:  300 Size:     4 [unused]
-                //   float gFogRange;                   // Offset:  304 Size:     4 [unused]
-                //   float4 gFogColor;                  // Offset:  320 Size:    16 [unused]
-                //
-                // }
-                //
-                //
-                // Resource Bindings:
-                //
-                // Name                                 Type  Format         Dim Slot Elements
-                // ------------------------------ ---------- ------- ----------- ---- --------
-                // cbPerFrame                        cbuffer      NA          NA    0        1
-                //
-                //
-                //
-                // Input signature:
-                //
-                // Name                 Index   Mask Register SysValue Format   Used
-                // -------------------- ----- ------ -------- -------- ------ ------
-                // POSITION                 0   xyz         0     NONE  float   xyz 
-                //
-                //
-                // Output signature:
-                //
-                // Name                 Index   Mask Register SysValue Format   Used
-                // -------------------- ----- ------ -------- -------- ------ ------
-                // SV_POSITION              0   xyzw        0      POS  float   xyzw
-                //
-                vs_5_0
-                dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[8], immediateIndexed
-                dcl_input v0.xyz
-                dcl_output_siv o0.xyzw, position
-                dcl_temps 1
-                
-                #line 228 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                mov r0.xyz, v0.xyzx
-                mov r0.w, l(1.000000)
-                dp4 o0.x, r0.xyzw, cb0[4].xyzw  // VSStencilPass<0:NaN:Inf>
-                dp4 o0.y, r0.xyzw, cb0[5].xyzw  // VSStencilPass<1:NaN:Inf>
-                dp4 o0.z, r0.xyzw, cb0[6].xyzw  // VSStencilPass<2:NaN:Inf>
-                dp4 o0.w, r0.xyzw, cb0[7].xyzw  // VSStencilPass<3:NaN:Inf>
-                ret 
-                // Approximately 7 instruction slots used
-                            
-            };
-            GeometryShader = NULL;
-            PixelShader = NULL;
         }
 
     }
