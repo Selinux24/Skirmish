@@ -103,17 +103,19 @@ PSVertexPositionColor VSPositionColorSkinnedI(VSVertexPositionColorSkinnedI inpu
 
 float4 PSPositionColor(PSVertexPositionColor input) : SV_TARGET
 {
-	float4 litColor = input.color * gMaterial.Diffuse;
+	float4 matColor = input.color * gMaterial.Diffuse;
+
+	float3 litColor = matColor.rgb;
 
 	if(gFogRange > 0)
 	{
 		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 		float distToEye = length(toEyeWorld);
 
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return litColor;
+	return float4(litColor, matColor.a);
 }
 
 /**********************************************************************************************************
@@ -198,16 +200,17 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinnedI(VSVertexPositionNormal
 
 float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 {
-	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
+	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+	float3 toEye = normalize(toEyeWorld);
 
 	float4 matColor = input.color * gMaterial.Diffuse;
 
-	float4 litColor = ComputeAllLights(
+	float3 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
 		toEye,
-		matColor,
+		matColor.rgb,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
@@ -217,13 +220,12 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 
 	if(gFogRange > 0)
 	{
-		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 		float distToEye = length(toEyeWorld);
 
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return litColor;
+	return float4(litColor, matColor.a);
 }
 
 /**********************************************************************************************************
@@ -298,53 +300,54 @@ PSVertexPositionTexture VSPositionTextureSkinnedI(VSVertexPositionTextureSkinned
 
 float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+	float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+
+    float3 litColor = textureColor.rgb;
 
 	if(gFogRange > 0)
 	{
 		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 		float distToEye = length(toEyeWorld);
 
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	litColor.a *= gMaterial.Diffuse.a;
-
-	return litColor;
+	return float4(litColor, textureColor.a);
 }
 float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex)).r;
+    float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 	
-	//Grayscale
-	return float4(litColor.rrr, 1);
+	//Grayscale of red channel
+	return float4(color.rrr, 1);
 }
 float4 PSPositionTextureGREEN(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex)).g;
+    float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 	
-	//Grayscale
-	return float4(litColor.ggg, 1);
+	//Grayscale of green channel
+	return float4(color.ggg, 1);
 }
 float4 PSPositionTextureBLUE(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex)).b;
+	float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 	
-	//Grayscale
-	return float4(litColor.bbb, 1);
+   	//Grayscale of blue channel
+	return float4(color.bbb, 1);
 }
 float4 PSPositionTextureALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex)).a;
+    float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 	
-	//Grayscale
-	return float4(litColor.aaa, 1);
+   	//Grayscale of alpha channel
+	return float4(color.aaa, 1);
 }
 float4 PSPositionTextureNOALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 litColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+    float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
-	return float4(litColor.rgb, 1);
+   	//Color channel
+	return float4(color.rgb, 1);
 }
 
 /**********************************************************************************************************
@@ -435,14 +438,15 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 {
     float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
-	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
+	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+	float3 toEye = normalize(toEyeWorld);
 
-	float4 litColor = ComputeAllLights(
+	float3 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
 		toEye,
-		textureColor,
+		textureColor.rgb,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
@@ -452,13 +456,12 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 
 	if(gFogRange > 0)
 	{
-		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 		float distToEye = length(toEyeWorld);
 
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return litColor;
+	return float4(litColor, textureColor.a);
 }
 
 /**********************************************************************************************************
@@ -562,14 +565,15 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 
 	float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
 
-	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
+	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+	float3 toEye = normalize(toEyeWorld);
 
-	float4 litColor = ComputeAllLights(
+	float3 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
 		toEye,
-		textureColor,
+		textureColor.rgb,
 		input.positionWorld,
 		normalWorld,
 		gMaterial.SpecularIntensity,
@@ -579,13 +583,12 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 
 	if(gFogRange > 0)
 	{
-		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 		float distToEye = length(toEyeWorld);
 
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return litColor;
+	return float4(litColor, textureColor.a);
 }
 
 /**********************************************************************************************************

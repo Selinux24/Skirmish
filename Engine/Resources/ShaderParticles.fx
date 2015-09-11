@@ -256,37 +256,37 @@ float4 PSDrawSolid(PSParticleSolid input) : SV_TARGET
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
-	float4 litColor = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
+	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
+
+	float3 litColor = textureColor.rgb;
 
 	if(gFogRange > 0)
 	{
 		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 		float distToEye = length(toEyeWorld);
 
-		float4 fog = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
-
-		litColor = float4(fog.rgb, litColor.a);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return litColor;
+	return float4(litColor, textureColor.a);
 }
 float4 PSDrawLine(PSParticleLine input) : SV_TARGET
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
-	float4 litColor = gTextureArray.Sample(SamplerLinear, uvw);
+	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
+
+	float3 litColor = textureColor.rgb;
 
 	if(gFogRange > 0)
 	{
 		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 		float distToEye = length(toEyeWorld);
 
-		float4 fog = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
-
-		litColor = float4(fog.rgb, litColor.a);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return litColor;
+	return float4(litColor, textureColor.a);
 }
 
 GBufferPSOutput PSDeferredDrawSolid(PSParticleSolid input)

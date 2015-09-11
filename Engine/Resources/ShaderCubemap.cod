@@ -268,476 +268,468 @@ fxgroup
                 
                 #line 31 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 sample_indexable(texturecube)(float,float,float,float) r0.xyzw, v1.xyzx, t0.xyzw, s0  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
+                add r1.xyz, -v1.xyzx, cb0[4].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 
-                #line 307 "IncLights.fx"
-                eq r1.x, cb0[7].y, l(1.000000)
-                if_nz r1.x
+                #line 304 "IncLights.fx"
+                eq r1.w, cb0[7].y, l(1.000000)
+                if_nz r1.w
                 
-                #line 175
-                  mul r1.xyz, r0.xyzx, cb0[5].xyzx
-                  mul r1.xyz, r1.xyzx, cb0[5].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r1.xyz, r1.xyzx
-                  mul r1.xyz, r1.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
-                  exp r1.xyz, r1.xyzx
-                  min r1.xyz, r1.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 173
+                  mul r2.xyz, r0.xyzx, cb0[5].xyzx
+                  mul r2.xyz, r2.xyzx, cb0[5].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 205
+                #line 202
                   eq r1.w, cb0[7].x, l(1.000000)
                 
-                #line 129
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.x, l(-1.#IND00, -1.#IND00, 0.000000, 0.000000), t1.xxxx, s1, l(-1.#IND00)  // percentLit<0:[0f,1f]>
+                #line 127
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, l(-0.000488, -0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)  // percentLit<0:[0f,1f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(0.000000, -0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.x  // percentLit<0:[0f,2f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(0.000488, -0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.x  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(-0.000488, 0.000000, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.x  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(0.000000, 0.000000, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.x  // percentLit<0:[0f,5f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(0.000488, 0.000000, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.x  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(-0.000488, 0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.x  // percentLit<0:[0f,7f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(0.000000, 0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.x  // percentLit<0:[0f,8f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(0.000488, 0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.x  // percentLit<0:[0f,9f]>
                 
-                #line 209
-                  mul r2.xyz, r1.xyzx, r2.xxxx  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 131
+                  mul r2.w, r2.w, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
-                #line 205
-                  movc r1.xyz, r1.wwww, r2.xyzx, r1.xyzx  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 206
+                  mul r3.xyz, r2.wwww, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 309
-                  mov r1.w, r0.w
+                #line 202
+                  movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 304
                 else 
-                  mov r1.xyzw, l(0,0,0,0)  // litColor<0: 0f,1: 0f,2: 0f,3: 0f>
+                  mov r2.xyz, l(0,0,0,0)  // litColor<0: 0f,1: 0f,2: 0f>
                 endif 
-                eq r2.x, cb0[10].y, l(1.000000)
-                if_nz r2.x
+                eq r1.w, cb0[10].y, l(1.000000)
+                if_nz r1.w
                 
-                #line 175
-                  mul r2.xyz, r0.xyzx, cb0[8].xyzx
-                  mul r2.xyz, r2.xyzx, cb0[8].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r2.xyz, r2.xyzx
-                  mul r2.xyz, r2.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
-                  exp r2.xyz, r2.xyzx
-                  min r2.xyz, r2.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 173
+                  mul r3.xyz, r0.xyzx, cb0[8].xyzx
+                  mul r3.xyz, r3.xyzx, cb0[8].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 205
-                  eq r2.w, cb0[10].x, l(1.000000)
+                #line 202
+                  eq r1.w, cb0[10].x, l(1.000000)
                 
-                #line 129
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(-1.#IND00, -1.#IND00, 0.000000, 0.000000), t1.xxxx, s1, l(-1.#IND00)  // percentLit<0:[0f,1f]>
+                #line 127
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, l(-0.000488, -0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)  // percentLit<0:[0f,1f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000000, -0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,2f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000488, -0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(-0.000488, 0.000000, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000000, 0.000000, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,5f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000488, 0.000000, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(-0.000488, 0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,7f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000000, 0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,8f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000488, 0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,9f]>
                 
-                #line 209
-                  mul r3.xyz, r2.xyzx, r3.xxxx  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 131
+                  mul r2.w, r2.w, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
-                #line 205
-                  movc r2.xyz, r2.wwww, r3.xyzx, r2.xyzx  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 206
+                  mul r4.xyz, r2.wwww, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 309
-                  mov r2.w, r0.w
-                  add r1.xyzw, r1.xyzw, r2.xyzw  // litColor<0:[0f,2f],1:[0f,2f],2:[0f,2f],3:NaN:Inf>
+                #line 202
+                  movc r3.xyz, r1.wwww, r4.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 306
+                  add r2.xyz, r2.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
-                eq r2.x, cb0[13].y, l(1.000000)
-                if_nz r2.x
+                eq r1.w, cb0[13].y, l(1.000000)
+                if_nz r1.w
                 
-                #line 175
-                  mul r2.xyz, r0.xyzx, cb0[11].xyzx
-                  mul r2.xyz, r2.xyzx, cb0[11].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r2.xyz, r2.xyzx
-                  mul r2.xyz, r2.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
-                  exp r2.xyz, r2.xyzx
-                  min r2.xyz, r2.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 173
+                  mul r3.xyz, r0.xyzx, cb0[11].xyzx
+                  mul r3.xyz, r3.xyzx, cb0[11].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 205
-                  eq r2.w, cb0[13].x, l(1.000000)
+                #line 202
+                  eq r1.w, cb0[13].x, l(1.000000)
                 
-                #line 129
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, l(-1.#IND00, -1.#IND00, 0.000000, 0.000000), t1.xxxx, s1, l(-1.#IND00)  // percentLit<0:[0f,1f]>
+                #line 127
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r2.w, l(-0.000488, -0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)  // percentLit<0:[0f,1f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000000, -0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,2f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000488, -0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,3f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(-0.000488, 0.000000, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,4f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000000, 0.000000, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,5f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000488, 0.000000, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,6f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(-0.000488, 0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,7f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000000, 0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,8f]>
+                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, l(0.000488, 0.000488, 0.000000, 0.000000), t1.xxxx, s1, l(0.000000)
+                  add r2.w, r2.w, r3.w  // percentLit<0:[0f,9f]>
                 
-                #line 209
-                  mul r3.xyz, r2.xyzx, r3.xxxx  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 131
+                  mul r2.w, r2.w, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
                 
-                #line 205
-                  movc r2.xyz, r2.wwww, r3.xyzx, r2.xyzx  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 206
+                  mul r4.xyz, r2.wwww, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 309
-                  mov r2.w, r0.w
-                  add r1.xyzw, r1.xyzw, r2.xyzw  // litColor<0:[0f,3f],1:[0f,3f],2:[0f,3f],3:NaN:Inf>
+                #line 202
+                  movc r3.xyz, r1.wwww, r4.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 306
+                  add r2.xyz, r2.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 
-                #line 325
-                eq r2.x, cb0[16].z, l(1.000000)
-                if_nz r2.x
+                #line 322
+                eq r1.w, cb0[16].z, l(1.000000)
                 
-                #line 224
-                  add r2.xyz, v1.xyzx, -cb0[15].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
-                  dp3 r2.x, r2.xyzx, r2.xyzx
-                  sqrt r2.x, r2.x  // distance<0:NaN:Inf>
+                #line 221
+                add r3.xyz, v1.xyzx, -cb0[15].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
+                dp3 r2.w, r3.xyzx, r3.xyzx
+                sqrt r2.w, r2.w  // distance<0:NaN:Inf>
                 
-                #line 175
-                  mul r2.yzw, r0.xxyz, cb0[14].xxyz
-                  mul r2.yzw, r2.yyzw, cb0[14].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r2.yzw, r2.yyzw
-                  mul r2.yzw, r2.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r2.yzw, r2.yyzw
-                  min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 173
+                mul r3.xyz, r0.xyzx, cb0[14].xyzx
+                mul r3.xyz, r3.xyzx, cb0[14].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 100
+                div r3.w, r2.w, cb0[16].x  // f<0:NaN:Inf>
+                mad r3.w, -r3.w, r3.w, l(1.000000)  // denom<0:NaN:Inf>
+                lt r4.x, l(0.000000), r3.w
+                div r2.w, r2.w, r3.w  // d<0:NaN:Inf>
+                add r2.w, r2.w, l(1.000000)  // dn<0:NaN:Inf>
+                mul r2.w, r2.w, r2.w
+                div r2.w, cb0[15].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
                 #line 102
-                  div r2.y, r2.x, cb0[16].x  // f<0:NaN:Inf>
-                  mad r2.y, -r2.y, r2.y, l(1.000000)  // denom<0:NaN:Inf>
-                  lt r2.z, l(0.000000), r2.y
-                  div r2.x, r2.x, r2.y  // d<0:NaN:Inf>
-                  add r2.x, r2.x, l(1.000000)  // dn<0:NaN:Inf>
-                  mul r2.x, r2.x, r2.x
-                  div r2.x, cb0[15].x, r2.x  // CalcSphericAttenuation<0:NaN:Inf>
+                and r2.w, r2.w, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 104
-                  and r2.x, r2.x, r2.z  // CalcSphericAttenuation<0:NaN:Inf>
+                #line 324
+                mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                eq r1.w, cb0[19].z, l(1.000000)
                 
-                #line 242
-                  mov r3.w, r0.w
+                #line 221
+                add r3.xyz, v1.xyzx, -cb0[18].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
+                dp3 r2.w, r3.xyzx, r3.xyzx
+                sqrt r2.w, r2.w  // distance<0:NaN:Inf>
                 
-                #line 327
-                  mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                endif 
-                eq r2.x, cb0[19].z, l(1.000000)
-                if_nz r2.x
+                #line 173
+                mul r3.xyz, r0.xyzx, cb0[17].xyzx
+                mul r3.xyz, r3.xyzx, cb0[17].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 224
-                  add r2.xyz, v1.xyzx, -cb0[18].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
-                  dp3 r2.x, r2.xyzx, r2.xyzx
-                  sqrt r2.x, r2.x  // distance<0:NaN:Inf>
-                
-                #line 175
-                  mul r2.yzw, r0.xxyz, cb0[17].xxyz
-                  mul r2.yzw, r2.yyzw, cb0[17].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r2.yzw, r2.yyzw
-                  mul r2.yzw, r2.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r2.yzw, r2.yyzw
-                  min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 100
+                div r3.w, r2.w, cb0[19].x  // f<0:NaN:Inf>
+                mad r3.w, -r3.w, r3.w, l(1.000000)  // denom<0:NaN:Inf>
+                lt r4.x, l(0.000000), r3.w
+                div r2.w, r2.w, r3.w  // d<0:NaN:Inf>
+                add r2.w, r2.w, l(1.000000)  // dn<0:NaN:Inf>
+                mul r2.w, r2.w, r2.w
+                div r2.w, cb0[18].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
                 #line 102
-                  div r2.y, r2.x, cb0[19].x  // f<0:NaN:Inf>
-                  mad r2.y, -r2.y, r2.y, l(1.000000)  // denom<0:NaN:Inf>
-                  lt r2.z, l(0.000000), r2.y
-                  div r2.x, r2.x, r2.y  // d<0:NaN:Inf>
-                  add r2.x, r2.x, l(1.000000)  // dn<0:NaN:Inf>
-                  mul r2.x, r2.x, r2.x
-                  div r2.x, cb0[18].x, r2.x  // CalcSphericAttenuation<0:NaN:Inf>
+                and r2.w, r2.w, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 104
-                  and r2.x, r2.x, r2.z  // CalcSphericAttenuation<0:NaN:Inf>
+                #line 324
+                mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                eq r1.w, cb0[22].z, l(1.000000)
                 
-                #line 242
-                  mov r3.w, r0.w
+                #line 221
+                add r3.xyz, v1.xyzx, -cb0[21].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
+                dp3 r2.w, r3.xyzx, r3.xyzx
+                sqrt r2.w, r2.w  // distance<0:NaN:Inf>
                 
-                #line 327
-                  mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                endif 
-                eq r2.x, cb0[22].z, l(1.000000)
-                if_nz r2.x
+                #line 173
+                mul r3.xyz, r0.xyzx, cb0[20].xyzx
+                mul r3.xyz, r3.xyzx, cb0[20].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 224
-                  add r2.xyz, v1.xyzx, -cb0[21].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
-                  dp3 r2.x, r2.xyzx, r2.xyzx
-                  sqrt r2.x, r2.x  // distance<0:NaN:Inf>
-                
-                #line 175
-                  mul r2.yzw, r0.xxyz, cb0[20].xxyz
-                  mul r2.yzw, r2.yyzw, cb0[20].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r2.yzw, r2.yyzw
-                  mul r2.yzw, r2.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r2.yzw, r2.yyzw
-                  min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 100
+                div r3.w, r2.w, cb0[22].x  // f<0:NaN:Inf>
+                mad r3.w, -r3.w, r3.w, l(1.000000)  // denom<0:NaN:Inf>
+                lt r4.x, l(0.000000), r3.w
+                div r2.w, r2.w, r3.w  // d<0:NaN:Inf>
+                add r2.w, r2.w, l(1.000000)  // dn<0:NaN:Inf>
+                mul r2.w, r2.w, r2.w
+                div r2.w, cb0[21].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
                 #line 102
-                  div r2.y, r2.x, cb0[22].x  // f<0:NaN:Inf>
-                  mad r2.y, -r2.y, r2.y, l(1.000000)  // denom<0:NaN:Inf>
-                  lt r2.z, l(0.000000), r2.y
-                  div r2.x, r2.x, r2.y  // d<0:NaN:Inf>
-                  add r2.x, r2.x, l(1.000000)  // dn<0:NaN:Inf>
-                  mul r2.x, r2.x, r2.x
-                  div r2.x, cb0[21].x, r2.x  // CalcSphericAttenuation<0:NaN:Inf>
+                and r2.w, r2.w, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 104
-                  and r2.x, r2.x, r2.z  // CalcSphericAttenuation<0:NaN:Inf>
+                #line 324
+                mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                eq r1.w, cb0[25].z, l(1.000000)
                 
-                #line 242
-                  mov r3.w, r0.w
+                #line 221
+                add r3.xyz, v1.xyzx, -cb0[24].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
+                dp3 r2.w, r3.xyzx, r3.xyzx
+                sqrt r2.w, r2.w  // distance<0:NaN:Inf>
                 
-                #line 327
-                  mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                endif 
-                eq r2.x, cb0[25].z, l(1.000000)
-                if_nz r2.x
+                #line 173
+                mul r3.xyz, r0.xyzx, cb0[23].xyzx
+                mul r3.xyz, r3.xyzx, cb0[23].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 224
-                  add r2.xyz, v1.xyzx, -cb0[24].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
-                  dp3 r2.x, r2.xyzx, r2.xyzx
-                  sqrt r2.x, r2.x  // distance<0:NaN:Inf>
-                
-                #line 175
-                  mul r2.yzw, r0.xxyz, cb0[23].xxyz
-                  mul r2.yzw, r2.yyzw, cb0[23].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r2.yzw, r2.yyzw
-                  mul r2.yzw, r2.yyzw, l(0.000000, 0.454545, 0.454545, 0.454545)
-                  exp r2.yzw, r2.yyzw
-                  min r3.xyz, r2.yzwy, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 100
+                div r3.w, r2.w, cb0[25].x  // f<0:NaN:Inf>
+                mad r3.w, -r3.w, r3.w, l(1.000000)  // denom<0:NaN:Inf>
+                lt r4.x, l(0.000000), r3.w
+                div r2.w, r2.w, r3.w  // d<0:NaN:Inf>
+                add r2.w, r2.w, l(1.000000)  // dn<0:NaN:Inf>
+                mul r2.w, r2.w, r2.w
+                div r2.w, cb0[24].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
                 #line 102
-                  div r2.y, r2.x, cb0[25].x  // f<0:NaN:Inf>
-                  mad r2.y, -r2.y, r2.y, l(1.000000)  // denom<0:NaN:Inf>
-                  lt r2.z, l(0.000000), r2.y
-                  div r2.x, r2.x, r2.y  // d<0:NaN:Inf>
-                  add r2.x, r2.x, l(1.000000)  // dn<0:NaN:Inf>
-                  mul r2.x, r2.x, r2.x
-                  div r2.x, cb0[24].x, r2.x  // CalcSphericAttenuation<0:NaN:Inf>
+                and r2.w, r2.w, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 104
-                  and r2.x, r2.x, r2.z  // CalcSphericAttenuation<0:NaN:Inf>
+                #line 324
+                mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 242
-                  mov r3.w, r0.w
+                #line 338
+                eq r1.w, cb0[29].z, l(1.000000)
+                if_nz r1.w
                 
-                #line 327
-                  mad r1.xyzw, r3.xyzw, r2.xxxx, r1.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                endif 
+                #line 253
+                  add r3.xyz, v1.xyzx, -cb0[27].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
+                  dp3 r1.w, r3.xyzx, r3.xyzx
+                  sqrt r1.w, r1.w  // distance<0:NaN:Inf>
+                  div r3.xyz, r3.xyzx, r1.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                  dp3 r2.w, r3.xyzx, cb0[28].xyzx  // spotFactor<0:NaN:Inf>
+                  add r3.x, -|r2.w|, l(1.000000)
+                  sqrt r3.x, r3.x
+                  mad r3.y, |r2.w|, l(-0.018729), l(0.074261)
+                  mad r3.y, r3.y, |r2.w|, l(-0.212114)
+                  mad r3.y, r3.y, |r2.w|, l(1.570729)
+                  mul r3.z, r3.x, r3.y
+                  mad r3.z, r3.z, l(-2.000000), l(3.141593)
+                  lt r2.w, r2.w, -r2.w
+                  and r2.w, r2.w, r3.z
+                  mad r2.w, r3.y, r3.x, r2.w
+                  mul r3.x, r2.w, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
+                  ge r3.x, cb0[28].w, r3.x
                 
-                #line 341
-                eq r2.x, cb0[29].z, l(1.000000)
-                if_nz r2.x
+                #line 173
+                  mul r3.yzw, r0.xxyz, cb0[26].xxyz
+                  mul r3.yzw, r3.yyzw, cb0[26].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 256
-                  add r2.xyz, v1.xyzx, -cb0[27].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
-                  dp3 r2.w, r2.xyzx, r2.xyzx
-                  sqrt r2.w, r2.w  // distance<0:NaN:Inf>
-                  div r2.xyz, r2.xyzx, r2.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  dp3 r2.x, r2.xyzx, cb0[28].xyzx  // spotFactor<0:NaN:Inf>
-                  add r2.y, -|r2.x|, l(1.000000)
-                  sqrt r2.y, r2.y
-                  mad r2.z, |r2.x|, l(-0.018729), l(0.074261)
-                  mad r2.z, r2.z, |r2.x|, l(-0.212114)
-                  mad r2.z, r2.z, |r2.x|, l(1.570729)
-                  mul r3.x, r2.y, r2.z
-                  mad r3.x, r3.x, l(-2.000000), l(3.141593)
-                  lt r2.x, r2.x, -r2.x
-                  and r2.x, r2.x, r3.x
-                  mad r2.x, r2.z, r2.y, r2.x
-                  mul r2.y, r2.x, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
-                  ge r2.y, cb0[28].w, r2.y
-                
-                #line 175
-                  mul r3.xyz, r0.xyzx, cb0[26].xyzx
-                  mul r3.xyz, r3.xyzx, cb0[26].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r3.xyz, r3.xyzx
-                  mul r3.xyz, r3.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
-                  exp r3.xyz, r3.xyzx
-                  min r3.xyz, r3.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 100
+                  div r4.x, r1.w, cb0[29].x  // f<0:NaN:Inf>
+                  mad r4.x, -r4.x, r4.x, l(1.000000)  // denom<0:NaN:Inf>
+                  lt r4.y, l(0.000000), r4.x
+                  div r1.w, r1.w, r4.x  // d<0:NaN:Inf>
+                  add r1.w, r1.w, l(1.000000)  // dn<0:NaN:Inf>
+                  mul r1.w, r1.w, r1.w
+                  div r1.w, cb0[27].x, r1.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
                 #line 102
-                  div r2.z, r2.w, cb0[29].x  // f<0:NaN:Inf>
-                  mad r2.z, -r2.z, r2.z, l(1.000000)  // denom<0:NaN:Inf>
-                  lt r4.x, l(0.000000), r2.z
-                  div r2.z, r2.w, r2.z  // d<0:NaN:Inf>
-                  add r2.z, r2.z, l(1.000000)  // dn<0:NaN:Inf>
-                  mul r2.z, r2.z, r2.z
-                  div r2.z, cb0[27].x, r2.z  // CalcSphericAttenuation<0:NaN:Inf>
+                  and r1.w, r1.w, r4.y  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 104
-                  and r2.z, r2.z, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
+                #line 276
+                  mad r2.w, -r2.w, l(57.295780), l(1.000000)
+                  add r4.x, -cb0[28].w, l(1.000000)
+                  div r2.w, r2.w, r4.x
+                  add r2.w, -r2.w, l(1.000000)  // attenuationS<0:NaN:Inf>
+                  mul r1.w, r1.w, r2.w
+                  mul r3.yzw, r1.wwww, r3.yyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 279
-                  mad r2.x, -r2.x, l(57.295780), l(1.000000)
-                  add r2.w, -cb0[28].w, l(1.000000)
-                  div r2.x, r2.x, r2.w
-                  add r2.x, -r2.x, l(1.000000)  // attenuationS<0:NaN:Inf>
-                  mul r2.x, r2.x, r2.z
-                  mov r3.w, r0.w
-                  mul r3.xyzw, r2.xxxx, r3.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 260
+                  and r3.xyz, r3.yzwy, r3.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 263
-                  and r2.xyzw, r2.yyyy, r3.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                
-                #line 343
-                  add r1.xyzw, r1.xyzw, r2.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 340
+                  add r2.xyz, r2.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
-                eq r2.x, cb0[33].z, l(1.000000)
-                if_nz r2.x
+                eq r1.w, cb0[33].z, l(1.000000)
+                if_nz r1.w
                 
-                #line 256
-                  add r2.xyz, v1.xyzx, -cb0[31].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
-                  dp3 r2.w, r2.xyzx, r2.xyzx
-                  sqrt r2.w, r2.w  // distance<0:NaN:Inf>
-                  div r2.xyz, r2.xyzx, r2.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  dp3 r2.x, r2.xyzx, cb0[32].xyzx  // spotFactor<0:NaN:Inf>
-                  add r2.y, -|r2.x|, l(1.000000)
-                  sqrt r2.y, r2.y
-                  mad r2.z, |r2.x|, l(-0.018729), l(0.074261)
-                  mad r2.z, r2.z, |r2.x|, l(-0.212114)
-                  mad r2.z, r2.z, |r2.x|, l(1.570729)
-                  mul r3.x, r2.y, r2.z
-                  mad r3.x, r3.x, l(-2.000000), l(3.141593)
-                  lt r2.x, r2.x, -r2.x
-                  and r2.x, r2.x, r3.x
-                  mad r2.x, r2.z, r2.y, r2.x
-                  mul r2.y, r2.x, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
-                  ge r2.y, cb0[32].w, r2.y
+                #line 253
+                  add r3.xyz, v1.xyzx, -cb0[31].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
+                  dp3 r1.w, r3.xyzx, r3.xyzx
+                  sqrt r1.w, r1.w  // distance<0:NaN:Inf>
+                  div r3.xyz, r3.xyzx, r1.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                  dp3 r2.w, r3.xyzx, cb0[32].xyzx  // spotFactor<0:NaN:Inf>
+                  add r3.x, -|r2.w|, l(1.000000)
+                  sqrt r3.x, r3.x
+                  mad r3.y, |r2.w|, l(-0.018729), l(0.074261)
+                  mad r3.y, r3.y, |r2.w|, l(-0.212114)
+                  mad r3.y, r3.y, |r2.w|, l(1.570729)
+                  mul r3.z, r3.x, r3.y
+                  mad r3.z, r3.z, l(-2.000000), l(3.141593)
+                  lt r2.w, r2.w, -r2.w
+                  and r2.w, r2.w, r3.z
+                  mad r2.w, r3.y, r3.x, r2.w
+                  mul r3.x, r2.w, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
+                  ge r3.x, cb0[32].w, r3.x
                 
-                #line 175
-                  mul r3.xyz, r0.xyzx, cb0[30].xyzx
-                  mul r3.xyz, r3.xyzx, cb0[30].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r3.xyz, r3.xyzx
-                  mul r3.xyz, r3.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
-                  exp r3.xyz, r3.xyzx
-                  min r3.xyz, r3.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 173
+                  mul r3.yzw, r0.xxyz, cb0[30].xxyz
+                  mul r3.yzw, r3.yyzw, cb0[30].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 100
+                  div r4.x, r1.w, cb0[33].x  // f<0:NaN:Inf>
+                  mad r4.x, -r4.x, r4.x, l(1.000000)  // denom<0:NaN:Inf>
+                  lt r4.y, l(0.000000), r4.x
+                  div r1.w, r1.w, r4.x  // d<0:NaN:Inf>
+                  add r1.w, r1.w, l(1.000000)  // dn<0:NaN:Inf>
+                  mul r1.w, r1.w, r1.w
+                  div r1.w, cb0[31].x, r1.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
                 #line 102
-                  div r2.z, r2.w, cb0[33].x  // f<0:NaN:Inf>
-                  mad r2.z, -r2.z, r2.z, l(1.000000)  // denom<0:NaN:Inf>
-                  lt r4.x, l(0.000000), r2.z
-                  div r2.z, r2.w, r2.z  // d<0:NaN:Inf>
-                  add r2.z, r2.z, l(1.000000)  // dn<0:NaN:Inf>
-                  mul r2.z, r2.z, r2.z
-                  div r2.z, cb0[31].x, r2.z  // CalcSphericAttenuation<0:NaN:Inf>
+                  and r1.w, r1.w, r4.y  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 104
-                  and r2.z, r2.z, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
+                #line 276
+                  mad r2.w, -r2.w, l(57.295780), l(1.000000)
+                  add r4.x, -cb0[32].w, l(1.000000)
+                  div r2.w, r2.w, r4.x
+                  add r2.w, -r2.w, l(1.000000)  // attenuationS<0:NaN:Inf>
+                  mul r1.w, r1.w, r2.w
+                  mul r3.yzw, r1.wwww, r3.yyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 279
-                  mad r2.x, -r2.x, l(57.295780), l(1.000000)
-                  add r2.w, -cb0[32].w, l(1.000000)
-                  div r2.x, r2.x, r2.w
-                  add r2.x, -r2.x, l(1.000000)  // attenuationS<0:NaN:Inf>
-                  mul r2.x, r2.x, r2.z
-                  mov r3.w, r0.w
-                  mul r3.xyzw, r2.xxxx, r3.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 260
+                  and r3.xyz, r3.yzwy, r3.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 263
-                  and r2.xyzw, r2.yyyy, r3.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                
-                #line 343
-                  add r1.xyzw, r1.xyzw, r2.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 340
+                  add r2.xyz, r2.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
-                eq r2.x, cb0[37].z, l(1.000000)
-                if_nz r2.x
+                eq r1.w, cb0[37].z, l(1.000000)
+                if_nz r1.w
                 
-                #line 256
-                  add r2.xyz, v1.xyzx, -cb0[35].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
-                  dp3 r2.w, r2.xyzx, r2.xyzx
-                  sqrt r2.w, r2.w  // distance<0:NaN:Inf>
-                  div r2.xyz, r2.xyzx, r2.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  dp3 r2.x, r2.xyzx, cb0[36].xyzx  // spotFactor<0:NaN:Inf>
-                  add r2.y, -|r2.x|, l(1.000000)
-                  sqrt r2.y, r2.y
-                  mad r2.z, |r2.x|, l(-0.018729), l(0.074261)
-                  mad r2.z, r2.z, |r2.x|, l(-0.212114)
-                  mad r2.z, r2.z, |r2.x|, l(1.570729)
-                  mul r3.x, r2.y, r2.z
-                  mad r3.x, r3.x, l(-2.000000), l(3.141593)
-                  lt r2.x, r2.x, -r2.x
-                  and r2.x, r2.x, r3.x
-                  mad r2.x, r2.z, r2.y, r2.x
-                  mul r2.y, r2.x, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
-                  ge r2.y, cb0[36].w, r2.y
+                #line 253
+                  add r3.xyz, v1.xyzx, -cb0[35].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
+                  dp3 r1.w, r3.xyzx, r3.xyzx
+                  sqrt r1.w, r1.w  // distance<0:NaN:Inf>
+                  div r3.xyz, r3.xyzx, r1.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                  dp3 r2.w, r3.xyzx, cb0[36].xyzx  // spotFactor<0:NaN:Inf>
+                  add r3.x, -|r2.w|, l(1.000000)
+                  sqrt r3.x, r3.x
+                  mad r3.y, |r2.w|, l(-0.018729), l(0.074261)
+                  mad r3.y, r3.y, |r2.w|, l(-0.212114)
+                  mad r3.y, r3.y, |r2.w|, l(1.570729)
+                  mul r3.z, r3.x, r3.y
+                  mad r3.z, r3.z, l(-2.000000), l(3.141593)
+                  lt r2.w, r2.w, -r2.w
+                  and r2.w, r2.w, r3.z
+                  mad r2.w, r3.y, r3.x, r2.w
+                  mul r3.x, r2.w, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
+                  ge r3.x, cb0[36].w, r3.x
                 
-                #line 175
-                  mul r3.xyz, r0.xyzx, cb0[34].xyzx
-                  mul r3.xyz, r3.xyzx, cb0[34].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r3.xyz, r3.xyzx
-                  mul r3.xyz, r3.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
-                  exp r3.xyz, r3.xyzx
-                  min r3.xyz, r3.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 173
+                  mul r3.yzw, r0.xxyz, cb0[34].xxyz
+                  mul r3.yzw, r3.yyzw, cb0[34].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 100
+                  div r4.x, r1.w, cb0[37].x  // f<0:NaN:Inf>
+                  mad r4.x, -r4.x, r4.x, l(1.000000)  // denom<0:NaN:Inf>
+                  lt r4.y, l(0.000000), r4.x
+                  div r1.w, r1.w, r4.x  // d<0:NaN:Inf>
+                  add r1.w, r1.w, l(1.000000)  // dn<0:NaN:Inf>
+                  mul r1.w, r1.w, r1.w
+                  div r1.w, cb0[35].x, r1.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
                 #line 102
-                  div r2.z, r2.w, cb0[37].x  // f<0:NaN:Inf>
-                  mad r2.z, -r2.z, r2.z, l(1.000000)  // denom<0:NaN:Inf>
-                  lt r4.x, l(0.000000), r2.z
-                  div r2.z, r2.w, r2.z  // d<0:NaN:Inf>
-                  add r2.z, r2.z, l(1.000000)  // dn<0:NaN:Inf>
-                  mul r2.z, r2.z, r2.z
-                  div r2.z, cb0[35].x, r2.z  // CalcSphericAttenuation<0:NaN:Inf>
+                  and r1.w, r1.w, r4.y  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 104
-                  and r2.z, r2.z, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
+                #line 276
+                  mad r2.w, -r2.w, l(57.295780), l(1.000000)
+                  add r4.x, -cb0[36].w, l(1.000000)
+                  div r2.w, r2.w, r4.x
+                  add r2.w, -r2.w, l(1.000000)  // attenuationS<0:NaN:Inf>
+                  mul r1.w, r1.w, r2.w
+                  mul r3.yzw, r1.wwww, r3.yyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 279
-                  mad r2.x, -r2.x, l(57.295780), l(1.000000)
-                  add r2.w, -cb0[36].w, l(1.000000)
-                  div r2.x, r2.x, r2.w
-                  add r2.x, -r2.x, l(1.000000)  // attenuationS<0:NaN:Inf>
-                  mul r2.x, r2.x, r2.z
-                  mov r3.w, r0.w
-                  mul r3.xyzw, r2.xxxx, r3.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 260
+                  and r3.xyz, r3.yzwy, r3.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 263
-                  and r2.xyzw, r2.yyyy, r3.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                
-                #line 343
-                  add r1.xyzw, r1.xyzw, r2.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 340
+                  add r2.xyz, r2.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
-                eq r2.x, cb0[41].z, l(1.000000)
-                if_nz r2.x
+                eq r1.w, cb0[41].z, l(1.000000)
+                if_nz r1.w
                 
-                #line 256
-                  add r2.xyz, v1.xyzx, -cb0[39].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
-                  dp3 r2.w, r2.xyzx, r2.xyzx
-                  sqrt r2.w, r2.w  // distance<0:NaN:Inf>
-                  div r2.xyz, r2.xyzx, r2.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  dp3 r2.x, r2.xyzx, cb0[40].xyzx  // spotFactor<0:NaN:Inf>
-                  add r2.y, -|r2.x|, l(1.000000)
-                  sqrt r2.y, r2.y
-                  mad r2.z, |r2.x|, l(-0.018729), l(0.074261)
-                  mad r2.z, r2.z, |r2.x|, l(-0.212114)
-                  mad r2.z, r2.z, |r2.x|, l(1.570729)
-                  mul r3.x, r2.y, r2.z
-                  mad r3.x, r3.x, l(-2.000000), l(3.141593)
-                  lt r2.x, r2.x, -r2.x
-                  and r2.x, r2.x, r3.x
-                  mad r2.x, r2.z, r2.y, r2.x
-                  mul r2.y, r2.x, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
-                  ge r2.y, cb0[40].w, r2.y
+                #line 253
+                  add r3.xyz, v1.xyzx, -cb0[39].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
+                  dp3 r1.w, r3.xyzx, r3.xyzx
+                  sqrt r1.w, r1.w  // distance<0:NaN:Inf>
+                  div r3.xyz, r3.xyzx, r1.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                  dp3 r2.w, r3.xyzx, cb0[40].xyzx  // spotFactor<0:NaN:Inf>
+                  add r3.x, -|r2.w|, l(1.000000)
+                  sqrt r3.x, r3.x
+                  mad r3.y, |r2.w|, l(-0.018729), l(0.074261)
+                  mad r3.y, r3.y, |r2.w|, l(-0.212114)
+                  mad r3.y, r3.y, |r2.w|, l(1.570729)
+                  mul r3.z, r3.x, r3.y
+                  mad r3.z, r3.z, l(-2.000000), l(3.141593)
+                  lt r2.w, r2.w, -r2.w
+                  and r2.w, r2.w, r3.z
+                  mad r2.w, r3.y, r3.x, r2.w
+                  mul r3.x, r2.w, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
+                  ge r3.x, cb0[40].w, r3.x
                 
-                #line 175
-                  mul r3.xyz, r0.xyzx, cb0[38].xyzx
-                  mul r3.xyz, r3.xyzx, cb0[38].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                  log r3.xyz, r3.xyzx
-                  mul r3.xyz, r3.xyzx, l(0.454545, 0.454545, 0.454545, 0.000000)
-                  exp r3.xyz, r3.xyzx
-                  min r0.xyz, r3.xyzx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                #line 173
+                  mul r0.xyz, r0.xyzx, cb0[38].xyzx
+                  mul r0.xyz, r0.xyzx, cb0[38].wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 100
+                  div r3.y, r1.w, cb0[41].x  // f<0:NaN:Inf>
+                  mad r3.y, -r3.y, r3.y, l(1.000000)  // denom<0:NaN:Inf>
+                  lt r3.z, l(0.000000), r3.y
+                  div r1.w, r1.w, r3.y  // d<0:NaN:Inf>
+                  add r1.w, r1.w, l(1.000000)  // dn<0:NaN:Inf>
+                  mul r1.w, r1.w, r1.w
+                  div r1.w, cb0[39].x, r1.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
                 #line 102
-                  div r2.z, r2.w, cb0[41].x  // f<0:NaN:Inf>
-                  mad r2.z, -r2.z, r2.z, l(1.000000)  // denom<0:NaN:Inf>
-                  lt r3.x, l(0.000000), r2.z
-                  div r2.z, r2.w, r2.z  // d<0:NaN:Inf>
-                  add r2.z, r2.z, l(1.000000)  // dn<0:NaN:Inf>
-                  mul r2.z, r2.z, r2.z
-                  div r2.z, cb0[39].x, r2.z  // CalcSphericAttenuation<0:NaN:Inf>
+                  and r1.w, r1.w, r3.z  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 104
-                  and r2.z, r2.z, r3.x  // CalcSphericAttenuation<0:NaN:Inf>
+                #line 276
+                  mad r2.w, -r2.w, l(57.295780), l(1.000000)
+                  add r3.y, -cb0[40].w, l(1.000000)
+                  div r2.w, r2.w, r3.y
+                  add r2.w, -r2.w, l(1.000000)  // attenuationS<0:NaN:Inf>
+                  mul r1.w, r1.w, r2.w
+                  mul r0.xyz, r0.xyzx, r1.wwww  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 279
-                  mad r2.x, -r2.x, l(57.295780), l(1.000000)
-                  add r2.w, -cb0[40].w, l(1.000000)
-                  div r2.x, r2.x, r2.w
-                  add r2.x, -r2.x, l(1.000000)  // attenuationS<0:NaN:Inf>
-                  mul r2.x, r2.x, r2.z
-                  mul r0.xyzw, r0.xyzw, r2.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 260
+                  and r0.xyz, r0.xyzx, r3.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 263
-                  and r0.xyzw, r0.xyzw, r2.yyyy  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
-                
-                #line 343
-                  add r1.xyzw, r0.xyzw, r1.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 340
+                  add r2.xyz, r0.xyzx, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 
-                #line 48 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
+                #line 49 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 lt r0.x, l(0.000000), cb0[42].y
-                add r0.yzw, -v1.xxyz, cb0[4].xxyz  // toEyeWorld<0:Inf,1:Inf,2:Inf>
-                dp3 r0.y, r0.yzwy, r0.yzwy
+                dp3 r0.y, r1.xyzx, r1.xyzx
                 sqrt r0.y, r0.y  // distToEye<0:NaN:Inf>
                 
-                #line 137 "IncLights.fx"
+                #line 135 "IncLights.fx"
                 add r0.y, r0.y, -cb0[42].x
                 div_sat r0.y, r0.y, cb0[42].y  // fogLerp<0:[0f,1f]>
-                add r2.xyzw, -r1.xyzw, cb0[43].xyzw
-                mad r2.xyzw, r0.yyyy, r2.xyzw, r1.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                add r1.xyz, -r2.xyzx, cb0[43].xyzx
+                mad r1.xyz, r0.yyyy, r1.xyzx, r2.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 48 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
-                movc o0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // PSForwardCubic<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 49 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
+                movc o0.xyz, r0.xxxx, r1.xyzx, r2.xyzx  // PSForwardCubic<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 56
+                mov o0.w, r0.w  // PSForwardCubic<3:Inf>
                 ret 
-                // Approximately 316 instruction slots used
+                // Approximately 310 instruction slots used
                             
             };
         }
@@ -898,18 +890,18 @@ fxgroup
                 dcl_output o2.xyzw
                 dcl_output o3.xyzw
                 
-                #line 63 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
+                #line 62 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 sample_indexable(texturecube)(float,float,float,float) o0.xyzw, v1.xyzx, t0.xyzw, s0  // PSDeferredCubic<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 71
+                #line 70
                 mov o1.xyzw, l(0,0,0,0)  // PSDeferredCubic<4: 0f,5: 0f,6: 0f,7: 0f>
                 
-                #line 68
+                #line 67
                 div o2.w, v0.z, v0.w  // PSDeferredCubic<11:NaN:Inf>
                 
-                #line 71
+                #line 70
                 mov o2.xyz, v1.xyzx  // PSDeferredCubic<8,9,10>
-                mov o3.xyzw, l(0,0,0,0)  // PSDeferredCubic<12: 0f,13: 0f,14: 0f,15: 0f>
+                mov o3.xyzw, l(0,0,0,1.000000)  // PSDeferredCubic<12: 0f,13: 0f,14: 0f,15: 1f>
                 ret 
                 // Approximately 6 instruction slots used
                             

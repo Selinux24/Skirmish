@@ -487,7 +487,11 @@ namespace DeferredTest
             {
                 this.helicopter.TextureIndex++;
 
-                if (this.helicopter.TextureIndex > 2) this.helicopter.TextureIndex = 0;
+                if (this.helicopter.TextureIndex >= this.helicopter.TextureCount)
+                {
+                    //Loop
+                    this.helicopter.TextureIndex = 0;
+                }
             }
 
             #endregion

@@ -281,10 +281,10 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 4
                 
-                #line 93 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 91 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r0.xyzw, v1.xyxx, t3.xyzw, s0  // shadow<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 129 "IncLights.fx"
+                #line 127 "IncLights.fx"
                 add r1.xyzw, r0.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
                 sample_c_lz_indexable(texture2d)(float,float,float,float) r1.x, r1.xyxx, t4.xxxx, s1, r0.z  // percentLit<0:[0f,1f]>
                 sample_c_lz_indexable(texture2d)(float,float,float,float) r1.y, r1.zwzz, t4.xxxx, s1, r0.z
@@ -307,19 +307,22 @@ fxgroup
                 add r0.x, r0.x, r1.x  // percentLit<0:[0f,8f]>
                 add r0.x, r0.y, r0.x  // percentLit<0:[0f,9f]>
                 
-                #line 91 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 131
+                mul r0.x, r0.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
+                
+                #line 89 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r1.xyz, v1.xyxx, t2.xyzw, s0  // depth<0:Inf,1:Inf,2:Inf>
                 
-                #line 95
+                #line 93
                 add r1.xyz, -r1.xyzx, cb0[8].xyzx
                 dp3 r0.y, r1.xyzx, r1.xyzx
                 rsq r0.y, r0.y
                 mul r1.xyz, r0.yyyy, r1.xyzx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 92
+                #line 90
                 sample_indexable(texture2d)(float,float,float,float) r2.xyzw, v1.xyxx, t1.xyzw, s0  // normal<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 164 "IncLights.fx"
+                #line 162 "IncLights.fx"
                 dp3 r0.y, cb0[10].yzwy, r2.xyzx
                 add r0.y, r0.y, r0.y
                 mad r3.xyz, r2.xyzx, -r0.yyyy, cb0[10].yzwy
@@ -329,62 +332,54 @@ fxgroup
                 dp3 r0.y, r1.xyzx, r3.xyzx
                 max r0.y, r0.y, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 170
+                #line 168
                 log r0.z, r0.y
                 lt r0.y, l(0.000000), r0.y
                 max r1.x, r2.w, l(1.000000)
                 
-                #line 158
+                #line 156
                 dp3 r1.y, r2.xyzx, -cb0[10].yzwy
                 max r1.y, r1.y, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 170
+                #line 168
                 mul r0.z, r0.z, r1.x
                 exp r0.z, r0.z  // specularFactor<0:NaN:Inf>
                 mul r0.z, r0.z, r0.w  // specular<0:NaN:Inf>
                 
-                #line 168
+                #line 166
                 and r2.y, r0.z, r0.y  // specular<0:NaN:Inf>
                 
-                #line 160
+                #line 158
                 lt r0.y, l(0.000000), r1.y
                 mul r2.x, r1.y, cb0[10].x  // diffuse<0:NaN:Inf>
                 and r0.yz, r2.xxyx, r0.yyyy  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 175
+                #line 173
                 add r0.y, r0.y, cb0[9].w
                 add r0.y, r0.z, r0.y
                 
-                #line 90 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 88 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t0.xyzw, s0  // diffuseColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 175 "IncLights.fx"
+                #line 173 "IncLights.fx"
                 mul r1.xyz, r1.xyzx, cb0[9].xyzx
                 
-                #line 108 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 106 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 mov o0.w, r1.w  // PSDirectionalLight<3:Inf>
                 
-                #line 175 "IncLights.fx"
+                #line 173 "IncLights.fx"
                 mul r0.yzw, r0.yyyy, r1.xxyz  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                log r0.yzw, r0.yyzw
                 
-                #line 133
-                mul r0.xyzw, r0.xyzw, l(0.111111, 0.454545, 0.454545, 0.454545)  // CalcShadowFactor<0:[0f,1f]>
+                #line 206
+                mul r1.xyz, r0.xxxx, r0.yzwy  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 176
-                exp r0.yzw, r0.yyzw
-                min r0.yzw, r0.yyzw, l(0.000000, 1.000000, 1.000000, 1.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
-                
-                #line 209
-                mul r1.xyz, r0.xxxx, r0.yzwy  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
-                
-                #line 205
+                #line 202
                 eq r0.x, cb0[11].x, l(1.000000)
-                movc o0.xyz, r0.xxxx, r1.xyzx, r0.yzwy  // PSDirectionalLight<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
+                movc o0.xyz, r0.xxxx, r1.xyzx, r0.yzwy  // PSDirectionalLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 108 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 106 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 ret 
-                // Approximately 62 instruction slots used
+                // Approximately 59 instruction slots used
                             
             };
         }
@@ -618,112 +613,113 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 5
                 
-                #line 114 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 110 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 div r0.xy, v2.xyxx, v2.wwww  // input<7:NaN:Inf,8:NaN:Inf>
                 
-                #line 118
+                #line 114
                 mov r0.z, -r0.y
                 add r0.xy, r0.xzxx, l(1.000000, 1.000000, 0.000000, 0.000000)
                 mul r0.xy, r0.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000)  // tex<0:NaN:Inf,1:NaN:Inf>
                 
-                #line 122
+                #line 118
                 sample_indexable(texture2d)(float,float,float,float) r1.xyz, r0.xyxx, t2.xyzw, s0  // depth<0:Inf,1:Inf,2:Inf>
                 
-                #line 125
+                #line 121
                 add r2.xyz, -r1.xyzx, cb0[8].xyzx
                 
-                #line 224 "IncLights.fx"
+                #line 221 "IncLights.fx"
                 add r1.xyz, r1.xyzx, -cb0[13].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                 
-                #line 125 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 121 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 dp3 r0.z, r2.xyzx, r2.xyzx
                 rsq r0.z, r0.z
                 mul r2.xyz, r0.zzzz, r2.xyzx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 225 "IncLights.fx"
+                #line 222 "IncLights.fx"
                 dp3 r0.z, r1.xyzx, r1.xyzx
                 sqrt r0.z, r0.z  // distance<0:NaN:Inf>
                 div r1.xyz, r1.xyzx, r0.zzzz  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 121 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 117 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r3.xyzw, r0.xyxx, t1.xyzw, s0  // normal<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 164 "IncLights.fx"
+                #line 162 "IncLights.fx"
                 dp3 r0.w, r1.xyzx, r3.xyzx
                 add r0.w, r0.w, r0.w
                 mad r4.xyz, r3.xyzx, -r0.wwww, r1.xyzx
                 
-                #line 158
+                #line 156
                 dp3 r0.w, r3.xyzx, -r1.xyzx
                 
-                #line 170
+                #line 168
                 max r1.x, r3.w, l(1.000000)
                 
-                #line 158
+                #line 156
                 max r0.w, r0.w, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 164
+                #line 162
                 dp3 r1.y, r4.xyzx, r4.xyzx
                 rsq r1.y, r1.y
                 mul r1.yzw, r1.yyyy, r4.xxyz  // lightReflection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 dp3 r1.y, r2.xyzx, r1.yzwy
                 max r1.y, r1.y, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 170
+                #line 168
                 log r1.z, r1.y
                 lt r1.y, l(0.000000), r1.y
                 mul r1.x, r1.z, r1.x
                 exp r1.x, r1.x  // specularFactor<0:NaN:Inf>
                 
-                #line 123 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 119 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r1.z, r0.xyxx, t3.xywz, s0  // shadow<3:Inf>
                 
-                #line 120
+                #line 116
                 sample_indexable(texture2d)(float,float,float,float) r2.xyzw, r0.xyxx, t0.xyzw, s0  // diffuseColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 171 "IncLights.fx"
+                #line 169 "IncLights.fx"
                 mul r0.x, r1.x, r1.z  // specular<0:NaN:Inf>
                 
-                #line 168
+                #line 166
                 and r0.y, r0.x, r1.y  // specular<0:NaN:Inf>
                 
-                #line 160
+                #line 158
                 lt r1.x, l(0.000000), r0.w
                 mul r0.x, r0.w, cb0[13].x  // diffuse<0:NaN:Inf>
                 and r0.xy, r0.xyxx, r1.xxxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 175
+                #line 173
                 add r0.x, r0.x, cb0[12].w
                 add r0.x, r0.y, r0.x
                 mul r1.xyz, r2.xyzx, cb0[12].xyzx
+                
+                #line 132 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                mov o0.w, r2.w  // PSPointLight<3:Inf>
+                
+                #line 173 "IncLights.fx"
                 mul r0.xyw, r0.xxxx, r1.xyxz  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                log r0.xyw, r0.xyxw
-                mul r0.xyw, r0.xyxw, l(0.454545, 0.454545, 0.000000, 0.454545)
-                exp r0.xyw, r0.xyxw
-                min r2.xyz, r0.xywx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
                 
-                #line 102
-                div r0.x, r0.z, cb0[14].x  // f<0:NaN:Inf>
-                mad r0.x, -r0.x, r0.x, l(1.000000)  // denom<0:NaN:Inf>
-                
-                #line 106
-                div r0.y, r0.z, r0.x  // d<0:NaN:Inf>
-                lt r0.x, l(0.000000), r0.x
-                
-                #line 107
-                add r0.y, r0.y, l(1.000000)  // dn<0:NaN:Inf>
-                mul r0.y, r0.y, r0.y
-                div r0.y, cb0[13].x, r0.y  // CalcSphericAttenuation<0:NaN:Inf>
+                #line 100
+                div r1.x, r0.z, cb0[14].x  // f<0:NaN:Inf>
+                mad r1.x, -r1.x, r1.x, l(1.000000)  // denom<0:NaN:Inf>
                 
                 #line 104
-                and r0.x, r0.y, r0.x  // CalcSphericAttenuation<0:NaN:Inf>
+                div r0.z, r0.z, r1.x  // d<0:NaN:Inf>
+                lt r1.x, l(0.000000), r1.x
                 
-                #line 242
-                mul o0.xyzw, r0.xxxx, r2.xyzw  // PSPointLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 105
+                add r0.z, r0.z, l(1.000000)  // dn<0:NaN:Inf>
+                mul r0.z, r0.z, r0.z
+                div r0.z, cb0[13].x, r0.z  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 136 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 102
+                and r0.z, r0.z, r1.x  // CalcSphericAttenuation<0:NaN:Inf>
+                
+                #line 239
+                mul o0.xyz, r0.zzzz, r0.xywx  // PSPointLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 132 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 ret 
-                // Approximately 54 instruction slots used
+                // Approximately 51 instruction slots used
                             
             };
         }
@@ -957,37 +953,37 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 5
                 
-                #line 142 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 136 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 div r0.xy, v2.xyxx, v2.wwww  // input<7:NaN:Inf,8:NaN:Inf>
                 
-                #line 146
+                #line 140
                 mov r0.z, -r0.y
                 add r0.xy, r0.xzxx, l(1.000000, 1.000000, 0.000000, 0.000000)
                 mul r0.xy, r0.xyxx, l(0.500000, 0.500000, 0.000000, 0.000000)  // tex<0:NaN:Inf,1:NaN:Inf>
                 
-                #line 150
+                #line 144
                 sample_indexable(texture2d)(float,float,float,float) r1.xyz, r0.xyxx, t2.xyzw, s0  // depth<0:Inf,1:Inf,2:Inf>
                 
-                #line 153
+                #line 147
                 add r2.xyz, -r1.xyzx, cb0[8].xyzx
                 
-                #line 256 "IncLights.fx"
+                #line 253 "IncLights.fx"
                 add r1.xyz, r1.xyzx, -cb0[16].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                 
-                #line 153 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 147 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 dp3 r0.z, r2.xyzx, r2.xyzx
                 rsq r0.z, r0.z
                 mul r2.xyz, r0.zzzz, r2.xyzx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 257 "IncLights.fx"
+                #line 254 "IncLights.fx"
                 dp3 r0.z, r1.xyzx, r1.xyzx
                 sqrt r0.z, r0.z  // distance<0:NaN:Inf>
                 div r1.xyz, r1.xyzx, r0.zzzz  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 149 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 143 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r3.xyzw, r0.xyxx, t1.xyzw, s0  // normal<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 164 "IncLights.fx"
+                #line 162 "IncLights.fx"
                 dp3 r0.w, r1.xyzx, r3.xyzx
                 add r0.w, r0.w, r0.w
                 mad r4.xyz, r3.xyzx, -r0.wwww, r1.xyzx
@@ -997,99 +993,100 @@ fxgroup
                 dp3 r0.w, r2.xyzx, r4.xyzx
                 max r0.w, r0.w, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 170
+                #line 168
                 log r1.w, r0.w
                 lt r0.w, l(0.000000), r0.w
                 max r2.x, r3.w, l(1.000000)
                 
-                #line 158
+                #line 156
                 dp3 r2.y, r3.xyzx, -r1.xyzx
                 
-                #line 260
+                #line 257
                 dp3 r1.x, r1.xyzx, cb0[17].xyzx  // spotFactor<0:NaN:Inf>
                 
-                #line 158
+                #line 156
                 max r1.y, r2.y, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                 
-                #line 170
+                #line 168
                 mul r1.z, r1.w, r2.x
                 exp r1.z, r1.z  // specularFactor<0:NaN:Inf>
                 
-                #line 151 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 145 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r1.w, r0.xyxx, t3.xyzw, s0  // shadow<3:Inf>
                 
-                #line 148
+                #line 142
                 sample_indexable(texture2d)(float,float,float,float) r2.xyzw, r0.xyxx, t0.xyzw, s0  // diffuseColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 171 "IncLights.fx"
+                #line 169 "IncLights.fx"
                 mul r0.x, r1.z, r1.w  // specular<0:NaN:Inf>
                 
-                #line 168
+                #line 166
                 and r0.y, r0.x, r0.w  // specular<0:NaN:Inf>
                 
-                #line 160
+                #line 158
                 lt r0.w, l(0.000000), r1.y
                 mul r0.x, r1.y, cb0[16].x  // diffuse<0:NaN:Inf>
                 and r0.xy, r0.xyxx, r0.wwww  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 175
+                #line 173
                 add r0.x, r0.x, cb0[15].w
                 add r0.x, r0.y, r0.x
                 mul r1.yzw, r2.xxyz, cb0[15].xxyz
+                
+                #line 158 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                mov o0.w, r2.w  // PSSpotLight<3:Inf>
+                
+                #line 173 "IncLights.fx"
                 mul r0.xyw, r0.xxxx, r1.yzyw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
-                log r0.xyw, r0.xyxw
-                mul r0.xyw, r0.xyxw, l(0.454545, 0.454545, 0.000000, 0.454545)
-                exp r0.xyw, r0.xyxw
-                min r2.xyz, r0.xywx, l(1.000000, 1.000000, 1.000000, 0.000000)  // litColor<0:[0f,1f],1:[0f,1f],2:[0f,1f]>
                 
-                #line 102
-                div r0.x, r0.z, cb0[18].x  // f<0:NaN:Inf>
-                mad r0.x, -r0.x, r0.x, l(1.000000)  // denom<0:NaN:Inf>
-                
-                #line 106
-                div r0.y, r0.z, r0.x  // d<0:NaN:Inf>
-                lt r0.x, l(0.000000), r0.x
-                
-                #line 107
-                add r0.y, r0.y, l(1.000000)  // dn<0:NaN:Inf>
-                mul r0.y, r0.y, r0.y
-                div r0.y, cb0[16].x, r0.y  // CalcSphericAttenuation<0:NaN:Inf>
+                #line 100
+                div r1.y, r0.z, cb0[18].x  // f<0:NaN:Inf>
+                mad r1.y, -r1.y, r1.y, l(1.000000)  // denom<0:NaN:Inf>
                 
                 #line 104
-                and r0.x, r0.y, r0.x  // CalcSphericAttenuation<0:NaN:Inf>
+                div r0.z, r0.z, r1.y  // d<0:NaN:Inf>
+                lt r1.y, l(0.000000), r1.y
                 
-                #line 261
-                mad r0.y, |r1.x|, l(-0.018729), l(0.074261)
-                mad r0.y, r0.y, |r1.x|, l(-0.212114)
-                mad r0.y, r0.y, |r1.x|, l(1.570729)
-                add r0.z, -|r1.x|, l(1.000000)
-                lt r0.w, r1.x, -r1.x
-                sqrt r0.z, r0.z
-                mul r1.x, r0.z, r0.y
-                mad r1.x, r1.x, l(-2.000000), l(3.141593)
-                and r0.w, r0.w, r1.x
-                mad r0.y, r0.y, r0.z, r0.w
+                #line 105
+                add r0.z, r0.z, l(1.000000)  // dn<0:NaN:Inf>
+                mul r0.z, r0.z, r0.z
+                div r0.z, cb0[16].x, r0.z  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 279
-                mad r0.z, -r0.y, l(57.295780), l(1.000000)
+                #line 102
+                and r0.z, r0.z, r1.y  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 261
-                mul r0.y, r0.y, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
-                ge r0.y, cb0[17].w, r0.y
+                #line 258
+                mad r1.y, |r1.x|, l(-0.018729), l(0.074261)
+                mad r1.y, r1.y, |r1.x|, l(-0.212114)
+                mad r1.y, r1.y, |r1.x|, l(1.570729)
+                add r1.z, -|r1.x|, l(1.000000)
+                lt r1.x, r1.x, -r1.x
+                sqrt r1.z, r1.z
+                mul r1.w, r1.z, r1.y
+                mad r1.w, r1.w, l(-2.000000), l(3.141593)
+                and r1.x, r1.x, r1.w
+                mad r1.x, r1.y, r1.z, r1.x
                 
-                #line 279
-                add r0.w, -cb0[17].w, l(1.000000)
-                div r0.z, r0.z, r0.w
-                add r0.z, -r0.z, l(1.000000)  // attenuationS<0:NaN:Inf>
-                mul r0.x, r0.z, r0.x
-                mul r1.xyzw, r0.xxxx, r2.xyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 276
+                mad r1.y, -r1.x, l(57.295780), l(1.000000)
                 
-                #line 263
-                and o0.xyzw, r0.yyyy, r1.xyzw  // PSSpotLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 258
+                mul r1.x, r1.x, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
+                ge r1.x, cb0[17].w, r1.x
                 
-                #line 164 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 276
+                add r1.z, -cb0[17].w, l(1.000000)
+                div r1.y, r1.y, r1.z
+                add r1.y, -r1.y, l(1.000000)  // attenuationS<0:NaN:Inf>
+                mul r0.z, r0.z, r1.y
+                mul r0.xyz, r0.zzzz, r0.xywx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 260
+                and o0.xyz, r0.xyzx, r1.xxxx  // PSSpotLight<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 158 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 ret 
-                // Approximately 73 instruction slots used
+                // Approximately 70 instruction slots used
                             
             };
         }
@@ -1308,34 +1305,35 @@ fxgroup
                 dcl_resource_texture2d (float,float,float,float) t5
                 dcl_input_ps linear v1.xy
                 dcl_output o0.xyzw
-                dcl_temps 3
+                dcl_temps 2
                 
-                #line 168 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                #line 162 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 sample_indexable(texture2d)(float,float,float,float) r0.xyz, v1.xyxx, t2.xyzw, s0  // depth<0:Inf,1:Inf,2:Inf>
                 
-                #line 173
+                #line 169
                 add r0.xyz, -r0.xyzx, cb0[8].xyzx  // toEyeWorld<0:Inf,1:Inf,2:Inf>
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // distToEye<0:NaN:Inf>
                 
-                #line 137 "IncLights.fx"
+                #line 135 "IncLights.fx"
                 add r0.x, r0.x, -cb0[19].x
                 div_sat r0.x, r0.x, cb0[19].y  // fogLerp<0:[0f,1f]>
                 
-                #line 169 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t5.xyzw, s0  // litColor<0:Inf,1:Inf,2:Inf,3:Inf>
+                #line 163 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                sample_indexable(texture2d)(float,float,float,float) r1.xyzw, v1.xyxx, t5.xyzw, s0  // color<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 139 "IncLights.fx"
-                add r2.xyzw, -r1.xyzw, cb0[20].xyzw
-                mad r0.xyzw, r0.xxxx, r2.xyzw, r1.xyzw  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 137 "IncLights.fx"
+                add r0.yzw, -r1.xxyz, cb0[20].xxyz
+                mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 171 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
-                lt r2.x, l(0.000000), cb0[19].y
-                movc o0.xyzw, r2.xxxx, r0.xyzw, r1.xyzw  // PSCombineLights<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf,3:NaN:Inf>
+                #line 167 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
+                lt r0.w, l(0.000000), cb0[19].y
+                movc o0.xyz, r0.wwww, r0.xyzx, r1.xyzx  // PSCombineLights<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 179
+                #line 175
+                mov o0.w, r1.w  // PSCombineLights<3:Inf>
                 ret 
-                // Approximately 12 instruction slots used
+                // Approximately 13 instruction slots used
                             
             };
         }

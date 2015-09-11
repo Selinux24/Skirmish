@@ -18,8 +18,8 @@ namespace Engine
                 {
                     Name = "Primary",
                     LightColor = Color.White,
-                    AmbientIntensity = 0.1f,
-                    DiffuseIntensity = 0.5f,
+                    AmbientIntensity = 0.40f,
+                    DiffuseIntensity = 0.60f,
                     Direction = Vector3.Normalize(new Vector3(0.57735f, -0.57735f, 0.57735f)),
                     Enabled = true,
                 };
@@ -35,9 +35,9 @@ namespace Engine
                 return new SceneLightDirectional()
                 {
                     Name = "Secondary",
-                    LightColor = Color.Yellow,
-                    AmbientIntensity = 0.02f,
-                    DiffuseIntensity = 0.05f,
+                    LightColor = Color.CornflowerBlue,
+                    AmbientIntensity = 0.15f,
+                    DiffuseIntensity = 0.35f,
                     Direction = Vector3.Normalize(new Vector3(-0.57735f, -0.57735f, 0.57735f)),
                     Enabled = true,
                 };
@@ -53,9 +53,9 @@ namespace Engine
                 return new SceneLightDirectional()
                 {
                     Name = "Tertiary",
-                    LightColor = Color.LightBlue,
+                    LightColor = Color.Yellow,
                     AmbientIntensity = 0.01f,
-                    DiffuseIntensity = 0.01f,
+                    DiffuseIntensity = 0.05f,
                     Direction = Vector3.Normalize(new Vector3(-0.57735f, -0.57735f, -0.57735f)),
                     Enabled = true,
                 };

@@ -199,6 +199,11 @@ namespace Engine.Common
         /// Datos de animación
         /// </summary>
         protected SkinningData SkinningData = null;
+        
+        /// <summary>
+        /// Gets the texture count for texture index
+        /// </summary>
+        public int TextureCount { get; private set; }
 
         #region Static Helpers
 
@@ -281,6 +286,9 @@ namespace Engine.Common
                     if (view != null)
                     {
                         this.Textures.Add(images, view);
+
+                        //Set the maximum texture index in the model
+                        if (info.Count > this.TextureCount) this.TextureCount = info.Count;
                     }
                 }
             }

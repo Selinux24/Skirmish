@@ -121,14 +121,15 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
 	clip(textureColor.a - 0.05f);
 
-	float3 toEye = normalize(gEyePositionWorld - input.positionWorld);
+	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+	float3 toEye = normalize(toEyeWorld);
 
-	float4 litColor = ComputeAllLights(
+	float3 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
 		toEye,
-		textureColor,
+		textureColor.rgb,
 		input.positionWorld,
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
@@ -138,13 +139,12 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 
 	if(gFogRange > 0)
 	{
-		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 		float distToEye = length(toEyeWorld);
 
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return litColor;
+	return float4(litColor, textureColor.a);
 }
 GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 {

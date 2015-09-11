@@ -26,8 +26,6 @@ SamplerComparisonState SamplerComparisonShadow
     ComparisonFunc = LESS;
 };
 
-static const float3 GAMMA = float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f);
-
 static const int MAX_LIGHTS_DIRECTIONAL = 3;
 static const int MAX_LIGHTS_POINT = 4;
 static const int MAX_LIGHTS_SPOT = 4;
@@ -132,20 +130,20 @@ float CalcShadowFactor(float4 shadowPosH, Texture2D shadowMap)
 	// Average the samples.
 	return percentLit / 9.0f;
 }
-float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRange, float4 fogColor)
+float3 ComputeFog(float3 litColor, float distToEye, float fogStart, float fogRange, float3 fogColor)
 {
 	float fogLerp = saturate((distToEye - fogStart) / fogRange);
 
 	return lerp(litColor, fogColor, fogLerp);
 }
 
-float4 ComputeBaseLight(
+float3 ComputeBaseLight(
 	float3 lightColor,
 	float lightAmbient,
 	float lightDiffuse,
 	float3 lightDirection,
 	float3 toEye,
-	float4 modelColor,
+	float3 modelColor,
 	float3 modelPosition,
 	float3 modelNormal,
 	float specularIntensity,
@@ -172,16 +170,15 @@ float4 ComputeBaseLight(
         }
 	}
 
-    float3 litColor = modelColor.rgb * lightColor * (ambient + diffuse + specular);
-	litColor = saturate(pow(litColor, GAMMA));
+    float3 litColor = modelColor * lightColor * (ambient + diffuse + specular);
 
-	return float4(litColor, modelColor.a);
+	return litColor;
 }
 
-float4 ComputeDirectionalLight(
+float3 ComputeDirectionalLight(
 	DirectionalLight L,
 	float3 toEye,
-	float4 color,
+	float3 color,
 	float3 position,
 	float3 normal,
 	float specularIntensity,
@@ -189,7 +186,7 @@ float4 ComputeDirectionalLight(
 	float4 shadowPosition,
 	Texture2D shadowMap)
 {
-	float4 litColor = ComputeBaseLight(
+	float3 litColor = ComputeBaseLight(
 		L.Color,
 		L.Ambient,
 		L.Diffuse,
@@ -206,16 +203,16 @@ float4 ComputeDirectionalLight(
 	{
 		float shadowFactor = CalcShadowFactor(shadowPosition, shadowMap);
 
-		litColor = float4(litColor.rgb * shadowFactor, litColor.a);
+		litColor *= shadowFactor;
 	}
 
 	return litColor;
 }
 
-float4 ComputePointLight(
+float3 ComputePointLight(
 	PointLight L, 
 	float3 toEye,
-	float4 color,
+	float3 color,
 	float3 position,
 	float3 normal, 
 	float specularIntensity,
@@ -225,7 +222,7 @@ float4 ComputePointLight(
 	float distance = length(lightDirection);
 	lightDirection /= distance;
 
-	float4 litColor = ComputeBaseLight(
+	float3 litColor = ComputeBaseLight(
 		L.Color,
 		L.Ambient,
 		L.Diffuse,
@@ -242,16 +239,16 @@ float4 ComputePointLight(
 	return litColor * attenuation;
 }
 
-float4 ComputeSpotLight(
+float3 ComputeSpotLight(
 	SpotLight L,
 	float3 toEye,
-	float4 color,
+	float3 color,
 	float3 position,
 	float3 normal, 
 	float specularIntensity,
 	float specularPower)
 {
-	float4 litColor = 0;
+	float3 litColor = 0;
 
 	float3 lightDirection = position - L.Position;
 	float distance = length(lightDirection);
@@ -284,12 +281,12 @@ float4 ComputeSpotLight(
 	return litColor;
 }
 
-float4 ComputeAllLights(
+float3 ComputeAllLights(
 	DirectionalLight dirLights[MAX_LIGHTS_DIRECTIONAL],
 	PointLight pointLights[MAX_LIGHTS_POINT],
 	SpotLight spotLights[MAX_LIGHTS_SPOT],
 	float3 toEye,
-	float4 color,
+	float3 color,
 	float3 position,
 	float3 normal,
 	float specularIntensity,
@@ -297,7 +294,7 @@ float4 ComputeAllLights(
 	float4 shadowPosition,
 	Texture2D shadowMap)
 {
-	float4 litColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float3 litColor = 0;
 
 	int i;
 

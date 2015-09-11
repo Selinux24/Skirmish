@@ -85,8 +85,6 @@ PSCombineLightsInput VSCombineLights(VSVertexPositionTexture input)
 
 float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 {
-	float4 litColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
     float4 diffuseColor = gTG1Map.Sample(SamplerPoint, input.tex); //Color
     float4 depth = gTG3Map.Sample(SamplerPoint, input.tex); //Depth
     float4 normal = gTG2Map.Sample(SamplerPoint, input.tex); //Normal
@@ -94,10 +92,10 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 
 	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
 
-	litColor = ComputeDirectionalLight(
+	float3 litColor = ComputeDirectionalLight(
 		gDirLight,
 		toEye,
-		diffuseColor,
+		diffuseColor.rgb,
 		depth.xyz,
 		normal.xyz,
 		shadow.w,
@@ -105,12 +103,10 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 		float4(shadow.xyz, 1),
 		gShadowMap);
 
-	return litColor;
+	return float4(litColor, diffuseColor.a);
 }
 float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 {
-	float4 litColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
 	input.positionScreen.xy /= input.positionScreen.w;
 
 	//Get texture coordinates
@@ -124,21 +120,19 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	
 	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
 
-	litColor = ComputePointLight(
+	float3 litColor = ComputePointLight(
 		gPointLight,
 		toEye,
-		diffuseColor,
+		diffuseColor.rgb,
 		depth.xyz,
 		normal.xyz,
 		shadow.w,
 		normal.w);
 
-	return litColor;
+	return float4(litColor, diffuseColor.a);
 }
 float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 {
-	float4 litColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
 	input.positionScreen.xy /= input.positionScreen.w;
 
 	//Get texture coordinates
@@ -152,31 +146,33 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	
 	float3 toEye = normalize(gEyePositionWorld - depth.xyz);
 
-	litColor = ComputeSpotLight(
+	float3 litColor = ComputeSpotLight(
 		gSpotLight,
 		toEye,
-		diffuseColor,
+		diffuseColor.rgb,
 		depth.xyz,
 		normal.xyz,
 		shadow.w,
 		normal.w);
 
-	return litColor;
+	return float4(litColor, diffuseColor.a);
 }
 float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 {
     float4 depth = gTG3Map.Sample(SamplerPoint, input.tex);
-	float4 litColor = gLightMap.Sample(SamplerPoint, input.tex);
+	float4 color = gLightMap.Sample(SamplerPoint, input.tex);
+
+	float3 litColor = color.rgb;
 
 	if(gFogRange > 0)
 	{
 		float3 toEyeWorld = gEyePositionWorld - depth.xyz;
 		float distToEye = length(toEyeWorld);
 
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return litColor;
+	return float4(litColor, color.a);
 }
 
 technique11 DeferredDirectionalLight

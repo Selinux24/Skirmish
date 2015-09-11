@@ -83,7 +83,7 @@ namespace Engine.Content
         {
             get
             {
-                return 
+                return
                     (this.paths != null && this.paths.Length > 1) ||
                     (this.streams != null && this.streams.Length > 1);
             }
@@ -96,6 +96,23 @@ namespace Engine.Content
         /// Cubic face size
         /// </summary>
         public int CubicFaceSize { get; set; }
+        /// <summary>
+        /// Gets the image count into the image content
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                if (this.paths != null || this.streams != null)
+                {
+                    return this.paths != null ? this.paths.Length : this.streams.Length;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
 
         /// <summary>
         /// Creates a unique texture image
@@ -243,9 +260,17 @@ namespace Engine.Content
             {
                 return string.Format("Path: {0}; ", this.Path);
             }
+            if (this.Paths != null && this.Paths.Length > 0)
+            {
+                return string.Format("Path array: {0}; ", this.Paths.Length);
+            }
             else if (this.Stream != null)
             {
                 return string.Format("Stream: {0} bytes; ", this.Stream.Length);
+            }
+            else if (this.Streams != null && this.Streams.Length > 0)
+            {
+                return string.Format("Stream array: {0}; ", this.Streams.Length);
             }
             else
             {

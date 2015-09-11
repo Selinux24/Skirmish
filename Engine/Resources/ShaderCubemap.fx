@@ -30,31 +30,30 @@ float4 PSForwardCubic(PSVertexPosition input) : SV_Target
 {
     float4 textureColor = gCubemap.Sample(SamplerLinear, input.positionLocal);
 
-	float3 toEye = normalize(gEyePositionWorld - input.positionLocal);
+	float3 toEyeWorld = gEyePositionWorld - input.positionLocal;
+	float3 toEye = normalize(toEyeWorld);
 
-	float4 litColor = ComputeAllLights(
+	float3 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
 		toEye,
-		textureColor,
+		textureColor.rgb,
 		input.positionLocal,
 		float3(0.0f, 0.0f, 0.0f),
 		0.0f,
 		0.0f,
-		float4(0.0f, 0.0f, 0.0f, 0.0f),
+		float4(0.0f, 0.0f, 0.0f, 1.0f),
 		gShadowMap);
 
 	if(gFogRange > 0)
 	{
-		float3 toEyeWorld = gEyePositionWorld - input.positionLocal;
 		float distToEye = length(toEyeWorld);
 
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return litColor;
-
+	return float4(litColor, textureColor.a);
 }
 GBufferPSOutput PSDeferredCubic(PSVertexPosition input)
 {
@@ -66,7 +65,7 @@ GBufferPSOutput PSDeferredCubic(PSVertexPosition input)
 	output.normal = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	output.depth.xyz = input.positionLocal;
 	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	output.shadow = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	output.shadow = float4(0.0f, 0.0f, 0.0f, 1.0f);
 
     return output;
 }
