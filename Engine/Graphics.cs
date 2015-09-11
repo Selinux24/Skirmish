@@ -611,7 +611,7 @@ namespace Engine
             #region Default blend state (No alpha)
             {
                 BlendStateDescription desc = new BlendStateDescription();
-                desc.AlphaToCoverageEnable = true;
+                desc.AlphaToCoverageEnable = false;
                 desc.IndependentBlendEnable = false;
 
                 desc.RenderTarget[0].IsBlendEnabled = true;
