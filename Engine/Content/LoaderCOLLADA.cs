@@ -221,10 +221,10 @@ namespace Engine.Content
                         info = new LightContent()
                         {
                             LightType = LightContentTypeEnum.Point,
-                            Color = dirTechnique.Point.Color.ToColor4(),
-                            ConstantAttenuation = dirTechnique.Point.ConstantAttenuation.Value,
-                            LinearAttenuation = dirTechnique.Point.LinearAttenuation.Value,
-                            QuadraticAttenuation = dirTechnique.Point.QuadraticAttenuation.Value,
+                            Color = pointTechnique.Point.Color.ToColor4(),
+                            ConstantAttenuation = pointTechnique.Point.ConstantAttenuation.Value,
+                            LinearAttenuation = pointTechnique.Point.LinearAttenuation.Value,
+                            QuadraticAttenuation = pointTechnique.Point.QuadraticAttenuation.Value,
                         };
                     }
 
@@ -234,12 +234,12 @@ namespace Engine.Content
                         info = new LightContent()
                         {
                             LightType = LightContentTypeEnum.Spot,
-                            Color = dirTechnique.Spot.Color.ToColor4(),
-                            ConstantAttenuation = dirTechnique.Spot.ConstantAttenuation.Value,
-                            LinearAttenuation = dirTechnique.Spot.LinearAttenuation.Value,
-                            QuadraticAttenuation = dirTechnique.Spot.QuadraticAttenuation.Value,
-                            FallOffAngle = dirTechnique.Spot.FalloffAngle.Value,
-                            FallOffExponent = dirTechnique.Spot.FalloffExponent.Value,
+                            Color = spotTechnique.Spot.Color.ToColor4(),
+                            ConstantAttenuation = spotTechnique.Spot.ConstantAttenuation.Value,
+                            LinearAttenuation = spotTechnique.Spot.LinearAttenuation.Value,
+                            QuadraticAttenuation = spotTechnique.Spot.QuadraticAttenuation.Value,
+                            FallOffAngle = spotTechnique.Spot.FalloffAngle.Value,
+                            FallOffExponent = spotTechnique.Spot.FalloffExponent.Value,
                         };
                     }
 
