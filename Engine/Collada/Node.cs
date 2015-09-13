@@ -45,6 +45,14 @@ namespace Engine.Collada
         public Extra[] Extras { get; set; }
 
         [XmlIgnore]
+        public bool IsLight
+        {
+            get
+            {
+                return (this.InstanceLight != null);
+            }
+        }
+        [XmlIgnore]
         public bool IsArmature
         {
             get

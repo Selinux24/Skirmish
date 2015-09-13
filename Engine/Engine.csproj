@@ -317,6 +317,7 @@
     <Compile Include="Common\PriorityQueueItem.cs" />
     <Compile Include="Common\QuadTree.cs" />
     <Compile Include="Common\QuadTreeNode.cs" />
+    <Compile Include="Content\LightContent.cs" />
     <Compile Include="Effects\EffectNull.cs" />
     <Compile Include="SceneRendererResultEnum.cs" />
     <Compile Include="Common\Skeleton.cs" />

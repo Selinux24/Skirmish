@@ -134,7 +134,7 @@ namespace DeferredTest
             this.tank = this.AddModel(new ModelDescription()
             {
                 ContentPath = resources,
-                ModelFileName = "tank.dae",
+                ModelFileName = "leopard.dae",
                 Opaque = true,
             });
             sw.Stop();

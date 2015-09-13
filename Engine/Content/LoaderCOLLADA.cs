@@ -60,6 +60,8 @@ namespace Engine.Content
 
                 #region Scene Objects
 
+                ProcessLibraryLights(dae, modelContent);
+
                 ProcessLibraryImages(dae, modelContent, contentFolder);
                 ProcessLibraryMaterial(dae, modelContent);
 
@@ -85,6 +87,17 @@ namespace Engine.Content
                         {
                             foreach (Node node in vScene.Nodes)
                             {
+                                #region Lights
+
+                                if (node.IsLight)
+                                {
+                                    Matrix trn = node.ReadMatrix();
+
+
+                                }
+
+                                #endregion
+
                                 #region Armatures (Skeletons)
 
                                 if (node.IsArmature)
@@ -179,6 +192,61 @@ namespace Engine.Content
 
         #region Dictionary loaders
 
+        /// <summary>
+        /// Process lightd
+        /// </summary>
+        /// <param name="dae">Dae object</param>
+        /// <param name="modelContent">Model content</param>
+        public static void ProcessLibraryLights(COLLADA dae, ModelContent modelContent)
+        {
+            if (dae.LibraryLights != null && dae.LibraryLights.Length > 0)
+            {
+                foreach (Light light in dae.LibraryLights)
+                {
+                    LightContent info = null;
+
+                    var dirTechnique = Array.Find(light.LightTechniqueCommon, l => l.Directional != null);
+                    if (dirTechnique != null)
+                    {
+                        info = new LightContent()
+                        {
+                            LightType = LightContentTypeEnum.Directional,
+                            Color = dirTechnique.Directional.Color.ToColor4(),
+                        };
+                    }
+
+                    var pointTechnique = Array.Find(light.LightTechniqueCommon, l => l.Point != null);
+                    if (pointTechnique != null)
+                    {
+                        info = new LightContent()
+                        {
+                            LightType = LightContentTypeEnum.Point,
+                            Color = dirTechnique.Point.Color.ToColor4(),
+                            ConstantAttenuation = dirTechnique.Point.ConstantAttenuation.Value,
+                            LinearAttenuation = dirTechnique.Point.LinearAttenuation.Value,
+                            QuadraticAttenuation = dirTechnique.Point.QuadraticAttenuation.Value,
+                        };
+                    }
+
+                    var spotTechnique = Array.Find(light.LightTechniqueCommon, l => l.Spot != null);
+                    if (spotTechnique != null)
+                    {
+                        info = new LightContent()
+                        {
+                            LightType = LightContentTypeEnum.Spot,
+                            Color = dirTechnique.Spot.Color.ToColor4(),
+                            ConstantAttenuation = dirTechnique.Spot.ConstantAttenuation.Value,
+                            LinearAttenuation = dirTechnique.Spot.LinearAttenuation.Value,
+                            QuadraticAttenuation = dirTechnique.Spot.QuadraticAttenuation.Value,
+                            FallOffAngle = dirTechnique.Spot.FalloffAngle.Value,
+                            FallOffExponent = dirTechnique.Spot.FalloffExponent.Value,
+                        };
+                    }
+
+                    modelContent.Lights[light.Id] = info;
+                }
+            }
+        }
         /// <summary>
         /// Process images
         /// </summary>

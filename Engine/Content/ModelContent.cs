@@ -26,6 +26,42 @@ namespace Engine.Content
         #region Classes
 
         /// <summary>
+        /// Lights dictionary by light name
+        /// </summary>
+        [Serializable]
+        public class LightDictionary : Dictionary<string, LightContent>
+        {
+            /// <summary>
+            /// Gets next light name
+            /// </summary>
+            private string NextLightName
+            {
+                get
+                {
+                    return string.Format("_light_{0}_", this.Count + 1);
+                }
+            }
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public LightDictionary()
+                : base()
+            {
+
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected LightDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
+        }
+        /// <summary>
         /// Images dictionary by image name
         /// </summary>
         [Serializable]
@@ -288,6 +324,10 @@ namespace Engine.Content
 
         #endregion
 
+        /// <summary>
+        /// Light dictionary
+        /// </summary>
+        public LightDictionary Lights = new LightDictionary();
         /// <summary>
         /// Texture dictionary
         /// </summary>
