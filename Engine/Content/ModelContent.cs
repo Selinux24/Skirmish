@@ -642,6 +642,43 @@ namespace Engine.Content
 
             return modelContent;
         }
+        /// <summary>
+        /// Generates a new model content from an height map
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="heightMap">Height map</param>
+        /// <param name="transform">Transform to apply to vertices</param>
+        /// <returns>Returns a new model content</returns>
+        public static ModelContent FromHeightmap(string contentFolder, string heightMap, Matrix transform)
+        {
+            ModelContent modelContent = new ModelContent();
+
+            string imageName = "heightmapTexture";
+            string materialName = "heightmapMaterial";
+            string geoName = "heightmapGeometry";
+
+            ImageContent image = new ImageContent()
+            {
+                Streams = ContentManager.FindContent(contentFolder, heightMap),
+            };
+
+            MaterialContent material = MaterialContent.Default;
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = PrimitiveTopology.TriangleList,
+                VertexType = VertexTypes.PositionNormalTexture,
+                Material = materialName,
+                Heightmap = imageName,
+            };
+
+            modelContent.Images.Add(imageName, image);
+            modelContent.Materials.Add(materialName, material);
+            modelContent.Geometry.Add(geoName, materialName, geo);
+            modelContent.Optimize();
+
+            return modelContent;
+        }
 
         /// <summary>
         /// Constructor

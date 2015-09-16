@@ -60,6 +60,10 @@ namespace Engine.Content
         /// Material
         /// </summary>
         public string Material { get; set; }
+        /// <summary>
+        /// Height map
+        /// </summary>
+        public string Heightmap = null;
 
         /// <summary>
         /// Submesh grouping optimization

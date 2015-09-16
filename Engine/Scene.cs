@@ -430,11 +430,27 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Terrain AddTerrain(TerrainDescription description, Matrix transform, bool optimize = true, int order = 0)
         {
-            ModelContent geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
+            ModelContent geo = null;
 
-            if (optimize) geo.Optimize();
+            if (!string.IsNullOrEmpty(description.ModelFileName))
+            {
+                geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
+            }
+            else if (!string.IsNullOrEmpty(description.HeightMapFileName))
+            {
+                geo = ModelContent.FromHeightmap(description.ContentPath, description.HeightMapFileName, transform);
+            }
 
-            return AddTerrain(geo, description, order);
+            if (geo != null)
+            {
+                if (optimize) geo.Optimize();
+
+                return AddTerrain(geo, description, order);
+            }
+            else
+            {
+                throw new ArgumentException("Model or Heightmap file name is mandatory in TerrainDescription");
+            }
         }
         /// <summary>
         /// Adds new terrain model

@@ -431,6 +431,10 @@ namespace Engine
         /// Model file name
         /// </summary>
         public string ModelFileName = null;
+        /// <summary>
+        /// Height map file name
+        /// </summary>
+        public string HeightMapFileName = null;
 
         /// <summary>
         /// Indicates whether the new terrain has vegetation
