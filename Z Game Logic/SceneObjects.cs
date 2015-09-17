@@ -129,10 +129,15 @@ namespace GameLogic
             });
             this.terrain = this.AddTerrain(new TerrainDescription()
             {
-                ModelFileName = "terrain.dae",
+                Model = new TerrainDescription.ModelDescription()
+                {
+                    ModelFileName = "terrain.dae",
+                },
                 ContentPath = "Resources3D",
-                UsePathFinding = true,
-                PathNodeSize = 5f,
+                PathFinder = new TerrainDescription.PathFinderDescription()
+                {
+                    NodeSize = 5f,
+                },
                 Opaque = true,
             });
             this.model = this.AddInstancingModel(new ModelInstancedDescription()

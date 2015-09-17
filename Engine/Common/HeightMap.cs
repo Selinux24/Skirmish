@@ -123,6 +123,9 @@ namespace Engine.Common
         /// <returns>Returns the generated vertex data array</returns>
         public void BuildGeometry(float cellSize, float cellHeight, out VertexData[] vertices, out uint[] indices)
         {
+            float totalWidth = cellSize * (this.Width - 1);
+            float totalDepth = cellSize * (this.Depth - 1);
+
             long vertexCountX = this.Width;
             long vertexCountZ = this.Depth;
 
@@ -135,9 +138,9 @@ namespace Engine.Common
             {
                 for (long depth = 0; depth < vertexCountZ; depth++)
                 {
-                    float posX = width * cellSize;
+                    float posX = (width * cellSize) - (totalWidth * 0.5f);
                     float posY = this.m_Data[depth, width] * cellHeight;
-                    float posZ = depth * cellSize;
+                    float posZ = (depth * cellSize) - (totalDepth * 0.5f);
 
                     VertexData newVertex = new VertexData()
                     {

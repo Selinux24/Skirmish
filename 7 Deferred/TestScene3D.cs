@@ -63,14 +63,24 @@ namespace DeferredTest
             this.terrain = this.AddTerrain(new TerrainDescription()
             {
                 ContentPath = resources,
-                ModelFileName = "terrain.dae",
-                UseQuadtree = true,
-                UsePathFinding = true,
-                PathNodeSize = 2f,
-                PathNodeInclination = MathUtil.DegreesToRadians(35),
-                AddSkydom = true,
-                SkydomTexture = "sunset.dds",
-                AddVegetation = true,
+                Model = new TerrainDescription.ModelDescription()
+                {
+                    ModelFileName = "terrain.dae",
+                },
+                Quadtree = new TerrainDescription.QuadtreeDescription()
+                {
+                    MaxTrianglesPerNode = 1024,
+                    MaxDepth = 0,
+                },
+                PathFinder = new TerrainDescription.PathFinderDescription()
+                {
+                    NodeSize = 2f,
+                    NodeInclination = MathUtil.DegreesToRadians(35),
+                },
+                Skydom = new TerrainDescription.SkydomDescription()
+                {
+                    Texture = "sunset.dds",
+                },
                 Vegetation = new[]
                 {
                     new TerrainDescription.VegetationDescription()

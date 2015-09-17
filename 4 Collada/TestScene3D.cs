@@ -65,8 +65,10 @@ namespace Collada
             TerrainDescription terrainDescription = new TerrainDescription()
             {
                 ContentPath = "Resources",
-                ModelFileName = "Ground.dae",
-                AddVegetation = true,
+                Model = new TerrainDescription.ModelDescription()
+                {
+                    ModelFileName = "Ground.dae",
+                },
                 Vegetation = new[]
                 {
                     new TerrainDescription.VegetationDescription()
@@ -89,8 +91,10 @@ namespace Collada
                         MaxSize = Vector2.One * 0.25f,
                     }
                 },
-                UsePathFinding = true,
-                PathNodeSize = 20f,
+                PathFinder = new TerrainDescription.PathFinderDescription()
+                {
+                    NodeSize = 20f,
+                },
                 Opaque = true,
             };
 

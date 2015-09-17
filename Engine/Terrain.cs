@@ -50,24 +50,30 @@ namespace Engine
             this.terrain.DeferredEnabled = description.DeferredEnabled;
 
             Triangle[] triangles = this.terrain.GetTriangles();
-            
-            if (description != null && description.UseQuadtree)
+
+            if (description != null && description.Quadtree != null)
             {
-                this.pickingQuadtree = QuadTree.Build(triangles);
+                this.pickingQuadtree = QuadTree.Build(
+                    triangles, 
+                    description.Quadtree.MaxTrianglesPerNode, 
+                    description.Quadtree.MaxDepth);
             }
 
-            if (description != null && description.UsePathFinding)
+            if (description != null && description.PathFinder != null)
             {
-                this.grid = Grid.Build(this, description.PathNodeSize, description.PathNodeInclination);
+                this.grid = Grid.Build(
+                    this, 
+                    description.PathFinder.NodeSize, 
+                    description.PathFinder.NodeInclination);
             }
 
-            if (description != null && description.AddSkydom)
+            if (description != null && description.Skydom != null)
             {
                 BoundingSphere bsph = this.terrain.GetBoundingSphere();
 
                 ModelContent skydomContent = ModelContent.GenerateSkydom(
                     contentFolder,
-                    description.SkydomTexture,
+                    description.Skydom.Texture,
                     bsph.Radius * 100f);
 
                 this.skydom = new Cubemap(game, skydomContent)
@@ -77,7 +83,7 @@ namespace Engine
                 };
             }
 
-            if (description != null && description.AddVegetation)
+            if (description != null && description.Vegetation != null && description.Vegetation.Length > 0)
             {
                 List<Billboard> vegetationList = new List<Billboard>();
 
@@ -385,6 +391,51 @@ namespace Engine
     public class TerrainDescription
     {
         /// <summary>
+        /// Model description
+        /// </summary>
+        public class ModelDescription
+        {
+            /// <summary>
+            /// Model file name
+            /// </summary>
+            public string ModelFileName = null;
+        }
+
+        /// <summary>
+        /// Heightmap description
+        /// </summary>
+        public class HeightmapDescription
+        {
+            /// <summary>
+            /// Height map file name
+            /// </summary>
+            public string HeightmapFileName = null;
+            /// <summary>
+            /// Textures for heightmap
+            /// </summary>
+            public string Texture = null;
+            /// <summary>
+            /// Cell size
+            /// </summary>
+            public float CellSize = 1;
+            /// <summary>
+            /// Maximum height
+            /// </summary>
+            public float MaximumHeight = 1;
+        }
+
+        /// <summary>
+        /// Skydom description
+        /// </summary>
+        public class SkydomDescription
+        {
+            /// <summary>
+            /// Skydom cube texture
+            /// </summary>
+            public string Texture = null;
+        }
+
+        /// <summary>
         /// Vegetation
         /// </summary>
         public class VegetationDescription
@@ -424,39 +475,63 @@ namespace Engine
         }
 
         /// <summary>
+        /// Quadtree description
+        /// </summary>
+        public class QuadtreeDescription
+        {
+            /// <summary>
+            /// Maximum triangle count per node
+            /// </summary>
+            public int MaxTrianglesPerNode = 1024;
+            /// <summary>
+            /// Maximum depth
+            /// </summary>
+            public int MaxDepth = 0;
+        }
+
+        /// <summary>
+        /// Path finder grid description
+        /// </summary>
+        public class PathFinderDescription
+        {
+            /// <summary>
+            /// Path node side size
+            /// </summary>
+            public float NodeSize = 10f;
+            /// <summary>
+            /// Path node maximum inclination
+            /// </summary>
+            public float NodeInclination = MathUtil.PiOverFour;
+        }
+
+        /// <summary>
         /// Content path
         /// </summary>
         public string ContentPath = "Resources";
         /// <summary>
-        /// Model file name
+        /// Model
         /// </summary>
-        public string ModelFileName = null;
+        public ModelDescription Model = null;
         /// <summary>
-        /// Height map file name
+        /// Heightmap
         /// </summary>
-        public string HeightMapFileName = null;
-        /// <summary>
-        /// Textures for heightmap
-        /// </summary>
-        public string HeightMapTexture = null;
-
-        /// <summary>
-        /// Indicates whether the new terrain has vegetation
-        /// </summary>
-        public bool AddVegetation = false;
+        public HeightmapDescription Heightmap = null;
         /// <summary>
         /// Vegetation collection
         /// </summary>
         public VegetationDescription[] Vegetation = null;
-
         /// <summary>
-        /// Indicates whether the new terrain has skydom
+        /// Skydom
         /// </summary>
-        public bool AddSkydom = false;
+        public SkydomDescription Skydom = null;
         /// <summary>
-        /// Skydom cube texture
+        /// Quadtree
         /// </summary>
-        public string SkydomTexture = null;
+        public QuadtreeDescription Quadtree = null;
+        /// <summary>
+        /// Path finder
+        /// </summary>
+        public PathFinderDescription PathFinder = null;
 
         /// <summary>
         /// Is Opaque
@@ -467,22 +542,5 @@ namespace Engine
         /// </summary>
         public bool DeferredEnabled = true;
 
-        /// <summary>
-        /// Use quadtree for picking
-        /// </summary>
-        public bool UseQuadtree = true;
-
-        /// <summary>
-        /// Generate grid for path finding
-        /// </summary>
-        public bool UsePathFinding = false;
-        /// <summary>
-        /// Path node side size
-        /// </summary>
-        public float PathNodeSize = 10f;
-        /// <summary>
-        /// Path node maximum inclination
-        /// </summary>
-        public float PathNodeInclination = MathUtil.PiOverFour;
     }
 }

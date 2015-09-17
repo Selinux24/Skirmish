@@ -91,9 +91,14 @@ namespace Skybox
             TerrainDescription desc = new TerrainDescription()
             {
                 ContentPath = "Resources",
-                ModelFileName = "ruins.dae",
-                AddSkydom = true,
-                SkydomTexture = "sunset.dds",
+                Model = new TerrainDescription.ModelDescription()
+                {
+                    ModelFileName = "ruins.dae",
+                },
+                Skydom = new TerrainDescription.SkydomDescription()
+                {
+                    Texture = "sunset.dds",
+                },
                 Opaque = true,
             };
             this.ruins = this.AddTerrain(desc, false);

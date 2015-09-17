@@ -432,13 +432,19 @@ namespace Engine
         {
             ModelContent geo = null;
 
-            if (!string.IsNullOrEmpty(description.ModelFileName))
+            if (description.Model != null)
             {
-                geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
+                geo = LoaderCOLLADA.Load(description.ContentPath, description.Model.ModelFileName, transform);
             }
-            else if (!string.IsNullOrEmpty(description.HeightMapFileName))
+            else if (description.Heightmap != null)
             {
-                geo = ModelContent.FromHeightmap(description.ContentPath, description.HeightMapFileName, description.HeightMapTexture, transform);
+                geo = ModelContent.FromHeightmap(
+                    description.ContentPath,
+                    description.Heightmap.HeightmapFileName,
+                    description.Heightmap.Texture,
+                    description.Heightmap.CellSize, 
+                    description.Heightmap.MaximumHeight, 
+                    transform);
             }
 
             if (geo != null)

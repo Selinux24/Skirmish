@@ -12,6 +12,11 @@ namespace HeightmapTest
 {
     public class TestScene3D : Scene
     {
+        private const float near = 0.1f;
+        private const float far = 1000f;
+        private const float fogStart = 0.01f;
+        private const float fogRange = 0.50f;
+
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer help = null;
@@ -28,8 +33,8 @@ namespace HeightmapTest
         {
             base.Initialize();
 
-            this.Camera.NearPlaneDistance = 0.5f;
-            this.Camera.FarPlaneDistance = 5000f;
+            this.Camera.NearPlaneDistance = near;
+            this.Camera.FarPlaneDistance = far;
 
             #region Texts
 
@@ -61,37 +66,21 @@ namespace HeightmapTest
             this.terrain = this.AddTerrain(new TerrainDescription()
             {
                 ContentPath = resources,
-                HeightMapFileName = "heightmap0.bmp",
-                HeightMapTexture = "dirt0.dds",
-                UseQuadtree = false,
-                UsePathFinding = false,
-                PathNodeSize = 2f,
-                PathNodeInclination = MathUtil.DegreesToRadians(35),
-                AddSkydom = true,
-                SkydomTexture = "sunset.dds",
-                AddVegetation = false,
-                Vegetation = new[]
+                Heightmap = new TerrainDescription.HeightmapDescription()
                 {
-                    new TerrainDescription.VegetationDescription()
-                    {
-                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
-                        Saturation = 0.5f,
-                        Opaque = true,
-                        Radius = 300f,
-                        MinSize = Vector2.One * 2.50f,
-                        MaxSize = Vector2.One * 3.50f,
-                    },
-                    new TerrainDescription.VegetationDescription()
-                    {
-                        VegetarionTextures = new[] { "grass0.png", "grass1.png", "grass2.png" },
-                        Saturation = 10f,
-                        Opaque = false,
-                        Radius = 50f,
-                        MinSize = Vector2.One * 0.20f,
-                        MaxSize = Vector2.One * 0.25f,
-                    }
+                    HeightmapFileName = "heightmap0.bmp",
+                    Texture = "dirt0.dds",
+                    CellSize = 5,
+                    MaximumHeight = 50,
                 },
-                Opaque = true,
+                Skydom = new TerrainDescription.SkydomDescription()
+                {
+                    Texture = "sunset.dds",
+                },
+                Quadtree = new TerrainDescription.QuadtreeDescription()
+                {
+                    
+                },
             });
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
@@ -107,6 +96,10 @@ namespace HeightmapTest
             this.Camera.Goto(-25, 25, -25);
             this.Camera.LookTo(Vector3.Zero);
 
+            this.Lights.FogColor = Color.WhiteSmoke;
+            this.Lights.FogStart = far * fogStart;
+            this.Lights.FogRange = far * fogRange;
+
             this.Lights.DirectionalLights[0].Enabled = true;
             this.Lights.DirectionalLights[1].Enabled = false;
             this.Lights.DirectionalLights[2].Enabled = false;
@@ -114,12 +107,30 @@ namespace HeightmapTest
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
             }
+
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F))
+            {
+                this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
+                this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.G))
+            {
+                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
+            }
+
+            base.Update(gameTime);
 
             Ray cursorRay = this.GetPickingRay();
 
@@ -153,6 +164,19 @@ namespace HeightmapTest
             if (this.Game.Input.KeyPressed(Keys.S))
             {
                 this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            #endregion
+
+            #region Walk
+
+            Vector3 v = this.Camera.Position;
+
+            Vector3 p;
+            Triangle tri;
+            if (this.terrain.FindTopGroundPosition(v.X, v.Z, out p, out tri))
+            {
+                this.Camera.Goto(p + Vector3.UnitY);
             }
 
             #endregion

@@ -650,7 +650,7 @@ namespace Engine.Content
         /// <param name="texture">Texture</param>
         /// <param name="transform">Transform to apply to vertices</param>
         /// <returns>Returns a new model content</returns>
-        public static ModelContent FromHeightmap(string contentFolder, string heightMap, string texture, Matrix transform)
+        public static ModelContent FromHeightmap(string contentFolder, string heightMap, string texture, float cellSize, float cellHeight, Matrix transform)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -675,7 +675,7 @@ namespace Engine.Content
 
             VertexData[] vertices;
             uint[] indices;
-            hm.BuildGeometry(1, 10, out vertices, out indices);
+            hm.BuildGeometry(cellSize, cellHeight, out vertices, out indices);
 
             SubMeshContent geo = new SubMeshContent()
             {
