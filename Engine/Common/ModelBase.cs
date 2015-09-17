@@ -199,7 +199,7 @@ namespace Engine.Common
         /// Datos de animación
         /// </summary>
         protected SkinningData SkinningData = null;
-        
+
         /// <summary>
         /// Gets the texture count for texture index
         /// </summary>
@@ -253,7 +253,7 @@ namespace Engine.Common
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
-        protected virtual void Initialize(ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps)
+        private void Initialize(ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps)
         {
             //Images
             this.InitializeTextures(modelContent);
@@ -274,7 +274,7 @@ namespace Engine.Common
         /// Initialize textures
         /// </summary>
         /// <param name="modelContent">Model content</param>
-        protected virtual void InitializeTextures(ModelContent modelContent)
+        private void InitializeTextures(ModelContent modelContent)
         {
             if (modelContent.Images != null)
             {
@@ -297,7 +297,7 @@ namespace Engine.Common
         /// Initialize materials
         /// </summary>
         /// <param name="modelContent">Model content</param>
-        protected virtual void InitializeMaterials(ModelContent modelContent)
+        private void InitializeMaterials(ModelContent modelContent)
         {
             if (modelContent.Materials != null)
             {
@@ -329,7 +329,7 @@ namespace Engine.Common
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
-        protected virtual void InitializeGeometry(ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps)
+        private void InitializeGeometry(ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps)
         {
             foreach (string meshName in modelContent.Geometry.Keys)
             {
@@ -338,6 +338,8 @@ namespace Engine.Common
                 bool isSkinned = false;
                 ControllerContent cInfo = null;
                 Matrix bindShapeMatrix = Matrix.Identity;
+                VertexData[] vertices = null;
+                uint[] indices = null;
                 Weight[] weights = null;
                 string[] jointNames = null;
                 if (loadAnimation && modelContent.Controllers != null && modelContent.SkinningInfo != null)
@@ -382,9 +384,12 @@ namespace Engine.Common
                         }
                     }
 
+                    vertices = geometry.Vertices;
+                    indices = geometry.Indices;
+
                     IVertexData[] vertexList = VertexData.Convert(
                         vertexType,
-                        geometry.Vertices,
+                        vertices,
                         weights,
                         jointNames,
                         bindShapeMatrix);
@@ -397,7 +402,7 @@ namespace Engine.Common
                             geometry.Material,
                             geometry.Topology,
                             vertexList,
-                            geometry.Indices,
+                            indices,
                             instances,
                             true);
                     }
@@ -407,7 +412,7 @@ namespace Engine.Common
                             geometry.Material,
                             geometry.Topology,
                             vertexList,
-                            geometry.Indices,
+                            indices,
                             true);
                     }
 
@@ -420,7 +425,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="modelContent">Model content</param>
         /// <param name="skinList">Skins</param>
-        protected virtual void InitializeSkinnedData(ModelContent modelContent)
+        private void InitializeSkinnedData(ModelContent modelContent)
         {
             if (modelContent.SkinningInfo != null)
             {
@@ -480,7 +485,7 @@ namespace Engine.Common
         /// <summary>
         /// Initialize mesh buffers in the graphics device
         /// </summary>
-        protected virtual void InitializeMeshes()
+        private void InitializeMeshes()
         {
             foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
             {
@@ -574,7 +579,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="transform">Transform to apply</param>
         /// <returns>Returns the transformed points</returns>
-        public virtual Vector3[] GetPoints(Matrix transform)
+        public Vector3[] GetPoints(Matrix transform)
         {
             List<Vector3> points = new List<Vector3>();
 
@@ -600,7 +605,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="transform">Transform to apply</param>
         /// <returns>Returns the transformed triangles</returns>
-        public virtual Triangle[] GetTriangles(Matrix transform)
+        public Triangle[] GetTriangles(Matrix transform)
         {
             List<Triangle> triangles = new List<Triangle>();
 

@@ -753,6 +753,17 @@ namespace Engine
         /// <summary>
         /// Move camera to position
         /// </summary>
+        /// <param name="x">X position component</param>
+        /// <param name="y">Y position component</param>
+        /// <param name="z">Z position component</param>
+        /// <param name="translation">Translation mode</param>
+        public void Goto(float x, float y, float z, CameraTranslations translation = CameraTranslations.None)
+        {
+            Goto(new Vector3(x, y, z), translation);
+        }
+        /// <summary>
+        /// Move camera to position
+        /// </summary>
         /// <param name="newPosition">New position</param>
         /// <param name="translation">Translation mode</param>
         public void Goto(Vector3 newPosition, CameraTranslations translation = CameraTranslations.None)
@@ -770,6 +781,17 @@ namespace Engine
                 this.Position += diff;
                 this.Interest += diff;
             }
+        }
+        /// <summary>
+        /// Center camera in new interest
+        /// </summary>
+        /// <param name="x">X position component</param>
+        /// <param name="y">Y position component</param>
+        /// <param name="z">Z position component</param>
+        /// <param name="translation">Translation mode</param>
+        public void LookTo(float x, float y, float z, CameraTranslations translation = CameraTranslations.None)
+        {
+            LookTo(new Vector3(x, y, z), translation);
         }
         /// <summary>
         /// Center camera in new interest

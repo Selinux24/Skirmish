@@ -647,32 +647,46 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="heightMap">Height map</param>
+        /// <param name="texture">Texture</param>
         /// <param name="transform">Transform to apply to vertices</param>
         /// <returns>Returns a new model content</returns>
-        public static ModelContent FromHeightmap(string contentFolder, string heightMap, Matrix transform)
+        public static ModelContent FromHeightmap(string contentFolder, string heightMap, string texture, Matrix transform)
         {
             ModelContent modelContent = new ModelContent();
 
-            string imageName = "heightmapTexture";
-            string materialName = "heightmapMaterial";
-            string geoName = "heightmapGeometry";
+            string texureName = "texture";
+            string materialName = "material";
+            string geoName = "geometry";
 
-            ImageContent image = new ImageContent()
+            ImageContent heightMapImage = new ImageContent()
             {
                 Streams = ContentManager.FindContent(contentFolder, heightMap),
             };
 
+            ImageContent textureImage = new ImageContent()
+            {
+                Streams = ContentManager.FindContent(contentFolder, texture),
+            };
+
             MaterialContent material = MaterialContent.Default;
+            material.DiffuseTexture = texureName;
+
+            HeightMap hm = HeightMap.FromStream(heightMapImage.Stream);
+
+            VertexData[] vertices;
+            uint[] indices;
+            hm.BuildGeometry(1, 10, out vertices, out indices);
 
             SubMeshContent geo = new SubMeshContent()
             {
                 Topology = PrimitiveTopology.TriangleList,
                 VertexType = VertexTypes.PositionNormalTexture,
                 Material = materialName,
-                Heightmap = imageName,
+                Vertices = vertices,
+                Indices = indices,
             };
 
-            modelContent.Images.Add(imageName, image);
+            modelContent.Images.Add(texureName, textureImage);
             modelContent.Materials.Add(materialName, material);
             modelContent.Geometry.Add(geoName, materialName, geo);
             modelContent.Optimize();

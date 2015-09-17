@@ -438,7 +438,7 @@ namespace Engine
             }
             else if (!string.IsNullOrEmpty(description.HeightMapFileName))
             {
-                geo = ModelContent.FromHeightmap(description.ContentPath, description.HeightMapFileName, transform);
+                geo = ModelContent.FromHeightmap(description.ContentPath, description.HeightMapFileName, description.HeightMapTexture, transform);
             }
 
             if (geo != null)

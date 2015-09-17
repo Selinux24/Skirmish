@@ -435,6 +435,10 @@ namespace Engine
         /// Height map file name
         /// </summary>
         public string HeightMapFileName = null;
+        /// <summary>
+        /// Textures for heightmap
+        /// </summary>
+        public string HeightMapTexture = null;
 
         /// <summary>
         /// Indicates whether the new terrain has vegetation
