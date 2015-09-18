@@ -390,6 +390,36 @@ namespace Engine.Common
 
             return false;
         }
+        /// <summary>
+        /// Gets the nodes contained into the specified frustum
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <returns>Returns the nodes contained into the frustum</returns>
+        public QuadTreeNode[] Contained(ref BoundingFrustum frustum)
+        {
+            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
+
+            if (this.Children == null)
+            {
+                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
+                {
+                    nodes.Add(this);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < this.Children.Length; i++)
+                {
+                    var childNodes = this.Children[i].Contained(ref frustum);
+                    if (childNodes.Length > 0)
+                    {
+                        nodes.AddRange(childNodes);
+                    }
+                }
+            }
+
+            return nodes.ToArray();
+        }
 
         /// <summary>
         /// Get bounding boxes of specified level

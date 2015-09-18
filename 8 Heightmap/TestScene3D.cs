@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Engine;
+﻿using Engine;
 using Engine.Common;
-using Engine.Helpers;
-using Engine.PathFinding;
 using SharpDX;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
+using System.Diagnostics;
 
 namespace HeightmapTest
 {
@@ -22,6 +17,7 @@ namespace HeightmapTest
         private TextDrawer help = null;
 
         private Terrain terrain = null;
+        private LineListDrawer bboxesDrawer = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -70,8 +66,8 @@ namespace HeightmapTest
                 {
                     HeightmapFileName = "heightmap0.bmp",
                     Texture = "dirt0.dds",
-                    CellSize = 5,
-                    MaximumHeight = 50,
+                    CellSize = 25,
+                    MaximumHeight = 250,
                 },
                 Skydom = new TerrainDescription.SkydomDescription()
                 {
@@ -79,7 +75,7 @@ namespace HeightmapTest
                 },
                 Quadtree = new TerrainDescription.QuadtreeDescription()
                 {
-                    
+
                 },
             });
             sw.Stop();
@@ -89,12 +85,24 @@ namespace HeightmapTest
 
             #endregion
 
+            #region Debug
+
+            BoundingBox[] bboxes = this.terrain.GetBoundingBoxes(5);
+            Line[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
+
+            this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
+            this.bboxesDrawer.Visible = false;
+            this.bboxesDrawer.Opaque = false;
+            this.bboxesDrawer.EnableAlphaBlending = true;
+
+            #endregion
+
             this.load.Text = loadingText;
 
             #endregion
 
-            this.Camera.Goto(-25, 25, -25);
-            this.Camera.LookTo(Vector3.Zero);
+            this.Camera.Goto(0, 1, 0);
+            this.Camera.LookTo(1, 1, 1);
 
             this.Lights.FogColor = Color.WhiteSmoke;
             this.Lights.FogStart = far * fogStart;
@@ -129,8 +137,6 @@ namespace HeightmapTest
             {
                 this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
             }
-
-            base.Update(gameTime);
 
             Ray cursorRay = this.GetPickingRay();
 
@@ -180,6 +186,23 @@ namespace HeightmapTest
             }
 
             #endregion
+
+            #region Debug
+
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.bboxesDrawer.Visible = !this.bboxesDrawer.Visible;
+            }
+
+            #endregion
+
+            base.Update(gameTime);
+
+            var frustum = this.Camera.Frustum;
+            var nodes = this.terrain.Contained(ref frustum);
+            var nodeCount = nodes != null ? nodes.Length : 0;
+
+            this.help.Text = string.Format("Visible quad-tree nodes: {0}", nodeCount);
         }
     }
 }

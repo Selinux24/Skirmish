@@ -27,11 +27,11 @@ namespace Engine
         /// <summary>
         /// Quadtree used for picking
         /// </summary>
-        public QuadTree pickingQuadtree = null;
+        private QuadTree pickingQuadtree = null;
         /// <summary>
         /// Grid used for pathfinding
         /// </summary>
-        public Grid grid = null;
+        private Grid grid = null;
 
         /// <summary>
         /// Constructor
@@ -54,16 +54,16 @@ namespace Engine
             if (description != null && description.Quadtree != null)
             {
                 this.pickingQuadtree = QuadTree.Build(
-                    triangles, 
-                    description.Quadtree.MaxTrianglesPerNode, 
+                    triangles,
+                    description.Quadtree.MaxTrianglesPerNode,
                     description.Quadtree.MaxDepth);
             }
 
             if (description != null && description.PathFinder != null)
             {
                 this.grid = Grid.Build(
-                    this, 
-                    description.PathFinder.NodeSize, 
+                    this,
+                    description.PathFinder.NodeSize,
                     description.PathFinder.NodeInclination);
             }
 
@@ -358,6 +358,20 @@ namespace Engine
         {
             return PathFinding.PathFinder.FindPath(this.grid, from, to);
         }
+        /// <summary>
+        /// Gets the quad-tree nodes contained into the specified frustum
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <returns>Returns the quad-tree nodes contained into the specified frustum</returns>
+        public QuadTreeNode[] Contained(ref BoundingFrustum frustum)
+        {
+            if (this.pickingQuadtree != null)
+            {
+                return this.pickingQuadtree.Contained(ref frustum);
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// Gets bounding sphere
@@ -374,6 +388,35 @@ namespace Engine
         public BoundingBox GetBoundingBox()
         {
             return this.terrain.GetBoundingBox();
+        }
+        /// <summary>
+        /// Gets terrain bounding boxes at specified level
+        /// </summary>
+        /// <param name="level">Level</param>
+        /// <returns>Returns terrain bounding boxes</returns>
+        public BoundingBox[] GetBoundingBoxes(int level = 0)
+        {
+            if (this.pickingQuadtree != null)
+            {
+                return this.pickingQuadtree.GetBoundingBoxes(level);
+            }
+            else
+            {
+                return new[] { this.terrain.GetBoundingBox() };
+            }
+        }
+        /// <summary>
+        /// Gets the path finder grid nodes
+        /// </summary>
+        /// <returns>Returns the path finder grid nodes</returns>
+        public GridNode[] GetNodes()
+        {
+            if (this.grid != null)
+            {
+                return this.grid.Nodes;
+            }
+
+            return null;
         }
         /// <summary>
         /// Gets triangle list

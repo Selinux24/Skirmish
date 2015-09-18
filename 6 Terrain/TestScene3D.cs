@@ -268,17 +268,19 @@ namespace TerrainTest
 
             #region DEBUG Path finding Grid
 
-            if (this.terrain.grid != null && this.terrain.grid.Nodes.Length > 0)
+            var nodes = this.terrain.GetNodes();
+
+            if (nodes != null && nodes.Length > 0)
             {
-                this.terrainGridDrawer = this.AddLineListDrawer(this.terrain.grid.Nodes.Length * 4);
+                this.terrainGridDrawer = this.AddLineListDrawer(nodes.Length * 4);
                 this.terrainGridDrawer.EnableAlphaBlending = true;
                 this.terrainGridDrawer.Visible = false;
 
                 Matrix m = Matrix.Translation(Vector3.Up * 0.5f);
 
-                for (int i = 0; i < this.terrain.grid.Nodes.Length; i++)
+                for (int i = 0; i < nodes.Length; i++)
                 {
-                    float c = (this.terrain.grid.Nodes[i].Cost / MathUtil.PiOverFour);
+                    float c = (nodes[i].Cost / MathUtil.PiOverFour);
 
                     Color4 color = Color.Transparent;
 
@@ -286,7 +288,7 @@ namespace TerrainTest
                     else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 0.5f); }
                     else { color = new Color4(Color.Green.ToColor3(), 0.5f); }
 
-                    Vector3[] corners = this.terrain.grid.Nodes[i].GetCorners();
+                    Vector3[] corners = nodes[i].GetCorners();
 
                     this.terrainGridDrawer.AddLines(color, Line.Transform(GeometryUtil.CreateWiredSquare(corners), m));
                 }

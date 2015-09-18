@@ -105,6 +105,16 @@ namespace Engine.Common
             }
         }
         /// <summary>
+        /// Gets the nodes contained into the specified frustum
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <returns>Returns the nodes contained into the frustum</returns>
+        public QuadTreeNode[] Contained(ref BoundingFrustum frustum)
+        {
+            return this.Root.Contained(ref frustum);
+        }
+
+        /// <summary>
         /// Gets bounding boxes of specified depth
         /// </summary>
         /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
