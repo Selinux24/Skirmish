@@ -44,6 +44,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
+        /// View * projection from light matrix
+        /// </summary>
+        private EffectMatrixVariable lightViewProjection = null;
+        /// <summary>
         /// Eye position effect variable
         /// </summary>
         private EffectVectorVariable eyePositionWorld = null;
@@ -84,10 +88,6 @@ namespace Engine.Effects
         /// </summary>
         private EffectShaderResourceVariable tg3Map = null;
         /// <summary>
-        /// Shadow Positions Map effect variable
-        /// </summary>
-        private EffectShaderResourceVariable tg4Map = null;
-        /// <summary>
         /// Shadow map effect variable
         /// </summary>
         private EffectShaderResourceVariable shadowMap = null;
@@ -122,6 +122,20 @@ namespace Engine.Effects
             set
             {
                 this.worldViewProjection.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// View * projection from light matrix
+        /// </summary>
+        protected Matrix LightViewProjection
+        {
+            get
+            {
+                return this.lightViewProjection.GetMatrix();
+            }
+            set
+            {
+                this.lightViewProjection.SetMatrix(value);
             }
         }
         /// <summary>
@@ -299,20 +313,6 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Shadow Positions Map
-        /// </summary>
-        protected ShaderResourceView TG4Map
-        {
-            get
-            {
-                return this.tg4Map.GetResource();
-            }
-            set
-            {
-                this.tg4Map.SetResource(value);
-            }
-        }
-        /// <summary>
         /// Shadow map
         /// </summary>
         protected ShaderResourceView ShadowMap
@@ -362,6 +362,7 @@ namespace Engine.Effects
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.lightViewProjection = this.Effect.GetVariableByName("gLightViewProjection").AsMatrix();
             this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
             this.directionalLight = this.Effect.GetVariableByName("gDirLight");
             this.pointLight = this.Effect.GetVariableByName("gPointLight");
@@ -372,7 +373,6 @@ namespace Engine.Effects
             this.tg1Map = this.Effect.GetVariableByName("gTG1Map").AsShaderResource();
             this.tg2Map = this.Effect.GetVariableByName("gTG2Map").AsShaderResource();
             this.tg3Map = this.Effect.GetVariableByName("gTG3Map").AsShaderResource();
-            this.tg4Map = this.Effect.GetVariableByName("gTG4Map").AsShaderResource();
             this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
             this.lightMap = this.Effect.GetVariableByName("gLightMap").AsShaderResource();
         }
@@ -417,7 +417,6 @@ namespace Engine.Effects
         /// <param name="colorMap">Color map texture</param>
         /// <param name="normalMap">Normal map texture</param>
         /// <param name="depthMap">Depth map texture</param>
-        /// <param name="shadowPositionsMap">Shadow positions map texture</param>
         /// <param name="shadowMap">Shadow map</param>
         public void UpdatePerFrame(
             Matrix world,
@@ -429,7 +428,6 @@ namespace Engine.Effects
             ShaderResourceView colorMap,
             ShaderResourceView normalMap,
             ShaderResourceView depthMap,
-            ShaderResourceView shadowPositionsMap,
             ShaderResourceView shadowMap)
         {
             this.World = world;
@@ -443,7 +441,6 @@ namespace Engine.Effects
             this.TG1Map = colorMap;
             this.TG2Map = normalMap;
             this.TG3Map = depthMap;
-            this.TG4Map = shadowPositionsMap;
 
             this.ShadowMap = shadowMap;
         }
@@ -451,9 +448,11 @@ namespace Engine.Effects
         /// Updates per directional light variables
         /// </summary>
         /// <param name="light">Light</param>
-        public void UpdatePerLight(SceneLightDirectional light)
+        /// <param name="lightViewProjection">View * projection from light matrix</param>
+        public void UpdatePerLight(SceneLightDirectional light, Matrix lightViewProjection)
         {
             this.DirectionalLight = new BufferDirectionalLight(light);
+            this.LightViewProjection = lightViewProjection;
         }
         /// <summary>
         /// Updates per spot light variables

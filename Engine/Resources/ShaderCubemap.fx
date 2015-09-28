@@ -63,9 +63,7 @@ GBufferPSOutput PSDeferredCubic(PSVertexPosition input)
 
 	output.color = color;
 	output.normal = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	output.depth.xyz = input.positionLocal;
-	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	output.shadow = float4(0.0f, 0.0f, 0.0f, 1.0f);
+	output.depth = float4(input.positionLocal, 0.0f);
 
     return output;
 }

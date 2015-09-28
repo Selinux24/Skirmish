@@ -136,9 +136,9 @@ namespace Engine.Common
         /// </summary>
         public ShaderResourceView ShadowMap;
         /// <summary>
-        /// Shadow transform
+        /// View * projection from light matrix
         /// </summary>
-        public Matrix ShadowTransform;
+        public Matrix ShadowMapViewProjection;
     }
 
     /// <summary>

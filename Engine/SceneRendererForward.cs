@@ -120,7 +120,7 @@ namespace Engine
                 this.DrawContext.EyePosition = scene.Camera.Position;
                 this.DrawContext.Lights = scene.Lights;
                 this.DrawContext.ShadowMap = null;
-                this.DrawContext.ShadowTransform = Matrix.Identity;
+                this.DrawContext.ShadowMapViewProjection = Matrix.Identity;
 #if DEBUG
                 swStartup.Stop();
 
@@ -201,7 +201,7 @@ namespace Engine
 
                             //Set shadow map and transform to drawing context
                             this.DrawContext.ShadowMap = this.shadowMapper.Texture;
-                            this.DrawContext.ShadowTransform = this.shadowMapper.Transform;
+                            this.DrawContext.ShadowMapViewProjection = this.shadowMapper.View * this.shadowMapper.Projection;
 #if DEBUG
                             swDraw.Stop();
 

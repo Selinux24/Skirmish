@@ -11,7 +11,7 @@ cbuffer cbPerFrame : register(b0)
 }
 
 //
-// 5 local object(s)
+// 4 local object(s)
 //
 SamplerState SamplerPoint
 {
@@ -28,15 +28,6 @@ SamplerState SamplerAnisotropic
     MaxAnisotropy = uint(4);
     AddressU = uint(WRAP /* 1 */);
     AddressV = uint(WRAP /* 1 */);
-};
-SamplerComparisonState SamplerComparisonShadow
-{
-    Filter   = uint(COMPARISON_MIN_MAG_LINEAR_MIP_POINT /* 148 */);
-    AddressU = uint(BORDER /* 4 */);
-    AddressV = uint(BORDER /* 4 */);
-    AddressW = uint(BORDER /* 4 */);
-    BorderColor = float4(0, 0, 0, 0);
-    ComparisonFunc = uint(LESS /* 2 */);
 };
 Texture2D gTexture;
 

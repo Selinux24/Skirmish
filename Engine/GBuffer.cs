@@ -68,7 +68,7 @@ namespace Engine
             int height = this.Game.Form.RenderHeight;
             Format rtFormat = Format.R32G32B32A32_Float;
 
-            int buffers = 4;
+            int buffers = 3;
             this.Textures = new ShaderResourceView[buffers];
             this.RenderTargets = new RenderTargetView[buffers];
 

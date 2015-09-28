@@ -155,12 +155,8 @@ GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 	clip(textureColor.a - 0.05f);
 
 	output.color = textureColor;
-	output.normal.xyz = input.normalWorld;
-	output.normal.w = gMaterial.SpecularPower;
-	output.depth.xyz = input.positionWorld;
-	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	output.shadow.xyz = input.shadowHomogeneous.xyz;
-	output.shadow.w = gMaterial.SpecularIntensity;
+	output.normal = float4(input.normalWorld, gMaterial.SpecularPower);
+	output.depth = float4(input.positionWorld, gMaterial.SpecularIntensity);
 
     return output;
 }

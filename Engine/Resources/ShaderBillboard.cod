@@ -30,7 +30,7 @@ cbuffer cbFixed : register(b2)
 }
 
 //
-// 6 local object(s)
+// 5 local object(s)
 //
 SamplerState SamplerPoint
 {
@@ -47,15 +47,6 @@ SamplerState SamplerAnisotropic
     MaxAnisotropy = uint(4);
     AddressU = uint(WRAP /* 1 */);
     AddressV = uint(WRAP /* 1 */);
-};
-SamplerComparisonState SamplerComparisonShadow
-{
-    Filter   = uint(COMPARISON_MIN_MAG_LINEAR_MIP_POINT /* 148 */);
-    AddressU = uint(BORDER /* 4 */);
-    AddressV = uint(BORDER /* 4 */);
-    AddressW = uint(BORDER /* 4 */);
-    BorderColor = float4(0, 0, 0, 0);
-    ComparisonFunc = uint(LESS /* 2 */);
 };
 Texture2DArray gTextureArray;
 Texture2D gShadowMap;
@@ -478,8 +469,8 @@ fxgroup
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
-                // SamplerLinear                     sampler      NA          NA    0        1
-                // SamplerComparisonShadow         sampler_c      NA          NA    1        1
+                // SamplerPoint                      sampler      NA          NA    0        1
+                // SamplerLinear                     sampler      NA          NA    1        1
                 // gTextureArray                     texture  float4     2darray    0        1
                 // gShadowMap                        texture  float4          2d    1        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
@@ -510,7 +501,7 @@ fxgroup
                 dcl_constantbuffer cb0[52], immediateIndexed
                 dcl_constantbuffer cb1[2], immediateIndexed
                 dcl_sampler s0, mode_default
-                dcl_sampler s1, mode_comparison
+                dcl_sampler s1, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
                 dcl_resource_texture2d (float,float,float,float) t1
                 dcl_input_ps linear v1.xyz
@@ -525,7 +516,7 @@ fxgroup
                 udiv null, r0.x, v5.x, cb1[1].z
                 utof r0.z, r0.x  // uvw<2:[0f,4.29497e+009f]>
                 mov r0.xy, v3.xyxx
-                sample_indexable(texture2darray)(float,float,float,float) r0.xyzw, r0.xyzx, t0.xyzw, s0  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
+                sample_indexable(texture2darray)(float,float,float,float) r0.xyzw, r0.xyzx, t0.xyzw, s1  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r1.x, r0.w, l(-0.050000)
                 lt r1.x, r1.x, l(0.000000)
                 discard r1.x
@@ -534,11 +525,11 @@ fxgroup
                 rsq r2.x, r1.w
                 mul r1.xyz, r1.xyzx, r2.xxxx  // toEye<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 304 "IncLights.fx"
+                #line 284 "IncLights.fx"
                 eq r2.x, cb0[15].y, l(1.000000)
                 if_nz r2.x
                 
-                #line 156
+                #line 136
                   dp3 r2.x, v2.xyzx, -cb0[14].yzwy
                   max r2.x, r2.x, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r2.y, l(0.000000), r2.x
@@ -553,71 +544,66 @@ fxgroup
                   max r2.x, r2.x, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r2.z, l(0.000000), r2.x
                 
-                #line 168
+                #line 148
                   max r2.w, cb1[1].y, l(1.000000)
                   log r2.x, r2.x
                   mul r2.x, r2.x, r2.w
                   exp r2.x, r2.x  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r2.x, r2.x, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r3.y, r2.x, r2.z  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r2.xy, r2.yyyy, r3.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r3.xyz, r0.xyzx, cb0[13].xyzx
                   add r2.x, r2.x, cb0[13].w
                   add r2.x, r2.y, r2.x
                   mul r2.xyz, r2.xxxx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 202
+                #line 182
                   eq r2.w, cb0[15].x, l(1.000000)
                 
-                #line 117
-                  div r3.xyz, v4.xyzx, v4.wwww  // shadowPosH<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 97
+                  div r3.x, v4.x, v4.w
+                  mad r3.x, r3.x, l(0.500000), l(0.500000)  // tex<0:NaN:Inf>
+                  div r3.z, -v4.y, v4.w
+                  mad r3.y, r3.z, l(0.500000), l(0.500000)  // tex<1:NaN:Inf>
+                  mov_sat r3.zw, r3.xxxy
+                  eq r3.zw, r3.zzzw, r3.xxxy
+                  and r3.z, r3.w, r3.z
+                  sample_indexable(texture2d)(float,float,float,float) r3.x, r3.xyxx, t1.xyzw, s0  // depth<0:Inf>
+                  if_nz r3.z
                 
-                #line 127
-                  add r4.xyzw, r3.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r4.xyxx, t1.xxxx, s1, r3.z  // percentLit<0:[0f,1f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r4.zwzz, t1.xxxx, s1, r3.z
-                  add r3.w, r3.w, r4.x  // percentLit<0:[0f,2f]>
-                  add r4.xyzw, r3.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r4.xyxx, t1.xxxx, s1, r3.z
-                  add r3.w, r3.w, r4.x  // percentLit<0:[0f,3f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r4.zwzz, t1.xxxx, s1, r3.z
-                  add r3.w, r3.w, r4.x  // percentLit<0:[0f,4f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r3.xyxx, t1.xxxx, s1, r3.z
-                  add r3.w, r3.w, r4.x  // percentLit<0:[0f,5f]>
-                  add r4.xyzw, r3.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r4.xyxx, t1.xxxx, s1, r3.z
-                  add r3.w, r3.w, r4.x  // percentLit<0:[0f,6f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r4.zwzz, t1.xxxx, s1, r3.z
-                  add r3.w, r3.w, r4.x  // percentLit<0:[0f,7f]>
-                  add r4.xyzw, r3.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.x, r4.xyxx, t1.xxxx, s1, r3.z
-                  add r3.x, r3.x, r3.w  // percentLit<0:[0f,8f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.y, r4.zwzz, t1.xxxx, s1, r3.z
-                  add r3.x, r3.y, r3.x  // percentLit<0:[0f,9f]>
+                #line 103
+                    div r3.y, v4.z, v4.w  // z<0:NaN:Inf>
+                    lt r3.x, r3.y, r3.x
                 
-                #line 131
-                  mul r3.x, r3.x, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
+                #line 102
+                    mov r3.y, l(1.000000)  // CalcShadowFactor<0: 1f>
+                  else 
+                    mov r3.x, l(0)
+                  endif 
                 
-                #line 206
+                #line 111
+                  movc r3.x, r3.x, r3.y, l(0.500000)  // CalcShadowFactor<0:Inf>
+                
+                #line 186
                   mul r3.xyz, r2.xyzx, r3.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 202
+                #line 182
                   movc r2.xyz, r2.wwww, r3.xyzx, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 304
+                #line 284
                 else 
                   mov r2.xyz, l(0,0,0,0)  // litColor<0: 0f,1: 0f,2: 0f>
                 endif 
                 eq r2.w, cb0[18].y, l(1.000000)
                 if_nz r2.w
                 
-                #line 156
+                #line 136
                   dp3 r2.w, v2.xyzx, -cb0[17].yzwy
                   max r2.w, r2.w, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.x, l(0.000000), r2.w
@@ -632,70 +618,65 @@ fxgroup
                   max r2.w, r2.w, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.y, l(0.000000), r2.w
                 
-                #line 168
+                #line 148
                   max r3.z, cb1[1].y, l(1.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, r3.z
                   exp r2.w, r2.w  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r2.w, r2.w, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r4.y, r2.w, r3.y  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r3.xy, r3.xxxx, r4.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r4.xyz, r0.xyzx, cb0[16].xyzx
                   add r2.w, r3.x, cb0[16].w
                   add r2.w, r3.y, r2.w
                   mul r3.xyz, r2.wwww, r4.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 202
+                #line 182
                   eq r2.w, cb0[18].x, l(1.000000)
                 
-                #line 117
-                  div r4.xyz, v4.xyzx, v4.wwww  // shadowPosH<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 97
+                  div r3.w, v4.x, v4.w
+                  mad r4.x, r3.w, l(0.500000), l(0.500000)  // tex<0:NaN:Inf>
+                  div r3.w, -v4.y, v4.w
+                  mad r4.y, r3.w, l(0.500000), l(0.500000)  // tex<1:NaN:Inf>
+                  mov_sat r4.zw, r4.xxxy
+                  eq r4.zw, r4.zzzw, r4.xxxy
+                  and r3.w, r4.w, r4.z
+                  sample_indexable(texture2d)(float,float,float,float) r4.x, r4.xyxx, t1.xyzw, s0  // depth<0:Inf>
+                  if_nz r3.w
                 
-                #line 127
-                  add r5.xyzw, r4.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r5.xyxx, t1.xxxx, s1, r4.z  // percentLit<0:[0f,1f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,2f]>
-                  add r5.xyzw, r4.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.xyxx, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,3f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,4f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r4.xyxx, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,5f]>
-                  add r5.xyzw, r4.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.xyxx, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,6f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,7f]>
-                  add r5.xyzw, r4.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r5.xyxx, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.x  // percentLit<0:[0f,8f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.x  // percentLit<0:[0f,9f]>
+                #line 103
+                    div r3.w, v4.z, v4.w  // z<0:NaN:Inf>
+                    lt r3.w, r3.w, r4.x
                 
-                #line 131
-                  mul r3.w, r3.w, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
+                #line 102
+                    mov r4.x, l(1.000000)  // CalcShadowFactor<0: 1f>
+                  else 
+                    mov r3.w, l(0)
+                  endif 
                 
-                #line 206
+                #line 111
+                  movc r3.w, r3.w, r4.x, l(0.500000)  // CalcShadowFactor<0:Inf>
+                
+                #line 186
                   mul r4.xyz, r3.wwww, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 202
+                #line 182
                   movc r3.xyz, r2.wwww, r4.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 306
+                #line 286
                   add r2.xyz, r2.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 eq r2.w, cb0[21].y, l(1.000000)
                 if_nz r2.w
                 
-                #line 156
+                #line 136
                   dp3 r2.w, v2.xyzx, -cb0[20].yzwy
                   max r2.w, r2.w, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.x, l(0.000000), r2.w
@@ -710,78 +691,73 @@ fxgroup
                   max r2.w, r2.w, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.y, l(0.000000), r2.w
                 
-                #line 168
+                #line 148
                   max r3.z, cb1[1].y, l(1.000000)
                   log r2.w, r2.w
                   mul r2.w, r2.w, r3.z
                   exp r2.w, r2.w  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r2.w, r2.w, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r4.y, r2.w, r3.y  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r3.xy, r3.xxxx, r4.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r4.xyz, r0.xyzx, cb0[19].xyzx
                   add r2.w, r3.x, cb0[19].w
                   add r2.w, r3.y, r2.w
                   mul r3.xyz, r2.wwww, r4.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 202
+                #line 182
                   eq r2.w, cb0[21].x, l(1.000000)
                 
-                #line 117
-                  div r4.xyz, v4.xyzx, v4.wwww  // shadowPosH<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 97
+                  div r3.w, v4.x, v4.w
+                  mad r4.x, r3.w, l(0.500000), l(0.500000)  // tex<0:NaN:Inf>
+                  div r3.w, -v4.y, v4.w
+                  mad r4.y, r3.w, l(0.500000), l(0.500000)  // tex<1:NaN:Inf>
+                  mov_sat r4.zw, r4.xxxy
+                  eq r4.zw, r4.zzzw, r4.xxxy
+                  and r3.w, r4.w, r4.z
+                  sample_indexable(texture2d)(float,float,float,float) r4.x, r4.xyxx, t1.xyzw, s0  // depth<0:Inf>
+                  if_nz r3.w
                 
-                #line 127
-                  add r5.xyzw, r4.xyxy, l(-0.000488, -0.000488, 0.000000, -0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r3.w, r5.xyxx, t1.xxxx, s1, r4.z  // percentLit<0:[0f,1f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,2f]>
-                  add r5.xyzw, r4.xyxy, l(0.000488, -0.000488, -0.000488, 0.000000)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.xyxx, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,3f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,4f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r4.xyxx, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,5f]>
-                  add r5.xyzw, r4.xyxy, l(0.000488, 0.000000, -0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.xyxx, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,6f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.w, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.w  // percentLit<0:[0f,7f]>
-                  add r5.xyzw, r4.xyxy, l(0.000000, 0.000488, 0.000488, 0.000488)
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r5.xyxx, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.x  // percentLit<0:[0f,8f]>
-                  sample_c_lz_indexable(texture2d)(float,float,float,float) r4.x, r5.zwzz, t1.xxxx, s1, r4.z
-                  add r3.w, r3.w, r4.x  // percentLit<0:[0f,9f]>
+                #line 103
+                    div r3.w, v4.z, v4.w  // z<0:NaN:Inf>
+                    lt r3.w, r3.w, r4.x
                 
-                #line 131
-                  mul r3.w, r3.w, l(0.111111)  // CalcShadowFactor<0:[0f,1f]>
+                #line 102
+                    mov r4.x, l(1.000000)  // CalcShadowFactor<0: 1f>
+                  else 
+                    mov r3.w, l(0)
+                  endif 
                 
-                #line 206
+                #line 111
+                  movc r3.w, r3.w, r4.x, l(0.500000)  // CalcShadowFactor<0:Inf>
+                
+                #line 186
                   mul r4.xyz, r3.wwww, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 202
+                #line 182
                   movc r3.xyz, r2.wwww, r4.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 306
+                #line 286
                   add r2.xyz, r2.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 
-                #line 322
+                #line 302
                 eq r2.w, cb0[24].z, l(1.000000)
                 if_nz r2.w
                 
-                #line 221
+                #line 201
                   add r3.xyz, v1.xyzx, -cb0[23].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                   dp3 r2.w, r3.xyzx, r3.xyzx
                   sqrt r2.w, r2.w  // distance<0:NaN:Inf>
                   div r3.xyz, r3.xyzx, r2.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 156
+                #line 136
                   dp3 r3.w, v2.xyzx, -r3.xyzx
                   max r3.w, r3.w, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r4.x, l(0.000000), r3.w
@@ -796,26 +772,26 @@ fxgroup
                   max r3.x, r3.x, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.y, l(0.000000), r3.x
                 
-                #line 168
+                #line 148
                   max r3.z, cb1[1].y, l(1.000000)
                   log r3.x, r3.x
                   mul r3.x, r3.x, r3.z
                   exp r3.x, r3.x  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r3.x, r3.x, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r5.y, r3.x, r3.y  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r3.xy, r4.xxxx, r5.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r4.xyz, r0.xyzx, cb0[22].xyzx
                   add r3.x, r3.x, cb0[22].w
                   add r3.x, r3.y, r3.x
                   mul r3.xyz, r3.xxxx, r4.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 100
+                #line 80
                   div r3.w, r2.w, cb0[24].x  // f<0:NaN:Inf>
                   mad r3.w, -r3.w, r3.w, l(1.000000)  // denom<0:NaN:Inf>
                   lt r4.x, l(0.000000), r3.w
@@ -824,22 +800,22 @@ fxgroup
                   mul r2.w, r2.w, r2.w
                   div r2.w, cb0[23].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 102
+                #line 82
                   and r2.w, r2.w, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 324
+                #line 304
                   mad r2.xyz, r3.xyzx, r2.wwww, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 eq r2.w, cb0[27].z, l(1.000000)
                 if_nz r2.w
                 
-                #line 221
+                #line 201
                   add r3.xyz, v1.xyzx, -cb0[26].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                   dp3 r2.w, r3.xyzx, r3.xyzx
                   sqrt r2.w, r2.w  // distance<0:NaN:Inf>
                   div r3.xyz, r3.xyzx, r2.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 156
+                #line 136
                   dp3 r3.w, v2.xyzx, -r3.xyzx
                   max r3.w, r3.w, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r4.x, l(0.000000), r3.w
@@ -854,26 +830,26 @@ fxgroup
                   max r3.x, r3.x, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.y, l(0.000000), r3.x
                 
-                #line 168
+                #line 148
                   max r3.z, cb1[1].y, l(1.000000)
                   log r3.x, r3.x
                   mul r3.x, r3.x, r3.z
                   exp r3.x, r3.x  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r3.x, r3.x, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r5.y, r3.x, r3.y  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r3.xy, r4.xxxx, r5.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r4.xyz, r0.xyzx, cb0[25].xyzx
                   add r3.x, r3.x, cb0[25].w
                   add r3.x, r3.y, r3.x
                   mul r3.xyz, r3.xxxx, r4.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 100
+                #line 80
                   div r3.w, r2.w, cb0[27].x  // f<0:NaN:Inf>
                   mad r3.w, -r3.w, r3.w, l(1.000000)  // denom<0:NaN:Inf>
                   lt r4.x, l(0.000000), r3.w
@@ -882,22 +858,22 @@ fxgroup
                   mul r2.w, r2.w, r2.w
                   div r2.w, cb0[26].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 102
+                #line 82
                   and r2.w, r2.w, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 324
+                #line 304
                   mad r2.xyz, r3.xyzx, r2.wwww, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 eq r2.w, cb0[30].z, l(1.000000)
                 if_nz r2.w
                 
-                #line 221
+                #line 201
                   add r3.xyz, v1.xyzx, -cb0[29].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                   dp3 r2.w, r3.xyzx, r3.xyzx
                   sqrt r2.w, r2.w  // distance<0:NaN:Inf>
                   div r3.xyz, r3.xyzx, r2.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 156
+                #line 136
                   dp3 r3.w, v2.xyzx, -r3.xyzx
                   max r3.w, r3.w, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r4.x, l(0.000000), r3.w
@@ -912,26 +888,26 @@ fxgroup
                   max r3.x, r3.x, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.y, l(0.000000), r3.x
                 
-                #line 168
+                #line 148
                   max r3.z, cb1[1].y, l(1.000000)
                   log r3.x, r3.x
                   mul r3.x, r3.x, r3.z
                   exp r3.x, r3.x  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r3.x, r3.x, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r5.y, r3.x, r3.y  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r3.xy, r4.xxxx, r5.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r4.xyz, r0.xyzx, cb0[28].xyzx
                   add r3.x, r3.x, cb0[28].w
                   add r3.x, r3.y, r3.x
                   mul r3.xyz, r3.xxxx, r4.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 100
+                #line 80
                   div r3.w, r2.w, cb0[30].x  // f<0:NaN:Inf>
                   mad r3.w, -r3.w, r3.w, l(1.000000)  // denom<0:NaN:Inf>
                   lt r4.x, l(0.000000), r3.w
@@ -940,22 +916,22 @@ fxgroup
                   mul r2.w, r2.w, r2.w
                   div r2.w, cb0[29].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 102
+                #line 82
                   and r2.w, r2.w, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 324
+                #line 304
                   mad r2.xyz, r3.xyzx, r2.wwww, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 eq r2.w, cb0[33].z, l(1.000000)
                 if_nz r2.w
                 
-                #line 221
+                #line 201
                   add r3.xyz, v1.xyzx, -cb0[32].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                   dp3 r2.w, r3.xyzx, r3.xyzx
                   sqrt r2.w, r2.w  // distance<0:NaN:Inf>
                   div r3.xyz, r3.xyzx, r2.wwww  // lightDirection<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 156
+                #line 136
                   dp3 r3.w, v2.xyzx, -r3.xyzx
                   max r3.w, r3.w, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r4.x, l(0.000000), r3.w
@@ -970,26 +946,26 @@ fxgroup
                   max r3.x, r3.x, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.y, l(0.000000), r3.x
                 
-                #line 168
+                #line 148
                   max r3.z, cb1[1].y, l(1.000000)
                   log r3.x, r3.x
                   mul r3.x, r3.x, r3.z
                   exp r3.x, r3.x  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r3.x, r3.x, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r5.y, r3.x, r3.y  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r3.xy, r4.xxxx, r5.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r4.xyz, r0.xyzx, cb0[31].xyzx
                   add r3.x, r3.x, cb0[31].w
                   add r3.x, r3.y, r3.x
                   mul r3.xyz, r3.xxxx, r4.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 100
+                #line 80
                   div r3.w, r2.w, cb0[33].x  // f<0:NaN:Inf>
                   mad r3.w, -r3.w, r3.w, l(1.000000)  // denom<0:NaN:Inf>
                   lt r4.x, l(0.000000), r3.w
@@ -998,18 +974,18 @@ fxgroup
                   mul r2.w, r2.w, r2.w
                   div r2.w, cb0[32].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 102
+                #line 82
                   and r2.w, r2.w, r4.x  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 324
+                #line 304
                   mad r2.xyz, r3.xyzx, r2.wwww, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 
-                #line 338
+                #line 318
                 eq r2.w, cb0[37].z, l(1.000000)
                 if_nz r2.w
                 
-                #line 253
+                #line 233
                   add r3.xyz, v1.xyzx, -cb0[35].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                   dp3 r2.w, r3.xyzx, r3.xyzx
                   sqrt r2.w, r2.w  // distance<0:NaN:Inf>
@@ -1028,7 +1004,7 @@ fxgroup
                   mul r4.x, r3.w, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
                   ge r4.x, cb0[36].w, r4.x
                 
-                #line 156
+                #line 136
                   dp3 r4.y, v2.xyzx, -r3.xyzx
                   max r4.y, r4.y, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r4.z, l(0.000000), r4.y
@@ -1043,26 +1019,26 @@ fxgroup
                   max r3.x, r3.x, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.y, l(0.000000), r3.x
                 
-                #line 168
+                #line 148
                   max r3.z, cb1[1].y, l(1.000000)
                   log r3.x, r3.x
                   mul r3.x, r3.x, r3.z
                   exp r3.x, r3.x  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r3.x, r3.x, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r5.y, r3.x, r3.y  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r3.xy, r4.zzzz, r5.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r4.yzw, r0.xxyz, cb0[34].xxyz
                   add r3.x, r3.x, cb0[34].w
                   add r3.x, r3.y, r3.x
                   mul r3.xyz, r3.xxxx, r4.yzwy  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 100
+                #line 80
                   div r4.y, r2.w, cb0[37].x  // f<0:NaN:Inf>
                   mad r4.y, -r4.y, r4.y, l(1.000000)  // denom<0:NaN:Inf>
                   lt r4.z, l(0.000000), r4.y
@@ -1071,10 +1047,10 @@ fxgroup
                   mul r2.w, r2.w, r2.w
                   div r2.w, cb0[35].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 102
+                #line 82
                   and r2.w, r2.w, r4.z  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 276
+                #line 256
                   mad r3.w, -r3.w, l(57.295780), l(1.000000)
                   add r4.y, -cb0[36].w, l(1.000000)
                   div r3.w, r3.w, r4.y
@@ -1082,16 +1058,16 @@ fxgroup
                   mul r2.w, r2.w, r3.w
                   mul r3.xyz, r2.wwww, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 260
+                #line 240
                   and r3.xyz, r3.xyzx, r4.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 340
+                #line 320
                   add r2.xyz, r2.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 eq r2.w, cb0[41].z, l(1.000000)
                 if_nz r2.w
                 
-                #line 253
+                #line 233
                   add r3.xyz, v1.xyzx, -cb0[39].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                   dp3 r2.w, r3.xyzx, r3.xyzx
                   sqrt r2.w, r2.w  // distance<0:NaN:Inf>
@@ -1110,7 +1086,7 @@ fxgroup
                   mul r4.x, r3.w, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
                   ge r4.x, cb0[40].w, r4.x
                 
-                #line 156
+                #line 136
                   dp3 r4.y, v2.xyzx, -r3.xyzx
                   max r4.y, r4.y, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r4.z, l(0.000000), r4.y
@@ -1125,26 +1101,26 @@ fxgroup
                   max r3.x, r3.x, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.y, l(0.000000), r3.x
                 
-                #line 168
+                #line 148
                   max r3.z, cb1[1].y, l(1.000000)
                   log r3.x, r3.x
                   mul r3.x, r3.x, r3.z
                   exp r3.x, r3.x  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r3.x, r3.x, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r5.y, r3.x, r3.y  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r3.xy, r4.zzzz, r5.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r4.yzw, r0.xxyz, cb0[38].xxyz
                   add r3.x, r3.x, cb0[38].w
                   add r3.x, r3.y, r3.x
                   mul r3.xyz, r3.xxxx, r4.yzwy  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 100
+                #line 80
                   div r4.y, r2.w, cb0[41].x  // f<0:NaN:Inf>
                   mad r4.y, -r4.y, r4.y, l(1.000000)  // denom<0:NaN:Inf>
                   lt r4.z, l(0.000000), r4.y
@@ -1153,10 +1129,10 @@ fxgroup
                   mul r2.w, r2.w, r2.w
                   div r2.w, cb0[39].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 102
+                #line 82
                   and r2.w, r2.w, r4.z  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 276
+                #line 256
                   mad r3.w, -r3.w, l(57.295780), l(1.000000)
                   add r4.y, -cb0[40].w, l(1.000000)
                   div r3.w, r3.w, r4.y
@@ -1164,16 +1140,16 @@ fxgroup
                   mul r2.w, r2.w, r3.w
                   mul r3.xyz, r2.wwww, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 260
+                #line 240
                   and r3.xyz, r3.xyzx, r4.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 340
+                #line 320
                   add r2.xyz, r2.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 eq r2.w, cb0[45].z, l(1.000000)
                 if_nz r2.w
                 
-                #line 253
+                #line 233
                   add r3.xyz, v1.xyzx, -cb0[43].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                   dp3 r2.w, r3.xyzx, r3.xyzx
                   sqrt r2.w, r2.w  // distance<0:NaN:Inf>
@@ -1192,7 +1168,7 @@ fxgroup
                   mul r4.x, r3.w, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
                   ge r4.x, cb0[44].w, r4.x
                 
-                #line 156
+                #line 136
                   dp3 r4.y, v2.xyzx, -r3.xyzx
                   max r4.y, r4.y, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r4.z, l(0.000000), r4.y
@@ -1207,26 +1183,26 @@ fxgroup
                   max r3.x, r3.x, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r3.y, l(0.000000), r3.x
                 
-                #line 168
+                #line 148
                   max r3.z, cb1[1].y, l(1.000000)
                   log r3.x, r3.x
                   mul r3.x, r3.x, r3.z
                   exp r3.x, r3.x  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r3.x, r3.x, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r5.y, r3.x, r3.y  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r3.xy, r4.zzzz, r5.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r4.yzw, r0.xxyz, cb0[42].xxyz
                   add r3.x, r3.x, cb0[42].w
                   add r3.x, r3.y, r3.x
                   mul r3.xyz, r3.xxxx, r4.yzwy  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 100
+                #line 80
                   div r4.y, r2.w, cb0[45].x  // f<0:NaN:Inf>
                   mad r4.y, -r4.y, r4.y, l(1.000000)  // denom<0:NaN:Inf>
                   lt r4.z, l(0.000000), r4.y
@@ -1235,10 +1211,10 @@ fxgroup
                   mul r2.w, r2.w, r2.w
                   div r2.w, cb0[43].x, r2.w  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 102
+                #line 82
                   and r2.w, r2.w, r4.z  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 276
+                #line 256
                   mad r3.w, -r3.w, l(57.295780), l(1.000000)
                   add r4.y, -cb0[44].w, l(1.000000)
                   div r3.w, r3.w, r4.y
@@ -1246,16 +1222,16 @@ fxgroup
                   mul r2.w, r2.w, r3.w
                   mul r3.xyz, r2.wwww, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 260
+                #line 240
                   and r3.xyz, r3.xyzx, r4.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 340
+                #line 320
                   add r2.xyz, r2.xyzx, r3.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 eq r2.w, cb0[49].z, l(1.000000)
                 if_nz r2.w
                 
-                #line 253
+                #line 233
                   add r3.xyz, v1.xyzx, -cb0[47].yzwy  // lightDirection<0:Inf,1:Inf,2:Inf>
                   dp3 r2.w, r3.xyzx, r3.xyzx
                   sqrt r2.w, r2.w  // distance<0:NaN:Inf>
@@ -1274,7 +1250,7 @@ fxgroup
                   mul r4.x, r3.w, l(57.295780)  // lightToSurfaceAngle<0:NaN:Inf>
                   ge r4.x, cb0[48].w, r4.x
                 
-                #line 156
+                #line 136
                   dp3 r4.y, v2.xyzx, -r3.xyzx
                   max r4.y, r4.y, l(0.000000)  // diffuseFactor<0:Inf:[-0f,1.#INFf]>
                   lt r4.z, l(0.000000), r4.y
@@ -1289,26 +1265,26 @@ fxgroup
                   max r1.x, r1.x, l(0.000000)  // specularFactor<0:Inf:[-0f,1.#INFf]>
                   lt r1.y, l(0.000000), r1.x
                 
-                #line 168
+                #line 148
                   max r1.z, cb1[1].y, l(1.000000)
                   log r1.x, r1.x
                   mul r1.x, r1.x, r1.z
                   exp r1.x, r1.x  // specularFactor<0:Inf:[0f,1.#INFf]>
                   mul r1.x, r1.x, cb1[1].x  // specular<0:NaN:Inf>
                 
-                #line 166
+                #line 146
                   and r5.y, r1.x, r1.y  // specular<0:NaN:Inf>
                 
-                #line 158
+                #line 138
                   and r1.xy, r4.zzzz, r5.xyxx  // diffuse<0:NaN:Inf>, specular<0:NaN:Inf>
                 
-                #line 173
+                #line 153
                   mul r0.xyz, r0.xyzx, cb0[46].xyzx
                   add r1.x, r1.x, cb0[46].w
                   add r1.x, r1.y, r1.x
                   mul r0.xyz, r0.xyzx, r1.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 100
+                #line 80
                   div r1.x, r2.w, cb0[49].x  // f<0:NaN:Inf>
                   mad r1.x, -r1.x, r1.x, l(1.000000)  // denom<0:NaN:Inf>
                   lt r1.y, l(0.000000), r1.x
@@ -1317,10 +1293,10 @@ fxgroup
                   mul r1.x, r1.x, r1.x
                   div r1.x, cb0[47].x, r1.x  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 102
+                #line 82
                   and r1.x, r1.x, r1.y  // CalcSphericAttenuation<0:NaN:Inf>
                 
-                #line 276
+                #line 256
                   mad r1.y, -r3.w, l(57.295780), l(1.000000)
                   add r1.z, -cb0[48].w, l(1.000000)
                   div r1.y, r1.y, r1.z
@@ -1328,10 +1304,10 @@ fxgroup
                   mul r1.x, r1.y, r1.x
                   mul r0.xyz, r0.xyzx, r1.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 260
+                #line 240
                   and r0.xyz, r0.xyzx, r4.xxxx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 340
+                #line 320
                   add r2.xyz, r0.xyzx, r2.xyzx  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 
@@ -1339,7 +1315,7 @@ fxgroup
                 lt r0.x, l(0.000000), cb0[50].y
                 sqrt r0.y, r1.w  // distToEye<0:NaN:Inf>
                 
-                #line 135 "IncLights.fx"
+                #line 115 "IncLights.fx"
                 add r0.y, r0.y, -cb0[50].x
                 div_sat r0.y, r0.y, cb0[50].y  // fogLerp<0:[0f,1f]>
                 add r1.xyz, -r2.xyzx, cb0[51].xyzx
@@ -1351,7 +1327,7 @@ fxgroup
                 #line 147
                 mov o0.w, r0.w  // PSForwardBillboard<3:Inf>
                 ret 
-                // Approximately 583 instruction slots used
+                // Approximately 562 instruction slots used
                             
             };
         }
@@ -1720,11 +1696,11 @@ fxgroup
                 //
                 // Name                 Index   Mask Register SysValue Format   Used
                 // -------------------- ----- ------ -------- -------- ------ ------
-                // SV_POSITION              0   xyzw        0      POS  float     zw
+                // SV_POSITION              0   xyzw        0      POS  float       
                 // POSITION                 0   xyz         1     NONE  float   xyz 
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // TEXCOORD                 0   xy          3     NONE  float   xy  
-                // TEXCOORD                 1   xyzw        4     NONE  float   xyz 
+                // TEXCOORD                 1   xyzw        4     NONE  float       
                 // SV_PrimitiveID           0   x           5   PRIMID   uint   x   
                 //
                 //
@@ -1735,23 +1711,19 @@ fxgroup
                 // SV_TARGET                0   xyzw        0   TARGET  float   xyzw
                 // SV_TARGET                1   xyzw        1   TARGET  float   xyzw
                 // SV_TARGET                2   xyzw        2   TARGET  float   xyzw
-                // SV_TARGET                3   xyzw        3   TARGET  float   xyzw
                 //
                 ps_5_0
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb1[2], immediateIndexed
                 dcl_sampler s0, mode_default
                 dcl_resource_texture2darray (float,float,float,float) t0
-                dcl_input_ps_siv linear noperspective v0.zw, position
                 dcl_input_ps linear v1.xyz
                 dcl_input_ps linear v2.xyz
                 dcl_input_ps linear v3.xy
-                dcl_input_ps linear v4.xyz
                 dcl_input_ps_sgv v5.x, primitive_id
                 dcl_output o0.xyzw
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
-                dcl_output o3.xyzw
                 dcl_temps 2
                 
                 #line 153 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
@@ -1761,26 +1733,20 @@ fxgroup
                 sample_indexable(texture2darray)(float,float,float,float) r0.xyzw, r0.xyzx, t0.xyzw, s0  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r1.x, r0.w, l(-0.050000)
                 
-                #line 165
+                #line 161
                 mov o0.xyzw, r0.xyzw  // PSDeferredBillboard<0:Inf,1:Inf,2:Inf,3:Inf>
                 
                 #line 155
                 lt r0.x, r1.x, l(0.000000)
                 discard r0.x
                 
-                #line 165
+                #line 161
                 mov o1.xyz, v2.xyzx  // PSDeferredBillboard<4,5,6>
                 mov o1.w, cb1[1].y  // PSDeferredBillboard<7>
-                
-                #line 161
-                div o2.w, v0.z, v0.w  // PSDeferredBillboard<11:NaN:Inf>
-                
-                #line 165
                 mov o2.xyz, v1.xyzx  // PSDeferredBillboard<8,9,10>
-                mov o3.xyz, v4.xyzx  // PSDeferredBillboard<12,13,14>
-                mov o3.w, cb1[1].x  // PSDeferredBillboard<15>
+                mov o2.w, cb1[1].x  // PSDeferredBillboard<11>
                 ret 
-                // Approximately 15 instruction slots used
+                // Approximately 13 instruction slots used
                             
             };
         }

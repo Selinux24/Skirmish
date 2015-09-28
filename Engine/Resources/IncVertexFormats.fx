@@ -349,7 +349,6 @@ struct GBufferPSOutput
     float4 color : SV_TARGET0;
     float4 normal : SV_TARGET1;
     float4 depth : SV_TARGET2;
-	float4 shadow : SV_TARGET3;
 };
 
 /*

@@ -15,29 +15,9 @@ SamplerState SamplerAnisotropic
 	AddressV = WRAP;
 };
 
-SamplerComparisonState SamplerComparisonShadow
-{
-	Filter   = COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
-	AddressU = BORDER;
-	AddressV = BORDER;
-	AddressW = BORDER;
-	BorderColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-    ComparisonFunc = LESS;
-};
-
 static const int MAX_LIGHTS_DIRECTIONAL = 3;
 static const int MAX_LIGHTS_POINT = 4;
 static const int MAX_LIGHTS_SPOT = 4;
-
-static const float SHADOWMAPSIZE = 2048.0f;
-static const float SHADOWMAPDX = 1.0f / SHADOWMAPSIZE;
-static const float2 SamplerShadowOffsets[9] =
-{
-	float2(-SHADOWMAPDX, -SHADOWMAPDX),		float2(0.0f, -SHADOWMAPDX),		float2(SHADOWMAPDX, -SHADOWMAPDX),
-	float2(-SHADOWMAPDX, 0.0f),				float2(0.0f, 0.0f),				float2(SHADOWMAPDX, 0.0f),
-	float2(-SHADOWMAPDX, +SHADOWMAPDX),		float2(0.0f, +SHADOWMAPDX),		float2(SHADOWMAPDX, +SHADOWMAPDX)
-};
 
 struct Material
 {
@@ -111,24 +91,24 @@ float CalcSphericAttenuation(float radius, float intensity, float maxDistance, f
         return 0.0f;
     }
 }
-float CalcShadowFactor(float4 shadowPosH, Texture2D shadowMap)
+float CalcShadowFactor(float4 lightPosition, Texture2D shadowMap)
 {
-	// Complete projection by doing division by w.
-	shadowPosH.xyz /= shadowPosH.w;
+    float2 tex;
+    tex.x = (+lightPosition.x / lightPosition.w * 0.5f) + 0.5f;
+    tex.y = (-lightPosition.y / lightPosition.w * 0.5f) + 0.5f;
 
-	// Depth in NDC space.
-	float depth = shadowPosH.z;
-
-	// 3×3 box filter pattern. Each sample does a 4-tap PCF.
-	float percentLit = 0.0f;
-	[unroll]
-	for(int i = 0; i < 9; ++i)
+	if((saturate(tex.x) == tex.x) && (saturate(tex.y) == tex.y))
 	{
-		percentLit += shadowMap.SampleCmpLevelZero(SamplerComparisonShadow, shadowPosH.xy + SamplerShadowOffsets[i], depth).r;
+		float depth = shadowMap.Sample(SamplerPoint, tex).r;
+		float z = (lightPosition.z / lightPosition.w) -  0.001f;
+
+		if(z < depth)
+		{
+			return 1.0f;
+		}
 	}
 
-	// Average the samples.
-	return percentLit / 9.0f;
+    return 0.5f;
 }
 float3 ComputeFog(float3 litColor, float distToEye, float fogStart, float fogRange, float3 fogColor)
 {
@@ -183,7 +163,7 @@ float3 ComputeDirectionalLight(
 	float3 normal,
 	float specularIntensity,
 	float specularPower,
-	float4 shadowPosition,
+	float4 lightPosition,
 	Texture2D shadowMap)
 {
 	float3 litColor = ComputeBaseLight(
@@ -201,7 +181,7 @@ float3 ComputeDirectionalLight(
 	[flatten]
 	if(L.CastShadow == 1)
 	{
-		float shadowFactor = CalcShadowFactor(shadowPosition, shadowMap);
+		float shadowFactor = CalcShadowFactor(lightPosition, shadowMap);
 
 		litColor *= shadowFactor;
 	}
@@ -291,7 +271,7 @@ float3 ComputeAllLights(
 	float3 normal,
 	float specularIntensity,
 	float specularPower,
-	float4 shadowPosition,
+	float4 lightPosition,
 	Texture2D shadowMap)
 {
 	float3 litColor = 0;
@@ -311,7 +291,7 @@ float3 ComputeAllLights(
 				normal,
 				specularIntensity,
 				specularPower,
-				shadowPosition,
+				lightPosition,
 				shadowMap);
 		}
 	}

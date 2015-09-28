@@ -114,14 +114,14 @@ namespace Engine
                             context.EyePosition,
                             context.Lights,
                             context.ShadowMap,
-                            context.ShadowTransform);
+                            context.ShadowMapViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
                         ((EffectBasicGBuffer)effect).UpdatePerFrame(
                             context.World * this.Manipulator.LocalTransform,
                             context.ViewProjection,
-                            context.ShadowTransform);
+                            context.ShadowMapViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {

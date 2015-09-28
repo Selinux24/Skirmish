@@ -297,10 +297,8 @@ GBufferPSOutput PSDeferredDrawSolid(PSParticleSolid input)
 	float4 color = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
 	
 	output.color = color;
-	output.normal = 0;
-	output.depth.xyz = input.positionHomogeneous.xyz;
-	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	output.shadow = 0;
+	output.normal = 0.0f;
+	output.depth = float4(input.positionHomogeneous.xyz, 0.0f);
 	
 	return output;
 }
@@ -312,10 +310,8 @@ GBufferPSOutput PSDeferredDrawLine(PSParticleLine input)
 	float4 color = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
 
 	output.color = color;
-	output.normal = 0;
-	output.depth.xyz = input.positionHomogeneous.xyz;
-	output.depth.w = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	output.shadow = 0;
+	output.normal = 0.0f;
+	output.depth = float4(input.positionHomogeneous.xyz, 0.0f);
 	
 	return output;
 }

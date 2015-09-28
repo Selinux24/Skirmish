@@ -69,7 +69,7 @@ namespace Engine
                             context.EyePosition,
                             context.Lights,
                             context.ShadowMap,
-                            context.ShadowTransform);
+                            context.ShadowMapViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
@@ -79,7 +79,7 @@ namespace Engine
                             context.EyePosition,
                             context.Lights,
                             context.ShadowMap,
-                            context.ShadowTransform);
+                            context.ShadowMapViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {

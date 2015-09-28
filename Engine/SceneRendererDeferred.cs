@@ -244,7 +244,7 @@ namespace Engine
                 this.DrawContext.EyePosition = scene.Camera.Position;
                 this.DrawContext.Lights = scene.Lights;
                 this.DrawContext.ShadowMap = null;
-                this.DrawContext.ShadowTransform = Matrix.Identity;
+                this.DrawContext.ShadowMapViewProjection = Matrix.Identity;
 #if DEBUG
                 swStartup.Stop();
 
@@ -316,7 +316,7 @@ namespace Engine
 
                             //Set shadow map and transform to drawing context
                             this.DrawContext.ShadowMap = this.shadowMapper.Texture;
-                            this.DrawContext.ShadowTransform = this.shadowMapper.Transform;
+                            this.DrawContext.ShadowMapViewProjection = this.shadowMapper.View * this.shadowMapper.Projection;
 #if DEBUG
                             swDraw.Stop();
 
@@ -606,7 +606,6 @@ namespace Engine
                 if (result == SceneRendererResultEnum.ColorMap) return this.GeometryMap.Length > 0 ? this.GeometryMap[0] : null;
                 if (result == SceneRendererResultEnum.NormalMap) return this.GeometryMap.Length > 1 ? this.GeometryMap[1] : null;
                 if (result == SceneRendererResultEnum.DepthMap) return this.GeometryMap.Length > 2 ? this.GeometryMap[2] : null;
-                if (result == SceneRendererResultEnum.Other) return this.GeometryMap.Length > 3 ? this.GeometryMap[3] : null;
             }
 
             return null;
@@ -818,7 +817,6 @@ namespace Engine
                 this.GeometryMap[0],
                 this.GeometryMap[1],
                 this.GeometryMap[2],
-                this.GeometryMap[3],
                 context.ShadowMap);
 
             this.Game.Graphics.SetDepthStencilRDZDisabled();
@@ -845,7 +843,7 @@ namespace Engine
 
                 for (int i = 0; i < directionalLights.Length; i++)
                 {
-                    effect.UpdatePerLight(directionalLights[i]);
+                    effect.UpdatePerLight(directionalLights[i], context.ShadowMapViewProjection);
 
                     for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                     {
