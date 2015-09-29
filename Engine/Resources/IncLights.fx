@@ -93,7 +93,7 @@ float CalcSphericAttenuation(float radius, float intensity, float maxDistance, f
 }
 float CalcShadowFactor(float4 lightPosition, Texture2D shadowMap)
 {
-    float2 tex;
+    float2 tex = 0.0f;
     tex.x = (+lightPosition.x / lightPosition.w * 0.5f) + 0.5f;
     tex.y = (-lightPosition.y / lightPosition.w * 0.5f) + 0.5f;
 

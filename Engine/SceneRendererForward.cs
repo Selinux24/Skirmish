@@ -60,11 +60,13 @@ namespace Engine
 
             this.DrawContext = new Context()
             {
+                Name = "Primary",
                 DrawerMode = DrawerModesEnum.Forward,
             };
 
             this.DrawShadowsContext = new Context()
             {
+                Name = "Secondary",
                 DrawerMode = DrawerModesEnum.ShadowMap,
             };
         }
@@ -120,7 +122,7 @@ namespace Engine
                 this.DrawContext.EyePosition = scene.Camera.Position;
                 this.DrawContext.Lights = scene.Lights;
                 this.DrawContext.ShadowMap = null;
-                this.DrawContext.ShadowMapViewProjection = Matrix.Identity;
+                this.DrawContext.FromLightViewProjection = Matrix.Identity;
 #if DEBUG
                 swStartup.Stop();
 
@@ -137,15 +139,15 @@ namespace Engine
 #if DEBUG
                     Stopwatch swShadowsPreparation = Stopwatch.StartNew();
 #endif
+                    //Update shadow transform using first ligth direction
+                    this.shadowMapper.Update(shadowCastingLights[0].Direction, scene.SceneVolume);
+                   
                     Matrix shadowViewProj = this.shadowMapper.View * this.shadowMapper.Projection;
 
                     this.DrawShadowsContext.World = Matrix.Identity;
                     this.DrawShadowsContext.ViewProjection = shadowViewProj;
                     this.DrawShadowsContext.Frustum = new BoundingFrustum(shadowViewProj);
-                    this.DrawShadowsContext.EyePosition = scene.Camera.Position;
-
-                    //Update shadow transform using first ligth direction
-                    this.shadowMapper.Update(shadowCastingLights[0].Direction, scene.SceneVolume);
+                    this.DrawShadowsContext.EyePosition = this.shadowMapper.LightPosition;
 #if DEBUG
                     swShadowsPreparation.Stop();
 
@@ -201,7 +203,7 @@ namespace Engine
 
                             //Set shadow map and transform to drawing context
                             this.DrawContext.ShadowMap = this.shadowMapper.Texture;
-                            this.DrawContext.ShadowMapViewProjection = this.shadowMapper.View * this.shadowMapper.Projection;
+                            this.DrawContext.FromLightViewProjection = this.shadowMapper.View * this.shadowMapper.Projection;
 #if DEBUG
                             swDraw.Stop();
 

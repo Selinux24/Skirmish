@@ -5,7 +5,7 @@ cbuffer cbPerFrame : register (b0)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
-	float4x4 gShadowTransform; 
+	float4x4 gLightViewProjection;
 	float3 gEyePositionWorld;
 	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPointLights[MAX_LIGHTS_POINT];
@@ -73,7 +73,6 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 		{
 			gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
 			gout.positionWorld = mul(v[i], gWorld).xyz;
-			gout.shadowHomogeneous = mul(v[i], gShadowTransform);
 			gout.normalWorld = up;
 			gout.tex = gQuadTexC[i];
 			gout.primitiveID = primID;
@@ -124,6 +123,8 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 	float3 toEye = normalize(toEyeWorld);
 
+	float4 shadowPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
+
 	float3 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
@@ -134,7 +135,7 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 		input.normalWorld,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
-		input.shadowHomogeneous,
+		shadowPosition,
 		gShadowMap);
 
 	if(gFogRange > 0)

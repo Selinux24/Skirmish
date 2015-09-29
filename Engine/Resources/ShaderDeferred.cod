@@ -336,7 +336,8 @@ fxgroup
                   dp4 r1.y, r3.xyzw, cb0[10].xyzw  // lPosition<2:NaN:Inf>
                 
                 #line 103 "IncLights.fx"
-                  div r1.y, r1.y, r4.z  // z<0:NaN:Inf>
+                  div r1.y, r1.y, r4.z
+                  add r1.y, r1.y, l(-0.001000)  // z<0:NaN:Inf>
                   lt r1.y, r1.y, r1.z
                 
                 #line 102
@@ -357,7 +358,7 @@ fxgroup
                 #line 107 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderDeferred.fx"
                 mov o0.w, r0.w  // PSDirectionalLight<3:Inf>
                 ret 
-                // Approximately 58 instruction slots used
+                // Approximately 59 instruction slots used
                             
             };
         }

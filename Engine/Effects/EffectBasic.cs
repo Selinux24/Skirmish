@@ -125,9 +125,9 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
-        /// Shadow transform
+        /// From light View * Projection transform
         /// </summary>
-        private EffectMatrixVariable shadowTransform = null;
+        private EffectMatrixVariable fromLightViewProjection = null;
         /// <summary>
         /// Texture index effect variable
         /// </summary>
@@ -328,17 +328,17 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Shadow transform
+        /// From light View * Projection transform
         /// </summary>
-        protected Matrix ShadowTransform
+        protected Matrix FromLightViewProjection
         {
             get
             {
-                return this.shadowTransform.GetMatrix();
+                return this.fromLightViewProjection.GetMatrix();
             }
             set
             {
-                this.shadowTransform.SetMatrix(value);
+                this.fromLightViewProjection.SetMatrix(value);
             }
         }
         /// <summary>
@@ -489,7 +489,7 @@ namespace Engine.Effects
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.shadowTransform = this.Effect.GetVariableByName("gShadowTransform").AsMatrix();
+            this.fromLightViewProjection = this.Effect.GetVariableByName("gLightViewProjection").AsMatrix();
             this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
             this.material = this.Effect.GetVariableByName("gMaterial");
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
@@ -584,14 +584,14 @@ namespace Engine.Effects
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMap">Shadow map texture</param>
-        /// <param name="shadowTransform">Shadow transform</param>
+        /// <param name="fromLightViewProjection">From light View * Projection transform</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             SceneLights lights,
             ShaderResourceView shadowMap,
-            Matrix shadowTransform)
+            Matrix fromLightViewProjection)
         {
             this.World = world;
             this.WorldInverse = Matrix.Invert(world);
@@ -630,7 +630,7 @@ namespace Engine.Effects
                 this.FogRange = lights.FogRange;
                 this.FogColor = lights.FogColor;
 
-                this.ShadowTransform = shadowTransform;
+                this.FromLightViewProjection = fromLightViewProjection;
                 this.ShadowMap = shadowMap;
             }
             else
@@ -645,7 +645,7 @@ namespace Engine.Effects
                 this.FogRange = 0;
                 this.FogColor = Color.Transparent;
 
-                this.ShadowTransform = Matrix.Identity;
+                this.FromLightViewProjection = Matrix.Identity;
                 this.ShadowMap = null;
             }
         }

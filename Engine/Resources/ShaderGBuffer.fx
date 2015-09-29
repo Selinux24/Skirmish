@@ -9,7 +9,6 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorld;
 	float4x4 gWorldInverse;
 	float4x4 gWorldViewProjection;
-	float4x4 gShadowTransform; 
 };
 cbuffer cbPerObject : register (b1)
 {
@@ -112,7 +111,6 @@ PSVertexPositionNormalColor VSPositionNormalColor(VSVertexPositionNormalColor in
     PSVertexPositionNormalColor output = (PSVertexPositionNormalColor)0;
 
     output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-	output.shadowHomogeneous = mul(float4(input.positionLocal, 1), gShadowTransform);
     output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.color = input.color;
@@ -126,7 +124,6 @@ PSVertexPositionNormalColor VSPositionNormalColorI(VSVertexPositionNormalColorI 
     float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
     output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
-	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
     output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.color = input.color;
@@ -150,7 +147,6 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinned(VSVertexPositionNormalC
 		normalL);
 
 	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
-	output.shadowHomogeneous = mul(positionL, gShadowTransform);
 	output.positionWorld = mul(positionL, gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL.xyz, (float3x3)gWorldInverse));
 	output.color = input.color;
@@ -176,7 +172,6 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinnedI(VSVertexPositionNormal
     float4 instancePosition = mul(positionL, input.localTransform);
 	
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
-	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL.xyz, (float3x3)gWorldInverse));
 	output.color = input.color;
@@ -284,7 +279,6 @@ PSVertexPositionNormalTexture VSPositionNormalTexture(VSVertexPositionNormalText
     PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture)0;
 
     output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-	output.shadowHomogeneous = mul(float4(input.positionLocal, 1), gShadowTransform);
     output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.tex = input.tex;
@@ -299,7 +293,6 @@ PSVertexPositionNormalTexture VSPositionNormalTextureI(VSVertexPositionNormalTex
     float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
     output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
-	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
     output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.tex = input.tex;
@@ -324,7 +317,6 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNor
 		normalL);
 	
 	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
-	output.shadowHomogeneous = mul(positionL, gShadowTransform);
 	output.positionWorld = mul(positionL, gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL.xyz, (float3x3)gWorldInverse));
 	output.tex = input.tex;
@@ -351,7 +343,6 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinnedI(VSVertexPositionNo
     float4 instancePosition = mul(positionL, input.localTransform);
 	
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
-	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL.xyz, (float3x3)gWorldInverse));
 	output.tex = input.tex;
@@ -379,7 +370,6 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangent(VSVertexPosi
     PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
 
     output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-	output.shadowHomogeneous = mul(float4(input.positionLocal, 1), gShadowTransform);
     output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.tangentWorld = mul(float4(input.tangentLocal, 0), gWorld).xyz;
@@ -395,7 +385,6 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentI(VSVertexPos
     float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
     output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
-	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
     output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.tangentWorld = mul(float4(input.tangentLocal, 0), gWorld).xyz;
@@ -424,7 +413,6 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinned(VSVer
 		tangentL);
 
 	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
-	output.shadowHomogeneous = mul(positionL, gShadowTransform);
 	output.positionWorld = mul(positionL, gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL.xyz, (float3x3)gWorldInverse));
 	output.tangentWorld = mul(tangentL, gWorld).xyz;
@@ -455,7 +443,6 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinnedI(VSVe
     float4 instancePosition = mul(positionL, input.localTransform);
 	
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
-	output.shadowHomogeneous = mul(instancePosition, gShadowTransform);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL.xyz, (float3x3)gWorldInverse));
 	output.tangentWorld = mul(tangentL, gWorld).xyz;

@@ -69,7 +69,7 @@ namespace Engine
                             context.EyePosition,
                             context.Lights,
                             context.ShadowMap,
-                            context.ShadowMapViewProjection);
+                            context.FromLightViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
@@ -79,7 +79,7 @@ namespace Engine
                             context.EyePosition,
                             context.Lights,
                             context.ShadowMap,
-                            context.ShadowMapViewProjection);
+                            context.FromLightViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
@@ -122,6 +122,10 @@ namespace Engine
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
                                 effect.UpdatePerObject(matData, this.Radius, textureCount, diffuseTexture);
+                            }
+                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                            {
+                                effect.UpdatePerObject(matData, 0, 0, null);
                             }
 
                             #endregion

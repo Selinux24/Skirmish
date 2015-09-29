@@ -1,7 +1,7 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
+using System;
 using BindFlags = SharpDX.Direct3D11.BindFlags;
 using CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags;
 using DepthStencilView = SharpDX.Direct3D11.DepthStencilView;
@@ -54,6 +54,10 @@ namespace Engine
         /// Projection matrix
         /// </summary>
         public Matrix Projection { get; protected set; }
+        /// <summary>
+        /// Light position
+        /// </summary>
+        public Vector3 LightPosition { get; protected set; }
         /// <summary>
         /// Shadow transform
         /// </summary>
@@ -129,10 +133,10 @@ namespace Engine
         public void Update(Vector3 lightDirection, BoundingSphere sceneVolume)
         {
             // Calc light position outside the scene volume
-            Vector3 lightPos = 2.0f * sceneVolume.Radius * -lightDirection;
+            this.LightPosition = 2.0f * sceneVolume.Radius * -lightDirection;
 
             // View from light to scene center position
-            this.View = Matrix.LookAtLH(lightPos, sceneVolume.Center, Vector3.Up);
+            this.View = Matrix.LookAtLH(this.LightPosition, sceneVolume.Center, Vector3.Up);
 
             // Transform bounding sphere to light space.
             Vector3 sphereCenterLS = Vector3.TransformCoordinate(sceneVolume.Center, this.View);

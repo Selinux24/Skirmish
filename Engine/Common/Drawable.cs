@@ -108,6 +108,10 @@ namespace Engine.Common
     public class Context
     {
         /// <summary>
+        /// Context name
+        /// </summary>
+        public string Name = "";
+        /// <summary>
         /// Drawer mode
         /// </summary>
         public DrawerModesEnum DrawerMode = DrawerModesEnum.Forward;
@@ -132,13 +136,13 @@ namespace Engine.Common
         /// </summary>
         public SceneLights Lights;
         /// <summary>
+        /// View * projection from light matrix
+        /// </summary>
+        public Matrix FromLightViewProjection;
+        /// <summary>
         /// Shadow map
         /// </summary>
         public ShaderResourceView ShadowMap;
-        /// <summary>
-        /// View * projection from light matrix
-        /// </summary>
-        public Matrix ShadowMapViewProjection;
     }
 
     /// <summary>

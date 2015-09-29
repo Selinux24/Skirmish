@@ -276,7 +276,7 @@ fxgroup
                   sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // depth<0:Inf>
                 
                 #line 111
-                  ge r2.w, l(0.000000), r2.w
+                  ge r2.w, l(-0.001000), r2.w
                   movc r2.w, r2.w, l(0.500000), l(1.000000)  // CalcShadowFactor<0:[0.5f,1f]>
                 
                 #line 186
@@ -303,7 +303,7 @@ fxgroup
                   sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // depth<0:Inf>
                 
                 #line 111
-                  ge r2.w, l(0.000000), r2.w
+                  ge r2.w, l(-0.001000), r2.w
                   movc r2.w, r2.w, l(0.500000), l(1.000000)  // CalcShadowFactor<0:[0.5f,1f]>
                 
                 #line 186
@@ -329,7 +329,7 @@ fxgroup
                   sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // depth<0:Inf>
                 
                 #line 111
-                  ge r2.w, l(0.000000), r2.w
+                  ge r2.w, l(-0.001000), r2.w
                   movc r2.w, r2.w, l(0.500000), l(1.000000)  // CalcShadowFactor<0:[0.5f,1f]>
                 
                 #line 186

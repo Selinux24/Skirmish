@@ -245,18 +245,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v2.x  // weights<0>
                 mov x0[1].x, v2.y  // weights<1>
                 mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -370,18 +370,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v2.x  // weights<0>
                 mov x0[1].x, v2.y  // weights<1>
                 mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -633,18 +633,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v3.x  // weights<0>
                 mov x0[1].x, v3.y  // weights<1>
                 mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -759,18 +759,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v3.x  // weights<0>
                 mov x0[1].x, v3.y  // weights<1>
                 mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1019,18 +1019,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v2.x  // weights<0>
                 mov x0[1].x, v2.y  // weights<1>
                 mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1144,18 +1144,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v2.x  // weights<0>
                 mov x0[1].x, v2.y  // weights<1>
                 mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1407,18 +1407,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v3.x  // weights<0>
                 mov x0[1].x, v3.y  // weights<1>
                 mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1533,18 +1533,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v3.x  // weights<0>
                 mov x0[1].x, v3.y  // weights<1>
                 mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1799,18 +1799,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v4.x  // weights<0>
                 mov x0[1].x, v4.y  // weights<1>
                 mov x0[2].x, v4.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1926,18 +1926,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v4.x  // weights<0>
                 mov x0[1].x, v4.y  // weights<1>
                 mov x0[2].x, v4.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>

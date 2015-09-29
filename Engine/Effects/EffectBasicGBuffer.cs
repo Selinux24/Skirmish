@@ -76,10 +76,6 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
-        /// Shadow transform effect variable
-        /// </summary>
-        private EffectMatrixVariable shadowTransform = null;
-        /// <summary>
         /// Material effect variable
         /// </summary>
         private EffectVariable material = null;
@@ -140,20 +136,6 @@ namespace Engine.Effects
             set
             {
                 this.worldViewProjection.SetMatrix(value);
-            }
-        }
-        /// <summary>
-        /// Shadow transform matrix
-        /// </summary>
-        protected Matrix ShadowTransform
-        {
-            get
-            {
-                return this.shadowTransform.GetMatrix();
-            }
-            set
-            {
-                this.shadowTransform.SetMatrix(value);
             }
         }
         /// <summary>
@@ -280,7 +262,6 @@ namespace Engine.Effects
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.shadowTransform = this.Effect.GetVariableByName("gShadowTransform").AsMatrix();
             this.material = this.Effect.GetVariableByName("gMaterial");
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
@@ -352,16 +333,13 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="world">World Matrix</param>
         /// <param name="viewProjection">View * projection</param>
-        /// <param name="shadowTransform">Shadow transform</param>
         public void UpdatePerFrame(
             Matrix world,
-            Matrix viewProjection,
-            Matrix shadowTransform)
+            Matrix viewProjection)
         {
             this.World = world;
             this.WorldInverse = Matrix.Invert(world);
             this.WorldViewProjection = world * viewProjection;
-            this.ShadowTransform = shadowTransform;
         }
         /// <summary>
         /// Update per model object data

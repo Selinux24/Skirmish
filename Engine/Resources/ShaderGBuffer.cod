@@ -8,7 +8,6 @@ cbuffer cbPerFrame : register(b0)
     float4x4 gWorld;                    // Offset:    0, size:   64
     float4x4 gWorldInverse;             // Offset:   64, size:   64
     float4x4 gWorldViewProjection;      // Offset:  128, size:   64
-    float4x4 gShadowTransform;          // Offset:  192, size:   64
 }
 
 cbuffer cbPerObject : register(b1)
@@ -73,7 +72,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
                 //
                 // }
                 //
@@ -112,7 +110,7 @@ fxgroup
                 dcl_output o2.xyzw
                 dcl_temps 1
                 
-                #line 37 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 36 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionColor<0:NaN:Inf>
@@ -123,7 +121,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionColor<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionColor<6:NaN:Inf>
                 
-                #line 41
+                #line 40
                 mov o2.xyzw, v1.xyzw  // VSPositionColor<7,8,9,10>
                 ret 
                 // Approximately 11 instruction slots used
@@ -186,10 +184,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 100 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 99 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul o0.xyzw, v2.xyzw, cb1[0].xyzw  // PSPositionColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 104
+                #line 103
                 mov o1.xyzw, l(0,0,0,0)  // PSPositionColor<4: 0f,5: 0f,6: 0f,7: 0f>
                 mov o2.xyz, v1.xyzx  // PSPositionColor<8,9,10>
                 mov o2.w, l(0)  // PSPositionColor<11: 0f>
@@ -218,7 +216,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
                 //
                 // }
                 //
@@ -267,7 +264,7 @@ fxgroup
                 dcl_output o2.xyzw
                 dcl_temps 1
                 
-                #line 47 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 46 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -280,7 +277,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionColorI<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionColorI<6:NaN:Inf>
                 
-                #line 53
+                #line 52
                 mov o2.xyzw, v1.xyzw  // VSPositionColorI<7,8,9,10>
                 ret 
                 // Approximately 13 instruction slots used
@@ -343,10 +340,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 100 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 99 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul o0.xyzw, v2.xyzw, cb1[0].xyzw  // PSPositionColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 104
+                #line 103
                 mov o1.xyzw, l(0,0,0,0)  // PSPositionColor<4: 0f,5: 0f,6: 0f,7: 0f>
                 mov o2.xyz, v1.xyzx  // PSPositionColor<8,9,10>
                 mov o2.w, l(0)  // PSPositionColor<11: 0f>
@@ -375,7 +372,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
                 //
                 // }
                 //
@@ -428,18 +424,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v2.x  // weights<0>
                 mov x0[1].x, v2.y  // weights<1>
                 mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -465,7 +461,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 68 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 67 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw  // VSPositionColorSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw  // VSPositionColorSkinned<1:NaN:Inf>
@@ -475,7 +471,7 @@ fxgroup
                 dp4 o1.y, r1.xyzw, cb0[1].xyzw  // VSPositionColorSkinned<5:NaN:Inf>
                 dp4 o1.z, r1.xyzw, cb0[2].xyzw  // VSPositionColorSkinned<6:NaN:Inf>
                 
-                #line 72
+                #line 71
                 mov o2.xyzw, v1.xyzw  // VSPositionColorSkinned<7,8,9,10>
                 ret 
                 // Approximately 41 instruction slots used
@@ -538,10 +534,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 100 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 99 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul o0.xyzw, v2.xyzw, cb1[0].xyzw  // PSPositionColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 104
+                #line 103
                 mov o1.xyzw, l(0,0,0,0)  // PSPositionColor<4: 0f,5: 0f,6: 0f,7: 0f>
                 mov o2.xyz, v1.xyzx  // PSPositionColor<8,9,10>
                 mov o2.w, l(0)  // PSPositionColor<11: 0f>
@@ -570,7 +566,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
                 //
                 // }
                 //
@@ -633,18 +628,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v2.x  // weights<0>
                 mov x0[1].x, v2.y  // weights<1>
                 mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -670,7 +665,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 87 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 86 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -683,7 +678,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionColorSkinnedI<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionColorSkinnedI<6:NaN:Inf>
                 
-                #line 93
+                #line 92
                 mov o2.xyzw, v1.xyzw  // VSPositionColorSkinnedI<7,8,9,10>
                 ret 
                 // Approximately 44 instruction slots used
@@ -746,10 +741,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 100 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 99 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul o0.xyzw, v2.xyzw, cb1[0].xyzw  // PSPositionColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 104
+                #line 103
                 mov o1.xyzw, l(0,0,0,0)  // PSPositionColor<4: 0f,5: 0f,6: 0f,7: 0f>
                 mov o2.xyz, v1.xyzx  // PSPositionColor<8,9,10>
                 mov o2.w, l(0)  // PSPositionColor<11: 0f>
@@ -778,7 +773,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -808,11 +802,10 @@ fxgroup
                 // POSITION                 0   xyz         1     NONE  float   xyz 
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // COLOR                    0   xyzw        3     NONE  float   xyzw
-                // TEXCOORD                 1   xyzw        4     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_input v0.xyz
                 dcl_input v1.xyz
                 dcl_input v2.xyzw
@@ -820,10 +813,9 @@ fxgroup
                 dcl_output o1.xyz
                 dcl_output o2.xyz
                 dcl_output o3.xyzw
-                dcl_output o4.xyzw
-                dcl_temps 2
+                dcl_temps 1
                 
-                #line 114 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 113 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionNormalColor<0:NaN:Inf>
@@ -833,25 +825,17 @@ fxgroup
                 dp4 o1.x, r0.xyzw, cb0[0].xyzw  // VSPositionNormalColor<4:NaN:Inf>
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionNormalColor<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionNormalColor<6:NaN:Inf>
-                dp3 r1.x, v1.xyzx, cb0[4].xyzx
-                dp3 r1.y, v1.xyzx, cb0[5].xyzx
-                dp3 r1.z, v1.xyzx, cb0[6].xyzx
-                dp3 r1.w, r1.xyzx, r1.xyzx
-                rsq r1.w, r1.w
-                mul o2.xyz, r1.wwww, r1.xyzx  // VSPositionNormalColor<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
+                dp3 r0.x, v1.xyzx, cb0[4].xyzx
+                dp3 r0.y, v1.xyzx, cb0[5].xyzx
+                dp3 r0.z, v1.xyzx, cb0[6].xyzx
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul o2.xyz, r0.wwww, r0.xyzx  // VSPositionNormalColor<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
                 
-                #line 120
+                #line 118
                 mov o3.xyzw, v2.xyzw  // VSPositionNormalColor<10,11,12,13>
-                
-                #line 115
-                dp4 o4.x, r0.xyzw, cb0[12].xyzw  // VSPositionNormalColor<14:NaN:Inf>
-                dp4 o4.y, r0.xyzw, cb0[13].xyzw  // VSPositionNormalColor<15:NaN:Inf>
-                dp4 o4.z, r0.xyzw, cb0[14].xyzw  // VSPositionNormalColor<16:NaN:Inf>
-                dp4 o4.w, r0.xyzw, cb0[15].xyzw  // VSPositionNormalColor<17:NaN:Inf>
-                
-                #line 120
                 ret 
-                // Approximately 21 instruction slots used
+                // Approximately 17 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -893,7 +877,6 @@ fxgroup
                 // POSITION                 0   xyz         1     NONE  float   xyz 
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // COLOR                    0   xyzw        3     NONE  float   xyzw
-                // TEXCOORD                 1   xyzw        4     NONE  float       
                 //
                 //
                 // Output signature:
@@ -914,10 +897,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 191 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 186 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul o0.xyzw, v3.xyzw, cb1[0].xyzw  // PSPositionNormalColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 195
+                #line 190
                 mov o1.xyz, v2.xyzx  // PSPositionNormalColor<4,5,6>
                 mov o1.w, cb1[1].y  // PSPositionNormalColor<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalColor<8,9,10>
@@ -947,7 +930,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -983,11 +965,10 @@ fxgroup
                 // POSITION                 0   xyz         1     NONE  float   xyz 
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // COLOR                    0   xyzw        3     NONE  float   xyzw
-                // TEXCOORD                 1   xyzw        4     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_input v0.xyz
                 dcl_input v1.xyz
                 dcl_input v2.xyzw
@@ -999,10 +980,9 @@ fxgroup
                 dcl_output o1.xyz
                 dcl_output o2.xyz
                 dcl_output o3.xyzw
-                dcl_output o4.xyzw
-                dcl_temps 2
+                dcl_temps 1
                 
-                #line 126 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 124 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -1014,25 +994,17 @@ fxgroup
                 dp4 o1.x, r0.xyzw, cb0[0].xyzw  // VSPositionNormalColorI<4:NaN:Inf>
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionNormalColorI<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionNormalColorI<6:NaN:Inf>
-                dp3 r1.x, v1.xyzx, cb0[4].xyzx
-                dp3 r1.y, v1.xyzx, cb0[5].xyzx
-                dp3 r1.z, v1.xyzx, cb0[6].xyzx
-                dp3 r1.w, r1.xyzx, r1.xyzx
-                rsq r1.w, r1.w
-                mul o2.xyz, r1.wwww, r1.xyzx  // VSPositionNormalColorI<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
+                dp3 r0.x, v1.xyzx, cb0[4].xyzx
+                dp3 r0.y, v1.xyzx, cb0[5].xyzx
+                dp3 r0.z, v1.xyzx, cb0[6].xyzx
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul o2.xyz, r0.wwww, r0.xyzx  // VSPositionNormalColorI<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
                 
-                #line 134
+                #line 131
                 mov o3.xyzw, v2.xyzw  // VSPositionNormalColorI<10,11,12,13>
-                
-                #line 129
-                dp4 o4.x, r0.xyzw, cb0[12].xyzw  // VSPositionNormalColorI<14:NaN:Inf>
-                dp4 o4.y, r0.xyzw, cb0[13].xyzw  // VSPositionNormalColorI<15:NaN:Inf>
-                dp4 o4.z, r0.xyzw, cb0[14].xyzw  // VSPositionNormalColorI<16:NaN:Inf>
-                dp4 o4.w, r0.xyzw, cb0[15].xyzw  // VSPositionNormalColorI<17:NaN:Inf>
-                
-                #line 134
                 ret 
-                // Approximately 23 instruction slots used
+                // Approximately 19 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -1074,7 +1046,6 @@ fxgroup
                 // POSITION                 0   xyz         1     NONE  float   xyz 
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // COLOR                    0   xyzw        3     NONE  float   xyzw
-                // TEXCOORD                 1   xyzw        4     NONE  float       
                 //
                 //
                 // Output signature:
@@ -1095,10 +1066,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 191 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 186 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul o0.xyzw, v3.xyzw, cb1[0].xyzw  // PSPositionNormalColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 195
+                #line 190
                 mov o1.xyz, v2.xyzx  // PSPositionNormalColor<4,5,6>
                 mov o1.w, cb1[1].y  // PSPositionNormalColor<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalColor<8,9,10>
@@ -1128,7 +1099,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -1168,11 +1138,10 @@ fxgroup
                 // POSITION                 0   xyz         1     NONE  float   xyz 
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // COLOR                    0   xyzw        3     NONE  float   xyzw
-                // TEXCOORD                 1   xyzw        4     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_constantbuffer cb2[383], dynamicIndexed
                 dcl_input v0.xyz
                 dcl_input v1.xyz
@@ -1183,22 +1152,21 @@ fxgroup
                 dcl_output o1.xyz
                 dcl_output o2.xyz
                 dcl_output o3.xyzw
-                dcl_output o4.xyzw
                 dcl_temps 6
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 397
+                #line 393
                 mov x0[0].x, v3.x  // weights<0>
                 mov x0[1].x, v3.y  // weights<1>
                 mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 404
+                #line 400
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1228,19 +1196,15 @@ fxgroup
                   dp3 r4.z, v1.xyzx, cb2[r3.y + 2].xyzx
                   mad r2.xyz, r2.wwww, r4.xyzx, r2.xyzx  // normalLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 402
+                #line 398
                 endloop 
                 
-                #line 152 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 149 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw  // VSPositionNormalColorSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw  // VSPositionNormalColorSkinned<1:NaN:Inf>
                 dp4 o0.z, r1.xyzw, cb0[10].xyzw  // VSPositionNormalColorSkinned<2:NaN:Inf>
                 dp4 o0.w, r1.xyzw, cb0[11].xyzw  // VSPositionNormalColorSkinned<3:NaN:Inf>
-                dp4 o4.x, r1.xyzw, cb0[12].xyzw  // VSPositionNormalColorSkinned<14:NaN:Inf>
-                dp4 o4.y, r1.xyzw, cb0[13].xyzw  // VSPositionNormalColorSkinned<15:NaN:Inf>
-                dp4 o4.z, r1.xyzw, cb0[14].xyzw  // VSPositionNormalColorSkinned<16:NaN:Inf>
-                dp4 o4.w, r1.xyzw, cb0[15].xyzw  // VSPositionNormalColorSkinned<17:NaN:Inf>
                 dp4 o1.x, r1.xyzw, cb0[0].xyzw  // VSPositionNormalColorSkinned<4:NaN:Inf>
                 dp4 o1.y, r1.xyzw, cb0[1].xyzw  // VSPositionNormalColorSkinned<5:NaN:Inf>
                 dp4 o1.z, r1.xyzw, cb0[2].xyzw  // VSPositionNormalColorSkinned<6:NaN:Inf>
@@ -1251,10 +1215,10 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx  // VSPositionNormalColorSkinned<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
                 
-                #line 158
+                #line 154
                 mov o3.xyzw, v2.xyzw  // VSPositionNormalColorSkinned<10,11,12,13>
                 ret 
-                // Approximately 56 instruction slots used
+                // Approximately 52 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -1296,7 +1260,6 @@ fxgroup
                 // POSITION                 0   xyz         1     NONE  float   xyz 
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // COLOR                    0   xyzw        3     NONE  float   xyzw
-                // TEXCOORD                 1   xyzw        4     NONE  float       
                 //
                 //
                 // Output signature:
@@ -1317,10 +1280,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 191 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 186 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul o0.xyzw, v3.xyzw, cb1[0].xyzw  // PSPositionNormalColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 195
+                #line 190
                 mov o1.xyz, v2.xyzx  // PSPositionNormalColor<4,5,6>
                 mov o1.w, cb1[1].y  // PSPositionNormalColor<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalColor<8,9,10>
@@ -1350,7 +1313,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -1396,11 +1358,10 @@ fxgroup
                 // POSITION                 0   xyz         1     NONE  float   xyz 
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // COLOR                    0   xyzw        3     NONE  float   xyzw
-                // TEXCOORD                 1   xyzw        4     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_constantbuffer cb2[383], dynamicIndexed
                 dcl_input v0.xyz
                 dcl_input v1.xyz
@@ -1415,22 +1376,21 @@ fxgroup
                 dcl_output o1.xyz
                 dcl_output o2.xyz
                 dcl_output o3.xyzw
-                dcl_output o4.xyzw
                 dcl_temps 6
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 397
+                #line 393
                 mov x0[0].x, v3.x  // weights<0>
                 mov x0[1].x, v3.y  // weights<1>
                 mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 404
+                #line 400
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // normalLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1460,10 +1420,10 @@ fxgroup
                   dp3 r4.z, v1.xyzx, cb2[r2.w + 2].xyzx
                   mad r1.xyz, r1.wwww, r4.xyzx, r1.xyzx  // normalLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 402
+                #line 398
                 endloop 
                 
-                #line 176 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 172 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -1472,10 +1432,6 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[9].xyzw  // VSPositionNormalColorSkinnedI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[10].xyzw  // VSPositionNormalColorSkinnedI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[11].xyzw  // VSPositionNormalColorSkinnedI<3:NaN:Inf>
-                dp4 o4.x, r0.xyzw, cb0[12].xyzw  // VSPositionNormalColorSkinnedI<14:NaN:Inf>
-                dp4 o4.y, r0.xyzw, cb0[13].xyzw  // VSPositionNormalColorSkinnedI<15:NaN:Inf>
-                dp4 o4.z, r0.xyzw, cb0[14].xyzw  // VSPositionNormalColorSkinnedI<16:NaN:Inf>
-                dp4 o4.w, r0.xyzw, cb0[15].xyzw  // VSPositionNormalColorSkinnedI<17:NaN:Inf>
                 dp4 o1.x, r0.xyzw, cb0[0].xyzw  // VSPositionNormalColorSkinnedI<4:NaN:Inf>
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionNormalColorSkinnedI<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionNormalColorSkinnedI<6:NaN:Inf>
@@ -1486,10 +1442,10 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx  // VSPositionNormalColorSkinnedI<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
                 
-                #line 184
+                #line 179
                 mov o3.xyzw, v2.xyzw  // VSPositionNormalColorSkinnedI<10,11,12,13>
                 ret 
-                // Approximately 59 instruction slots used
+                // Approximately 55 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -1531,7 +1487,6 @@ fxgroup
                 // POSITION                 0   xyz         1     NONE  float   xyz 
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // COLOR                    0   xyzw        3     NONE  float   xyzw
-                // TEXCOORD                 1   xyzw        4     NONE  float       
                 //
                 //
                 // Output signature:
@@ -1552,10 +1507,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 191 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 186 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul o0.xyzw, v3.xyzw, cb1[0].xyzw  // PSPositionNormalColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 195
+                #line 190
                 mov o1.xyz, v2.xyzx  // PSPositionNormalColor<4,5,6>
                 mov o1.w, cb1[1].y  // PSPositionNormalColor<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalColor<8,9,10>
@@ -1585,7 +1540,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
                 //
                 // }
                 //
@@ -1635,7 +1589,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_temps 1
                 
-                #line 205 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 200 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionTexture<0:NaN:Inf>
@@ -1646,7 +1600,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionTexture<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionTexture<6:NaN:Inf>
                 
-                #line 210
+                #line 205
                 mov o2.xy, v1.xyxx  // VSPositionTexture<7,8>
                 mov o2.z, cb3[0].x  // VSPositionTexture<9>
                 ret 
@@ -1697,10 +1651,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 272 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 267 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0  // PSPositionTexture<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 276
+                #line 271
                 mov o1.xyzw, l(0,0,0,0)  // PSPositionTexture<4: 0f,5: 0f,6: 0f,7: 0f>
                 mov o2.xyz, v1.xyzx  // PSPositionTexture<8,9,10>
                 mov o2.w, l(0)  // PSPositionTexture<11: 0f>
@@ -1729,7 +1683,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
                 //
                 // }
                 //
@@ -1781,7 +1734,7 @@ fxgroup
                 dcl_output o2.z
                 dcl_temps 1
                 
-                #line 216 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 211 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -1794,7 +1747,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionTextureI<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionTextureI<6:NaN:Inf>
                 
-                #line 223
+                #line 218
                 mov o2.xy, v1.xyxx  // VSPositionTextureI<7,8>
                 mov o2.z, v6.x  // VSPositionTextureI<9>
                 ret 
@@ -1845,10 +1798,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 272 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 267 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0  // PSPositionTexture<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 276
+                #line 271
                 mov o1.xyzw, l(0,0,0,0)  // PSPositionTexture<4: 0f,5: 0f,6: 0f,7: 0f>
                 mov o2.xyz, v1.xyzx  // PSPositionTexture<8,9,10>
                 mov o2.w, l(0)  // PSPositionTexture<11: 0f>
@@ -1877,7 +1830,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
                 //
                 // }
                 //
@@ -1941,18 +1893,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v2.x  // weights<0>
                 mov x0[1].x, v2.y  // weights<1>
                 mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1978,7 +1930,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 238 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 233 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw  // VSPositionTextureSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw  // VSPositionTextureSkinned<1:NaN:Inf>
@@ -1988,7 +1940,7 @@ fxgroup
                 dp4 o1.y, r1.xyzw, cb0[1].xyzw  // VSPositionTextureSkinned<5:NaN:Inf>
                 dp4 o1.z, r1.xyzw, cb0[2].xyzw  // VSPositionTextureSkinned<6:NaN:Inf>
                 
-                #line 243
+                #line 238
                 mov o2.xy, v1.xyxx  // VSPositionTextureSkinned<7,8>
                 mov o2.z, cb3[0].x  // VSPositionTextureSkinned<9>
                 ret 
@@ -2039,10 +1991,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 272 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 267 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0  // PSPositionTexture<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 276
+                #line 271
                 mov o1.xyzw, l(0,0,0,0)  // PSPositionTexture<4: 0f,5: 0f,6: 0f,7: 0f>
                 mov o2.xyz, v1.xyzx  // PSPositionTexture<8,9,10>
                 mov o2.w, l(0)  // PSPositionTexture<11: 0f>
@@ -2071,7 +2023,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64 [unused]
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64 [unused]
                 //
                 // }
                 //
@@ -2137,18 +2088,18 @@ fxgroup
                 dcl_temps 5
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v2.x, l(1.000000)
                 add r0.x, r0.x, -v2.y
                 add r0.x, r0.x, -v2.z
                 
-                #line 375
+                #line 371
                 mov x0[0].x, v2.x  // weights<0>
                 mov x0[1].x, v2.y  // weights<1>
                 mov x0[2].x, v2.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 381
+                #line 377
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -2174,7 +2125,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endloop 
                 
-                #line 258 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 253 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -2187,7 +2138,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionTextureSkinnedI<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionTextureSkinnedI<6:NaN:Inf>
                 
-                #line 265
+                #line 260
                 mov o2.xy, v1.xyxx  // VSPositionTextureSkinnedI<7,8>
                 mov o2.z, v8.x  // VSPositionTextureSkinnedI<9>
                 ret 
@@ -2238,10 +2189,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 272 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 267 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v2.xyzx, t0.xyzw, s0  // PSPositionTexture<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 276
+                #line 271
                 mov o1.xyzw, l(0,0,0,0)  // PSPositionTexture<4: 0f,5: 0f,6: 0f,7: 0f>
                 mov o2.xyz, v1.xyzx  // PSPositionTexture<8,9,10>
                 mov o2.w, l(0)  // PSPositionTexture<11: 0f>
@@ -2270,7 +2221,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -2309,11 +2259,10 @@ fxgroup
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // TEXCOORD                 0   xy          3     NONE  float   xy  
                 // textureIndex             0     z         3     NONE  float     z 
-                // TEXCOORD                 1   xyzw        4     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_constantbuffer cb3[1], immediateIndexed
                 dcl_input v0.xyz
                 dcl_input v1.xyz
@@ -2323,10 +2272,9 @@ fxgroup
                 dcl_output o2.xyz
                 dcl_output o3.xy
                 dcl_output o3.z
-                dcl_output o4.xyzw
-                dcl_temps 2
+                dcl_temps 1
                 
-                #line 286 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 281 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionNormalTexture<0:NaN:Inf>
@@ -2336,26 +2284,18 @@ fxgroup
                 dp4 o1.x, r0.xyzw, cb0[0].xyzw  // VSPositionNormalTexture<4:NaN:Inf>
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionNormalTexture<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionNormalTexture<6:NaN:Inf>
-                dp3 r1.x, v1.xyzx, cb0[4].xyzx
-                dp3 r1.y, v1.xyzx, cb0[5].xyzx
-                dp3 r1.z, v1.xyzx, cb0[6].xyzx
-                dp3 r1.w, r1.xyzx, r1.xyzx
-                rsq r1.w, r1.w
-                mul o2.xyz, r1.wwww, r1.xyzx  // VSPositionNormalTexture<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
-                
-                #line 293
-                mov o3.xy, v2.xyxx  // VSPositionNormalTexture<10,11>
-                mov o3.z, cb3[0].x  // VSPositionNormalTexture<16>
+                dp3 r0.x, v1.xyzx, cb0[4].xyzx
+                dp3 r0.y, v1.xyzx, cb0[5].xyzx
+                dp3 r0.z, v1.xyzx, cb0[6].xyzx
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul o2.xyz, r0.wwww, r0.xyzx  // VSPositionNormalTexture<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
                 
                 #line 287
-                dp4 o4.x, r0.xyzw, cb0[12].xyzw  // VSPositionNormalTexture<12:NaN:Inf>
-                dp4 o4.y, r0.xyzw, cb0[13].xyzw  // VSPositionNormalTexture<13:NaN:Inf>
-                dp4 o4.z, r0.xyzw, cb0[14].xyzw  // VSPositionNormalTexture<14:NaN:Inf>
-                dp4 o4.w, r0.xyzw, cb0[15].xyzw  // VSPositionNormalTexture<15:NaN:Inf>
-                
-                #line 293
+                mov o3.xy, v2.xyxx  // VSPositionNormalTexture<10,11>
+                mov o3.z, cb3[0].x  // VSPositionNormalTexture<12>
                 ret 
-                // Approximately 22 instruction slots used
+                // Approximately 18 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -2400,7 +2340,6 @@ fxgroup
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // TEXCOORD                 0   xy          3     NONE  float   xy  
                 // textureIndex             0     z         3     NONE  float     z 
-                // TEXCOORD                 1   xyzw        4     NONE  float       
                 //
                 //
                 // Output signature:
@@ -2424,10 +2363,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 367 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 358 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0  // PSPositionNormalTexture<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 371
+                #line 362
                 mov o1.xyz, v2.xyzx  // PSPositionNormalTexture<4,5,6>
                 mov o1.w, cb1[1].y  // PSPositionNormalTexture<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTexture<8,9,10>
@@ -2457,7 +2396,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -2494,11 +2432,10 @@ fxgroup
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // TEXCOORD                 0   xy          3     NONE  float   xy  
                 // textureIndex             0     z         3     NONE  float     z 
-                // TEXCOORD                 1   xyzw        4     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_input v0.xyz
                 dcl_input v1.xyz
                 dcl_input v2.xy
@@ -2512,10 +2449,9 @@ fxgroup
                 dcl_output o2.xyz
                 dcl_output o3.xy
                 dcl_output o3.z
-                dcl_output o4.xyzw
-                dcl_temps 2
+                dcl_temps 1
                 
-                #line 299 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 293 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -2527,26 +2463,18 @@ fxgroup
                 dp4 o1.x, r0.xyzw, cb0[0].xyzw  // VSPositionNormalTextureI<4:NaN:Inf>
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionNormalTextureI<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionNormalTextureI<6:NaN:Inf>
-                dp3 r1.x, v1.xyzx, cb0[4].xyzx
-                dp3 r1.y, v1.xyzx, cb0[5].xyzx
-                dp3 r1.z, v1.xyzx, cb0[6].xyzx
-                dp3 r1.w, r1.xyzx, r1.xyzx
-                rsq r1.w, r1.w
-                mul o2.xyz, r1.wwww, r1.xyzx  // VSPositionNormalTextureI<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
+                dp3 r0.x, v1.xyzx, cb0[4].xyzx
+                dp3 r0.y, v1.xyzx, cb0[5].xyzx
+                dp3 r0.z, v1.xyzx, cb0[6].xyzx
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul o2.xyz, r0.wwww, r0.xyzx  // VSPositionNormalTextureI<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
                 
-                #line 308
+                #line 301
                 mov o3.xy, v2.xyxx  // VSPositionNormalTextureI<10,11>
-                mov o3.z, v7.x  // VSPositionNormalTextureI<16>
-                
-                #line 302
-                dp4 o4.x, r0.xyzw, cb0[12].xyzw  // VSPositionNormalTextureI<12:NaN:Inf>
-                dp4 o4.y, r0.xyzw, cb0[13].xyzw  // VSPositionNormalTextureI<13:NaN:Inf>
-                dp4 o4.z, r0.xyzw, cb0[14].xyzw  // VSPositionNormalTextureI<14:NaN:Inf>
-                dp4 o4.w, r0.xyzw, cb0[15].xyzw  // VSPositionNormalTextureI<15:NaN:Inf>
-                
-                #line 308
+                mov o3.z, v7.x  // VSPositionNormalTextureI<12>
                 ret 
-                // Approximately 24 instruction slots used
+                // Approximately 20 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -2591,7 +2519,6 @@ fxgroup
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // TEXCOORD                 0   xy          3     NONE  float   xy  
                 // textureIndex             0     z         3     NONE  float     z 
-                // TEXCOORD                 1   xyzw        4     NONE  float       
                 //
                 //
                 // Output signature:
@@ -2615,10 +2542,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 367 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 358 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0  // PSPositionNormalTexture<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 371
+                #line 362
                 mov o1.xyz, v2.xyzx  // PSPositionNormalTexture<4,5,6>
                 mov o1.w, cb1[1].y  // PSPositionNormalTexture<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTexture<8,9,10>
@@ -2648,7 +2575,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -2697,11 +2623,10 @@ fxgroup
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // TEXCOORD                 0   xy          3     NONE  float   xy  
                 // textureIndex             0     z         3     NONE  float     z 
-                // TEXCOORD                 1   xyzw        4     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_constantbuffer cb2[383], dynamicIndexed
                 dcl_constantbuffer cb3[1], immediateIndexed
                 dcl_input v0.xyz
@@ -2714,22 +2639,21 @@ fxgroup
                 dcl_output o2.xyz
                 dcl_output o3.xy
                 dcl_output o3.z
-                dcl_output o4.xyzw
                 dcl_temps 6
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 397
+                #line 393
                 mov x0[0].x, v3.x  // weights<0>
                 mov x0[1].x, v3.y  // weights<1>
                 mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 404
+                #line 400
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -2759,19 +2683,15 @@ fxgroup
                   dp3 r4.z, v1.xyzx, cb2[r3.y + 2].xyzx
                   mad r2.xyz, r2.wwww, r4.xyzx, r2.xyzx  // normalLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 402
+                #line 398
                 endloop 
                 
-                #line 326 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 319 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw  // VSPositionNormalTextureSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw  // VSPositionNormalTextureSkinned<1:NaN:Inf>
                 dp4 o0.z, r1.xyzw, cb0[10].xyzw  // VSPositionNormalTextureSkinned<2:NaN:Inf>
                 dp4 o0.w, r1.xyzw, cb0[11].xyzw  // VSPositionNormalTextureSkinned<3:NaN:Inf>
-                dp4 o4.x, r1.xyzw, cb0[12].xyzw  // VSPositionNormalTextureSkinned<12:NaN:Inf>
-                dp4 o4.y, r1.xyzw, cb0[13].xyzw  // VSPositionNormalTextureSkinned<13:NaN:Inf>
-                dp4 o4.z, r1.xyzw, cb0[14].xyzw  // VSPositionNormalTextureSkinned<14:NaN:Inf>
-                dp4 o4.w, r1.xyzw, cb0[15].xyzw  // VSPositionNormalTextureSkinned<15:NaN:Inf>
                 dp4 o1.x, r1.xyzw, cb0[0].xyzw  // VSPositionNormalTextureSkinned<4:NaN:Inf>
                 dp4 o1.y, r1.xyzw, cb0[1].xyzw  // VSPositionNormalTextureSkinned<5:NaN:Inf>
                 dp4 o1.z, r1.xyzw, cb0[2].xyzw  // VSPositionNormalTextureSkinned<6:NaN:Inf>
@@ -2782,11 +2702,11 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx  // VSPositionNormalTextureSkinned<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
                 
-                #line 333
+                #line 325
                 mov o3.xy, v2.xyxx  // VSPositionNormalTextureSkinned<10,11>
-                mov o3.z, cb3[0].x  // VSPositionNormalTextureSkinned<16>
+                mov o3.z, cb3[0].x  // VSPositionNormalTextureSkinned<12>
                 ret 
-                // Approximately 57 instruction slots used
+                // Approximately 53 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -2831,7 +2751,6 @@ fxgroup
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // TEXCOORD                 0   xy          3     NONE  float   xy  
                 // textureIndex             0     z         3     NONE  float     z 
-                // TEXCOORD                 1   xyzw        4     NONE  float       
                 //
                 //
                 // Output signature:
@@ -2855,10 +2774,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 367 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 358 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0  // PSPositionNormalTexture<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 371
+                #line 362
                 mov o1.xyz, v2.xyzx  // PSPositionNormalTexture<4,5,6>
                 mov o1.w, cb1[1].y  // PSPositionNormalTexture<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTexture<8,9,10>
@@ -2888,7 +2807,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -2935,11 +2853,10 @@ fxgroup
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // TEXCOORD                 0   xy          3     NONE  float   xy  
                 // textureIndex             0     z         3     NONE  float     z 
-                // TEXCOORD                 1   xyzw        4     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_constantbuffer cb2[383], dynamicIndexed
                 dcl_input v0.xyz
                 dcl_input v1.xyz
@@ -2956,22 +2873,21 @@ fxgroup
                 dcl_output o2.xyz
                 dcl_output o3.xy
                 dcl_output o3.z
-                dcl_output o4.xyzw
                 dcl_temps 6
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v3.x, l(1.000000)
                 add r0.x, r0.x, -v3.y
                 add r0.x, r0.x, -v3.z
                 
-                #line 397
+                #line 393
                 mov x0[0].x, v3.x  // weights<0>
                 mov x0[1].x, v3.y  // weights<1>
                 mov x0[2].x, v3.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 404
+                #line 400
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // normalLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -3001,10 +2917,10 @@ fxgroup
                   dp3 r4.z, v1.xyzx, cb2[r2.w + 2].xyzx
                   mad r1.xyz, r1.wwww, r4.xyzx, r1.xyzx  // normalLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 402
+                #line 398
                 endloop 
                 
-                #line 351 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 343 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -3013,10 +2929,6 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[9].xyzw  // VSPositionNormalTextureSkinnedI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[10].xyzw  // VSPositionNormalTextureSkinnedI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[11].xyzw  // VSPositionNormalTextureSkinnedI<3:NaN:Inf>
-                dp4 o4.x, r0.xyzw, cb0[12].xyzw  // VSPositionNormalTextureSkinnedI<12:NaN:Inf>
-                dp4 o4.y, r0.xyzw, cb0[13].xyzw  // VSPositionNormalTextureSkinnedI<13:NaN:Inf>
-                dp4 o4.z, r0.xyzw, cb0[14].xyzw  // VSPositionNormalTextureSkinnedI<14:NaN:Inf>
-                dp4 o4.w, r0.xyzw, cb0[15].xyzw  // VSPositionNormalTextureSkinnedI<15:NaN:Inf>
                 dp4 o1.x, r0.xyzw, cb0[0].xyzw  // VSPositionNormalTextureSkinnedI<4:NaN:Inf>
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionNormalTextureSkinnedI<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionNormalTextureSkinnedI<6:NaN:Inf>
@@ -3027,11 +2939,11 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx  // VSPositionNormalTextureSkinnedI<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
                 
-                #line 360
+                #line 351
                 mov o3.xy, v2.xyxx  // VSPositionNormalTextureSkinnedI<10,11>
-                mov o3.z, v9.x  // VSPositionNormalTextureSkinnedI<16>
+                mov o3.z, v9.x  // VSPositionNormalTextureSkinnedI<12>
                 ret 
-                // Approximately 60 instruction slots used
+                // Approximately 56 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -3076,7 +2988,6 @@ fxgroup
                 // NORMAL                   0   xyz         2     NONE  float   xyz 
                 // TEXCOORD                 0   xy          3     NONE  float   xy  
                 // textureIndex             0     z         3     NONE  float     z 
-                // TEXCOORD                 1   xyzw        4     NONE  float       
                 //
                 //
                 // Output signature:
@@ -3100,10 +3011,10 @@ fxgroup
                 dcl_output o1.xyzw
                 dcl_output o2.xyzw
                 
-                #line 367 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 358 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v3.xyzx, t0.xyzw, s0  // PSPositionNormalTexture<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 371
+                #line 362
                 mov o1.xyz, v2.xyzx  // PSPositionNormalTexture<4,5,6>
                 mov o1.w, cb1[1].y  // PSPositionNormalTexture<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTexture<8,9,10>
@@ -3133,7 +3044,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -3174,11 +3084,10 @@ fxgroup
                 // TANGENT                  0   xyz         3     NONE  float   xyz 
                 // TEXCOORD                 0   xy          4     NONE  float   xy  
                 // textureIndex             0     z         4     NONE  float     z 
-                // TEXCOORD                 1   xyzw        5     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_constantbuffer cb3[1], immediateIndexed
                 dcl_input v0.xyz
                 dcl_input v1.xyz
@@ -3190,10 +3099,9 @@ fxgroup
                 dcl_output o3.xyz
                 dcl_output o4.xy
                 dcl_output o4.z
-                dcl_output o5.xyzw
-                dcl_temps 2
+                dcl_temps 1
                 
-                #line 381 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 372 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw  // VSPositionNormalTextureTangent<0:NaN:Inf>
@@ -3203,29 +3111,21 @@ fxgroup
                 dp4 o1.x, r0.xyzw, cb0[0].xyzw  // VSPositionNormalTextureTangent<4:NaN:Inf>
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionNormalTextureTangent<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionNormalTextureTangent<6:NaN:Inf>
-                dp3 r1.x, v1.xyzx, cb0[4].xyzx
-                dp3 r1.y, v1.xyzx, cb0[5].xyzx
-                dp3 r1.z, v1.xyzx, cb0[6].xyzx
-                dp3 r1.w, r1.xyzx, r1.xyzx
-                rsq r1.w, r1.w
-                mul o2.xyz, r1.wwww, r1.xyzx  // VSPositionNormalTextureTangent<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
+                dp3 r0.x, v1.xyzx, cb0[4].xyzx
+                dp3 r0.y, v1.xyzx, cb0[5].xyzx
+                dp3 r0.z, v1.xyzx, cb0[6].xyzx
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul o2.xyz, r0.wwww, r0.xyzx  // VSPositionNormalTextureTangent<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
                 dp3 o3.x, v2.xyzx, cb0[0].xyzx  // VSPositionNormalTextureTangent<10:NaN:Inf>
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx  // VSPositionNormalTextureTangent<11:NaN:Inf>
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx  // VSPositionNormalTextureTangent<12:NaN:Inf>
                 
-                #line 389
+                #line 379
                 mov o4.xy, v3.xyxx  // VSPositionNormalTextureTangent<13,14>
-                mov o4.z, cb3[0].x  // VSPositionNormalTextureTangent<19>
-                
-                #line 382
-                dp4 o5.x, r0.xyzw, cb0[12].xyzw  // VSPositionNormalTextureTangent<15:NaN:Inf>
-                dp4 o5.y, r0.xyzw, cb0[13].xyzw  // VSPositionNormalTextureTangent<16:NaN:Inf>
-                dp4 o5.z, r0.xyzw, cb0[14].xyzw  // VSPositionNormalTextureTangent<17:NaN:Inf>
-                dp4 o5.w, r0.xyzw, cb0[15].xyzw  // VSPositionNormalTextureTangent<18:NaN:Inf>
-                
-                #line 389
+                mov o4.z, cb3[0].x  // VSPositionNormalTextureTangent<15>
                 ret 
-                // Approximately 25 instruction slots used
+                // Approximately 21 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -3273,7 +3173,6 @@ fxgroup
                 // TANGENT                  0   xyz         3     NONE  float   xyz 
                 // TEXCOORD                 0   xy          4     NONE  float   xy  
                 // textureIndex             0     z         4     NONE  float     z 
-                // TEXCOORD                 1   xyzw        5     NONE  float       
                 //
                 //
                 // Output signature:
@@ -3301,7 +3200,7 @@ fxgroup
                 dcl_output o2.xyzw
                 dcl_temps 3
                 
-                #line 472 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 459 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
                 #line 71 "IncLights.fx"
@@ -3313,7 +3212,7 @@ fxgroup
                 mul r1.xyz, r0.yzxy, v2.zxyz
                 mad r1.xyz, v2.yzxy, r0.zxyz, -r1.xyzx  // B<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 473 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 460 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
                 #line 67 "IncLights.fx"
@@ -3327,7 +3226,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o1.xyz, r0.wwww, r0.xyzx  // PSPositionNormalTextureTangent<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
                 
-                #line 480 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 467 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o1.w, cb1[1].y  // PSPositionNormalTextureTangent<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTextureTangent<8,9,10>
                 mov o2.w, cb1[1].x  // PSPositionNormalTextureTangent<11>
@@ -3356,7 +3255,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -3395,11 +3293,10 @@ fxgroup
                 // TANGENT                  0   xyz         3     NONE  float   xyz 
                 // TEXCOORD                 0   xy          4     NONE  float   xy  
                 // textureIndex             0     z         4     NONE  float     z 
-                // TEXCOORD                 1   xyzw        5     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_input v0.xyz
                 dcl_input v1.xyz
                 dcl_input v2.xyz
@@ -3415,10 +3312,9 @@ fxgroup
                 dcl_output o3.xyz
                 dcl_output o4.xy
                 dcl_output o4.z
-                dcl_output o5.xyzw
-                dcl_temps 2
+                dcl_temps 1
                 
-                #line 395 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 385 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, v0.yyyy, v5.xyzw
                 mad r0.xyzw, v0.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v6.xyzw, r0.xyzw
@@ -3430,29 +3326,21 @@ fxgroup
                 dp4 o1.x, r0.xyzw, cb0[0].xyzw  // VSPositionNormalTextureTangentI<4:NaN:Inf>
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionNormalTextureTangentI<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionNormalTextureTangentI<6:NaN:Inf>
-                dp3 r1.x, v1.xyzx, cb0[4].xyzx
-                dp3 r1.y, v1.xyzx, cb0[5].xyzx
-                dp3 r1.z, v1.xyzx, cb0[6].xyzx
-                dp3 r1.w, r1.xyzx, r1.xyzx
-                rsq r1.w, r1.w
-                mul o2.xyz, r1.wwww, r1.xyzx  // VSPositionNormalTextureTangentI<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
+                dp3 r0.x, v1.xyzx, cb0[4].xyzx
+                dp3 r0.y, v1.xyzx, cb0[5].xyzx
+                dp3 r0.z, v1.xyzx, cb0[6].xyzx
+                dp3 r0.w, r0.xyzx, r0.xyzx
+                rsq r0.w, r0.w
+                mul o2.xyz, r0.wwww, r0.xyzx  // VSPositionNormalTextureTangentI<7:NaN:Inf,8:NaN:Inf,9:NaN:Inf>
                 dp3 o3.x, v2.xyzx, cb0[0].xyzx  // VSPositionNormalTextureTangentI<10:NaN:Inf>
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx  // VSPositionNormalTextureTangentI<11:NaN:Inf>
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx  // VSPositionNormalTextureTangentI<12:NaN:Inf>
                 
-                #line 405
+                #line 394
                 mov o4.xy, v3.xyxx  // VSPositionNormalTextureTangentI<13,14>
-                mov o4.z, v8.x  // VSPositionNormalTextureTangentI<19>
-                
-                #line 398
-                dp4 o5.x, r0.xyzw, cb0[12].xyzw  // VSPositionNormalTextureTangentI<15:NaN:Inf>
-                dp4 o5.y, r0.xyzw, cb0[13].xyzw  // VSPositionNormalTextureTangentI<16:NaN:Inf>
-                dp4 o5.z, r0.xyzw, cb0[14].xyzw  // VSPositionNormalTextureTangentI<17:NaN:Inf>
-                dp4 o5.w, r0.xyzw, cb0[15].xyzw  // VSPositionNormalTextureTangentI<18:NaN:Inf>
-                
-                #line 405
+                mov o4.z, v8.x  // VSPositionNormalTextureTangentI<15>
                 ret 
-                // Approximately 27 instruction slots used
+                // Approximately 23 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -3500,7 +3388,6 @@ fxgroup
                 // TANGENT                  0   xyz         3     NONE  float   xyz 
                 // TEXCOORD                 0   xy          4     NONE  float   xy  
                 // textureIndex             0     z         4     NONE  float     z 
-                // TEXCOORD                 1   xyzw        5     NONE  float       
                 //
                 //
                 // Output signature:
@@ -3528,7 +3415,7 @@ fxgroup
                 dcl_output o2.xyzw
                 dcl_temps 3
                 
-                #line 472 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 459 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
                 #line 71 "IncLights.fx"
@@ -3540,7 +3427,7 @@ fxgroup
                 mul r1.xyz, r0.yzxy, v2.zxyz
                 mad r1.xyz, v2.yzxy, r0.zxyz, -r1.xyzx  // B<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 473 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 460 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
                 #line 67 "IncLights.fx"
@@ -3554,7 +3441,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o1.xyz, r0.wwww, r0.xyzx  // PSPositionNormalTextureTangent<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
                 
-                #line 480 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 467 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o1.w, cb1[1].y  // PSPositionNormalTextureTangent<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTextureTangent<8,9,10>
                 mov o2.w, cb1[1].x  // PSPositionNormalTextureTangent<11>
@@ -3583,7 +3470,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -3634,11 +3520,10 @@ fxgroup
                 // TANGENT                  0   xyz         3     NONE  float   xyz 
                 // TEXCOORD                 0   xy          4     NONE  float   xy  
                 // textureIndex             0     z         4     NONE  float     z 
-                // TEXCOORD                 1   xyzw        5     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_constantbuffer cb2[383], dynamicIndexed
                 dcl_constantbuffer cb3[1], immediateIndexed
                 dcl_input v0.xyz
@@ -3653,22 +3538,21 @@ fxgroup
                 dcl_output o3.xyz
                 dcl_output o4.xy
                 dcl_output o4.z
-                dcl_output o5.xyzw
                 dcl_temps 7
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 424
+                #line 420
                 mov x0[0].x, v4.x  // weights<0>
                 mov x0[1].x, v4.y  // weights<1>
                 mov x0[2].x, v4.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 432
+                #line 428
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // positionLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -3703,19 +3587,15 @@ fxgroup
                   dp3 r5.z, v2.xyzx, cb2[r3.w + 2].xyzx
                   mad r3.xyz, r2.wwww, r5.xyzx, r3.xyzx  // tangentLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 430
+                #line 426
                 endloop 
                 
-                #line 426 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 415 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw  // VSPositionNormalTextureTangentSkinned<0:NaN:Inf>
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw  // VSPositionNormalTextureTangentSkinned<1:NaN:Inf>
                 dp4 o0.z, r1.xyzw, cb0[10].xyzw  // VSPositionNormalTextureTangentSkinned<2:NaN:Inf>
                 dp4 o0.w, r1.xyzw, cb0[11].xyzw  // VSPositionNormalTextureTangentSkinned<3:NaN:Inf>
-                dp4 o5.x, r1.xyzw, cb0[12].xyzw  // VSPositionNormalTextureTangentSkinned<15:NaN:Inf>
-                dp4 o5.y, r1.xyzw, cb0[13].xyzw  // VSPositionNormalTextureTangentSkinned<16:NaN:Inf>
-                dp4 o5.z, r1.xyzw, cb0[14].xyzw  // VSPositionNormalTextureTangentSkinned<17:NaN:Inf>
-                dp4 o5.w, r1.xyzw, cb0[15].xyzw  // VSPositionNormalTextureTangentSkinned<18:NaN:Inf>
                 dp4 o1.x, r1.xyzw, cb0[0].xyzw  // VSPositionNormalTextureTangentSkinned<4:NaN:Inf>
                 dp4 o1.y, r1.xyzw, cb0[1].xyzw  // VSPositionNormalTextureTangentSkinned<5:NaN:Inf>
                 dp4 o1.z, r1.xyzw, cb0[2].xyzw  // VSPositionNormalTextureTangentSkinned<6:NaN:Inf>
@@ -3729,11 +3609,11 @@ fxgroup
                 dp3 o3.y, r3.xyzx, cb0[1].xyzx  // VSPositionNormalTextureTangentSkinned<11:NaN:Inf>
                 dp3 o3.z, r3.xyzx, cb0[2].xyzx  // VSPositionNormalTextureTangentSkinned<12:NaN:Inf>
                 
-                #line 434
+                #line 422
                 mov o4.xy, v3.xyxx  // VSPositionNormalTextureTangentSkinned<13,14>
-                mov o4.z, cb3[0].x  // VSPositionNormalTextureTangentSkinned<19>
+                mov o4.z, cb3[0].x  // VSPositionNormalTextureTangentSkinned<15>
                 ret 
-                // Approximately 65 instruction slots used
+                // Approximately 61 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -3781,7 +3661,6 @@ fxgroup
                 // TANGENT                  0   xyz         3     NONE  float   xyz 
                 // TEXCOORD                 0   xy          4     NONE  float   xy  
                 // textureIndex             0     z         4     NONE  float     z 
-                // TEXCOORD                 1   xyzw        5     NONE  float       
                 //
                 //
                 // Output signature:
@@ -3809,7 +3688,7 @@ fxgroup
                 dcl_output o2.xyzw
                 dcl_temps 3
                 
-                #line 472 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 459 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
                 #line 71 "IncLights.fx"
@@ -3821,7 +3700,7 @@ fxgroup
                 mul r1.xyz, r0.yzxy, v2.zxyz
                 mad r1.xyz, v2.yzxy, r0.zxyz, -r1.xyzx  // B<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 473 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 460 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
                 #line 67 "IncLights.fx"
@@ -3835,7 +3714,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o1.xyz, r0.wwww, r0.xyzx  // PSPositionNormalTextureTangent<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
                 
-                #line 480 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 467 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o1.w, cb1[1].y  // PSPositionNormalTextureTangent<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTextureTangent<8,9,10>
                 mov o2.w, cb1[1].x  // PSPositionNormalTextureTangent<11>
@@ -3864,7 +3743,6 @@ fxgroup
                 //   float4x4 gWorld;                   // Offset:    0 Size:    64
                 //   float4x4 gWorldInverse;            // Offset:   64 Size:    64
                 //   float4x4 gWorldViewProjection;     // Offset:  128 Size:    64
-                //   float4x4 gShadowTransform;         // Offset:  192 Size:    64
                 //
                 // }
                 //
@@ -3913,11 +3791,10 @@ fxgroup
                 // TANGENT                  0   xyz         3     NONE  float   xyz 
                 // TEXCOORD                 0   xy          4     NONE  float   xy  
                 // textureIndex             0     z         4     NONE  float     z 
-                // TEXCOORD                 1   xyzw        5     NONE  float   xyzw
                 //
                 vs_5_0
                 dcl_globalFlags refactoringAllowed
-                dcl_constantbuffer cb0[16], immediateIndexed
+                dcl_constantbuffer cb0[12], immediateIndexed
                 dcl_constantbuffer cb2[383], dynamicIndexed
                 dcl_input v0.xyz
                 dcl_input v1.xyz
@@ -3936,22 +3813,21 @@ fxgroup
                 dcl_output o3.xyz
                 dcl_output o4.xy
                 dcl_output o4.z
-                dcl_output o5.xyzw
                 dcl_temps 7
                 dcl_indexableTemp x0[4], 4
                 
-                #line 364 "IncVertexFormats.fx"
+                #line 360 "IncVertexFormats.fx"
                 add r0.x, -v4.x, l(1.000000)
                 add r0.x, r0.x, -v4.y
                 add r0.x, r0.x, -v4.z
                 
-                #line 424
+                #line 420
                 mov x0[0].x, v4.x  // weights<0>
                 mov x0[1].x, v4.y  // weights<1>
                 mov x0[2].x, v4.z  // weights<2>
                 mov x0[3].x, r0.x  // weights<3>
                 
-                #line 432
+                #line 428
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 mov r1.xyz, l(0,0,0,0)  // normalLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -3986,10 +3862,10 @@ fxgroup
                   dp3 r5.z, v2.xyzx, cb2[r2.w + 2].xyzx
                   mad r2.xyz, r1.wwww, r5.xyzx, r2.xyzx  // tangentLocal<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 430
+                #line 426
                 endloop 
                 
-                #line 455 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 443 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mul r0.xyzw, r3.yyyy, v7.xyzw
                 mad r0.xyzw, r3.xxxx, v6.xyzw, r0.xyzw
                 mad r0.xyzw, r3.zzzz, v8.xyzw, r0.xyzw
@@ -3998,10 +3874,6 @@ fxgroup
                 dp4 o0.y, r0.xyzw, cb0[9].xyzw  // VSPositionNormalTextureTangentSkinnedI<1:NaN:Inf>
                 dp4 o0.z, r0.xyzw, cb0[10].xyzw  // VSPositionNormalTextureTangentSkinnedI<2:NaN:Inf>
                 dp4 o0.w, r0.xyzw, cb0[11].xyzw  // VSPositionNormalTextureTangentSkinnedI<3:NaN:Inf>
-                dp4 o5.x, r0.xyzw, cb0[12].xyzw  // VSPositionNormalTextureTangentSkinnedI<15:NaN:Inf>
-                dp4 o5.y, r0.xyzw, cb0[13].xyzw  // VSPositionNormalTextureTangentSkinnedI<16:NaN:Inf>
-                dp4 o5.z, r0.xyzw, cb0[14].xyzw  // VSPositionNormalTextureTangentSkinnedI<17:NaN:Inf>
-                dp4 o5.w, r0.xyzw, cb0[15].xyzw  // VSPositionNormalTextureTangentSkinnedI<18:NaN:Inf>
                 dp4 o1.x, r0.xyzw, cb0[0].xyzw  // VSPositionNormalTextureTangentSkinnedI<4:NaN:Inf>
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw  // VSPositionNormalTextureTangentSkinnedI<5:NaN:Inf>
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw  // VSPositionNormalTextureTangentSkinnedI<6:NaN:Inf>
@@ -4015,11 +3887,11 @@ fxgroup
                 dp3 o3.y, r2.xyzx, cb0[1].xyzx  // VSPositionNormalTextureTangentSkinnedI<11:NaN:Inf>
                 dp3 o3.z, r2.xyzx, cb0[2].xyzx  // VSPositionNormalTextureTangentSkinnedI<12:NaN:Inf>
                 
-                #line 465
+                #line 452
                 mov o4.xy, v3.xyxx  // VSPositionNormalTextureTangentSkinnedI<13,14>
-                mov o4.z, v10.x  // VSPositionNormalTextureTangentSkinnedI<19>
+                mov o4.z, v10.x  // VSPositionNormalTextureTangentSkinnedI<15>
                 ret 
-                // Approximately 68 instruction slots used
+                // Approximately 64 instruction slots used
                             
             };
             GeometryShader = NULL;
@@ -4067,7 +3939,6 @@ fxgroup
                 // TANGENT                  0   xyz         3     NONE  float   xyz 
                 // TEXCOORD                 0   xy          4     NONE  float   xy  
                 // textureIndex             0     z         4     NONE  float     z 
-                // TEXCOORD                 1   xyzw        5     NONE  float       
                 //
                 //
                 // Output signature:
@@ -4095,7 +3966,7 @@ fxgroup
                 dcl_output o2.xyzw
                 dcl_temps 3
                 
-                #line 472 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 459 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1  // PSPositionNormalTextureTangent<0:Inf,1:Inf,2:Inf,3:Inf>
                 
                 #line 71 "IncLights.fx"
@@ -4107,7 +3978,7 @@ fxgroup
                 mul r1.xyz, r0.yzxy, v2.zxyz
                 mad r1.xyz, v2.yzxy, r0.zxyz, -r1.xyzx  // B<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 473 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 460 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // normalMapSample<0:Inf,1:Inf,2:Inf>
                 
                 #line 67 "IncLights.fx"
@@ -4121,7 +3992,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o1.xyz, r0.wwww, r0.xyzx  // PSPositionNormalTextureTangent<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
                 
-                #line 480 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
+                #line 467 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 mov o1.w, cb1[1].y  // PSPositionNormalTextureTangent<7>
                 mov o2.xyz, v1.xyzx  // PSPositionNormalTextureTangent<8,9,10>
                 mov o2.w, cb1[1].x  // PSPositionNormalTextureTangent<11>

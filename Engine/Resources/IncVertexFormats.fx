@@ -251,7 +251,6 @@ struct PSVertexBillboard
 	float3 positionWorld : POSITION;
 	float3 normalWorld : NORMAL;
 	float2 tex : TEXCOORD0;
-	float4 shadowHomogeneous : TEXCOORD1;
 	uint primitiveID : SV_PrimitiveID;
 };
 struct PSParticleSolid
@@ -287,7 +286,6 @@ struct PSVertexPositionNormalColor
 	float3 positionWorld : POSITION;
     float3 normalWorld : NORMAL;
     float4 color : COLOR0;
-	float4 shadowHomogeneous : TEXCOORD1;
 };
 struct PSVertexPositionTexture
 {
@@ -302,7 +300,6 @@ struct PSVertexPositionNormalTexture
 	float3 positionWorld : POSITION;
     float3 normalWorld : NORMAL;
     float2 tex : TEXCOORD0;
-	float4 shadowHomogeneous : TEXCOORD1;
 	float textureIndex : textureIndex;
 };
 struct PSVertexPositionNormalTextureTangent
@@ -312,7 +309,6 @@ struct PSVertexPositionNormalTextureTangent
     float3 normalWorld : NORMAL;
     float3 tangentWorld : TANGENT;
     float2 tex : TEXCOORD0;
-	float4 shadowHomogeneous : TEXCOORD1;
 	float textureIndex : textureIndex;
 };
 
