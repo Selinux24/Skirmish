@@ -101,6 +101,10 @@ namespace Engine
                     {
                         this.Game.Graphics.SetBlendDeferredComposerTransparent();
                     }
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    {
+                        this.Game.Graphics.SetBlendTransparent();
+                    }
 
                     foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
                     {
@@ -125,7 +129,7 @@ namespace Engine
                             }
                             else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                             {
-                                effect.UpdatePerObject(matData, 0, 0, null);
+                                effect.UpdatePerObject(matData, 0, textureCount, diffuseTexture);
                             }
 
                             #endregion

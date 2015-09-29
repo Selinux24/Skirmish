@@ -82,7 +82,7 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 	}
 }
 [maxvertexcount(4)]
-void GSSMBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, inout TriangleStream<ShadowMapOutput> outputStream)
+void GSSMBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSShadowMapOutput> outputStream)
 {
 	float3 look = gEyePositionWorld - input[0].centerWorld;
 	if(gRadius == 0 || length(look) < gRadius)
@@ -103,11 +103,14 @@ void GSSMBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveI
 		v[3] = float4(input[0].centerWorld - halfWidth * right + halfHeight * up, 1.0f);
 
 		//Transform quad vertices to world space and output them as a triangle strip.
-		ShadowMapOutput gout;
+		PSShadowMapOutput gout;
 		[unroll]
 		for(int i = 0; i < 4; ++i)
 		{
 			gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
+			gout.depth = v[i];
+			gout.tex = gQuadTexC[i];
+			gout.primitiveID = primID;
 
 			outputStream.Append(gout);
 		}
@@ -161,6 +164,24 @@ GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 
     return output;
 }
+float4 PSSMBillboard(PSShadowMapOutput input) : SV_Target
+{
+	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
+	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
+
+	if(textureColor.a > 0.05f)
+	{
+		float depthValue = input.depth.z / input.depth.w;
+
+		return float4(depthValue, depthValue, depthValue, 1.0f);
+	}
+	else
+	{
+		discard;
+
+		return 0.0f;
+	}
+}
 
 technique11 ForwardBillboard
 {
@@ -186,6 +207,6 @@ technique11 ShadowMapBillboard
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSBillboard()));
 		SetGeometryShader(CompileShader(gs_5_0, GSSMBillboard()));
-		SetPixelShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSSMBillboard()));
 	}
 }

@@ -319,6 +319,13 @@ struct ShadowMapOutput
 {
 	float4 positionHomogeneous : SV_POSITION;
 };
+struct PSShadowMapOutput
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float4 depth : TEXCOORD0;
+    float2 tex : TEXCOORD1;
+	uint primitiveID : SV_PrimitiveID;
+};
 
 /*
 DEFERRED LIGHTNING
