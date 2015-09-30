@@ -1,6 +1,7 @@
-﻿using System.Windows.Forms;
+﻿using Engine.Properties;
 using SharpDX;
 using SharpDX.Windows;
+using System.Windows.Forms;
 
 namespace Engine
 {
@@ -55,9 +56,23 @@ namespace Engine
 
             this.UpdateSizes(fullScreen);
 
+            this.InitializeComponent();
+
             this.initialized = true;
         }
+        /// <summary>
+        /// Initialize component
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            
+            this.Icon = Resources.engine;
+            this.Name = "EngineForm";
+            this.Text = "Engine Form";
 
+            this.ResumeLayout(false);
+        }
         /// <summary>
         /// Invalidation override
         /// </summary>
