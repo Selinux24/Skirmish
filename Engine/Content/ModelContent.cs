@@ -527,7 +527,6 @@ namespace Engine.Content
 
             foreach (Triangle tri in triList)
             {
-                float area = tri.Area;
                 float inc = MathUtil.RadiansToDegrees(tri.Inclination);
 
                 if (inc > maxAngle)
@@ -539,7 +538,7 @@ namespace Engine.Content
                     inc = (inc + maxAngle) / maxAngle;
                 }
 
-                int num = (int)(area * saturation * inc);
+                int num = (int)(saturation * inc);
                 for (int b = 0; b < num; b++)
                 {
                     //Buscar un punto en el triángulo

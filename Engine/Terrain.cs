@@ -13,14 +13,6 @@ namespace Engine
     public class Terrain : Drawable
     {
         /// <summary>
-        /// Geometry
-        /// </summary>
-        private Model terrain = null;
-        /// <summary>
-        /// Vegetation
-        /// </summary>
-        private Billboard[] vegetation = null;
-        /// <summary>
         /// Skydom
         /// </summary>
         private Cubemap skydom = null;
@@ -28,6 +20,15 @@ namespace Engine
         /// Quadtree used for picking
         /// </summary>
         private QuadTree pickingQuadtree = null;
+
+        /// <summary>
+        /// Geometry
+        /// </summary>
+        private Model terrain = null;
+        /// <summary>
+        /// Vegetation
+        /// </summary>
+        private Billboard[] vegetation = null;
         /// <summary>
         /// Grid used for pathfinding
         /// </summary>
@@ -49,28 +50,65 @@ namespace Engine
             this.terrain.Opaque = this.Opaque = description.Opaque;
             this.terrain.DeferredEnabled = description.DeferredEnabled;
 
+            BoundingSphere bsph = this.terrain.GetBoundingSphere();
             Triangle[] triangles = this.terrain.GetTriangles();
 
             if (description != null && description.Quadtree != null)
             {
-                this.pickingQuadtree = QuadTree.Build(
-                    triangles,
-                    description.Quadtree.MaxTrianglesPerNode,
-                    description.Quadtree.MaxDepth);
+                this.pickingQuadtree = QuadTree.Build(game, triangles, description);
             }
-
-            if (description != null && description.PathFinder != null)
+            else
             {
-                this.grid = Grid.Build(
-                    this,
-                    description.PathFinder.NodeSize,
-                    description.PathFinder.NodeInclination);
+                if (description != null && description.PathFinder != null)
+                {
+                    BoundingBox bbox = this.terrain.GetBoundingBox();
+
+                    this.grid = Grid.Build(
+                        bbox,
+                        triangles,
+                        description.PathFinder.NodeSize,
+                        description.PathFinder.NodeInclination);
+                }
+
+                if (description != null && description.Vegetation != null && description.Vegetation.Length > 0)
+                {
+                    List<Billboard> vegetationList = new List<Billboard>();
+
+                    BoundingBox bbox = this.terrain.GetBoundingBox();
+
+                    for (int i = 0; i < description.Vegetation.Length; i++)
+                    {
+                        TerrainDescription.VegetationDescription vegetationDesc = description.Vegetation[i];
+
+                        ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
+                            contentFolder,
+                            bbox,
+                            triangles,
+                            vegetationDesc.VegetarionTextures,
+                            vegetationDesc.Saturation,
+                            vegetationDesc.MinSize,
+                            vegetationDesc.MaxSize,
+                            vegetationDesc.Seed);
+
+                        if (vegetationContent != null)
+                        {
+                            var billboard = new Billboard(game, vegetationContent)
+                            {
+                                Radius = vegetationDesc.Radius,
+                                Opaque = vegetationDesc.Opaque,
+                                DeferredEnabled = vegetationDesc.DeferredEnabled,
+                            };
+
+                            vegetationList.Add(billboard);
+                        }
+                    }
+
+                    this.vegetation = vegetationList.ToArray();
+                }
             }
 
             if (description != null && description.Skydom != null)
             {
-                BoundingSphere bsph = this.terrain.GetBoundingSphere();
-
                 ModelContent skydomContent = ModelContent.GenerateSkydom(
                     contentFolder,
                     description.Skydom.Texture,
@@ -81,42 +119,6 @@ namespace Engine
                     Opaque = description.Opaque,
                     DeferredEnabled = description.DeferredEnabled,
                 };
-            }
-
-            if (description != null && description.Vegetation != null && description.Vegetation.Length > 0)
-            {
-                List<Billboard> vegetationList = new List<Billboard>();
-
-                BoundingBox bbox = this.terrain.GetBoundingBox();
-
-                for (int i = 0; i < description.Vegetation.Length; i++)
-                {
-                    TerrainDescription.VegetationDescription vegetationDesc = description.Vegetation[i];
-
-                    ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
-                        contentFolder,
-                        bbox,
-                        triangles,
-                        vegetationDesc.VegetarionTextures,
-                        vegetationDesc.Saturation,
-                        vegetationDesc.MinSize,
-                        vegetationDesc.MaxSize,
-                        vegetationDesc.Seed);
-
-                    if (vegetationContent != null)
-                    {
-                        var billboard = new Billboard(game, vegetationContent)
-                        {
-                            Radius = vegetationDesc.Radius,
-                            Opaque = vegetationDesc.Opaque,
-                            DeferredEnabled = vegetationDesc.DeferredEnabled,
-                        };
-
-                        vegetationList.Add(billboard);
-                    }
-                }
-
-                this.vegetation = vegetationList.ToArray();
             }
         }
         /// <summary>
@@ -152,14 +154,23 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public override void Update(GameTime gameTime)
         {
-            this.terrain.Update(gameTime);
-
-            if (this.vegetation != null && this.vegetation.Length > 0)
+            if (this.pickingQuadtree == null)
             {
-                for (int i = 0; i < this.vegetation.Length; i++)
+                this.terrain.Update(gameTime);
+
+                if (this.vegetation != null && this.vegetation.Length > 0)
                 {
-                    this.vegetation[i].Update(gameTime);
+                    for (int i = 0; i < this.vegetation.Length; i++)
+                    {
+                        this.vegetation[i].Update(gameTime);
+                    }
                 }
+            }
+            else
+            {
+                this.terrain.Update(gameTime);
+
+                this.pickingQuadtree.Update(gameTime);
             }
 
             if (this.skydom != null) this.skydom.Update(gameTime);
@@ -176,17 +187,26 @@ namespace Engine
                 this.skydom.Draw(gameTime, context);
             }
 
-            if (!this.terrain.Cull)
+            if (this.pickingQuadtree == null)
+            {
+                if (!this.terrain.Cull)
+                {
+                    this.terrain.Draw(gameTime, context);
+
+                    if (this.vegetation != null && this.vegetation.Length > 0)
+                    {
+                        for (int i = 0; i < this.vegetation.Length; i++)
+                        {
+                            this.vegetation[i].Draw(gameTime, context);
+                        }
+                    }
+                }
+            }
+            else
             {
                 this.terrain.Draw(gameTime, context);
 
-                if (this.vegetation != null && this.vegetation.Length > 0)
-                {
-                    for (int i = 0; i < this.vegetation.Length; i++)
-                    {
-                        this.vegetation[i].Draw(gameTime, context);
-                    }
-                }
+                this.pickingQuadtree.Draw(gameTime, context);
             }
         }
         /// <summary>
@@ -195,7 +215,14 @@ namespace Engine
         /// <param name="frustum">Camera frustum</param>
         public override void FrustumCulling(BoundingFrustum frustum)
         {
-            this.terrain.FrustumCulling(frustum);
+            if (this.pickingQuadtree == null)
+            {
+                this.terrain.FrustumCulling(frustum);
+            }
+            else
+            {
+                this.pickingQuadtree.FrustumCulling(frustum);
+            }
         }
 
         /// <summary>
@@ -379,7 +406,14 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere()
         {
-            return this.terrain.GetBoundingSphere();
+            if (this.pickingQuadtree == null)
+            {
+                return this.terrain.GetBoundingSphere();
+            }
+            else
+            {
+                return this.pickingQuadtree.BoundingSphere;
+            }
         }
         /// <summary>
         /// Gets bounding box
@@ -387,7 +421,14 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox()
         {
-            return this.terrain.GetBoundingBox();
+            if (this.pickingQuadtree == null)
+            {
+                return this.terrain.GetBoundingBox();
+            }
+            else
+            {
+                return this.pickingQuadtree.BoundingBox;
+            }
         }
         /// <summary>
         /// Gets terrain bounding boxes at specified level
@@ -424,7 +465,14 @@ namespace Engine
         /// <returns>Returns triangle list. Empty if the vertex type hasn't position channel</returns>
         public Triangle[] GetTriangles()
         {
-            return this.terrain.GetTriangles();
+            if (this.pickingQuadtree == null)
+            {
+                return this.terrain.GetTriangles();
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 

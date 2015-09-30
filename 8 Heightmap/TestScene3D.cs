@@ -77,6 +77,29 @@ namespace HeightmapTest
                 {
 
                 },
+                PathFinder = new TerrainDescription.PathFinderDescription()
+                {
+                    NodeSize = 25,
+                },
+                Vegetation = new TerrainDescription.VegetationDescription[]
+                {
+                    new TerrainDescription.VegetationDescription()
+                    {
+                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds" },
+                        Saturation = 2f,
+                        Radius = 300f,
+                        MinSize = Vector2.One * 5f,
+                        MaxSize = Vector2.One * 10f,
+                    },
+                    new TerrainDescription.VegetationDescription()
+                    {
+                        VegetarionTextures = new[] { "grass.png" },
+                        Saturation = 100f,
+                        Radius = 50f,
+                        MinSize = Vector2.One * 0.20f,
+                        MaxSize = Vector2.One * 0.25f,
+                    },
+                }
             });
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);

@@ -11,26 +11,45 @@ namespace Engine.Common
         /// <summary>
         /// Build quadtree
         /// </summary>
+        /// <param name="game">Game</param>
         /// <param name="triangles">Partitioning triangles</param>
-        /// <param name="maxTrianglesPerNode">Maximum triangle count by node tail node (1024 by default)</param>
-        /// <param name="maxDepth">Maximum depth for the quadtree (if zero there is no limit)</param>
+        /// <param name="description">Description</param>
         /// <returns>Returns generated quadtree</returns>
-        public static QuadTree Build(Triangle[] triangles, int maxTrianglesPerNode = 1024, int maxDepth = 0)
+        public static QuadTree Build(
+            Game game,
+            Triangle[] triangles, 
+            TerrainDescription description)
         {
             BoundingBox bbox = Helper.CreateBoundingBox(triangles);
+            BoundingSphere bsph = Helper.CreateBoundingSphere(triangles);
 
-            QuadTree q = new QuadTree()
+            QuadTreeNode root = QuadTreeNode.CreatePartitions(
+                game,
+                bbox, 
+                triangles, 
+                0,
+                description);
+
+            return new QuadTree()
             {
-                Root = QuadTreeNode.CreatePartitions(bbox, triangles, 0, maxTrianglesPerNode, maxDepth),
+                Root = root,
+                BoundingBox = bbox,
+                BoundingSphere = bsph,
             };
-
-            return q;
         }
 
         /// <summary>
         /// Root node
         /// </summary>
-        public QuadTreeNode Root;
+        public QuadTreeNode Root { get; private set; }
+        /// <summary>
+        /// Global bounding box
+        /// </summary>
+        public BoundingBox BoundingBox { get; private set; }
+        /// <summary>
+        /// Global bounding sphere
+        /// </summary>
+        public BoundingSphere BoundingSphere { get; private set; }
 
         /// <summary>
         /// Pick nearest position
@@ -122,6 +141,33 @@ namespace Engine.Common
         public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
         {
             return this.Root.GetBoundingBoxes(maxDepth);
+        }
+
+        /// <summary>
+        /// Perfomrs frustum culling into the quad tree
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        public void FrustumCulling(BoundingFrustum frustum)
+        {
+            this.Root.CullAll();
+            this.Root.FrustumCulling(frustum);
+        }
+        /// <summary>
+        /// Updates the quad tree components
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
+        {
+            this.Root.Update(gameTime);
+        }
+        /// <summary>
+        /// Draws the quad tree components
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Drawing context</param>
+        public void Draw(GameTime gameTime, Context context)
+        {
+            this.Root.Draw(gameTime, context);
         }
 
         /// <summary>

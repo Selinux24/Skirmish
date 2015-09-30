@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Engine.Content;
 using SharpDX;
+using System;
+using System.Collections.Generic;
 
 namespace Engine.Common
 {
@@ -12,12 +13,18 @@ namespace Engine.Common
         /// <summary>
         /// Recursive partition creation
         /// </summary>
+        /// <param name="game">Game</param>
         /// <param name="bbox">Parent bounding box</param>
-        /// <param name="depth">Current depth</param>
-        /// <param name="maxDepth">Maximum quadtree depth</param>
         /// <param name="triangles">All triangles</param>
+        /// <param name="depth">Current depth</param>
+        /// <param name="description">Description</param>
         /// <returns></returns>
-        public static QuadTreeNode CreatePartitions(BoundingBox bbox, Triangle[] triangles, int depth, int maxTrianglesPerNode, int maxDepth)
+        public static QuadTreeNode CreatePartitions(
+            Game game,
+            BoundingBox bbox, 
+            Triangle[] triangles, 
+            int depth,
+            TerrainDescription description)
         {
             Triangle[] nodeTriangles = Array.FindAll(triangles, t =>
             {
@@ -34,12 +41,57 @@ namespace Engine.Common
                     BoundingBox = bbox,
                 };
 
-                bool haltByDepth = maxDepth > 0 ? depth >= maxDepth : false;
-                bool haltByCount = nodeTriangles.Length < maxTrianglesPerNode;
+                bool haltByDepth = description.Quadtree.MaxDepth > 0 ? depth >= description.Quadtree.MaxDepth : false;
+                bool haltByCount = nodeTriangles.Length < description.Quadtree.MaxTrianglesPerNode;
 
                 if (haltByDepth || haltByCount)
                 {
                     node.Triangles = nodeTriangles;
+
+                    //Set path finder
+                    if (description.PathFinder != null)
+                    {
+                        node.Grid = Grid.Build(
+                            bbox,
+                            nodeTriangles,
+                            description.PathFinder.NodeSize,
+                            description.PathFinder.NodeInclination);
+                    }
+
+                    //Set vegetation
+                    if (description.Vegetation != null && description.Vegetation.Length > 0)
+                    {
+                        List<Billboard> vegetationList = new List<Billboard>();
+
+                        for (int i = 0; i < description.Vegetation.Length; i++)
+                        {
+                            TerrainDescription.VegetationDescription vegetationDesc = description.Vegetation[i];
+
+                            ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
+                                description.ContentPath,
+                                bbox,
+                                nodeTriangles,
+                                vegetationDesc.VegetarionTextures,
+                                vegetationDesc.Saturation,
+                                vegetationDesc.MinSize,
+                                vegetationDesc.MaxSize,
+                                vegetationDesc.Seed);
+
+                            if (vegetationContent != null)
+                            {
+                                var billboard = new Billboard(game, vegetationContent)
+                                {
+                                    Radius = vegetationDesc.Radius,
+                                    Opaque = vegetationDesc.Opaque,
+                                    DeferredEnabled = vegetationDesc.DeferredEnabled,
+                                };
+
+                                vegetationList.Add(billboard);
+                            }
+                        }
+
+                        node.Vegetation = vegetationList.ToArray();
+                    }
                 }
                 else
                 {
@@ -56,10 +108,10 @@ namespace Engine.Common
                     //+0-1-1   +1+1+0   -->   cmm    MMc
                     BoundingBox half3 = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
 
-                    QuadTreeNode child0 = CreatePartitions(half0, triangles, depth + 1, maxTrianglesPerNode, maxDepth);
-                    QuadTreeNode child1 = CreatePartitions(half1, triangles, depth + 1, maxTrianglesPerNode, maxDepth);
-                    QuadTreeNode child2 = CreatePartitions(half2, triangles, depth + 1, maxTrianglesPerNode, maxDepth);
-                    QuadTreeNode child3 = CreatePartitions(half3, triangles, depth + 1, maxTrianglesPerNode, maxDepth);
+                    QuadTreeNode child0 = CreatePartitions(game, half0, triangles, depth + 1, description);
+                    QuadTreeNode child1 = CreatePartitions(game, half1, triangles, depth + 1, description);
+                    QuadTreeNode child2 = CreatePartitions(game, half2, triangles, depth + 1, description);
+                    QuadTreeNode child3 = CreatePartitions(game, half3, triangles, depth + 1, description);
 
                     List<QuadTreeNode> childList = new List<QuadTreeNode>();
 
@@ -96,6 +148,22 @@ namespace Engine.Common
         /// Triangle list
         /// </summary>
         public Triangle[] Triangles;
+        /// <summary>
+        /// Local model
+        /// </summary>
+        public Model Model = null;
+        /// <summary>
+        /// Local vegetation
+        /// </summary>
+        public Billboard[] Vegetation = null;
+        /// <summary>
+        /// Local pathfinding grid
+        /// </summary>
+        public Grid Grid = null;
+        /// <summary>
+        /// Gets if local quad node is culled
+        /// </summary>
+        public bool Cull = false;
 
         /// <summary>
         /// Pick nearest position
@@ -478,6 +546,100 @@ namespace Engine.Common
             }
 
             return level;
+        }
+
+        /// <summary>
+        /// Mark the node and its chils culled
+        /// </summary>
+        public void CullAll()
+        {
+            this.Cull = true;
+
+            if (this.Children != null && this.Children.Length > 0)
+            {
+                for (int i = 0; i < this.Children.Length; i++)
+                {
+                    this.Children[i].CullAll();
+                }
+            }
+        }
+        /// <summary>
+        /// Perfomrs frustum culling in the node and its childs
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        public void FrustumCulling(BoundingFrustum frustum)
+        {
+            if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
+            {
+                this.Cull = false;
+
+                if (this.Children != null && this.Children.Length > 0)
+                {
+                    for (int i = 0; i < this.Children.Length; i++)
+                    {
+                        this.Children[i].FrustumCulling(frustum);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Updates node and its childs
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
+        {
+            if (!this.Cull)
+            {
+                if (this.Children != null && this.Children.Length > 0)
+                {
+                    for (int i = 0; i < this.Children.Length; i++)
+                    {
+                        this.Children[i].Update(gameTime);
+                    }
+                }
+                else
+                {
+                    //this.Model.Update(gameTime);
+
+                    if (this.Vegetation != null && this.Vegetation.Length > 0)
+                    {
+                        for (int i = 0; i < this.Vegetation.Length; i++)
+                        {
+                            this.Vegetation[i].Update(gameTime);
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Draws node and its childs
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Drawing context</param>
+        public void Draw(GameTime gameTime, Context context)
+        {
+            if (!this.Cull)
+            {
+                if (this.Children != null && this.Children.Length > 0)
+                {
+                    for (int i = 0; i < this.Children.Length; i++)
+                    {
+                        this.Children[i].Draw(gameTime, context);
+                    }
+                }
+                else
+                {
+                    //this.Model.Draw(gameTime, context);
+
+                    if (this.Vegetation != null && this.Vegetation.Length > 0)
+                    {
+                        for (int i = 0; i < this.Vegetation.Length; i++)
+                        {
+                            this.Vegetation[i].Draw(gameTime, context);
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -45,17 +45,16 @@ namespace Engine.Common
         /// <summary>
         /// Build node list from triangles
         /// </summary>
+        /// <param name="bbox">Bounding box</param>
         /// <param name="triangles">Triangles</param>
         /// <param name="size">Node size</param>
         /// <param name="angle">Maximum angle of node</param>
         /// <returns>Returns generated grid node list</returns>
-        public static Grid Build(Terrain terrain, float size, float angle = MathUtil.PiOverFour)
+        public static Grid Build(BoundingBox bbox, Triangle[] triangles, float size, float angle = MathUtil.PiOverFour)
         {
             List<GridNode> result = new List<GridNode>();
 
             Dictionary<Vector2, GridCollisionInfo[]> dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
-
-            BoundingBox bbox = terrain.GetBoundingBox();
 
             float fxSize = (bbox.Maximum.X - bbox.Minimum.X) / size;
             float fzSize = (bbox.Maximum.Z - bbox.Minimum.Z) / size;
@@ -69,15 +68,21 @@ namespace Engine.Common
                 {
                     GridCollisionInfo[] info = null;
 
-                    Vector3[] points;
-                    Triangle[] triangles;
-                    if (TestPoint(x, z, terrain, angle, out points, out triangles))
+                    Ray ray = new Ray()
                     {
-                        info = new GridCollisionInfo[points.Length];
+                        Position = new Vector3(x, bbox.Maximum.Y + 0.01f, z),
+                        Direction = Vector3.Down,
+                    };
 
-                        for (int i = 0; i < points.Length; i++)
+                    Vector3[] pickedPoints;
+                    Triangle[] pickedTriangles;
+                    if (Triangle.IntersectAll(ref ray, triangles, true, out pickedPoints, out pickedTriangles))
+                    {
+                        info = new GridCollisionInfo[pickedPoints.Length];
+
+                        for (int i = 0; i < pickedPoints.Length; i++)
                         {
-                            info[i] = new GridCollisionInfo() { Point = points[i], Triangle = triangles[i], };
+                            info[i] = new GridCollisionInfo() { Point = pickedPoints[i], Triangle = pickedTriangles[i], };
                         }
                     }
                     else
