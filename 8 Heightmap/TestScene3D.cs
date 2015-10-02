@@ -16,6 +16,7 @@ namespace HeightmapTest
         private TextDrawer load = null;
         private TextDrawer help = null;
 
+        private LensFlare lensFlare = null;
         private Terrain terrain = null;
         private LineListDrawer bboxesDrawer = null;
 
@@ -29,8 +30,19 @@ namespace HeightmapTest
         {
             base.Initialize();
 
+            this.Lights.FogColor = Color.WhiteSmoke;
+            this.Lights.FogStart = far * fogStart;
+            this.Lights.FogRange = far * fogRange;
+
+            this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[1].Enabled = false;
+            this.Lights.DirectionalLights[2].Enabled = false;
+
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
+
+            this.Camera.Goto(0, 1, 0);
+            this.Camera.LookTo(1, 1, 1);
 
             #region Texts
 
@@ -55,6 +67,33 @@ namespace HeightmapTest
             Stopwatch sw = Stopwatch.StartNew();
 
             string loadingText = null;
+
+            #region Lens flare
+
+            this.lensFlare = this.AddLensFlare(new LensFlareDescription()
+            {
+                ContentPath = resources,
+                GlowTexture = "lfGlow.png",
+                Flares = new FlareDescription[]
+                {
+                    new FlareDescription(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
+                    new FlareDescription( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
+                    new FlareDescription( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
+                    new FlareDescription( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
+
+                    new FlareDescription(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
+                    new FlareDescription( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
+                    new FlareDescription( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
+
+                    new FlareDescription(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
+                    new FlareDescription( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
+                    new FlareDescription( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
+                }
+            });
+
+            this.lensFlare.Light = this.Lights.DirectionalLights[0];
+
+            #endregion
 
             #region Terrain
 
@@ -81,25 +120,25 @@ namespace HeightmapTest
                 {
                     NodeSize = 25,
                 },
-                Vegetation = new TerrainDescription.VegetationDescription[]
-                {
-                    new TerrainDescription.VegetationDescription()
-                    {
-                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds" },
-                        Saturation = 2f,
-                        Radius = 300f,
-                        MinSize = Vector2.One * 5f,
-                        MaxSize = Vector2.One * 10f,
-                    },
-                    new TerrainDescription.VegetationDescription()
-                    {
-                        VegetarionTextures = new[] { "grass.png" },
-                        Saturation = 100f,
-                        Radius = 50f,
-                        MinSize = Vector2.One * 0.20f,
-                        MaxSize = Vector2.One * 0.25f,
-                    },
-                }
+                //Vegetation = new TerrainDescription.VegetationDescription[]
+                //{
+                //    new TerrainDescription.VegetationDescription()
+                //    {
+                //        VegetarionTextures = new[] { "tree0.dds", "tree1.dds" },
+                //        Saturation = 2f,
+                //        Radius = 300f,
+                //        MinSize = Vector2.One * 5f,
+                //        MaxSize = Vector2.One * 10f,
+                //    },
+                //    new TerrainDescription.VegetationDescription()
+                //    {
+                //        VegetarionTextures = new[] { "grass.png" },
+                //        Saturation = 100f,
+                //        Radius = 50f,
+                //        MinSize = Vector2.One * 0.20f,
+                //        MaxSize = Vector2.One * 0.25f,
+                //    },
+                //}
             });
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
@@ -123,17 +162,6 @@ namespace HeightmapTest
             this.load.Text = loadingText;
 
             #endregion
-
-            this.Camera.Goto(0, 1, 0);
-            this.Camera.LookTo(1, 1, 1);
-
-            this.Lights.FogColor = Color.WhiteSmoke;
-            this.Lights.FogStart = far * fogStart;
-            this.Lights.FogRange = far * fogRange;
-
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = false;
-            this.Lights.DirectionalLights[2].Enabled = false;
         }
 
         public override void Update(GameTime gameTime)

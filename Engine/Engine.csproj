@@ -319,7 +319,9 @@
     <Compile Include="Common\QuadTree.cs" />
     <Compile Include="Common\QuadTreeNode.cs" />
     <Compile Include="Content\LightContent.cs" />
+    <Compile Include="Effects\EffectSprite.cs" />
     <Compile Include="Effects\EffectNull.cs" />
+    <Compile Include="LensFlare.cs" />
     <Compile Include="SceneRendererResultEnum.cs" />
     <Compile Include="Common\Skeleton.cs" />
     <Compile Include="Content\LoaderConversion.cs" />
@@ -474,6 +476,7 @@
     <None Include="Resources\ShaderCubemap.fx" />
     <None Include="Resources\ShaderParticles.fx" />
     <None Include="Resources\ShaderShadow.fxo" />
+    <None Include="Resources\ShaderSprite.fxo" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\IncLights.fx" />
@@ -482,6 +485,7 @@
     <Content Include="engine.ico" />
     <None Include="Resources\ShaderDeferred.fx" />
     <None Include="Resources\ShaderNull.fx" />
+    <None Include="Resources\ShaderSprite.fx" />
     <Content Include="sharpdx_direct3d11_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

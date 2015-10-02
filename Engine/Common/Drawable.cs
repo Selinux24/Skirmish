@@ -120,6 +120,14 @@ namespace Engine.Common
         /// </summary>
         public Matrix World;
         /// <summary>
+        /// View matrix
+        /// </summary>
+        public Matrix View;
+        /// <summary>
+        /// Projection matrix
+        /// </summary>
+        public Matrix Projection;
+        /// <summary>
         /// View * projection matrix
         /// </summary>
         public Matrix ViewProjection;
@@ -131,6 +139,10 @@ namespace Engine.Common
         /// Eye position
         /// </summary>
         public Vector3 EyePosition;
+        /// <summary>
+        /// Eye target
+        /// </summary>
+        public Vector3 EyeTarget;
         /// <summary>
         /// Lights
         /// </summary>

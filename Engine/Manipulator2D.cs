@@ -17,6 +17,10 @@ namespace Engine
         /// Position component
         /// </summary>
         private Vector2 position = Vector2.Zero;
+        /// <summary>
+        /// Scale component
+        /// </summary>
+        private Vector2 scale = Vector2.One;
 
         /// <summary>
         /// Gets Position component
@@ -26,6 +30,16 @@ namespace Engine
             get
             {
                 return new Vector2(this.position.X, -this.position.Y);
+            }
+        }
+        /// <summary>
+        /// Gets Scale component
+        /// </summary>
+        public Vector2 Scale
+        {
+            get
+            {
+                return this.scale;
             }
         }
         /// <summary>
@@ -55,12 +69,12 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="relativeCenter">Relative window center</param>
-        /// <param name="width">Object width</param>
-        /// <param name="height">Object height</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
         public void Update(GameTime gameTime, Point relativeCenter, float width, float height)
         {
             this.localTransform =
-                Matrix.Scaling(width, height, 1f) *
+                Matrix.Scaling(this.scale.X * width, this.scale.Y * height, 1f) *
                 Matrix.Translation(-relativeCenter.X, +relativeCenter.Y, 0f) *
                 Matrix.Translation(this.position.X, this.position.Y, 0f);
 
@@ -125,6 +139,31 @@ namespace Engine
         public void SetPosition(Vector2 position)
         {
             this.position = new Vector2(position.X, -position.Y);
+        }
+        /// <summary>
+        /// Sets scale
+        /// </summary>
+        /// <param name="scale">Scale component</param>
+        public void SetScale(float scale)
+        {
+            this.scale = new Vector2(scale, scale);
+        }
+        /// <summary>
+        /// Sets scale
+        /// </summary>
+        /// <param name="x">X component of scale</param>
+        /// <param name="y">Y component of scale</param>
+        public void SetScale(float x, float y)
+        {
+            this.scale = new Vector2(x, y);
+        }
+        /// <summary>
+        /// Sets scale
+        /// </summary>
+        /// <param name="scale">Scale component</param>
+        public void SetScale(Vector2 scale)
+        {
+            this.scale = scale;
         }
 
         /// <summary>

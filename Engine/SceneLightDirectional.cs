@@ -66,5 +66,15 @@ namespace Engine
         /// Light direction
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
+
+        /// <summary>
+        /// Gets light position at specified distance
+        /// </summary>
+        /// <param name="distance">Distance</param>
+        /// <returns>Returns light position at specified distance</returns>
+        public Vector3 GetPosition(float distance)
+        {
+            return distance * -this.Direction;
+        }
     }
 }

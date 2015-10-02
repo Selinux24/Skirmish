@@ -689,6 +689,20 @@ namespace Engine
 
             return newModel;
         }
+        /// <summary>
+        /// Adds a lens flare drawer
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new lens flare drawer</returns>
+        public LensFlare AddLensFlare(LensFlareDescription description, int order = 0)
+        {
+            LensFlare newModel = new LensFlare(this.Game, description);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
 
         /// <summary>
         /// Add component to collection

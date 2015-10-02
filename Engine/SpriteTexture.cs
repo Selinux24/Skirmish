@@ -126,13 +126,22 @@ namespace Engine
             this.Manipulator.SetPosition(left, top);
             this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
 
-            Matrix viewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            Matrix view;
+            Matrix proj;
+            Sprite.CreateViewOrthoProjection(
+                this.Game.Form.RenderWidth,
+                this.Game.Form.RenderHeight,
+                out view,
+                out proj);
 
             this.drawContext = new Context()
             {
                 EyePosition = new Vector3(0, 0, -1),
+                EyeTarget = new Vector3(0, 0, 0),
                 World = this.Manipulator.LocalTransform,
-                ViewProjection = viewProjection,
+                View = view,
+                Projection = proj,
+                ViewProjection = view * proj,
                 Lights = SceneLights.Default,
             };
         }

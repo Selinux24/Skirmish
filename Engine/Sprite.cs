@@ -20,19 +20,32 @@ namespace Engine
         /// <returns>Returns view * orthoprojection matrix</returns>
         public static Matrix CreateViewOrthoProjection(int width, int height)
         {
+            Matrix view;
+            Matrix projection;
+            CreateViewOrthoProjection(width, height, out view, out projection);
+
+            return view * projection;
+        }
+        /// <summary>
+        /// Creates view and orthoprojection from specified size
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="view">View matrix</param>
+        /// <param name="projection">Ortho projection matrix</param>
+        public static void CreateViewOrthoProjection(int width, int height, out Matrix view, out Matrix projection)
+        {
             Vector3 pos = new Vector3(0, 0, -1);
 
-            Matrix view = Matrix.LookAtLH(
+            view = Matrix.LookAtLH(
                 pos,
                 pos + Vector3.ForwardLH,
                 Vector3.Up);
 
-            Matrix orthoProj = Matrix.OrthoLH(
+            projection = Matrix.OrthoLH(
                 width,
                 height,
                 0f, 100f);
-
-            return view * orthoProj;
         }
 
         /// <summary>
@@ -115,6 +128,10 @@ namespace Engine
         /// </summary>
         public int TextureIndex { get; set; }
         /// <summary>
+        /// Base color
+        /// </summary>
+        public Color4 Color { get; set; }
+        /// <summary>
         /// Manipulator
         /// </summary>
         public Manipulator2D Manipulator { get; private set; }
@@ -137,6 +154,7 @@ namespace Engine
             this.Height = this.sourceHeight;
             this.FitScreen = description.FitScreen;
             this.TextureIndex = 0;
+            this.Color = Color4.White;
 
             this.Manipulator = new Manipulator2D();
         }
@@ -148,11 +166,7 @@ namespace Engine
         {
             base.Update(gameTime);
 
-            this.Manipulator.Update(
-                gameTime,
-                this.Game.Form.RelativeCenter,
-                this.Width,
-                this.Height);
+            this.Manipulator.Update(gameTime, this.Game.Form.RelativeCenter, this.Width, this.Height);
         }
         /// <summary>
         /// Draw
@@ -163,9 +177,11 @@ namespace Engine
         {
             if (this.Meshes != null)
             {
+                var effect = DrawerPool.EffectSprite;
+
                 #region Per frame update
 
-                DrawerPool.EffectBasic.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
+                effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
 
                 #endregion
 
@@ -175,39 +191,26 @@ namespace Engine
                 {
                     MeshMaterialsDictionary dictionary = this.Meshes[meshName];
 
-                    #region Per skinning update
-
-                    if (this.SkinningData != null)
-                    {
-                        DrawerPool.EffectBasic.UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
-                    }
-                    else
-                    {
-                        DrawerPool.EffectBasic.UpdatePerSkinning(null);
-                    }
-
-                    #endregion
-
                     foreach (string material in dictionary.Keys)
                     {
                         Mesh mesh = dictionary[material];
                         MeshMaterial mat = this.Materials[material];
-                        EffectTechnique technique = DrawerPool.EffectBasic.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
+                        EffectTechnique technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
 
                         #region Per object update
 
                         if (mat != null)
                         {
-                            DrawerPool.EffectBasic.UpdatePerObject(mat.Material, mat.DiffuseTexture, mat.NormalMap, this.TextureIndex);
+                            effect.UpdatePerObject(this.Color, mat.DiffuseTexture, this.TextureIndex);
                         }
                         else
                         {
-                            DrawerPool.EffectBasic.UpdatePerObject(Material.Default, null, null, this.TextureIndex);
+                            effect.UpdatePerObject(this.Color, null, this.TextureIndex);
                         }
 
                         #endregion
 
-                        mesh.SetInputAssembler(this.DeviceContext, DrawerPool.EffectBasic.GetInputLayout(technique));
+                        mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 
                         for (int p = 0; p < technique.Description.PassCount; p++)
                         {

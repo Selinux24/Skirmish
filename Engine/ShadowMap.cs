@@ -59,6 +59,10 @@ namespace Engine
         /// </summary>
         public Vector3 LightPosition { get; protected set; }
         /// <summary>
+        /// Light direction
+        /// </summary>
+        public Vector3 LightDirection { get; protected set; }
+        /// <summary>
         /// Shadow transform
         /// </summary>
         public Matrix Transform { get; protected set; }
@@ -130,10 +134,11 @@ namespace Engine
         /// </summary>
         /// <param name="lightDirection">Light direction</param>
         /// <param name="sceneVolume">Scene volume</param>
-        public void Update(Vector3 lightDirection, BoundingSphere sceneVolume)
+        public void Update(SceneLightDirectional light, BoundingSphere sceneVolume)
         {
             // Calc light position outside the scene volume
-            this.LightPosition = 2.0f * sceneVolume.Radius * -lightDirection;
+            this.LightPosition = light.GetPosition(2.0f * sceneVolume.Radius);
+            this.LightDirection = light.Direction;
 
             // View from light to scene center position
             this.View = Matrix.LookAtLH(this.LightPosition, sceneVolume.Center, Vector3.Up);

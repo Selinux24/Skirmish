@@ -241,9 +241,12 @@ namespace Engine
                 Matrix viewProj = scene.Camera.View * scene.Camera.Projection;
 
                 this.DrawContext.World = scene.World;
+                this.DrawContext.View = scene.Camera.View;
+                this.DrawContext.Projection = scene.Camera.Projection;
                 this.DrawContext.ViewProjection = viewProj;
                 this.DrawContext.Frustum = new BoundingFrustum(viewProj);
                 this.DrawContext.EyePosition = scene.Camera.Position;
+                this.DrawContext.EyeTarget = scene.Camera.Direction;
                 this.DrawContext.Lights = scene.Lights;
                 this.DrawContext.ShadowMap = null;
                 this.DrawContext.FromLightViewProjection = Matrix.Identity;
@@ -264,14 +267,17 @@ namespace Engine
                     Stopwatch swShadowsPreparation = Stopwatch.StartNew();
 #endif
                     //Update shadow transform using first ligth direction
-                    this.shadowMapper.Update(shadowCastingLights[0].Direction, scene.SceneVolume);
+                    this.shadowMapper.Update(shadowCastingLights[0], scene.SceneVolume);
 
                     Matrix shadowViewProj = this.shadowMapper.View * this.shadowMapper.Projection;
 
                     this.DrawShadowsContext.World = scene.World;
+                    this.DrawShadowsContext.View = this.shadowMapper.View;
+                    this.DrawShadowsContext.Projection = this.shadowMapper.Projection;
                     this.DrawShadowsContext.ViewProjection = shadowViewProj;
                     this.DrawShadowsContext.Frustum = new BoundingFrustum(shadowViewProj);
                     this.DrawShadowsContext.EyePosition = this.shadowMapper.LightPosition;
+                    this.DrawShadowsContext.EyeTarget = this.shadowMapper.LightDirection;
 #if DEBUG
                     swShadowsPreparation.Stop();
 

@@ -14,6 +14,10 @@ namespace Engine.Effects
         /// </summary>
         public static EffectNull EffectNull { get; private set; }
         /// <summary>
+        /// Sprite effect
+        /// </summary>
+        public static EffectSprite EffectSprite { get; private set; }
+        /// <summary>
         /// Basic effect
         /// </summary>
         public static EffectBasic EffectBasic { get; private set; }
@@ -71,6 +75,15 @@ namespace Engine.Effects
             else
             {
                 EffectNull = new EffectNull(device, Resources.ShaderNullFx, true);
+            }
+
+            if (Resources.ShaderSpriteFxo != null)
+            {
+                EffectSprite = new EffectSprite(device, Resources.ShaderSpriteFxo, false);
+            }
+            else
+            {
+                EffectSprite = new EffectSprite(device, Resources.ShaderSpriteFx, true);
             }
 
             if (Resources.ShaderBasicFxo != null)
