@@ -517,18 +517,17 @@ namespace Engine.Content
         {
             ModelContent modelContent = new ModelContent();
 
-            Random rnd = new Random(seed);
-
             float maxAngle = 60f;
 
             List<VertexData> vertices = new List<VertexData>();
 
             #region Find billboard positions
 
-            foreach (Triangle tri in triList)
+            for (int i = 0; i< triList.Length; i++)
             {
-                float inc = MathUtil.RadiansToDegrees(tri.Inclination);
+                Triangle tri = triList[i];
 
+                float inc = MathUtil.RadiansToDegrees(tri.Inclination);
                 if (inc > maxAngle)
                 {
                     inc = 0;
@@ -539,20 +538,25 @@ namespace Engine.Content
                 }
 
                 int num = (int)(saturation * inc);
-                for (int b = 0; b < num; b++)
+                if (num > 0)
                 {
-                    //Buscar un punto en el triángulo
-                    Vector3 v = rnd.NextVector3(tri.Min, tri.Max);
-                    Ray ray = new Ray(new Vector3(v.X, bbox.Maximum.Y + 0.1f, v.Z), Vector3.Down);
-                    Vector3 iPoint;
-                    if (tri.Intersects(ref ray, out iPoint))
+                    Random rnd = new Random(seed + i);
+
+                    for (int b = 0; b < num; b++)
                     {
-                        Vector2 bbsize = rnd.NextVector2(minSize, maxSize);
+                        //Buscar un punto en el triángulo
+                        Vector3 v = rnd.NextVector3(tri.Min, tri.Max);
+                        Ray ray = new Ray(new Vector3(v.X, bbox.Maximum.Y + 0.1f, v.Z), Vector3.Down);
+                        Vector3 iPoint;
+                        if (tri.Intersects(ref ray, out iPoint))
+                        {
+                            Vector2 bbsize = rnd.NextVector2(minSize, maxSize);
 
-                        Vector3 bbpos = iPoint;
-                        bbpos.Y += bbsize.Y * 0.5f;
+                            Vector3 bbpos = iPoint;
+                            bbpos.Y += bbsize.Y * 0.5f;
 
-                        vertices.Add(VertexData.CreateVertexBillboard(bbpos, bbsize));
+                            vertices.Add(VertexData.CreateVertexBillboard(bbpos, bbsize));
+                        }
                     }
                 }
             }
