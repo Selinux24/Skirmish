@@ -16,12 +16,13 @@ namespace HeightmapTest
         private TextDrawer load = null;
         private TextDrawer help = null;
 
+        private Cursor cursor;
         private LensFlare lensFlare = null;
         private Terrain terrain = null;
         private LineListDrawer bboxesDrawer = null;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.ForwardLigthning)
+            : base(game, SceneModesEnum.DeferredLightning)
         {
 
         }
@@ -31,8 +32,8 @@ namespace HeightmapTest
             base.Initialize();
 
             this.Lights.FogColor = Color.WhiteSmoke;
-            this.Lights.FogStart = far * fogStart;
-            this.Lights.FogRange = far * fogRange;
+            this.Lights.FogStart = 0;
+            this.Lights.FogRange = 0;
 
             this.Lights.DirectionalLights[0].Enabled = true;
             this.Lights.DirectionalLights[1].Enabled = false;
@@ -41,8 +42,18 @@ namespace HeightmapTest
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
 
-            this.Camera.Goto(0, 1, 0);
-            this.Camera.LookTo(1, 1, 1);
+            #region Cursor
+
+            SpriteDescription cursorDesc = new SpriteDescription()
+            {
+                Textures = new[] { "target.png" },
+                Width = 16,
+                Height = 16,
+            };
+
+            this.cursor = this.AddCursor(cursorDesc);
+
+            #endregion
 
             #region Texts
 
@@ -162,6 +173,9 @@ namespace HeightmapTest
             this.load.Text = loadingText;
 
             #endregion
+
+            this.Camera.Goto(0, 0, 0);
+            this.Camera.LookTo(this.Lights.DirectionalLights[0].GetPosition(100));
         }
 
         public override void Update(GameTime gameTime)

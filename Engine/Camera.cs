@@ -909,8 +909,11 @@ namespace Engine
         /// </summary>
         private void StopTranslations()
         {
-            this.translationMode = CameraTranslations.None;
-            this.translationInterest = Vector3.Zero;
+            if (this.translationMode != CameraTranslations.None)
+            {
+                this.translationMode = CameraTranslations.None;
+                this.translationInterest = Vector3.Zero;
+            }
         }
         /// <summary>
         /// Performs translation to target

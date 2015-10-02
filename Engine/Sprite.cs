@@ -106,6 +106,16 @@ namespace Engine
         /// </summary>
         public int Height { get; set; }
         /// <summary>
+        /// Relative center
+        /// </summary>
+        public Vector2 RelativeCenter
+        {
+            get
+            {
+                return (new Vector2(this.Width, this.Height)) * 0.5f;
+            }
+        }
+        /// <summary>
         /// Sprite rectangle
         /// </summary>
         public Rectangle Rectangle

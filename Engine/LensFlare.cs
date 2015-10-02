@@ -1,64 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpDX;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
+﻿using SharpDX;
+using System;
 
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     public class LensFlare : Drawable
     {
-        SceneLightDirectional light;
-
-        Matrix projection;
-
-        Vector2 flareVector;
-
-        public SceneLightDirectional Light
-        {
-            get
-            {
-                return this.light;
-            }
-            set
-            {
-                this.light = value;
-                if (this.light != null)
-                {
-                    Vector3 lightPosition = this.light.GetPosition(1000000);
-
-                    // Lensflare sprites are positioned at intervals along a line that runs from the 2D light position toward the center of the screen.
-                    Vector2 screenCenter = new Vector2(this.Game.Graphics.Viewport.Width, this.Game.Graphics.Viewport.Height) * 0.5f;
-                    Vector2 lightPosition2D = new Vector2(lightPosition.X, lightPosition.Y);
-
-                    this.flareVector = screenCenter - lightPosition2D;
-                }
-                else
-                {
-                    this.flareVector = Vector2.Zero;
-                }
-            }
-        }
-
         private Sprite glowSprite;
         private Flare[] flares = null;
+
+        public SceneLightDirectional Light { get; set; }
 
         public LensFlare(Game game, LensFlareDescription description)
             : base(game)
         {
-            this.projection = Matrix.OrthoOffCenterLH(
-                0,
-                game.Graphics.Viewport.Width,
-                game.Graphics.Viewport.Height,
-                0,
-                0,
-                1);
-
             this.glowSprite = new Sprite(game, new SpriteDescription()
             {
                 ContentPath = description.ContentPath,
@@ -102,7 +58,7 @@ namespace Engine
 
         public override void Update(GameTime gameTime)
         {
-            if (this.light != null)
+            if (this.Light != null)
             {
                 this.glowSprite.Update(gameTime);
 
@@ -118,24 +74,14 @@ namespace Engine
 
         public override void Draw(GameTime gameTime, Context context)
         {
-            if (this.light != null)
+            if (this.Light != null)
             {
-                // The sun is infinitely distant, so it should not be affected by the
-                // position of the camera. Floating point math doesn't support infinitely
-                // distant vectors, but we can get the same result by making a copy of our
-                // view matrix, then resetting the view translation to zero. Pretending the
-                // camera has not moved position gives the same result as if the camera
-                // was moving, but the light was infinitely far away. If our flares came
-                // from a local object rather than the sun, we would use the original view
-                // matrix here.
+                // Set view translation to Zero to simulate infinite
                 Matrix infiniteView = context.View;
-
                 infiniteView.TranslationVector = Vector3.Zero;
 
                 // Project the light position into 2D screen space.
-                ViewportF viewport = this.Game.Graphics.Viewport;
-
-                Vector3 projectedPosition = viewport.Project(
+                Vector3 projectedPosition = this.Game.Graphics.Viewport.Project(
                     -this.Light.Direction,
                     context.Projection,
                     infiniteView,
@@ -146,33 +92,26 @@ namespace Engine
                 {
                     return;
                 }
+                else
+                {
+                    Vector2 lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
+                    Vector2 lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
 
-                Vector2 lightPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
-
-                Vector3 p = this.light.GetPosition(100);
-
-                // View pos to light pos
-                Vector3 v1 = Vector3.Normalize(p - context.EyePosition);
-
-                // View direction
-                Vector3 v2 = context.EyeTarget;
-
-                float angle = Vector3.Dot(v1, v2);
-
-                float alpha = Math.Min(1f, angle * angle);
-
-                this.DrawGlow(gameTime, context, lightPosition, alpha);
-                this.DrawFlares(gameTime, context, lightPosition, alpha);
+                    this.DrawGlow(gameTime, context, lightProjectedPosition, lightProjectedDirection);
+                    this.DrawFlares(gameTime, context, lightProjectedPosition, lightProjectedDirection);
+                }
             }
         }
 
-        private void DrawGlow(GameTime gameTime, Context context, Vector2 lightPosition, float angle)
+        private void DrawGlow(GameTime gameTime, Context context, Vector2 lightPosition, Vector2 lightDirection)
         {
-            Color4 color = new Color4(1, 1, 1, angle);
-            float scale = 100f / this.glowSprite.Width;
+            Color4 color = this.Light.LightColor;
+            color.Alpha = 0.25f;
+            
+            float scale = 50f / this.glowSprite.Width;
 
             this.glowSprite.Color = color;
-            this.glowSprite.Manipulator.SetPosition(lightPosition);
+            this.glowSprite.Manipulator.SetPosition(lightPosition - (this.glowSprite.RelativeCenter * scale));
             this.glowSprite.Manipulator.SetScale(scale);
 
             //Draw sprite with alpha
@@ -180,7 +119,7 @@ namespace Engine
             this.glowSprite.Draw(gameTime, context);
         }
 
-        private void DrawFlares(GameTime gameTime, Context context, Vector2 lightPosition, float angle)
+        private void DrawFlares(GameTime gameTime, Context context, Vector2 lightPosition, Vector2 lightDirection)
         {
             if (this.flares != null && this.flares.Length > 0)
             {
@@ -192,13 +131,14 @@ namespace Engine
 
                     // Set the flare alpha based on the previous occlusion query result.
                     Color4 flareColor = flare.Color;
-                    flareColor.Alpha *= angle;
+                    flareColor.Alpha *= 0.5f;
 
                     // Compute the position of this flare sprite.
-                    Vector2 flarePosition = lightPosition + this.flareVector * flare.Position;
+                    Vector2 flarePosition = (lightPosition + lightDirection * flare.Position);
 
                     flare.FlareSprite.Color = flareColor;
-                    flare.FlareSprite.Manipulator.SetPosition(flarePosition);
+                    flare.FlareSprite.Manipulator.SetScale(flare.Scale);
+                    flare.FlareSprite.Manipulator.SetPosition(flarePosition - (flare.FlareSprite.RelativeCenter * flare.Scale));
 
                     // Draw the flare sprite using additive blending.
                     flare.FlareSprite.Draw(gameTime, context);
