@@ -128,21 +128,23 @@ namespace TerrainTest
                 },
                 Vegetation = new[]
                 {
-                    new TerrainDescription.VegetationDescription()
+                    new TerrainDescription.VegetationDescriptionBillboard()
                     {
                         VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
                         Saturation = 0.5f,
                         Opaque = true,
-                        Radius = 300f,
+                        StartRadius= 0f,
+                        EndRadius = 300f,
                         MinSize = Vector2.One * 2.50f,
                         MaxSize = Vector2.One * 3.50f,
                     },
-                    new TerrainDescription.VegetationDescription()
+                    new TerrainDescription.VegetationDescriptionBillboard()
                     {
                         VegetarionTextures = new[] { "grass0.png", "grass1.png", "grass2.png" },
                         Saturation = 10f,
                         Opaque = false,
-                        Radius = 50f,
+                        StartRadius= 0f,
+                        EndRadius = 50f,
                         MinSize = Vector2.One * 0.20f,
                         MaxSize = Vector2.One * 0.25f,
                     }

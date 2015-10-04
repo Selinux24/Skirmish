@@ -141,7 +141,7 @@ namespace Engine
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
                         ((EffectInstancingShadow)effect).UpdatePerFrame(
-                            context.World, 
+                            context.World,
                             context.ViewProjection);
                     }
 
@@ -246,6 +246,31 @@ namespace Engine
                 if (this.Instances[i].Visible)
                 {
                     this.Instances[i].FrustumCulling(frustum);
+                }
+            }
+        }
+
+
+        public void SetPositions(Vector3[] positions)
+        {
+            if (positions != null && positions.Length > 0)
+            {
+                if (this.Instances != null && this.Instances.Length > 0)
+                {
+                    for (int i = 0; i < this.Instances.Length; i++)
+                    {
+                        if (i < positions.Length)
+                        {
+                            this.Instances[i].Manipulator.SetPosition(positions[i], true);
+                            this.Instances[i].Active = true;
+                            this.Instances[i].Visible = true;
+                        }
+                        else
+                        {
+                            this.Instances[i].Active = false;
+                            this.Instances[i].Visible = false;
+                        }
+                    }
                 }
             }
         }

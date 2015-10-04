@@ -18,7 +18,7 @@ namespace HeightmapTest
 
         private Cursor cursor;
         private LensFlare lensFlare = null;
-        private Terrain terrain = null;
+        private Terrain2 terrain = null;
         private LineListDrawer bboxesDrawer = null;
 
         public TestScene3D(Game game)
@@ -109,7 +109,7 @@ namespace HeightmapTest
             #region Terrain
 
             sw.Restart();
-            this.terrain = this.AddTerrain(new TerrainDescription()
+            this.terrain = this.AddTerrain2(new TerrainDescription()
             {
                 ContentPath = resources,
                 Heightmap = new TerrainDescription.HeightmapDescription()
@@ -131,42 +131,54 @@ namespace HeightmapTest
                 {
                     NodeSize = 25,
                 },
-                //Vegetation = new TerrainDescription.VegetationDescription[]
-                //{
-                //    new TerrainDescription.VegetationDescription()
-                //    {
-                //        VegetarionTextures = new[] { "tree0.dds", "tree1.dds" },
-                //        Saturation = 2f,
-                //        Radius = 300f,
-                //        MinSize = Vector2.One * 5f,
-                //        MaxSize = Vector2.One * 10f,
-                //    },
-                //    new TerrainDescription.VegetationDescription()
-                //    {
-                //        VegetarionTextures = new[] { "grass.png" },
-                //        Saturation = 100f,
-                //        Radius = 50f,
-                //        MinSize = Vector2.One * 0.20f,
-                //        MaxSize = Vector2.One * 0.25f,
-                //    },
-                //}
+                Vegetation = new TerrainDescription.VegetationDescription[]
+                {
+                    new TerrainDescription.VegetationDescriptionBillboard()
+                    {
+                        ContentPath = "Resources/Folliage/Billboard",
+                        VegetarionTextures = new[] { "grass.png" },
+                        Saturation = 100f,
+                        StartRadius = 0f,
+                        EndRadius = 50f,
+                        MinSize = Vector2.One * 0.20f,
+                        MaxSize = Vector2.One * 0.25f,
+                    },
+                    new TerrainDescription.VegetationDescriptionBillboard()
+                    {
+                        ContentPath = "Resources/Folliage/Billboard",
+                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds" },
+                        Saturation = 2f,
+                        StartRadius = 100f,
+                        EndRadius = 300f,
+                        MinSize = Vector2.One * 5f,
+                        MaxSize = Vector2.One * 10f,
+                    },
+                    new TerrainDescription.VegetationDescriptionModel()
+                    {
+                        ContentPath = "Resources/Folliage/Model",
+                        Model = "tree1.dae",
+                        Saturation = 2f,
+                        StartRadius = 0f,
+                        EndRadius = 100f,
+                    },
+                }
             });
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.SceneVolume = this.terrain.GetBoundingSphere();
+            //this.SceneVolume = this.terrain.GetBoundingSphere();
 
             #endregion
 
             #region Debug
 
-            BoundingBox[] bboxes = this.terrain.GetBoundingBoxes(5);
-            Line[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
+            //BoundingBox[] bboxes = this.terrain.GetBoundingBoxes(5);
+            //Line[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
 
-            this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
-            this.bboxesDrawer.Visible = false;
-            this.bboxesDrawer.Opaque = false;
-            this.bboxesDrawer.EnableAlphaBlending = true;
+            //this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
+            //this.bboxesDrawer.Visible = false;
+            //this.bboxesDrawer.Opaque = false;
+            //this.bboxesDrawer.EnableAlphaBlending = true;
 
             #endregion
 
@@ -241,14 +253,14 @@ namespace HeightmapTest
 
             #region Walk
 
-            Vector3 v = this.Camera.Position;
+            //Vector3 v = this.Camera.Position;
 
-            Vector3 p;
-            Triangle tri;
-            if (this.terrain.FindTopGroundPosition(v.X, v.Z, out p, out tri))
-            {
-                this.Camera.Goto(p + Vector3.UnitY);
-            }
+            //Vector3 p;
+            //Triangle tri;
+            //if (this.terrain.FindTopGroundPosition(v.X, v.Z, out p, out tri))
+            //{
+            //    this.Camera.Goto(p + Vector3.UnitY);
+            //}
 
             #endregion
 
@@ -263,11 +275,11 @@ namespace HeightmapTest
 
             base.Update(gameTime);
 
-            var frustum = this.Camera.Frustum;
-            var nodes = this.terrain.Contained(ref frustum);
-            var nodeCount = nodes != null ? nodes.Length : 0;
+            //var frustum = this.Camera.Frustum;
+            //var nodes = this.terrain.Contained(ref frustum);
+            //var nodeCount = nodes != null ? nodes.Length : 0;
 
-            this.help.Text = string.Format("Visible quad-tree nodes: {0}", nodeCount);
+            //this.help.Text = string.Format("Visible quad-tree nodes: {0}", nodeCount);
         }
     }
 }

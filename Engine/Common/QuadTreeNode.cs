@@ -21,8 +21,10 @@ namespace Engine.Common
         /// <returns></returns>
         public static QuadTreeNode CreatePartitions(
             Game game,
-            BoundingBox bbox, 
-            Triangle[] triangles, 
+            QuadTree quadTree,
+            QuadTreeNode parent,
+            BoundingBox bbox,
+            Triangle[] triangles,
             int depth,
             TerrainDescription description)
         {
@@ -35,7 +37,7 @@ namespace Engine.Common
 
             if (nodeTriangles.Length > 0)
             {
-                QuadTreeNode node = new QuadTreeNode()
+                QuadTreeNode node = new QuadTreeNode(quadTree, parent)
                 {
                     Level = depth,
                     BoundingBox = bbox,
@@ -61,36 +63,53 @@ namespace Engine.Common
                     //Set vegetation
                     if (description.Vegetation != null && description.Vegetation.Length > 0)
                     {
-                        List<Billboard> vegetationList = new List<Billboard>();
-
                         for (int i = 0; i < description.Vegetation.Length; i++)
                         {
                             TerrainDescription.VegetationDescription vegetationDesc = description.Vegetation[i];
 
-                            ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
-                                description.ContentPath,
-                                bbox,
-                                nodeTriangles,
-                                vegetationDesc.VegetarionTextures,
-                                vegetationDesc.Saturation,
-                                vegetationDesc.MinSize,
-                                vegetationDesc.MaxSize,
-                                vegetationDesc.Seed);
+                            VertexData[] vData = null;
 
-                            if (vegetationContent != null)
+                            var vBillboardDesc = vegetationDesc as TerrainDescription.VegetationDescriptionBillboard;
+                            if (vBillboardDesc != null)
                             {
-                                var billboard = new Billboard(game, vegetationContent)
+                                Vector3[] vertices = ModelContent.GenerateRandomPositions(
+                                    bbox,
+                                    nodeTriangles,
+                                    vBillboardDesc.Saturation,
+                                    vBillboardDesc.Seed);
+                                if (vertices != null && vertices.Length > 0)
                                 {
-                                    Radius = vegetationDesc.Radius,
-                                    Opaque = vegetationDesc.Opaque,
-                                    DeferredEnabled = vegetationDesc.DeferredEnabled,
-                                };
+                                    vData = new VertexData[vertices.Length];
 
-                                vegetationList.Add(billboard);
+                                    Random rnd = new Random();
+
+                                    for (int v = 0; v < vertices.Length; v++)
+                                    {
+                                        //Set max / min sizes
+                                        Vector2 bbsize = rnd.NextVector2(vBillboardDesc.MinSize, vBillboardDesc.MaxSize);
+
+                                        Vector3 bbpos = vertices[i];
+                                        bbpos.Y += bbsize.Y * 0.5f;
+
+                                        vData[v] = VertexData.CreateVertexBillboard(bbpos, bbsize);
+                                    }
+                                }
+
+                                node.vegetationBillBoardPositions.Add(i, vData);
+                            }
+
+                            var vModelDesc = vegetationDesc as TerrainDescription.VegetationDescriptionModel;
+                            if (vModelDesc != null)
+                            {
+                                Vector3[] vertices = ModelContent.GenerateRandomPositions(
+                                    bbox,
+                                    nodeTriangles,
+                                    vModelDesc.Saturation,
+                                    vModelDesc.Seed);
+
+                                node.vegetationModelPositions.Add(i, vertices);
                             }
                         }
-
-                        node.Vegetation = vegetationList.ToArray();
                     }
                 }
                 else
@@ -108,10 +127,10 @@ namespace Engine.Common
                     //+0-1-1   +1+1+0   -->   cmm    MMc
                     BoundingBox half3 = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
 
-                    QuadTreeNode child0 = CreatePartitions(game, half0, triangles, depth + 1, description);
-                    QuadTreeNode child1 = CreatePartitions(game, half1, triangles, depth + 1, description);
-                    QuadTreeNode child2 = CreatePartitions(game, half2, triangles, depth + 1, description);
-                    QuadTreeNode child3 = CreatePartitions(game, half3, triangles, depth + 1, description);
+                    QuadTreeNode child0 = CreatePartitions(game, quadTree, node, half0, triangles, depth + 1, description);
+                    QuadTreeNode child1 = CreatePartitions(game, quadTree, node, half1, triangles, depth + 1, description);
+                    QuadTreeNode child2 = CreatePartitions(game, quadTree, node, half2, triangles, depth + 1, description);
+                    QuadTreeNode child3 = CreatePartitions(game, quadTree, node, half3, triangles, depth + 1, description);
 
                     List<QuadTreeNode> childList = new List<QuadTreeNode>();
 
@@ -133,6 +152,14 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Parent
+        /// </summary>
+        public QuadTree QuadTree { get; private set; }
+        /// <summary>
+        /// Parent node
+        /// </summary>
+        public QuadTreeNode Parent { get; private set; }
+        /// <summary>
         /// Depth level
         /// </summary>
         public int Level;
@@ -153,10 +180,6 @@ namespace Engine.Common
         /// </summary>
         public Model Model = null;
         /// <summary>
-        /// Local vegetation
-        /// </summary>
-        public Billboard[] Vegetation = null;
-        /// <summary>
         /// Local pathfinding grid
         /// </summary>
         public Grid Grid = null;
@@ -164,6 +187,21 @@ namespace Engine.Common
         /// Gets if local quad node is culled
         /// </summary>
         public bool Cull = false;
+
+        private Dictionary<int, VertexData[]> vegetationBillBoardPositions = new Dictionary<int, VertexData[]>();
+
+        private Dictionary<int, Vector3[]> vegetationModelPositions = new Dictionary<int, Vector3[]>();
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="quadTree">Quadtree</param>
+        /// <param name="parent">Parent node</param>
+        public QuadTreeNode(QuadTree quadTree, QuadTreeNode parent)
+        {
+            this.QuadTree = quadTree;
+            this.Parent = parent;
+        }
 
         /// <summary>
         /// Pick nearest position
@@ -580,6 +618,26 @@ namespace Engine.Common
                         this.Children[i].FrustumCulling(frustum);
                     }
                 }
+                else
+                {
+                    foreach (var index in this.vegetationBillBoardPositions.Keys)
+                    {
+                        var items = this.vegetationBillBoardPositions[index];
+                        if (items != null && items.Length > 0)
+                        {
+                            //None
+                        }
+                    }
+
+                    foreach (var index in this.vegetationModelPositions.Keys)
+                    {
+                        var items = this.vegetationModelPositions[index];
+                        if (items != null && items.Length > 0)
+                        {
+                            //None
+                        }
+                    }
+                }
             }
         }
         /// <summary>
@@ -588,28 +646,7 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            if (!this.Cull)
-            {
-                if (this.Children != null && this.Children.Length > 0)
-                {
-                    for (int i = 0; i < this.Children.Length; i++)
-                    {
-                        this.Children[i].Update(gameTime);
-                    }
-                }
-                else
-                {
-                    //this.Model.Update(gameTime);
-
-                    if (this.Vegetation != null && this.Vegetation.Length > 0)
-                    {
-                        for (int i = 0; i < this.Vegetation.Length; i++)
-                        {
-                            this.Vegetation[i].Update(gameTime);
-                        }
-                    }
-                }
-            }
+            
         }
         /// <summary>
         /// Draws node and its childs
@@ -629,13 +666,44 @@ namespace Engine.Common
                 }
                 else
                 {
-                    //this.Model.Draw(gameTime, context);
-
-                    if (this.Vegetation != null && this.Vegetation.Length > 0)
+                    foreach (var index in this.vegetationBillBoardPositions.Keys)
                     {
-                        for (int i = 0; i < this.Vegetation.Length; i++)
+                        var items = this.vegetationBillBoardPositions[index];
+                        if (items != null && items.Length > 0)
                         {
-                            this.Vegetation[i].Draw(gameTime, context);
+                            //((Billboard)this.QuadTree.Drawers[index]).WriteData(items);
+
+                            //this.QuadTree.Drawers[index].Draw(gameTime, context);
+                        }
+                    }
+
+                    foreach (var index in this.vegetationModelPositions.Keys)
+                    {
+                        var items = this.vegetationModelPositions[index];
+                        if (items != null && items.Length > 0)
+                        {
+                            var model = this.QuadTree.Drawers[index] as ModelInstanced;
+                            if (model != null)
+                            {
+                                Vector3[] f = Array.FindAll(items, it => 
+                                {
+                                    float dd = Vector3.DistanceSquared(it, context.EyePosition);
+
+                                    return dd >= 0 && dd <= (100 * 100);
+                                });
+
+                                if (f.Length > 0)
+                                {
+                                    model.SetPositions(f);
+
+                                    var par = context.Frustum.GetCameraParams();
+                                    par.ZFar = 100;
+                                    BoundingFrustum bf = BoundingFrustum.FromCamera(par);
+
+                                    model.FrustumCulling(bf);
+                                    model.Draw(gameTime, context);
+                                }
+                            }
                         }
                     }
                 }

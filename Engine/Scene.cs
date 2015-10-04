@@ -473,6 +473,23 @@ namespace Engine
 
             return newModel;
         }
+
+        /// <summary>
+        /// Adds new terrain model
+        /// </summary>
+        /// <param name="description">Terrain description</param>
+        /// <param name="optimize">Optimize model</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new model</returns>
+        public Terrain2 AddTerrain2(TerrainDescription description, bool optimize = true, int order = 0)
+        {
+            Terrain2 newModel = new Terrain2(this.Game, description);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        
         /// <summary>
         /// Adds new mini-map
         /// </summary>

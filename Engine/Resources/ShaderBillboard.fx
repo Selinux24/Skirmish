@@ -13,7 +13,8 @@ cbuffer cbPerFrame : register (b0)
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
-	float gRadius;
+	float gStartRadius;
+	float gEndRadius;
 };
 cbuffer cbPerObject : register (b1)
 {
@@ -49,7 +50,7 @@ GSVertexBillboard VSBillboard(VSVertexBillboard input)
 void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSVertexBillboard> outputStream)
 {
 	float3 look = gEyePositionWorld - input[0].centerWorld;
-	if(gRadius == 0 || length(look) < gRadius)
+	if(gEndRadius == 0 || length(look) < gEndRadius)
 	{
 		//Compute the local coordinate system of the sprite relative to the world space such that the billboard is aligned with the y-axis and faces the eye.
 		look.y = 0.0f; // y-axis aligned, so project to xz-plane
@@ -85,7 +86,7 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 void GSSMBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSShadowMapOutput> outputStream)
 {
 	float3 look = gEyePositionWorld - input[0].centerWorld;
-	if(gRadius == 0 || length(look) < gRadius)
+	if(gEndRadius == 0 || length(look) < gEndRadius)
 	{
 		//Compute the local coordinate system of the sprite relative to the world space such that the billboard is aligned with the y-axis and faces the eye.
 		look.y = 0.0f; // y-axis aligned, so project to xz-plane

@@ -376,6 +376,7 @@
     <Compile Include="PathFinding\PathFinderData.cs" />
     <Compile Include="ShadowMap.cs" />
     <Compile Include="SpriteButton.cs" />
+    <Compile Include="Terrain2.cs" />
     <Compile Include="TriangleListDrawer.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
     <Compile Include="Effects\EffectParticles.cs" />

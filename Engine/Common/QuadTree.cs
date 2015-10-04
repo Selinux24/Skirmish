@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using SharpDX;
+using System.Collections.Generic;
+using Engine.Content;
 
 namespace Engine.Common
 {
@@ -17,25 +19,70 @@ namespace Engine.Common
         /// <returns>Returns generated quadtree</returns>
         public static QuadTree Build(
             Game game,
-            Triangle[] triangles, 
+            Triangle[] triangles,
             TerrainDescription description)
         {
+            QuadTree quadTree = new QuadTree();
+
+            List<Billboard> billboardList = new List<Billboard>();
+            List<ModelInstanced> modelList = new List<ModelInstanced>();
+
+            if (description.Vegetation != null && description.Vegetation.Length > 0)
+            {
+                for (int i = 0; i < description.Vegetation.Length; i++)
+                {
+                    var billBoardDesc = description.Vegetation[i] as TerrainDescription.VegetationDescriptionBillboard;
+                    if (billBoardDesc != null)
+                    {
+                        var modelContent = ModelContent.GenerateBillboard(billBoardDesc.ContentPath, billBoardDesc.VegetarionTextures);
+
+                        int maxInstances = (int)(description.Quadtree.MaxTrianglesPerNode * billBoardDesc.Saturation) + 1;
+
+                        Billboard bb = new Billboard(game, modelContent, maxInstances);
+
+                        quadTree.Drawers.Add(i, bb);
+                    }
+
+                    var modelDesc = description.Vegetation[i] as TerrainDescription.VegetationDescriptionModel;
+                    if (modelDesc != null)
+                    {
+                        var modelContent = LoaderCOLLADA.Load(modelDesc.ContentPath, modelDesc.Model);
+
+                        int maxInstances = (int)(description.Quadtree.MaxTrianglesPerNode * modelDesc.Saturation) + 1;
+
+                        ModelInstanced bb = new ModelInstanced(game, modelContent, maxInstances);
+
+                        quadTree.Drawers.Add(i, bb);
+                    }
+                }
+            }
+
             BoundingBox bbox = Helper.CreateBoundingBox(triangles);
             BoundingSphere bsph = Helper.CreateBoundingSphere(triangles);
 
             QuadTreeNode root = QuadTreeNode.CreatePartitions(
                 game,
-                bbox, 
-                triangles, 
+                quadTree,
+                null,
+                bbox,
+                triangles,
                 0,
                 description);
 
-            return new QuadTree()
-            {
-                Root = root,
-                BoundingBox = bbox,
-                BoundingSphere = bsph,
-            };
+            quadTree.Root = root;
+            quadTree.BoundingBox = bbox;
+            quadTree.BoundingSphere = bsph;
+
+            return quadTree;
+        }
+
+        public static QuadTree Build(
+            Game game, 
+            VertexData[] vertices, 
+            uint[] indices, 
+            TerrainDescription description)
+        {
+            throw new System.NotImplementedException();
         }
 
         /// <summary>
@@ -50,6 +97,18 @@ namespace Engine.Common
         /// Global bounding sphere
         /// </summary>
         public BoundingSphere BoundingSphere { get; private set; }
+        /// <summary>
+        /// Drawer dictionary
+        /// </summary>
+        public Dictionary<int, Drawable> Drawers { get; private set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public QuadTree()
+        {
+            this.Drawers = new Dictionary<int, Drawable>();
+        }
 
         /// <summary>
         /// Pick nearest position
@@ -130,7 +189,11 @@ namespace Engine.Common
         /// <returns>Returns the nodes contained into the frustum</returns>
         public QuadTreeNode[] Contained(ref BoundingFrustum frustum)
         {
-            return this.Root.Contained(ref frustum);
+            var par = frustum.GetCameraParams();
+            par.ZFar = 100;
+            BoundingFrustum bf = BoundingFrustum.FromCamera(par);
+
+            return this.Root.Contained(ref bf);
         }
 
         /// <summary>
@@ -149,8 +212,12 @@ namespace Engine.Common
         /// <param name="frustum">Frustum</param>
         public void FrustumCulling(BoundingFrustum frustum)
         {
+            var par = frustum.GetCameraParams();
+            par.ZFar = 100;
+            BoundingFrustum bf = BoundingFrustum.FromCamera(par);
+
             this.Root.CullAll();
-            this.Root.FrustumCulling(frustum);
+            this.Root.FrustumCulling(bf);
         }
         /// <summary>
         /// Updates the quad tree components

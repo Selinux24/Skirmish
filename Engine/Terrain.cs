@@ -78,28 +78,31 @@ namespace Engine
 
                     for (int i = 0; i < description.Vegetation.Length; i++)
                     {
-                        TerrainDescription.VegetationDescription vegetationDesc = description.Vegetation[i];
-
-                        ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
-                            contentFolder,
-                            bbox,
-                            triangles,
-                            vegetationDesc.VegetarionTextures,
-                            vegetationDesc.Saturation,
-                            vegetationDesc.MinSize,
-                            vegetationDesc.MaxSize,
-                            vegetationDesc.Seed);
-
-                        if (vegetationContent != null)
+                        TerrainDescription.VegetationDescriptionBillboard vegetationDesc = description.Vegetation[i] as TerrainDescription.VegetationDescriptionBillboard;
+                        if (vegetationDesc != null)
                         {
-                            var billboard = new Billboard(game, vegetationContent)
-                            {
-                                Radius = vegetationDesc.Radius,
-                                Opaque = vegetationDesc.Opaque,
-                                DeferredEnabled = vegetationDesc.DeferredEnabled,
-                            };
+                            ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
+                                contentFolder,
+                                bbox,
+                                triangles,
+                                vegetationDesc.VegetarionTextures,
+                                vegetationDesc.Saturation,
+                                vegetationDesc.MinSize,
+                                vegetationDesc.MaxSize,
+                                vegetationDesc.Seed);
 
-                            vegetationList.Add(billboard);
+                            if (vegetationContent != null)
+                            {
+                                var billboard = new Billboard(game, vegetationContent, 0)
+                                {
+                                    StartRadius = vegetationDesc.StartRadius,
+                                    EndRadius = vegetationDesc.EndRadius,
+                                    Opaque = vegetationDesc.Opaque,
+                                    DeferredEnabled = vegetationDesc.DeferredEnabled,
+                                };
+
+                                vegetationList.Add(billboard);
+                            }
                         }
                     }
 
@@ -532,29 +535,25 @@ namespace Engine
         public class VegetationDescription
         {
             /// <summary>
-            /// Texture names array for vegetation
+            /// Content path
             /// </summary>
-            public string[] VegetarionTextures = null;
-            /// <summary>
-            /// Vegetation saturation per triangle
-            /// </summary>
-            public float Saturation = 0.1f;
-            /// <summary>
-            /// Vegetation sprite minimum size
-            /// </summary>
-            public Vector2 MinSize = Vector2.One;
-            /// <summary>
-            /// Vegetation sprite maximum size
-            /// </summary>
-            public Vector2 MaxSize = Vector2.One * 2f;
+            public string ContentPath = "Resources";
             /// <summary>
             /// Drawing radius for vegetation
             /// </summary>
-            public float Radius = 0f;
+            public float StartRadius = 0f;
+            /// <summary>
+            /// Drawing radius for vegetation
+            /// </summary>
+            public float EndRadius = 0f;
             /// <summary>
             /// Seed for random position generation
             /// </summary>
             public int Seed = 0;
+            /// <summary>
+            /// Vegetation saturation per triangle
+            /// </summary>
+            public float Saturation = 0.1f;
             /// <summary>
             /// Is opaque
             /// </summary>
@@ -563,6 +562,34 @@ namespace Engine
             /// Can be renderer by the deferred renderer
             /// </summary>
             public bool DeferredEnabled = true;
+        }
+        /// <summary>
+        /// Vegetation billboards
+        /// </summary>
+        public class VegetationDescriptionBillboard : VegetationDescription
+        {
+            /// <summary>
+            /// Texture names array for vegetation
+            /// </summary>
+            public string[] VegetarionTextures = null;
+            /// <summary>
+            /// Vegetation sprite minimum size
+            /// </summary>
+            public Vector2 MinSize = Vector2.One;
+            /// <summary>
+            /// Vegetation sprite maximum size
+            /// </summary>
+            public Vector2 MaxSize = Vector2.One * 2f;
+        }
+        /// <summary>
+        /// Vegetation models
+        /// </summary>
+        public class VegetationDescriptionModel : VegetationDescription
+        {
+            /// <summary>
+            /// Model file name
+            /// </summary>
+            public string Model;
         }
 
         /// <summary>

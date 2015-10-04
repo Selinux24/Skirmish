@@ -83,19 +83,21 @@ namespace DeferredTest
                 },
                 Vegetation = new[]
                 {
-                    new TerrainDescription.VegetationDescription()
+                    new TerrainDescription.VegetationDescriptionBillboard()
                     {
                         VegetarionTextures = new[] { "tree0.dds", "tree1.dds" },
                         Saturation = 0.15f,
-                        Radius = 300f,
+                        StartRadius = 0f,
+                        EndRadius = 300f,
                         MinSize = Vector2.One * 5f,
                         MaxSize = Vector2.One * 10f,
                     },
-                    new TerrainDescription.VegetationDescription()
+                    new TerrainDescription.VegetationDescriptionBillboard()
                     {
                         VegetarionTextures = new[] { "grass.png" },
                         Saturation = 20f,
-                        Radius = 50f,
+                        StartRadius = 0f,
+                        EndRadius = 50f,
                         MinSize = Vector2.One * 0.20f,
                         MaxSize = Vector2.One * 0.25f,
                     }

@@ -697,6 +697,82 @@ namespace Engine.Content
             return modelContent;
         }
 
+        public static ModelContent GenerateBillboard(string contentFolder, string[] textures)
+        {
+            ModelContent modelContent = new ModelContent();
+
+            string imageName = "billboard";
+            string materialName = "billboardMaterial";
+            string geoName = "billboardGeometry";
+
+            ImageContent imageContent = new ImageContent()
+            {
+                Streams = ContentManager.FindContent(contentFolder, textures),
+            };
+
+            modelContent.Images.Add(imageName, imageContent);
+
+            MaterialContent material = MaterialContent.Default;
+            material.DiffuseTexture = imageName;
+
+            modelContent.Materials.Add(materialName, material);
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = PrimitiveTopology.PointList,
+                VertexType = VertexTypes.Billboard,
+                Vertices = null,
+                Indices = null,
+                Material = materialName,
+            };
+
+            modelContent.Geometry.Add(geoName, materialName, geo);
+            modelContent.Optimize();
+
+            return modelContent;
+        }
+
+        public static Vector3[] GenerateRandomPositions(BoundingBox bbox, Triangle[] triList, float saturation, int seed = 0, float maxAngle = 60f)
+        {
+            List<Vector3> vertices = new List<Vector3>();
+
+            for (int i = 0; i < triList.Length; i++)
+            {
+                Triangle tri = triList[i];
+
+                float inc = MathUtil.RadiansToDegrees(tri.Inclination);
+                if (inc > maxAngle)
+                {
+                    inc = 0;
+                }
+                else
+                {
+                    inc = (inc + maxAngle) / maxAngle;
+                }
+
+                int num = (int)(saturation * inc);
+                if (num > 0)
+                {
+                    Random rnd = new Random(seed + i);
+
+                    for (int b = 0; b < num; b++)
+                    {
+                        //Buscar un punto en el triángulo
+                        Vector3 v = rnd.NextVector3(tri.Min, tri.Max);
+                        Ray ray = new Ray(new Vector3(v.X, bbox.Maximum.Y + 0.1f, v.Z), Vector3.Down);
+                        Vector3 iPoint;
+                        if (tri.Intersects(ref ray, out iPoint))
+                        {
+                            vertices.Add(iPoint);
+                        }
+                    }
+                }
+            }
+
+            return vertices.ToArray();
+        }
+
+
         /// <summary>
         /// Constructor
         /// </summary>

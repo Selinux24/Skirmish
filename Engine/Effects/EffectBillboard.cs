@@ -60,9 +60,13 @@ namespace Engine.Effects
         /// </summary>
         private EffectVectorVariable fogColor = null;
         /// <summary>
-        /// Bounding sphere
+        /// Start radius
         /// </summary>
-        private EffectScalarVariable radius = null;
+        private EffectScalarVariable startRadius = null;
+        /// <summary>
+        /// End radius
+        /// </summary>
+        private EffectScalarVariable endRadius = null;
         /// <summary>
         /// World effect variable
         /// </summary>
@@ -225,17 +229,31 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Bounding sphere
+        /// Start radius
         /// </summary>
-        protected float Radius
+        protected float StartRadius
         {
             get
             {
-                return this.radius.GetFloat();
+                return this.startRadius.GetFloat();
             }
             set
             {
-                this.radius.Set(value);
+                this.startRadius.Set(value);
+            }
+        }
+        /// <summary>
+        /// End radius
+        /// </summary>
+        protected float EndRadius
+        {
+            get
+            {
+                return this.endRadius.GetFloat();
+            }
+            set
+            {
+                this.endRadius.Set(value);
             }
         }
         /// <summary>
@@ -375,7 +393,8 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
-            this.radius = this.Effect.GetVariableByName("gRadius").AsScalar();
+            this.startRadius = this.Effect.GetVariableByName("gStartRadius").AsScalar();
+            this.endRadius = this.Effect.GetVariableByName("gEndRadius").AsScalar();
             this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
@@ -490,17 +509,20 @@ namespace Engine.Effects
         /// Update per model object data
         /// </summary>
         /// <param name="material">Material</param>
-        /// <param name="radius">Drawing radius</param>
+        /// <param name="startRadius">Drawing start radius</param>
+        /// <param name="endRadius">Drawing end radius</param>
         /// <param name="textureCount">Texture count</param>
         /// <param name="texture">Texture</param>
         public void UpdatePerObject(
             Material material,
-            float radius,
+            float startRadius,
+            float endRadius,
             uint textureCount,
             ShaderResourceView texture)
         {
             this.Material = new BufferMaterials(material);
-            this.Radius = radius;
+            this.StartRadius = startRadius;
+            this.EndRadius = endRadius;
             this.TextureCount = textureCount;
             this.Textures = texture;
         }

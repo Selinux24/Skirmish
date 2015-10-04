@@ -239,6 +239,27 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Dispose disposable objects dictionary
+        /// </summary>
+        /// <param name="dictionary">Disposable objects dictionary</param>
+        public static void Dispose<TKey, TValue>(IDictionary<TKey, TValue> dictionary)
+        {
+            if (typeof(TValue) is IDisposable)
+            {
+                foreach (var item in dictionary)
+                {
+                    Helper.Dispose((IDisposable)item.Value);
+                }
+            }
+            else if (typeof(TValue) is IEnumerable<IDisposable>)
+            {
+                foreach (var item in dictionary)
+                {
+                    Helper.Dispose((IEnumerable<IDisposable>)item.Value);
+                }
+            }
+        }
+        /// <summary>
         /// Gets the maximum value of the collection 
         /// </summary>
         /// <typeparam name="T">Type</typeparam>
