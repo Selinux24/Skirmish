@@ -190,3 +190,4 @@ Thumbs.db
 
 #NUGET
 .nuget/
+*.cod
