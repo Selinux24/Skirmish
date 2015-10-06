@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using Buffer = SharpDX.Direct3D11.Buffer;
-using SharpDX;
-using SharpDX.Direct3D;
 
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Helpers;
     using Engine.Content;
+    using Engine.Helpers;
 
     public class Terrain2 : Drawable
     {
@@ -32,8 +30,10 @@ namespace Engine
                 Streams = ContentManager.FindContent(description.ContentPath, description.Heightmap.HeightmapFileName),
             };
 
+            //Read heightmap
             this.heightMap = HeightMap.FromStream(heightMapImage.Stream);
 
+            //Get vertices and indices
             VertexData[] vertices;
             uint[] indices;
             this.heightMap.BuildGeometry(
@@ -42,7 +42,10 @@ namespace Engine
                 out vertices, out indices);
 
             //Initialize Quadtree
-            this.quadTree = QuadTree.Build(game, vertices, indices, description);
+            this.quadTree = QuadTree.Build(
+                game, 
+                vertices, 
+                description);
 
             //Initialize patches
             this.InitializePatches(description.Quadtree.MaxTrianglesPerNode);

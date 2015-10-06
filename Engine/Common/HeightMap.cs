@@ -19,13 +19,17 @@ namespace Engine.Common
         {
             using (var bitmap = Bitmap.FromStream(stream) as Bitmap)
             {
-                var result = new float[bitmap.Height, bitmap.Width];
+                var result = new float[bitmap.Height + 1, bitmap.Width + 1];
 
-                for (int x = 0; x < bitmap.Width; x++)
+                for (int x = 0; x < bitmap.Width + 1; x++)
                 {
-                    for (int y = 0; y < bitmap.Height; y++)
+                    int xx = x < bitmap.Width ? x : x - 1;
+
+                    for (int y = 0; y < bitmap.Height + 1; y++)
                     {
-                        var color = bitmap.GetPixel(x, y);
+                        int yy = y < bitmap.Height ? y : y - 1;
+
+                        var color = bitmap.GetPixel(xx, yy);
 
                         result[x, y] = (float)color.B / 255f;
                     }

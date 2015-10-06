@@ -16,7 +16,7 @@ namespace Engine.Common
         /// <param name="game">Game</param>
         /// <param name="bbox">Parent bounding box</param>
         /// <param name="triangles">All triangles</param>
-        /// <param name="depth">Current depth</param>
+        /// <param name="treeDepth">Current depth</param>
         /// <param name="description">Description</param>
         /// <returns></returns>
         public static QuadTreeNode CreatePartitions(
@@ -25,7 +25,7 @@ namespace Engine.Common
             QuadTreeNode parent,
             BoundingBox bbox,
             Triangle[] triangles,
-            int depth,
+            int treeDepth,
             TerrainDescription description)
         {
             Triangle[] nodeTriangles = Array.FindAll(triangles, t =>
@@ -39,14 +39,13 @@ namespace Engine.Common
             {
                 QuadTreeNode node = new QuadTreeNode(quadTree, parent)
                 {
-                    Level = depth,
+                    Level = treeDepth,
                     BoundingBox = bbox,
                 };
 
-                bool haltByDepth = description.Quadtree.MaxDepth > 0 ? depth >= description.Quadtree.MaxDepth : false;
                 bool haltByCount = nodeTriangles.Length < description.Quadtree.MaxTrianglesPerNode;
 
-                if (haltByDepth || haltByCount)
+                if (haltByCount)
                 {
                     node.Triangles = nodeTriangles;
 
@@ -127,10 +126,76 @@ namespace Engine.Common
                     //+0-1-1   +1+1+0   -->   cmm    MMc
                     BoundingBox half3 = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
 
-                    QuadTreeNode child0 = CreatePartitions(game, quadTree, node, half0, triangles, depth + 1, description);
-                    QuadTreeNode child1 = CreatePartitions(game, quadTree, node, half1, triangles, depth + 1, description);
-                    QuadTreeNode child2 = CreatePartitions(game, quadTree, node, half2, triangles, depth + 1, description);
-                    QuadTreeNode child3 = CreatePartitions(game, quadTree, node, half3, triangles, depth + 1, description);
+                    QuadTreeNode child0 = CreatePartitions(game, quadTree, node, half0, triangles, treeDepth + 1, description);
+                    QuadTreeNode child1 = CreatePartitions(game, quadTree, node, half1, triangles, treeDepth + 1, description);
+                    QuadTreeNode child2 = CreatePartitions(game, quadTree, node, half2, triangles, treeDepth + 1, description);
+                    QuadTreeNode child3 = CreatePartitions(game, quadTree, node, half3, triangles, treeDepth + 1, description);
+
+                    List<QuadTreeNode> childList = new List<QuadTreeNode>();
+
+                    if (child0 != null) childList.Add(child0);
+                    if (child1 != null) childList.Add(child1);
+                    if (child2 != null) childList.Add(child2);
+                    if (child3 != null) childList.Add(child3);
+
+                    if (childList.Count > 0)
+                    {
+                        node.Children = childList.ToArray();
+                    }
+                }
+
+                return node;
+            }
+
+            return null;
+        }
+
+        public static QuadTreeNode CreatePartitions(
+            Game game,
+            QuadTree quadTree, QuadTreeNode parent,
+            BoundingBox bbox, VertexData[] vertices,
+            int treeDepth,
+            TerrainDescription description)
+        {
+            VertexData[] nodeVertices = Array.FindAll(vertices, p =>
+            {
+                var containment = bbox.Contains(p.Position.Value);
+
+                return containment != ContainmentType.Disjoint;
+            });
+
+            if (nodeVertices.Length > 0)
+            {
+                QuadTreeNode node = new QuadTreeNode(quadTree, parent)
+                {
+                    Level = treeDepth,
+                    BoundingBox = bbox,
+                };
+
+                bool haltByCount = nodeVertices.Length <= description.Quadtree.MaxVerticesByNode;
+                if (haltByCount)
+                {
+                    node.Vertices = nodeVertices;
+                }
+                else
+                {
+                    Vector3 M = bbox.Maximum;
+                    Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
+                    Vector3 m = bbox.Minimum;
+
+                    //-1-1-1   +0+1+0   -->   mmm    cMc
+                    BoundingBox half0 = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+                    //+0-1+0   +1+1+1   -->   cmc    MMM
+                    BoundingBox half1 = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+                    //-1-1+0   +0+1+1   -->   mmc    cMM
+                    BoundingBox half2 = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+                    //+0-1-1   +1+1+0   -->   cmm    MMc
+                    BoundingBox half3 = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+
+                    QuadTreeNode child0 = CreatePartitions(game, quadTree, node, half0, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode child1 = CreatePartitions(game, quadTree, node, half1, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode child2 = CreatePartitions(game, quadTree, node, half2, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode child3 = CreatePartitions(game, quadTree, node, half3, nodeVertices, treeDepth + 1, description);
 
                     List<QuadTreeNode> childList = new List<QuadTreeNode>();
 
@@ -191,6 +256,8 @@ namespace Engine.Common
         private Dictionary<int, VertexData[]> vegetationBillBoardPositions = new Dictionary<int, VertexData[]>();
 
         private Dictionary<int, Vector3[]> vegetationModelPositions = new Dictionary<int, Vector3[]>();
+
+        private VertexData[] Vertices;
 
         /// <summary>
         /// Constructor
@@ -646,7 +713,7 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            
+
         }
         /// <summary>
         /// Draws node and its childs
@@ -685,7 +752,7 @@ namespace Engine.Common
                             var model = this.QuadTree.Drawers[index] as ModelInstanced;
                             if (model != null)
                             {
-                                Vector3[] f = Array.FindAll(items, it => 
+                                Vector3[] f = Array.FindAll(items, it =>
                                 {
                                     float dd = Vector3.DistanceSquared(it, context.EyePosition);
 

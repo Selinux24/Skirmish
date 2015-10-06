@@ -2,6 +2,7 @@
 using SharpDX;
 using System.Collections.Generic;
 using Engine.Content;
+using System;
 
 namespace Engine.Common
 {
@@ -77,12 +78,34 @@ namespace Engine.Common
         }
 
         public static QuadTree Build(
-            Game game, 
-            VertexData[] vertices, 
-            uint[] indices, 
+            Game game,
+            VertexData[] vertices,
             TerrainDescription description)
         {
-            throw new System.NotImplementedException();
+            //Process Quadtree. Each tail quadnode must contains same number of vertices
+
+            //Compute bounding volumes
+            long index = 0;
+            Vector3[] positions = new Vector3[vertices.Length];
+            Array.ForEach(vertices, v => positions[index++] = v.Position.Value);
+
+            BoundingBox bbox = BoundingBox.FromPoints(positions);
+            BoundingSphere bsph = BoundingSphere.FromPoints(positions);
+
+            QuadTree quadTree = new QuadTree();
+
+            QuadTreeNode root = QuadTreeNode.CreatePartitions(
+                game,
+                quadTree, null,
+                bbox, vertices,
+                0,
+                description);
+
+            quadTree.Root = root;
+            quadTree.BoundingBox = bbox;
+            quadTree.BoundingSphere = bsph;
+
+            return quadTree;
         }
 
         /// <summary>

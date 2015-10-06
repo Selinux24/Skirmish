@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
+using System;
 
 namespace Engine
 {
@@ -600,11 +601,41 @@ namespace Engine
             /// <summary>
             /// Maximum triangle count per node
             /// </summary>
-            public int MaxTrianglesPerNode = 1024;
+            private int maxTrianglesPerNode = 0;
+
             /// <summary>
-            /// Maximum depth
+            /// Maximum triangle count per node
             /// </summary>
-            public int MaxDepth = 0;
+            public int MaxTrianglesPerNode
+            {
+                get
+                {
+                    return this.maxTrianglesPerNode;
+                }
+                set
+                {
+                    this.maxTrianglesPerNode = value;
+
+                    float v = (float)Math.Pow((Math.Sqrt(value / 2) + 1), 2);
+                    int vi = (int)v;
+
+                    if (v != (float)vi) throw new ArgumentException("Bad triangles per node count.");
+
+                    this.MaxVerticesByNode = vi;
+                }
+            }
+            /// <summary>
+            /// Maximum vertex count per node
+            /// </summary>
+            public int MaxVerticesByNode { get; protected set; }
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public QuadtreeDescription()
+            {
+                this.MaxTrianglesPerNode = 2048;
+            }
         }
 
         /// <summary>

@@ -114,8 +114,7 @@ namespace TerrainTest
                 },
                 Quadtree = new TerrainDescription.QuadtreeDescription()
                 {
-                    MaxTrianglesPerNode = 1024,
-                    MaxDepth = 0,
+                    MaxTrianglesPerNode = 2048,
                 },
                 PathFinder = new TerrainDescription.PathFinderDescription()
                 {
