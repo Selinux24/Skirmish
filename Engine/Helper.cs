@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using SharpDX;
+using System.Collections;
 
 namespace Engine
 {
@@ -233,30 +234,39 @@ namespace Engine
         /// <param name="array">Disposable objects array</param>
         public static void Dispose(IEnumerable<IDisposable> array)
         {
-            foreach (var item in array)
+            if (array != null && array.Count() > 0)
             {
-                Helper.Dispose(item);
+                foreach (var item in array)
+                {
+                    Helper.Dispose(item);
+                }
             }
         }
         /// <summary>
         /// Dispose disposable objects dictionary
         /// </summary>
         /// <param name="dictionary">Disposable objects dictionary</param>
-        public static void Dispose<TKey, TValue>(IDictionary<TKey, TValue> dictionary)
+        public static void Dispose(IDictionary dictionary)
         {
-            if (typeof(TValue) is IDisposable)
+            if (dictionary != null && dictionary.Count > 0)
             {
-                foreach (var item in dictionary)
+                foreach (var item in dictionary.Values)
                 {
-                    Helper.Dispose((IDisposable)item.Value);
+                    if (item is IDisposable)
+                    {
+                        Helper.Dispose((IDisposable)item);
+                    }
+                    else if (item is IEnumerable<IDisposable>)
+                    {
+                        Helper.Dispose((IEnumerable<IDisposable>)item);
+                    }
+                    else if (item is IDictionary)
+                    {
+                        Helper.Dispose((IDictionary)item);
+                    }
                 }
-            }
-            else if (typeof(TValue) is IEnumerable<IDisposable>)
-            {
-                foreach (var item in dictionary)
-                {
-                    Helper.Dispose((IEnumerable<IDisposable>)item.Value);
-                }
+
+                dictionary.Clear();
             }
         }
         /// <summary>
