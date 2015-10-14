@@ -166,116 +166,136 @@ namespace Engine
     {
         public static uint[] GenerateIndices(IndexBufferShapeEnum bufferShape, int trianglesPerNode)
         {
-            uint[] indices = null;
+            uint[] indices = GenerateDiamond(bufferShape, trianglesPerNode);
 
-            bool full = bufferShape == IndexBufferShapeEnum.Full;
-            bool side = (
-                bufferShape == IndexBufferShapeEnum.SideTop ||
-                bufferShape == IndexBufferShapeEnum.SideBottom ||
-                bufferShape == IndexBufferShapeEnum.SideLeft ||
-                bufferShape == IndexBufferShapeEnum.SideRight);
-            bool corner = (
+            return indices;
+        }
+
+        private static uint[] GenerateDiamond(IndexBufferShapeEnum bufferShape, int trianglesPerNode)
+        {
+            int nodes = trianglesPerNode / 2;
+            uint side = (uint)Math.Sqrt(nodes);
+            uint sideLoss = side / 2;
+
+            bool topSide =
                 bufferShape == IndexBufferShapeEnum.CornerTopLeft ||
-                bufferShape == IndexBufferShapeEnum.CornerBottomLeft ||
                 bufferShape == IndexBufferShapeEnum.CornerTopRight ||
-                bufferShape == IndexBufferShapeEnum.CornerBottomRight);
+                bufferShape == IndexBufferShapeEnum.SideTop;
 
-            if (full)
-            {
-                indices = GenerateFull(trianglesPerNode);
-            }
-            else if (side)
-            {
-                indices = GenerateSide(bufferShape, trianglesPerNode);
-            }
-            else if (corner)
-            {
-                indices = GenerateCorner(bufferShape, trianglesPerNode);
-            }
+            bool bottomSide =
+                bufferShape == IndexBufferShapeEnum.CornerBottomLeft ||
+                bufferShape == IndexBufferShapeEnum.CornerBottomRight ||
+                bufferShape == IndexBufferShapeEnum.SideBottom;
 
-            return indices;
-        }
+            bool leftSide =
+                bufferShape == IndexBufferShapeEnum.CornerBottomLeft ||
+                bufferShape == IndexBufferShapeEnum.CornerTopLeft ||
+                bufferShape == IndexBufferShapeEnum.SideLeft;
 
-        private static uint[] GenerateFull(int trianglesPerNode)
-        {
-            int nodes = trianglesPerNode / 2;
-            uint size = (uint)Math.Sqrt(nodes);
+            bool rightSide =
+                bufferShape == IndexBufferShapeEnum.CornerBottomRight ||
+                bufferShape == IndexBufferShapeEnum.CornerTopRight ||
+                bufferShape == IndexBufferShapeEnum.SideRight;
 
-            uint[] indices = new uint[trianglesPerNode * 3];
+            uint totalTriangles = (uint)trianglesPerNode;
+            if (topSide) totalTriangles -= sideLoss;
+            if (bottomSide) totalTriangles -= sideLoss;
+            if (leftSide) totalTriangles -= sideLoss;
+            if (rightSide) totalTriangles -= sideLoss;
 
-            int index = 0;
-
-            for (uint y = 0; y < size; y++)
-            {
-                for (uint x = 0; x < size; x++)
-                {
-                    uint indexCRow = ((y + 0) * size) + x;
-                    uint indexNRow = ((y + 1) * size) + x;
-
-                    //Tri 1
-                    indices[index++] = indexCRow;
-                    indices[index++] = indexCRow + 1;
-                    indices[index++] = indexNRow;
-
-                    //Tri 2
-                    indices[index++] = indexCRow + 1;
-                    indices[index++] = indexNRow;
-                    indices[index++] = indexNRow + 1;
-                }
-            }
-
-            return indices;
-        }
-
-        private static uint[] GenerateSide(IndexBufferShapeEnum bufferShape, int trianglesPerNode)
-        {
-            uint nodes = (uint)trianglesPerNode / 2;
-            uint size = (uint)Math.Sqrt(nodes);
-            uint triangles = ((nodes - size) * 2) + ((size / 2) * 3);
-
-            uint lY = bufferShape == IndexBufferShapeEnum.SideTop ? (uint)1 : (uint)0;
-            uint lX = bufferShape == IndexBufferShapeEnum.SideLeft ? (uint)1 : (uint)0;
-            uint rY = bufferShape == IndexBufferShapeEnum.SideBottom ? (uint)1 : (uint)0;
-            uint rX = bufferShape == IndexBufferShapeEnum.SideRight ? (uint)1 : (uint)0;
-
-            uint[] indices = new uint[triangles * 3];
+            uint[] indices = new uint[totalTriangles * 3];
 
             int index = 0;
 
-            //Compute regular nodes
-            for (uint y = 0 + lY; y < size - rY; y++)
+            for (uint y = 1; y < side; y += 2)
             {
-                for (uint x = 0 + lX; x < size - rX; x++)
+                for (uint x = 1; x < side; x += 2)
                 {
-                    uint indexCRow = ((y + 0) * size) + x;
-                    uint indexNRow = ((y + 1) * size) + x;
+                    uint indexPRow = ((y - 1) * side) + x;
+                    uint indexCRow = ((y + 0) * side) + x;
+                    uint indexNRow = ((y + 1) * side) + x;
 
-                    //Tri 1
-                    indices[index++] = indexCRow;
-                    indices[index++] = indexCRow + 1;
-                    indices[index++] = indexNRow;
+                    //Top side
+                    if (y == 1 && topSide)
+                    {
+                        //Top
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow - 1;
+                        indices[index++] = indexPRow + 1;
+                    }
+                    else
+                    {
+                        //Top left
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow - 1;
+                        indices[index++] = indexPRow;
+                        //Top right
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow;
+                        indices[index++] = indexPRow + 1;
+                    }
 
-                    //Tri 2
-                    indices[index++] = indexCRow + 1;
-                    indices[index++] = indexNRow;
-                    indices[index++] = indexNRow + 1;
+                    //Bottom side
+                    if (y == side - 1 && bottomSide)
+                    {
+                        //Bottom only
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexNRow + 1;
+                        indices[index++] = indexNRow - 1;
+                    }
+                    else
+                    {
+                        //Bottom left
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexNRow;
+                        indices[index++] = indexNRow - 1;
+                        //Bottom right
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexNRow + 1;
+                        indices[index++] = indexNRow;
+                    }
+
+                    //Left side
+                    if (x == 1 && leftSide)
+                    {
+                        //Left only
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow - 1;
+                        indices[index++] = indexNRow - 1;
+                    }
+                    else
+                    {
+                        //Left top
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexCRow - 1;
+                        indices[index++] = indexPRow - 1;
+                        //Left bottom
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexNRow - 1;
+                        indices[index++] = indexCRow - 1;
+                    }
+
+                    //Right side
+                    if (x == side - 1 && rightSide)
+                    {
+                        //Right only
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow + 1;
+                        indices[index++] = indexNRow + 1;
+                    }
+                    else
+                    {
+                        //Right top
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow + 1;
+                        indices[index++] = indexCRow + 1;
+                        //Right bottom
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexCRow + 1;
+                        indices[index++] = indexNRow + 1;
+                    }
                 }
             }
-
-            //Compute side
-
-
-            return indices;
-        }
-
-        private static uint[] GenerateCorner(IndexBufferShapeEnum bufferShape, int trianglesPerNode)
-        {
-            int nodes = trianglesPerNode / 2;
-            int size = (int)Math.Sqrt(nodes);
-            int triangles = ((size - 1) * (size - 1) * 2) + ((size - 1) * 3) + 4;
-
-            uint[] indices = new uint[triangles * 3];
-
 
             return indices;
         }
@@ -295,11 +315,10 @@ namespace Engine
             {
                 //Vertices
                 int vertices = (int)Math.Pow((Math.Sqrt(triangleCount / 4) + 1), 2);
-                int indices = triangleCount * 3;
 
                 VertexPositionNormalTextureTangent[] vertexData = new VertexPositionNormalTextureTangent[vertices];
 
-                return new TerrainPatch()
+                return new TerrainPatch(game)
                 {
                     LevelOfDetail = detail,
                     Current = null,
@@ -308,7 +327,7 @@ namespace Engine
             }
             else
             {
-                return new TerrainPatch()
+                return new TerrainPatch(game)
                 {
                     LevelOfDetail = detail,
                     Current = null,
@@ -316,20 +335,28 @@ namespace Engine
             }
         }
 
+        public readonly Game Game;
         public LevelOfDetailEnum LevelOfDetail = LevelOfDetailEnum.None;
         public QuadTreeNode Current;
         public Buffer VertexBuffer;
         public Dictionary<int, Drawable[]> Drawables = new Dictionary<int, Drawable[]>();
 
-        public TerrainPatch()
+        public TerrainPatch(Game game)
         {
-
+            this.Game = game;
         }
 
         public void Dispose()
         {
             Helper.Dispose(this.VertexBuffer);
             Helper.Dispose(this.Drawables);
+        }
+
+        public void WriteData(VertexPositionNormalTextureTangent[] vertexData)
+        {
+            this.Game.Graphics.DeviceContext.WriteBuffer(
+                this.VertexBuffer,
+                vertexData);
         }
     }
 
