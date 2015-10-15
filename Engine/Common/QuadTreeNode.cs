@@ -118,29 +118,33 @@ namespace Engine.Common
                     Vector3 m = bbox.Minimum;
 
                     //-1-1-1   +0+1+0   -->   mmm    cMc
-                    BoundingBox half0 = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-                    //+0-1+0   +1+1+1   -->   cmc    MMM
-                    BoundingBox half1 = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+                    BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
                     //-1-1+0   +0+1+1   -->   mmc    cMM
-                    BoundingBox half2 = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+                    BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
                     //+0-1-1   +1+1+0   -->   cmm    MMc
-                    BoundingBox half3 = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+                    BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+                    //+0-1+0   +1+1+1   -->   cmc    MMM
+                    BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
 
-                    QuadTreeNode child0 = CreatePartitions(game, quadTree, node, half0, triangles, treeDepth + 1, description);
-                    QuadTreeNode child1 = CreatePartitions(game, quadTree, node, half1, triangles, treeDepth + 1, description);
-                    QuadTreeNode child2 = CreatePartitions(game, quadTree, node, half2, triangles, treeDepth + 1, description);
-                    QuadTreeNode child3 = CreatePartitions(game, quadTree, node, half3, triangles, treeDepth + 1, description);
+                    QuadTreeNode topLeftChild = CreatePartitions(game, quadTree, node, topLeftBox, triangles, treeDepth + 1, description);
+                    QuadTreeNode topRightChild = CreatePartitions(game, quadTree, node, topRightBox, triangles, treeDepth + 1, description);
+                    QuadTreeNode bottomLeftChild = CreatePartitions(game, quadTree, node, bottomLeftBox, triangles, treeDepth + 1, description);
+                    QuadTreeNode bottomRightChild = CreatePartitions(game, quadTree, node, bottomRightBox, triangles, treeDepth + 1, description);
 
                     List<QuadTreeNode> childList = new List<QuadTreeNode>();
 
-                    if (child0 != null) childList.Add(child0);
-                    if (child1 != null) childList.Add(child1);
-                    if (child2 != null) childList.Add(child2);
-                    if (child3 != null) childList.Add(child3);
+                    if (topLeftChild != null) childList.Add(topLeftChild);
+                    if (topRightChild != null) childList.Add(topRightChild);
+                    if (bottomLeftChild != null) childList.Add(bottomLeftChild);
+                    if (bottomRightChild != null) childList.Add(bottomRightChild);
 
                     if (childList.Count > 0)
                     {
                         node.Children = childList.ToArray();
+                        node.TopLeftChild = topLeftChild;
+                        node.TopRightChild = topRightChild;
+                        node.BottomLeftChild = bottomLeftChild;
+                        node.BottomRightChild = bottomRightChild;
                     }
                 }
 
@@ -184,29 +188,33 @@ namespace Engine.Common
                     Vector3 m = bbox.Minimum;
 
                     //-1-1-1   +0+1+0   -->   mmm    cMc
-                    BoundingBox half0 = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-                    //+0-1+0   +1+1+1   -->   cmc    MMM
-                    BoundingBox half1 = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+                    BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
                     //-1-1+0   +0+1+1   -->   mmc    cMM
-                    BoundingBox half2 = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+                    BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
                     //+0-1-1   +1+1+0   -->   cmm    MMc
-                    BoundingBox half3 = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+                    BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+                    //+0-1+0   +1+1+1   -->   cmc    MMM
+                    BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
 
-                    QuadTreeNode child0 = CreatePartitions(game, quadTree, node, half0, nodeVertices, treeDepth + 1, description);
-                    QuadTreeNode child1 = CreatePartitions(game, quadTree, node, half1, nodeVertices, treeDepth + 1, description);
-                    QuadTreeNode child2 = CreatePartitions(game, quadTree, node, half2, nodeVertices, treeDepth + 1, description);
-                    QuadTreeNode child3 = CreatePartitions(game, quadTree, node, half3, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode topLeftChild = CreatePartitions(game, quadTree, node, topLeftBox, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode topRightChild = CreatePartitions(game, quadTree, node, topRightBox, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode bottomLeftChild = CreatePartitions(game, quadTree, node, bottomLeftBox, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode bottomRightChild = CreatePartitions(game, quadTree, node, bottomRightBox, nodeVertices, treeDepth + 1, description);
 
                     List<QuadTreeNode> childList = new List<QuadTreeNode>();
 
-                    if (child0 != null) childList.Add(child0);
-                    if (child1 != null) childList.Add(child1);
-                    if (child2 != null) childList.Add(child2);
-                    if (child3 != null) childList.Add(child3);
+                    if (topLeftChild != null) childList.Add(topLeftChild);
+                    if (topRightChild != null) childList.Add(topRightChild);
+                    if (bottomLeftChild != null) childList.Add(bottomLeftChild);
+                    if (bottomRightChild != null) childList.Add(bottomRightChild);
 
                     if (childList.Count > 0)
                     {
                         node.Children = childList.ToArray();
+                        node.TopLeftChild = topLeftChild;
+                        node.TopRightChild = topRightChild;
+                        node.BottomLeftChild = bottomLeftChild;
+                        node.BottomRightChild = bottomRightChild;
                     }
                 }
 
@@ -224,6 +232,17 @@ namespace Engine.Common
         /// Parent node
         /// </summary>
         public QuadTreeNode Parent { get; private set; }
+
+        public QuadTreeNode TopLeftChild { get; private set; }
+        public QuadTreeNode TopRightChild { get; private set; }
+        public QuadTreeNode BottomLeftChild { get; private set; }
+        public QuadTreeNode BottomRightChild { get; private set; }
+
+        public QuadTreeNode TopNeighbour { get; private set; }
+        public QuadTreeNode BottomNeighbour { get; private set; }
+        public QuadTreeNode LeftNeighbour { get; private set; }
+        public QuadTreeNode RightNeighbour { get; private set; }
+
         /// <summary>
         /// Depth level
         /// </summary>
@@ -232,6 +251,16 @@ namespace Engine.Common
         /// Bounding box
         /// </summary>
         public BoundingBox BoundingBox;
+        /// <summary>
+        /// Gets the node center position
+        /// </summary>
+        public Vector3 Center
+        {
+            get
+            {
+                return (this.BoundingBox.Maximum + this.BoundingBox.Minimum) * 0.5f;
+            }
+        }
         /// <summary>
         /// Children list
         /// </summary>
@@ -268,6 +297,159 @@ namespace Engine.Common
         {
             this.QuadTree = quadTree;
             this.Parent = parent;
+        }
+
+        public void ConnectNodes()
+        {
+            this.TopNeighbour = this.GetNeighbourNodeAtTop();
+            this.BottomNeighbour = this.GetNeighbourNodeAtBottom();
+            this.LeftNeighbour = this.GetNeighbourNodeAtLeft();
+            this.RightNeighbour = this.GetNeighbourNodeAtRight();
+
+            if (this.Children != null && this.Children.Length > 0)
+            {
+                for (int i = 0; i < this.Children.Length; i++)
+                {
+                    this.Children[i].ConnectNodes();
+                }
+            }
+        }
+
+        private QuadTreeNode GetNeighbourNodeAtTop()
+        {
+            if (this.Parent != null)
+            {
+                if (this == this.Parent.TopLeftChild)
+                {
+                    var node = this.Parent.GetNeighbourNodeAtTop();
+                    if (node != null)
+                    {
+                        return node.BottomLeftChild;
+                    }
+                }
+                else if (this == this.Parent.TopRightChild)
+                {
+                    var node = this.Parent.GetNeighbourNodeAtTop();
+                    if (node != null)
+                    {
+                        return node.BottomRightChild;
+                    }
+                }
+                else if (this == this.Parent.BottomLeftChild)
+                {
+                    return this.Parent.TopLeftChild;
+                }
+                else if (this == this.Parent.BottomRightChild)
+                {
+                    return this.Parent.TopRightChild;
+                }
+            }
+
+            return null;
+        }
+
+        private QuadTreeNode GetNeighbourNodeAtBottom()
+        {
+            if (this.Parent != null)
+            {
+                if (this == this.Parent.TopLeftChild)
+                {
+                    return this.Parent.BottomLeftChild;
+                }
+                else if (this == this.Parent.TopRightChild)
+                {
+                    return this.Parent.BottomRightChild;
+                }
+                else if (this == this.Parent.BottomLeftChild)
+                {
+                    var node = this.Parent.GetNeighbourNodeAtBottom();
+                    if (node != null)
+                    {
+                        return node.TopLeftChild;
+                    }
+                }
+                else if (this == this.Parent.BottomRightChild)
+                {
+                    var node = this.Parent.GetNeighbourNodeAtBottom();
+                    if (node != null)
+                    {
+                        return node.TopRightChild;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private QuadTreeNode GetNeighbourNodeAtRight()
+        {
+            if (this.Parent != null)
+            {
+                if (this == this.Parent.TopLeftChild)
+                {
+                    return this.Parent.TopRightChild;
+                }
+                else if (this == this.Parent.TopRightChild)
+                {
+                    var node = this.Parent.GetNeighbourNodeAtRight();
+                    if (node != null)
+                    {
+                        return node.TopLeftChild;
+                    }
+                }
+                else if (this == this.Parent.BottomLeftChild)
+                {
+                    return this.Parent.BottomRightChild;
+                }
+                else if (this == this.Parent.BottomRightChild)
+                {
+                    var node = this.Parent.GetNeighbourNodeAtRight();
+                    if (node != null)
+                    {
+                        return node.BottomLeftChild;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private QuadTreeNode GetNeighbourNodeAtLeft()
+        {
+            if (this.Parent != null)
+            {
+                if (this == this.Parent.TopLeftChild)
+                {
+                    var node = this.Parent.GetNeighbourNodeAtLeft();
+                    if (node != null)
+                    {
+                        return node.TopRightChild;
+                    }
+                }
+                else if (this == this.Parent.TopRightChild)
+                {
+                    return this.Parent.TopLeftChild;
+                }
+                else if (this == this.Parent.BottomLeftChild)
+                {
+                    var node = this.Parent.GetNeighbourNodeAtLeft();
+                    if (node != null)
+                    {
+                        return node.BottomRightChild;
+                    }
+                }
+                else if (this == this.Parent.BottomRightChild)
+                {
+                    return this.Parent.BottomLeftChild;
+                }
+            }
+
+            return null;
+        }
+
+        public IVertexData[] GetVertexData(VertexTypes vertexType)
+        {
+            return VertexData.Convert(vertexType, this.Vertices, null, null, Matrix.Identity);
         }
 
         /// <summary>
@@ -584,6 +766,32 @@ namespace Engine.Common
                 for (int i = 0; i < this.Children.Length; i++)
                 {
                     var childNodes = this.Children[i].Contained(ref frustum);
+                    if (childNodes.Length > 0)
+                    {
+                        nodes.AddRange(childNodes);
+                    }
+                }
+            }
+
+            return nodes.ToArray();
+        }
+
+        public QuadTreeNode[] GetNodesToDraw(ref BoundingFrustum frustum)
+        {
+            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
+
+            if (this.Children == null)
+            {
+                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
+                {
+                    nodes.Add(this);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < this.Children.Length; i++)
+                {
+                    var childNodes = this.Children[i].GetNodesToDraw(ref frustum);
                     if (childNodes.Length > 0)
                     {
                         nodes.AddRange(childNodes);

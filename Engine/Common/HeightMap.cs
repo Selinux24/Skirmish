@@ -192,12 +192,12 @@ namespace Engine.Common
                 {
                     long index1 = (y * width) + x;
 
-                    VertexData pos1 = vertList[index1];
+                    Vector3 normal = Vector3.Up;
 
                     if (x == 0 || y == 0 || x == (depth - 1) || y == (width - 1))
                     {
                         // The vertices in the borders have always the up normal
-                        pos1.Normal = Vector3.Up;
+                        normal = Vector3.Up;
                     }
                     else
                     {
@@ -213,6 +213,7 @@ namespace Engine.Common
 
                         long index2;
                         long index3;
+                        VertexData pos1 = vertList[index1];
                         VertexData pos2;
                         VertexData pos3;
 
@@ -220,7 +221,7 @@ namespace Engine.Common
                         index3 = (y * width) + (x - 1);
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        VertexData.ComputeNormals(pos1, pos2, pos3, out tangent, out binormal, out norm1);
+                        VertexData.ComputeNormals(pos1, pos3, pos2, out tangent, out binormal, out norm1);
 
                         index2 = (y * width) + (x - 1);
                         index3 = ((y + 1) * width) + (x - 1);
@@ -254,8 +255,10 @@ namespace Engine.Common
 
                         Vector3 norm = (norm1 + norm2 + norm3 + norm4 + norm5 + norm6) / 6.0f;
 
-                        pos1.Normal = Vector3.Normalize(norm);
+                        normal = Vector3.Normalize(norm);
                     }
+
+                    vertList[index1].Normal = normal;
                 }
             }
         }

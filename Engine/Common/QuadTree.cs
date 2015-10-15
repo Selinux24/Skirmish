@@ -1,8 +1,8 @@
-﻿using System.Diagnostics;
+﻿using Engine.Content;
 using SharpDX;
-using System.Collections.Generic;
-using Engine.Content;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Engine.Common
 {
@@ -61,6 +61,9 @@ namespace Engine.Common
             BoundingBox bbox = Helper.CreateBoundingBox(triangles);
             BoundingSphere bsph = Helper.CreateBoundingSphere(triangles);
 
+            quadTree.BoundingBox = bbox;
+            quadTree.BoundingSphere = bsph;
+
             QuadTreeNode root = QuadTreeNode.CreatePartitions(
                 game,
                 quadTree,
@@ -71,8 +74,7 @@ namespace Engine.Common
                 description);
 
             quadTree.Root = root;
-            quadTree.BoundingBox = bbox;
-            quadTree.BoundingSphere = bsph;
+            quadTree.Root.ConnectNodes();
 
             return quadTree;
         }
@@ -93,6 +95,8 @@ namespace Engine.Common
             BoundingSphere bsph = BoundingSphere.FromPoints(positions);
 
             QuadTree quadTree = new QuadTree();
+            quadTree.BoundingBox = bbox;
+            quadTree.BoundingSphere = bsph;
 
             QuadTreeNode root = QuadTreeNode.CreatePartitions(
                 game,
@@ -102,8 +106,7 @@ namespace Engine.Common
                 description);
 
             quadTree.Root = root;
-            quadTree.BoundingBox = bbox;
-            quadTree.BoundingSphere = bsph;
+            quadTree.Root.ConnectNodes();
 
             return quadTree;
         }
@@ -217,6 +220,11 @@ namespace Engine.Common
             BoundingFrustum bf = BoundingFrustum.FromCamera(par);
 
             return this.Root.Contained(ref bf);
+        }
+
+        public QuadTreeNode[] GetNodesToDraw(ref BoundingFrustum frustum)
+        {
+            return this.Root.GetNodesToDraw(ref frustum);
         }
 
         /// <summary>
