@@ -447,9 +447,30 @@ namespace Engine.Common
             return null;
         }
 
-        public IVertexData[] GetVertexData(VertexTypes vertexType)
+        public IVertexData[] GetVertexData(VertexTypes vertexType, int range)
         {
-            return VertexData.Convert(vertexType, this.Vertices, null, null, Matrix.Identity);
+            var data = VertexData.Convert(vertexType, this.Vertices, null, null, Matrix.Identity);
+
+            if (range > 1)
+            {
+                int side = (int)Math.Sqrt(data.Length);
+
+                List<IVertexData> data2 = new List<IVertexData>();
+
+                for (int y = 0; y < side; y += range)
+                {
+                    for (int x = 0; x < side; x += range)
+                    {
+                        int index = (y * side) + x;
+
+                        data2.Add(data[index]);
+                    }
+                }
+
+                data = data2.ToArray();
+            }
+
+            return data;
         }
 
         /// <summary>

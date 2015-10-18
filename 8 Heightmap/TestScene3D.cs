@@ -8,7 +8,7 @@ namespace HeightmapTest
     public class TestScene3D : Scene
     {
         private const float near = 0.1f;
-        private const float far = 1000f;
+        private const float far = 3000f;
         private const float fogStart = 0.01f;
         private const float fogRange = 0.50f;
 
@@ -186,8 +186,10 @@ namespace HeightmapTest
 
             #endregion
 
-            this.Camera.Goto(0, 0, 0);
-            this.Camera.LookTo(this.Lights.DirectionalLights[0].GetPosition(100));
+            this.Camera.Goto(50, 50, 50);
+            this.Camera.LookTo(0, 0, 0);
+            //this.Camera.Goto(0, 0, 0);
+            //this.Camera.LookTo(this.Lights.DirectionalLights[0].GetPosition(100));
         }
 
         public override void Update(GameTime gameTime)

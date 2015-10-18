@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine
 {
@@ -14,20 +15,28 @@ namespace Engine
 
     public class Terrain2 : Drawable
     {
-        public const int MaxPatchesHighLevel = 4;
-        public const int MaxPatchesMediumLevel = 6;
-        public const int MaxPatchesLowLevel = 8;
+        public const int MaxPatchesHighLevel = 1;
+        public const int MaxPatchesMediumLevel = 3;
+        public const int MaxPatchesLowLevel = 9;
         public const int MaxPatchesDataLoadLevel = 10;
 
         private HeightMap heightMap = null;
         private IndexBufferDictionary indices = new IndexBufferDictionary();
         private TerrainPatchDictionary patches = new TerrainPatchDictionary();
+        private ShaderResourceView textures = null;
         private QuadTree quadTree = null;
         private QuadTreeNode[] nodesToDraw = null;
 
         public Terrain2(Game game, TerrainDescription description)
             : base(game)
         {
+            ImageContent terrainTextures = new ImageContent()
+            {
+                Streams = ContentManager.FindContent(description.ContentPath, description.Heightmap.Texture),
+            };
+
+            this.textures = game.Graphics.Device.LoadTexture(terrainTextures.Stream);
+
             ImageContent heightMapImage = new ImageContent()
             {
                 Streams = ContentManager.FindContent(description.ContentPath, description.Heightmap.HeightmapFileName),
@@ -59,6 +68,7 @@ namespace Engine
 
         public override void Dispose()
         {
+            Helper.Dispose(this.textures);
             Helper.Dispose(this.indices);
             Helper.Dispose(this.patches);
         }
@@ -126,13 +136,13 @@ namespace Engine
 
             for (int i = 0; i < MaxPatchesMediumLevel; i++)
             {
-                var patch = TerrainPatch.CreatePatch(this.Game, LevelOfDetailEnum.Medium, trianglesPerNode);
+                var patch = TerrainPatch.CreatePatch(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
                 this.patches[LevelOfDetailEnum.Medium][i] = patch;
             }
 
             for (int i = 0; i < MaxPatchesLowLevel; i++)
             {
-                var patch = TerrainPatch.CreatePatch(this.Game, LevelOfDetailEnum.Low, trianglesPerNode);
+                var patch = TerrainPatch.CreatePatch(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
                 this.patches[LevelOfDetailEnum.Low][i] = patch;
             }
 
@@ -175,33 +185,41 @@ namespace Engine
                 {
                     if (patchesHighLevel < MaxPatchesHighLevel)
                     {
-                        this.patches[LevelOfDetailEnum.High][patchesHighLevel].Action = TerrainPatchActionEnum.Draw;
-                        this.patches[LevelOfDetailEnum.High][patchesHighLevel].Current = this.nodesToDraw[i];
-                        this.patches[LevelOfDetailEnum.High][patchesHighLevel].IndexBuffer = this.indices[LevelOfDetailEnum.High][IndexBufferShapeEnum.Full];
+                        this.patches[LevelOfDetailEnum.High][patchesHighLevel].SetData(
+                            TerrainPatchActionEnum.Draw,
+                            LevelOfDetailEnum.High,
+                            this.nodesToDraw[i],
+                            this.indices[LevelOfDetailEnum.High][IndexBufferShapeEnum.Full]);
 
                         patchesHighLevel++;
                     }
                     else if (patchesMediumLevel < MaxPatchesMediumLevel)
                     {
-                        this.patches[LevelOfDetailEnum.Medium][patchesMediumLevel].Action = TerrainPatchActionEnum.Draw;
-                        this.patches[LevelOfDetailEnum.Medium][patchesMediumLevel].Current = this.nodesToDraw[i];
-                        this.patches[LevelOfDetailEnum.Medium][patchesMediumLevel].IndexBuffer = this.indices[LevelOfDetailEnum.Medium][IndexBufferShapeEnum.Full];
+                        this.patches[LevelOfDetailEnum.Medium][patchesMediumLevel].SetData(
+                            TerrainPatchActionEnum.Draw,
+                            LevelOfDetailEnum.Medium,
+                            this.nodesToDraw[i],
+                            this.indices[LevelOfDetailEnum.Medium][IndexBufferShapeEnum.Full]);
 
                         patchesMediumLevel++;
                     }
                     else if (patchesLowLevel < MaxPatchesLowLevel)
                     {
-                        this.patches[LevelOfDetailEnum.Low][patchesLowLevel].Action = TerrainPatchActionEnum.Draw;
-                        this.patches[LevelOfDetailEnum.Low][patchesLowLevel].Current = this.nodesToDraw[i];
-                        this.patches[LevelOfDetailEnum.Low][patchesLowLevel].IndexBuffer = this.indices[LevelOfDetailEnum.Low][IndexBufferShapeEnum.Full];
+                        this.patches[LevelOfDetailEnum.Low][patchesLowLevel].SetData(
+                            TerrainPatchActionEnum.Draw,
+                            LevelOfDetailEnum.Low,
+                            this.nodesToDraw[i],
+                            this.indices[LevelOfDetailEnum.Low][IndexBufferShapeEnum.Full]);
 
                         patchesLowLevel++;
                     }
                     else if (patchesDataLoadLevel < MaxPatchesDataLoadLevel)
                     {
-                        this.patches[LevelOfDetailEnum.DataLoad][patchesDataLoadLevel].Action = TerrainPatchActionEnum.Load;
-                        this.patches[LevelOfDetailEnum.DataLoad][patchesDataLoadLevel].Current = this.nodesToDraw[i];
-                        this.patches[LevelOfDetailEnum.DataLoad][patchesDataLoadLevel].IndexBuffer = null;
+                        this.patches[LevelOfDetailEnum.DataLoad][patchesDataLoadLevel].SetData(
+                            TerrainPatchActionEnum.Load,
+                            LevelOfDetailEnum.DataLoad,
+                            this.nodesToDraw[i],
+                            null);
 
                         patchesDataLoadLevel++;
                     }
@@ -211,7 +229,7 @@ namespace Engine
                     }
                 }
 
-                this.patches.Draw(this.Game, gameTime, context);
+                this.patches.Draw(this.Game, gameTime, context, this.textures);
             }
         }
     }
@@ -221,8 +239,8 @@ namespace Engine
         None = 0,
         High = 1,
         Medium = 2,
-        Low = 3,
-        DataLoad = 4,
+        Low = 4,
+        DataLoad = 8,
     }
 
     public enum IndexBufferShapeEnum : int
@@ -286,9 +304,9 @@ namespace Engine
             {
                 for (uint x = 1; x < side; x += 2)
                 {
-                    uint indexPRow = ((y - 1) * side) + x;
-                    uint indexCRow = ((y + 0) * side) + x;
-                    uint indexNRow = ((y + 1) * side) + x;
+                    uint indexPRow = ((y - 1) * (side + 1)) + x;
+                    uint indexCRow = ((y + 0) * (side + 1)) + x;
+                    uint indexNRow = ((y + 1) * (side + 1)) + x;
 
                     //Top side
                     if (y == 1 && topSide)
@@ -396,7 +414,7 @@ namespace Engine
             if (triangleCount > 0)
             {
                 //Vertices
-                int vertices = (int)Math.Pow((Math.Sqrt(triangleCount / 4) + 1), 2);
+                int vertices = (int)Math.Pow((Math.Sqrt(triangleCount / 2) + 1), 2);
 
                 VertexPositionNormalTextureTangent[] vertexData = new VertexPositionNormalTextureTangent[vertices];
 
@@ -423,29 +441,7 @@ namespace Engine
         private VertexBufferBinding[] vertexBufferBinding = null;
 
         public readonly Game Game;
-        public TerrainPatchActionEnum Action = TerrainPatchActionEnum.None;
-        public QuadTreeNode Current
-        {
-            get
-            {
-                return this.current;
-            }
-            set
-            {
-                if (this.current != value)
-                {
-                    this.current = value;
-
-                    if (this.current != null)
-                    {
-                        VertexData.WriteVertexBuffer(
-                            this.Game.Graphics.DeviceContext,
-                            this.vertexBuffer,
-                            this.current.GetVertexData(VertexTypes.PositionNormalTextureTangent));
-                    }
-                }
-            }
-        }
+        public TerrainPatchActionEnum Action { get; private set; }
         public IndexBuffer IndexBuffer = null;
         public Dictionary<int, Drawable[]> Drawables = new Dictionary<int, Drawable[]>();
 
@@ -463,6 +459,35 @@ namespace Engine
         public void Reset()
         {
             this.Action = TerrainPatchActionEnum.None;
+        }
+
+        public void SetData(TerrainPatchActionEnum action, LevelOfDetailEnum lod, QuadTreeNode node, IndexBuffer indexBuffer)
+        {
+            if (this.vertexBuffer != null)
+            {
+                this.Action = action;
+
+                if (this.current != node)
+                {
+                    this.current = node;
+
+                    if (this.current != null)
+                    {
+                        this.IndexBuffer = indexBuffer;
+
+                        var data = this.current.GetVertexData(VertexTypes.PositionNormalTextureTangent, (int)lod);
+
+                        VertexData.WriteVertexBuffer(
+                            this.Game.Graphics.DeviceContext,
+                            this.vertexBuffer,
+                            data);
+                    }
+                }
+            }
+            else
+            {
+                this.Action = TerrainPatchActionEnum.None;
+            }
         }
 
         public void Draw(GameTime gameTime, Context context, EffectTechnique technique)
@@ -498,7 +523,7 @@ namespace Engine
             }
         }
 
-        public void Draw(Game game, GameTime gameTime, Context context)
+        public void Draw(Game game, GameTime gameTime, Context context, ShaderResourceView textures)
         {
             Drawer effect = null;
             if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectBasic;
@@ -508,6 +533,7 @@ namespace Engine
             if (effect != null)
             {
                 game.Graphics.SetDepthStencilZEnabled();
+                game.Graphics.SetRasterizerWireframe();
 
                 #region Per frame update
 
@@ -557,11 +583,11 @@ namespace Engine
 
                 if (context.DrawerMode == DrawerModesEnum.Forward)
                 {
-                    ((EffectBasic)effect).UpdatePerObject(Material.Default, null, null, 0);
+                    ((EffectBasic)effect).UpdatePerObject(Material.Default, textures, null, 0);
                 }
                 else if (context.DrawerMode == DrawerModesEnum.Deferred)
                 {
-                    ((EffectBasicGBuffer)effect).UpdatePerObject(Material.Default, null, null, 0);
+                    ((EffectBasicGBuffer)effect).UpdatePerObject(Material.Default, textures, null, 0);
                 }
 
                 #endregion
