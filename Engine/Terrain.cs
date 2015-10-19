@@ -510,6 +510,10 @@ namespace Engine
             /// </summary>
             public string Texture = null;
             /// <summary>
+            /// Normal map
+            /// </summary>
+            public string NormalMap = null;
+            /// <summary>
             /// Cell size
             /// </summary>
             public float CellSize = 1;

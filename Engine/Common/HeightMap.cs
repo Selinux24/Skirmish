@@ -255,7 +255,7 @@ namespace Engine.Common
 
                         Vector3 norm = (norm1 + norm2 + norm3 + norm4 + norm5 + norm6) / 6.0f;
 
-                        normal = Vector3.Normalize(norm);
+                        normal = -Vector3.Normalize(norm);
                     }
 
                     vertList[index1].Normal = normal;

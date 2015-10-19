@@ -116,8 +116,9 @@ namespace HeightmapTest
                 {
                     HeightmapFileName = "heightmap0.bmp",
                     Texture = "dirt0.dds",
-                    CellSize = 25,
-                    MaximumHeight = 250,
+                    NormalMap = "nmap0.png",
+                    CellSize = 5,
+                    MaximumHeight = 50,
                 },
                 Skydom = new TerrainDescription.SkydomDescription()
                 {
