@@ -25,6 +25,8 @@ namespace Engine
             : base(game, content, false, 0, false, false)
         {
             this.Manipulator = new Manipulator3D();
+            this.Opaque = true;
+            this.DeferredEnabled = true;
         }
         /// <summary>
         /// Update

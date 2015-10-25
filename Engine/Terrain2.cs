@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using Buffer = SharpDX.Direct3D11.Buffer;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
+using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {

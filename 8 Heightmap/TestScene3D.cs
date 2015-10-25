@@ -18,6 +18,7 @@ namespace HeightmapTest
 
         private Cursor cursor;
         private LensFlare lensFlare = null;
+        private Cubemap skydom = null;
         private Terrain2 terrain = null;
         private LineListDrawer bboxesDrawer = null;
 
@@ -106,6 +107,20 @@ namespace HeightmapTest
 
             #endregion
 
+            #region Skydom
+
+            sw.Restart();
+            this.skydom = this.AddSkydom(new CubemapDescription()
+            {
+                ContentPath = resources,
+                Radius = far,
+                Texture = "sunset.dds",
+            });
+            sw.Stop();
+            loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
             #region Terrain
 
             sw.Restart();
@@ -119,10 +134,6 @@ namespace HeightmapTest
                     NormalMap = "nmap0.png",
                     CellSize = 5,
                     MaximumHeight = 50,
-                },
-                Skydom = new TerrainDescription.SkydomDescription()
-                {
-                    Texture = "sunset.dds",
                 },
                 Quadtree = new TerrainDescription.QuadtreeDescription()
                 {

@@ -14,10 +14,6 @@ namespace Engine
     public class Terrain : Drawable
     {
         /// <summary>
-        /// Skydom
-        /// </summary>
-        private Cubemap skydom = null;
-        /// <summary>
         /// Quadtree used for picking
         /// </summary>
         private QuadTree pickingQuadtree = null;
@@ -110,20 +106,6 @@ namespace Engine
                     this.vegetation = vegetationList.ToArray();
                 }
             }
-
-            if (description != null && description.Skydom != null)
-            {
-                ModelContent skydomContent = ModelContent.GenerateSkydom(
-                    contentFolder,
-                    description.Skydom.Texture,
-                    bsph.Radius * 100f);
-
-                this.skydom = new Cubemap(game, skydomContent)
-                {
-                    Opaque = description.Opaque,
-                    DeferredEnabled = description.DeferredEnabled,
-                };
-            }
         }
         /// <summary>
         /// Dispose of created resources
@@ -144,12 +126,6 @@ namespace Engine
                 }
 
                 this.vegetation = null;
-            }
-
-            if (this.skydom != null)
-            {
-                this.skydom.Dispose();
-                this.skydom = null;
             }
         }
         /// <summary>
@@ -176,8 +152,6 @@ namespace Engine
 
                 this.pickingQuadtree.Update(gameTime);
             }
-
-            if (this.skydom != null) this.skydom.Update(gameTime);
         }
         /// <summary>
         /// Objects drawing
@@ -186,11 +160,6 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(GameTime gameTime, Context context)
         {
-            if (this.skydom != null)
-            {
-                this.skydom.Draw(gameTime, context);
-            }
-
             if (this.pickingQuadtree == null)
             {
                 if (!this.terrain.Cull)
@@ -495,7 +464,6 @@ namespace Engine
             /// </summary>
             public string ModelFileName = null;
         }
-
         /// <summary>
         /// Heightmap description
         /// </summary>
@@ -522,18 +490,6 @@ namespace Engine
             /// </summary>
             public float MaximumHeight = 1;
         }
-
-        /// <summary>
-        /// Skydom description
-        /// </summary>
-        public class SkydomDescription
-        {
-            /// <summary>
-            /// Skydom cube texture
-            /// </summary>
-            public string Texture = null;
-        }
-
         /// <summary>
         /// Vegetation
         /// </summary>
@@ -674,10 +630,6 @@ namespace Engine
         /// </summary>
         public VegetationDescription[] Vegetation = null;
         /// <summary>
-        /// Skydom
-        /// </summary>
-        public SkydomDescription Skydom = null;
-        /// <summary>
         /// Quadtree
         /// </summary>
         public QuadtreeDescription Quadtree = null;
@@ -694,6 +646,5 @@ namespace Engine
         /// Can be renderer by the deferred renderer
         /// </summary>
         public bool DeferredEnabled = true;
-
     }
 }

@@ -27,6 +27,7 @@ namespace Skybox
         private TextDrawer help = null;
         private TextDrawer fps = null;
 
+        private Cubemap skydom = null;
         private Terrain ruins = null;
         private TriangleListDrawer pickedTri = null;
         private LineListDrawer bboxGlobalDrawer = null;
@@ -86,6 +87,17 @@ namespace Skybox
 
             #endregion
 
+            #region Skydom
+
+            this.skydom = this.AddSkydom(new CubemapDescription()
+            {
+                ContentPath = "Resources",
+                Radius = this.Camera.FarPlaneDistance,
+                Texture = "sunset.dds",
+            });
+
+            #endregion
+
             #region Terrain
 
             TerrainDescription desc = new TerrainDescription()
@@ -94,10 +106,6 @@ namespace Skybox
                 Model = new TerrainDescription.ModelDescription()
                 {
                     ModelFileName = "ruins.dae",
-                },
-                Skydom = new TerrainDescription.SkydomDescription()
-                {
-                    Texture = "sunset.dds",
                 },
                 Opaque = true,
             };

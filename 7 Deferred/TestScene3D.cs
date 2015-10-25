@@ -24,6 +24,7 @@ namespace DeferredTest
         private Model tank = null;
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
+        private Cubemap skydom = null;
         private Terrain terrain = null;
         private ParticleSystem fire = null;
 
@@ -57,6 +58,20 @@ namespace DeferredTest
 
             string loadingText = null;
 
+            #region Skydom
+
+            sw.Restart();
+            this.skydom = this.AddSkydom(new CubemapDescription()
+            {
+                ContentPath = resources,
+                Radius = far,
+                Texture = "sunset.dds",
+            });
+            sw.Stop();
+            loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
             #region Terrain
 
             sw.Restart();
@@ -75,10 +90,6 @@ namespace DeferredTest
                 {
                     NodeSize = 2f,
                     NodeInclination = MathUtil.DegreesToRadians(35),
-                },
-                Skydom = new TerrainDescription.SkydomDescription()
-                {
-                    Texture = "sunset.dds",
                 },
                 Vegetation = new[]
                 {

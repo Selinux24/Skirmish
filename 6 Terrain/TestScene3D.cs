@@ -27,6 +27,7 @@ namespace TerrainTest
         private Model cursor3D = null;
         private Model tank = null;
 
+        private Cubemap skydom = null;
         private Terrain terrain = null;
         private List<Line> oks = new List<Line>();
         private List<Line> errs = new List<Line>();
@@ -102,6 +103,20 @@ namespace TerrainTest
 
             #endregion
 
+            #region Skydom
+
+            sw.Restart();
+            this.skydom = this.AddSkydom(new CubemapDescription()
+            {
+                ContentPath = resources,
+                Radius = this.Camera.FarPlaneDistance,
+                Texture = "sunset.dds",
+            });
+            sw.Stop();
+            loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
             #region Terrain
 
             sw.Restart();
@@ -120,10 +135,6 @@ namespace TerrainTest
                 {
                     NodeSize = 2f,
                     NodeInclination = MathUtil.DegreesToRadians(35),
-                },
-                Skydom = new TerrainDescription.SkydomDescription()
-                {
-                    Texture = "sunset.dds",
                 },
                 Vegetation = new[]
                 {
