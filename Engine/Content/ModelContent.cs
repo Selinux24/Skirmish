@@ -653,7 +653,7 @@ namespace Engine.Content
         /// <param name="texture">Texture</param>
         /// <param name="transform">Transform to apply to vertices</param>
         /// <returns>Returns a new model content</returns>
-        public static ModelContent FromHeightmap(string contentFolder, string heightMap, string texture, float cellSize, float cellHeight, Matrix transform)
+        public static ModelContent FromHeightmap(string contentFolder, string heightMap, string[] textures, float cellSize, float cellHeight, Matrix transform)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -668,7 +668,7 @@ namespace Engine.Content
 
             ImageContent textureImage = new ImageContent()
             {
-                Streams = ContentManager.FindContent(contentFolder, texture),
+                Streams = ContentManager.FindContent(contentFolder, textures),
             };
 
             MaterialContent material = MaterialContent.Default;

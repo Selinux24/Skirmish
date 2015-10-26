@@ -131,7 +131,7 @@ namespace HeightmapTest
                 {
                     HeightmapFileName = "heightmap0.bmp",
                     ColormapFileName = "colorm01.bmp",
-                    Texture = "dirt0.dds",
+                    Textures = new[] { "dirt0.dds", "detail001.dds" },
                     NormalMap = "nmap0.png",
                     CellSize = 5,
                     MaximumHeight = 50,

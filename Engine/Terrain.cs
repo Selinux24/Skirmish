@@ -480,7 +480,7 @@ namespace Engine
             /// <summary>
             /// Textures for heightmap
             /// </summary>
-            public string Texture = null;
+            public string[] Textures = null;
             /// <summary>
             /// Normal map
             /// </summary>

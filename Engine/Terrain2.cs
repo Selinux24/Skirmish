@@ -33,11 +33,18 @@ namespace Engine
         {
             ImageContent terrainTextures = new ImageContent()
             {
-                Streams = ContentManager.FindContent(description.ContentPath, description.Heightmap.Texture),
+                Streams = ContentManager.FindContent(description.ContentPath, description.Heightmap.Textures),
             };
 
             //Read textures
-            this.textures = game.Graphics.Device.LoadTexture(terrainTextures.Stream);
+            if (terrainTextures.IsArray)
+            {
+                this.textures = game.Graphics.Device.LoadTextureArray(terrainTextures.Streams);
+            }
+            else
+            {
+                this.textures = game.Graphics.Device.LoadTexture(terrainTextures.Stream);
+            }
 
             ImageContent normalMapTextures = new ImageContent()
             {
