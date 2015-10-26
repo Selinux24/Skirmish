@@ -22,7 +22,7 @@ namespace Engine
 
         private HeightMap heightMap = null;
         private IndexBufferDictionary indices = new IndexBufferDictionary();
-        private TerrainPatchDictionary patches = new TerrainPatchDictionary();
+        private TerrainPatchDictionary patches = null;
         private ShaderResourceView textures = null;
         private ShaderResourceView normalMap = null;
         private QuadTree quadTree = null;
@@ -150,6 +150,8 @@ namespace Engine
 
         private void InitializePatches<T>(int trianglesPerNode) where T : struct, IVertexData
         {
+            this.patches = new TerrainPatchDictionary(this.Game);
+
             this.patches.Add(LevelOfDetailEnum.High, new TerrainPatch[MaxPatchesHighLevel]);
             this.patches.Add(LevelOfDetailEnum.Medium, new TerrainPatch[MaxPatchesMediumLevel]);
             this.patches.Add(LevelOfDetailEnum.Low, new TerrainPatch[MaxPatchesLowLevel]);
@@ -334,7 +336,7 @@ namespace Engine
                     }
                 }
 
-                this.patches.Draw(this.Game, gameTime, context, this.textures, this.normalMap);
+                this.patches.Draw(gameTime, context, this.textures, this.normalMap);
             }
         }
     }
@@ -360,12 +362,6 @@ namespace Engine
         CornerBottomLeft = 6,
         CornerTopRight = 7,
         CornerBottomRight = 8,
-    }
-
-    public class IndexBuffer
-    {
-        public Buffer Buffer;
-        public int Count;
     }
 
     public class IndexBufferDictionary : Dictionary<LevelOfDetailEnum, Dictionary<IndexBufferShapeEnum, IndexBuffer>>
@@ -500,11 +496,108 @@ namespace Engine
         }
     }
 
+    public class IndexBuffer
+    {
+        public Buffer Buffer;
+        public int Count;
+    }
+
     public enum TerrainPatchActionEnum
     {
         None,
         Draw,
         Load,
+    }
+
+    public class TerrainPatchDictionary : Dictionary<LevelOfDetailEnum, TerrainPatch[]>
+    {
+        public readonly Game Game = null;
+
+        public TerrainPatchDictionary(Game game)
+            : base()
+        {
+            this.Game = game;
+        }
+
+        public void Reset()
+        {
+            foreach (var item in this.Values)
+            {
+                if (item != null && item.Length > 0)
+                {
+                    for (int i = 0; i < item.Length; i++)
+                    {
+                        item[i].Reset();
+                    }
+                }
+            }
+        }
+
+        public void Draw(GameTime gameTime, Context context, ShaderResourceView textures, ShaderResourceView normalMap)
+        {
+            EffectTerrain effect = DrawerPool.EffectTerrain;
+            if (effect != null)
+            {
+                this.Game.Graphics.SetDepthStencilZEnabled();
+                this.Game.Graphics.SetRasterizerDefault();
+
+                #region Per frame update
+
+                if (context.DrawerMode == DrawerModesEnum.Forward)
+                {
+                    effect.UpdatePerFrame(
+                        context.World,
+                        context.ViewProjection,
+                        context.EyePosition,
+                        context.Lights,
+                        context.ShadowMap,
+                        context.FromLightViewProjection);
+                }
+                else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                {
+                    effect.UpdatePerFrame(
+                        context.World,
+                        context.ViewProjection);
+                }
+                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                {
+                    effect.UpdatePerFrame(
+                        context.World,
+                        context.ViewProjection);
+                }
+
+                #endregion
+
+                #region Per object update
+
+                if (context.DrawerMode == DrawerModesEnum.Forward)
+                {
+                    effect.UpdatePerObject(Material.Default, textures, normalMap);
+                }
+                else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                {
+                    effect.UpdatePerObject(Material.Default, textures, normalMap);
+                }
+
+                #endregion
+
+                var technique = effect.GetTechnique(VertexTypes.Terrain, DrawingStages.Drawing, context.DrawerMode);
+
+                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
+
+                foreach (var lod in this.Keys)
+                {
+                    foreach (var item in this[lod])
+                    {
+                        if (item.Action == TerrainPatchActionEnum.Draw)
+                        {
+                            item.Draw(gameTime, context, technique);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public class TerrainPatch : IDisposable
@@ -630,89 +723,6 @@ namespace Engine
             }
 
             return IndexBufferShapeEnum.None;
-        }
-    }
-
-    public class TerrainPatchDictionary : Dictionary<LevelOfDetailEnum, TerrainPatch[]>
-    {
-        public void Reset()
-        {
-            foreach (var item in this.Values)
-            {
-                if (item != null && item.Length > 0)
-                {
-                    for (int i = 0; i < item.Length; i++)
-                    {
-                        item[i].Reset();
-                    }
-                }
-            }
-        }
-
-        public void Draw(Game game, GameTime gameTime, Context context, ShaderResourceView textures, ShaderResourceView normalMap)
-        {
-            EffectTerrain effect = DrawerPool.EffectTerrain;
-            if (effect != null)
-            {
-                game.Graphics.SetDepthStencilZEnabled();
-                game.Graphics.SetRasterizerDefault();
-
-                #region Per frame update
-
-                if (context.DrawerMode == DrawerModesEnum.Forward)
-                {
-                    effect.UpdatePerFrame(
-                        context.World,
-                        context.ViewProjection,
-                        context.EyePosition,
-                        context.Lights,
-                        context.ShadowMap,
-                        context.FromLightViewProjection);
-                }
-                else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                {
-                    effect.UpdatePerFrame(
-                        context.World,
-                        context.ViewProjection);
-                }
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                {
-                    effect.UpdatePerFrame(
-                        context.World,
-                        context.ViewProjection);
-                }
-
-                #endregion
-
-                #region Per object update
-
-                if (context.DrawerMode == DrawerModesEnum.Forward)
-                {
-                    effect.UpdatePerObject(Material.Default, textures, normalMap);
-                }
-                else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                {
-                    effect.UpdatePerObject(Material.Default, textures, normalMap);
-                }
-
-                #endregion
-
-                var technique = effect.GetTechnique(VertexTypes.Terrain, DrawingStages.Drawing, context.DrawerMode);
-
-                game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
-
-                foreach (var lod in this.Keys)
-                {
-                    foreach (var item in this[lod])
-                    {
-                        if (item.Action == TerrainPatchActionEnum.Draw)
-                        {
-                            item.Draw(gameTime, context, technique);
-                        }
-                    }
-                }
-            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Engine;
-using Engine.Common;
 using SharpDX;
 using System.Diagnostics;
 
@@ -23,7 +22,7 @@ namespace HeightmapTest
         private LineListDrawer bboxesDrawer = null;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.DeferredLightning)
+            : base(game, SceneModesEnum.ForwardLigthning)
         {
 
         }
@@ -132,7 +131,7 @@ namespace HeightmapTest
                     HeightmapFileName = "heightmap0.bmp",
                     ColormapFileName = "colorm01.bmp",
                     Textures = new[] { "dirt0.dds", "detail001.dds" },
-                    NormalMap = "nmap0.png",
+                    NormalMap = "nmap0.dds",
                     CellSize = 5,
                     MaximumHeight = 50,
                 },

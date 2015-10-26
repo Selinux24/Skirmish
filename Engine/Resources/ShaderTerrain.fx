@@ -39,7 +39,6 @@ PSVertexTerrain VSTerrainForward(VSVertexTerrain input)
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.tangentWorld = mul(float4(input.tangentLocal, 0), gWorld).xyz;
 	output.tex = input.tex;
-	output.depth = output.positionHomogeneous;
 	output.color = input.color;
     
     return output;
@@ -58,8 +57,8 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 	float3 normalWorld = 0.0f;
 	float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 0));
 
-	float depthValue = input.depth.z / input.depth.w;
-	if(depthValue >= 0.99f)
+	float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	if(depthValue < 0.75f)
 	{
 		normalWorld = input.normalWorld;
 	}
@@ -68,7 +67,7 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
 		normalWorld = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
-		textureColor *= gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 1)) * 2.0f;
+		textureColor *= gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 1)) * 1.8f;
 	}
 
 	textureColor = saturate(textureColor * input.color * 2.0f);
@@ -107,8 +106,8 @@ GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 	float3 normal = 0.0f;
 	float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 0));
 
-	float depthValue = input.depth.z / input.depth.w;
-	if(depthValue >= 0.99f)
+	float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
+	if(depthValue < 0.75f)
 	{
 		normal = input.normalWorld;
 	}
@@ -117,7 +116,7 @@ GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 		float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
 		normal = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
-		color *= gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 1)) * 2.0f;
+		color *= gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 1)) * 1.8f;
 	}
 
 	color = saturate(color * input.color * 2.0f);

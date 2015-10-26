@@ -326,7 +326,6 @@ struct PSVertexTerrain
     float3 normalWorld : NORMAL;
     float3 tangentWorld : TANGENT;
     float2 tex : TEXCOORD0;
-    float4 depth : TEXCOORD1;
     float4 color : COLOR0;
 };
 
