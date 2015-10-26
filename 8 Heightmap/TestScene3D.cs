@@ -130,6 +130,7 @@ namespace HeightmapTest
                 Heightmap = new TerrainDescription.HeightmapDescription()
                 {
                     HeightmapFileName = "heightmap0.bmp",
+                    ColormapFileName = "colorm01.bmp",
                     Texture = "dirt0.dds",
                     NormalMap = "nmap0.png",
                     CellSize = 5,

@@ -51,9 +51,15 @@ namespace Engine
             {
                 Streams = ContentManager.FindContent(description.ContentPath, description.Heightmap.HeightmapFileName),
             };
+            ImageContent colorMapImage = new ImageContent()
+            {
+                Streams = !string.IsNullOrEmpty(description.Heightmap.ColormapFileName) ?
+                    ContentManager.FindContent(description.ContentPath, description.Heightmap.ColormapFileName) :
+                    null,
+            };
 
             //Read heightmap
-            this.heightMap = HeightMap.FromStream(heightMapImage.Stream);
+            this.heightMap = HeightMap.FromStream(heightMapImage.Stream, colorMapImage.Stream);
 
             //Get vertices and indices
             VertexData[] vertices;
@@ -73,7 +79,7 @@ namespace Engine
             this.InitializeIndices(description.Quadtree.MaxTrianglesPerNode);
 
             //Initialize patches
-            this.InitializePatches(description.Quadtree.MaxTrianglesPerNode);
+            this.InitializePatches<VertexTerrain>(description.Quadtree.MaxTrianglesPerNode);
 
             this.Opaque = true;
             this.DeferredEnabled = true;
@@ -135,7 +141,7 @@ namespace Engine
             }
         }
 
-        private void InitializePatches(int trianglesPerNode)
+        private void InitializePatches<T>(int trianglesPerNode) where T : struct, IVertexData
         {
             this.patches.Add(LevelOfDetailEnum.High, new TerrainPatch[MaxPatchesHighLevel]);
             this.patches.Add(LevelOfDetailEnum.Medium, new TerrainPatch[MaxPatchesMediumLevel]);
@@ -144,25 +150,25 @@ namespace Engine
 
             for (int i = 0; i < MaxPatchesHighLevel; i++)
             {
-                var patch = TerrainPatch.CreatePatch(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
+                var patch = TerrainPatch.CreatePatch<T>(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
                 this.patches[LevelOfDetailEnum.High][i] = patch;
             }
 
             for (int i = 0; i < MaxPatchesMediumLevel; i++)
             {
-                var patch = TerrainPatch.CreatePatch(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
+                var patch = TerrainPatch.CreatePatch<T>(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
                 this.patches[LevelOfDetailEnum.Medium][i] = patch;
             }
 
             for (int i = 0; i < MaxPatchesLowLevel; i++)
             {
-                var patch = TerrainPatch.CreatePatch(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
+                var patch = TerrainPatch.CreatePatch<T>(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
                 this.patches[LevelOfDetailEnum.Low][i] = patch;
             }
 
             for (int i = 0; i < MaxPatchesDataLoadLevel; i++)
             {
-                var patch = TerrainPatch.CreatePatch(this.Game, LevelOfDetailEnum.DataLoad, trianglesPerNode);
+                var patch = TerrainPatch.CreatePatch<T>(this.Game, LevelOfDetailEnum.DataLoad, trianglesPerNode);
                 this.patches[LevelOfDetailEnum.DataLoad][i] = patch;
             }
         }
@@ -496,7 +502,7 @@ namespace Engine
 
     public class TerrainPatch : IDisposable
     {
-        public static TerrainPatch CreatePatch(Game game, LevelOfDetailEnum detail, int trianglesPerNode)
+        public static TerrainPatch CreatePatch<T>(Game game, LevelOfDetailEnum detail, int trianglesPerNode) where T : struct, IVertexData
         {
             int triangleCount = 0;
 
@@ -509,12 +515,12 @@ namespace Engine
                 //Vertices
                 int vertices = (int)Math.Pow((Math.Sqrt(triangleCount / 2) + 1), 2);
 
-                VertexPositionNormalTextureTangent[] vertexData = new VertexPositionNormalTextureTangent[vertices];
+                T[] vertexData = new T[vertices];
 
                 var vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(vertexData);
                 var vertexBufferBinding = new[]
                 {
-                    new VertexBufferBinding(vertexBuffer, default(VertexPositionNormalTextureTangent).Stride, 0),
+                    new VertexBufferBinding(vertexBuffer, default(T).Stride, 0),
                 };
 
                 return new TerrainPatch(game)
@@ -568,7 +574,7 @@ namespace Engine
 
                     if (this.current != null)
                     {
-                        var data = this.current.GetVertexData(VertexTypes.PositionNormalTextureTangent, (int)lod);
+                        var data = this.current.GetVertexData(VertexTypes.Terrain, (int)lod);
 
                         VertexData.WriteVertexBuffer(
                             this.Game.Graphics.DeviceContext,
@@ -638,11 +644,7 @@ namespace Engine
 
         public void Draw(Game game, GameTime gameTime, Context context, ShaderResourceView textures, ShaderResourceView normalMap)
         {
-            Drawer effect = null;
-            if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectBasic;
-            else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectGBuffer;
-            else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
-
+            EffectTerrain effect = DrawerPool.EffectTerrain;
             if (effect != null)
             {
                 game.Graphics.SetDepthStencilZEnabled();
@@ -652,7 +654,7 @@ namespace Engine
 
                 if (context.DrawerMode == DrawerModesEnum.Forward)
                 {
-                    ((EffectBasic)effect).UpdatePerFrame(
+                    effect.UpdatePerFrame(
                         context.World,
                         context.ViewProjection,
                         context.EyePosition,
@@ -662,32 +664,15 @@ namespace Engine
                 }
                 else if (context.DrawerMode == DrawerModesEnum.Deferred)
                 {
-                    ((EffectBasicGBuffer)effect).UpdatePerFrame(
+                    effect.UpdatePerFrame(
                         context.World,
                         context.ViewProjection);
                 }
                 else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                 {
-                    ((EffectBasicShadow)effect).UpdatePerFrame(
+                    effect.UpdatePerFrame(
                         context.World,
                         context.ViewProjection);
-                }
-
-                #endregion
-
-                #region Per skinning update
-
-                if (context.DrawerMode == DrawerModesEnum.Forward)
-                {
-                    ((EffectBasic)effect).UpdatePerSkinning(null);
-                }
-                else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                {
-                    ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
-                }
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                {
-                    ((EffectBasicShadow)effect).UpdatePerSkinning(null);
                 }
 
                 #endregion
@@ -696,16 +681,16 @@ namespace Engine
 
                 if (context.DrawerMode == DrawerModesEnum.Forward)
                 {
-                    ((EffectBasic)effect).UpdatePerObject(Material.Default, textures, normalMap, 0);
+                    effect.UpdatePerObject(Material.Default, textures, normalMap);
                 }
                 else if (context.DrawerMode == DrawerModesEnum.Deferred)
                 {
-                    ((EffectBasicGBuffer)effect).UpdatePerObject(Material.Default, textures, normalMap, 0);
+                    effect.UpdatePerObject(Material.Default, textures, normalMap);
                 }
 
                 #endregion
 
-                var technique = effect.GetTechnique(VertexTypes.PositionNormalTextureTangent, DrawingStages.Drawing);
+                var technique = effect.GetTechnique(VertexTypes.Terrain, DrawingStages.Drawing, context.DrawerMode);
 
                 game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
                 game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;

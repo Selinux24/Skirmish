@@ -1,5 +1,5 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
@@ -16,73 +16,20 @@ namespace Engine.Effects
     /// <summary>
     /// Basic effect
     /// </summary>
-    public class EffectBasic : Drawer
+    public class EffectTerrain : Drawer
     {
         /// <summary>
-        /// Maximum number of bones in a skeleton
+        /// Forward drawing technique
         /// </summary>
-        public const int MaxBoneTransforms = 96;
-
+        public readonly EffectTechnique TerrainForward = null;
         /// <summary>
-        /// Position color drawing technique
+        /// Deferred drawing technique
         /// </summary>
-        public readonly EffectTechnique PositionColor = null;
+        public readonly EffectTechnique TerrainDeferred = null;
         /// <summary>
-        /// Position color skinned drawing technique
+        /// Shadow mapping technique
         /// </summary>
-        public readonly EffectTechnique PositionColorSkinned = null;
-        /// <summary>
-        /// Position normal color drawing technique
-        /// </summary>
-        public readonly EffectTechnique PositionNormalColor = null;
-        /// <summary>
-        /// Position normal color skinned drawing technique
-        /// </summary>
-        public readonly EffectTechnique PositionNormalColorSkinned = null;
-        /// <summary>
-        /// Position texture technique
-        /// </summary>
-        public readonly EffectTechnique PositionTexture = null;
-        /// <summary>
-        /// Position texture using red channer as gray-scale technique
-        /// </summary>
-        public readonly EffectTechnique PositionTextureRED = null;
-        /// <summary>
-        /// Position texture using green channer as gray-scale technique
-        /// </summary>
-        public readonly EffectTechnique PositionTextureGREEN = null;
-        /// <summary>
-        /// Position texture using blue channer as gray-scale technique
-        /// </summary>
-        public readonly EffectTechnique PositionTextureBLUE = null;
-        /// <summary>
-        /// Position texture using alpha channer as gray-scale technique
-        /// </summary>
-        public readonly EffectTechnique PositionTextureALPHA = null;
-        /// <summary>
-        /// Position texture without alpha channel
-        /// </summary>
-        public readonly EffectTechnique PositionTextureNOALPHA = null;
-        /// <summary>
-        /// Position texture skinned technique
-        /// </summary>
-        public readonly EffectTechnique PositionTextureSkinned = null;
-        /// <summary>
-        /// Position normal texture technique
-        /// </summary>
-        public readonly EffectTechnique PositionNormalTexture = null;
-        /// <summary>
-        /// Position normal texture skinned technique
-        /// </summary>
-        public readonly EffectTechnique PositionNormalTextureSkinned = null;
-        /// <summary>
-        /// Position normal texture with normal mapping technique
-        /// </summary>
-        public readonly EffectTechnique PositionNormalTextureTangent = null;
-        /// <summary>
-        /// Position normal texture skinned with normal mapping technique
-        /// </summary>
-        public readonly EffectTechnique PositionNormalTextureTangentSkinned = null;
+        public readonly EffectTechnique TerrainShadowMap = null;
 
         /// <summary>
         /// Directional lights effect variable
@@ -129,17 +76,9 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable fromLightViewProjection = null;
         /// <summary>
-        /// Texture index effect variable
-        /// </summary>
-        private EffectScalarVariable textureIndex = null;
-        /// <summary>
         /// Material effect variable
         /// </summary>
         private EffectVariable material = null;
-        /// <summary>
-        /// Bone transformation matrices effect variable
-        /// </summary>
-        private EffectMatrixVariable boneTransforms = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
@@ -342,20 +281,6 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Texture index
-        /// </summary>
-        protected int TextureIndex
-        {
-            get
-            {
-                return (int)this.textureIndex.GetFloat();
-            }
-            set
-            {
-                this.textureIndex.Set((float)value);
-            }
-        }
-        /// <summary>
         /// Material
         /// </summary>
         protected BufferMaterials Material
@@ -376,29 +301,6 @@ namespace Engine.Effects
                     ds.Position = 0;
 
                     this.material.SetRawValue(ds, default(BufferMaterials).Stride);
-                }
-            }
-        }
-        /// <summary>
-        /// Bone transformations
-        /// </summary>
-        protected Matrix[] BoneTransforms
-        {
-            get
-            {
-                return this.boneTransforms.GetMatrixArray<Matrix>(MaxBoneTransforms);
-            }
-            set
-            {
-                if (value != null && value.Length > MaxBoneTransforms) throw new Exception(string.Format("Bonetransforms must set {0}. Has {1}", MaxBoneTransforms, value.Length));
-
-                if (value == null)
-                {
-                    this.boneTransforms.SetMatrix(new Matrix[MaxBoneTransforms]);
-                }
-                else
-                {
-                    this.boneTransforms.SetMatrix(value);
                 }
             }
         }
@@ -451,46 +353,21 @@ namespace Engine.Effects
         /// <param name="device">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectBasic(Device device, byte[] effect, bool compile)
+        public EffectTerrain(Device device, byte[] effect, bool compile)
             : base(device, effect, compile)
         {
-            this.PositionColor = this.Effect.GetTechniqueByName("PositionColor");
-            this.PositionColorSkinned = this.Effect.GetTechniqueByName("PositionColorSkinned");
-            this.PositionNormalColor = this.Effect.GetTechniqueByName("PositionNormalColor");
-            this.PositionNormalColorSkinned = this.Effect.GetTechniqueByName("PositionNormalColorSkinned");
-            this.PositionTexture = this.Effect.GetTechniqueByName("PositionTexture");
-            this.PositionTextureNOALPHA = this.Effect.GetTechniqueByName("PositionTextureNOALPHA");
-            this.PositionTextureRED = this.Effect.GetTechniqueByName("PositionTextureRED");
-            this.PositionTextureGREEN = this.Effect.GetTechniqueByName("PositionTextureGREEN");
-            this.PositionTextureBLUE = this.Effect.GetTechniqueByName("PositionTextureBLUE");
-            this.PositionTextureALPHA = this.Effect.GetTechniqueByName("PositionTextureALPHA");
-            this.PositionTextureSkinned = this.Effect.GetTechniqueByName("PositionTextureSkinned");
-            this.PositionNormalTexture = this.Effect.GetTechniqueByName("PositionNormalTexture");
-            this.PositionNormalTextureSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureSkinned");
-            this.PositionNormalTextureTangent = this.Effect.GetTechniqueByName("PositionNormalTextureTangent");
-            this.PositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureTangentSkinned");
+            this.TerrainForward = this.Effect.GetTechniqueByName("TerrainForward");
+            this.TerrainDeferred = this.Effect.GetTechniqueByName("TerrainDeferred");
+            this.TerrainShadowMap = this.Effect.GetTechniqueByName("TerrainShadowMap");
 
-            this.AddInputLayout(this.PositionColor, VertexPositionColor.GetInput());
-            this.AddInputLayout(this.PositionColorSkinned, VertexSkinnedPositionColor.GetInput());
-            this.AddInputLayout(this.PositionNormalColor, VertexPositionNormalColor.GetInput());
-            this.AddInputLayout(this.PositionNormalColorSkinned, VertexSkinnedPositionNormalColor.GetInput());
-            this.AddInputLayout(this.PositionTexture, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureNOALPHA, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureRED, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureGREEN, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureBLUE, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureALPHA, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureSkinned, VertexSkinnedPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionNormalTexture, VertexPositionNormalTexture.GetInput());
-            this.AddInputLayout(this.PositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput());
-            this.AddInputLayout(this.PositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput());
-            this.AddInputLayout(this.PositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput());
+            this.AddInputLayout(this.TerrainForward, VertexTerrain.GetInput());
+            this.AddInputLayout(this.TerrainDeferred, VertexTerrain.GetInput());
+            this.AddInputLayout(this.TerrainShadowMap, VertexTerrain.GetInput());
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.fromLightViewProjection = this.Effect.GetVariableByName("gLightViewProjection").AsMatrix();
-            this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
             this.material = this.Effect.GetVariableByName("gMaterial");
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
             this.pointLights = this.Effect.GetVariableByName("gPointLights");
@@ -499,7 +376,6 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
-            this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
             this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
@@ -513,57 +389,24 @@ namespace Engine.Effects
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
         public override EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage, DrawerModesEnum mode)
         {
+            EffectTechnique technique = null;
+
             if (stage == DrawingStages.Drawing)
             {
-                if (vertexType == VertexTypes.PositionColor)
+                if (vertexType == VertexTypes.Terrain)
                 {
-                    return this.PositionColor;
-                }
-                else if (vertexType == VertexTypes.PositionColorSkinned)
-                {
-                    return this.PositionColorSkinned;
-                }
-                else if (vertexType == VertexTypes.PositionNormalColor)
-                {
-                    return this.PositionNormalColor;
-                }
-                else if (vertexType == VertexTypes.PositionNormalColorSkinned)
-                {
-                    return this.PositionNormalColorSkinned;
-                }
-                else if (vertexType == VertexTypes.PositionTexture)
-                {
-                    return this.PositionTexture;
-                }
-                else if (vertexType == VertexTypes.PositionTextureSkinned)
-                {
-                    return this.PositionTextureSkinned;
-                }
-                else if (vertexType == VertexTypes.PositionNormalTexture)
-                {
-                    return this.PositionNormalTexture;
-                }
-                else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
-                {
-                    return this.PositionNormalTextureSkinned;
-                }
-                else if (vertexType == VertexTypes.PositionNormalTextureTangent)
-                {
-                    return this.PositionNormalTextureTangent;
-                }
-                else if (vertexType == VertexTypes.PositionNormalTextureTangentSkinned)
-                {
-                    return this.PositionNormalTextureTangentSkinned;
-                }
-                else
-                {
-                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    if (mode == DrawerModesEnum.Forward) technique = this.TerrainForward;
+                    if (mode == DrawerModesEnum.Deferred) technique = this.TerrainDeferred;
+                    if (mode == DrawerModesEnum.ShadowMap) technique = this.TerrainShadowMap;
                 }
             }
-            else
+
+            if (technique == null)
             {
-                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
+                throw new Exception(string.Format("Bad vertex type for effect, stage and mode: {0} - {1} - {2}", vertexType, stage, mode));
             }
+
+            return technique;
         }
 
         /// <summary>
@@ -656,25 +499,14 @@ namespace Engine.Effects
         /// <param name="material">Material</param>
         /// <param name="texture">Texture</param>
         /// <param name="normalMap">Normal map</param>
-        /// <param name="textureIndex">Texture index</param>
         public void UpdatePerObject(
             Material material,
             ShaderResourceView texture,
-            ShaderResourceView normalMap,
-            int textureIndex)
+            ShaderResourceView normalMap)
         {
             this.Material = new BufferMaterials(material);
             this.Textures = texture;
             this.NormalMap = normalMap;
-            this.TextureIndex = textureIndex;
-        }
-        /// <summary>
-        /// Update per model skin data
-        /// </summary>
-        /// <param name="finalTransforms">Skinning final transforms</param>
-        public void UpdatePerSkinning(Matrix[] finalTransforms)
-        {
-            this.BoneTransforms = finalTransforms;
         }
     }
 }

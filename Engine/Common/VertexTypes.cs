@@ -19,6 +19,10 @@ namespace Engine.Common
         /// Particles
         /// </summary>
         Particle,
+        /// <summary>
+        /// Terrain
+        /// </summary>
+        Terrain,
 
         /// <summary>
         /// Position

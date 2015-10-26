@@ -674,7 +674,7 @@ namespace Engine.Content
             MaterialContent material = MaterialContent.Default;
             material.DiffuseTexture = texureName;
 
-            HeightMap hm = HeightMap.FromStream(heightMapImage.Stream);
+            HeightMap hm = HeightMap.FromStream(heightMapImage.Stream, null);
 
             VertexData[] vertices;
             uint[] indices;

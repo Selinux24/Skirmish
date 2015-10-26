@@ -474,6 +474,10 @@ namespace Engine
             /// </summary>
             public string HeightmapFileName = null;
             /// <summary>
+            /// Color map file name
+            /// </summary>
+            public string ColormapFileName = null;
+            /// <summary>
             /// Textures for heightmap
             /// </summary>
             public string Texture = null;

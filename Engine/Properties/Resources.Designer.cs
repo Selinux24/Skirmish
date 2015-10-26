@@ -289,5 +289,25 @@ namespace Engine.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderTerrainFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderTerrainFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderTerrainFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderTerrainFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

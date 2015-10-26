@@ -42,6 +42,10 @@ namespace Engine.Effects
         /// </summary>
         public static EffectParticles EffectParticles { get; private set; }
         /// <summary>
+        /// Terrain drawing effect
+        /// </summary>
+        public static EffectTerrain EffectTerrain { get; private set; }
+        /// <summary>
         /// Shadows effect
         /// </summary>
         public static EffectBasicShadow EffectShadow { get; private set; }
@@ -155,6 +159,15 @@ namespace Engine.Effects
                 EffectParticles = new EffectParticles(device, Resources.ShaderParticlesFx, true);
             }
 
+            if (Resources.ShaderTerrainFxo != null)
+            {
+                EffectTerrain = new EffectTerrain(device, Resources.ShaderTerrainFxo, false);
+            }
+            else
+            {
+                EffectTerrain = new EffectTerrain(device, Resources.ShaderTerrainFx, true);
+            }
+
             if (Resources.ShaderDeferredFxo != null)
             {
                 EffectDeferred = new EffectDeferred(device, Resources.ShaderDeferredFxo, false);
@@ -176,6 +189,7 @@ namespace Engine.Effects
             Helper.Dispose(EffectFont);
             Helper.Dispose(EffectInstancing);
             Helper.Dispose(EffectParticles);
+            Helper.Dispose(EffectTerrain);
             Helper.Dispose(EffectShadow);
             Helper.Dispose(EffectInstancingShadow);
             Helper.Dispose(EffectGBuffer);

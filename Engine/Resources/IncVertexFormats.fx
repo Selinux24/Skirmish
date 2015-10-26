@@ -48,6 +48,14 @@ struct VSVertexPositionNormalTextureTangent
     float3 tangentLocal : TANGENT;
     float2 tex : TEXCOORD0;
 };
+struct VSVertexTerrain
+{
+    float3 positionLocal : POSITION;
+    float3 normalLocal : NORMAL;
+    float3 tangentLocal : TANGENT;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
+};
 
 /*
 SKINNED VS INPUTS
@@ -310,6 +318,15 @@ struct PSVertexPositionNormalTextureTangent
     float3 tangentWorld : TANGENT;
     float2 tex : TEXCOORD0;
 	float textureIndex : textureIndex;
+};
+struct PSVertexTerrain
+{
+    float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float3 tangentWorld : TANGENT;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
 };
 
 /*

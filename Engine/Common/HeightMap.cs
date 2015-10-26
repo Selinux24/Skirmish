@@ -1,5 +1,5 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
+using System;
 using System.Drawing;
 using System.IO;
 
@@ -13,36 +13,58 @@ namespace Engine.Common
         /// <summary>
         /// Generates a new height map from a bitmap stream
         /// </summary>
-        /// <param name="stream">Bitmap stream</param>
+        /// <param name="heightData">Height data stream</param>
+        /// <param name="colorData">Color data stream</param>
         /// <returns>Returns the new generated height map</returns>
-        public static HeightMap FromStream(Stream stream)
+        public static HeightMap FromStream(Stream heightData, Stream colorData)
         {
-            using (var bitmap = Bitmap.FromStream(stream) as Bitmap)
+            Bitmap heightBitmap = Bitmap.FromStream(heightData) as Bitmap;
+
+            Bitmap colorBitmap = null;
+            if (colorData != null)
             {
-                var result = new float[bitmap.Height + 1, bitmap.Width + 1];
+                colorBitmap = Bitmap.FromStream(colorData) as Bitmap;
 
-                for (int x = 0; x < bitmap.Width + 1; x++)
+                if (colorBitmap.Height != heightBitmap.Height || colorBitmap.Width != heightBitmap.Width)
                 {
-                    int xx = x < bitmap.Width ? x : x - 1;
+                    throw new Exception("Height map and color map must have the same size");
+                }
+            }
 
-                    for (int y = 0; y < bitmap.Height + 1; y++)
+            var heights = new float[heightBitmap.Height + 1, heightBitmap.Width + 1];
+            var colors = new Color4[heightBitmap.Height + 1, heightBitmap.Width + 1];
+
+            using (colorBitmap)
+            using (heightBitmap)
+            {
+                for (int x = 0; x < heightBitmap.Width + 1; x++)
+                {
+                    int xx = x < heightBitmap.Width ? x : x - 1;
+
+                    for (int y = 0; y < heightBitmap.Height + 1; y++)
                     {
-                        int yy = y < bitmap.Height ? y : y - 1;
+                        int yy = y < heightBitmap.Height ? y : y - 1;
 
-                        var color = bitmap.GetPixel(xx, yy);
+                        var height = heightBitmap.GetPixel(xx, yy);
+                        var color = colorBitmap != null ? colorBitmap.GetPixel(xx, yy) : System.Drawing.Color.Gray;
 
-                        result[x, y] = (float)color.B / 255f;
+                        heights[x, y] = (float)height.B / 255f;
+                        colors[x, y] = new SharpDX.Color(color.R, color.G, color.B, color.A);
                     }
                 }
-
-                return new HeightMap(result);
             }
+
+            return new HeightMap(heights, colors);
         }
 
         /// <summary>
         /// Heights
         /// </summary>
-        private float[,] m_Data;
+        private float[,] m_HeightData;
+        /// <summary>
+        /// Color map data
+        /// </summary>
+        private Color4[,] m_ColorData;
         /// <summary>
         /// Minimum height
         /// </summary>
@@ -59,9 +81,9 @@ namespace Engine.Common
         {
             get
             {
-                if (this.m_Data != null)
+                if (this.m_HeightData != null)
                 {
-                    return this.m_Data.GetLongLength(0);
+                    return this.m_HeightData.GetLongLength(0);
                 }
 
                 return 0;
@@ -74,9 +96,9 @@ namespace Engine.Common
         {
             get
             {
-                if (this.m_Data != null)
+                if (this.m_HeightData != null)
                 {
-                    return this.m_Data.GetLongLength(1);
+                    return this.m_HeightData.GetLongLength(1);
                 }
 
                 return 0;
@@ -89,9 +111,9 @@ namespace Engine.Common
         {
             get
             {
-                if (this.m_Data != null)
+                if (this.m_HeightData != null)
                 {
-                    return this.m_Data.LongLength;
+                    return this.m_HeightData.LongLength;
                 }
 
                 return 0;
@@ -101,12 +123,14 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="data">Height map data</param>
-        public HeightMap(float[,] data)
+        /// <param name="heightData">Height map data</param>
+        /// <param name="colorData">Color map data</param>
+        public HeightMap(float[,] heightData, Color4[,] colorData)
         {
-            this.m_Data = data;
+            this.m_HeightData = heightData;
+            this.m_ColorData = colorData;
 
-            foreach (int height in data)
+            foreach (int height in heightData)
             {
                 if (height < this.Min)
                 {
@@ -143,13 +167,14 @@ namespace Engine.Common
                 for (long depth = 0; depth < vertexCountZ; depth++)
                 {
                     float posX = (width * cellSize) - (totalWidth * 0.5f);
-                    float posY = this.m_Data[depth, width] * cellHeight;
+                    float posY = this.m_HeightData[depth, width] * cellHeight;
                     float posZ = (depth * cellSize) - (totalDepth * 0.5f);
 
                     VertexData newVertex = new VertexData()
                     {
                         Position = new Vector3(posX, posY, posZ),
                         Texture = new Vector2(width / 10.0f, depth / 10.0f),
+                        Color = this.m_ColorData[depth, width],
                     };
 
                     vertices[vertexCount++] = newVertex;

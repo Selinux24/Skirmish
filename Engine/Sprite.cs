@@ -205,7 +205,7 @@ namespace Engine
                     {
                         Mesh mesh = dictionary[material];
                         MeshMaterial mat = this.Materials[material];
-                        EffectTechnique technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing);
+                        EffectTechnique technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing, context.DrawerMode);
 
                         #region Per object update
 

@@ -381,8 +381,9 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="vertexType">VertexType</param>
         /// <param name="stage">Stage</param>
+        /// <param name="mode">Mode</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage)
+        public override EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage, DrawerModesEnum mode)
         {
             if (stage == DrawingStages.Drawing)
             {

@@ -15,8 +15,9 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="vertexType">VertexType</param>
         /// <param name="stage">Stage</param>
+        /// <param name="mode">Mode</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage);
+        EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage, DrawerModesEnum mode);
         /// <summary>
         /// Gets input layout by technique name
         /// </summary>
