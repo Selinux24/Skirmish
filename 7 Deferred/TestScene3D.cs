@@ -334,12 +334,12 @@ namespace DeferredTest
                     int smTop = this.Game.Form.RenderHeight - height;
 
                     this.bufferDrawer.Manipulator.SetPosition(smLeft, smTop);
-                    this.bufferDrawer.Resize(width, height);
+                    this.bufferDrawer.ResizeSprite(width, height);
                 }
                 else
                 {
                     this.bufferDrawer.Manipulator.SetPosition(Vector2.Zero);
-                    this.bufferDrawer.Resize(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+                    this.bufferDrawer.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
                 }
             }
 

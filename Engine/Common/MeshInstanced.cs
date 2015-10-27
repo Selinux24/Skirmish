@@ -82,7 +82,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="deviceContext">Immediate context</param>
-        public override void Draw(GameTime gameTime, DeviceContext deviceContext)
+        public override void Draw(DeviceContext deviceContext)
         {
             if (this.Indexed)
             {
@@ -108,7 +108,7 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         /// <param name="deviceContext">Immediate context</param>
         /// <param name="count">Instances to draw</param>
-        public virtual void Draw(GameTime gameTime, DeviceContext deviceContext, int count)
+        public virtual void Draw(DeviceContext deviceContext, int count)
         {
             int instanceCount = count == 0 ? this.InstanceCount : count;
             if (instanceCount > 0)

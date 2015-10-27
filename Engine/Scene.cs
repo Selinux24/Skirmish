@@ -185,17 +185,9 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Update(GameTime gameTime)
         {
-#if DEBUG
-            Stopwatch swTotal = Stopwatch.StartNew();
-#endif
             this.camera.Update(gameTime);
 
-            //Update active components
-            List<Drawable> activeComponents = this.components.FindAll(c => c.Active);
-            for (int i = 0; i < activeComponents.Count; i++)
-            {
-                activeComponents[i].Update(gameTime);
-            }
+            this.Renderer.Update(gameTime, this);
 
             this.CapturedControl = this.capturedControl != null;
 
@@ -227,12 +219,6 @@ namespace Engine
             }
 
             if (!this.Game.Input.LeftMouseButtonPressed) this.capturedControl = null;
-#if DEBUG
-            swTotal.Stop();
-#endif
-#if DEBUG
-            Counters.SetStatistics("Scene.Update", string.Format("Update = {0:000000}", swTotal.ElapsedTicks));
-#endif
         }
         /// <summary>
         /// Draw scene objects
@@ -245,17 +231,16 @@ namespace Engine
         /// <summary>
         /// Makes cull test for specified drawable collection
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="context">Drawing context</param>
+        /// <param name="frustum">Frustum</param>
         /// <param name="components">Components</param>
         /// <returns>Returns true if any component passed culling test</returns>
-        public virtual bool CullTest(GameTime gameTime, Context context, IList<Drawable> components)
+        public virtual bool CullTest(BoundingFrustum frustum, IList<Drawable> components)
         {
             bool res = false;
 
             for (int i = 0; i < components.Count; i++)
             {
-                components[i].FrustumCulling(context.Frustum);
+                components[i].FrustumCulling(frustum);
 
                 if (!components[i].Cull) res = true;
             }

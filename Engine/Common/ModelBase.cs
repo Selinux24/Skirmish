@@ -499,12 +499,12 @@ namespace Engine.Common
         /// <summary>
         /// Update model
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
         {
             if (this.SkinningData != null)
             {
-                this.SkinningData.Update(gameTime);
+                this.SkinningData.Update(context.GameTime);
             }
         }
         /// <summary>

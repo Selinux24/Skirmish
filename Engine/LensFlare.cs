@@ -9,6 +9,9 @@ namespace Engine
     {
         private Sprite glowSprite;
         private Flare[] flares = null;
+        private bool drawFlares = false;
+        private Vector2 lightProjectedPosition;
+        private Vector2 lightProjectedDirection;
 
         public SceneLightDirectional Light { get; set; }
 
@@ -56,26 +59,20 @@ namespace Engine
             Helper.Dispose(this.flares);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(UpdateContext context)
         {
             if (this.Light != null)
             {
-                this.glowSprite.Update(gameTime);
+                this.glowSprite.Update(context);
 
                 if (this.flares != null && this.flares.Length > 0)
                 {
                     for (int i = 0; i < this.flares.Length; i++)
                     {
-                        this.flares[i].FlareSprite.Update(gameTime);
+                        this.flares[i].FlareSprite.Update(context);
                     }
                 }
-            }
-        }
 
-        public override void Draw(GameTime gameTime, Context context)
-        {
-            if (this.Light != null)
-            {
                 // Set view translation to Zero to simulate infinite
                 Matrix infiniteView = context.View;
                 infiniteView.TranslationVector = Vector3.Zero;
@@ -90,24 +87,32 @@ namespace Engine
                 // Don't draw any flares if the light is behind the camera.
                 if ((projectedPosition.Z < 0) || (projectedPosition.Z > 1))
                 {
-                    return;
+                    this.drawFlares = false;
                 }
                 else
                 {
-                    Vector2 lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
-                    Vector2 lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
+                    this.lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
+                    this.lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
 
-                    this.DrawGlow(gameTime, context, lightProjectedPosition, lightProjectedDirection);
-                    this.DrawFlares(gameTime, context, lightProjectedPosition, lightProjectedDirection);
+                    this.drawFlares = true;
                 }
             }
         }
 
-        private void DrawGlow(GameTime gameTime, Context context, Vector2 lightPosition, Vector2 lightDirection)
+        public override void Draw(DrawContext context)
+        {
+            if (this.drawFlares)
+            {
+                this.DrawGlow(context, this.lightProjectedPosition, this.lightProjectedDirection);
+                this.DrawFlares(context, this.lightProjectedPosition, this.lightProjectedDirection);
+            }
+        }
+
+        private void DrawGlow(DrawContext context, Vector2 lightPosition, Vector2 lightDirection)
         {
             Color4 color = this.Light.LightColor;
             color.Alpha = 0.25f;
-            
+
             float scale = 50f / this.glowSprite.Width;
 
             this.glowSprite.Color = color;
@@ -116,10 +121,10 @@ namespace Engine
 
             //Draw sprite with alpha
             this.Game.Graphics.SetBlendAdditive();
-            this.glowSprite.Draw(gameTime, context);
+            this.glowSprite.Draw(context);
         }
 
-        private void DrawFlares(GameTime gameTime, Context context, Vector2 lightPosition, Vector2 lightDirection)
+        private void DrawFlares(DrawContext context, Vector2 lightPosition, Vector2 lightDirection)
         {
             if (this.flares != null && this.flares.Length > 0)
             {
@@ -141,7 +146,7 @@ namespace Engine
                     flare.FlareSprite.Manipulator.SetPosition(flarePosition - (flare.FlareSprite.RelativeCenter * flare.Scale));
 
                     // Draw the flare sprite using additive blending.
-                    flare.FlareSprite.Draw(gameTime, context);
+                    flare.FlareSprite.Draw(context);
                 }
             }
         }

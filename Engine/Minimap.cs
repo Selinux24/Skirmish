@@ -31,7 +31,7 @@ namespace Engine
         /// <summary>
         /// Context to draw
         /// </summary>
-        private Context drawContext;
+        private DrawContext drawContext;
         /// <summary>
         /// Minimap rendered area
         /// </summary>
@@ -98,7 +98,7 @@ namespace Engine
                 near,
                 y + near);
 
-            this.drawContext = new Context()
+            this.drawContext = new DrawContext()
             {
                 DrawerMode = DrawerModesEnum.Forward,
                 World = Matrix.Identity,
@@ -111,19 +111,18 @@ namespace Engine
             };
         }
         /// <summary>
-        /// Update state
+        /// Update objects
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
         {
-
+            
         }
         /// <summary>
         /// Draw objects
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public override void Draw(GameTime gameTime, Context context)
+        public override void Draw(DrawContext context)
         {
             if (this.Drawables != null && this.Drawables.Length > 0)
             {
@@ -134,7 +133,7 @@ namespace Engine
 
                 for (int i = 0; i < this.Drawables.Length; i++)
                 {
-                    this.Drawables[i].Draw(gameTime, this.drawContext);
+                    this.Drawables[i].Draw(this.drawContext);
                 }
 
                 this.Game.Graphics.SetDefaultViewport();
@@ -142,7 +141,7 @@ namespace Engine
             }
 
             this.minimapBox.Texture = this.renderTexture;
-            this.minimapBox.Draw(gameTime, context);
+            this.minimapBox.Draw(context);
         }
         /// <summary>
         /// Dispose objects

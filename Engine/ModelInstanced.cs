@@ -73,10 +73,10 @@ namespace Engine
         /// <summary>
         /// Update
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
         {
-            base.Update(gameTime);
+            base.Update(context);
 
             if (this.instances != null && this.instances.Length > 0)
             {
@@ -84,7 +84,7 @@ namespace Engine
                 {
                     if (this.instances[i].Active)
                     {
-                        this.instances[i].Manipulator.Update(gameTime);
+                        this.instances[i].Manipulator.Update(context.GameTime);
                     }
                 }
             }
@@ -92,9 +92,8 @@ namespace Engine
         /// <summary>
         /// Draw
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public override void Draw(GameTime gameTime, Context context)
+        public override void Draw(DrawContext context)
         {
             if (this.Meshes != null && this.VisibleCount > 0)
             {
@@ -225,7 +224,7 @@ namespace Engine
                             {
                                 technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
-                                mesh.Draw(gameTime, this.DeviceContext, this.VisibleCount);
+                                mesh.Draw(this.DeviceContext, this.VisibleCount);
                             }
                         }
                     }
@@ -249,8 +248,10 @@ namespace Engine
                 }
             }
         }
-
-
+        /// <summary>
+        /// Set instance positions
+        /// </summary>
+        /// <param name="positions">New positions</param>
         public void SetPositions(Vector3[] positions)
         {
             if (positions != null && positions.Length > 0)

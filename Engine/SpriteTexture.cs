@@ -40,9 +40,9 @@ namespace Engine
         /// </summary>
         private EffectTechnique effectTechnique;
         /// <summary>
-        /// Context to draw minimap
+        /// View * projection for 2D projection
         /// </summary>
-        private Context drawContext;
+        private Matrix viewProjection = Matrix.Identity;
         /// <summary>
         /// Drawing channels
         /// </summary>
@@ -134,31 +134,21 @@ namespace Engine
                 out view,
                 out proj);
 
-            this.drawContext = new Context()
-            {
-                EyePosition = new Vector3(0, 0, -1),
-                EyeTarget = new Vector3(0, 0, 0),
-                World = this.Manipulator.LocalTransform,
-                View = view,
-                Projection = proj,
-                ViewProjection = view * proj,
-                Lights = SceneLights.Default,
-            };
+            this.viewProjection = view * proj;
         }
         /// <summary>
         /// Update state
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
         {
-            this.drawContext.World = this.Manipulator.LocalTransform;
+            
         }
         /// <summary>
         /// Draw objects
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public override void Draw(GameTime gameTime, Context context)
+        public override void Draw(DrawContext context)
         {
             this.Game.Graphics.SetDepthStencilZDisabled();
 
@@ -167,7 +157,7 @@ namespace Engine
             this.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
             this.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
 
-            this.effect.UpdatePerFrame(this.drawContext.World, this.drawContext.ViewProjection);
+            this.effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
             this.effect.UpdatePerObject(Material.Default, this.Texture, null, 0);
             this.effect.UpdatePerSkinning(null);
 
@@ -179,18 +169,18 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Resize
+        /// Screen resize
         /// </summary>
         public virtual void Resize()
         {
-            this.drawContext.ViewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            this.viewProjection = Sprite.CreateViewOrthoProjection(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
         }
         /// <summary>
-        /// Resize
+        /// Object resize
         /// </summary>
         /// <param name="width">New width</param>
         /// <param name="height">New height</param>
-        public virtual void Resize(float width, float height)
+        public virtual void ResizeSprite(float width, float height)
         {
             this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
         }

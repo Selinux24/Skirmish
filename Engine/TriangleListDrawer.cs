@@ -58,18 +58,17 @@ namespace Engine
             this.dictionaryChanged = false;
         }
         /// <summary>
-        /// Draw content
+        /// Update content
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public override void Draw(GameTime gameTime, Context context)
+        public override void Update(UpdateContext context)
         {
             if (this.triangleDictionary.Count > 0)
             {
                 this.WriteDataInBuffer();
-
-                base.Draw(gameTime, context);
             }
+
+            base.Update(context);
         }
         /// <summary>
         /// No frustum culling

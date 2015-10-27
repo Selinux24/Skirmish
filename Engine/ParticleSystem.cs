@@ -68,6 +68,18 @@ namespace Engine
         /// Acceleration vector
         /// </summary>
         private Vector3 particleAcceleration;
+        /// <summary>
+        /// Total game time
+        /// </summary>
+        private float totalTime = 0f;
+        /// <summary>
+        /// Elapsed game time
+        /// </summary>
+        private float elapsedTime = 0f;
+        /// <summary>
+        /// Local system transform
+        /// </summary>
+        private Matrix local = Matrix.Identity;
 
         /// <summary>
         /// Input layout
@@ -198,17 +210,20 @@ namespace Engine
         /// <summary>
         /// Updating
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
         {
-            this.Manipulator.Update(gameTime);
+            this.Manipulator.Update(context.GameTime);
+
+            this.local = context.World * this.Manipulator.LocalTransform;
+            this.totalTime = context.GameTime.TotalSeconds;
+            this.elapsedTime = context.GameTime.ElapsedSeconds;
         }
         /// <summary>
         /// Drawing
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public override void Draw(GameTime gameTime, Context context)
+        public override void Draw(DrawContext context)
         {
             this.Game.Graphics.DeviceContext.OutputMerger.BlendState = null;
             this.Game.Graphics.DeviceContext.OutputMerger.BlendFactor = Color.Zero;
@@ -221,7 +236,7 @@ namespace Engine
             #region Per frame update
 
             DrawerPool.EffectParticles.UpdatePerFrame(
-                context.World * this.Manipulator.LocalTransform,
+                this.local,
                 context.ViewProjection,
                 context.EyePosition,
                 context.Lights,
@@ -230,8 +245,8 @@ namespace Engine
                 this.textureRandom,
                 this.emitterAge,
                 this.maximumAge,
-                gameTime.TotalSeconds,
-                gameTime.ElapsedSeconds,
+                this.totalTime,
+                this.elapsedTime,
                 this.particleAcceleration);
 
             #endregion

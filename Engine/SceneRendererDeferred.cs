@@ -92,13 +92,17 @@ namespace Engine
         /// </summary>
         protected Matrix ViewProjection;
         /// <summary>
+        /// Update context
+        /// </summary>
+        protected UpdateContext UpdateContext = null;
+        /// <summary>
         /// Draw context
         /// </summary>
-        protected Context DrawContext = null;
+        protected DrawContext DrawContext = null;
         /// <summary>
         /// Context for shadow map drawing
         /// </summary>
-        protected Context DrawShadowsContext = null;
+        protected DrawContext DrawShadowsContext = null;
         /// <summary>
         /// Shadow map
         /// </summary>
@@ -159,13 +163,18 @@ namespace Engine
             this.geometryBuffer = new GBuffer(game);
             this.lightBuffer = new LightBuffer(game);
 
-            this.DrawContext = new Context()
+            this.UpdateContext = new UpdateContext()
+            {
+                Name = "Primary",
+            };
+
+            this.DrawContext = new DrawContext()
             {
                 Name = "Primary",
                 DrawerMode = DrawerModesEnum.Deferred,
             };
 
-            this.DrawShadowsContext = new Context()
+            this.DrawShadowsContext = new DrawContext()
             {
                 Name = "Secondary",
                 DrawerMode = DrawerModesEnum.ShadowMap,
@@ -197,6 +206,40 @@ namespace Engine
             {
                 this.lightBuffer.Resize();
             }
+        }
+        /// <summary>
+        /// Updates scene components
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="scene">Scene</param>
+        public virtual void Update(GameTime gameTime, Scene scene)
+        {
+#if DEBUG
+            Stopwatch swTotal = Stopwatch.StartNew();
+#endif
+            Matrix viewProj = scene.Camera.View * scene.Camera.Projection;
+
+            this.UpdateContext.GameTime = gameTime;
+            this.UpdateContext.World = scene.World;
+            this.UpdateContext.View = scene.Camera.View;
+            this.UpdateContext.Projection = scene.Camera.Projection;
+            this.UpdateContext.ViewProjection = viewProj;
+            this.UpdateContext.Frustum = new BoundingFrustum(viewProj);
+            this.UpdateContext.EyePosition = scene.Camera.Position;
+            this.UpdateContext.EyeTarget = scene.Camera.Direction;
+
+            //Update active components
+            List<Drawable> activeComponents = scene.Components.FindAll(c => c.Active);
+            for (int i = 0; i < activeComponents.Count; i++)
+            {
+                activeComponents[i].Update(this.UpdateContext);
+            }
+#if DEBUG
+            swTotal.Stop();
+#endif
+#if DEBUG
+            Counters.SetStatistics("Scene.Update", string.Format("Update = {0:000000}", swTotal.ElapsedTicks));
+#endif
         }
         /// <summary>
         /// Draws scene components
@@ -237,16 +280,15 @@ namespace Engine
 #if DEBUG
                 Stopwatch swStartup = Stopwatch.StartNew();
 #endif
-                //Initialize context data
-                Matrix viewProj = scene.Camera.View * scene.Camera.Projection;
-
-                this.DrawContext.World = scene.World;
-                this.DrawContext.View = scene.Camera.View;
-                this.DrawContext.Projection = scene.Camera.Projection;
-                this.DrawContext.ViewProjection = viewProj;
-                this.DrawContext.Frustum = new BoundingFrustum(viewProj);
-                this.DrawContext.EyePosition = scene.Camera.Position;
-                this.DrawContext.EyeTarget = scene.Camera.Direction;
+                //Initialize context data from update context
+                this.DrawContext.World = this.UpdateContext.World;
+                this.DrawContext.View = this.UpdateContext.View;
+                this.DrawContext.Projection = this.UpdateContext.Projection;
+                this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
+                this.DrawContext.Frustum = this.UpdateContext.Frustum;
+                this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
+                this.DrawContext.EyeTarget = this.UpdateContext.EyeTarget;
+                //Initialize context data from scene
                 this.DrawContext.Lights = scene.Lights;
                 this.DrawContext.ShadowMap = null;
                 this.DrawContext.FromLightViewProjection = Matrix.Identity;
@@ -271,7 +313,7 @@ namespace Engine
 
                     Matrix shadowViewProj = this.shadowMapper.View * this.shadowMapper.Projection;
 
-                    this.DrawShadowsContext.World = scene.World;
+                    this.DrawShadowsContext.World = this.UpdateContext.World;
                     this.DrawShadowsContext.View = this.shadowMapper.View;
                     this.DrawShadowsContext.Projection = this.shadowMapper.Projection;
                     this.DrawShadowsContext.ViewProjection = shadowViewProj;
@@ -297,7 +339,7 @@ namespace Engine
                         if (scene.PerformFrustumCulling)
                         {
                             //Frustum culling
-                            draw = scene.CullTest(gameTime, this.DrawShadowsContext, shadowComponents);
+                            draw = scene.CullTest(this.DrawShadowsContext.Frustum, shadowComponents);
                         }
                         else
                         {
@@ -354,7 +396,7 @@ namespace Engine
                     if (scene.PerformFrustumCulling)
                     {
                         //Frustum culling
-                        draw = scene.CullTest(gameTime, this.DrawContext, solidComponents);
+                        draw = scene.CullTest(this.DrawContext.Frustum, solidComponents);
                     }
                     else
                     {
@@ -803,7 +845,7 @@ namespace Engine
         /// Draw lights
         /// </summary>
         /// <param name="context">Drawing context</param>
-        private void DrawLights(Context context)
+        private void DrawLights(DrawContext context)
         {
 #if DEBUG
             Stopwatch swTotal = Stopwatch.StartNew();
@@ -1073,7 +1115,7 @@ namespace Engine
         /// Draw result
         /// </summary>
         /// <param name="context">Drawing context</param>
-        private void DrawResult(Context context)
+        private void DrawResult(DrawContext context)
         {
 #if DEBUG
             long total = 0;
@@ -1150,7 +1192,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawShadowsComponents(GameTime gameTime, Context context, IList<Drawable> components)
+        private void DrawShadowsComponents(GameTime gameTime, DrawContext context, IList<Drawable> components)
         {
             for (int i = 0; i < components.Count; i++)
             {
@@ -1159,7 +1201,7 @@ namespace Engine
                     this.Game.Graphics.SetRasterizerShadows();
                     this.Game.Graphics.SetBlendDefault();
 
-                    components[i].Draw(gameTime, context);
+                    components[i].Draw(context);
                 }
             }
         }
@@ -1169,7 +1211,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(GameTime gameTime, Context context, IList<Drawable> components)
+        private void DrawResultComponents(GameTime gameTime, DrawContext context, IList<Drawable> components)
         {
             for (int i = 0; i < components.Count; i++)
             {
@@ -1185,7 +1227,7 @@ namespace Engine
                         this.Game.Graphics.SetBlendDeferredComposerTransparent();
                     }
 
-                    components[i].Draw(gameTime, context);
+                    components[i].Draw(context);
                 }
             }
         }

@@ -171,19 +171,18 @@ namespace Engine
         /// <summary>
         /// Update
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
         {
-            base.Update(gameTime);
+            base.Update(context);
 
-            this.Manipulator.Update(gameTime, this.Game.Form.RelativeCenter, this.Width, this.Height);
+            this.Manipulator.Update(context.GameTime, this.Game.Form.RelativeCenter, this.Width, this.Height);
         }
         /// <summary>
         /// Draw
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public override void Draw(GameTime gameTime, Context context)
+        public override void Draw(DrawContext context)
         {
             if (this.Meshes != null)
             {
@@ -226,7 +225,7 @@ namespace Engine
                         {
                             technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
-                            mesh.Draw(gameTime, this.DeviceContext);
+                            mesh.Draw(this.DeviceContext);
                         }
                     }
                 }

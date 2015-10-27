@@ -168,9 +168,8 @@ namespace Engine.Common
         /// <summary>
         /// Draw mesh geometry
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="deviceContext">Immediate context</param>
-        public virtual void Draw(GameTime gameTime, DeviceContext deviceContext)
+        public virtual void Draw(DeviceContext deviceContext)
         {
             if (this.Indexed)
             {

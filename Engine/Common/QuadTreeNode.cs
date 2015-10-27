@@ -939,17 +939,16 @@ namespace Engine.Common
         /// <summary>
         /// Updates node and its childs
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public void Update(UpdateContext context)
         {
 
         }
         /// <summary>
         /// Draws node and its childs
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Drawing context</param>
-        public void Draw(GameTime gameTime, Context context)
+        public void Draw(DrawContext context)
         {
             if (!this.Cull)
             {
@@ -957,7 +956,7 @@ namespace Engine.Common
                 {
                     for (int i = 0; i < this.Children.Length; i++)
                     {
-                        this.Children[i].Draw(gameTime, context);
+                        this.Children[i].Draw(context);
                     }
                 }
                 else
@@ -997,7 +996,7 @@ namespace Engine.Common
                                     BoundingFrustum bf = BoundingFrustum.FromCamera(par);
 
                                     model.FrustumCulling(bf);
-                                    model.Draw(gameTime, context);
+                                    model.Draw(context);
                                 }
                             }
                         }

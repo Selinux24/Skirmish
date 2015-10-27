@@ -9,6 +9,12 @@ namespace Engine.Common
     public interface ISceneRenderer : IScreenFitted, IDisposable
     {
         /// <summary>
+        /// Updates scene components
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="scene">Scene</param>
+        void Update(GameTime gameTime, Scene scene);
+        /// <summary>
         /// Draws scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>

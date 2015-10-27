@@ -131,55 +131,54 @@ namespace Engine
         /// <summary>
         /// Objects updating
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
         {
             if (this.pickingQuadtree == null)
             {
-                this.terrain.Update(gameTime);
+                this.terrain.Update(context);
 
                 if (this.vegetation != null && this.vegetation.Length > 0)
                 {
                     for (int i = 0; i < this.vegetation.Length; i++)
                     {
-                        this.vegetation[i].Update(gameTime);
+                        this.vegetation[i].Update(context);
                     }
                 }
             }
             else
             {
-                this.terrain.Update(gameTime);
+                this.terrain.Update(context);
 
-                this.pickingQuadtree.Update(gameTime);
+                this.pickingQuadtree.Update(context);
             }
         }
         /// <summary>
         /// Objects drawing
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public override void Draw(GameTime gameTime, Context context)
+        public override void Draw(DrawContext context)
         {
             if (this.pickingQuadtree == null)
             {
                 if (!this.terrain.Cull)
                 {
-                    this.terrain.Draw(gameTime, context);
+                    this.terrain.Draw(context);
 
                     if (this.vegetation != null && this.vegetation.Length > 0)
                     {
                         for (int i = 0; i < this.vegetation.Length; i++)
                         {
-                            this.vegetation[i].Draw(gameTime, context);
+                            this.vegetation[i].Draw(context);
                         }
                     }
                 }
             }
             else
             {
-                this.terrain.Draw(gameTime, context);
+                this.terrain.Draw(context);
 
-                this.pickingQuadtree.Draw(gameTime, context);
+                this.pickingQuadtree.Draw(context);
             }
         }
         /// <summary>

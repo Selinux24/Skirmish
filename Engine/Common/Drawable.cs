@@ -69,14 +69,13 @@ namespace Engine.Common
         /// <summary>
         /// Update state
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public abstract void Update(GameTime gameTime);
+        /// <param name="context">Context</param>
+        public abstract void Update(UpdateContext context);
         /// <summary>
         /// Draw
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public abstract void Draw(GameTime gameTime, Context context);
+        public abstract void Draw(DrawContext context);
         /// <summary>
         /// Dispose resources
         /// </summary>
@@ -103,9 +102,52 @@ namespace Engine.Common
     }
 
     /// <summary>
-    /// Drawable context
+    /// Updating context
     /// </summary>
-    public class Context
+    public class UpdateContext
+    {
+        /// <summary>
+        /// Context name
+        /// </summary>
+        public string Name = "";
+        /// <summary>
+        /// Game time
+        /// </summary>
+        public GameTime GameTime;
+        /// <summary>
+        /// World matrix
+        /// </summary>
+        public Matrix World;
+        /// <summary>
+        /// View matrix
+        /// </summary>
+        public Matrix View;
+        /// <summary>
+        /// Projection matrix
+        /// </summary>
+        public Matrix Projection;
+        /// <summary>
+        /// View * projection matrix
+        /// </summary>
+        public Matrix ViewProjection;
+        /// <summary>
+        /// Bounding frustum
+        /// </summary>
+        public BoundingFrustum Frustum;
+        /// <summary>
+        /// Eye position
+        /// </summary>
+        public Vector3 EyePosition;
+        /// <summary>
+        /// Eye target
+        /// </summary>
+        public Vector3 EyeTarget;
+    }
+
+    /// <summary>
+    /// Drawing context
+    /// </summary>
+    public class DrawContext
     {
         /// <summary>
         /// Context name

@@ -1,4 +1,5 @@
 ﻿using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+using SharpDX;
 
 namespace Engine
 {
@@ -11,6 +12,11 @@ namespace Engine
     /// </summary>
     public class Cubemap : ModelBase
     {
+        /// <summary>
+        /// Local transform
+        /// </summary>
+        private Matrix local = Matrix.Identity;
+
         /// <summary>
         /// Manipulator
         /// </summary>
@@ -31,19 +37,20 @@ namespace Engine
         /// <summary>
         /// Update
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
         {
-            base.Update(gameTime);
+            base.Update(context);
 
-            this.Manipulator.Update(gameTime);
+            this.Manipulator.Update(context.GameTime);
+
+            this.local = context.World * this.Manipulator.LocalTransform;
         }
         /// <summary>
         /// Draw
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public override void Draw(GameTime gameTime, Context context)
+        public override void Draw(DrawContext context)
         {
             if (this.Meshes != null)
             {
@@ -57,7 +64,7 @@ namespace Engine
                     #region Per frame update
 
                     effect.UpdatePerFrame(
-                        context.World * this.Manipulator.LocalTransform,
+                        this.local,
                         context.ViewProjection,
                         context.EyePosition,
                         context.Lights);
@@ -85,7 +92,7 @@ namespace Engine
                             {
                                 technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
-                                mesh.Draw(gameTime, this.DeviceContext);
+                                mesh.Draw(this.DeviceContext);
                             }
                         }
                     }

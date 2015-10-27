@@ -182,12 +182,7 @@ namespace Engine
             }
         }
 
-        public override void Update(GameTime gameTime)
-        {
-
-        }
-
-        public override void Draw(GameTime gameTime, Context context)
+        public override void Update(UpdateContext context)
         {
             this.nodesToDraw = this.quadTree.GetNodesToDraw(ref context.Frustum);
 
@@ -335,9 +330,12 @@ namespace Engine
                         }
                     }
                 }
-
-                this.patches.Draw(gameTime, context, this.textures, this.normalMap);
             }
+        }
+
+        public override void Draw(DrawContext context)
+        {
+            this.patches.Draw(context, this.textures, this.normalMap);
         }
     }
 
@@ -533,7 +531,7 @@ namespace Engine
             }
         }
 
-        public void Draw(GameTime gameTime, Context context, ShaderResourceView textures, ShaderResourceView normalMap)
+        public void Draw(DrawContext context, ShaderResourceView textures, ShaderResourceView normalMap)
         {
             EffectTerrain effect = DrawerPool.EffectTerrain;
             if (effect != null)
@@ -592,7 +590,7 @@ namespace Engine
                     {
                         if (item.Action == TerrainPatchActionEnum.Draw)
                         {
-                            item.Draw(gameTime, context, technique);
+                            item.Draw(context, technique);
                         }
                     }
                 }
@@ -689,7 +687,7 @@ namespace Engine
             }
         }
 
-        public void Draw(GameTime gameTime, Context context, EffectTechnique technique)
+        public void Draw(DrawContext context, EffectTechnique technique)
         {
             this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
             this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.IndexBuffer.Buffer, SharpDX.DXGI.Format.R32_UInt, 0);

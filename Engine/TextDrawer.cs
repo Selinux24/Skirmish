@@ -258,17 +258,16 @@ namespace Engine
         /// <summary>
         /// Update component state
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
         {
 
         }
         /// <summary>
         /// Draw text
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public override void Draw(GameTime gameTime, Context context)
+        public override void Draw(DrawContext context)
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
@@ -305,7 +304,7 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="position">Position</param>
         /// <param name="color">Color</param>
-        private void DrawText(Context context, Vector2 position, Color4 color)
+        private void DrawText(DrawContext context, Vector2 position, Color4 color)
         {
             #region Per frame update
 

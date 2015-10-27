@@ -22,21 +22,9 @@ namespace Engine
     public class Billboard : Drawable
     {
         /// <summary>
-        /// Manipulator
+        /// Local transform
         /// </summary>
-        public Manipulator3D Manipulator { get; set; }
-        /// <summary>
-        /// Drawing start radius from eye point
-        /// </summary>
-        public float StartRadius { get; set; }
-        /// <summary>
-        /// Drawing end radius from eye point
-        /// </summary>
-        public float EndRadius { get; set; }
-        /// <summary>
-        /// Material
-        /// </summary>
-        public Material Material { get; set; }
+        private Matrix local = Matrix.Identity;
 
         /// <summary>
         /// Vertex buffer
@@ -58,6 +46,23 @@ namespace Engine
         /// Texture count
         /// </summary>
         protected uint TextureCount { get; set; }
+
+        /// <summary>
+        /// Manipulator
+        /// </summary>
+        public Manipulator3D Manipulator { get; set; }
+        /// <summary>
+        /// Drawing start radius from eye point
+        /// </summary>
+        public float StartRadius { get; set; }
+        /// <summary>
+        /// Drawing end radius from eye point
+        /// </summary>
+        public float EndRadius { get; set; }
+        /// <summary>
+        /// Material
+        /// </summary>
+        public Material Material { get; set; }
 
         /// <summary>
         /// Constructor
@@ -92,7 +97,14 @@ namespace Engine
                 foreach (var image in content.Images)
                 {
                     this.TextureCount = (uint)image.Value.Count;
-                    this.Textures = this.Game.Graphics.Device.LoadTextureArray(image.Value.Streams);
+                    if (image.Value.IsArray)
+                    {
+                        this.Textures = this.Game.Graphics.Device.LoadTextureArray(image.Value.Streams);
+                    }
+                    else
+                    {
+                        this.Textures = this.Game.Graphics.Device.LoadTexture(image.Value.Stream);
+                    }
 
                     break;
                 }
@@ -111,125 +123,108 @@ namespace Engine
         /// <summary>
         /// Update
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public override void Update(GameTime gameTime)
+        /// <param name="context">Context</param>
+        public override void Update(UpdateContext context)
         {
-            this.Manipulator.Update(gameTime);
+            this.Manipulator.Update(context.GameTime);
+
+            this.local = context.World * this.Manipulator.LocalTransform;
         }
         /// <summary>
         /// Draw
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        public override void Draw(GameTime gameTime, Context context)
-        {
-            EffectBillboard effect = DrawerPool.EffectBillboard;
-            EffectTechnique technique = null;
-            if (context.DrawerMode == DrawerModesEnum.Forward) { technique = effect.ForwardBillboard; }
-            else if (context.DrawerMode == DrawerModesEnum.Deferred) { technique = effect.DeferredBillboard; }
-            else if (context.DrawerMode == DrawerModesEnum.ShadowMap) { technique = effect.ShadowMapBillboard; }
-
-            if (technique != null)
-            {
-                #region Per frame update
-
-                if (context.DrawerMode == DrawerModesEnum.Forward)
-                {
-                    effect.UpdatePerFrame(
-                        context.World * this.Manipulator.LocalTransform,
-                        context.ViewProjection,
-                        context.EyePosition,
-                        context.Lights,
-                        context.ShadowMap,
-                        context.FromLightViewProjection);
-                }
-                else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                {
-                    effect.UpdatePerFrame(
-                        context.World * this.Manipulator.LocalTransform,
-                        context.ViewProjection,
-                        context.EyePosition,
-                        context.Lights,
-                        context.ShadowMap,
-                        context.FromLightViewProjection);
-                }
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                {
-                    effect.UpdatePerFrame(
-                        context.World * this.Manipulator.LocalTransform,
-                        context.ViewProjection,
-                        context.EyePosition);
-                }
-
-                #endregion
-
-                this.Game.Graphics.SetDepthStencilZEnabled();
-
-                if (context.DrawerMode == DrawerModesEnum.Forward)
-                {
-                    this.Game.Graphics.SetBlendTransparent();
-                }
-                else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                {
-                    this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                }
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                {
-                    this.Game.Graphics.SetBlendTransparent();
-                }
-
-                #region Per object update
-
-                if (context.DrawerMode == DrawerModesEnum.Forward)
-                {
-                    effect.UpdatePerObject(this.Material, this.StartRadius, this.EndRadius, this.TextureCount, this.Textures);
-                }
-                else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                {
-                    effect.UpdatePerObject(this.Material, this.StartRadius, this.EndRadius, this.TextureCount, this.Textures);
-                }
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                {
-                    effect.UpdatePerObject(this.Material, this.StartRadius, this.EndRadius, this.TextureCount, this.Textures);
-                }
-
-                #endregion
-
-                this.SetInputAssembler(this.Game.Graphics.DeviceContext, effect.GetInputLayout(technique));
-
-                for (int p = 0; p < technique.Description.PassCount; p++)
-                {
-                    technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
-
-                    this.Draw(gameTime, this.DeviceContext);
-                }
-            }
-        }
-        /// <summary>
-        /// Sets input layout to assembler
-        /// </summary>
-        /// <param name="deviceContext">Immediate context</param>
-        /// <param name="inputLayout">Layout</param>
-        protected virtual void SetInputAssembler(DeviceContext deviceContext, InputLayout inputLayout)
-        {
-            deviceContext.InputAssembler.InputLayout = inputLayout;
-            deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
-            deviceContext.InputAssembler.SetVertexBuffers(0, this.VertexBufferBinding);
-            deviceContext.InputAssembler.SetIndexBuffer(null, Format.R32_UInt, 0);
-        }
-        /// <summary>
-        /// Draw mesh geometry
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="deviceContext">Immediate context</param>
-        protected virtual void Draw(GameTime gameTime, DeviceContext deviceContext)
+        public override void Draw(DrawContext context)
         {
             if (this.VertexCount > 0)
             {
-                deviceContext.Draw(this.VertexCount, 0);
+                EffectBillboard effect = DrawerPool.EffectBillboard;
+                EffectTechnique technique = null;
+                if (context.DrawerMode == DrawerModesEnum.Forward) { technique = effect.ForwardBillboard; }
+                else if (context.DrawerMode == DrawerModesEnum.Deferred) { technique = effect.DeferredBillboard; }
+                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) { technique = effect.ShadowMapBillboard; }
 
-                Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
+                if (technique != null)
+                {
+                    #region Per frame update
+
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    {
+                        effect.UpdatePerFrame(
+                            this.local,
+                            context.ViewProjection,
+                            context.EyePosition,
+                            context.Lights,
+                            context.ShadowMap,
+                            context.FromLightViewProjection);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        effect.UpdatePerFrame(
+                            this.local,
+                            context.ViewProjection,
+                            context.EyePosition,
+                            context.Lights,
+                            context.ShadowMap,
+                            context.FromLightViewProjection);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    {
+                        effect.UpdatePerFrame(
+                            this.local,
+                            context.ViewProjection,
+                            context.EyePosition);
+                    }
+
+                    #endregion
+
+                    this.Game.Graphics.SetDepthStencilZEnabled();
+
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    {
+                        this.Game.Graphics.SetBlendTransparent();
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    {
+                        this.Game.Graphics.SetBlendTransparent();
+                    }
+
+                    #region Per object update
+
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    {
+                        effect.UpdatePerObject(this.Material, this.StartRadius, this.EndRadius, this.TextureCount, this.Textures);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        effect.UpdatePerObject(this.Material, this.StartRadius, this.EndRadius, this.TextureCount, this.Textures);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    {
+                        effect.UpdatePerObject(this.Material, this.StartRadius, this.EndRadius, this.TextureCount, this.Textures);
+                    }
+
+                    #endregion
+
+                    this.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                    this.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
+                    this.DeviceContext.InputAssembler.SetVertexBuffers(0, this.VertexBufferBinding);
+                    this.DeviceContext.InputAssembler.SetIndexBuffer(null, Format.R32_UInt, 0);
+
+                    for (int p = 0; p < technique.Description.PassCount; p++)
+                    {
+                        technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+
+                        this.DeviceContext.Draw(this.VertexCount, 0);
+
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame++;
+                    }
+                }
             }
         }
         /// <summary>

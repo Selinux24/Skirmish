@@ -253,19 +253,18 @@ namespace Engine.Common
         /// <summary>
         /// Updates the quad tree components
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        /// <param name="context">Drawing context</param>
+        public void Update(UpdateContext context)
         {
-            this.Root.Update(gameTime);
+            this.Root.Update(context);
         }
         /// <summary>
         /// Draws the quad tree components
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Drawing context</param>
-        public void Draw(GameTime gameTime, Context context)
+        public void Draw(DrawContext context)
         {
-            this.Root.Draw(gameTime, context);
+            this.Root.Draw(context);
         }
 
         /// <summary>
