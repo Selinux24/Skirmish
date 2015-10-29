@@ -97,14 +97,8 @@ namespace Engine
                 foreach (var image in content.Images)
                 {
                     this.TextureCount = (uint)image.Value.Count;
-                    if (image.Value.IsArray)
-                    {
-                        this.Textures = this.Game.Graphics.Device.LoadTextureArray(image.Value.Streams);
-                    }
-                    else
-                    {
-                        this.Textures = this.Game.Graphics.Device.LoadTexture(image.Value.Stream);
-                    }
+
+                    this.Textures = this.Game.Graphics.Device.LoadTextureArray(image.Value.Streams);
 
                     break;
                 }

@@ -41,7 +41,7 @@ namespace Engine.Content
         {
             get
             {
-                return this.streams != null && this.streams.Length > 1 ? this.streams : null;
+                return this.streams;
             }
             set
             {

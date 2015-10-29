@@ -1,5 +1,4 @@
-﻿using Engine.Content;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 
@@ -14,17 +13,17 @@ namespace Engine.Common
         /// Recursive partition creation
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="quadTree">Quadtree</param>
+        /// <param name="parent">Parent node</param>
         /// <param name="bbox">Parent bounding box</param>
         /// <param name="triangles">All triangles</param>
         /// <param name="treeDepth">Current depth</param>
         /// <param name="description">Description</param>
-        /// <returns></returns>
+        /// <returns>Returns new node</returns>
         public static QuadTreeNode CreatePartitions(
             Game game,
-            QuadTree quadTree,
-            QuadTreeNode parent,
-            BoundingBox bbox,
-            Triangle[] triangles,
+            QuadTree quadTree, QuadTreeNode parent,
+            BoundingBox bbox, Triangle[] triangles,
             int treeDepth,
             TerrainDescription description)
         {
@@ -57,58 +56,6 @@ namespace Engine.Common
                             nodeTriangles,
                             description.PathFinder.NodeSize,
                             description.PathFinder.NodeInclination);
-                    }
-
-                    //Set vegetation
-                    if (description.Vegetation != null && description.Vegetation.Length > 0)
-                    {
-                        for (int i = 0; i < description.Vegetation.Length; i++)
-                        {
-                            TerrainDescription.VegetationDescription vegetationDesc = description.Vegetation[i];
-
-                            VertexData[] vData = null;
-
-                            var vBillboardDesc = vegetationDesc as TerrainDescription.VegetationDescriptionBillboard;
-                            if (vBillboardDesc != null)
-                            {
-                                Vector3[] vertices = ModelContent.GenerateRandomPositions(
-                                    bbox,
-                                    nodeTriangles,
-                                    vBillboardDesc.Saturation,
-                                    vBillboardDesc.Seed);
-                                if (vertices != null && vertices.Length > 0)
-                                {
-                                    vData = new VertexData[vertices.Length];
-
-                                    Random rnd = new Random();
-
-                                    for (int v = 0; v < vertices.Length; v++)
-                                    {
-                                        //Set max / min sizes
-                                        Vector2 bbsize = rnd.NextVector2(vBillboardDesc.MinSize, vBillboardDesc.MaxSize);
-
-                                        Vector3 bbpos = vertices[i];
-                                        bbpos.Y += bbsize.Y * 0.5f;
-
-                                        vData[v] = VertexData.CreateVertexBillboard(bbpos, bbsize);
-                                    }
-                                }
-
-                                node.vegetationBillBoardPositions.Add(i, vData);
-                            }
-
-                            var vModelDesc = vegetationDesc as TerrainDescription.VegetationDescriptionModel;
-                            if (vModelDesc != null)
-                            {
-                                Vector3[] vertices = ModelContent.GenerateRandomPositions(
-                                    bbox,
-                                    nodeTriangles,
-                                    vModelDesc.Saturation,
-                                    vModelDesc.Seed);
-
-                                node.vegetationModelPositions.Add(i, vertices);
-                            }
-                        }
                     }
                 }
                 else
@@ -153,7 +100,17 @@ namespace Engine.Common
 
             return null;
         }
-
+        /// <summary>
+        /// Recursive partition creation
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="quadTree">Quadtree</param>
+        /// <param name="parent">Parent node</param>
+        /// <param name="bbox">Parent bounding box</param>
+        /// <param name="vertices">Vertices contained into parent bounding box</param>
+        /// <param name="treeDepth">Current depth</param>
+        /// <param name="description">Description</param>
+        /// <returns>Returns new node</returns>
         public static QuadTreeNode CreatePartitions(
             Game game,
             QuadTree quadTree, QuadTreeNode parent,
@@ -180,6 +137,21 @@ namespace Engine.Common
                 if (haltByCount)
                 {
                     node.Vertices = nodeVertices;
+
+                    //Get positions
+                    List<Vector3> positions = new List<Vector3>();
+                    Array.ForEach(nodeVertices, v => positions.Add(v.Position.Value));
+
+                    //Triangles per node
+                    int nodeSide = (int)Math.Sqrt(positions.Count) - 1;
+
+                    //Get indices
+                    uint[] indices = GeometryUtil.GenerateIndices(IndexBufferShapeEnum.Full, nodeSide * nodeSide * 2);
+
+                    node.Triangles = Triangle.ComputeTriangleList(
+                        SharpDX.Direct3D.PrimitiveTopology.TriangleList, 
+                        positions.ToArray(),
+                        indices);
                 }
                 else
                 {
@@ -232,15 +204,38 @@ namespace Engine.Common
         /// Parent node
         /// </summary>
         public QuadTreeNode Parent { get; private set; }
-
+        /// <summary>
+        /// Gets the child node al top lef position (from above)
+        /// </summary>
         public QuadTreeNode TopLeftChild { get; private set; }
+        /// <summary>
+        /// Gets the child node al top right position (from above)
+        /// </summary>
         public QuadTreeNode TopRightChild { get; private set; }
+        /// <summary>
+        /// Gets the child node al bottom lef position (from above)
+        /// </summary>
         public QuadTreeNode BottomLeftChild { get; private set; }
+        /// <summary>
+        /// Gets the child node al bottom right position (from above)
+        /// </summary>
         public QuadTreeNode BottomRightChild { get; private set; }
 
+        /// <summary>
+        /// Gets the neighbour at top position (from above)
+        /// </summary>
         public QuadTreeNode TopNeighbour { get; private set; }
+        /// <summary>
+        /// Gets the neighbour at bottom position (from above)
+        /// </summary>
         public QuadTreeNode BottomNeighbour { get; private set; }
+        /// <summary>
+        /// Gets the neighbour at left position (from above)
+        /// </summary>
         public QuadTreeNode LeftNeighbour { get; private set; }
+        /// <summary>
+        /// Gets the neighbour at right position (from above)
+        /// </summary>
         public QuadTreeNode RightNeighbour { get; private set; }
 
         /// <summary>
@@ -266,10 +261,6 @@ namespace Engine.Common
         /// </summary>
         public QuadTreeNode[] Children;
         /// <summary>
-        /// Triangle list
-        /// </summary>
-        public Triangle[] Triangles;
-        /// <summary>
         /// Local model
         /// </summary>
         public Model Model = null;
@@ -281,12 +272,14 @@ namespace Engine.Common
         /// Gets if local quad node is culled
         /// </summary>
         public bool Cull = false;
-
-        private Dictionary<int, VertexData[]> vegetationBillBoardPositions = new Dictionary<int, VertexData[]>();
-
-        private Dictionary<int, Vector3[]> vegetationModelPositions = new Dictionary<int, Vector3[]>();
-
+        /// <summary>
+        /// Node vertices
+        /// </summary>
         private VertexData[] Vertices;
+        /// <summary>
+        /// Node triangles
+        /// </summary>
+        public Triangle[] Triangles;
 
         /// <summary>
         /// Constructor
@@ -298,13 +291,15 @@ namespace Engine.Common
             this.QuadTree = quadTree;
             this.Parent = parent;
         }
-
+        /// <summary>
+        /// Connect nodes in the grid
+        /// </summary>
         public void ConnectNodes()
         {
-            this.TopNeighbour = this.GetNeighbourNodeAtTop();
-            this.BottomNeighbour = this.GetNeighbourNodeAtBottom();
-            this.LeftNeighbour = this.GetNeighbourNodeAtLeft();
-            this.RightNeighbour = this.GetNeighbourNodeAtRight();
+            this.TopNeighbour = this.FindNeighbourNodeAtTop();
+            this.BottomNeighbour = this.FindNeighbourNodeAtBottom();
+            this.LeftNeighbour = this.FindNeighbourNodeAtLeft();
+            this.RightNeighbour = this.FindNeighbourNodeAtRight();
 
             if (this.Children != null && this.Children.Length > 0)
             {
@@ -314,14 +309,17 @@ namespace Engine.Common
                 }
             }
         }
-
-        private QuadTreeNode GetNeighbourNodeAtTop()
+        /// <summary>
+        /// Searchs for the neighbour node at top position (from above)
+        /// </summary>
+        /// <returns>Returns the neighbour node at top position if exists.</returns>
+        private QuadTreeNode FindNeighbourNodeAtTop()
         {
             if (this.Parent != null)
             {
                 if (this == this.Parent.TopLeftChild)
                 {
-                    var node = this.Parent.GetNeighbourNodeAtTop();
+                    var node = this.Parent.FindNeighbourNodeAtTop();
                     if (node != null)
                     {
                         return node.BottomLeftChild;
@@ -329,7 +327,7 @@ namespace Engine.Common
                 }
                 else if (this == this.Parent.TopRightChild)
                 {
-                    var node = this.Parent.GetNeighbourNodeAtTop();
+                    var node = this.Parent.FindNeighbourNodeAtTop();
                     if (node != null)
                     {
                         return node.BottomRightChild;
@@ -347,8 +345,11 @@ namespace Engine.Common
 
             return null;
         }
-
-        private QuadTreeNode GetNeighbourNodeAtBottom()
+        /// <summary>
+        /// Searchs for the neighbour node at bottom position (from above)
+        /// </summary>
+        /// <returns>Returns the neighbour node at bottom position if exists.</returns>
+        private QuadTreeNode FindNeighbourNodeAtBottom()
         {
             if (this.Parent != null)
             {
@@ -362,7 +363,7 @@ namespace Engine.Common
                 }
                 else if (this == this.Parent.BottomLeftChild)
                 {
-                    var node = this.Parent.GetNeighbourNodeAtBottom();
+                    var node = this.Parent.FindNeighbourNodeAtBottom();
                     if (node != null)
                     {
                         return node.TopLeftChild;
@@ -370,7 +371,7 @@ namespace Engine.Common
                 }
                 else if (this == this.Parent.BottomRightChild)
                 {
-                    var node = this.Parent.GetNeighbourNodeAtBottom();
+                    var node = this.Parent.FindNeighbourNodeAtBottom();
                     if (node != null)
                     {
                         return node.TopRightChild;
@@ -380,8 +381,11 @@ namespace Engine.Common
 
             return null;
         }
-
-        private QuadTreeNode GetNeighbourNodeAtRight()
+        /// <summary>
+        /// Searchs for the neighbour node at right position(from above)
+        /// </summary>
+        /// <returns>Returns the neighbour node at top position if exists.</returns>
+        private QuadTreeNode FindNeighbourNodeAtRight()
         {
             if (this.Parent != null)
             {
@@ -391,7 +395,7 @@ namespace Engine.Common
                 }
                 else if (this == this.Parent.TopRightChild)
                 {
-                    var node = this.Parent.GetNeighbourNodeAtRight();
+                    var node = this.Parent.FindNeighbourNodeAtRight();
                     if (node != null)
                     {
                         return node.TopLeftChild;
@@ -403,7 +407,7 @@ namespace Engine.Common
                 }
                 else if (this == this.Parent.BottomRightChild)
                 {
-                    var node = this.Parent.GetNeighbourNodeAtRight();
+                    var node = this.Parent.FindNeighbourNodeAtRight();
                     if (node != null)
                     {
                         return node.BottomLeftChild;
@@ -413,14 +417,17 @@ namespace Engine.Common
 
             return null;
         }
-
-        private QuadTreeNode GetNeighbourNodeAtLeft()
+        /// <summary>
+        /// Searchs for the neighbour node at left position (from above)
+        /// </summary>
+        /// <returns>Returns the neighbour node at left position if exists.</returns>
+        private QuadTreeNode FindNeighbourNodeAtLeft()
         {
             if (this.Parent != null)
             {
                 if (this == this.Parent.TopLeftChild)
                 {
-                    var node = this.Parent.GetNeighbourNodeAtLeft();
+                    var node = this.Parent.FindNeighbourNodeAtLeft();
                     if (node != null)
                     {
                         return node.TopRightChild;
@@ -432,7 +439,7 @@ namespace Engine.Common
                 }
                 else if (this == this.Parent.BottomLeftChild)
                 {
-                    var node = this.Parent.GetNeighbourNodeAtLeft();
+                    var node = this.Parent.FindNeighbourNodeAtLeft();
                     if (node != null)
                     {
                         return node.BottomRightChild;
@@ -446,11 +453,17 @@ namespace Engine.Common
 
             return null;
         }
-
-        public IVertexData[] GetVertexData(VertexTypes vertexType, int range)
+        /// <summary>
+        /// Gets the vertex data for buffer writing
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="lod">Level of detail</param>
+        /// <returns>Returns the vertex data for buffer writing</returns>
+        public IVertexData[] GetVertexData(VertexTypes vertexType, LevelOfDetailEnum lod)
         {
             var data = VertexData.Convert(vertexType, this.Vertices, null, null, Matrix.Identity);
 
+            int range = (int)lod;
             if (range > 1)
             {
                 int side = (int)Math.Sqrt(data.Length);
@@ -767,63 +780,6 @@ namespace Engine.Common
             return false;
         }
         /// <summary>
-        /// Gets the nodes contained into the specified frustum
-        /// </summary>
-        /// <param name="frustum">Bounding frustum</param>
-        /// <returns>Returns the nodes contained into the frustum</returns>
-        public QuadTreeNode[] Contained(ref BoundingFrustum frustum)
-        {
-            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
-
-            if (this.Children == null)
-            {
-                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
-                {
-                    nodes.Add(this);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < this.Children.Length; i++)
-                {
-                    var childNodes = this.Children[i].Contained(ref frustum);
-                    if (childNodes.Length > 0)
-                    {
-                        nodes.AddRange(childNodes);
-                    }
-                }
-            }
-
-            return nodes.ToArray();
-        }
-
-        public QuadTreeNode[] GetNodesToDraw(ref BoundingFrustum frustum)
-        {
-            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
-
-            if (this.Children == null)
-            {
-                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
-                {
-                    nodes.Add(this);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < this.Children.Length; i++)
-                {
-                    var childNodes = this.Children[i].GetNodesToDraw(ref frustum);
-                    if (childNodes.Length > 0)
-                    {
-                        nodes.AddRange(childNodes);
-                    }
-                }
-            }
-
-            return nodes.ToArray();
-        }
-
-        /// <summary>
         /// Get bounding boxes of specified level
         /// </summary>
         /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
@@ -883,60 +839,6 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Mark the node and its chils culled
-        /// </summary>
-        public void CullAll()
-        {
-            this.Cull = true;
-
-            if (this.Children != null && this.Children.Length > 0)
-            {
-                for (int i = 0; i < this.Children.Length; i++)
-                {
-                    this.Children[i].CullAll();
-                }
-            }
-        }
-        /// <summary>
-        /// Perfomrs frustum culling in the node and its childs
-        /// </summary>
-        /// <param name="frustum">Frustum</param>
-        public void FrustumCulling(BoundingFrustum frustum)
-        {
-            if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
-            {
-                this.Cull = false;
-
-                if (this.Children != null && this.Children.Length > 0)
-                {
-                    for (int i = 0; i < this.Children.Length; i++)
-                    {
-                        this.Children[i].FrustumCulling(frustum);
-                    }
-                }
-                else
-                {
-                    foreach (var index in this.vegetationBillBoardPositions.Keys)
-                    {
-                        var items = this.vegetationBillBoardPositions[index];
-                        if (items != null && items.Length > 0)
-                        {
-                            //None
-                        }
-                    }
-
-                    foreach (var index in this.vegetationModelPositions.Keys)
-                    {
-                        var items = this.vegetationModelPositions[index];
-                        if (items != null && items.Length > 0)
-                        {
-                            //None
-                        }
-                    }
-                }
-            }
-        }
-        /// <summary>
         /// Updates node and its childs
         /// </summary>
         /// <param name="context">Context</param>
@@ -959,50 +861,37 @@ namespace Engine.Common
                         this.Children[i].Draw(context);
                     }
                 }
-                else
+            }
+        }
+        /// <summary>
+        /// Gets the tail nodes contained into the specified frustum
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <returns>Returns the tail nodes contained into the frustum</returns>
+        public QuadTreeNode[] GetNodesInVolume(ref BoundingFrustum frustum)
+        {
+            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
+
+            if (this.Children == null)
+            {
+                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
                 {
-                    foreach (var index in this.vegetationBillBoardPositions.Keys)
+                    nodes.Add(this);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < this.Children.Length; i++)
+                {
+                    var childNodes = this.Children[i].GetNodesInVolume(ref frustum);
+                    if (childNodes.Length > 0)
                     {
-                        var items = this.vegetationBillBoardPositions[index];
-                        if (items != null && items.Length > 0)
-                        {
-                            //((Billboard)this.QuadTree.Drawers[index]).WriteData(items);
-
-                            //this.QuadTree.Drawers[index].Draw(gameTime, context);
-                        }
-                    }
-
-                    foreach (var index in this.vegetationModelPositions.Keys)
-                    {
-                        var items = this.vegetationModelPositions[index];
-                        if (items != null && items.Length > 0)
-                        {
-                            var model = this.QuadTree.Drawers[index] as ModelInstanced;
-                            if (model != null)
-                            {
-                                Vector3[] f = Array.FindAll(items, it =>
-                                {
-                                    float dd = Vector3.DistanceSquared(it, context.EyePosition);
-
-                                    return dd >= 0 && dd <= (100 * 100);
-                                });
-
-                                if (f.Length > 0)
-                                {
-                                    model.SetPositions(f);
-
-                                    var par = context.Frustum.GetCameraParams();
-                                    par.ZFar = 100;
-                                    BoundingFrustum bf = BoundingFrustum.FromCamera(par);
-
-                                    model.FrustumCulling(bf);
-                                    model.Draw(context);
-                                }
-                            }
-                        }
+                        nodes.AddRange(childNodes);
                     }
                 }
             }
+
+            return nodes.ToArray();
         }
 
         /// <summary>

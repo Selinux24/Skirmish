@@ -58,7 +58,7 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 	float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 0));
 
 	float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	if(depthValue < 0.75f)
+	if(depthValue < 0.25f)
 	{
 		normalWorld = input.normalWorld;
 	}
@@ -107,7 +107,7 @@ GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 	float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 0));
 
 	float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	if(depthValue < 0.75f)
+	if(depthValue < 0.25f)
 	{
 		normal = input.normalWorld;
 	}

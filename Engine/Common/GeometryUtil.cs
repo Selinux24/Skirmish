@@ -6,6 +6,135 @@ namespace Engine.Common
 {
     public static class GeometryUtil
     {
+        public static uint[] GenerateIndices(IndexBufferShapeEnum bufferShape, int trianglesPerNode)
+        {
+            int nodes = trianglesPerNode / 2;
+            uint side = (uint)Math.Sqrt(nodes);
+            uint sideLoss = side / 2;
+
+            bool topSide =
+                bufferShape == IndexBufferShapeEnum.CornerTopLeft ||
+                bufferShape == IndexBufferShapeEnum.CornerTopRight ||
+                bufferShape == IndexBufferShapeEnum.SideTop;
+
+            bool bottomSide =
+                bufferShape == IndexBufferShapeEnum.CornerBottomLeft ||
+                bufferShape == IndexBufferShapeEnum.CornerBottomRight ||
+                bufferShape == IndexBufferShapeEnum.SideBottom;
+
+            bool leftSide =
+                bufferShape == IndexBufferShapeEnum.CornerBottomLeft ||
+                bufferShape == IndexBufferShapeEnum.CornerTopLeft ||
+                bufferShape == IndexBufferShapeEnum.SideLeft;
+
+            bool rightSide =
+                bufferShape == IndexBufferShapeEnum.CornerBottomRight ||
+                bufferShape == IndexBufferShapeEnum.CornerTopRight ||
+                bufferShape == IndexBufferShapeEnum.SideRight;
+
+            uint totalTriangles = (uint)trianglesPerNode;
+            if (topSide) totalTriangles -= sideLoss;
+            if (bottomSide) totalTriangles -= sideLoss;
+            if (leftSide) totalTriangles -= sideLoss;
+            if (rightSide) totalTriangles -= sideLoss;
+
+            uint[] indices = new uint[totalTriangles * 3];
+
+            int index = 0;
+
+            for (uint y = 1; y < side; y += 2)
+            {
+                for (uint x = 1; x < side; x += 2)
+                {
+                    uint indexPRow = ((y - 1) * (side + 1)) + x;
+                    uint indexCRow = ((y + 0) * (side + 1)) + x;
+                    uint indexNRow = ((y + 1) * (side + 1)) + x;
+
+                    //Top side
+                    if (y == 1 && topSide)
+                    {
+                        //Top
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow - 1;
+                        indices[index++] = indexPRow + 1;
+                    }
+                    else
+                    {
+                        //Top left
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow - 1;
+                        indices[index++] = indexPRow;
+                        //Top right
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow;
+                        indices[index++] = indexPRow + 1;
+                    }
+
+                    //Bottom side
+                    if (y == side - 1 && bottomSide)
+                    {
+                        //Bottom only
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexNRow + 1;
+                        indices[index++] = indexNRow - 1;
+                    }
+                    else
+                    {
+                        //Bottom left
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexNRow;
+                        indices[index++] = indexNRow - 1;
+                        //Bottom right
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexNRow + 1;
+                        indices[index++] = indexNRow;
+                    }
+
+                    //Left side
+                    if (x == 1 && leftSide)
+                    {
+                        //Left only
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexNRow - 1;
+                        indices[index++] = indexPRow - 1;
+                    }
+                    else
+                    {
+                        //Left top
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexCRow - 1;
+                        indices[index++] = indexPRow - 1;
+                        //Left bottom
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexNRow - 1;
+                        indices[index++] = indexCRow - 1;
+                    }
+
+                    //Right side
+                    if (x == side - 1 && rightSide)
+                    {
+                        //Right only
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow + 1;
+                        indices[index++] = indexNRow + 1;
+                    }
+                    else
+                    {
+                        //Right top
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexPRow + 1;
+                        indices[index++] = indexCRow + 1;
+                        //Right bottom
+                        indices[index++] = indexCRow;
+                        indices[index++] = indexCRow + 1;
+                        indices[index++] = indexNRow + 1;
+                    }
+                }
+            }
+
+            return indices;
+        }
+
         public static Line[] CreateWiredTriangle(Triangle[] triangleList)
         {
             List<Line> lines = new List<Line>();
@@ -284,5 +413,19 @@ namespace Engine.Common
 
             return lines.ToArray();
         }
+    }
+
+    public enum IndexBufferShapeEnum : int
+    {
+        None = -1,
+        Full = 0,
+        SideTop = 1,
+        SideBottom = 2,
+        SideLeft = 3,
+        SideRight = 4,
+        CornerTopLeft = 5,
+        CornerBottomLeft = 6,
+        CornerTopRight = 7,
+        CornerBottomRight = 8,
     }
 }

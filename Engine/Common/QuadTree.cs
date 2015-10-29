@@ -78,13 +78,19 @@ namespace Engine.Common
 
             return quadTree;
         }
-
+        /// <summary>
+        /// Build quadtree
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="description">Description</param>
+        /// <returns>Returns generated quadtree</returns>
         public static QuadTree Build(
             Game game,
             VertexData[] vertices,
             TerrainDescription description)
         {
-            //Process Quadtree. Each tail quadnode must contains same number of vertices
+            //Process Quadtree. Each tail quadnode must contains the same number of vertices
 
             //Compute bounding volumes
             long index = 0;
@@ -134,6 +140,23 @@ namespace Engine.Common
         public QuadTree()
         {
             this.Drawers = new Dictionary<int, Drawable>();
+        }
+
+        /// <summary>
+        /// Updates the quad tree components
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        public void Update(UpdateContext context)
+        {
+            this.Root.Update(context);
+        }
+        /// <summary>
+        /// Draws the quad tree components
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        public void Draw(DrawContext context)
+        {
+            this.Root.Draw(context);
         }
 
         /// <summary>
@@ -209,25 +232,6 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Gets the nodes contained into the specified frustum
-        /// </summary>
-        /// <param name="frustum">Bounding frustum</param>
-        /// <returns>Returns the nodes contained into the frustum</returns>
-        public QuadTreeNode[] Contained(ref BoundingFrustum frustum)
-        {
-            var par = frustum.GetCameraParams();
-            par.ZFar = 100;
-            BoundingFrustum bf = BoundingFrustum.FromCamera(par);
-
-            return this.Root.Contained(ref bf);
-        }
-
-        public QuadTreeNode[] GetNodesToDraw(ref BoundingFrustum frustum)
-        {
-            return this.Root.GetNodesToDraw(ref frustum);
-        }
-
-        /// <summary>
         /// Gets bounding boxes of specified depth
         /// </summary>
         /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
@@ -238,33 +242,13 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Perfomrs frustum culling into the quad tree
+        /// Gets the nodes contained into the specified frustum
         /// </summary>
-        /// <param name="frustum">Frustum</param>
-        public void FrustumCulling(BoundingFrustum frustum)
+        /// <param name="frustum">Bounding frustum</param>
+        /// <returns>Returns the nodes contained into the frustum</returns>
+        public QuadTreeNode[] GetNodesInVolume(ref BoundingFrustum frustum)
         {
-            var par = frustum.GetCameraParams();
-            par.ZFar = 100;
-            BoundingFrustum bf = BoundingFrustum.FromCamera(par);
-
-            this.Root.CullAll();
-            this.Root.FrustumCulling(bf);
-        }
-        /// <summary>
-        /// Updates the quad tree components
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        public void Update(UpdateContext context)
-        {
-            this.Root.Update(context);
-        }
-        /// <summary>
-        /// Draws the quad tree components
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        public void Draw(DrawContext context)
-        {
-            this.Root.Draw(context);
+            return this.Root.GetNodesInVolume(ref frustum);
         }
 
         /// <summary>

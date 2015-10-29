@@ -7,9 +7,11 @@ namespace HeightmapTest
     public class TestScene3D : Scene
     {
         private const float near = 0.1f;
-        private const float far = 3000f;
+        private const float far = 1000f;
         private const float fogStart = 0.01f;
         private const float fogRange = 0.50f;
+
+        private Vector3 playerHeight = Vector3.UnitY;
 
         private TextDrawer title = null;
         private TextDrawer load = null;
@@ -198,10 +200,14 @@ namespace HeightmapTest
 
             #endregion
 
-            this.Camera.Goto(50, 50, 50);
-            this.Camera.LookTo(0, 0, 0);
-            //this.Camera.Goto(0, 0, 0);
-            //this.Camera.LookTo(this.Lights.DirectionalLights[0].GetPosition(100));
+            Vector3 position;
+            if (this.terrain.FindTopGroundPosition(0, 0, out position))
+            {
+                position += this.playerHeight;
+
+                this.Camera.Goto(position);
+                this.Camera.LookTo(position + Vector3.ForwardLH);
+            };
         }
 
         public override void Update(GameTime gameTime)
@@ -288,6 +294,14 @@ namespace HeightmapTest
             #endregion
 
             base.Update(gameTime);
+
+            Vector3 position;
+            if (this.terrain.FindTopGroundPosition(this.Camera.Position.X, this.Camera.Position.Z, out position))
+            {
+                position += this.playerHeight;
+
+                this.Camera.Goto(position);
+            };
 
             //var frustum = this.Camera.Frustum;
             //var nodes = this.terrain.Contained(ref frustum);

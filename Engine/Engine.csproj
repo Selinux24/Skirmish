@@ -324,6 +324,7 @@
     <Compile Include="Effects\EffectSprite.cs" />
     <Compile Include="Effects\EffectNull.cs" />
     <Compile Include="LensFlare.cs" />
+    <Compile Include="LevelOfDetailEnum.cs" />
     <Compile Include="SceneRendererResultEnum.cs" />
     <Compile Include="Common\Skeleton.cs" />
     <Compile Include="Content\LoaderConversion.cs" />

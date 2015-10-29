@@ -1,6 +1,6 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -181,21 +181,6 @@ namespace Engine
                 this.pickingQuadtree.Draw(context);
             }
         }
-        /// <summary>
-        /// Performs frustum culling test
-        /// </summary>
-        /// <param name="frustum">Camera frustum</param>
-        public override void FrustumCulling(BoundingFrustum frustum)
-        {
-            if (this.pickingQuadtree == null)
-            {
-                this.terrain.FrustumCulling(frustum);
-            }
-            else
-            {
-                this.pickingQuadtree.FrustumCulling(frustum);
-            }
-        }
 
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -356,20 +341,6 @@ namespace Engine
         public Path FindPath(Vector3 from, Vector3 to)
         {
             return PathFinding.PathFinder.FindPath(this.grid, from, to);
-        }
-        /// <summary>
-        /// Gets the quad-tree nodes contained into the specified frustum
-        /// </summary>
-        /// <param name="frustum">Frustum</param>
-        /// <returns>Returns the quad-tree nodes contained into the specified frustum</returns>
-        public QuadTreeNode[] Contained(ref BoundingFrustum frustum)
-        {
-            if (this.pickingQuadtree != null)
-            {
-                return this.pickingQuadtree.Contained(ref frustum);
-            }
-
-            return null;
         }
 
         /// <summary>
