@@ -1,7 +1,7 @@
-﻿using System;
-using Engine;
+﻿using Engine;
 using Engine.Common;
 using SharpDX;
+using System;
 
 namespace Skybox
 {
@@ -27,7 +27,7 @@ namespace Skybox
         private TextDrawer help = null;
         private TextDrawer fps = null;
 
-        private Cubemap skydom = null;
+        private Skydom skydom = null;
         private Terrain ruins = null;
         private TriangleListDrawer pickedTri = null;
         private LineListDrawer bboxGlobalDrawer = null;
@@ -89,7 +89,7 @@ namespace Skybox
 
             #region Skydom
 
-            this.skydom = this.AddSkydom(new CubemapDescription()
+            this.skydom = this.AddSkydom(new SkydomDescription()
             {
                 ContentPath = "Resources",
                 Radius = this.Camera.FarPlaneDistance,

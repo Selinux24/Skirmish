@@ -490,16 +490,32 @@ namespace Engine
             return newModel;
         }
         /// <summary>
+        /// Adds new cubemap
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new model</returns>
+        public Cubemap AddCubemap(CubemapDescription description, int order = 0)
+        {
+            ModelContent cubemap = ModelContent.GenerateSphere(description.ContentPath, description.Texture, description.Radius);
+
+            Cubemap newModel = new Cubemap(this.Game, cubemap);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
         /// Adds new skydom
         /// </summary>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Cubemap AddSkydom(CubemapDescription description, int order = 0)
+        public Skydom AddSkydom(SkydomDescription description, int order = 0)
         {
             ModelContent skydom = ModelContent.GenerateSkydom(description.ContentPath, description.Texture, description.Radius);
 
-            Cubemap newModel = new Cubemap(this.Game, skydom);
+            Skydom newModel = new Skydom(this.Game, skydom);
 
             this.AddComponent(newModel, order);
 

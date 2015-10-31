@@ -24,7 +24,7 @@ namespace DeferredTest
         private Model tank = null;
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
-        private Cubemap skydom = null;
+        private Skydom skydom = null;
         private Terrain terrain = null;
         private ParticleSystem fire = null;
 
@@ -61,7 +61,7 @@ namespace DeferredTest
             #region Skydom
 
             sw.Restart();
-            this.skydom = this.AddSkydom(new CubemapDescription()
+            this.skydom = this.AddSkydom(new SkydomDescription()
             {
                 ContentPath = resources,
                 Radius = far,

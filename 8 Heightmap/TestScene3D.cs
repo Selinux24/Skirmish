@@ -19,7 +19,7 @@ namespace HeightmapTest
 
         private Cursor cursor;
         private LensFlare lensFlare = null;
-        private Cubemap skydom = null;
+        private Skydom skydom = null;
         private Terrain2 terrain = null;
         private LineListDrawer bboxesDrawer = null;
 
@@ -111,7 +111,7 @@ namespace HeightmapTest
             #region Skydom
 
             sw.Restart();
-            this.skydom = this.AddSkydom(new CubemapDescription()
+            this.skydom = this.AddSkydom(new SkydomDescription()
             {
                 ContentPath = resources,
                 Radius = far,

@@ -601,6 +601,49 @@ namespace Engine.Content
             }
         }
         /// <summary>
+        /// Generate model content for cubemap
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="texture">Texture</param>
+        /// <param name="radius">cubemap radius</param>
+        /// <returns>Returns new model content</returns>
+        public static ModelContent GenerateSphere(string contentFolder, string texture, float radius)
+        {
+            ModelContent modelContent = new ModelContent();
+
+            string imageName = "cubeTexture";
+            string materialName = "sphereMaterial";
+            string geoName = "sphereGeometry";
+
+            ImageContent image = new ImageContent()
+            {
+                Streams = ContentManager.FindContent(contentFolder, texture),
+            };
+
+            MaterialContent material = MaterialContent.Default;
+            material.DiffuseTexture = imageName;
+
+            VertexData[] verts = null;
+            uint[] indices = null;
+            VertexData.CreateSphere(radius, 20, 20, out verts, out indices);
+
+            SubMeshContent geo = new SubMeshContent()
+            {
+                Topology = PrimitiveTopology.TriangleList,
+                VertexType = VertexTypes.Position,
+                Vertices = verts,
+                Indices = indices,
+                Material = materialName,
+            };
+
+            modelContent.Images.Add(imageName, image);
+            modelContent.Materials.Add(materialName, material);
+            modelContent.Geometry.Add(geoName, materialName, geo);
+            modelContent.Optimize();
+
+            return modelContent;
+        }
+        /// <summary>
         /// Generate model content for sky dom
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
@@ -696,7 +739,12 @@ namespace Engine.Content
 
             return modelContent;
         }
-
+        /// <summary>
+        /// Generates a new model content for a billboard
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="textures">Textures</param>
+        /// <returns>Returns a new model content</returns>
         public static ModelContent GenerateBillboard(string contentFolder, string[] textures)
         {
             ModelContent modelContent = new ModelContent();
@@ -731,47 +779,6 @@ namespace Engine.Content
 
             return modelContent;
         }
-
-        public static Vector3[] GenerateRandomPositions(BoundingBox bbox, Triangle[] triList, float saturation, int seed = 0, float maxAngle = 60f)
-        {
-            List<Vector3> vertices = new List<Vector3>();
-
-            for (int i = 0; i < triList.Length; i++)
-            {
-                Triangle tri = triList[i];
-
-                float inc = MathUtil.RadiansToDegrees(tri.Inclination);
-                if (inc > maxAngle)
-                {
-                    inc = 0;
-                }
-                else
-                {
-                    inc = (inc + maxAngle) / maxAngle;
-                }
-
-                int num = (int)(saturation * inc);
-                if (num > 0)
-                {
-                    Random rnd = new Random(seed + i);
-
-                    for (int b = 0; b < num; b++)
-                    {
-                        //Buscar un punto en el triángulo
-                        Vector3 v = rnd.NextVector3(tri.Min, tri.Max);
-                        Ray ray = new Ray(new Vector3(v.X, bbox.Maximum.Y + 0.1f, v.Z), Vector3.Down);
-                        Vector3 iPoint;
-                        if (tri.Intersects(ref ray, out iPoint))
-                        {
-                            vertices.Add(iPoint);
-                        }
-                    }
-                }
-            }
-
-            return vertices.ToArray();
-        }
-
 
         /// <summary>
         /// Constructor

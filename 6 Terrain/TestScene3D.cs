@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Engine;
+﻿using Engine;
 using Engine.Common;
 using Engine.Helpers;
 using Engine.PathFinding;
 using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace TerrainTest
@@ -27,7 +27,7 @@ namespace TerrainTest
         private Model cursor3D = null;
         private Model tank = null;
 
-        private Cubemap skydom = null;
+        private Skydom skydom = null;
         private Terrain terrain = null;
         private List<Line> oks = new List<Line>();
         private List<Line> errs = new List<Line>();
@@ -106,7 +106,7 @@ namespace TerrainTest
             #region Skydom
 
             sw.Restart();
-            this.skydom = this.AddSkydom(new CubemapDescription()
+            this.skydom = this.AddSkydom(new SkydomDescription()
             {
                 ContentPath = resources,
                 Radius = this.Camera.FarPlaneDistance,

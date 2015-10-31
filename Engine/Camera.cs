@@ -297,11 +297,11 @@ namespace Engine
         /// <summary>
         /// Movement delta
         /// </summary>
-        public float MovementDelta = 35f;
+        public float MovementDelta = 2.5f;
         /// <summary>
         /// Slow movement delta
         /// </summary>
-        public float SlowMovementDelta = 1f;
+        public float SlowMovementDelta = 1.0f;
         /// <summary>
         /// Rotation delta
         /// </summary>
@@ -309,7 +309,7 @@ namespace Engine
         /// <summary>
         /// Slow rotation delta
         /// </summary>
-        public float SlowRotationDelta = 0.025f;
+        public float SlowRotationDelta = 0.10f;
         /// <summary>
         /// Maximum zoom value
         /// </summary>
@@ -325,7 +325,7 @@ namespace Engine
         /// <summary>
         /// Zoom movement delta
         /// </summary>
-        public float SlowZoomDelta = 25f;
+        public float SlowZoomDelta = 40f;
         /// <summary>
         /// Gets or sets field of view value
         /// </summary>

@@ -342,6 +342,7 @@
     <Compile Include="SceneModesEnum.cs" />
     <Compile Include="SceneRendererDeferred.cs" />
     <Compile Include="SceneRendererForward.cs" />
+    <Compile Include="Skydom.cs" />
     <Compile Include="SpriteTexture.cs" />
     <Compile Include="Curve.cs" />
     <Compile Include="Effects\DrawerPool.cs" />
