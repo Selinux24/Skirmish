@@ -297,7 +297,7 @@ namespace Engine
         /// <summary>
         /// Movement delta
         /// </summary>
-        public float MovementDelta = 2.5f;
+        public float MovementDelta = 20.5f;
         /// <summary>
         /// Slow movement delta
         /// </summary>

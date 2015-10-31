@@ -149,7 +149,7 @@ namespace Engine.Common
                     uint[] indices = GeometryUtil.GenerateIndices(IndexBufferShapeEnum.Full, nodeSide * nodeSide * 2);
 
                     node.Triangles = Triangle.ComputeTriangleList(
-                        SharpDX.Direct3D.PrimitiveTopology.TriangleList, 
+                        SharpDX.Direct3D.PrimitiveTopology.TriangleList,
                         positions.ToArray(),
                         indices);
                 }
@@ -544,7 +544,7 @@ namespace Engine.Common
 
                 #region Find children contacts by distance to hit in bounding box
 
-                foreach (QuadTreeNode node in this.Children)
+                foreach (var node in this.Children)
                 {
                     float d;
                     if (Collision.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
@@ -571,7 +571,7 @@ namespace Engine.Common
                     Triangle bestTri = new Triangle();
                     float bestD = float.MaxValue;
 
-                    foreach (QuadTreeNode node in boxHitsByDistance.Values)
+                    foreach (var node in boxHitsByDistance.Values)
                     {
                         Vector3 thisHit;
                         Triangle thisTri;
@@ -660,7 +660,7 @@ namespace Engine.Common
             {
                 #region Find first hit
 
-                foreach (QuadTreeNode node in this.Children)
+                foreach (var node in this.Children)
                 {
                     float d;
                     if (Collision.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
@@ -743,7 +743,7 @@ namespace Engine.Common
                 List<Vector3> hits = new List<Vector3>();
                 List<Triangle> tris = new List<Triangle>();
 
-                foreach (QuadTreeNode node in this.Children)
+                foreach (var node in this.Children)
                 {
                     float d;
                     if (Collision.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
@@ -884,6 +884,32 @@ namespace Engine.Common
                 for (int i = 0; i < this.Children.Length; i++)
                 {
                     var childNodes = this.Children[i].GetNodesInVolume(ref frustum);
+                    if (childNodes.Length > 0)
+                    {
+                        nodes.AddRange(childNodes);
+                    }
+                }
+            }
+
+            return nodes.ToArray();
+        }
+        /// <summary>
+        /// Gets all tail nodes
+        /// </summary>
+        /// <returns>Returns all tail nodes</returns>
+        public QuadTreeNode[] GetTailNodes()
+        {
+            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
+
+            if (this.Children == null)
+            {
+                nodes.Add(this);
+            }
+            else
+            {
+                for (int i = 0; i < this.Children.Length; i++)
+                {
+                    var childNodes = this.Children[i].GetTailNodes();
                     if (childNodes.Length > 0)
                     {
                         nodes.AddRange(childNodes);

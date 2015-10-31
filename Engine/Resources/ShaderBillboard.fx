@@ -40,7 +40,7 @@ GSVertexBillboard VSBillboard(VSVertexBillboard input)
 	GSVertexBillboard output;
 
 	output.centerWorld = input.positionWorld;
-	output.centerWorld.y -= (input.sizeWorld.y * 0.1f);
+	output.centerWorld.y += (input.sizeWorld.y * 0.25f);
 	output.sizeWorld = input.sizeWorld;
 
 	return output;

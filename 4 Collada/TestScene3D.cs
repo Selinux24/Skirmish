@@ -69,29 +69,16 @@ namespace Collada
                 {
                     ModelFileName = "Ground.dae",
                 },
-                Vegetation = new[]
+                Vegetation = new TerrainDescription.VegetationDescription()
                 {
-                    new TerrainDescription.VegetationDescriptionBillboard()
-                    {
-                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
-                        Saturation = 0.05f,
-                        StartRadius = 0f,
-                        EndRadius = 300f,
-                        MinSize = Vector2.One * 10f,
-                        MaxSize = Vector2.One * 15f,
-                        Seed = 1024,
-                        Opaque = true,
-                    },
-                    new TerrainDescription.VegetationDescriptionBillboard()
-                    {
-                        VegetarionTextures = new[] { "grass2.png" },
-                        Saturation = 1f,
-                        Opaque = false,
-                        StartRadius = 0f,
-                        EndRadius = 50f,
-                        MinSize = Vector2.One * 0.20f,
-                        MaxSize = Vector2.One * 0.25f,
-                    }
+                    VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
+                    Saturation = 0.05f,
+                    StartRadius = 0f,
+                    EndRadius = 300f,
+                    MinSize = Vector2.One * 10f,
+                    MaxSize = Vector2.One * 15f,
+                    Seed = 1024,
+                    Opaque = true,
                 },
                 PathFinder = new TerrainDescription.PathFinderDescription()
                 {

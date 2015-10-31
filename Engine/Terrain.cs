@@ -66,45 +66,6 @@ namespace Engine
                         description.PathFinder.NodeSize,
                         description.PathFinder.NodeInclination);
                 }
-
-                if (description != null && description.Vegetation != null && description.Vegetation.Length > 0)
-                {
-                    List<Billboard> vegetationList = new List<Billboard>();
-
-                    BoundingBox bbox = this.terrain.GetBoundingBox();
-
-                    for (int i = 0; i < description.Vegetation.Length; i++)
-                    {
-                        TerrainDescription.VegetationDescriptionBillboard vegetationDesc = description.Vegetation[i] as TerrainDescription.VegetationDescriptionBillboard;
-                        if (vegetationDesc != null)
-                        {
-                            ModelContent vegetationContent = ModelContent.GenerateVegetationBillboard(
-                                contentFolder,
-                                bbox,
-                                triangles,
-                                vegetationDesc.VegetarionTextures,
-                                vegetationDesc.Saturation,
-                                vegetationDesc.MinSize,
-                                vegetationDesc.MaxSize,
-                                vegetationDesc.Seed);
-
-                            if (vegetationContent != null)
-                            {
-                                var billboard = new Billboard(game, vegetationContent, 0)
-                                {
-                                    StartRadius = vegetationDesc.StartRadius,
-                                    EndRadius = vegetationDesc.EndRadius,
-                                    Opaque = vegetationDesc.Opaque,
-                                    DeferredEnabled = vegetationDesc.DeferredEnabled,
-                                };
-
-                                vegetationList.Add(billboard);
-                            }
-                        }
-                    }
-
-                    this.vegetation = vegetationList.ToArray();
-                }
             }
         }
         /// <summary>
@@ -497,12 +458,7 @@ namespace Engine
             /// Can be renderer by the deferred renderer
             /// </summary>
             public bool DeferredEnabled = true;
-        }
-        /// <summary>
-        /// Vegetation billboards
-        /// </summary>
-        public class VegetationDescriptionBillboard : VegetationDescription
-        {
+
             /// <summary>
             /// Texture names array for vegetation
             /// </summary>
@@ -515,16 +471,6 @@ namespace Engine
             /// Vegetation sprite maximum size
             /// </summary>
             public Vector2 MaxSize = Vector2.One * 2f;
-        }
-        /// <summary>
-        /// Vegetation models
-        /// </summary>
-        public class VegetationDescriptionModel : VegetationDescription
-        {
-            /// <summary>
-            /// Model file name
-            /// </summary>
-            public string Model;
         }
 
         /// <summary>
@@ -602,7 +548,7 @@ namespace Engine
         /// <summary>
         /// Vegetation collection
         /// </summary>
-        public VegetationDescription[] Vegetation = null;
+        public VegetationDescription Vegetation = null;
         /// <summary>
         /// Quadtree
         /// </summary>

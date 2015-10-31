@@ -91,26 +91,14 @@ namespace DeferredTest
                     NodeSize = 2f,
                     NodeInclination = MathUtil.DegreesToRadians(35),
                 },
-                Vegetation = new[]
+                Vegetation = new TerrainDescription.VegetationDescription()
                 {
-                    new TerrainDescription.VegetationDescriptionBillboard()
-                    {
-                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds" },
-                        Saturation = 0.15f,
-                        StartRadius = 0f,
-                        EndRadius = 300f,
-                        MinSize = Vector2.One * 5f,
-                        MaxSize = Vector2.One * 10f,
-                    },
-                    new TerrainDescription.VegetationDescriptionBillboard()
-                    {
-                        VegetarionTextures = new[] { "grass.png" },
-                        Saturation = 20f,
-                        StartRadius = 0f,
-                        EndRadius = 50f,
-                        MinSize = Vector2.One * 0.20f,
-                        MaxSize = Vector2.One * 0.25f,
-                    }
+                    VegetarionTextures = new[] { "grass.png" },
+                    Saturation = 20f,
+                    StartRadius = 0f,
+                    EndRadius = 50f,
+                    MinSize = Vector2.One * 0.20f,
+                    MaxSize = Vector2.One * 0.25f,
                 },
             });
             sw.Stop();

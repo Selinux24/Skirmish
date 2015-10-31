@@ -11,7 +11,8 @@ namespace HeightmapTest
         private const float fogStart = 0.01f;
         private const float fogRange = 0.50f;
 
-        private Vector3 playerHeight = Vector3.UnitY;
+        private Vector3 playerHeight = Vector3.UnitY * 5f;
+        private bool playerFlying = false;
 
         private TextDrawer title = null;
         private TextDrawer load = null;
@@ -145,42 +146,21 @@ namespace HeightmapTest
                 {
                     NodeSize = 25,
                 },
-                Vegetation = new TerrainDescription.VegetationDescription[]
+                Vegetation = new TerrainDescription.VegetationDescription()
                 {
-                    new TerrainDescription.VegetationDescriptionBillboard()
-                    {
-                        ContentPath = "Resources/Folliage/Billboard",
-                        VegetarionTextures = new[] { "grass.png" },
-                        Saturation = 100f,
-                        StartRadius = 0f,
-                        EndRadius = 50f,
-                        MinSize = Vector2.One * 0.20f,
-                        MaxSize = Vector2.One * 0.25f,
-                    },
-                    new TerrainDescription.VegetationDescriptionBillboard()
-                    {
-                        ContentPath = "Resources/Folliage/Billboard",
-                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds" },
-                        Saturation = 2f,
-                        StartRadius = 100f,
-                        EndRadius = 300f,
-                        MinSize = Vector2.One * 5f,
-                        MaxSize = Vector2.One * 10f,
-                    },
-                    new TerrainDescription.VegetationDescriptionModel()
-                    {
-                        ContentPath = "Resources/Folliage/Model",
-                        Model = "tree1.dae",
-                        Saturation = 2f,
-                        StartRadius = 0f,
-                        EndRadius = 100f,
-                    },
+                    ContentPath = "Resources/Folliage/Billboard",
+                    VegetarionTextures = new[] { "grass.png" },
+                    Saturation = 0.3f,
+                    StartRadius = 0f,
+                    EndRadius = 100f,
+                    MinSize = Vector2.One * 2.0f,
+                    MaxSize = Vector2.One * 2.5f,
                 }
             });
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
-            //this.SceneVolume = this.terrain.GetBoundingSphere();
+            this.SceneVolume = this.terrain.GetBoundingSphere();
 
             #endregion
 
@@ -271,16 +251,12 @@ namespace HeightmapTest
 
             #endregion
 
-            #region Walk
+            #region Walk / Fly
 
-            //Vector3 v = this.Camera.Position;
-
-            //Vector3 p;
-            //Triangle tri;
-            //if (this.terrain.FindTopGroundPosition(v.X, v.Z, out p, out tri))
-            //{
-            //    this.Camera.Goto(p + Vector3.UnitY);
-            //}
+            if (this.Game.Input.KeyJustReleased(Keys.P))
+            {
+                this.playerFlying = !this.playerFlying;
+            }
 
             #endregion
 
@@ -295,13 +271,16 @@ namespace HeightmapTest
 
             base.Update(gameTime);
 
-            Vector3 position;
-            if (this.terrain.FindTopGroundPosition(this.Camera.Position.X, this.Camera.Position.Z, out position))
+            if (!this.playerFlying)
             {
-                position += this.playerHeight;
+                Vector3 position;
+                if (this.terrain.FindTopGroundPosition(this.Camera.Position.X, this.Camera.Position.Z, out position))
+                {
+                    position += this.playerHeight;
 
-                this.Camera.Goto(position);
-            };
+                    this.Camera.Goto(position);
+                };
+            }
 
             //var frustum = this.Camera.Frustum;
             //var nodes = this.terrain.Contained(ref frustum);

@@ -23,48 +23,16 @@ namespace Engine.Common
             Triangle[] triangles,
             TerrainDescription description)
         {
-            QuadTree quadTree = new QuadTree();
-
-            List<Billboard> billboardList = new List<Billboard>();
-            List<ModelInstanced> modelList = new List<ModelInstanced>();
-
-            if (description.Vegetation != null && description.Vegetation.Length > 0)
-            {
-                for (int i = 0; i < description.Vegetation.Length; i++)
-                {
-                    var billBoardDesc = description.Vegetation[i] as TerrainDescription.VegetationDescriptionBillboard;
-                    if (billBoardDesc != null)
-                    {
-                        var modelContent = ModelContent.GenerateBillboard(billBoardDesc.ContentPath, billBoardDesc.VegetarionTextures);
-
-                        int maxInstances = (int)(description.Quadtree.MaxTrianglesPerNode * billBoardDesc.Saturation) + 1;
-
-                        Billboard bb = new Billboard(game, modelContent, maxInstances);
-
-                        quadTree.Drawers.Add(i, bb);
-                    }
-
-                    var modelDesc = description.Vegetation[i] as TerrainDescription.VegetationDescriptionModel;
-                    if (modelDesc != null)
-                    {
-                        var modelContent = LoaderCOLLADA.Load(modelDesc.ContentPath, modelDesc.Model);
-
-                        int maxInstances = (int)(description.Quadtree.MaxTrianglesPerNode * modelDesc.Saturation) + 1;
-
-                        ModelInstanced bb = new ModelInstanced(game, modelContent, maxInstances);
-
-                        quadTree.Drawers.Add(i, bb);
-                    }
-                }
-            }
-
             BoundingBox bbox = Helper.CreateBoundingBox(triangles);
             BoundingSphere bsph = Helper.CreateBoundingSphere(triangles);
 
-            quadTree.BoundingBox = bbox;
-            quadTree.BoundingSphere = bsph;
+            QuadTree quadTree = new QuadTree()
+            {
+                BoundingBox = bbox,
+                BoundingSphere = bsph,
+            };
 
-            QuadTreeNode root = QuadTreeNode.CreatePartitions(
+            quadTree.Root = QuadTreeNode.CreatePartitions(
                 game,
                 quadTree,
                 null,
@@ -73,7 +41,6 @@ namespace Engine.Common
                 0,
                 description);
 
-            quadTree.Root = root;
             quadTree.Root.ConnectNodes();
 
             return quadTree;
@@ -100,18 +67,19 @@ namespace Engine.Common
             BoundingBox bbox = BoundingBox.FromPoints(positions);
             BoundingSphere bsph = BoundingSphere.FromPoints(positions);
 
-            QuadTree quadTree = new QuadTree();
-            quadTree.BoundingBox = bbox;
-            quadTree.BoundingSphere = bsph;
+            QuadTree quadTree = new QuadTree()
+            {
+                BoundingBox = bbox,
+                BoundingSphere = bsph,
+            };
 
-            QuadTreeNode root = QuadTreeNode.CreatePartitions(
+            quadTree.Root = QuadTreeNode.CreatePartitions(
                 game,
                 quadTree, null,
                 bbox, vertices,
                 0,
                 description);
 
-            quadTree.Root = root;
             quadTree.Root.ConnectNodes();
 
             return quadTree;
@@ -129,17 +97,13 @@ namespace Engine.Common
         /// Global bounding sphere
         /// </summary>
         public BoundingSphere BoundingSphere { get; private set; }
-        /// <summary>
-        /// Drawer dictionary
-        /// </summary>
-        public Dictionary<int, Drawable> Drawers { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         public QuadTree()
         {
-            this.Drawers = new Dictionary<int, Drawable>();
+            
         }
 
         /// <summary>
@@ -240,7 +204,6 @@ namespace Engine.Common
         {
             return this.Root.GetBoundingBoxes(maxDepth);
         }
-
         /// <summary>
         /// Gets the nodes contained into the specified frustum
         /// </summary>
@@ -249,6 +212,14 @@ namespace Engine.Common
         public QuadTreeNode[] GetNodesInVolume(ref BoundingFrustum frustum)
         {
             return this.Root.GetNodesInVolume(ref frustum);
+        }
+        /// <summary>
+        /// Gets all tail nodes
+        /// </summary>
+        /// <returns>Returns all tais nodel</returns>
+        public QuadTreeNode[] GetTailNodes()
+        {
+            return this.Root.GetTailNodes();
         }
 
         /// <summary>
