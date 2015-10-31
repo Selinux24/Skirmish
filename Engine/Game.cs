@@ -254,7 +254,7 @@ namespace Engine
         {
             this.GameTime.Update();
 
-            this.Input.Update();
+            this.Input.Update(this.GameTime);
 
             this.Graphics.Begin();
 

@@ -80,13 +80,17 @@ namespace Engine.Effects
         /// </summary>
         private EffectVariable material = null;
         /// <summary>
-        /// Texture effect variable
+        /// Low resolution textures effect variable
         /// </summary>
-        private EffectShaderResourceVariable textures = null;
+        private EffectShaderResourceVariable texturesLR = null;
+        /// <summary>
+        /// High resolution textures effect variable
+        /// </summary>
+        private EffectShaderResourceVariable texturesHR = null;
         /// <summary>
         /// Normal map effect variable
         /// </summary>
-        private EffectShaderResourceVariable normalMap = null;
+        private EffectShaderResourceVariable normalMaps = null;
         /// <summary>
         /// Shadow map effect variable
         /// </summary>
@@ -305,31 +309,45 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Texture
+        /// Low resolution textures
         /// </summary>
-        protected ShaderResourceView Textures
+        protected ShaderResourceView TexturesLR
         {
             get
             {
-                return this.textures.GetResource();
+                return this.texturesLR.GetResource();
             }
             set
             {
-                this.textures.SetResource(value);
+                this.texturesLR.SetResource(value);
+            }
+        }
+        /// <summary>
+        /// High resolution textures
+        /// </summary>
+        protected ShaderResourceView TexturesHR
+        {
+            get
+            {
+                return this.texturesHR.GetResource();
+            }
+            set
+            {
+                this.texturesHR.SetResource(value);
             }
         }
         /// <summary>
         /// Normal map
         /// </summary>
-        protected ShaderResourceView NormalMap
+        protected ShaderResourceView NormalMaps
         {
             get
             {
-                return this.normalMap.GetResource();
+                return this.normalMaps.GetResource();
             }
             set
             {
-                this.normalMap.SetResource(value);
+                this.normalMaps.SetResource(value);
             }
         }
         /// <summary>
@@ -376,8 +394,9 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
-            this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
-            this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
+            this.texturesLR = this.Effect.GetVariableByName("gTextureLRArray").AsShaderResource();
+            this.texturesHR = this.Effect.GetVariableByName("gTextureHRArray").AsShaderResource();
+            this.normalMaps = this.Effect.GetVariableByName("gNormalMapArray").AsShaderResource();
             this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
         }
         /// <summary>
@@ -497,16 +516,19 @@ namespace Engine.Effects
         /// Update per model object data
         /// </summary>
         /// <param name="material">Material</param>
-        /// <param name="texture">Texture</param>
+        /// <param name="texturesLR">Low resolution textures</param>
+        /// <param name="texturesHR">High resolution textures</param>
         /// <param name="normalMap">Normal map</param>
         public void UpdatePerObject(
             Material material,
-            ShaderResourceView texture,
+            ShaderResourceView texturesLR,
+            ShaderResourceView texturesHR,
             ShaderResourceView normalMap)
         {
             this.Material = new BufferMaterials(material);
-            this.Textures = texture;
-            this.NormalMap = normalMap;
+            this.TexturesLR = texturesLR;
+            this.TexturesHR = texturesHR;
+            this.NormalMaps = normalMap;
         }
     }
 }

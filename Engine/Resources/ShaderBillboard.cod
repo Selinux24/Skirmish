@@ -99,7 +99,7 @@ fxgroup
                 //   o0.x <- <VSBillboard return value>.centerWorld.x; o0.y <- <VSBillboard return value>.centerWorld.y; o0.z <- <VSBillboard return value>.centerWorld.z
                 //
                 #line 43 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
-                mad o0.y, v1.y, l(0.250000), v0.y
+                mad o0.y, v1.y, l(0.450000), v0.y
                 
                 #line 46
                 mov o0.xz, v0.xxzx
@@ -1313,7 +1313,7 @@ fxgroup
                 //   o0.x <- <VSBillboard return value>.centerWorld.x; o0.y <- <VSBillboard return value>.centerWorld.y; o0.z <- <VSBillboard return value>.centerWorld.z
                 //
                 #line 43 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
-                mad o0.y, v1.y, l(0.250000), v0.y
+                mad o0.y, v1.y, l(0.450000), v0.y
                 
                 #line 46
                 mov o0.xz, v0.xxzx
@@ -1716,7 +1716,7 @@ fxgroup
                 //   o0.x <- <VSBillboard return value>.centerWorld.x; o0.y <- <VSBillboard return value>.centerWorld.y; o0.z <- <VSBillboard return value>.centerWorld.z
                 //
                 #line 43 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
-                mad o0.y, v1.y, l(0.250000), v0.y
+                mad o0.y, v1.y, l(0.450000), v0.y
                 
                 #line 46
                 mov o0.xz, v0.xxzx

@@ -23,8 +23,9 @@ cbuffer cbPerObject : register (b1)
 	Material gMaterial;
 };
 
-Texture2DArray gTextureArray;
-Texture2D gNormalMap;
+Texture2DArray gTextureLRArray;
+Texture2DArray gTextureHRArray;
+Texture2DArray gNormalMapArray;
 Texture2D gShadowMap;
 
 /**********************************************************************************************************
@@ -55,19 +56,19 @@ ShadowMapOutput VSTerrainShadowMap(VSVertexTerrain input)
 float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 {
 	float3 normalWorld = 0.0f;
-	float4 textureColor = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 0));
+	float4 textureColor = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 0));
 
 	float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	if(depthValue < 0.25f)
+	if(depthValue < 0.05f)
 	{
 		normalWorld = input.normalWorld;
 	}
 	else
 	{
-		float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
+		float3 normalMapSample = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, 0)).rgb;
 		normalWorld = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
-		textureColor *= gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 1)) * 1.8f;
+		textureColor *= gTextureHRArray.Sample(SamplerAnisotropic, float3(input.tex, 0)) * 1.8f;
 	}
 
 	textureColor = saturate(textureColor * input.color * 2.0f);
@@ -104,19 +105,19 @@ GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
     GBufferPSOutput output = (GBufferPSOutput)0;
 
 	float3 normal = 0.0f;
-	float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 0));
+	float4 color = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 0));
 
 	float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	if(depthValue < 0.25f)
+	if(depthValue < 0.05f)
 	{
 		normal = input.normalWorld;
 	}
 	else
 	{
-		float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
+		float3 normalMapSample = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, 0)).rgb;
 		normal = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
-		color *= gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, 1)) * 1.8f;
+		color *= gTextureHRArray.Sample(SamplerAnisotropic, float3(input.tex, 0)) * 1.8f;
 	}
 
 	color = saturate(color * input.color * 2.0f);

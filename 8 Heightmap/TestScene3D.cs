@@ -76,8 +76,6 @@ namespace HeightmapTest
 
             #region Models
 
-            string resources = @"Resources";
-
             Stopwatch sw = Stopwatch.StartNew();
 
             string loadingText = null;
@@ -86,7 +84,7 @@ namespace HeightmapTest
 
             this.lensFlare = this.AddLensFlare(new LensFlareDescription()
             {
-                ContentPath = resources,
+                ContentPath = @"Resources/Scenery/Flare",
                 GlowTexture = "lfGlow.png",
                 Flares = new FlareDescription[]
                 {
@@ -114,7 +112,7 @@ namespace HeightmapTest
             sw.Restart();
             this.skydom = this.AddSkydom(new SkydomDescription()
             {
-                ContentPath = resources,
+                ContentPath = @"Resources/Scenery/Skydom",
                 Radius = far,
                 Texture = "sunset.dds",
             });
@@ -128,13 +126,13 @@ namespace HeightmapTest
             sw.Restart();
             this.terrain = this.AddTerrain2(new TerrainDescription()
             {
-                ContentPath = resources,
+                ContentPath = "Resources/Scenery",
+
                 Heightmap = new TerrainDescription.HeightmapDescription()
                 {
-                    HeightmapFileName = "heightmap0.bmp",
-                    ColormapFileName = "colorm01.bmp",
-                    Textures = new[] { "dirt0.dds", "detail001.dds" },
-                    NormalMap = "nmap0.dds",
+                    ContentPath = "Heightmap",
+                    HeightmapFileName = "desert0hm.bmp",
+                    ColormapFileName = "desert0cm.bmp",
                     CellSize = 5,
                     MaximumHeight = 50,
                 },
@@ -142,19 +140,22 @@ namespace HeightmapTest
                 {
 
                 },
-                PathFinder = new TerrainDescription.PathFinderDescription()
+                Textures = new TerrainDescription.TexturesDescription()
                 {
-                    NodeSize = 25,
+                    ContentPath = "Textures",
+                    TexturesLR = new[] { "dirt0lr.dds" },
+                    TexturesHR = new[] { "dirt0hr.dds" },
+                    NormalMaps = new[] { "dirt0nm.dds" },
                 },
                 Vegetation = new TerrainDescription.VegetationDescription()
                 {
-                    ContentPath = "Resources/Folliage/Billboard",
+                    ContentPath = "Folliage/Billboard",
                     VegetarionTextures = new[] { "grass.png" },
                     Saturation = 0.3f,
                     StartRadius = 0f,
-                    EndRadius = 100f,
-                    MinSize = Vector2.One * 2.0f,
-                    MaxSize = Vector2.One * 2.5f,
+                    EndRadius = 200f,
+                    MinSize = new Vector2(2, 2),
+                    MaxSize = new Vector2(2, 4),
                 }
             });
             sw.Stop();

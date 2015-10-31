@@ -13,6 +13,15 @@ namespace Engine
     public class Input : IDisposable
     {
         /// <summary>
+        /// Frame time
+        /// </summary>
+        public const float InputTime = 1f / 60f;
+        /// <summary>
+        /// Elapsed time
+        /// </summary>
+        public float Elapsed = 0f;
+
+        /// <summary>
         /// Engine render form
         /// </summary>
         private EngineForm form;
@@ -199,119 +208,127 @@ namespace Engine
         /// <summary>
         /// Updates input state
         /// </summary>
-        public void Update()
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
         {
-            if (this.mouseIn)
+            this.Elapsed += gameTime.ElapsedSeconds;
+
+            if (this.Elapsed >= InputTime)
             {
-                if (this.firstUpdate)
+                this.Elapsed -= InputTime;
+
+                if (this.mouseIn)
                 {
-                    this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
+                    if (this.firstUpdate)
+                    {
+                        this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
 
-                    this.ClearInputData();
+                        this.ClearInputData();
 
-                    this.firstUpdate = false;
+                        this.firstUpdate = false;
+                    }
+                    else
+                    {
+                        #region Mouse position
+
+                        {
+                            Point mousePos = this.form.PointToClient(Cursor.ScreenPosition);
+
+                            this.MouseXDelta = mousePos.X - this.lastMousePos.X;
+                            this.MouseYDelta = mousePos.Y - this.lastMousePos.Y;
+
+                            this.MouseX = mousePos.X;
+                            this.MouseY = mousePos.Y;
+
+                            this.lastMousePos = mousePos;
+
+                            if (this.LockMouse)
+                            {
+                                this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
+                            }
+                        }
+
+                        #endregion
+
+                        #region Mouse buttons
+
+                        {
+                            this.lastMouseButtons.Clear();
+                            this.lastMouseButtons.AddRange(this.currentMouseButtons);
+                            this.currentMouseButtons.Clear();
+
+                            MouseButtons[] buttons = this.GetPressedButtons();
+                            if (buttons.Length > 0)
+                            {
+                                this.currentMouseButtons.AddRange(buttons);
+                            }
+
+                            bool prev = false;
+                            bool curr = false;
+
+                            prev = this.lastMouseButtons.Contains(MouseButtons.Left);
+                            curr = this.currentMouseButtons.Contains(MouseButtons.Left);
+                            this.LeftMouseButtonPressed = curr;
+                            this.LeftMouseButtonJustPressed = curr && !prev;
+                            this.LeftMouseButtonJustReleased = !curr && prev;
+
+                            prev = this.lastMouseButtons.Contains(MouseButtons.Right);
+                            curr = this.currentMouseButtons.Contains(MouseButtons.Right);
+                            this.RightMouseButtonPressed = curr;
+                            this.RightMouseButtonJustPressed = curr && !prev;
+                            this.RightMouseButtonJustReleased = !curr && prev;
+
+                            prev = this.lastMouseButtons.Contains(MouseButtons.Middle);
+                            curr = this.currentMouseButtons.Contains(MouseButtons.Middle);
+                            this.MiddleMouseButtonPressed = curr;
+                            this.MiddleMouseButtonJustPressed = curr && !prev;
+                            this.MiddleMouseButtonJustReleased = !curr && prev;
+
+                            prev = this.lastMouseButtons.Contains(MouseButtons.XButton1);
+                            curr = this.currentMouseButtons.Contains(MouseButtons.XButton1);
+                            this.X1MouseButtonPressed = curr;
+                            this.X1MouseButtonJustPressed = curr && !prev;
+                            this.X1MouseButtonJustReleased = !curr && prev;
+
+                            prev = this.lastMouseButtons.Contains(MouseButtons.XButton2);
+                            curr = this.currentMouseButtons.Contains(MouseButtons.XButton2);
+                            this.X2MouseButtonPressed = curr;
+                            this.X2MouseButtonJustPressed = curr && !prev;
+                            this.X2MouseButtonJustReleased = !curr && prev;
+                        }
+
+                        #endregion
+
+                        #region Mouse Wheel
+
+                        {
+                            this.lastMouseWheel = this.mouseWheel;
+                            this.mouseWheel = 0;
+                        }
+
+                        #endregion
+
+                        #region Keyboard Keys
+
+                        {
+                            this.lastKeyboardKeys.Clear();
+                            this.lastKeyboardKeys.AddRange(this.currentKeyboardKeys);
+                            this.currentKeyboardKeys.Clear();
+
+                            Keys[] keyboard = this.GetPressedKeys();
+                            if (keyboard.Length > 0)
+                            {
+                                this.currentKeyboardKeys.AddRange(keyboard);
+                            }
+                        }
+
+                        #endregion
+                    }
                 }
                 else
                 {
-                    #region Mouse position
-
-                    {
-                        Point mousePos = this.form.PointToClient(Cursor.ScreenPosition);
-
-                        this.MouseXDelta = mousePos.X - this.lastMousePos.X;
-                        this.MouseYDelta = mousePos.Y - this.lastMousePos.Y;
-
-                        this.MouseX = mousePos.X;
-                        this.MouseY = mousePos.Y;
-
-                        this.lastMousePos = mousePos;
-
-                        if (this.LockMouse)
-                        {
-                            this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
-                        }
-                    }
-
-                    #endregion
-
-                    #region Mouse buttons
-
-                    {
-                        this.lastMouseButtons.Clear();
-                        this.lastMouseButtons.AddRange(this.currentMouseButtons);
-                        this.currentMouseButtons.Clear();
-
-                        MouseButtons[] buttons = this.GetPressedButtons();
-                        if (buttons.Length > 0)
-                        {
-                            this.currentMouseButtons.AddRange(buttons);
-                        }
-
-                        bool prev = false;
-                        bool curr = false;
-
-                        prev = this.lastMouseButtons.Contains(MouseButtons.Left);
-                        curr = this.currentMouseButtons.Contains(MouseButtons.Left);
-                        this.LeftMouseButtonPressed = curr;
-                        this.LeftMouseButtonJustPressed = curr && !prev;
-                        this.LeftMouseButtonJustReleased = !curr && prev;
-
-                        prev = this.lastMouseButtons.Contains(MouseButtons.Right);
-                        curr = this.currentMouseButtons.Contains(MouseButtons.Right);
-                        this.RightMouseButtonPressed = curr;
-                        this.RightMouseButtonJustPressed = curr && !prev;
-                        this.RightMouseButtonJustReleased = !curr && prev;
-
-                        prev = this.lastMouseButtons.Contains(MouseButtons.Middle);
-                        curr = this.currentMouseButtons.Contains(MouseButtons.Middle);
-                        this.MiddleMouseButtonPressed = curr;
-                        this.MiddleMouseButtonJustPressed = curr && !prev;
-                        this.MiddleMouseButtonJustReleased = !curr && prev;
-
-                        prev = this.lastMouseButtons.Contains(MouseButtons.XButton1);
-                        curr = this.currentMouseButtons.Contains(MouseButtons.XButton1);
-                        this.X1MouseButtonPressed = curr;
-                        this.X1MouseButtonJustPressed = curr && !prev;
-                        this.X1MouseButtonJustReleased = !curr && prev;
-
-                        prev = this.lastMouseButtons.Contains(MouseButtons.XButton2);
-                        curr = this.currentMouseButtons.Contains(MouseButtons.XButton2);
-                        this.X2MouseButtonPressed = curr;
-                        this.X2MouseButtonJustPressed = curr && !prev;
-                        this.X2MouseButtonJustReleased = !curr && prev;
-                    }
-
-                    #endregion
-
-                    #region Mouse Wheel
-
-                    {
-                        this.lastMouseWheel = this.mouseWheel;
-                        this.mouseWheel = 0;
-                    }
-
-                    #endregion
-
-                    #region Keyboard Keys
-
-                    {
-                        this.lastKeyboardKeys.Clear();
-                        this.lastKeyboardKeys.AddRange(this.currentKeyboardKeys);
-                        this.currentKeyboardKeys.Clear();
-
-                        Keys[] keyboard = this.GetPressedKeys();
-                        if (keyboard.Length > 0)
-                        {
-                            this.currentKeyboardKeys.AddRange(keyboard);
-                        }
-                    }
-
-                    #endregion
+                    this.ClearInputData();
                 }
-            }
-            else
-            {
-                this.ClearInputData();
             }
         }
         /// <summary>

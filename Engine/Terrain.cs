@@ -401,6 +401,10 @@ namespace Engine
         public class HeightmapDescription
         {
             /// <summary>
+            /// Content path
+            /// </summary>
+            public string ContentPath = "Heightmap";
+            /// <summary>
             /// Height map file name
             /// </summary>
             public string HeightmapFileName = null;
@@ -408,14 +412,6 @@ namespace Engine
             /// Color map file name
             /// </summary>
             public string ColormapFileName = null;
-            /// <summary>
-            /// Textures for heightmap
-            /// </summary>
-            public string[] Textures = null;
-            /// <summary>
-            /// Normal map
-            /// </summary>
-            public string NormalMap = null;
             /// <summary>
             /// Cell size
             /// </summary>
@@ -426,6 +422,28 @@ namespace Engine
             public float MaximumHeight = 1;
         }
         /// <summary>
+        /// Terrain textures
+        /// </summary>
+        public class TexturesDescription
+        {
+            /// <summary>
+            /// Content path
+            /// </summary>
+            public string ContentPath = "Textures";
+            /// <summary>
+            /// High resolution textures
+            /// </summary>
+            public string[] TexturesHR = null;
+            /// <summary>
+            /// Low resolution textures
+            /// </summary>
+            public string[] TexturesLR = null;
+            /// <summary>
+            /// Normal maps
+            /// </summary>
+            public string[] NormalMaps = null;
+        }
+        /// <summary>
         /// Vegetation
         /// </summary>
         public class VegetationDescription
@@ -433,7 +451,7 @@ namespace Engine
             /// <summary>
             /// Content path
             /// </summary>
-            public string ContentPath = "Resources";
+            public string ContentPath = "Vegetation";
             /// <summary>
             /// Drawing radius for vegetation
             /// </summary>
@@ -472,7 +490,6 @@ namespace Engine
             /// </summary>
             public Vector2 MaxSize = Vector2.One * 2f;
         }
-
         /// <summary>
         /// Quadtree description
         /// </summary>
@@ -517,7 +534,6 @@ namespace Engine
                 this.MaxTrianglesPerNode = 2048;
             }
         }
-
         /// <summary>
         /// Path finder grid description
         /// </summary>
@@ -545,6 +561,10 @@ namespace Engine
         /// Heightmap
         /// </summary>
         public HeightmapDescription Heightmap = null;
+        /// <summary>
+        /// Textures
+        /// </summary>
+        public TexturesDescription Textures = null;
         /// <summary>
         /// Vegetation collection
         /// </summary>

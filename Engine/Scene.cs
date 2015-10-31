@@ -426,7 +426,7 @@ namespace Engine
                 geo = ModelContent.FromHeightmap(
                     description.ContentPath,
                     description.Heightmap.HeightmapFileName,
-                    description.Heightmap.Textures,
+                    description.Textures.TexturesLR,
                     description.Heightmap.CellSize, 
                     description.Heightmap.MaximumHeight, 
                     transform);
