@@ -189,6 +189,9 @@ namespace HeightmapTest
                 this.Camera.Goto(position);
                 this.Camera.LookTo(position + Vector3.ForwardLH);
             };
+
+            this.Camera.Goto(new Vector3(155.7729f, 6.176476f, -56.17199f));
+            this.Camera.LookTo(new Vector3(155.7517f, 6.158489f, -57.1716f));
         }
 
         public override void Update(GameTime gameTime)
@@ -288,6 +291,7 @@ namespace HeightmapTest
             //var nodeCount = nodes != null ? nodes.Length : 0;
 
             //this.help.Text = string.Format("Visible quad-tree nodes: {0}", nodeCount);
+            this.help.Text = string.Format("Eye position {0}; Interest {1}", this.Camera.Position, this.Camera.Interest);
         }
     }
 }

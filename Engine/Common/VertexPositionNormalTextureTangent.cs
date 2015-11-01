@@ -1,7 +1,7 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Direct3D11;
+using System;
+using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
@@ -84,10 +84,24 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel) where T : struct
         {
-            if (channel == VertexDataChannels.Position) return (T)Convert.ChangeType(this.Position, typeof(T));
-            else if (channel == VertexDataChannels.Normal) return (T)Convert.ChangeType(this.Normal, typeof(T));
-            else if (channel == VertexDataChannels.Texture) return (T)Convert.ChangeType(this.Texture, typeof(T));
-            else if (channel == VertexDataChannels.Tangent) return (T)Convert.ChangeType(this.Tangent, typeof(T));
+            if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
+            else if (channel == VertexDataChannels.Normal) return this.Normal.Cast<T>();
+            else if (channel == VertexDataChannels.Texture) return this.Texture.Cast<T>();
+            else if (channel == VertexDataChannels.Tangent) return this.Tangent.Cast<T>();
+            else throw new Exception(string.Format("Channel data not found: {0}", channel));
+        }
+        /// <summary>
+        /// Sets the channer value
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="channel">Channel</param>
+        /// <param name="value">Value</param>
+        public void SetChannelValue<T>(VertexDataChannels channel, T value) where T : struct
+        {
+            if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
+            else if (channel == VertexDataChannels.Normal) this.Normal = value.Cast<Vector3>();
+            else if (channel == VertexDataChannels.Texture) this.Texture = value.Cast<Vector2>();
+            else if (channel == VertexDataChannels.Tangent) this.Tangent = value.Cast<Vector3>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
 

@@ -13,9 +13,50 @@ namespace Engine
     using Engine.Content;
     using Engine.Effects;
     using Engine.Helpers;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     public class Terrain2 : Drawable
     {
+        #region Draw context for terrain
+
+        /// <summary>
+        /// Draw context
+        /// </summary>
+        public class TerrainDrawContext
+        {
+            /// <summary>
+            /// General draw context
+            /// </summary>
+            public DrawContext BaseContext;
+            /// <summary>
+            /// Low resolution textures for terrain
+            /// </summary>
+            public ShaderResourceView TerraintexturesLR;
+            /// <summary>
+            /// High resolution textures for terrain
+            /// </summary>
+            public ShaderResourceView TerraintexturesHR;
+            /// <summary>
+            /// Normal map textures for terrain
+            /// </summary>
+            public ShaderResourceView TerrainNormalMaps;
+            /// <summary>
+            /// Folliage textures
+            /// </summary>
+            public ShaderResourceView FolliageTextures;
+            /// <summary>
+            /// Folliage texture count
+            /// </summary>
+            public uint FolliageTextureCount;
+            /// <summary>
+            /// Folliage end radius
+            /// </summary>
+            public float FolliageEndRadius;
+        }
+
+        #endregion
+
         #region Index buffers
 
         /// <summary>
@@ -102,59 +143,56 @@ namespace Engine
             /// Draw patches
             /// </summary>
             /// <param name="context">Drawing context</param>
-            /// <param name="terraintextures">Textures</param>
-            /// <param name="normalMap">Normal map</param>
-            public void Draw(
-                DrawContext context,
-                ShaderResourceView terraintexturesLR, ShaderResourceView terraintexturesHR, ShaderResourceView normalMap,
-                ShaderResourceView folliageTextures, uint folliageTextureCount, float folliageEndRadius)
+            public void Draw(TerrainDrawContext context)
             {
+                this.Game.Graphics.SetDepthStencilZEnabled();
+
                 {
                     EffectTerrain effect = DrawerPool.EffectTerrain;
 
-                    this.Game.Graphics.SetDepthStencilZEnabled();
+                    this.Game.Graphics.SetBlendDefault();
 
                     #region Per frame update
 
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
                         effect.UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection,
-                            context.EyePosition,
-                            context.Lights,
-                            context.ShadowMap,
-                            context.FromLightViewProjection);
+                            context.BaseContext.World,
+                            context.BaseContext.ViewProjection,
+                            context.BaseContext.EyePosition,
+                            context.BaseContext.Lights,
+                            context.BaseContext.ShadowMap,
+                            context.BaseContext.FromLightViewProjection);
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
                         effect.UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection);
+                            context.BaseContext.World,
+                            context.BaseContext.ViewProjection);
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
                         effect.UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection);
+                            context.BaseContext.World,
+                            context.BaseContext.ViewProjection);
                     }
 
                     #endregion
 
                     #region Per object update
 
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        effect.UpdatePerObject(Material.Default, terraintexturesLR, terraintexturesHR, normalMap);
+                        effect.UpdatePerObject(Material.Default, context.TerraintexturesLR, context.TerraintexturesHR, context.TerrainNormalMaps);
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        effect.UpdatePerObject(Material.Default, terraintexturesLR, terraintexturesHR, normalMap);
+                        effect.UpdatePerObject(Material.Default, context.TerraintexturesLR, context.TerraintexturesHR, context.TerrainNormalMaps);
                     }
 
                     #endregion
 
-                    var technique = effect.GetTechnique(VertexTypes.Terrain, DrawingStages.Drawing, context.DrawerMode);
+                    var technique = effect.GetTechnique(VertexTypes.Terrain, DrawingStages.Drawing, context.BaseContext.DrawerMode);
 
                     this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
                     this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
@@ -165,7 +203,7 @@ namespace Engine
                         {
                             if (item.Action == TerrainPatchActionEnum.Draw)
                             {
-                                item.DrawTerrain(context, technique);
+                                item.DrawTerrain(context.BaseContext, technique);
                             }
                         }
                     }
@@ -174,71 +212,69 @@ namespace Engine
                 {
                     EffectBillboard effect = DrawerPool.EffectBillboard;
 
-                    this.Game.Graphics.SetDepthStencilZEnabled();
-
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
                         this.Game.Graphics.SetBlendTransparent();
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
                         this.Game.Graphics.SetBlendDeferredComposerTransparent();
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
                         this.Game.Graphics.SetBlendTransparent();
                     }
 
                     #region Per frame update
 
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
                         effect.UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection,
-                            context.EyePosition,
-                            context.Lights,
-                            context.ShadowMap,
-                            context.FromLightViewProjection);
+                            context.BaseContext.World,
+                            context.BaseContext.ViewProjection,
+                            context.BaseContext.EyePosition,
+                            context.BaseContext.Lights,
+                            context.BaseContext.ShadowMap,
+                            context.BaseContext.FromLightViewProjection);
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
                         effect.UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection,
-                            context.EyePosition,
-                            context.Lights,
-                            context.ShadowMap,
-                            context.FromLightViewProjection);
+                            context.BaseContext.World,
+                            context.BaseContext.ViewProjection,
+                            context.BaseContext.EyePosition,
+                            context.BaseContext.Lights,
+                            context.BaseContext.ShadowMap,
+                            context.BaseContext.FromLightViewProjection);
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
                         effect.UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection,
-                            context.EyePosition);
+                            context.BaseContext.World,
+                            context.BaseContext.ViewProjection,
+                            context.BaseContext.EyePosition);
                     }
 
                     #endregion
 
                     #region Per object update
 
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        effect.UpdatePerObject(Material.Default, 0, folliageEndRadius, folliageTextureCount, folliageTextures);
+                        effect.UpdatePerObject(Material.Default, 0, context.FolliageEndRadius, context.FolliageTextureCount, context.FolliageTextures);
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        effect.UpdatePerObject(Material.Default, 0, folliageEndRadius, folliageTextureCount, folliageTextures);
+                        effect.UpdatePerObject(Material.Default, 0, context.FolliageEndRadius, context.FolliageTextureCount, context.FolliageTextures);
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        effect.UpdatePerObject(Material.Default, 0, folliageEndRadius, folliageTextureCount, folliageTextures);
+                        effect.UpdatePerObject(Material.Default, 0, context.FolliageEndRadius, context.FolliageTextureCount, context.FolliageTextures);
                     }
 
                     #endregion
 
-                    var technique = effect.GetTechnique(VertexTypes.Billboard, DrawingStages.Drawing, context.DrawerMode);
+                    var technique = effect.GetTechnique(VertexTypes.Billboard, DrawingStages.Drawing, context.BaseContext.DrawerMode);
 
                     this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
                     this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.PointList;
@@ -249,7 +285,7 @@ namespace Engine
                         {
                             if (item.Action == TerrainPatchActionEnum.Draw)
                             {
-                                item.DrawFolliage(context, technique);
+                                item.DrawFolliage(context.BaseContext, technique);
                             }
                         }
                     }
@@ -287,7 +323,7 @@ namespace Engine
 
                 if (triangleCount > 0)
                 {
-                    var patch = new TerrainPatch(game);
+                    var patch = new TerrainPatch(game, lod);
 
                     //Terrain buffer
                     {
@@ -317,7 +353,7 @@ namespace Engine
                 }
                 else
                 {
-                    return new TerrainPatch(game);
+                    return new TerrainPatch(game, lod);
                 }
             }
 
@@ -354,9 +390,21 @@ namespace Engine
             /// </summary>
             private QuadTreeNode current = null;
             /// <summary>
-            /// Folliage populated
+            /// Folliage populated flag
             /// </summary>
-            private bool planted = false;
+            private bool folliagePlanted = false;
+            /// <summary>
+            /// Folliage populating flag
+            /// </summary>
+            private bool folliagePlanting = false;
+            /// <summary>
+            /// Folliage attached to buffer flag
+            /// </summary>
+            private bool folliageAttached = false;
+            /// <summary>
+            /// Folliage generated data
+            /// </summary>
+            private IVertexData[] folliageData = null;
 
             /// <summary>
             /// Game
@@ -375,9 +423,11 @@ namespace Engine
             /// Cosntructor
             /// </summary>
             /// <param name="game">Game</param>
-            public TerrainPatch(Game game)
+            /// <param name="lod">Level of detail</param>
+            public TerrainPatch(Game game, LevelOfDetailEnum lod)
             {
                 this.Game = game;
+                this.LevelOfDetail = lod;
             }
             /// <summary>
             /// Releases created resources
@@ -398,14 +448,12 @@ namespace Engine
             /// Sets vertex data
             /// </summary>
             /// <param name="action">Action</param>
-            /// <param name="lod">Level of detail</param>
             /// <param name="node">Node to attach to the vertex buffer</param>
-            public void SetVertexData(TerrainPatchActionEnum action, LevelOfDetailEnum lod, QuadTreeNode node)
+            public void SetVertexData(TerrainPatchActionEnum action, QuadTreeNode node)
             {
                 if (this.vertexBuffer != null)
                 {
                     this.Action = action;
-                    this.LevelOfDetail = lod;
 
                     if (this.current != node)
                     {
@@ -413,14 +461,31 @@ namespace Engine
 
                         if (this.current != null)
                         {
-                            var data = this.current.GetVertexData(VertexTypes.Terrain, lod);
+                            var data = this.current.GetVertexData(VertexTypes.Terrain, this.LevelOfDetail);
+
+                            if (this.LevelOfDetail == LevelOfDetailEnum.High)
+                            {
+                                Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(0f, 0f, 1f, 1f)));
+                            }
+                            else if (this.LevelOfDetail == LevelOfDetailEnum.Medium)
+                            {
+                                Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(0f, 1f, 0f, 1f)));
+                            }
+                            else if (this.LevelOfDetail == LevelOfDetailEnum.Low)
+                            {
+                                Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(1f, 0f, 0f, 1f)));
+                            }
 
                             VertexData.WriteVertexBuffer(
                                 this.Game.Graphics.DeviceContext,
                                 this.vertexBuffer,
                                 data);
 
-                            this.planted = false;
+                            this.folliagePlanting = false;
+                            this.folliageAttached = false;
+                            this.folliagePlanted = false;
+                            this.folliageData = null;
+                            this.folliageCount = 0;
                         }
                     }
                 }
@@ -447,93 +512,27 @@ namespace Engine
                 }
             }
             /// <summary>
-            /// Populates folliage buffer
-            /// </summary>
-            public void Plant(TerrainDescription.VegetationDescription description)
-            {
-                if (!this.planted && this.current != null)
-                {
-                    VertexData[] vertexData = new VertexData[MAX];
-
-                    var triangles = this.current.Triangles;
-                    if (triangles != null && triangles.Length > 0)
-                    {
-                        Random rnd = new Random(description.Seed);
-                        BoundingBox bbox = this.current.BoundingBox;
-                        float density = description.Saturation;
-                        int count = 0;
-
-                        for (int i = 0; i < triangles.Length; i++)
-                        {
-                            var tri = triangles[i];
-                            BoundingBox tribox = BoundingBox.FromPoints(tri.GetCorners());
-
-                            float triCount = 0;
-                            float maxCount = tri.Area * density * (tri.Normal.Y);
-
-                            while (triCount < maxCount && count < MAX)
-                            {
-                                Vector3 pos = new Vector3(
-                                    rnd.NextFloat(tribox.Minimum.X, tribox.Maximum.X),
-                                    bbox.Maximum.Y + 1f,
-                                    rnd.NextFloat(tribox.Minimum.Z, tribox.Maximum.Z));
-
-                                Ray ray = new Ray(pos, Vector3.Down);
-
-                                Vector3 intersectionPoint;
-                                if (tri.Intersects(ref ray, out intersectionPoint))
-                                {
-                                    vertexData[count] = new VertexData()
-                                    {
-                                        Position = intersectionPoint,
-                                        Size = new Vector2(
-                                            rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                                            rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
-                                    };
-
-                                    triCount++;
-                                    count++;
-                                }
-                            }
-
-                            if (count >= MAX)
-                            {
-                                break;
-                            }
-                        }
-
-                        this.folliageCount = count;
-
-                        var data = VertexData.Convert(VertexTypes.Billboard, vertexData, null, null, Matrix.Identity);
-
-                        VertexData.WriteVertexBuffer(
-                            this.Game.Graphics.DeviceContext,
-                            this.folliageBuffer,
-                            data);
-
-                        this.planted = true;
-                    }
-                }
-            }
-            /// <summary>
             /// Draw the patch terrain
             /// </summary>
             /// <param name="context">Drawing context</param>
             /// <param name="technique">Technique</param>
             public void DrawTerrain(DrawContext context, EffectTechnique technique)
             {
-                //Sets vertex and index buffer
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, SharpDX.DXGI.Format.R32_UInt, 0);
-
-                for (int p = 0; p < technique.Description.PassCount; p++)
+                if (this.indexCount > 0)
                 {
-                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                    //Sets vertex and index buffer
+                    this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+                    this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, SharpDX.DXGI.Format.R32_UInt, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+                    for (int p = 0; p < technique.Description.PassCount; p++)
+                    {
+                        technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
+                        this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame++;
+                    }
                 }
             }
             /// <summary>
@@ -543,18 +542,21 @@ namespace Engine
             /// <param name="technique">Technique</param>
             public void DrawFolliage(DrawContext context, EffectTechnique technique)
             {
-                //Sets vertex and index buffer
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.folliageBufferBinding);
-                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
-
-                for (int p = 0; p < technique.Description.PassCount; p++)
+                if (this.folliageCount > 0)
                 {
-                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                    //Sets vertex and index buffer
+                    this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.folliageBufferBinding);
+                    this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
 
-                    this.Game.Graphics.DeviceContext.Draw(this.folliageCount, 0);
+                    for (int p = 0; p < technique.Description.PassCount; p++)
+                    {
+                        technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
+                        this.Game.Graphics.DeviceContext.Draw(this.folliageCount, 0);
+
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame++;
+                    }
                 }
             }
 
@@ -582,26 +584,135 @@ namespace Engine
 
                 return IndexBufferShapeEnum.None;
             }
+            /// <summary>
+            /// Launchs folliage population asynchronous task
+            /// </summary>
+            /// <param name="description">Terrain vegetation description</param>
+            public void Plant(TerrainDescription.VegetationDescription description)
+            {
+                if (this.current != null)
+                {
+                    if (!this.folliagePlanted)
+                    {
+                        if (!this.folliagePlanting)
+                        {
+                            //Start planting task
+                            this.folliagePlanting = true;
+
+                            Task<VertexData[]> t = Task.Factory.StartNew<VertexData[]>(() => PlantTask(this.current, description));
+
+                            t.ContinueWith(task => PlantThreadCompleted(task.Result));
+                        }
+                    }
+                    else if (!this.folliageAttached)
+                    {
+                        //Attach data
+                        VertexData.WriteVertexBuffer(
+                            this.Game.Graphics.DeviceContext,
+                            this.folliageBuffer,
+                            this.folliageData);
+
+                        this.folliageAttached = true;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Asynchronous planting task
+            /// </summary>
+            /// <param name="node">Node to process</param>
+            /// <param name="description">Vegetation task</param>
+            /// <returns>Returns generated vertex data</returns>
+            private static VertexData[] PlantTask(QuadTreeNode node, TerrainDescription.VegetationDescription description)
+            {
+                List<VertexData> vertexData = new List<VertexData>(MAX);
+
+                var triangles = node.Triangles;
+                if (triangles != null && triangles.Length > 0)
+                {
+                    Random rnd = new Random(description.Seed);
+                    BoundingBox bbox = node.BoundingBox;
+                    float density = description.Saturation;
+                    int count = 0;
+
+                    for (int i = 0; i < triangles.Length; i++)
+                    {
+                        var tri = triangles[i];
+                        BoundingBox tribox = BoundingBox.FromPoints(tri.GetCorners());
+
+                        float triCount = 0;
+                        float maxCount = tri.Area * density * (tri.Normal.Y);
+
+                        while (triCount < maxCount && count < MAX)
+                        {
+                            Vector3 pos = new Vector3(
+                                rnd.NextFloat(tribox.Minimum.X, tribox.Maximum.X),
+                                bbox.Maximum.Y + 1f,
+                                rnd.NextFloat(tribox.Minimum.Z, tribox.Maximum.Z));
+
+                            Ray ray = new Ray(pos, Vector3.Down);
+
+                            Vector3 intersectionPoint;
+                            if (tri.Intersects(ref ray, out intersectionPoint))
+                            {
+                                vertexData.Add(new VertexData()
+                                {
+                                    Position = intersectionPoint,
+                                    Size = new Vector2(
+                                        rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
+                                        rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
+                                });
+
+                                triCount++;
+                                count++;
+                            }
+                        }
+
+                        if (count >= MAX)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                return vertexData.ToArray();
+            }
+            /// <summary>
+            /// Planting task completed
+            /// </summary>
+            /// <param name="vData">Vertex data generated in asynchronous task</param>
+            private void PlantThreadCompleted(VertexData[] vData)
+            {
+                this.folliageCount = vData.Length;
+                this.folliageData = VertexData.Convert(VertexTypes.Billboard, vData, null, null, Matrix.Identity);
+                this.folliagePlanting = false;
+                this.folliagePlanted = true;
+                this.folliageAttached = false;
+            }
         }
 
         #endregion
 
         /// <summary>
+        /// Base grid side of patches
+        /// </summary>
+        public const int PatchesBaseSide = 3;
+        /// <summary>
         /// Maximum number of patches in high level of detail
         /// </summary>
-        public const int MaxPatchesHighLevel = 4;
+        public const int MaxPatchesHighLevel = PatchesBaseSide * PatchesBaseSide;
         /// <summary>
         /// Maximum number of patches in medium level
         /// </summary>
-        public const int MaxPatchesMediumLevel = 12;
+        public const int MaxPatchesMediumLevel = ((PatchesBaseSide + 2) * (PatchesBaseSide + 2)) - MaxPatchesHighLevel;
         /// <summary>
         /// Maximum number of patches in low level
         /// </summary>
-        public const int MaxPatchesLowLevel = 20;
+        public const int MaxPatchesLowLevel = ((PatchesBaseSide + 4) * (PatchesBaseSide + 4)) - MaxPatchesMediumLevel;
         /// <summary>
         /// Maximum number of patches in minimum level
         /// </summary>
-        public const int MaxPatchesMinimumLevel = 28;
+        public const int MaxPatchesMinimumLevel = ((PatchesBaseSide + 6) * (PatchesBaseSide + 6)) - MaxPatchesLowLevel;
 
         /// <summary>
         /// Height map
@@ -643,6 +754,10 @@ namespace Engine
         /// Folliage generation description
         /// </summary>
         private TerrainDescription.VegetationDescription folliageDescription = null;
+        /// <summary>
+        /// Terrain draw context
+        /// </summary>
+        private TerrainDrawContext drawContext = null;
 
         /// <summary>
         /// Constructor
@@ -736,6 +851,17 @@ namespace Engine
 
             //Initialize patch dictionary
             this.InitializePatches<VertexTerrain, VertexBillboard>(description.Quadtree.MaxTrianglesPerNode);
+
+            //Initialize draw context
+            this.drawContext = new TerrainDrawContext()
+            {
+                TerraintexturesLR = this.terrainTexturesLR,
+                TerraintexturesHR = this.terrainTexturesHR,
+                TerrainNormalMaps = this.terrainNormalMap,
+                FolliageTextureCount = this.folliageTextureCount,
+                FolliageTextures = this.folliageTextures,
+                FolliageEndRadius = description.Vegetation != null ? description.Vegetation.EndRadius : 0,
+            };
 
             //Set drawing parameters for renderer
             this.Opaque = true;
@@ -831,13 +957,13 @@ namespace Engine
 
             for (int i = 0; i < MaxPatchesMediumLevel; i++)
             {
-                var patch = TerrainPatch.CreatePatch<T, F>(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
+                var patch = TerrainPatch.CreatePatch<T, F>(this.Game, LevelOfDetailEnum.Medium, trianglesPerNode);
                 this.patches[LevelOfDetailEnum.Medium][i] = patch;
             }
 
             for (int i = 0; i < MaxPatchesLowLevel; i++)
             {
-                var patch = TerrainPatch.CreatePatch<T, F>(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
+                var patch = TerrainPatch.CreatePatch<T, F>(this.Game, LevelOfDetailEnum.Low, trianglesPerNode);
                 this.patches[LevelOfDetailEnum.Low][i] = patch;
             }
 
@@ -879,49 +1005,30 @@ namespace Engine
                 TerrainPatch[] patchList = new TerrainPatch[visibleNodes.Length];
 
                 //Assign level of detail bases in distance to eye position
+                //TODO: Prefer current node assignation to prevent folliage reloading in lod change
                 for (int i = 0; i < visibleNodes.Length; i++)
                 {
                     float dist = Vector3.Distance(context.EyePosition, visibleNodes[i].Center);
 
-                    if (patchesHighLevel < MaxPatchesHighLevel && dist < 200f)
+                    if (patchesHighLevel < MaxPatchesHighLevel && dist < 250f)
                     {
-                        patchList[i] = this.patches[LevelOfDetailEnum.High][patchesHighLevel];
-                        patchList[i].SetVertexData(
-                            TerrainPatchActionEnum.Draw,
-                            LevelOfDetailEnum.High,
-                            visibleNodes[i]);
-
-                        patchesHighLevel++;
+                        patchList[i] = this.patches[LevelOfDetailEnum.High][patchesHighLevel++];
+                        patchList[i].SetVertexData(TerrainPatchActionEnum.Draw, visibleNodes[i]);
                     }
-                    else if (patchesMediumLevel < MaxPatchesMediumLevel && dist < 400f)
+                    else if (patchesMediumLevel < MaxPatchesMediumLevel && dist < 500f)
                     {
-                        patchList[i] = this.patches[LevelOfDetailEnum.Medium][patchesMediumLevel];
-                        patchList[i].SetVertexData(
-                            TerrainPatchActionEnum.Draw,
-                            LevelOfDetailEnum.Medium,
-                            visibleNodes[i]);
-
-                        patchesMediumLevel++;
+                        patchList[i] = this.patches[LevelOfDetailEnum.Medium][patchesMediumLevel++];
+                        patchList[i].SetVertexData(TerrainPatchActionEnum.Draw, visibleNodes[i]);
                     }
-                    else if (patchesLowLevel < MaxPatchesLowLevel && dist < 600f)
+                    else if (patchesLowLevel < MaxPatchesLowLevel && dist < 750f)
                     {
-                        patchList[i] = this.patches[LevelOfDetailEnum.Low][patchesLowLevel];
-                        patchList[i].SetVertexData(
-                            TerrainPatchActionEnum.Draw,
-                            LevelOfDetailEnum.Low,
-                            visibleNodes[i]);
-
-                        patchesLowLevel++;
+                        patchList[i] = this.patches[LevelOfDetailEnum.Low][patchesLowLevel++];
+                        patchList[i].SetVertexData(TerrainPatchActionEnum.Draw, visibleNodes[i]);
                     }
-                    else if (patchesDataLoadLevel < MaxPatchesMinimumLevel && dist < 800f)
+                    else if (patchesDataLoadLevel < MaxPatchesMinimumLevel && dist < 1000f)
                     {
-                        patchList[i] = this.patches[LevelOfDetailEnum.Minimum][patchesDataLoadLevel];
-                        patchList[i].SetVertexData(
-                            TerrainPatchActionEnum.Load,
-                            LevelOfDetailEnum.Minimum,
-                            visibleNodes[i]);
-
-                        patchesDataLoadLevel++;
+                        patchList[i] = this.patches[LevelOfDetailEnum.Minimum][patchesDataLoadLevel++];
+                        patchList[i].SetVertexData(TerrainPatchActionEnum.Load, visibleNodes[i]);
                     }
                     else
                     {
@@ -934,64 +1041,69 @@ namespace Engine
                 {
                     for (int a = 0; a < assignedPatches; a++)
                     {
-                        if (patchList[a].LevelOfDetail != LevelOfDetailEnum.None)
+                        if (patchList[a].LevelOfDetail != LevelOfDetailEnum.None &&
+                            patchList[a].LevelOfDetail != LevelOfDetailEnum.Minimum)
                         {
                             IndexBufferShapeEnum t0 = IndexBufferShapeEnum.Full;
 
                             for (int b = a + 1; b < assignedPatches; b++)
                             {
-                                IndexBufferShapeEnum t1 = patchList[a].Test(patchList[b]);
-                                if (t1 != IndexBufferShapeEnum.None)
+                                if (patchList[b].LevelOfDetail != LevelOfDetailEnum.None &&
+                                    patchList[b].LevelOfDetail != LevelOfDetailEnum.Minimum)
                                 {
-                                    if (t0 == IndexBufferShapeEnum.Full)
+                                    IndexBufferShapeEnum t1 = patchList[a].Test(patchList[b]);
+                                    if (t1 != IndexBufferShapeEnum.None)
                                     {
-                                        t0 = t1;
-                                    }
-                                    else
-                                    {
-                                        if (t0 == IndexBufferShapeEnum.SideTop && t1 == IndexBufferShapeEnum.SideLeft)
+                                        if (t0 == IndexBufferShapeEnum.Full)
                                         {
-                                            t0 = IndexBufferShapeEnum.CornerTopLeft;
-                                            break;
-                                        }
-                                        else if (t0 == IndexBufferShapeEnum.SideTop && t1 == IndexBufferShapeEnum.SideRight)
-                                        {
-                                            t0 = IndexBufferShapeEnum.CornerTopRight;
-                                            break;
-                                        }
-                                        else if (t0 == IndexBufferShapeEnum.SideBottom && t1 == IndexBufferShapeEnum.SideLeft)
-                                        {
-                                            t0 = IndexBufferShapeEnum.CornerBottomLeft;
-                                            break;
-                                        }
-                                        else if (t0 == IndexBufferShapeEnum.SideBottom && t1 == IndexBufferShapeEnum.SideRight)
-                                        {
-                                            t0 = IndexBufferShapeEnum.CornerBottomRight;
-                                            break;
-                                        }
-                                        else if (t0 == IndexBufferShapeEnum.SideLeft && t1 == IndexBufferShapeEnum.SideTop)
-                                        {
-                                            t0 = IndexBufferShapeEnum.CornerTopLeft;
-                                            break;
-                                        }
-                                        else if (t0 == IndexBufferShapeEnum.SideLeft && t1 == IndexBufferShapeEnum.SideBottom)
-                                        {
-                                            t0 = IndexBufferShapeEnum.CornerBottomLeft;
-                                            break;
-                                        }
-                                        else if (t0 == IndexBufferShapeEnum.SideRight && t1 == IndexBufferShapeEnum.SideTop)
-                                        {
-                                            t0 = IndexBufferShapeEnum.CornerTopRight;
-                                            break;
-                                        }
-                                        else if (t0 == IndexBufferShapeEnum.SideRight && t1 == IndexBufferShapeEnum.SideBottom)
-                                        {
-                                            t0 = IndexBufferShapeEnum.CornerBottomRight;
-                                            break;
+                                            t0 = t1;
                                         }
                                         else
                                         {
-                                            t0 = t1;
+                                            if (t0 == IndexBufferShapeEnum.SideTop && t1 == IndexBufferShapeEnum.SideLeft)
+                                            {
+                                                t0 = IndexBufferShapeEnum.CornerTopLeft;
+                                                break;
+                                            }
+                                            else if (t0 == IndexBufferShapeEnum.SideTop && t1 == IndexBufferShapeEnum.SideRight)
+                                            {
+                                                t0 = IndexBufferShapeEnum.CornerTopRight;
+                                                break;
+                                            }
+                                            else if (t0 == IndexBufferShapeEnum.SideBottom && t1 == IndexBufferShapeEnum.SideLeft)
+                                            {
+                                                t0 = IndexBufferShapeEnum.CornerBottomLeft;
+                                                break;
+                                            }
+                                            else if (t0 == IndexBufferShapeEnum.SideBottom && t1 == IndexBufferShapeEnum.SideRight)
+                                            {
+                                                t0 = IndexBufferShapeEnum.CornerBottomRight;
+                                                break;
+                                            }
+                                            else if (t0 == IndexBufferShapeEnum.SideLeft && t1 == IndexBufferShapeEnum.SideTop)
+                                            {
+                                                t0 = IndexBufferShapeEnum.CornerTopLeft;
+                                                break;
+                                            }
+                                            else if (t0 == IndexBufferShapeEnum.SideLeft && t1 == IndexBufferShapeEnum.SideBottom)
+                                            {
+                                                t0 = IndexBufferShapeEnum.CornerBottomLeft;
+                                                break;
+                                            }
+                                            else if (t0 == IndexBufferShapeEnum.SideRight && t1 == IndexBufferShapeEnum.SideTop)
+                                            {
+                                                t0 = IndexBufferShapeEnum.CornerTopRight;
+                                                break;
+                                            }
+                                            else if (t0 == IndexBufferShapeEnum.SideRight && t1 == IndexBufferShapeEnum.SideBottom)
+                                            {
+                                                t0 = IndexBufferShapeEnum.CornerBottomRight;
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                t0 = t1;
+                                            }
                                         }
                                     }
                                 }
@@ -1022,10 +1134,9 @@ namespace Engine
         /// <param name="context">Draw context</param>
         public override void Draw(DrawContext context)
         {
-            this.patches.Draw(
-                context,
-                this.terrainTexturesLR, this.terrainTexturesHR, this.terrainNormalMap,
-                this.folliageTextures, this.folliageTextureCount, this.folliageDescription.EndRadius);
+            this.drawContext.BaseContext = context;
+
+            this.patches.Draw(this.drawContext);
         }
 
         /// <summary>

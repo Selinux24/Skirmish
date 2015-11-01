@@ -1,7 +1,7 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Direct3D11;
+using System;
+using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
@@ -104,10 +104,39 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel) where T : struct
         {
-            if (channel == VertexDataChannels.Position) return (T)Convert.ChangeType(this.Position, typeof(T));
-            else if (channel == VertexDataChannels.Color) return (T)Convert.ChangeType(this.Color, typeof(T));
-            else if (channel == VertexDataChannels.Weights) return (T)Convert.ChangeType(new[] { this.Weight1, this.Weight2, this.Weight3, (1.0f - this.Weight1 - this.Weight2 - this.Weight3) }, typeof(T));
-            else if (channel == VertexDataChannels.BoneIndices) return (T)Convert.ChangeType(new[] { this.BoneIndex1, this.BoneIndex2, this.BoneIndex3, this.BoneIndex4 }, typeof(T));
+            if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
+            else if (channel == VertexDataChannels.Color) return this.Color.Cast<T>();
+            else if (channel == VertexDataChannels.Weights) return (new[] { this.Weight1, this.Weight2, this.Weight3, (1.0f - this.Weight1 - this.Weight2 - this.Weight3) }).Cast<T>();
+            else if (channel == VertexDataChannels.BoneIndices) return (new[] { this.BoneIndex1, this.BoneIndex2, this.BoneIndex3, this.BoneIndex4 }).Cast<T>();
+            else throw new Exception(string.Format("Channel data not found: {0}", channel));
+        }
+        /// <summary>
+        /// Sets the channer value
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="channel">Channel</param>
+        /// <param name="value">Value</param>
+        public void SetChannelValue<T>(VertexDataChannels channel, T value) where T : struct
+        {
+            if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
+            else if (channel == VertexDataChannels.Color) this.Color = value.Cast<Color4>();
+            else if (channel == VertexDataChannels.Weights)
+            {
+                float[] weights = value.Cast<float[]>();
+
+                this.Weight1 = weights[0];
+                this.Weight2 = weights[1];
+                this.Weight3 = weights[2];
+            }
+            else if (channel == VertexDataChannels.BoneIndices)
+            {
+                byte[] boneIndices = value.Cast<byte[]>();
+
+                this.BoneIndex1 = boneIndices[0];
+                this.BoneIndex2 = boneIndices[1];
+                this.BoneIndex3 = boneIndices[2];
+                this.BoneIndex4 = boneIndices[3];
+            }
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
 

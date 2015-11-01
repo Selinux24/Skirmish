@@ -461,5 +461,17 @@ namespace Engine
 
             return res;
         }
+
+
+
+        public static T Cast<T>(this object input)
+        {
+            return (T)input;
+        }
+
+        public static T Convert<T>(this object input)
+        {
+            return (T)System.Convert.ChangeType(input, typeof(T));
+        }
     }
 }

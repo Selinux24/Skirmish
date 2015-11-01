@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Runtime.InteropServices;
-using SharpDX;
 using InputClassification = SharpDX.Direct3D11.InputClassification;
 using InputElement = SharpDX.Direct3D11.InputElement;
 
@@ -93,9 +93,22 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel) where T : struct
         {
-            if (channel == VertexDataChannels.Position) return (T)Convert.ChangeType(this.Position, typeof(T));
-            else if (channel == VertexDataChannels.Color) return (T)Convert.ChangeType(this.Color, typeof(T));
-            else if (channel == VertexDataChannels.Size) return (T)Convert.ChangeType(this.Size, typeof(T));
+            if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
+            else if (channel == VertexDataChannels.Color) return this.Color.Cast<T>();
+            else if (channel == VertexDataChannels.Size) return this.Size.Cast<T>();
+            else throw new Exception(string.Format("Channel data not found: {0}", channel));
+        }
+        /// <summary>
+        /// Sets the channer value
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="channel">Channel</param>
+        /// <param name="value">Value</param>
+        public void SetChannelValue<T>(VertexDataChannels channel, T value) where T : struct
+        {
+            if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
+            else if (channel == VertexDataChannels.Color) this.Color = value.Cast<Color4>();
+            else if (channel == VertexDataChannels.Size) this.Size = value.Cast<Vector2>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
 
