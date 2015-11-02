@@ -87,25 +87,21 @@ namespace Engine
         class TerrainPatchDictionary : IDisposable
         {
             /// <summary>
-            /// Base grid side of patches
-            /// </summary>
-            public const int PatchesBaseSide = 3;
-            /// <summary>
             /// Maximum number of patches in high level of detail
             /// </summary>
-            public const int MaxPatchesHighLevel = PatchesBaseSide * PatchesBaseSide;
+            public const int MaxPatchesHighLevel = 6;
             /// <summary>
             /// Maximum number of patches in medium level
             /// </summary>
-            public const int MaxPatchesMediumLevel = ((PatchesBaseSide + 2) * (PatchesBaseSide + 2)) - MaxPatchesHighLevel;
+            public const int MaxPatchesMediumLevel = 7;
             /// <summary>
             /// Maximum number of patches in low level
             /// </summary>
-            public const int MaxPatchesLowLevel = ((PatchesBaseSide + 4) * (PatchesBaseSide + 4)) - MaxPatchesMediumLevel;
+            public const int MaxPatchesLowLevel = 20;
             /// <summary>
             /// Maximum number of patches in minimum level
             /// </summary>
-            public const int MaxPatchesMinimumLevel = ((PatchesBaseSide + 6) * (PatchesBaseSide + 6)) - MaxPatchesLowLevel;
+            public const int MaxPatchesMinimumLevel = 13;
 
             /// <summary>
             /// Game
@@ -280,25 +276,25 @@ namespace Engine
 
                         float dist = Vector3.Distance(eyePosition, current.Center);
 
-                        if (patchesHighLevel < MaxPatchesHighLevel && dist < 200f)
+                        if (patchesHighLevel < MaxPatchesHighLevel)
                         {
                             patchList[i] = this.patches[LevelOfDetailEnum.High][patchesHighLevel++];
                             patchList[i].SetVertexData(current);
                             patchList[i].Visible = true;
                         }
-                        else if (patchesMediumLevel < MaxPatchesMediumLevel && dist < 400f)
+                        else if (patchesMediumLevel < MaxPatchesMediumLevel)
                         {
                             patchList[i] = this.patches[LevelOfDetailEnum.Medium][patchesMediumLevel++];
                             patchList[i].SetVertexData(current);
                             patchList[i].Visible = true;
                         }
-                        else if (patchesLowLevel < MaxPatchesLowLevel && dist < 600f)
+                        else if (patchesLowLevel < MaxPatchesLowLevel)
                         {
                             patchList[i] = this.patches[LevelOfDetailEnum.Low][patchesLowLevel++];
                             patchList[i].SetVertexData(current);
                             patchList[i].Visible = true;
                         }
-                        else if (patchesDataLoadLevel < MaxPatchesMinimumLevel && dist < 800f)
+                        else if (patchesDataLoadLevel < MaxPatchesMinimumLevel)
                         {
                             patchList[i] = this.patches[LevelOfDetailEnum.Minimum][patchesDataLoadLevel++];
                             patchList[i].SetVertexData(current);
@@ -738,18 +734,18 @@ namespace Engine
                         {
                             var data = this.current.GetVertexData(VertexTypes.Terrain, this.LevelOfDetail);
 
-                            //if (this.LevelOfDetail == LevelOfDetailEnum.High)
-                            //{
-                            //    Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(0.5f, 0.5f, 1f, 1f)));
-                            //}
-                            //else if (this.LevelOfDetail == LevelOfDetailEnum.Medium)
-                            //{
-                            //    Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(0.5f, 1f, 0.5f, 1f)));
-                            //}
-                            //else if (this.LevelOfDetail == LevelOfDetailEnum.Low)
-                            //{
-                            //    Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(1f, 0.5f, 0.5f, 1f)));
-                            //}
+                            if (this.LevelOfDetail == LevelOfDetailEnum.High)
+                            {
+                                Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(0.5f, 0.5f, 1f, 1f)));
+                            }
+                            else if (this.LevelOfDetail == LevelOfDetailEnum.Medium)
+                            {
+                                Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(0.5f, 1f, 0.5f, 1f)));
+                            }
+                            else if (this.LevelOfDetail == LevelOfDetailEnum.Low)
+                            {
+                                Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(1f, 0.5f, 0.5f, 1f)));
+                            }
 
                             VertexData.WriteVertexBuffer(
                                 this.Game.Graphics.DeviceContext,
