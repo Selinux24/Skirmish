@@ -1,11 +1,12 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
-using System.IO;
 
 namespace Engine
 {
@@ -13,12 +14,29 @@ namespace Engine
     using Engine.Content;
     using Engine.Effects;
     using Engine.Helpers;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     public class Terrain2 : Drawable
     {
-        #region Draw context for terrain
+        #region Update and Draw context for terrain
+
+        /// <summary>
+        /// Update context
+        /// </summary>
+        public class TerrainUpdateContext
+        {
+            /// <summary>
+            /// General update context
+            /// </summary>
+            public UpdateContext BaseContext;
+            /// <summary>
+            /// Visible Nodes
+            /// </summary>
+            public QuadTreeNode[] VisibleNodes;
+            /// <summary>
+            /// Folliage generation description
+            /// </summary>
+            public TerrainDescription.VegetationDescription FolliageDescription;
+        }
 
         /// <summary>
         /// Draw context
@@ -42,6 +60,10 @@ namespace Engine
             /// </summary>
             public ShaderResourceView TerrainNormalMaps;
             /// <summary>
+            /// Slope ranges
+            /// </summary>
+            public Vector2 SlopeRanges;
+            /// <summary>
             /// Folliage textures
             /// </summary>
             public ShaderResourceView FolliageTextures;
@@ -57,84 +79,333 @@ namespace Engine
 
         #endregion
 
-        #region Index buffers
-
-        /// <summary>
-        /// Index buffer dictionary by level of detail and shape type
-        /// </summary>
-        class IndexBufferDictionary : Dictionary<LevelOfDetailEnum, Dictionary<IndexBufferShapeEnum, IndexBuffer>>
-        {
-
-        }
-        /// <summary>
-        /// Index buffer descriptor
-        /// </summary>
-        class IndexBuffer
-        {
-            /// <summary>
-            /// Buffer
-            /// </summary>
-            public Buffer Buffer;
-            /// <summary>
-            /// Index count in buffer
-            /// </summary>
-            public int Count;
-        }
-
-        #endregion
-
         #region Terrain patches
 
         /// <summary>
-        /// Terrain patch action enumeration
-        /// </summary>
-        enum TerrainPatchActionEnum
-        {
-            /// <summary>
-            /// No action
-            /// </summary>
-            None,
-            /// <summary>
-            /// Draw patch
-            /// </summary>
-            Draw,
-            /// <summary>
-            /// Load data in patch
-            /// </summary>
-            Load,
-        }
-        /// <summary>
         /// Terrain patch dictionary by level of detail
         /// </summary>
-        class TerrainPatchDictionary : Dictionary<LevelOfDetailEnum, TerrainPatch[]>
+        class TerrainPatchDictionary : IDisposable
         {
+            /// <summary>
+            /// Base grid side of patches
+            /// </summary>
+            public const int PatchesBaseSide = 3;
+            /// <summary>
+            /// Maximum number of patches in high level of detail
+            /// </summary>
+            public const int MaxPatchesHighLevel = PatchesBaseSide * PatchesBaseSide;
+            /// <summary>
+            /// Maximum number of patches in medium level
+            /// </summary>
+            public const int MaxPatchesMediumLevel = ((PatchesBaseSide + 2) * (PatchesBaseSide + 2)) - MaxPatchesHighLevel;
+            /// <summary>
+            /// Maximum number of patches in low level
+            /// </summary>
+            public const int MaxPatchesLowLevel = ((PatchesBaseSide + 4) * (PatchesBaseSide + 4)) - MaxPatchesMediumLevel;
+            /// <summary>
+            /// Maximum number of patches in minimum level
+            /// </summary>
+            public const int MaxPatchesMinimumLevel = ((PatchesBaseSide + 6) * (PatchesBaseSide + 6)) - MaxPatchesLowLevel;
+
             /// <summary>
             /// Game
             /// </summary>
-            public readonly Game Game = null;
+            private Game game = null;
+            /// <summary>
+            /// Patches dictionary
+            /// </summary>
+            private Dictionary<LevelOfDetailEnum, TerrainPatch[]> patches = null;
+            /// <summary>
+            /// Index dictionary
+            /// </summary>
+            private Dictionary<LevelOfDetailEnum, Dictionary<IndexBufferShapeEnum, IndexBuffer>> indices = null;
 
             /// <summary>
             /// Constructor
             /// </summary>
             /// <param name="game">Game</param>
-            public TerrainPatchDictionary(Game game)
+            /// <param name="trianglesPerNode">Triangles per node</param>
+            public TerrainPatchDictionary(Game game, int trianglesPerNode)
                 : base()
             {
-                this.Game = game;
+                this.game = game;
+
+                this.InitializePatches(trianglesPerNode);
+
+                this.InitializeIndices(trianglesPerNode);
+            }
+            /// <summary>
+            /// Resource disposal
+            /// </summary>
+            public void Dispose()
+            {
+                Helper.Dispose(this.patches);
+                Helper.Dispose(this.indices);
             }
 
             /// <summary>
-            /// Resets all patches state
+            /// Initialize patch dictionary
             /// </summary>
-            public void Reset()
+            /// <param name="trianglesPerNode">Triangles per node</param>
+            private void InitializePatches(int trianglesPerNode)
             {
-                foreach (var item in this.Values)
+                this.patches = new Dictionary<LevelOfDetailEnum, TerrainPatch[]>();
+
+                this.patches.Add(LevelOfDetailEnum.High, new TerrainPatch[MaxPatchesHighLevel]);
+                this.patches.Add(LevelOfDetailEnum.Medium, new TerrainPatch[MaxPatchesMediumLevel]);
+                this.patches.Add(LevelOfDetailEnum.Low, new TerrainPatch[MaxPatchesLowLevel]);
+                this.patches.Add(LevelOfDetailEnum.Minimum, new TerrainPatch[MaxPatchesMinimumLevel]);
+
+                for (int i = 0; i < MaxPatchesHighLevel; i++)
                 {
-                    if (item != null && item.Length > 0)
+                    var patch = TerrainPatch.CreatePatch(this.game, LevelOfDetailEnum.High, trianglesPerNode);
+                    this.patches[LevelOfDetailEnum.High][i] = patch;
+                }
+
+                for (int i = 0; i < MaxPatchesMediumLevel; i++)
+                {
+                    var patch = TerrainPatch.CreatePatch(this.game, LevelOfDetailEnum.Medium, trianglesPerNode);
+                    this.patches[LevelOfDetailEnum.Medium][i] = patch;
+                }
+
+                for (int i = 0; i < MaxPatchesLowLevel; i++)
+                {
+                    var patch = TerrainPatch.CreatePatch(this.game, LevelOfDetailEnum.Low, trianglesPerNode);
+                    this.patches[LevelOfDetailEnum.Low][i] = patch;
+                }
+
+                for (int i = 0; i < MaxPatchesMinimumLevel; i++)
+                {
+                    var patch = TerrainPatch.CreatePatch(this.game, LevelOfDetailEnum.Minimum, trianglesPerNode);
+                    this.patches[LevelOfDetailEnum.Minimum][i] = patch;
+                }
+            }
+            /// <summary>
+            /// Initialize index dictionary
+            /// </summary>
+            /// <param name="trianglesPerNode">Triangles per node</param>
+            private void InitializeIndices(int trianglesPerNode)
+            {
+                this.indices = new Dictionary<LevelOfDetailEnum, Dictionary<IndexBufferShapeEnum, IndexBuffer>>();
+
+                this.indices.Add(LevelOfDetailEnum.High, new Dictionary<IndexBufferShapeEnum, IndexBuffer>());
+                this.indices.Add(LevelOfDetailEnum.Medium, new Dictionary<IndexBufferShapeEnum, IndexBuffer>());
+                this.indices.Add(LevelOfDetailEnum.Low, new Dictionary<IndexBufferShapeEnum, IndexBuffer>());
+
+                //High level
+                for (int i = 0; i < 9; i++)
+                {
+                    IndexBufferShapeEnum shape = (IndexBufferShapeEnum)i;
+
+                    uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode);
+                    IndexBuffer buffer = new IndexBuffer()
                     {
-                        for (int i = 0; i < item.Length; i++)
+                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(indexList),
+                        Count = indexList.Length,
+                    };
+                    this.indices[LevelOfDetailEnum.High].Add(shape, buffer);
+                }
+
+                //Medium level
+                for (int i = 0; i < 9; i++)
+                {
+                    IndexBufferShapeEnum shape = (IndexBufferShapeEnum)i;
+
+                    uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4);
+                    IndexBuffer buffer = new IndexBuffer()
+                    {
+                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(indexList),
+                        Count = indexList.Length,
+                    };
+                    this.indices[LevelOfDetailEnum.Medium].Add(shape, buffer);
+                }
+
+                //Low level
+                {
+                    IndexBufferShapeEnum shape = IndexBufferShapeEnum.Full;
+
+                    uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4 / 4);
+                    IndexBuffer buffer = new IndexBuffer()
+                    {
+                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(indexList),
+                        Count = indexList.Length,
+                    };
+                    this.indices[LevelOfDetailEnum.Low].Add(shape, buffer);
+                }
+            }
+
+            /// <summary>
+            /// Updates dictionary
+            /// </summary>
+            /// <param name="context">Update context</param>
+            public void Update(TerrainUpdateContext context)
+            {
+                var visibleNodes = context.VisibleNodes;
+
+                if (visibleNodes != null && visibleNodes.Length > 0)
+                {
+                    //Reset visibility for all patches
+                    foreach (var patch in this.patches.Values)
+                    {
+                        for (int i = 0; i < patch.Length; i++)
                         {
-                            item[i].Reset();
+                            patch[i].Visible = false;
+                        }
+                    }
+
+                    Vector3 eyePosition = context.BaseContext.EyePosition;
+
+                    //Sort by distance to eye position
+                    Array.Sort(visibleNodes, (n1, n2) =>
+                    {
+                        float d1 = Vector3.DistanceSquared(n1.Center, eyePosition);
+                        float d2 = Vector3.DistanceSquared(n2.Center, eyePosition);
+
+                        return d1.CompareTo(d2);
+                    });
+
+                    //Assign level of detail by order
+                    int patchesHighLevel = 0;
+                    int patchesMediumLevel = 0;
+                    int patchesLowLevel = 0;
+                    int patchesDataLoadLevel = 0;
+
+                    TerrainPatch[] patchList = new TerrainPatch[visibleNodes.Length];
+
+                    //Assign level of detail bases in distance to eye position
+                    //TODO: Prefer current node assignation to prevent folliage reloading in lod change
+                    for (int i = 0; i < visibleNodes.Length; i++)
+                    {
+                        var current = visibleNodes[i];
+
+                        float dist = Vector3.Distance(eyePosition, current.Center);
+
+                        if (patchesHighLevel < MaxPatchesHighLevel && dist < 200f)
+                        {
+                            patchList[i] = this.patches[LevelOfDetailEnum.High][patchesHighLevel++];
+                            patchList[i].SetVertexData(current);
+                            patchList[i].Visible = true;
+                        }
+                        else if (patchesMediumLevel < MaxPatchesMediumLevel && dist < 400f)
+                        {
+                            patchList[i] = this.patches[LevelOfDetailEnum.Medium][patchesMediumLevel++];
+                            patchList[i].SetVertexData(current);
+                            patchList[i].Visible = true;
+                        }
+                        else if (patchesLowLevel < MaxPatchesLowLevel && dist < 600f)
+                        {
+                            patchList[i] = this.patches[LevelOfDetailEnum.Low][patchesLowLevel++];
+                            patchList[i].SetVertexData(current);
+                            patchList[i].Visible = true;
+                        }
+                        else if (patchesDataLoadLevel < MaxPatchesMinimumLevel && dist < 800f)
+                        {
+                            patchList[i] = this.patches[LevelOfDetailEnum.Minimum][patchesDataLoadLevel++];
+                            patchList[i].SetVertexData(current);
+                        }
+                    }
+
+                    //var patch = this.patches.FindPatch(LevelOfDetailEnum.High, current);
+                    //if (patch != null)
+                    //{
+                    //    patchList[i] = patch;
+                    //}
+                    //else
+                    //{
+                    //    patchList[i] = this.patches[LevelOfDetailEnum.High][patchesHighLevel];
+                    //}
+
+                    int assignedPatches = patchesHighLevel + patchesMediumLevel + patchesLowLevel + patchesDataLoadLevel;
+                    if (assignedPatches > 0)
+                    {
+                        for (int a = 0; a < assignedPatches; a++)
+                        {
+                            if (patchList[a].LevelOfDetail != LevelOfDetailEnum.None &&
+                                patchList[a].LevelOfDetail != LevelOfDetailEnum.Minimum)
+                            {
+                                IndexBufferShapeEnum t0 = IndexBufferShapeEnum.Full;
+
+                                for (int b = a + 1; b < assignedPatches; b++)
+                                {
+                                    if (patchList[b].LevelOfDetail != LevelOfDetailEnum.None &&
+                                        patchList[b].LevelOfDetail != LevelOfDetailEnum.Minimum)
+                                    {
+                                        IndexBufferShapeEnum t1 = patchList[a].Test(patchList[b]);
+                                        if (t1 != IndexBufferShapeEnum.None)
+                                        {
+                                            if (t0 == IndexBufferShapeEnum.Full)
+                                            {
+                                                t0 = t1;
+                                            }
+                                            else
+                                            {
+                                                if (t0 == IndexBufferShapeEnum.SideTop && t1 == IndexBufferShapeEnum.SideLeft)
+                                                {
+                                                    t0 = IndexBufferShapeEnum.CornerTopLeft;
+                                                    break;
+                                                }
+                                                else if (t0 == IndexBufferShapeEnum.SideTop && t1 == IndexBufferShapeEnum.SideRight)
+                                                {
+                                                    t0 = IndexBufferShapeEnum.CornerTopRight;
+                                                    break;
+                                                }
+                                                else if (t0 == IndexBufferShapeEnum.SideBottom && t1 == IndexBufferShapeEnum.SideLeft)
+                                                {
+                                                    t0 = IndexBufferShapeEnum.CornerBottomLeft;
+                                                    break;
+                                                }
+                                                else if (t0 == IndexBufferShapeEnum.SideBottom && t1 == IndexBufferShapeEnum.SideRight)
+                                                {
+                                                    t0 = IndexBufferShapeEnum.CornerBottomRight;
+                                                    break;
+                                                }
+                                                else if (t0 == IndexBufferShapeEnum.SideLeft && t1 == IndexBufferShapeEnum.SideTop)
+                                                {
+                                                    t0 = IndexBufferShapeEnum.CornerTopLeft;
+                                                    break;
+                                                }
+                                                else if (t0 == IndexBufferShapeEnum.SideLeft && t1 == IndexBufferShapeEnum.SideBottom)
+                                                {
+                                                    t0 = IndexBufferShapeEnum.CornerBottomLeft;
+                                                    break;
+                                                }
+                                                else if (t0 == IndexBufferShapeEnum.SideRight && t1 == IndexBufferShapeEnum.SideTop)
+                                                {
+                                                    t0 = IndexBufferShapeEnum.CornerTopRight;
+                                                    break;
+                                                }
+                                                else if (t0 == IndexBufferShapeEnum.SideRight && t1 == IndexBufferShapeEnum.SideBottom)
+                                                {
+                                                    t0 = IndexBufferShapeEnum.CornerBottomRight;
+                                                    break;
+                                                }
+                                                else
+                                                {
+                                                    t0 = t1;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (t0 != IndexBufferShapeEnum.None)
+                                {
+                                    patchList[a].SetIndexData(this.indices[patchList[a].LevelOfDetail][t0]);
+                                }
+                                else
+                                {
+                                    patchList[a].SetIndexData(null);
+                                }
+
+                                if (context.FolliageDescription != null)
+                                {
+                                    if (patchList[a].LevelOfDetail == LevelOfDetailEnum.High ||
+                                        patchList[a].LevelOfDetail == LevelOfDetailEnum.Medium)
+                                    {
+                                        patchList[a].Plant(context.FolliageDescription);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -145,12 +416,12 @@ namespace Engine
             /// <param name="context">Drawing context</param>
             public void Draw(TerrainDrawContext context)
             {
-                this.Game.Graphics.SetDepthStencilZEnabled();
+                this.game.Graphics.SetDepthStencilZEnabled();
 
                 {
                     EffectTerrain effect = DrawerPool.EffectTerrain;
 
-                    this.Game.Graphics.SetBlendDefault();
+                    this.game.Graphics.SetBlendDefault();
 
                     #region Per frame update
 
@@ -183,25 +454,35 @@ namespace Engine
 
                     if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        effect.UpdatePerObject(Material.Default, context.TerraintexturesLR, context.TerraintexturesHR, context.TerrainNormalMaps);
+                        effect.UpdatePerObject(
+                            Material.Default, 
+                            context.TerraintexturesLR, 
+                            context.TerraintexturesHR, 
+                            context.TerrainNormalMaps,
+                            context.SlopeRanges);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        effect.UpdatePerObject(Material.Default, context.TerraintexturesLR, context.TerraintexturesHR, context.TerrainNormalMaps);
+                        effect.UpdatePerObject(
+                            Material.Default, 
+                            context.TerraintexturesLR, 
+                            context.TerraintexturesHR, 
+                            context.TerrainNormalMaps,
+                            context.SlopeRanges);
                     }
 
                     #endregion
 
                     var technique = effect.GetTechnique(VertexTypes.Terrain, DrawingStages.Drawing, context.BaseContext.DrawerMode);
 
-                    this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                    this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
+                    this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                    this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
 
-                    foreach (var lod in this.Keys)
+                    foreach (var lod in this.patches.Keys)
                     {
-                        foreach (var item in this[lod])
+                        foreach (var item in this.patches[lod])
                         {
-                            if (item.Action == TerrainPatchActionEnum.Draw)
+                            if (item.Visible)
                             {
                                 item.DrawTerrain(context.BaseContext, technique);
                             }
@@ -214,15 +495,15 @@ namespace Engine
 
                     if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        this.Game.Graphics.SetBlendTransparent();
+                        this.game.Graphics.SetBlendTransparent();
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                        this.game.Graphics.SetBlendDeferredComposerTransparent();
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        this.Game.Graphics.SetBlendTransparent();
+                        this.game.Graphics.SetBlendTransparent();
                     }
 
                     #region Per frame update
@@ -276,14 +557,14 @@ namespace Engine
 
                     var technique = effect.GetTechnique(VertexTypes.Billboard, DrawingStages.Drawing, context.BaseContext.DrawerMode);
 
-                    this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                    this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.PointList;
+                    this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                    this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.PointList;
 
-                    foreach (var lod in this.Keys)
+                    foreach (var lod in this.patches.Keys)
                     {
-                        foreach (var item in this[lod])
+                        foreach (var item in this.patches[lod])
                         {
-                            if (item.Action == TerrainPatchActionEnum.Draw)
+                            if (item.Visible)
                             {
                                 item.DrawFolliage(context.BaseContext, technique);
                             }
@@ -311,9 +592,7 @@ namespace Engine
             /// <param name="lod">Level of detail</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static TerrainPatch CreatePatch<T, F>(Game game, LevelOfDetailEnum lod, int trianglesPerNode)
-                where T : struct, IVertexData
-                where F : struct, IVertexData
+            public static TerrainPatch CreatePatch(Game game, LevelOfDetailEnum lod, int trianglesPerNode)
             {
                 int triangleCount = 0;
 
@@ -329,23 +608,23 @@ namespace Engine
                     {
                         int vertices = (int)Math.Pow((Math.Sqrt(triangleCount / 2) + 1), 2);
 
-                        T[] vertexData = new T[vertices];
+                        VertexTerrain[] vertexData = new VertexTerrain[vertices];
 
                         patch.vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(vertexData);
                         patch.vertexBufferBinding = new[]
                         {
-                            new VertexBufferBinding(patch.vertexBuffer, default(T).Stride, 0),
+                            new VertexBufferBinding(patch.vertexBuffer, default(VertexTerrain).Stride, 0),
                         };
                     }
 
                     //Folliage buffer
                     {
-                        F[] vertexData = new F[MAX];
+                        VertexBillboard[] vertexData = new VertexBillboard[MAX];
 
                         patch.folliageBuffer = game.Graphics.Device.CreateVertexBufferWrite(vertexData);
                         patch.folliageBufferBinding = new[]
                         {
-                            new VertexBufferBinding(patch.folliageBuffer, default(F).Stride, 0),
+                            new VertexBufferBinding(patch.folliageBuffer, default(VertexBillboard).Stride, 0),
                         };
                     }
 
@@ -411,13 +690,13 @@ namespace Engine
             /// </summary>
             public readonly Game Game = null;
             /// <summary>
-            /// Patch action
-            /// </summary>
-            public TerrainPatchActionEnum Action { get; private set; }
-            /// <summary>
             /// Level of detail
             /// </summary>
             public LevelOfDetailEnum LevelOfDetail { get; private set; }
+            /// <summary>
+            /// Gets or sets if patch is visible
+            /// </summary>
+            public bool Visible { get; set; }
 
             /// <summary>
             /// Cosntructor
@@ -438,60 +717,50 @@ namespace Engine
             }
 
             /// <summary>
-            /// Resets patch
-            /// </summary>
-            public void Reset()
-            {
-                this.Action = TerrainPatchActionEnum.None;
-            }
-            /// <summary>
             /// Sets vertex data
             /// </summary>
-            /// <param name="action">Action</param>
             /// <param name="node">Node to attach to the vertex buffer</param>
-            public void SetVertexData(TerrainPatchActionEnum action, QuadTreeNode node)
+            public void SetVertexData(QuadTreeNode node)
             {
                 if (this.vertexBuffer != null)
                 {
-                    this.Action = action;
-
                     if (this.current != node)
                     {
+                        this.folliagePlanting = false;
+                        this.folliageAttached = false;
+                        this.folliagePlanted = false;
+                        this.folliageData = null;
+                        this.folliageCount = 0;
+
                         this.current = node;
 
                         if (this.current != null)
                         {
                             var data = this.current.GetVertexData(VertexTypes.Terrain, this.LevelOfDetail);
 
-                            if (this.LevelOfDetail == LevelOfDetailEnum.High)
-                            {
-                                Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(0f, 0f, 1f, 1f)));
-                            }
-                            else if (this.LevelOfDetail == LevelOfDetailEnum.Medium)
-                            {
-                                Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(0f, 1f, 0f, 1f)));
-                            }
-                            else if (this.LevelOfDetail == LevelOfDetailEnum.Low)
-                            {
-                                Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(1f, 0f, 0f, 1f)));
-                            }
+                            //if (this.LevelOfDetail == LevelOfDetailEnum.High)
+                            //{
+                            //    Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(0.5f, 0.5f, 1f, 1f)));
+                            //}
+                            //else if (this.LevelOfDetail == LevelOfDetailEnum.Medium)
+                            //{
+                            //    Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(0.5f, 1f, 0.5f, 1f)));
+                            //}
+                            //else if (this.LevelOfDetail == LevelOfDetailEnum.Low)
+                            //{
+                            //    Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(1f, 0.5f, 0.5f, 1f)));
+                            //}
 
                             VertexData.WriteVertexBuffer(
                                 this.Game.Graphics.DeviceContext,
                                 this.vertexBuffer,
                                 data);
-
-                            this.folliagePlanting = false;
-                            this.folliageAttached = false;
-                            this.folliagePlanted = false;
-                            this.folliageData = null;
-                            this.folliageCount = 0;
                         }
                     }
                 }
                 else
                 {
-                    this.Action = TerrainPatchActionEnum.None;
+
                 }
             }
             /// <summary>
@@ -606,11 +875,14 @@ namespace Engine
                     }
                     else if (!this.folliageAttached)
                     {
-                        //Attach data
-                        VertexData.WriteVertexBuffer(
-                            this.Game.Graphics.DeviceContext,
-                            this.folliageBuffer,
-                            this.folliageData);
+                        if (this.folliageData != null && this.folliageData.Length > 0)
+                        {
+                            //Attach data
+                            VertexData.WriteVertexBuffer(
+                                this.Game.Graphics.DeviceContext,
+                                this.folliageBuffer,
+                                this.folliageData);
+                        }
 
                         this.folliageAttached = true;
                     }
@@ -690,42 +962,43 @@ namespace Engine
                 this.folliageAttached = false;
             }
         }
+        /// <summary>
+        /// Index buffer descriptor
+        /// </summary>
+        class IndexBuffer
+        {
+            /// <summary>
+            /// Buffer
+            /// </summary>
+            public Buffer Buffer;
+            /// <summary>
+            /// Index count in buffer
+            /// </summary>
+            public int Count;
+        }
 
         #endregion
-
-        /// <summary>
-        /// Base grid side of patches
-        /// </summary>
-        public const int PatchesBaseSide = 3;
-        /// <summary>
-        /// Maximum number of patches in high level of detail
-        /// </summary>
-        public const int MaxPatchesHighLevel = PatchesBaseSide * PatchesBaseSide;
-        /// <summary>
-        /// Maximum number of patches in medium level
-        /// </summary>
-        public const int MaxPatchesMediumLevel = ((PatchesBaseSide + 2) * (PatchesBaseSide + 2)) - MaxPatchesHighLevel;
-        /// <summary>
-        /// Maximum number of patches in low level
-        /// </summary>
-        public const int MaxPatchesLowLevel = ((PatchesBaseSide + 4) * (PatchesBaseSide + 4)) - MaxPatchesMediumLevel;
-        /// <summary>
-        /// Maximum number of patches in minimum level
-        /// </summary>
-        public const int MaxPatchesMinimumLevel = ((PatchesBaseSide + 6) * (PatchesBaseSide + 6)) - MaxPatchesLowLevel;
 
         /// <summary>
         /// Height map
         /// </summary>
         private HeightMap heightMap = null;
         /// <summary>
-        /// Index dictionary
+        /// Quadtree
         /// </summary>
-        private IndexBufferDictionary indices = null;
+        private QuadTree quadTree = null;
         /// <summary>
         /// Patch dictionary
         /// </summary>
         private TerrainPatchDictionary patches = null;
+        /// <summary>
+        /// Terrain update context
+        /// </summary>
+        private TerrainUpdateContext updateContext = null;
+        /// <summary>
+        /// Terrain draw context
+        /// </summary>
+        private TerrainDrawContext drawContext = null;
         /// <summary>
         /// Terrain low res textures
         /// </summary>
@@ -737,7 +1010,11 @@ namespace Engine
         /// <summary>
         /// Terrain normal maps
         /// </summary>
-        private ShaderResourceView terrainNormalMap = null;
+        private ShaderResourceView terrainNormalMaps = null;
+        /// <summary>
+        /// Slope ranges
+        /// </summary>
+        private Vector2 slopeRanges = Vector2.Zero;
         /// <summary>
         /// Folliage textures
         /// </summary>
@@ -746,18 +1023,6 @@ namespace Engine
         /// Folliage texture count
         /// </summary>
         private uint folliageTextureCount = 0;
-        /// <summary>
-        /// Quadtree
-        /// </summary>
-        private QuadTree quadTree = null;
-        /// <summary>
-        /// Folliage generation description
-        /// </summary>
-        private TerrainDescription.VegetationDescription folliageDescription = null;
-        /// <summary>
-        /// Terrain draw context
-        /// </summary>
-        private TerrainDrawContext drawContext = null;
 
         /// <summary>
         /// Constructor
@@ -808,7 +1073,8 @@ namespace Engine
 
                 this.terrainTexturesLR = game.Graphics.Device.LoadTextureArray(terrainTexturesLR.Streams);
                 this.terrainTexturesHR = game.Graphics.Device.LoadTextureArray(terrainTexturesHR.Streams);
-                this.terrainNormalMap = game.Graphics.Device.LoadTextureArray(normalMapTextures.Streams);
+                this.terrainNormalMaps = game.Graphics.Device.LoadTextureArray(normalMapTextures.Streams);
+                this.slopeRanges = description.Textures.SlopeRanges;
             }
 
             #endregion
@@ -827,7 +1093,6 @@ namespace Engine
 
                 this.folliageTextures = game.Graphics.Device.LoadTextureArray(folliageTextures.Streams);
                 this.folliageTextureCount = (uint)folliageTextures.Count;
-                this.folliageDescription = description.Vegetation;
             }
 
             #endregion
@@ -846,18 +1111,24 @@ namespace Engine
                 vertices,
                 description);
 
-            //Intialize index dictionary
-            this.InitializeIndices(description.Quadtree.MaxTrianglesPerNode);
-
             //Initialize patch dictionary
-            this.InitializePatches<VertexTerrain, VertexBillboard>(description.Quadtree.MaxTrianglesPerNode);
+            this.patches = new TerrainPatchDictionary(
+                game, 
+                description.Quadtree.MaxTrianglesPerNode);
+
+            //Initialize update context
+            this.updateContext = new TerrainUpdateContext()
+            {
+                FolliageDescription = description.Vegetation,
+            };
 
             //Initialize draw context
             this.drawContext = new TerrainDrawContext()
             {
                 TerraintexturesLR = this.terrainTexturesLR,
                 TerraintexturesHR = this.terrainTexturesHR,
-                TerrainNormalMaps = this.terrainNormalMap,
+                TerrainNormalMaps = this.terrainNormalMaps,
+                SlopeRanges = this.slopeRanges,
                 FolliageTextureCount = this.folliageTextureCount,
                 FolliageTextures = this.folliageTextures,
                 FolliageEndRadius = description.Vegetation != null ? description.Vegetation.EndRadius : 0,
@@ -874,104 +1145,9 @@ namespace Engine
         {
             Helper.Dispose(this.terrainTexturesLR);
             Helper.Dispose(this.terrainTexturesHR);
-            Helper.Dispose(this.terrainNormalMap);
+            Helper.Dispose(this.terrainNormalMaps);
             Helper.Dispose(this.folliageTextures);
-            Helper.Dispose(this.indices);
             Helper.Dispose(this.patches);
-        }
-        /// <summary>
-        /// Initialize index dictionary
-        /// </summary>
-        /// <param name="trianglesPerNode">Triangles per node</param>
-        private void InitializeIndices(int trianglesPerNode)
-        {
-            this.indices = new IndexBufferDictionary();
-
-            this.indices.Add(LevelOfDetailEnum.High, new Dictionary<IndexBufferShapeEnum, IndexBuffer>());
-            this.indices.Add(LevelOfDetailEnum.Medium, new Dictionary<IndexBufferShapeEnum, IndexBuffer>());
-            this.indices.Add(LevelOfDetailEnum.Low, new Dictionary<IndexBufferShapeEnum, IndexBuffer>());
-
-            //High level
-            for (int i = 0; i < 9; i++)
-            {
-                IndexBufferShapeEnum shape = (IndexBufferShapeEnum)i;
-
-                uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode);
-                IndexBuffer buffer = new IndexBuffer()
-                {
-                    Buffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(indexList),
-                    Count = indexList.Length,
-                };
-                this.indices[LevelOfDetailEnum.High].Add(shape, buffer);
-            }
-
-            //Medium level
-            for (int i = 0; i < 9; i++)
-            {
-                IndexBufferShapeEnum shape = (IndexBufferShapeEnum)i;
-
-                uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4);
-                IndexBuffer buffer = new IndexBuffer()
-                {
-                    Buffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(indexList),
-                    Count = indexList.Length,
-                };
-                this.indices[LevelOfDetailEnum.Medium].Add(shape, buffer);
-            }
-
-            //Low level
-            {
-                IndexBufferShapeEnum shape = IndexBufferShapeEnum.Full;
-
-                uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4 / 4);
-                IndexBuffer buffer = new IndexBuffer()
-                {
-                    Buffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(indexList),
-                    Count = indexList.Length,
-                };
-                this.indices[LevelOfDetailEnum.Low].Add(shape, buffer);
-            }
-        }
-        /// <summary>
-        /// Initialize patch dictionary
-        /// </summary>
-        /// <typeparam name="T">Terrain vertext type</typeparam>
-        /// <typeparam name="F">Folliage vertex type</typeparam>
-        /// <param name="trianglesPerNode">Triangles per node</param>
-        private void InitializePatches<T, F>(int trianglesPerNode)
-            where T : struct, IVertexData
-            where F : struct, IVertexData
-        {
-            this.patches = new TerrainPatchDictionary(this.Game);
-
-            this.patches.Add(LevelOfDetailEnum.High, new TerrainPatch[MaxPatchesHighLevel]);
-            this.patches.Add(LevelOfDetailEnum.Medium, new TerrainPatch[MaxPatchesMediumLevel]);
-            this.patches.Add(LevelOfDetailEnum.Low, new TerrainPatch[MaxPatchesLowLevel]);
-            this.patches.Add(LevelOfDetailEnum.Minimum, new TerrainPatch[MaxPatchesMinimumLevel]);
-
-            for (int i = 0; i < MaxPatchesHighLevel; i++)
-            {
-                var patch = TerrainPatch.CreatePatch<T, F>(this.Game, LevelOfDetailEnum.High, trianglesPerNode);
-                this.patches[LevelOfDetailEnum.High][i] = patch;
-            }
-
-            for (int i = 0; i < MaxPatchesMediumLevel; i++)
-            {
-                var patch = TerrainPatch.CreatePatch<T, F>(this.Game, LevelOfDetailEnum.Medium, trianglesPerNode);
-                this.patches[LevelOfDetailEnum.Medium][i] = patch;
-            }
-
-            for (int i = 0; i < MaxPatchesLowLevel; i++)
-            {
-                var patch = TerrainPatch.CreatePatch<T, F>(this.Game, LevelOfDetailEnum.Low, trianglesPerNode);
-                this.patches[LevelOfDetailEnum.Low][i] = patch;
-            }
-
-            for (int i = 0; i < MaxPatchesMinimumLevel; i++)
-            {
-                var patch = TerrainPatch.CreatePatch<T, F>(this.Game, LevelOfDetailEnum.Minimum, trianglesPerNode);
-                this.patches[LevelOfDetailEnum.Minimum][i] = patch;
-            }
         }
 
         /// <summary>
@@ -980,152 +1156,12 @@ namespace Engine
         /// <param name="context">Update context</param>
         public override void Update(UpdateContext context)
         {
-            QuadTreeNode[] visibleNodes = this.quadTree.GetNodesInVolume(ref context.Frustum);
-
-            if (visibleNodes != null && visibleNodes.Length > 0)
+            if (this.patches != null)
             {
-                //Sort by distance to eye position
-                Array.Sort(visibleNodes, (n1, n2) =>
-                {
-                    float d1 = Vector3.DistanceSquared(n1.Center, context.EyePosition);
-                    float d2 = Vector3.DistanceSquared(n2.Center, context.EyePosition);
+                this.updateContext.BaseContext = context;
+                this.updateContext.VisibleNodes = this.quadTree.GetNodesInVolume(ref context.Frustum);
 
-                    return d1.CompareTo(d2);
-                });
-
-                //Assign level of detail by order
-                int patchesHighLevel = 0;
-                int patchesMediumLevel = 0;
-                int patchesLowLevel = 0;
-                int patchesDataLoadLevel = 0;
-
-                //Reset actions
-                this.patches.Reset();
-
-                TerrainPatch[] patchList = new TerrainPatch[visibleNodes.Length];
-
-                //Assign level of detail bases in distance to eye position
-                //TODO: Prefer current node assignation to prevent folliage reloading in lod change
-                for (int i = 0; i < visibleNodes.Length; i++)
-                {
-                    float dist = Vector3.Distance(context.EyePosition, visibleNodes[i].Center);
-
-                    if (patchesHighLevel < MaxPatchesHighLevel && dist < 250f)
-                    {
-                        patchList[i] = this.patches[LevelOfDetailEnum.High][patchesHighLevel++];
-                        patchList[i].SetVertexData(TerrainPatchActionEnum.Draw, visibleNodes[i]);
-                    }
-                    else if (patchesMediumLevel < MaxPatchesMediumLevel && dist < 500f)
-                    {
-                        patchList[i] = this.patches[LevelOfDetailEnum.Medium][patchesMediumLevel++];
-                        patchList[i].SetVertexData(TerrainPatchActionEnum.Draw, visibleNodes[i]);
-                    }
-                    else if (patchesLowLevel < MaxPatchesLowLevel && dist < 750f)
-                    {
-                        patchList[i] = this.patches[LevelOfDetailEnum.Low][patchesLowLevel++];
-                        patchList[i].SetVertexData(TerrainPatchActionEnum.Draw, visibleNodes[i]);
-                    }
-                    else if (patchesDataLoadLevel < MaxPatchesMinimumLevel && dist < 1000f)
-                    {
-                        patchList[i] = this.patches[LevelOfDetailEnum.Minimum][patchesDataLoadLevel++];
-                        patchList[i].SetVertexData(TerrainPatchActionEnum.Load, visibleNodes[i]);
-                    }
-                    else
-                    {
-                        visibleNodes[i].Cull = true;
-                    }
-                }
-
-                int assignedPatches = patchesHighLevel + patchesMediumLevel + patchesLowLevel + patchesDataLoadLevel;
-                if (assignedPatches > 0)
-                {
-                    for (int a = 0; a < assignedPatches; a++)
-                    {
-                        if (patchList[a].LevelOfDetail != LevelOfDetailEnum.None &&
-                            patchList[a].LevelOfDetail != LevelOfDetailEnum.Minimum)
-                        {
-                            IndexBufferShapeEnum t0 = IndexBufferShapeEnum.Full;
-
-                            for (int b = a + 1; b < assignedPatches; b++)
-                            {
-                                if (patchList[b].LevelOfDetail != LevelOfDetailEnum.None &&
-                                    patchList[b].LevelOfDetail != LevelOfDetailEnum.Minimum)
-                                {
-                                    IndexBufferShapeEnum t1 = patchList[a].Test(patchList[b]);
-                                    if (t1 != IndexBufferShapeEnum.None)
-                                    {
-                                        if (t0 == IndexBufferShapeEnum.Full)
-                                        {
-                                            t0 = t1;
-                                        }
-                                        else
-                                        {
-                                            if (t0 == IndexBufferShapeEnum.SideTop && t1 == IndexBufferShapeEnum.SideLeft)
-                                            {
-                                                t0 = IndexBufferShapeEnum.CornerTopLeft;
-                                                break;
-                                            }
-                                            else if (t0 == IndexBufferShapeEnum.SideTop && t1 == IndexBufferShapeEnum.SideRight)
-                                            {
-                                                t0 = IndexBufferShapeEnum.CornerTopRight;
-                                                break;
-                                            }
-                                            else if (t0 == IndexBufferShapeEnum.SideBottom && t1 == IndexBufferShapeEnum.SideLeft)
-                                            {
-                                                t0 = IndexBufferShapeEnum.CornerBottomLeft;
-                                                break;
-                                            }
-                                            else if (t0 == IndexBufferShapeEnum.SideBottom && t1 == IndexBufferShapeEnum.SideRight)
-                                            {
-                                                t0 = IndexBufferShapeEnum.CornerBottomRight;
-                                                break;
-                                            }
-                                            else if (t0 == IndexBufferShapeEnum.SideLeft && t1 == IndexBufferShapeEnum.SideTop)
-                                            {
-                                                t0 = IndexBufferShapeEnum.CornerTopLeft;
-                                                break;
-                                            }
-                                            else if (t0 == IndexBufferShapeEnum.SideLeft && t1 == IndexBufferShapeEnum.SideBottom)
-                                            {
-                                                t0 = IndexBufferShapeEnum.CornerBottomLeft;
-                                                break;
-                                            }
-                                            else if (t0 == IndexBufferShapeEnum.SideRight && t1 == IndexBufferShapeEnum.SideTop)
-                                            {
-                                                t0 = IndexBufferShapeEnum.CornerTopRight;
-                                                break;
-                                            }
-                                            else if (t0 == IndexBufferShapeEnum.SideRight && t1 == IndexBufferShapeEnum.SideBottom)
-                                            {
-                                                t0 = IndexBufferShapeEnum.CornerBottomRight;
-                                                break;
-                                            }
-                                            else
-                                            {
-                                                t0 = t1;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            if (t0 != IndexBufferShapeEnum.None)
-                            {
-                                patchList[a].SetIndexData(this.indices[patchList[a].LevelOfDetail][t0]);
-                            }
-                            else
-                            {
-                                patchList[a].SetIndexData(null);
-                            }
-
-                            if (patchList[a].LevelOfDetail == LevelOfDetailEnum.High ||
-                                patchList[a].LevelOfDetail == LevelOfDetailEnum.Medium)
-                            {
-                                patchList[a].Plant(this.folliageDescription);
-                            }
-                        }
-                    }
-                }
+                this.patches.Update(this.updateContext);
             }
         }
         /// <summary>
@@ -1134,9 +1170,12 @@ namespace Engine
         /// <param name="context">Draw context</param>
         public override void Draw(DrawContext context)
         {
-            this.drawContext.BaseContext = context;
+            if (this.patches != null)
+            {
+                this.drawContext.BaseContext = context;
 
-            this.patches.Draw(this.drawContext);
+                this.patches.Draw(this.drawContext);
+            }
         }
 
         /// <summary>

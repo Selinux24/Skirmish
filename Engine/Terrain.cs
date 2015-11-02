@@ -110,8 +110,6 @@ namespace Engine
             else
             {
                 this.terrain.Update(context);
-
-                this.pickingQuadtree.Update(context);
             }
         }
         /// <summary>
@@ -138,8 +136,6 @@ namespace Engine
             else
             {
                 this.terrain.Draw(context);
-
-                this.pickingQuadtree.Draw(context);
             }
         }
 
@@ -442,6 +438,10 @@ namespace Engine
             /// Normal maps
             /// </summary>
             public string[] NormalMaps = null;
+            /// <summary>
+            /// Slope ranges
+            /// </summary>
+            public Vector2 SlopeRanges = Vector2.Zero;
         }
         /// <summary>
         /// Vegetation

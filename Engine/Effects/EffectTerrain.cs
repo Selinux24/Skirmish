@@ -95,6 +95,10 @@ namespace Engine.Effects
         /// Shadow map effect variable
         /// </summary>
         private EffectShaderResourceVariable shadowMap = null;
+        /// <summary>
+        /// Slope ranges effect variable
+        /// </summary>
+        private EffectVectorVariable slopeRanges = null;
 
         /// <summary>
         /// Directional lights
@@ -364,6 +368,24 @@ namespace Engine.Effects
                 this.shadowMap.SetResource(value);
             }
         }
+        /// <summary>
+        /// Slope ranges
+        /// </summary>
+        protected Vector2 SlopeRanges
+        {
+            get
+            {
+                Vector4 v = this.slopeRanges.GetFloatVector();
+
+                return new Vector2(v.X, v.Y);
+            }
+            set
+            {
+                Vector4 v4 = new Vector4(value.X, value.Y, 0f, 1f);
+
+                this.slopeRanges.Set(v4);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -398,6 +420,7 @@ namespace Engine.Effects
             this.texturesHR = this.Effect.GetVariableByName("gTextureHRArray").AsShaderResource();
             this.normalMaps = this.Effect.GetVariableByName("gNormalMapArray").AsShaderResource();
             this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
+            this.slopeRanges = this.Effect.GetVariableByName("gSlopeRanges").AsVector();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -519,16 +542,19 @@ namespace Engine.Effects
         /// <param name="texturesLR">Low resolution textures</param>
         /// <param name="texturesHR">High resolution textures</param>
         /// <param name="normalMap">Normal map</param>
+        /// <param name="slopeRanges">Slope ranges</param>
         public void UpdatePerObject(
             Material material,
             ShaderResourceView texturesLR,
             ShaderResourceView texturesHR,
-            ShaderResourceView normalMap)
+            ShaderResourceView normalMap,
+            Vector2 slopeRanges)
         {
             this.Material = new BufferMaterials(material);
             this.TexturesLR = texturesLR;
             this.TexturesHR = texturesHR;
             this.NormalMaps = normalMap;
+            this.SlopeRanges = slopeRanges;
         }
     }
 }

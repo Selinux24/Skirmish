@@ -107,23 +107,6 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Updates the quad tree components
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        public void Update(UpdateContext context)
-        {
-            this.Root.Update(context);
-        }
-        /// <summary>
-        /// Draws the quad tree components
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        public void Draw(DrawContext context)
-        {
-            this.Root.Draw(context);
-        }
-
-        /// <summary>
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>

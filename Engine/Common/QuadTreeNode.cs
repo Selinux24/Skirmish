@@ -269,10 +269,6 @@ namespace Engine.Common
         /// </summary>
         public Grid Grid = null;
         /// <summary>
-        /// Gets if local quad node is culled
-        /// </summary>
-        public bool Cull = false;
-        /// <summary>
         /// Node vertices
         /// </summary>
         private VertexData[] Vertices;
@@ -838,31 +834,6 @@ namespace Engine.Common
             return level;
         }
 
-        /// <summary>
-        /// Updates node and its childs
-        /// </summary>
-        /// <param name="context">Context</param>
-        public void Update(UpdateContext context)
-        {
-
-        }
-        /// <summary>
-        /// Draws node and its childs
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        public void Draw(DrawContext context)
-        {
-            if (!this.Cull)
-            {
-                if (this.Children != null && this.Children.Length > 0)
-                {
-                    for (int i = 0; i < this.Children.Length; i++)
-                    {
-                        this.Children[i].Draw(context);
-                    }
-                }
-            }
-        }
         /// <summary>
         /// Gets the tail nodes contained into the specified frustum
         /// </summary>

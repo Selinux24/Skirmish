@@ -441,7 +441,6 @@ namespace Engine.Helpers
                     OptionFlags = ResourceOptionFlags.None,
                 }))
             {
-
                 for (int i = 0; i < textureList.Count; i++)
                 {
                     for (int mipLevel = 0; mipLevel < textureDescription.MipLevels; mipLevel++)

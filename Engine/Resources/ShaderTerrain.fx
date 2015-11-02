@@ -17,6 +17,7 @@ cbuffer cbPerFrame : register (b0)
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
+	float2 gSlopeRanges;
 };
 cbuffer cbPerObject : register (b1)
 {
@@ -55,19 +56,35 @@ ShadowMapOutput VSTerrainShadowMap(VSVertexTerrain input)
 
 float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 {
-	float3 normalWorld = 0.0f;
-	float4 textureColor = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 0));
+	float3 normalMapSample = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, 0)).rgb;
+	float3 normalWorld = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
+
+	float4 textureColor = 0;
+
+	// Determine which texture to use based on height.
+	float slope = 1.0f - input.normalWorld.y;
+    if(slope < gSlopeRanges.x)
+    {
+        textureColor = lerp(
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 0)), 
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 1)), 
+			slope / gSlopeRanges.x);
+    }
+    if((slope < gSlopeRanges.y) && (slope >= gSlopeRanges.x))
+    {
+        textureColor = lerp(
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 1)), 
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 2)), 
+			(slope - gSlopeRanges.x) * (1.0f / (gSlopeRanges.y - gSlopeRanges.x)));
+    }
+    if(slope >= gSlopeRanges.y) 
+    {
+        textureColor = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 2));
+    }
 
 	float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	if(depthValue < 0.05f)
+	if(depthValue >= 0.05f)
 	{
-		normalWorld = input.normalWorld;
-	}
-	else
-	{
-		float3 normalMapSample = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, 0)).rgb;
-		normalWorld = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
-
 		textureColor *= gTextureHRArray.Sample(SamplerAnisotropic, float3(input.tex, 0)) * 1.8f;
 	}
 
@@ -104,19 +121,35 @@ GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 {
     GBufferPSOutput output = (GBufferPSOutput)0;
 
-	float3 normal = 0.0f;
-	float4 color = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 0));
+	float3 normalMapSample = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, 0)).rgb;
+	float3 normal = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
+
+	float4 color = 0.0f;
+
+	// Determine which texture to use based on height.
+	float slope = 1.0f - input.normalWorld.y;
+    if(slope < gSlopeRanges.x)
+    {
+        color = lerp(
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 0)), 
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 1)), 
+			slope / gSlopeRanges.x);
+    }
+    if((slope < gSlopeRanges.y) && (slope >= gSlopeRanges.x))
+    {
+        color = lerp(
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 1)), 
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 2)), 
+			(slope - gSlopeRanges.x) * (1.0f / (gSlopeRanges.y - gSlopeRanges.x)));
+    }
+    if(slope >= gSlopeRanges.y) 
+    {
+        color = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 2));
+    }
 
 	float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
-	if(depthValue < 0.05f)
+	if(depthValue >= 0.05f)
 	{
-		normal = input.normalWorld;
-	}
-	else
-	{
-		float3 normalMapSample = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, 0)).rgb;
-		normal = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
-
 		color *= gTextureHRArray.Sample(SamplerAnisotropic, float3(input.tex, 0)) * 1.8f;
 	}
 

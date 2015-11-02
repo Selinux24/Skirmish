@@ -61,16 +61,16 @@ namespace HeightmapTest
             #region Texts
 
             this.title = this.AddText("Tahoma", 18, Color.White);
-            this.load = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.help = this.AddText("Lucida Casual", 12, Color.Yellow);
+            this.load = this.AddText("Tahoma", 11, Color.Yellow);
+            this.help = this.AddText("Tahoma", 11, Color.Yellow);
 
             this.title.Text = "Heightmap Terrain test";
             this.load.Text = "";
             this.help.Text = "";
 
             this.title.Position = Vector2.Zero;
-            this.load.Position = new Vector2(0, 24);
-            this.help.Position = new Vector2(0, 48);
+            this.load.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
+            this.help.Position = new Vector2(5, this.load.Top + this.load.Height + 3);
 
             #endregion
 
@@ -143,9 +143,10 @@ namespace HeightmapTest
                 Textures = new TerrainDescription.TexturesDescription()
                 {
                     ContentPath = "Textures",
-                    TexturesLR = new[] { "dirt0lr.dds" },
+                    TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
                     TexturesHR = new[] { "dirt0hr.dds" },
                     NormalMaps = new[] { "dirt0nm.dds" },
+                    SlopeRanges = new Vector2(0.1f, 0.3f),
                 },
                 Vegetation = new TerrainDescription.VegetationDescription()
                 {
@@ -190,8 +191,8 @@ namespace HeightmapTest
                 this.Camera.LookTo(position + Vector3.ForwardLH);
             };
 
-            this.Camera.Goto(new Vector3(155.7729f, 6.176476f, -56.17199f));
-            this.Camera.LookTo(new Vector3(155.7517f, 6.158489f, -57.1716f));
+            this.Camera.Goto(new Vector3(444.4133f, 43.37331f, -389.4511f));
+            this.Camera.LookTo(new Vector3(443.4733f, 43.20348f, -389.1551f));
         }
 
         public override void Update(GameTime gameTime)
