@@ -10,6 +10,11 @@ namespace Engine.Common
     public class QuadTreeNode
     {
         /// <summary>
+        /// Static node count
+        /// </summary>
+        private static int NodeCount = 0;
+
+        /// <summary>
         /// Recursive partition creation
         /// </summary>
         /// <param name="game">Game</param>
@@ -38,6 +43,7 @@ namespace Engine.Common
             {
                 QuadTreeNode node = new QuadTreeNode(quadTree, parent)
                 {
+                    Id = NodeCount++,
                     Level = treeDepth,
                     BoundingBox = bbox,
                 };
@@ -129,6 +135,7 @@ namespace Engine.Common
             {
                 QuadTreeNode node = new QuadTreeNode(quadTree, parent)
                 {
+                    Id = NodeCount++,
                     Level = treeDepth,
                     BoundingBox = bbox,
                 };
@@ -238,6 +245,10 @@ namespace Engine.Common
         /// </summary>
         public QuadTreeNode RightNeighbour { get; private set; }
 
+        /// <summary>
+        /// Node Id
+        /// </summary>
+        public int Id;
         /// <summary>
         /// Depth level
         /// </summary>
@@ -900,12 +911,12 @@ namespace Engine.Common
             if (this.Children == null)
             {
                 //Tail node
-                return string.Format("QuadTreeNode; Depth {0}; Triangles {1}", this.Level, this.Triangles.Length);
+                return string.Format("QuadTreeNode {0}; Depth {1}; Triangles {2}", this.Id, this.Level, this.Triangles.Length);
             }
             else
             {
                 //Node
-                return string.Format("QuadTreeNode; Depth {0}; Childs {1}", this.Level, this.Children.Length);
+                return string.Format("QuadTreeNode {0}; Depth {1}; Childs {2}", this.Id, this.Level, this.Children.Length);
             }
         }
     }

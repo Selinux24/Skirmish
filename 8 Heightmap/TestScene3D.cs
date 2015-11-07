@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Common;
 using SharpDX;
 using System.Diagnostics;
 
@@ -17,6 +18,7 @@ namespace HeightmapTest
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer help = null;
+        private TextDrawer help2 = null;
 
         private Cursor cursor;
         private LensFlare lensFlare = null;
@@ -63,14 +65,17 @@ namespace HeightmapTest
             this.title = this.AddText("Tahoma", 18, Color.White);
             this.load = this.AddText("Tahoma", 11, Color.Yellow);
             this.help = this.AddText("Tahoma", 11, Color.Yellow);
+            this.help2 = this.AddText("Tahoma", 11, Color.Orange);
 
             this.title.Text = "Heightmap Terrain test";
             this.load.Text = "";
             this.help.Text = "";
+            this.help2.Text = "";
 
             this.title.Position = Vector2.Zero;
             this.load.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
             this.help.Position = new Vector2(5, this.load.Top + this.load.Height + 3);
+            this.help2.Position = new Vector2(5, this.help.Top + this.help.Height + 3);
 
             #endregion
 
@@ -287,12 +292,8 @@ namespace HeightmapTest
                 };
             }
 
-            //var frustum = this.Camera.Frustum;
-            //var nodes = this.terrain.Contained(ref frustum);
-            //var nodeCount = nodes != null ? nodes.Length : 0;
-
-            //this.help.Text = string.Format("Visible quad-tree nodes: {0}", nodeCount);
             this.help.Text = string.Format("Eye position {0}; Interest {1}", this.Camera.Position, this.Camera.Interest);
+            this.help2.Text = this.Game.RuntimeText;
         }
     }
 }
