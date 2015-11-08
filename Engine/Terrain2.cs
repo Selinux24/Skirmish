@@ -33,9 +33,9 @@ namespace Engine
             /// </summary>
             public QuadTreeNode[] VisibleNodes;
             /// <summary>
-            /// Folliage generation description
+            /// Foliage generation description
             /// </summary>
-            public TerrainDescription.VegetationDescription FolliageDescription;
+            public TerrainDescription.VegetationDescription FoliageDescription;
         }
 
         /// <summary>
@@ -64,17 +64,17 @@ namespace Engine
             /// </summary>
             public Vector2 SlopeRanges;
             /// <summary>
-            /// Folliage textures
+            /// Foliage textures
             /// </summary>
-            public ShaderResourceView FolliageTextures;
+            public ShaderResourceView FoliageTextures;
             /// <summary>
-            /// Folliage texture count
+            /// Foliage texture count
             /// </summary>
-            public uint FolliageTextureCount;
+            public uint FoliageTextureCount;
             /// <summary>
-            /// Folliage end radius
+            /// Foliage end radius
             /// </summary>
-            public float FolliageEndRadius;
+            public float FoliageEndRadius;
         }
 
         #endregion
@@ -376,9 +376,9 @@ namespace Engine
                                     {
                                         freePatch.Visible = true;
                                         freePatch.SetVertexData(node);
-                                        if (context.FolliageDescription != null)
+                                        if (context.FoliageDescription != null)
                                         {
-                                            freePatch.CopyFolliageData(currentPatch);
+                                            freePatch.CopyFoliageData(currentPatch);
                                         }
                                     }
 
@@ -405,9 +405,9 @@ namespace Engine
                                 {
                                     freePatch.Visible = true;
                                     freePatch.SetVertexData(node);
-                                    if (context.FolliageDescription != null)
+                                    if (context.FoliageDescription != null)
                                     {
-                                        freePatch.Plant(context.FolliageDescription);
+                                        freePatch.Plant(context.FoliageDescription);
                                     }
 
                                     changes++;
@@ -645,15 +645,15 @@ namespace Engine
 
                     if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        effect.UpdatePerObject(Material.Default, 0, context.FolliageEndRadius, context.FolliageTextureCount, context.FolliageTextures);
+                        effect.UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        effect.UpdatePerObject(Material.Default, 0, context.FolliageEndRadius, context.FolliageTextureCount, context.FolliageTextures);
+                        effect.UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        effect.UpdatePerObject(Material.Default, 0, context.FolliageEndRadius, context.FolliageTextureCount, context.FolliageTextures);
+                        effect.UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
                     }
 
                     #endregion
@@ -669,7 +669,7 @@ namespace Engine
                         {
                             if (item.Visible)
                             {
-                                item.DrawFolliage(context.BaseContext, technique);
+                                item.DrawFoliage(context.BaseContext, technique);
                             }
                         }
                     }
@@ -689,8 +689,6 @@ namespace Engine
             /// <summary>
             /// Creates a new patch of the specified level of detail
             /// </summary>
-            /// <typeparam name="T">Terrain vertext type</typeparam>
-            /// <typeparam name="F">Folliage vertex type</typeparam>
             /// <param name="game">Game</param>
             /// <param name="lod">Level of detail</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
@@ -720,14 +718,14 @@ namespace Engine
                         };
                     }
 
-                    //Folliage buffer
+                    //Foliage buffer
                     {
                         VertexBillboard[] vertexData = new VertexBillboard[MAX];
 
-                        patch.folliageBuffer = game.Graphics.Device.CreateVertexBufferWrite(vertexData);
-                        patch.folliageBufferBinding = new[]
+                        patch.foliageBuffer = game.Graphics.Device.CreateVertexBufferWrite(vertexData);
+                        patch.foliageBufferBinding = new[]
                         {
-                            new VertexBufferBinding(patch.folliageBuffer, default(VertexBillboard).Stride, 0),
+                            new VertexBufferBinding(patch.foliageBuffer, default(VertexBillboard).Stride, 0),
                         };
                     }
 
@@ -756,33 +754,33 @@ namespace Engine
             /// </summary>
             private VertexBufferBinding[] vertexBufferBinding = null;
             /// <summary>
-            /// Vertex buffer with folliage data
+            /// Vertex buffer with foliage data
             /// </summary>
-            private Buffer folliageBuffer = null;
+            private Buffer foliageBuffer = null;
             /// <summary>
-            /// Folliage positions
+            /// Foliage positions
             /// </summary>
-            private int folliageCount = 0;
+            private int foliageCount = 0;
             /// <summary>
-            /// Vertex buffer binding for folliage buffer
+            /// Vertex buffer binding for foliage buffer
             /// </summary>
-            private VertexBufferBinding[] folliageBufferBinding = null;
+            private VertexBufferBinding[] foliageBufferBinding = null;
             /// <summary>
-            /// Folliage populated flag
+            /// Foliage populated flag
             /// </summary>
-            private bool folliagePlanted = false;
+            private bool foliagePlanted = false;
             /// <summary>
-            /// Folliage populating flag
+            /// Foliage populating flag
             /// </summary>
-            private bool folliagePlanting = false;
+            private bool foliagePlanting = false;
             /// <summary>
-            /// Folliage attached to buffer flag
+            /// Foliage attached to buffer flag
             /// </summary>
-            private bool folliageAttached = false;
+            private bool foliageAttached = false;
             /// <summary>
-            /// Folliage generated data
+            /// Foliage generated data
             /// </summary>
-            private IVertexData[] folliageData = null;
+            private IVertexData[] foliageData = null;
 
             /// <summary>
             /// Game
@@ -898,25 +896,25 @@ namespace Engine
                 }
             }
             /// <summary>
-            /// Draw the patch folliage
+            /// Draw the patch foliage
             /// </summary>
             /// <param name="context">Drawing context</param>
             /// <param name="technique">Technique</param>
-            public void DrawFolliage(DrawContext context, EffectTechnique technique)
+            public void DrawFoliage(DrawContext context, EffectTechnique technique)
             {
-                if (this.folliageCount > 0)
+                if (this.foliageCount > 0)
                 {
-                    this.AttachFolliage();
+                    this.AttachFoliage();
 
                     //Sets vertex and index buffer
-                    this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.folliageBufferBinding);
+                    this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.foliageBufferBinding);
                     this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
 
                     for (int p = 0; p < technique.Description.PassCount; p++)
                     {
                         technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                        this.Game.Graphics.DeviceContext.Draw(this.folliageCount, 0);
+                        this.Game.Graphics.DeviceContext.Draw(this.foliageCount, 0);
 
                         Counters.DrawCallsPerFrame++;
                         Counters.InstancesPerFrame++;
@@ -949,20 +947,20 @@ namespace Engine
                 return IndexBufferShapeEnum.None;
             }
             /// <summary>
-            /// Launchs folliage population asynchronous task
+            /// Launchs foliage population asynchronous task
             /// </summary>
             /// <param name="description">Terrain vegetation description</param>
             public void Plant(TerrainDescription.VegetationDescription description)
             {
                 if (this.Current != null)
                 {
-                    this.folliageAttached = false;
-                    this.folliagePlanted = false;
+                    this.foliageAttached = false;
+                    this.foliagePlanted = false;
 
-                    if (!this.folliagePlanting)
+                    if (!this.foliagePlanting)
                     {
                         //Start planting task
-                        this.folliagePlanting = true;
+                        this.foliagePlanting = true;
 
                         Task<VertexData[]> t = Task.Factory.StartNew<VertexData[]>(() => PlantTask(this.Current, description));
 
@@ -971,16 +969,16 @@ namespace Engine
                 }
             }
             /// <summary>
-            /// Copies the folliage data from one patch to another
+            /// Copies the foliage data from one patch to another
             /// </summary>
             /// <param name="patch">The other patch from copy data to</param>
-            public void CopyFolliageData(TerrainPatch patch)
+            public void CopyFoliageData(TerrainPatch patch)
             {
-                this.folliageCount = patch.folliageCount;
-                this.folliageData = patch.folliageData;
-                this.folliagePlanting = false;
-                this.folliagePlanted = true;
-                this.folliageAttached = false;
+                this.foliageCount = patch.foliageCount;
+                this.foliageData = patch.foliageData;
+                this.foliagePlanting = false;
+                this.foliagePlanted = true;
+                this.foliageAttached = false;
             }
 
             /// <summary>
@@ -1049,29 +1047,29 @@ namespace Engine
             /// <param name="vData">Vertex data generated in asynchronous task</param>
             private void PlantThreadCompleted(VertexData[] vData)
             {
-                this.folliageCount = vData.Length;
-                this.folliageData = VertexData.Convert(VertexTypes.Billboard, vData, null, null, Matrix.Identity);
-                this.folliagePlanting = false;
-                this.folliagePlanted = true;
-                this.folliageAttached = false;
+                this.foliageCount = vData.Length;
+                this.foliageData = VertexData.Convert(VertexTypes.Billboard, vData, null, null, Matrix.Identity);
+                this.foliagePlanting = false;
+                this.foliagePlanted = true;
+                this.foliageAttached = false;
             }
             /// <summary>
-            /// Attachs the folliage data to the vertex buffer
+            /// Attachs the foliage data to the vertex buffer
             /// </summary>
-            private void AttachFolliage()
+            private void AttachFoliage()
             {
-                if (!this.folliageAttached)
+                if (!this.foliageAttached)
                 {
-                    if (this.folliagePlanted && this.folliageData != null && this.folliageData.Length > 0)
+                    if (this.foliagePlanted && this.foliageData != null && this.foliageData.Length > 0)
                     {
                         //Attach data
                         VertexData.WriteVertexBuffer(
                             this.Game.Graphics.DeviceContext,
-                            this.folliageBuffer,
-                            this.folliageData);
+                            this.foliageBuffer,
+                            this.foliageData);
                     }
 
-                    this.folliageAttached = true;
+                    this.foliageAttached = true;
                 }
             }
 
@@ -1081,11 +1079,11 @@ namespace Engine
             /// <returns>Returns the instance text representation</returns>
             public override string ToString()
             {
-                return string.Format("LOD: {0}; Visible: {1}; Indices: {2}; Folliage: {3}; {4}",
+                return string.Format("LOD: {0}; Visible: {1}; Indices: {2}; Foliage: {3}; {4}",
                     this.LevelOfDetail,
                     this.Visible,
                     this.indexCount,
-                    this.folliageCount,
+                    this.foliageCount,
                     this.Current);
             }
         }
@@ -1143,13 +1141,17 @@ namespace Engine
         /// </summary>
         private Vector2 slopeRanges = Vector2.Zero;
         /// <summary>
-        /// Folliage textures
+        /// Foliage textures
         /// </summary>
-        private ShaderResourceView folliageTextures = null;
+        private ShaderResourceView foliageTextures = null;
         /// <summary>
-        /// Folliage texture count
+        /// Foliage texture count
         /// </summary>
-        private uint folliageTextureCount = 0;
+        private uint foliageTextureCount = 0;
+
+
+        public float WindRotation;
+        public int WindDirection;
 
         /// <summary>
         /// Constructor
@@ -1206,20 +1208,20 @@ namespace Engine
 
             #endregion
 
-            #region Read folliage textures
+            #region Read foliage textures
 
             if (description.Vegetation != null)
             {
-                //Read folliage textures
+                //Read foliage textures
                 string contentPath = Path.Combine(description.ContentPath, description.Vegetation.ContentPath);
 
-                ImageContent folliageTextures = new ImageContent()
+                ImageContent foliageTextures = new ImageContent()
                 {
                     Streams = ContentManager.FindContent(contentPath, description.Vegetation.VegetarionTextures),
                 };
 
-                this.folliageTextures = game.Graphics.Device.LoadTextureArray(folliageTextures.Streams);
-                this.folliageTextureCount = (uint)folliageTextures.Count;
+                this.foliageTextures = game.Graphics.Device.LoadTextureArray(foliageTextures.Streams);
+                this.foliageTextureCount = (uint)foliageTextures.Count;
             }
 
             #endregion
@@ -1246,7 +1248,7 @@ namespace Engine
             //Initialize update context
             this.updateContext = new TerrainUpdateContext()
             {
-                FolliageDescription = description.Vegetation,
+                FoliageDescription = description.Vegetation,
             };
 
             //Initialize draw context
@@ -1256,9 +1258,9 @@ namespace Engine
                 TerraintexturesHR = this.terrainTexturesHR,
                 TerrainNormalMaps = this.terrainNormalMaps,
                 SlopeRanges = this.slopeRanges,
-                FolliageTextureCount = this.folliageTextureCount,
-                FolliageTextures = this.folliageTextures,
-                FolliageEndRadius = description.Vegetation != null ? description.Vegetation.EndRadius : 0,
+                FoliageTextureCount = this.foliageTextureCount,
+                FoliageTextures = this.foliageTextures,
+                FoliageEndRadius = description.Vegetation != null ? description.Vegetation.EndRadius : 0,
             };
 
             //Set drawing parameters for renderer
@@ -1273,7 +1275,7 @@ namespace Engine
             Helper.Dispose(this.terrainTexturesLR);
             Helper.Dispose(this.terrainTexturesHR);
             Helper.Dispose(this.terrainNormalMaps);
-            Helper.Dispose(this.folliageTextures);
+            Helper.Dispose(this.foliageTextures);
             Helper.Dispose(this.patches);
         }
 
@@ -1285,6 +1287,24 @@ namespace Engine
         {
             if (this.patches != null)
             {
+                // Update the wind rotation.
+                if (this.WindDirection == 1)
+                {
+                    this.WindRotation += 0.1f;
+                    if (this.WindRotation > 10.0f)
+                    {
+                        this.WindDirection = 2;
+                    }
+                }
+                else
+                {
+                    this.WindRotation -= 0.1f;
+                    if (this.WindRotation < -10.0f)
+                    {
+                        this.WindDirection = 1;
+                    }
+                }
+
                 this.updateContext.BaseContext = context;
                 this.updateContext.VisibleNodes = this.quadTree.GetNodesInVolume(ref context.Frustum);
 

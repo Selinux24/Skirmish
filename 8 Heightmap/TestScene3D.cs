@@ -1,5 +1,4 @@
 ﻿using Engine;
-using Engine.Common;
 using SharpDX;
 using System.Diagnostics;
 
@@ -155,7 +154,7 @@ namespace HeightmapTest
                 },
                 Vegetation = new TerrainDescription.VegetationDescription()
                 {
-                    ContentPath = "Folliage/Billboard",
+                    ContentPath = "Foliage/Billboard",
                     VegetarionTextures = new[] { "grass.png" },
                     Saturation = 0.3f,
                     StartRadius = 0f,
