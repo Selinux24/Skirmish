@@ -281,6 +281,7 @@ namespace Engine
                 Stopwatch swStartup = Stopwatch.StartNew();
 #endif
                 //Initialize context data from update context
+                this.DrawContext.GameTime = gameTime;
                 this.DrawContext.World = this.UpdateContext.World;
                 this.DrawContext.View = this.UpdateContext.View;
                 this.DrawContext.Projection = this.UpdateContext.Projection;
@@ -313,6 +314,7 @@ namespace Engine
 
                     Matrix shadowViewProj = this.shadowMapper.View * this.shadowMapper.Projection;
 
+                    this.DrawShadowsContext.GameTime = gameTime;
                     this.DrawShadowsContext.World = this.UpdateContext.World;
                     this.DrawShadowsContext.View = this.shadowMapper.View;
                     this.DrawShadowsContext.Projection = this.shadowMapper.Projection;

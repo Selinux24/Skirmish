@@ -15,6 +15,9 @@ cbuffer cbPerFrame : register (b0)
 	float4 gFogColor;
 	float gStartRadius;
 	float gEndRadius;
+	float3 gWindDirection;
+	float gWindStrength;
+	float gTime;
 };
 cbuffer cbPerObject : register (b1)
 {
@@ -34,6 +37,13 @@ cbuffer cbFixed : register (b2)
 
 Texture2DArray gTextureArray;
 Texture2D gShadowMap;
+
+float3 CalcWindTranslation(float3 pos, float time, float3 direction, float strength)
+{
+	float3 wind = sin(time + (pos.x + pos.y + pos.z) * 0.1f) * direction.xyz * strength;
+	
+	return pos + wind;
+}
 
 GSVertexBillboard VSBillboard(VSVertexBillboard input)
 {
@@ -66,6 +76,12 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 		v[1] = float4(input[0].centerWorld + halfWidth * right + halfHeight * up, 1.0f);
 		v[2] = float4(input[0].centerWorld - halfWidth * right - halfHeight * up, 1.0f);
 		v[3] = float4(input[0].centerWorld - halfWidth * right + halfHeight * up, 1.0f);
+
+		if(gWindStrength > 0)
+		{
+			v[1].xyz = CalcWindTranslation(v[1].xyz, gTime, gWindDirection, gWindStrength);
+			v[3].xyz = CalcWindTranslation(v[3].xyz, gTime, gWindDirection, gWindStrength);
+		}
 
 		//Transform quad vertices to world space and output them as a triangle strip.
 		PSVertexBillboard gout;
@@ -102,6 +118,12 @@ void GSSMBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveI
 		v[1] = float4(input[0].centerWorld + halfWidth * right + halfHeight * up, 1.0f);
 		v[2] = float4(input[0].centerWorld - halfWidth * right - halfHeight * up, 1.0f);
 		v[3] = float4(input[0].centerWorld - halfWidth * right + halfHeight * up, 1.0f);
+
+		if(gWindStrength > 0)
+		{
+			v[1].xyz = CalcWindTranslation(v[1].xyz, gTime, gWindDirection, gWindStrength);
+			v[3].xyz = CalcWindTranslation(v[3].xyz, gTime, gWindDirection, gWindStrength);
+		}
 
 		//Transform quad vertices to world space and output them as a triangle strip.
 		PSShadowMapOutput gout;

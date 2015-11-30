@@ -95,6 +95,18 @@ namespace Engine.Effects
         /// Shadow map effect variable
         /// </summary>
         private EffectShaderResourceVariable shadowMap = null;
+        /// <summary>
+        /// Wind direction effect variable
+        /// </summary>
+        private EffectVectorVariable windDirection = null;
+        /// <summary>
+        /// Wind strength effect variable
+        /// </summary>
+        private EffectScalarVariable windStrength = null;
+        /// <summary>
+        /// Time effect variable
+        /// </summary>
+        private EffectScalarVariable time = null;
 
         /// <summary>
         /// Directional lights
@@ -364,6 +376,52 @@ namespace Engine.Effects
                 this.shadowMap.SetResource(value);
             }
         }
+        /// <summary>
+        /// Wind direction
+        /// </summary>
+        protected Vector3 WindDirection
+        {
+            get
+            {
+                Vector4 v = this.windDirection.GetFloatVector();
+
+                return new Vector3(v.X, v.Y, v.Z);
+            }
+            set
+            {
+                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
+
+                this.windDirection.Set(v4);
+            }
+        }
+        /// <summary>
+        /// Wind strength
+        /// </summary>
+        protected float WindStrength
+        {
+            get
+            {
+                return this.windStrength.GetFloat();
+            }
+            set
+            {
+                this.windStrength.Set(value);
+            }
+        }
+        /// <summary>
+        /// Time
+        /// </summary>
+        protected float Time
+        {
+            get
+            {
+                return this.time.GetFloat();
+            }
+            set
+            {
+                this.time.Set(value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -398,6 +456,10 @@ namespace Engine.Effects
             this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
+
+            this.windDirection = this.Effect.GetVariableByName("gWindDirection").AsVector();
+            this.windStrength = this.Effect.GetVariableByName("gWindStrength").AsScalar();
+            this.time = this.Effect.GetVariableByName("gTime").AsScalar();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -454,6 +516,40 @@ namespace Engine.Effects
             ShaderResourceView shadowMap,
             Matrix fromLightViewProjection)
         {
+            this.UpdatePerFrame(
+                world,
+                viewProjection,
+                eyePositionWorld,
+                lights,
+                shadowMap,
+                fromLightViewProjection,
+                Vector3.Zero,
+                0f,
+                0f);
+        }
+        /// <summary>
+        /// Update per frame data
+        /// </summary>
+        /// <param name="world">World</param>
+        /// <param name="viewProjection">View * projection</param>
+        /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="lights">Scene ligths</param>
+        /// <param name="shadowMap">Shadow map texture</param>
+        /// <param name="fromLightViewProjection">From camera View * Projection transform</param>
+        /// <param name="windDirection">Wind direction</param>
+        /// <param name="windStrength">Wind strength</param>
+        /// <param name="time">Time</param>
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection,
+            Vector3 eyePositionWorld,
+            SceneLights lights,
+            ShaderResourceView shadowMap,
+            Matrix fromLightViewProjection,
+            Vector3 windDirection,
+            float windStrength,
+            float time)
+        {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
             this.EyePositionWorld = eyePositionWorld;
@@ -505,6 +601,10 @@ namespace Engine.Effects
                 this.FromLightViewProjection = Matrix.Identity;
                 this.ShadowMap = null;
             }
+
+            this.WindDirection = windDirection;
+            this.WindStrength = windStrength;
+            this.Time = time;
         }
         /// <summary>
         /// Update per model object data

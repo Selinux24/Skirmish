@@ -154,6 +154,10 @@ namespace Engine.Common
         /// </summary>
         public string Name = "";
         /// <summary>
+        /// Game time
+        /// </summary>
+        public GameTime GameTime;
+        /// <summary>
         /// Drawer mode
         /// </summary>
         public DrawerModesEnum DrawerMode = DrawerModesEnum.Forward;

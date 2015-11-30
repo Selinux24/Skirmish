@@ -75,6 +75,14 @@ namespace Engine
             /// Foliage end radius
             /// </summary>
             public float FoliageEndRadius;
+            /// <summary>
+            /// Wind direction
+            /// </summary>
+            public Vector3 WindDirection;
+            /// <summary>
+            /// Wind strength
+            /// </summary>
+            public float WindStrength;
         }
 
         #endregion
@@ -619,7 +627,10 @@ namespace Engine
                             context.BaseContext.EyePosition,
                             context.BaseContext.Lights,
                             context.BaseContext.ShadowMap,
-                            context.BaseContext.FromLightViewProjection);
+                            context.BaseContext.FromLightViewProjection,
+                            context.WindDirection,
+                            context.WindStrength,
+                            context.BaseContext.GameTime.TotalSeconds);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
@@ -629,14 +640,23 @@ namespace Engine
                             context.BaseContext.EyePosition,
                             context.BaseContext.Lights,
                             context.BaseContext.ShadowMap,
-                            context.BaseContext.FromLightViewProjection);
+                            context.BaseContext.FromLightViewProjection,
+                            context.WindDirection,
+                            context.WindStrength,
+                            context.BaseContext.GameTime.TotalSeconds);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
                         effect.UpdatePerFrame(
                             context.BaseContext.World,
                             context.BaseContext.ViewProjection,
-                            context.BaseContext.EyePosition);
+                            context.BaseContext.EyePosition,
+                            null,
+                            null,
+                            Matrix.Identity,
+                            context.WindDirection,
+                            context.WindStrength,
+                            context.BaseContext.GameTime.TotalSeconds);
                     }
 
                     #endregion
@@ -1149,10 +1169,6 @@ namespace Engine
         /// </summary>
         private uint foliageTextureCount = 0;
 
-
-        public float WindRotation;
-        public int WindDirection;
-
         /// <summary>
         /// Constructor
         /// </summary>
@@ -1287,24 +1303,6 @@ namespace Engine
         {
             if (this.patches != null)
             {
-                // Update the wind rotation.
-                if (this.WindDirection == 1)
-                {
-                    this.WindRotation += 0.1f;
-                    if (this.WindRotation > 10.0f)
-                    {
-                        this.WindDirection = 2;
-                    }
-                }
-                else
-                {
-                    this.WindRotation -= 0.1f;
-                    if (this.WindRotation < -10.0f)
-                    {
-                        this.WindDirection = 1;
-                    }
-                }
-
                 this.updateContext.BaseContext = context;
                 this.updateContext.VisibleNodes = this.quadTree.GetNodesInVolume(ref context.Frustum);
 
@@ -1470,6 +1468,20 @@ namespace Engine
         public BoundingBox GetBoundingBox()
         {
             return this.quadTree.BoundingBox;
+        }
+
+        /// <summary>
+        /// Sets wind parameters
+        /// </summary>
+        /// <param name="direction">Direction</param>
+        /// <param name="strength">Strength</param>
+        public void SetWind(Vector3 direction, float strength)
+        {
+            if (this.drawContext != null)
+            {
+                this.drawContext.WindDirection = direction;
+                this.drawContext.WindStrength = strength;
+            }
         }
     }
 }

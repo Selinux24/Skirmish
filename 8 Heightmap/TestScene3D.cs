@@ -14,6 +14,9 @@ namespace HeightmapTest
         private Vector3 playerHeight = Vector3.UnitY * 5f;
         private bool playerFlying = false;
 
+        private Vector3 windDirection = Vector3.UnitX;
+        private float windStrength = 1f;
+
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer help = null;
@@ -167,6 +170,7 @@ namespace HeightmapTest
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
+            this.terrain.SetWind(this.windDirection, this.windStrength);
 
             #endregion
 
@@ -269,6 +273,28 @@ namespace HeightmapTest
 
             #endregion
 
+            #region Wind
+
+            if (this.Game.Input.KeyPressed(Keys.Add))
+            {
+                this.windStrength += 0.01f;
+
+                if (this.windStrength > 100f) this.windStrength = 100f;
+
+                this.terrain.SetWind(this.windDirection, this.windStrength);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Subtract))
+            {
+                this.windStrength -= 0.01f;
+
+                if (this.windStrength < 0f) this.windStrength = 0f;
+
+                this.terrain.SetWind(this.windDirection, this.windStrength);
+            }
+
+            #endregion
+
             #region Debug
 
             if (this.Game.Input.KeyJustReleased(Keys.F1))
@@ -291,7 +317,7 @@ namespace HeightmapTest
                 };
             }
 
-            this.help.Text = string.Format("Eye position {0}; Interest {1}", this.Camera.Position, this.Camera.Interest);
+            this.help.Text = string.Format("Wind {0} {1}", this.windDirection, this.windStrength);
             this.help2.Text = this.Game.RuntimeText;
         }
     }
