@@ -19,7 +19,7 @@ cbuffer cbPerFrame : register(b0)
     float   gEndRadius;                 // Offset:  836, size:    4
     float3  gWindDirection;             // Offset:  848, size:   12
     float   gWindStrength;              // Offset:  860, size:    4
-    float   gTime;                      // Offset:  864, size:    4
+    float   gTotalTime;                 // Offset:  864, size:    4
 }
 
 cbuffer cbPerObject : register(b1)
@@ -34,7 +34,7 @@ cbuffer cbFixed : register(b2)
 }
 
 //
-// 5 local object(s)
+// 6 local object(s)
 //
 SamplerState SamplerPoint
 {
@@ -54,6 +54,7 @@ SamplerState SamplerAnisotropic
 };
 Texture2DArray gTextureArray;
 Texture2D gShadowMap;
+Texture1D gTextureRandom;
 
 //
 // 1 groups(s)
@@ -95,10 +96,10 @@ fxgroup
                 dcl_output o0.xyz
                 dcl_output o1.xy
                 
-                #line 53 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 56 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 mad o0.y, v1.y, l(0.450000), v0.y  // VSBillboard<1:Inf>
                 
-                #line 56
+                #line 59
                 mov o0.xz, v0.xxzx  // VSBillboard<0,2>
                 mov o1.xy, v1.xyxx  // VSBillboard<3,4>
                 ret 
@@ -170,7 +171,7 @@ fxgroup
                 //   float gEndRadius;                  // Offset:  836 Size:     4
                 //   float3 gWindDirection;             // Offset:  848 Size:    12
                 //   float gWindStrength;               // Offset:  860 Size:     4
-                //   float gTime;                       // Offset:  864 Size:     4
+                //   float gTotalTime;                  // Offset:  864 Size:     4
                 //
                 // }
                 //
@@ -190,6 +191,8 @@ fxgroup
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
+                // SamplerLinear                     sampler      NA          NA    0        1
+                // gTextureRandom                    texture  float4          1d    0        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
                 // cbFixed                           cbuffer      NA          NA    2        1
                 //
@@ -218,10 +221,13 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[55], immediateIndexed
                 dcl_constantbuffer cb2[4], immediateIndexed
+                dcl_sampler s0, mode_default
+                dcl_resource_texture1d (float,float,float,float) t0
                 dcl_input v[1][0].xyz
                 dcl_input v[1][1].xy
                 dcl_input vPrim
-                dcl_temps 6
+                dcl_temps 5
+                dcl_indexableTemp x0[4], 4
                 dcl_inputprimitive point 
                 dcl_stream m0
                 dcl_outputtopology trianglestrip 
@@ -232,7 +238,7 @@ fxgroup
                 dcl_output_sgv o4.x, primitive_id
                 dcl_maxout 4
                 
-                #line 62 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 65 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 add r0.xyz, cb0[12].xyzx, -v[0][0].xyzx  // look<0:Inf,1:Inf,2:Inf>
                 eq r0.w, cb0[52].y, l(0.000000)
                 dp3 r0.y, r0.xyzx, r0.xyzx
@@ -241,7 +247,7 @@ fxgroup
                 or r0.y, r0.y, r0.w
                 if_nz r0.y
                 
-                #line 67
+                #line 70
                   dp2 r0.y, r0.xzxx, r0.xzxx
                   rsq r1.x, r0.y
                   mul r1.yz, r0.zzxz, r1.xxxx  // look<2:NaN:Inf,0:NaN:Inf>
@@ -249,108 +255,76 @@ fxgroup
                   mov r0.z, l(0)
                   mad r0.xyz, -r1.xyzx, l(0.000000, 0.000000, 1.000000, 0.000000), r0.xyzx  // right<0:NaN:Inf,1: 0f,2:NaN:Inf>
                 
-                #line 75
+                #line 78
                   mul r0.w, l(0.500000), v[0][1].x  // halfWidth<0:[-1.70141e+038f,1.70141e+038f]>
                   mad r1.xyz, r0.wwww, r0.xyzx, v[0][0].xyzx
                   mad r2.xyz, -v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r1.xyzx
                   mad r1.xyz, v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r1.xyzx  // pos<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                  mov x0[1].xyz, r1.xyzx  // v<4,5,6>
                   mad r0.xyz, -r0.wwww, r0.xyzx, v[0][0].xyzx
                   mad r3.xyz, -v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r0.xyzx
                   mad r0.xyz, v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r0.xyzx  // pos<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                  mov x0[3].xyz, r0.xyzx  // v<12,13,14>
                   lt r0.w, l(0.000000), cb0[53].w
+                  if_nz r0.w
                 
-                #line 43
-                  add r1.w, r1.y, r1.x
-                  add r1.w, r1.z, r1.w
-                  mad r1.w, r1.w, l(0.100000), cb0[54].x
-                  sincos r1.w, null, r1.w
-                  mul r4.xyz, r1.wwww, cb0[53].xyzx
-                  mad r4.xyz, r4.xyzx, cb0[53].wwww, r1.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 44
+                    add r0.w, r1.y, r1.x
+                    add r0.w, r1.z, r0.w
+                    mad r0.w, r0.w, l(0.100000), cb0[54].x
+                    sincos r0.w, null, r0.w
+                    mul r4.xyz, r0.wwww, cb0[53].xyzx
+                    mul r4.xyz, r4.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    utof r0.w, vPrim
+                    sample_l_indexable(texture1d)(float,float,float,float) r0.w, r0.w, t0.yzwx, s0, l(0.000000)  // sRandom<0:Inf>
+                    min r0.w, r0.w, l(1.000000)
+                    mad r1.xyz, r4.xyzx, r0.wwww, r1.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 82
-                  movc r1.xyz, r0.wwww, r4.xyzx, r1.xyzx
+                #line 85
+                    mov x0[1].xyz, r1.xyzx  // v<4,5,6>
                 
-                #line 43
-                  add r4.x, r0.y, r0.x
-                  add r4.x, r0.z, r4.x
-                  mad r4.x, r4.x, l(0.100000), cb0[54].x
-                  sincos r4.x, null, r4.x
-                  mul r4.xyz, r4.xxxx, cb0[53].xyzx
-                  mad r4.xyz, r4.xyzx, cb0[53].wwww, r0.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 44
+                    add r1.x, r0.y, r0.x
+                    add r1.x, r0.z, r1.x
+                    mad r1.x, r1.x, l(0.100000), cb0[54].x
+                    sincos r1.x, null, r1.x
+                    mul r1.xyz, r1.xxxx, cb0[53].xyzx
+                    mul r1.xyz, r1.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 48
+                    mad r0.xyz, r1.xyzx, r0.wwww, r0.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 86
+                    mov x0[3].xyz, r0.xyzx  // v<12,13,14>
                 
                 #line 83
-                  movc r0.xyz, r0.wwww, r4.xyzx, r0.xyzx
+                  endif 
                 
-                #line 91
+                #line 94
                   mov r2.w, l(1.000000)
-                  dp4 r4.x, r2.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
-                  dp4 r4.y, r2.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
-                  dp4 r4.z, r2.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
-                  dp4 r4.w, r2.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
-                  dp4 r5.x, r2.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
-                  dp4 r5.y, r2.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
-                  dp4 r2.x, r2.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
+                  dp4 r0.x, r2.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
+                  dp4 r0.y, r2.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
+                  dp4 r0.z, r2.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
+                  dp4 r0.w, r2.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
+                  dp4 r1.x, r2.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
+                  dp4 r1.y, r2.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
+                  dp4 r1.z, r2.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
                 
-                #line 97
-                  mov o0.x, r4.x  // outputStream<0>
-                  mov o0.y, r4.y  // outputStream<0>
-                  mov o0.z, r4.z  // outputStream<0>
-                  mov o0.w, r4.w  // outputStream<0>
-                  mov o1.x, r5.x  // outputStream<0>
-                  mov o1.y, r5.y  // outputStream<0>
-                  mov o1.z, r2.x  // outputStream<0>
+                #line 100
+                  mov o0.x, r0.x  // outputStream<0>
+                  mov o0.y, r0.y  // outputStream<0>
+                  mov o0.z, r0.z  // outputStream<0>
+                  mov o0.w, r0.w  // outputStream<0>
+                  mov o1.x, r1.x  // outputStream<0>
+                  mov o1.y, r1.y  // outputStream<0>
+                  mov o1.z, r1.z  // outputStream<0>
                   mov o2.xyz, l(0,1.000000,0,0)  // outputStream<0,0,0>
                   mov o3.xy, cb2[0].xyxx  // outputStream<0,0>
                   mov o4.x, vPrim  // outputStream<0>
                   emit_stream m0
                 
-                #line 91
-                  mov r1.w, l(1.000000)
-                  dp4 r2.x, r1.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
-                  dp4 r2.y, r1.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
-                  dp4 r2.z, r1.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
-                  dp4 r2.w, r1.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
-                  dp4 r4.x, r1.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
-                  dp4 r4.y, r1.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
-                  dp4 r1.x, r1.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
-                
-                #line 97
-                  mov o0.x, r2.x  // outputStream<0>
-                  mov o0.y, r2.y  // outputStream<0>
-                  mov o0.z, r2.z  // outputStream<0>
-                  mov o0.w, r2.w  // outputStream<0>
-                  mov o1.x, r4.x  // outputStream<0>
-                  mov o1.y, r4.y  // outputStream<0>
-                  mov o1.z, r1.x  // outputStream<0>
-                  mov o2.xyz, l(0,1.000000,0,0)  // outputStream<0,0,0>
-                  mov o3.xy, cb2[1].xyxx  // outputStream<0,0>
-                  mov o4.x, vPrim  // outputStream<0>
-                  emit_stream m0
-                
-                #line 91
-                  mov r3.w, l(1.000000)
-                  dp4 r1.x, r3.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
-                  dp4 r1.y, r3.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
-                  dp4 r1.z, r3.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
-                  dp4 r1.w, r3.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
-                  dp4 r2.x, r3.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
-                  dp4 r2.y, r3.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
-                  dp4 r2.z, r3.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
-                
-                #line 97
-                  mov o0.x, r1.x  // outputStream<0>
-                  mov o0.y, r1.y  // outputStream<0>
-                  mov o0.z, r1.z  // outputStream<0>
-                  mov o0.w, r1.w  // outputStream<0>
-                  mov o1.x, r2.x  // outputStream<0>
-                  mov o1.y, r2.y  // outputStream<0>
-                  mov o1.z, r2.z  // outputStream<0>
-                  mov o2.xyz, l(0,1.000000,0,0)  // outputStream<0,0,0>
-                  mov o3.xy, cb2[2].xyxx  // outputStream<0,0>
-                  mov o4.x, vPrim  // outputStream<0>
-                  emit_stream m0
-                
-                #line 91
+                #line 94
+                  mov r0.xyz, x0[1].xyzx  // v<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
                   mov r0.w, l(1.000000)
                   dp4 r1.x, r0.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
                   dp4 r1.y, r0.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
@@ -360,7 +334,54 @@ fxgroup
                   dp4 r2.y, r0.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
                   dp4 r0.x, r0.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
                 
-                #line 97
+                #line 100
+                  mov o0.x, r1.x  // outputStream<0>
+                  mov o0.y, r1.y  // outputStream<0>
+                  mov o0.z, r1.z  // outputStream<0>
+                  mov o0.w, r1.w  // outputStream<0>
+                  mov o1.x, r2.x  // outputStream<0>
+                  mov o1.y, r2.y  // outputStream<0>
+                  mov o1.z, r0.x  // outputStream<0>
+                  mov o2.xyz, l(0,1.000000,0,0)  // outputStream<0,0,0>
+                  mov o3.xy, cb2[1].xyxx  // outputStream<0,0>
+                  mov o4.x, vPrim  // outputStream<0>
+                  emit_stream m0
+                
+                #line 94
+                  mov r3.w, l(1.000000)
+                  dp4 r0.x, r3.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
+                  dp4 r0.y, r3.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
+                  dp4 r0.z, r3.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
+                  dp4 r0.w, r3.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
+                  dp4 r1.x, r3.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
+                  dp4 r1.y, r3.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
+                  dp4 r1.z, r3.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
+                
+                #line 100
+                  mov o0.x, r0.x  // outputStream<0>
+                  mov o0.y, r0.y  // outputStream<0>
+                  mov o0.z, r0.z  // outputStream<0>
+                  mov o0.w, r0.w  // outputStream<0>
+                  mov o1.x, r1.x  // outputStream<0>
+                  mov o1.y, r1.y  // outputStream<0>
+                  mov o1.z, r1.z  // outputStream<0>
+                  mov o2.xyz, l(0,1.000000,0,0)  // outputStream<0,0,0>
+                  mov o3.xy, cb2[2].xyxx  // outputStream<0,0>
+                  mov o4.x, vPrim  // outputStream<0>
+                  emit_stream m0
+                
+                #line 94
+                  mov r0.xyz, x0[3].xyzx  // v<12:NaN:Inf,13:NaN:Inf,14:NaN:Inf>
+                  mov r0.w, l(1.000000)
+                  dp4 r1.x, r0.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
+                  dp4 r1.y, r0.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
+                  dp4 r1.z, r0.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
+                  dp4 r1.w, r0.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
+                  dp4 r2.x, r0.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
+                  dp4 r2.y, r0.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
+                  dp4 r0.x, r0.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
+                
+                #line 100
                   mov o0.x, r1.x  // outputStream<0>
                   mov o0.y, r1.y  // outputStream<0>
                   mov o0.z, r1.z  // outputStream<0>
@@ -373,12 +394,12 @@ fxgroup
                   mov o4.x, vPrim  // outputStream<0>
                   emit_stream m0
                 
-                #line 63
+                #line 66
                 endif 
                 
-                #line 60
+                #line 63
                 ret 
-                // Approximately 113 instruction slots used
+                // Approximately 124 instruction slots used
                             
             };
             PixelShader = asm {
@@ -446,7 +467,7 @@ fxgroup
                 //   float gEndRadius;                  // Offset:  836 Size:     4 [unused]
                 //   float3 gWindDirection;             // Offset:  848 Size:    12 [unused]
                 //   float gWindStrength;               // Offset:  860 Size:     4 [unused]
-                //   float gTime;                       // Offset:  864 Size:     4 [unused]
+                //   float gTotalTime;                  // Offset:  864 Size:     4 [unused]
                 //
                 // }
                 //
@@ -511,7 +532,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 6
                 
-                #line 145 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 148 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 udiv null, r0.x, v4.x, cb1[1].z
                 utof r0.z, r0.x  // uvw<2:[0f,4.29497e+009f]>
                 mov r0.xy, v3.xyxx
@@ -1319,7 +1340,7 @@ fxgroup
                   add r2.yzw, r0.xxyz, r2.yyzw  // litColor<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 endif 
                 
-                #line 167 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 170 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 lt r0.x, l(0.000000), cb0[50].y
                 sqrt r0.y, r1.w  // distToEye<0:NaN:Inf>
                 
@@ -1329,10 +1350,10 @@ fxgroup
                 add r1.xyz, -r2.yzwy, cb0[51].xyzx
                 mad r1.xyz, r0.yyyy, r1.xyzx, r2.yzwy  // ComputeFog<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 167 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 170 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 movc o0.xyz, r0.xxxx, r1.xyzx, r2.yzwy  // PSForwardBillboard<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 174
+                #line 177
                 mov o0.w, r0.w  // PSForwardBillboard<3:Inf>
                 ret 
                 // Approximately 571 instruction slots used
@@ -1374,10 +1395,10 @@ fxgroup
                 dcl_output o0.xyz
                 dcl_output o1.xy
                 
-                #line 53 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 56 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 mad o0.y, v1.y, l(0.450000), v0.y  // VSBillboard<1:Inf>
                 
-                #line 56
+                #line 59
                 mov o0.xz, v0.xxzx  // VSBillboard<0,2>
                 mov o1.xy, v1.xyxx  // VSBillboard<3,4>
                 ret 
@@ -1449,7 +1470,7 @@ fxgroup
                 //   float gEndRadius;                  // Offset:  836 Size:     4
                 //   float3 gWindDirection;             // Offset:  848 Size:    12
                 //   float gWindStrength;               // Offset:  860 Size:     4
-                //   float gTime;                       // Offset:  864 Size:     4
+                //   float gTotalTime;                  // Offset:  864 Size:     4
                 //
                 // }
                 //
@@ -1469,6 +1490,8 @@ fxgroup
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
+                // SamplerLinear                     sampler      NA          NA    0        1
+                // gTextureRandom                    texture  float4          1d    0        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
                 // cbFixed                           cbuffer      NA          NA    2        1
                 //
@@ -1497,10 +1520,13 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[55], immediateIndexed
                 dcl_constantbuffer cb2[4], immediateIndexed
+                dcl_sampler s0, mode_default
+                dcl_resource_texture1d (float,float,float,float) t0
                 dcl_input v[1][0].xyz
                 dcl_input v[1][1].xy
                 dcl_input vPrim
-                dcl_temps 6
+                dcl_temps 5
+                dcl_indexableTemp x0[4], 4
                 dcl_inputprimitive point 
                 dcl_stream m0
                 dcl_outputtopology trianglestrip 
@@ -1511,7 +1537,7 @@ fxgroup
                 dcl_output_sgv o4.x, primitive_id
                 dcl_maxout 4
                 
-                #line 62 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 65 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 add r0.xyz, cb0[12].xyzx, -v[0][0].xyzx  // look<0:Inf,1:Inf,2:Inf>
                 eq r0.w, cb0[52].y, l(0.000000)
                 dp3 r0.y, r0.xyzx, r0.xyzx
@@ -1520,7 +1546,7 @@ fxgroup
                 or r0.y, r0.y, r0.w
                 if_nz r0.y
                 
-                #line 67
+                #line 70
                   dp2 r0.y, r0.xzxx, r0.xzxx
                   rsq r1.x, r0.y
                   mul r1.yz, r0.zzxz, r1.xxxx  // look<2:NaN:Inf,0:NaN:Inf>
@@ -1528,108 +1554,76 @@ fxgroup
                   mov r0.z, l(0)
                   mad r0.xyz, -r1.xyzx, l(0.000000, 0.000000, 1.000000, 0.000000), r0.xyzx  // right<0:NaN:Inf,1: 0f,2:NaN:Inf>
                 
-                #line 75
+                #line 78
                   mul r0.w, l(0.500000), v[0][1].x  // halfWidth<0:[-1.70141e+038f,1.70141e+038f]>
                   mad r1.xyz, r0.wwww, r0.xyzx, v[0][0].xyzx
                   mad r2.xyz, -v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r1.xyzx
                   mad r1.xyz, v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r1.xyzx  // pos<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                  mov x0[1].xyz, r1.xyzx  // v<4,5,6>
                   mad r0.xyz, -r0.wwww, r0.xyzx, v[0][0].xyzx
                   mad r3.xyz, -v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r0.xyzx
                   mad r0.xyz, v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r0.xyzx  // pos<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                  mov x0[3].xyz, r0.xyzx  // v<12,13,14>
                   lt r0.w, l(0.000000), cb0[53].w
+                  if_nz r0.w
                 
-                #line 43
-                  add r1.w, r1.y, r1.x
-                  add r1.w, r1.z, r1.w
-                  mad r1.w, r1.w, l(0.100000), cb0[54].x
-                  sincos r1.w, null, r1.w
-                  mul r4.xyz, r1.wwww, cb0[53].xyzx
-                  mad r4.xyz, r4.xyzx, cb0[53].wwww, r1.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 44
+                    add r0.w, r1.y, r1.x
+                    add r0.w, r1.z, r0.w
+                    mad r0.w, r0.w, l(0.100000), cb0[54].x
+                    sincos r0.w, null, r0.w
+                    mul r4.xyz, r0.wwww, cb0[53].xyzx
+                    mul r4.xyz, r4.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    utof r0.w, vPrim
+                    sample_l_indexable(texture1d)(float,float,float,float) r0.w, r0.w, t0.yzwx, s0, l(0.000000)  // sRandom<0:Inf>
+                    min r0.w, r0.w, l(1.000000)
+                    mad r1.xyz, r4.xyzx, r0.wwww, r1.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 82
-                  movc r1.xyz, r0.wwww, r4.xyzx, r1.xyzx
+                #line 85
+                    mov x0[1].xyz, r1.xyzx  // v<4,5,6>
                 
-                #line 43
-                  add r4.x, r0.y, r0.x
-                  add r4.x, r0.z, r4.x
-                  mad r4.x, r4.x, l(0.100000), cb0[54].x
-                  sincos r4.x, null, r4.x
-                  mul r4.xyz, r4.xxxx, cb0[53].xyzx
-                  mad r4.xyz, r4.xyzx, cb0[53].wwww, r0.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 44
+                    add r1.x, r0.y, r0.x
+                    add r1.x, r0.z, r1.x
+                    mad r1.x, r1.x, l(0.100000), cb0[54].x
+                    sincos r1.x, null, r1.x
+                    mul r1.xyz, r1.xxxx, cb0[53].xyzx
+                    mul r1.xyz, r1.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 48
+                    mad r0.xyz, r1.xyzx, r0.wwww, r0.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 86
+                    mov x0[3].xyz, r0.xyzx  // v<12,13,14>
                 
                 #line 83
-                  movc r0.xyz, r0.wwww, r4.xyzx, r0.xyzx
+                  endif 
                 
-                #line 91
+                #line 94
                   mov r2.w, l(1.000000)
-                  dp4 r4.x, r2.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
-                  dp4 r4.y, r2.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
-                  dp4 r4.z, r2.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
-                  dp4 r4.w, r2.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
-                  dp4 r5.x, r2.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
-                  dp4 r5.y, r2.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
-                  dp4 r2.x, r2.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
+                  dp4 r0.x, r2.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
+                  dp4 r0.y, r2.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
+                  dp4 r0.z, r2.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
+                  dp4 r0.w, r2.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
+                  dp4 r1.x, r2.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
+                  dp4 r1.y, r2.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
+                  dp4 r1.z, r2.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
                 
-                #line 97
-                  mov o0.x, r4.x  // outputStream<0>
-                  mov o0.y, r4.y  // outputStream<0>
-                  mov o0.z, r4.z  // outputStream<0>
-                  mov o0.w, r4.w  // outputStream<0>
-                  mov o1.x, r5.x  // outputStream<0>
-                  mov o1.y, r5.y  // outputStream<0>
-                  mov o1.z, r2.x  // outputStream<0>
+                #line 100
+                  mov o0.x, r0.x  // outputStream<0>
+                  mov o0.y, r0.y  // outputStream<0>
+                  mov o0.z, r0.z  // outputStream<0>
+                  mov o0.w, r0.w  // outputStream<0>
+                  mov o1.x, r1.x  // outputStream<0>
+                  mov o1.y, r1.y  // outputStream<0>
+                  mov o1.z, r1.z  // outputStream<0>
                   mov o2.xyz, l(0,1.000000,0,0)  // outputStream<0,0,0>
                   mov o3.xy, cb2[0].xyxx  // outputStream<0,0>
                   mov o4.x, vPrim  // outputStream<0>
                   emit_stream m0
                 
-                #line 91
-                  mov r1.w, l(1.000000)
-                  dp4 r2.x, r1.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
-                  dp4 r2.y, r1.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
-                  dp4 r2.z, r1.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
-                  dp4 r2.w, r1.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
-                  dp4 r4.x, r1.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
-                  dp4 r4.y, r1.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
-                  dp4 r1.x, r1.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
-                
-                #line 97
-                  mov o0.x, r2.x  // outputStream<0>
-                  mov o0.y, r2.y  // outputStream<0>
-                  mov o0.z, r2.z  // outputStream<0>
-                  mov o0.w, r2.w  // outputStream<0>
-                  mov o1.x, r4.x  // outputStream<0>
-                  mov o1.y, r4.y  // outputStream<0>
-                  mov o1.z, r1.x  // outputStream<0>
-                  mov o2.xyz, l(0,1.000000,0,0)  // outputStream<0,0,0>
-                  mov o3.xy, cb2[1].xyxx  // outputStream<0,0>
-                  mov o4.x, vPrim  // outputStream<0>
-                  emit_stream m0
-                
-                #line 91
-                  mov r3.w, l(1.000000)
-                  dp4 r1.x, r3.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
-                  dp4 r1.y, r3.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
-                  dp4 r1.z, r3.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
-                  dp4 r1.w, r3.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
-                  dp4 r2.x, r3.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
-                  dp4 r2.y, r3.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
-                  dp4 r2.z, r3.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
-                
-                #line 97
-                  mov o0.x, r1.x  // outputStream<0>
-                  mov o0.y, r1.y  // outputStream<0>
-                  mov o0.z, r1.z  // outputStream<0>
-                  mov o0.w, r1.w  // outputStream<0>
-                  mov o1.x, r2.x  // outputStream<0>
-                  mov o1.y, r2.y  // outputStream<0>
-                  mov o1.z, r2.z  // outputStream<0>
-                  mov o2.xyz, l(0,1.000000,0,0)  // outputStream<0,0,0>
-                  mov o3.xy, cb2[2].xyxx  // outputStream<0,0>
-                  mov o4.x, vPrim  // outputStream<0>
-                  emit_stream m0
-                
-                #line 91
+                #line 94
+                  mov r0.xyz, x0[1].xyzx  // v<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
                   mov r0.w, l(1.000000)
                   dp4 r1.x, r0.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
                   dp4 r1.y, r0.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
@@ -1639,7 +1633,54 @@ fxgroup
                   dp4 r2.y, r0.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
                   dp4 r0.x, r0.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
                 
-                #line 97
+                #line 100
+                  mov o0.x, r1.x  // outputStream<0>
+                  mov o0.y, r1.y  // outputStream<0>
+                  mov o0.z, r1.z  // outputStream<0>
+                  mov o0.w, r1.w  // outputStream<0>
+                  mov o1.x, r2.x  // outputStream<0>
+                  mov o1.y, r2.y  // outputStream<0>
+                  mov o1.z, r0.x  // outputStream<0>
+                  mov o2.xyz, l(0,1.000000,0,0)  // outputStream<0,0,0>
+                  mov o3.xy, cb2[1].xyxx  // outputStream<0,0>
+                  mov o4.x, vPrim  // outputStream<0>
+                  emit_stream m0
+                
+                #line 94
+                  mov r3.w, l(1.000000)
+                  dp4 r0.x, r3.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
+                  dp4 r0.y, r3.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
+                  dp4 r0.z, r3.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
+                  dp4 r0.w, r3.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
+                  dp4 r1.x, r3.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
+                  dp4 r1.y, r3.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
+                  dp4 r1.z, r3.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
+                
+                #line 100
+                  mov o0.x, r0.x  // outputStream<0>
+                  mov o0.y, r0.y  // outputStream<0>
+                  mov o0.z, r0.z  // outputStream<0>
+                  mov o0.w, r0.w  // outputStream<0>
+                  mov o1.x, r1.x  // outputStream<0>
+                  mov o1.y, r1.y  // outputStream<0>
+                  mov o1.z, r1.z  // outputStream<0>
+                  mov o2.xyz, l(0,1.000000,0,0)  // outputStream<0,0,0>
+                  mov o3.xy, cb2[2].xyxx  // outputStream<0,0>
+                  mov o4.x, vPrim  // outputStream<0>
+                  emit_stream m0
+                
+                #line 94
+                  mov r0.xyz, x0[3].xyzx  // v<12:NaN:Inf,13:NaN:Inf,14:NaN:Inf>
+                  mov r0.w, l(1.000000)
+                  dp4 r1.x, r0.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
+                  dp4 r1.y, r0.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
+                  dp4 r1.z, r0.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
+                  dp4 r1.w, r0.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
+                  dp4 r2.x, r0.xyzw, cb0[0].xyzw  // gout<4:NaN:Inf>
+                  dp4 r2.y, r0.xyzw, cb0[1].xyzw  // gout<5:NaN:Inf>
+                  dp4 r0.x, r0.xyzw, cb0[2].xyzw  // gout<6:NaN:Inf>
+                
+                #line 100
                   mov o0.x, r1.x  // outputStream<0>
                   mov o0.y, r1.y  // outputStream<0>
                   mov o0.z, r1.z  // outputStream<0>
@@ -1652,12 +1693,12 @@ fxgroup
                   mov o4.x, vPrim  // outputStream<0>
                   emit_stream m0
                 
-                #line 63
+                #line 66
                 endif 
                 
-                #line 60
+                #line 63
                 ret 
-                // Approximately 113 instruction slots used
+                // Approximately 124 instruction slots used
                             
             };
             PixelShader = asm {
@@ -1726,21 +1767,21 @@ fxgroup
                 dcl_output o2.xyzw
                 dcl_temps 2
                 
-                #line 180 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 183 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 udiv null, r0.x, v4.x, cb1[1].z
                 utof r0.z, r0.x  // uvw<2:[0f,4.29497e+009f]>
                 mov r0.xy, v3.xyxx
                 sample_indexable(texture2darray)(float,float,float,float) r0.xyzw, r0.xyzx, t0.xyzw, s0  // textureColor<0:Inf,1:Inf,2:Inf,3:Inf>
                 add r1.x, r0.w, l(-0.050000)
                 
-                #line 188
+                #line 191
                 mov o0.xyzw, r0.xyzw  // PSDeferredBillboard<0:Inf,1:Inf,2:Inf,3:Inf>
                 
-                #line 182
+                #line 185
                 lt r0.x, r1.x, l(0.000000)
                 discard r0.x
                 
-                #line 188
+                #line 191
                 mov o1.xyz, v2.xyzx  // PSDeferredBillboard<4,5,6>
                 mov o1.w, cb1[1].y  // PSDeferredBillboard<7>
                 mov o2.xyz, v1.xyzx  // PSDeferredBillboard<8,9,10>
@@ -1785,10 +1826,10 @@ fxgroup
                 dcl_output o0.xyz
                 dcl_output o1.xy
                 
-                #line 53 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 56 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 mad o0.y, v1.y, l(0.450000), v0.y  // VSBillboard<1:Inf>
                 
-                #line 56
+                #line 59
                 mov o0.xz, v0.xxzx  // VSBillboard<0,2>
                 mov o1.xy, v1.xyxx  // VSBillboard<3,4>
                 ret 
@@ -1860,7 +1901,7 @@ fxgroup
                 //   float gEndRadius;                  // Offset:  836 Size:     4
                 //   float3 gWindDirection;             // Offset:  848 Size:    12
                 //   float gWindStrength;               // Offset:  860 Size:     4
-                //   float gTime;                       // Offset:  864 Size:     4
+                //   float gTotalTime;                  // Offset:  864 Size:     4
                 //
                 // }
                 //
@@ -1880,6 +1921,8 @@ fxgroup
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
+                // SamplerLinear                     sampler      NA          NA    0        1
+                // gTextureRandom                    texture  float4          1d    0        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
                 // cbFixed                           cbuffer      NA          NA    2        1
                 //
@@ -1907,10 +1950,13 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[55], immediateIndexed
                 dcl_constantbuffer cb2[4], immediateIndexed
+                dcl_sampler s0, mode_default
+                dcl_resource_texture1d (float,float,float,float) t0
                 dcl_input v[1][0].xyz
                 dcl_input v[1][1].xy
                 dcl_input vPrim
                 dcl_temps 5
+                dcl_indexableTemp x0[4], 4
                 dcl_inputprimitive point 
                 dcl_stream m0
                 dcl_outputtopology trianglestrip 
@@ -1920,7 +1966,7 @@ fxgroup
                 dcl_output_sgv o3.x, primitive_id
                 dcl_maxout 4
                 
-                #line 104 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 107 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 add r0.xyz, cb0[12].xyzx, -v[0][0].xyzx  // look<0:Inf,1:Inf,2:Inf>
                 eq r0.w, cb0[52].y, l(0.000000)
                 dp3 r0.y, r0.xyzx, r0.xyzx
@@ -1929,7 +1975,7 @@ fxgroup
                 or r0.y, r0.y, r0.w
                 if_nz r0.y
                 
-                #line 109
+                #line 112
                   dp2 r0.y, r0.xzxx, r0.xzxx
                   rsq r1.x, r0.y
                   mul r1.yz, r0.zzxz, r1.xxxx  // look<2:NaN:Inf,0:NaN:Inf>
@@ -1937,100 +1983,115 @@ fxgroup
                   mov r0.z, l(0)
                   mad r0.xyz, -r1.xyzx, l(0.000000, 0.000000, 1.000000, 0.000000), r0.xyzx  // right<0:NaN:Inf,1: 0f,2:NaN:Inf>
                 
-                #line 117
+                #line 120
                   mul r0.w, l(0.500000), v[0][1].x  // halfWidth<0:[-1.70141e+038f,1.70141e+038f]>
                   mad r1.xyz, r0.wwww, r0.xyzx, v[0][0].xyzx
                   mad r2.xyz, -v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r1.xyzx  // gout<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
                   mad r1.xyz, v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r1.xyzx  // pos<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                  mov x0[1].xyz, r1.xyzx  // v<4,5,6>
                   mad r0.xyz, -r0.wwww, r0.xyzx, v[0][0].xyzx
                   mad r3.xyz, -v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r0.xyzx  // gout<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
                   mad r0.xyz, v[0][1].yyyy, l(0.000000, 0.500000, 0.000000, 0.000000), r0.xyzx  // pos<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                  mov x0[3].xyz, r0.xyzx  // v<12,13,14>
                   lt r0.w, l(0.000000), cb0[53].w
+                  if_nz r0.w
                 
-                #line 43
-                  add r1.w, r1.y, r1.x
-                  add r1.w, r1.z, r1.w
-                  mad r1.w, r1.w, l(0.100000), cb0[54].x
-                  sincos r1.w, null, r1.w
-                  mul r4.xyz, r1.wwww, cb0[53].xyzx
-                  mad r4.xyz, r4.xyzx, cb0[53].wwww, r1.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 44
+                    add r0.w, r1.y, r1.x
+                    add r0.w, r1.z, r0.w
+                    mad r0.w, r0.w, l(0.100000), cb0[54].x
+                    sincos r0.w, null, r0.w
+                    mul r4.xyz, r0.wwww, cb0[53].xyzx
+                    mul r4.xyz, r4.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    utof r0.w, vPrim
+                    sample_l_indexable(texture1d)(float,float,float,float) r0.w, r0.w, t0.yzwx, s0, l(0.000000)  // sRandom<0:Inf>
+                    min r0.w, r0.w, l(1.000000)
+                    mad r1.xyz, r4.xyzx, r0.wwww, r1.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
-                #line 124
-                  movc r1.xyz, r0.wwww, r4.xyzx, r1.xyzx  // gout<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
+                #line 127
+                    mov x0[1].xyz, r1.xyzx  // v<4,5,6>
                 
-                #line 43
-                  add r4.x, r0.y, r0.x
-                  add r4.x, r0.z, r4.x
-                  mad r4.x, r4.x, l(0.100000), cb0[54].x
-                  sincos r4.x, null, r4.x
-                  mul r4.xyz, r4.xxxx, cb0[53].xyzx
-                  mad r4.xyz, r4.xyzx, cb0[53].wwww, r0.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                #line 44
+                    add r1.x, r0.y, r0.x
+                    add r1.x, r0.z, r1.x
+                    mad r1.x, r1.x, l(0.100000), cb0[54].x
+                    sincos r1.x, null, r1.x
+                    mul r1.xyz, r1.xxxx, cb0[53].xyzx
+                    mul r1.xyz, r1.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 48
+                    mad r0.xyz, r1.xyzx, r0.wwww, r0.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                
+                #line 128
+                    mov x0[3].xyz, r0.xyzx  // v<12,13,14>
                 
                 #line 125
-                  movc r0.xyz, r0.wwww, r4.xyzx, r0.xyzx  // gout<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
+                  endif 
                 
-                #line 133
+                #line 136
                   mov r2.w, l(1.000000)
-                  dp4 r4.x, r2.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
-                  dp4 r4.y, r2.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
-                  dp4 r4.z, r2.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
-                  dp4 r2.w, r2.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
+                  dp4 r0.x, r2.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
+                  dp4 r0.y, r2.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
+                  dp4 r0.z, r2.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
+                  dp4 r0.w, r2.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
                 
-                #line 138
-                  mov o0.x, r4.x  // outputStream<0>
-                  mov o0.y, r4.y  // outputStream<0>
-                  mov o0.z, r4.z  // outputStream<0>
-                  mov o0.w, r2.w  // outputStream<0>
+                #line 141
+                  mov o0.x, r0.x  // outputStream<0>
+                  mov o0.y, r0.y  // outputStream<0>
+                  mov o0.z, r0.z  // outputStream<0>
+                  mov o0.w, r0.w  // outputStream<0>
                   mov o1.xyz, r2.xyzx  // outputStream<0,0,0>
                   mov o1.w, l(1.000000)  // outputStream<0>
                   mov o2.xy, cb2[0].xyxx  // outputStream<0,0>
                   mov o3.x, vPrim  // outputStream<0>
                   emit_stream m0
                 
-                #line 133
-                  mov r1.w, l(1.000000)
-                  dp4 r2.x, r1.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
-                  dp4 r2.y, r1.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
-                  dp4 r2.z, r1.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
-                  dp4 r1.w, r1.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
-                
-                #line 138
-                  mov o0.x, r2.x  // outputStream<0>
-                  mov o0.y, r2.y  // outputStream<0>
-                  mov o0.z, r2.z  // outputStream<0>
-                  mov o0.w, r1.w  // outputStream<0>
-                  mov o1.xyz, r1.xyzx  // outputStream<0,0,0>
-                  mov o1.w, l(1.000000)  // outputStream<0>
-                  mov o2.xy, cb2[1].xyxx  // outputStream<0,0>
-                  mov o3.x, vPrim  // outputStream<0>
-                  emit_stream m0
-                
-                #line 133
-                  mov r3.w, l(1.000000)
-                  dp4 r1.x, r3.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
-                  dp4 r1.y, r3.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
-                  dp4 r1.z, r3.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
-                  dp4 r1.w, r3.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
-                
-                #line 138
-                  mov o0.x, r1.x  // outputStream<0>
-                  mov o0.y, r1.y  // outputStream<0>
-                  mov o0.z, r1.z  // outputStream<0>
-                  mov o0.w, r1.w  // outputStream<0>
-                  mov o1.xyz, r3.xyzx  // outputStream<0,0,0>
-                  mov o1.w, l(1.000000)  // outputStream<0>
-                  mov o2.xy, cb2[2].xyxx  // outputStream<0,0>
-                  mov o3.x, vPrim  // outputStream<0>
-                  emit_stream m0
-                
-                #line 133
+                #line 136
+                  mov r0.xyz, x0[1].xyzx  // v<4:NaN:Inf,5:NaN:Inf,6:NaN:Inf>
                   mov r0.w, l(1.000000)
                   dp4 r1.x, r0.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
                   dp4 r1.y, r0.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
                   dp4 r1.z, r0.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
                   dp4 r0.w, r0.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
                 
-                #line 138
+                #line 141
+                  mov o0.x, r1.x  // outputStream<0>
+                  mov o0.y, r1.y  // outputStream<0>
+                  mov o0.z, r1.z  // outputStream<0>
+                  mov o0.w, r0.w  // outputStream<0>
+                  mov o1.xyz, r0.xyzx  // outputStream<0,0,0>
+                  mov o1.w, l(1.000000)  // outputStream<0>
+                  mov o2.xy, cb2[1].xyxx  // outputStream<0,0>
+                  mov o3.x, vPrim  // outputStream<0>
+                  emit_stream m0
+                
+                #line 136
+                  mov r3.w, l(1.000000)
+                  dp4 r0.x, r3.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
+                  dp4 r0.y, r3.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
+                  dp4 r0.z, r3.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
+                  dp4 r0.w, r3.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
+                
+                #line 141
+                  mov o0.x, r0.x  // outputStream<0>
+                  mov o0.y, r0.y  // outputStream<0>
+                  mov o0.z, r0.z  // outputStream<0>
+                  mov o0.w, r0.w  // outputStream<0>
+                  mov o1.xyz, r3.xyzx  // outputStream<0,0,0>
+                  mov o1.w, l(1.000000)  // outputStream<0>
+                  mov o2.xy, cb2[2].xyxx  // outputStream<0,0>
+                  mov o3.x, vPrim  // outputStream<0>
+                  emit_stream m0
+                
+                #line 136
+                  mov r0.xyz, x0[3].xyzx  // v<12:NaN:Inf,13:NaN:Inf,14:NaN:Inf>
+                  mov r0.w, l(1.000000)
+                  dp4 r1.x, r0.xyzw, cb0[4].xyzw  // gout<0:NaN:Inf>
+                  dp4 r1.y, r0.xyzw, cb0[5].xyzw  // gout<1:NaN:Inf>
+                  dp4 r1.z, r0.xyzw, cb0[6].xyzw  // gout<2:NaN:Inf>
+                  dp4 r0.w, r0.xyzw, cb0[7].xyzw  // gout<3:NaN:Inf>
+                
+                #line 141
                   mov o0.x, r1.x  // outputStream<0>
                   mov o0.y, r1.y  // outputStream<0>
                   mov o0.z, r1.z  // outputStream<0>
@@ -2041,12 +2102,12 @@ fxgroup
                   mov o3.x, vPrim  // outputStream<0>
                   emit_stream m0
                 
-                #line 105
+                #line 108
                 endif 
                 
-                #line 102
+                #line 105
                 ret 
-                // Approximately 93 instruction slots used
+                // Approximately 104 instruction slots used
                             
             };
             PixelShader = asm {
@@ -2109,7 +2170,7 @@ fxgroup
                 dcl_output o0.xyzw
                 dcl_temps 1
                 
-                #line 192 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
+                #line 195 "C:\Users\25466449\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBillboard.fx"
                 udiv null, r0.x, v3.x, cb1[1].z
                 utof r0.z, r0.x  // uvw<2:[0f,4.29497e+009f]>
                 mov r0.xy, v2.xyxx
@@ -2120,15 +2181,15 @@ fxgroup
                   mov o0.w, l(1.000000)  // PSSMBillboard<3: 1f>
                   ret 
                 
-                #line 195
+                #line 198
                 else 
                 
-                #line 203
+                #line 206
                   discard l(-1)
                   mov o0.xyzw, l(0,0,0,0)  // PSSMBillboard<0: 0f,1: 0f,2: 0f,3: 0f>
                   ret 
                 
-                #line 195
+                #line 198
                 endif 
                 ret 
                 // Approximately 15 instruction slots used

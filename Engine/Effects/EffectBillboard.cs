@@ -106,7 +106,11 @@ namespace Engine.Effects
         /// <summary>
         /// Time effect variable
         /// </summary>
-        private EffectScalarVariable time = null;
+        private EffectScalarVariable totalTime = null;
+        /// <summary>
+        /// Random texture effect variable
+        /// </summary>
+        private EffectShaderResourceVariable textureRandom = null;
 
         /// <summary>
         /// Directional lights
@@ -411,15 +415,29 @@ namespace Engine.Effects
         /// <summary>
         /// Time
         /// </summary>
-        protected float Time
+        protected float TotalTime
         {
             get
             {
-                return this.time.GetFloat();
+                return this.totalTime.GetFloat();
             }
             set
             {
-                this.time.Set(value);
+                this.totalTime.Set(value);
+            }
+        }
+        /// <summary>
+        /// Random texture
+        /// </summary>
+        protected ShaderResourceView TextureRandom
+        {
+            get
+            {
+                return this.textureRandom.GetResource();
+            }
+            set
+            {
+                this.textureRandom.SetResource(value);
             }
         }
 
@@ -459,7 +477,8 @@ namespace Engine.Effects
 
             this.windDirection = this.Effect.GetVariableByName("gWindDirection").AsVector();
             this.windStrength = this.Effect.GetVariableByName("gWindStrength").AsScalar();
-            this.time = this.Effect.GetVariableByName("gTime").AsScalar();
+            this.totalTime = this.Effect.GetVariableByName("gTotalTime").AsScalar();
+            this.textureRandom = this.Effect.GetVariableByName("gTextureRandom").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -525,7 +544,8 @@ namespace Engine.Effects
                 fromLightViewProjection,
                 Vector3.Zero,
                 0f,
-                0f);
+                0f,
+                null);
         }
         /// <summary>
         /// Update per frame data
@@ -538,7 +558,8 @@ namespace Engine.Effects
         /// <param name="fromLightViewProjection">From camera View * Projection transform</param>
         /// <param name="windDirection">Wind direction</param>
         /// <param name="windStrength">Wind strength</param>
-        /// <param name="time">Time</param>
+        /// <param name="totalTime">Total time</param>
+        /// <param name="randomTexture">Random texture</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
@@ -548,7 +569,8 @@ namespace Engine.Effects
             Matrix fromLightViewProjection,
             Vector3 windDirection,
             float windStrength,
-            float time)
+            float totalTime,
+            ShaderResourceView randomTexture)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
@@ -604,7 +626,8 @@ namespace Engine.Effects
 
             this.WindDirection = windDirection;
             this.WindStrength = windStrength;
-            this.Time = time;
+            this.TotalTime = totalTime;
+            this.TextureRandom = randomTexture;
         }
         /// <summary>
         /// Update per model object data

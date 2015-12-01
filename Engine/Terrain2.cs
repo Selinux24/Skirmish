@@ -83,6 +83,10 @@ namespace Engine
             /// Wind strength
             /// </summary>
             public float WindStrength;
+            /// <summary>
+            /// Random texture
+            /// </summary>
+            public ShaderResourceView RandomTexture;
         }
 
         #endregion
@@ -630,7 +634,8 @@ namespace Engine
                             context.BaseContext.FromLightViewProjection,
                             context.WindDirection,
                             context.WindStrength,
-                            context.BaseContext.GameTime.TotalSeconds);
+                            context.BaseContext.GameTime.TotalSeconds,
+                            context.RandomTexture);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
@@ -643,7 +648,8 @@ namespace Engine
                             context.BaseContext.FromLightViewProjection,
                             context.WindDirection,
                             context.WindStrength,
-                            context.BaseContext.GameTime.TotalSeconds);
+                            context.BaseContext.GameTime.TotalSeconds,
+                            context.RandomTexture);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
@@ -656,7 +662,8 @@ namespace Engine
                             Matrix.Identity,
                             context.WindDirection,
                             context.WindStrength,
-                            context.BaseContext.GameTime.TotalSeconds);
+                            context.BaseContext.GameTime.TotalSeconds,
+                            context.RandomTexture);
                     }
 
                     #endregion
@@ -1157,6 +1164,10 @@ namespace Engine
         /// </summary>
         private ShaderResourceView terrainNormalMaps = null;
         /// <summary>
+        /// Random texture
+        /// </summary>
+        private ShaderResourceView textureRandom = null;
+        /// <summary>
         /// Slope ranges
         /// </summary>
         private Vector2 slopeRanges = Vector2.Zero;
@@ -1242,6 +1253,12 @@ namespace Engine
 
             #endregion
 
+            #region Random texture generation
+
+            this.textureRandom = game.Graphics.Device.CreateRandomTexture(1024);
+
+            #endregion
+
             //Get vertices and indices from heightmap
             VertexData[] vertices;
             uint[] indices;
@@ -1277,6 +1294,7 @@ namespace Engine
                 FoliageTextureCount = this.foliageTextureCount,
                 FoliageTextures = this.foliageTextures,
                 FoliageEndRadius = description.Vegetation != null ? description.Vegetation.EndRadius : 0,
+                RandomTexture = this.textureRandom,
             };
 
             //Set drawing parameters for renderer
@@ -1292,6 +1310,7 @@ namespace Engine
             Helper.Dispose(this.terrainTexturesHR);
             Helper.Dispose(this.terrainNormalMaps);
             Helper.Dispose(this.foliageTextures);
+            Helper.Dispose(this.textureRandom);
             Helper.Dispose(this.patches);
         }
 
