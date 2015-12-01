@@ -83,6 +83,8 @@ namespace Engine
             /// Wind strength
             /// </summary>
             public float WindStrength;
+
+            public float Time;
             /// <summary>
             /// Random texture
             /// </summary>
@@ -634,7 +636,7 @@ namespace Engine
                             context.BaseContext.FromLightViewProjection,
                             context.WindDirection,
                             context.WindStrength,
-                            context.BaseContext.GameTime.TotalSeconds,
+                            context.Time,
                             context.RandomTexture);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
@@ -648,7 +650,7 @@ namespace Engine
                             context.BaseContext.FromLightViewProjection,
                             context.WindDirection,
                             context.WindStrength,
-                            context.BaseContext.GameTime.TotalSeconds,
+                            context.Time,
                             context.RandomTexture);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
@@ -662,7 +664,7 @@ namespace Engine
                             Matrix.Identity,
                             context.WindDirection,
                             context.WindStrength,
-                            context.BaseContext.GameTime.TotalSeconds,
+                            context.Time,
                             context.RandomTexture);
                     }
 
@@ -1179,6 +1181,10 @@ namespace Engine
         /// Foliage texture count
         /// </summary>
         private uint foliageTextureCount = 0;
+        /// <summary>
+        /// Wind total time
+        /// </summary>
+        private float windTime = 0;
 
         /// <summary>
         /// Constructor
@@ -1336,7 +1342,10 @@ namespace Engine
         {
             if (this.patches != null)
             {
+                this.windTime += context.GameTime.ElapsedSeconds * this.drawContext.WindStrength;
+
                 this.drawContext.BaseContext = context;
+                this.drawContext.Time = this.windTime;
 
                 this.patches.Draw(this.drawContext);
             }

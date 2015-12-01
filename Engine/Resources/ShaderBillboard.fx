@@ -39,9 +39,9 @@ Texture2DArray gTextureArray;
 Texture2D gShadowMap;
 Texture1D gTextureRandom;
 
-float3 CalcWindTranslation(uint primID, float3 pos, float time, float3 direction, float strength)
+float3 CalcWindTranslation(uint primID, float3 pos)
 {
-	float3 vWind = sin(time + (pos.x + pos.y + pos.z) * 0.1f) * direction.xyz * strength;
+	float3 vWind = sin(gTotalTime + (pos.x + pos.y + pos.z) * 0.1f) + (gWindDirection * gWindStrength);
 
 	float sRandom = gTextureRandom.SampleLevel(SamplerLinear, primID, 0).x;
 
@@ -82,8 +82,8 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 
 		if(gWindStrength > 0)
 		{
-			v[1].xyz = CalcWindTranslation(primID, v[1].xyz, gTotalTime, gWindDirection, gWindStrength);
-			v[3].xyz = CalcWindTranslation(primID, v[3].xyz, gTotalTime, gWindDirection, gWindStrength);
+			v[1].xyz = CalcWindTranslation(primID, v[1].xyz);
+			v[3].xyz = CalcWindTranslation(primID, v[3].xyz);
 		}
 
 		//Transform quad vertices to world space and output them as a triangle strip.
@@ -124,8 +124,8 @@ void GSSMBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveI
 
 		if(gWindStrength > 0)
 		{
-			v[1].xyz = CalcWindTranslation(primID, v[1].xyz, gTotalTime, gWindDirection, gWindStrength);
-			v[3].xyz = CalcWindTranslation(primID, v[3].xyz, gTotalTime, gWindDirection, gWindStrength);
+			v[1].xyz = CalcWindTranslation(primID, v[1].xyz);
+			v[3].xyz = CalcWindTranslation(primID, v[3].xyz);
 		}
 
 		//Transform quad vertices to world space and output them as a triangle strip.

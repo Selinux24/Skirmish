@@ -273,8 +273,7 @@ fxgroup
                     add r0.w, r1.z, r0.w
                     mad r0.w, r0.w, l(0.100000), cb0[54].x
                     sincos r0.w, null, r0.w
-                    mul r4.xyz, r0.wwww, cb0[53].xyzx
-                    mul r4.xyz, r4.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    mad r4.xyz, cb0[53].xyzx, cb0[53].wwww, r0.wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                     utof r0.w, vPrim
                     sample_l_indexable(texture1d)(float,float,float,float) r0.w, r0.w, t0.yzwx, s0, l(0.000000)  // sRandom<0:Inf>
                     min r0.w, r0.w, l(1.000000)
@@ -288,8 +287,7 @@ fxgroup
                     add r1.x, r0.z, r1.x
                     mad r1.x, r1.x, l(0.100000), cb0[54].x
                     sincos r1.x, null, r1.x
-                    mul r1.xyz, r1.xxxx, cb0[53].xyzx
-                    mul r1.xyz, r1.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    mad r1.xyz, cb0[53].xyzx, cb0[53].wwww, r1.xxxx  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 48
                     mad r0.xyz, r1.xyzx, r0.wwww, r0.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -399,7 +397,7 @@ fxgroup
                 
                 #line 63
                 ret 
-                // Approximately 124 instruction slots used
+                // Approximately 122 instruction slots used
                             
             };
             PixelShader = asm {
@@ -1572,8 +1570,7 @@ fxgroup
                     add r0.w, r1.z, r0.w
                     mad r0.w, r0.w, l(0.100000), cb0[54].x
                     sincos r0.w, null, r0.w
-                    mul r4.xyz, r0.wwww, cb0[53].xyzx
-                    mul r4.xyz, r4.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    mad r4.xyz, cb0[53].xyzx, cb0[53].wwww, r0.wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                     utof r0.w, vPrim
                     sample_l_indexable(texture1d)(float,float,float,float) r0.w, r0.w, t0.yzwx, s0, l(0.000000)  // sRandom<0:Inf>
                     min r0.w, r0.w, l(1.000000)
@@ -1587,8 +1584,7 @@ fxgroup
                     add r1.x, r0.z, r1.x
                     mad r1.x, r1.x, l(0.100000), cb0[54].x
                     sincos r1.x, null, r1.x
-                    mul r1.xyz, r1.xxxx, cb0[53].xyzx
-                    mul r1.xyz, r1.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    mad r1.xyz, cb0[53].xyzx, cb0[53].wwww, r1.xxxx  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 48
                     mad r0.xyz, r1.xyzx, r0.wwww, r0.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -1698,7 +1694,7 @@ fxgroup
                 
                 #line 63
                 ret 
-                // Approximately 124 instruction slots used
+                // Approximately 122 instruction slots used
                             
             };
             PixelShader = asm {
@@ -2001,8 +1997,7 @@ fxgroup
                     add r0.w, r1.z, r0.w
                     mad r0.w, r0.w, l(0.100000), cb0[54].x
                     sincos r0.w, null, r0.w
-                    mul r4.xyz, r0.wwww, cb0[53].xyzx
-                    mul r4.xyz, r4.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    mad r4.xyz, cb0[53].xyzx, cb0[53].wwww, r0.wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                     utof r0.w, vPrim
                     sample_l_indexable(texture1d)(float,float,float,float) r0.w, r0.w, t0.yzwx, s0, l(0.000000)  // sRandom<0:Inf>
                     min r0.w, r0.w, l(1.000000)
@@ -2016,8 +2011,7 @@ fxgroup
                     add r1.x, r0.z, r1.x
                     mad r1.x, r1.x, l(0.100000), cb0[54].x
                     sincos r1.x, null, r1.x
-                    mul r1.xyz, r1.xxxx, cb0[53].xyzx
-                    mul r1.xyz, r1.xyzx, cb0[53].wwww  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
+                    mad r1.xyz, cb0[53].xyzx, cb0[53].wwww, r1.xxxx  // vWind<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
                 
                 #line 48
                     mad r0.xyz, r1.xyzx, r0.wwww, r0.xyzx  // CalcWindTranslation<0:NaN:Inf,1:NaN:Inf,2:NaN:Inf>
@@ -2107,7 +2101,7 @@ fxgroup
                 
                 #line 105
                 ret 
-                // Approximately 104 instruction slots used
+                // Approximately 102 instruction slots used
                             
             };
             PixelShader = asm {

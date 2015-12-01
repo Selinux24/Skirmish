@@ -1,5 +1,6 @@
 ﻿using Engine;
 using SharpDX;
+using System;
 using System.Diagnostics;
 
 namespace HeightmapTest
@@ -11,11 +12,14 @@ namespace HeightmapTest
         private const float fogStart = 0.01f;
         private const float fogRange = 0.50f;
 
+        private Random rnd = new Random();
+
         private Vector3 playerHeight = Vector3.UnitY * 5f;
         private bool playerFlying = false;
 
         private Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
+        private float windDuration = 0;
 
         private TextDrawer title = null;
         private TextDrawer load = null;
@@ -275,23 +279,28 @@ namespace HeightmapTest
 
             #region Wind
 
+            this.windDuration += gameTime.ElapsedSeconds;
+            if (this.windDuration > 10)
+            {
+                this.windDuration = 0;
+
+                this.windStrength += this.rnd.NextFloat(-0.25f, +0.25f);
+            }
+
             if (this.Game.Input.KeyPressed(Keys.Add))
             {
                 this.windStrength += 0.01f;
-
-                if (this.windStrength > 100f) this.windStrength = 100f;
-
-                this.terrain.SetWind(this.windDirection, this.windStrength);
             }
 
             if (this.Game.Input.KeyPressed(Keys.Subtract))
             {
                 this.windStrength -= 0.01f;
-
-                if (this.windStrength < 0f) this.windStrength = 0f;
-
-                this.terrain.SetWind(this.windDirection, this.windStrength);
             }
+
+            if (this.windStrength > 100f) this.windStrength = 100f;
+            if (this.windStrength < 0f) this.windStrength = 0f;
+
+            this.terrain.SetWind(this.windDirection, this.windStrength);
 
             #endregion
 
