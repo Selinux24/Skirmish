@@ -304,6 +304,7 @@
     <Compile Include="Collada\VertexWeights.cs" />
     <Compile Include="Collada\Vertices.cs" />
     <Compile Include="Collada\VisualScene.cs" />
+    <Compile Include="Common\NavMesh.cs" />
     <Compile Include="Common\VertexTerrain.cs" />
     <Compile Include="Common\GeometryUtil.cs" />
     <Compile Include="Common\Grid.cs" />

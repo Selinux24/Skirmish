@@ -588,10 +588,11 @@ namespace Engine.Helpers
         /// </summary>
         /// <param name="device">Graphics device</param>
         /// <param name="size">Texture size</param>
+        /// <param name="seed">Random seed</param>
         /// <returns>Returns created texture</returns>
-        public static ShaderResourceView CreateRandomTexture(this Device device, int size)
+        public static ShaderResourceView CreateRandomTexture(this Device device, int size, int seed = 0)
         {
-            Random rnd = new Random();
+            Random rnd = new Random(seed);
 
             var randomValues = new List<Vector4>();
             for (int i = 0; i < size; i++)

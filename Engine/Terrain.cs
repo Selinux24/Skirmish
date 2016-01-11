@@ -54,18 +54,16 @@ namespace Engine
             {
                 this.pickingQuadtree = QuadTree.Build(game, triangles, description);
             }
-            else
-            {
-                if (description != null && description.PathFinder != null)
-                {
-                    BoundingBox bbox = this.terrain.GetBoundingBox();
 
-                    this.grid = Grid.Build(
-                        bbox,
-                        triangles,
-                        description.PathFinder.NodeSize,
-                        description.PathFinder.NodeInclination);
-                }
+            if (description != null && description.PathFinder != null)
+            {
+                BoundingBox bbox = this.terrain.GetBoundingBox();
+
+                this.grid = Grid.Build(
+                    bbox,
+                    triangles,
+                    description.PathFinder.NodeSize,
+                    description.PathFinder.NodeInclination);
             }
         }
         /// <summary>

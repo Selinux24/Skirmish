@@ -19,6 +19,8 @@ namespace HeightmapTest
 
         private Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
+        private float windNextStrength = 1f;
+        private float windStep = 0.001f;
         private float windDuration = 0;
 
         private TextDrawer title = null;
@@ -284,21 +286,33 @@ namespace HeightmapTest
             {
                 this.windDuration = 0;
 
-                this.windStrength += this.rnd.NextFloat(-0.25f, +0.25f);
+                this.windNextStrength = this.windStrength + this.rnd.NextFloat(-0.5f, +0.5f);
+                if (this.windNextStrength > 100f) this.windNextStrength = 100f;
+                if (this.windNextStrength < 0f) this.windNextStrength = 0f;
             }
 
             if (this.Game.Input.KeyPressed(Keys.Add))
             {
-                this.windStrength += 0.01f;
+                this.windStrength += this.windStep;
+                if (this.windStrength > 100f) this.windStrength = 100f;
             }
 
             if (this.Game.Input.KeyPressed(Keys.Subtract))
             {
-                this.windStrength -= 0.01f;
+                this.windStrength -= this.windStep;
+                if (this.windStrength < 0f) this.windStrength = 0f;
             }
 
-            if (this.windStrength > 100f) this.windStrength = 100f;
-            if (this.windStrength < 0f) this.windStrength = 0f;
+            if (this.windNextStrength < this.windStrength)
+            {
+                this.windStrength -= this.windStep;
+                if (this.windNextStrength > this.windStrength) this.windStrength = this.windNextStrength;
+            }
+            if (this.windNextStrength > this.windStrength)
+            {
+                this.windStrength += this.windStep;
+                if (this.windNextStrength < this.windStrength) this.windStrength = this.windNextStrength;
+            }
 
             this.terrain.SetWind(this.windDirection, this.windStrength);
 
@@ -326,7 +340,7 @@ namespace HeightmapTest
                 };
             }
 
-            this.help.Text = string.Format("Wind {0} {1}", this.windDirection, this.windStrength);
+            this.help.Text = string.Format("Wind {0} {1} - Next {2}", this.windDirection, this.windStrength, this.windNextStrength);
             this.help2.Text = this.Game.RuntimeText;
         }
     }

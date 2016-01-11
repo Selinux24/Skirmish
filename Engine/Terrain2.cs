@@ -1020,50 +1020,53 @@ namespace Engine
             {
                 List<VertexData> vertexData = new List<VertexData>(MAX);
 
-                var triangles = node.Triangles;
-                if (triangles != null && triangles.Length > 0)
+                if (node != null)
                 {
-                    Random rnd = new Random(description.Seed);
-                    BoundingBox bbox = node.BoundingBox;
-                    float density = description.Saturation;
-                    int count = 0;
-
-                    for (int i = 0; i < triangles.Length; i++)
+                    var triangles = node.Triangles;
+                    if (triangles != null && triangles.Length > 0)
                     {
-                        var tri = triangles[i];
-                        BoundingBox tribox = BoundingBox.FromPoints(tri.GetCorners());
+                        Random rnd = new Random(description.Seed);
+                        BoundingBox bbox = node.BoundingBox;
+                        float density = description.Saturation;
+                        int count = 0;
 
-                        float triCount = 0;
-                        float maxCount = tri.Area * density * (tri.Normal.Y);
-
-                        while (triCount < maxCount && count < MAX)
+                        for (int i = 0; i < triangles.Length; i++)
                         {
-                            Vector3 pos = new Vector3(
-                                rnd.NextFloat(tribox.Minimum.X, tribox.Maximum.X),
-                                bbox.Maximum.Y + 1f,
-                                rnd.NextFloat(tribox.Minimum.Z, tribox.Maximum.Z));
+                            var tri = triangles[i];
+                            BoundingBox tribox = BoundingBox.FromPoints(tri.GetCorners());
 
-                            Ray ray = new Ray(pos, Vector3.Down);
+                            float triCount = 0;
+                            float maxCount = tri.Area * density * (tri.Normal.Y);
 
-                            Vector3 intersectionPoint;
-                            if (tri.Intersects(ref ray, out intersectionPoint))
+                            while (triCount < maxCount && count < MAX)
                             {
-                                vertexData.Add(new VertexData()
+                                Vector3 pos = new Vector3(
+                                    rnd.NextFloat(tribox.Minimum.X, tribox.Maximum.X),
+                                    bbox.Maximum.Y + 1f,
+                                    rnd.NextFloat(tribox.Minimum.Z, tribox.Maximum.Z));
+
+                                Ray ray = new Ray(pos, Vector3.Down);
+
+                                Vector3 intersectionPoint;
+                                if (tri.Intersects(ref ray, out intersectionPoint))
                                 {
-                                    Position = intersectionPoint,
-                                    Size = new Vector2(
-                                        rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                                        rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
-                                });
+                                    vertexData.Add(new VertexData()
+                                    {
+                                        Position = intersectionPoint,
+                                        Size = new Vector2(
+                                            rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
+                                            rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
+                                    });
 
-                                triCount++;
-                                count++;
+                                    triCount++;
+                                    count++;
+                                }
                             }
-                        }
 
-                        if (count >= MAX)
-                        {
-                            break;
+                            if (count >= MAX)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
@@ -1261,7 +1264,7 @@ namespace Engine
 
             #region Random texture generation
 
-            this.textureRandom = game.Graphics.Device.CreateRandomTexture(1024);
+            this.textureRandom = game.Graphics.Device.CreateRandomTexture(1024, 24);
 
             #endregion
 
