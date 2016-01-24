@@ -271,7 +271,7 @@ namespace Engine
                 DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
 
 #if DEBUG
-                creationFlags |= DeviceCreationFlags.Debug;
+                //creationFlags |= DeviceCreationFlags.Debug;
 #endif
 
                 Device device = null;

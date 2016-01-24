@@ -93,7 +93,7 @@ namespace Engine
         {
             get
             {
-                return Helper.Angle(this.Normal, Vector3.Up);
+                return Helper.Angle(this.Normal, Vector3.Down);
             }
         }
 

@@ -7,7 +7,7 @@ namespace Engine.Common
 {
     public class NavMesh
     {
-        List<Polygon> poligons = new List<Polygon>();
+        List<TPPLPoly> poligons = new List<TPPLPoly>();
 
         public static NavMesh Build(Triangle[] triangles, float size, float angle = MathUtil.PiOverFour)
         {
@@ -19,15 +19,29 @@ namespace Engine.Common
             //Son bordes los que coinciden con triángulos no eliminados
 
             //Generar polígonos con los bordes
-
-            var tris = Array.FindAll(triangles, t => t.Inclination >= angle);
+            float a = MathUtil.DegreesToRadians(angle);
+            var tris = Array.FindAll(triangles, t => t.Inclination <= a);
             if (tris != null && tris.Length > 0)
             {
-                Array.ForEach(tris, t =>
+                List<TPPLPoly> polys = new List<TPPLPoly>(tris.Length);
+                for (int i = 0; i < tris.Length; i++)
                 {
-                    //Buscar polígono para el triángulo
-                    var poly = result.poligons.Find(p => p.Inside(new Vector2(t.Point1.X, t.Point1.Z)));
-                });
+                    Triangle tri = tris[i];
+                    polys.Add(new TPPLPoly(
+                        new Vector2(tri.Point1.X, tri.Point1.Z),
+                        new Vector2(tri.Point2.X, tri.Point2.Z),
+                        new Vector2(tri.Point3.X, tri.Point3.Z)));
+                }
+
+                List<TPPLPoly> parts;
+                if (TPPLPartition.ConvexPartition_HM(polys, out parts))
+                {
+                    List<TPPLPoly> mergedPolis;
+                    if (TPPLPartition.MergeConvex(parts, out mergedPolis))
+                    {
+                        result.poligons = mergedPolis;
+                    }
+                }
             }
 
             return result;
@@ -232,40 +246,45 @@ namespace Engine.Common
         /// <summary>
         /// Adds a point to collection
         /// </summary>
-        public bool AddPoint(Vector2 point, bool convexResult = true)
+        public bool Add(TPPLPoly poly, MergeInfo mergeInfo, bool convexResult = true)
         {
             if (this.Count == 0)
             {
-                this.Points = new Vector2[1] { point };
+                this.Points = poly.Points;
+                this.Count = poly.Count;
+                this.Hole = poly.Hole;
                 return true;
             }
             else
             {
-                if (!Array.Exists(this.Points, p => p == point))
-                {
-                    Vector2[] copy = new Vector2[this.Count + 1];
-                    Array.Copy(this.Points, copy, this.Count);
-                    copy[this.Count] = point;
+                List<Vector2> v = new List<Vector2>(this.Points);
+                List<Vector2> toMerge = new List<Vector2>(poly.Count - 2);
 
-                    if (!convexResult || copy.Length < 3)
+                //Find shared points in new poly
+                for (int i = 0; i < poly.Count; i++)
+                {
+                    if (i != mergeInfo.SharedOtherPoint1 && i != mergeInfo.SharedOtherPoint2)
                     {
-                        this.Points = copy;
-                        this.Count++;
-                        return true;
+                        toMerge.Add(poly[i]);
                     }
-                    else
-                    {
-                        if (IsConvex(copy))
-                        {
-                            this.Points = copy;
-                            this.Count++;
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
-                    }
+                }
+
+                v.InsertRange(mergeInfo.SharedThisPoint1 + 1, toMerge);
+
+                Vector2[] copy = v.ToArray();
+
+                if (!convexResult || copy.Length < 3)
+                {
+                    this.Points = copy;
+                    this.Count++;
+                    return true;
+                }
+                else if (IsConvex(copy))
+                {
+                    this.Points = copy;
+                    this.Count = copy.Length;
+                    this.Hole = false;
+                    return true;
                 }
 
                 return false;
@@ -274,21 +293,20 @@ namespace Engine.Common
 
         public static TPPLPoly Merge(TPPLPoly source, TPPLPoly poly, bool convexResult = true)
         {
-            TPPLPoly newpoly = new TPPLPoly()
+            MergeInfo mergeInfo;
+            if (source.ShareAnEdgeWith(poly, out mergeInfo))
             {
-                Points = source.Points,
-                Count = source.Count,
-                Hole = source.Hole,
-            };
+                TPPLPoly newpoly = new TPPLPoly()
+                {
+                    Points = source.Points,
+                    Count = source.Count,
+                    Hole = source.Hole,
+                };
 
-            for (int i = 0; i < poly.Count; i++)
-            {
-                newpoly.AddPoint(poly[i], false);
-            }
-
-            if (newpoly.IsConvex())
-            {
-                return newpoly;
+                if (newpoly.Add(poly, mergeInfo, true))
+                {
+                    return newpoly;
+                }
             }
 
             return null;
@@ -347,8 +365,11 @@ namespace Engine.Common
             return IsConvex(this.Points);
         }
 
-        public bool ShareAnEdgeWith(TPPLPoly poly)
+        public bool ShareAnEdgeWith(TPPLPoly poly, out MergeInfo mergeInfo)
         {
+            bool result = false;
+            mergeInfo = null;
+
             for (int i1 = 0; i1 < this.Points.Length; i1++)
             {
                 int j1 = Array.IndexOf(poly.Points, this.Points[i1]);
@@ -358,11 +379,31 @@ namespace Engine.Common
                     int i2 = i1 + 1 < this.Points.Length ? i1 + 1 : 0;
                     int j2 = j1 - 1 >= 0 ? j1 - 1 : poly.Points.Length - 1;
 
-                    if (this.Points[i2] == poly.Points[j2]) return true;
+                    if (this.Points[i2] == poly.Points[j2])
+                    {
+                        mergeInfo = new MergeInfo()
+                        {
+                            SharedThisPoint1 = i1,
+                            SharedThisPoint2 = i2,
+
+                            SharedOtherPoint1 = j1,
+                            SharedOtherPoint2 = j2,
+                        };
+
+                        if (result == false)
+                        {
+                            result = true;
+                        }
+                        else
+                        {
+                            result = false;
+                            break;
+                        }
+                    }
                 }
             }
 
-            return false;
+            return result;
         }
 
         private static bool IsConvex(Vector2[] points)
@@ -405,6 +446,15 @@ namespace Engine.Common
         }
     };
 
+    public class MergeInfo
+    {
+        public int SharedThisPoint1;
+        public int SharedThisPoint2;
+
+        public int SharedOtherPoint1;
+        public int SharedOtherPoint2;
+    }
+
     public class TPPLPartition
     {
         public static bool MergeConvex(List<TPPLPoly> inpolys, out List<TPPLPoly> outpolys)
@@ -431,8 +481,6 @@ namespace Engine.Common
                     for (int j = i + 1; j < inpolys.Count; j++)
                     {
                         if (mergedPolys.Contains(inpolys[j])) continue;
-
-                        if (!newpoly.ShareAnEdgeWith(inpolys[j])) continue;
 
                         var mergedpoly = TPPLPoly.Merge(newpoly, inpolys[j]);
                         if (mergedpoly != null)

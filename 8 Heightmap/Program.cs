@@ -15,26 +15,42 @@ namespace HeightmapTest
             using (Game cl = new Game("8 Heightmap"))
 #endif
             {
-                TPPLPoly poly = new TPPLPoly(8);
-                poly[0] = new Vector2(+1, +1);
-                poly[1] = new Vector2(+0, +1);
-                poly[2] = new Vector2(-1, +1);
-                poly[3] = new Vector2(-1, +0);
-                poly[4] = new Vector2(-1, -1);
-                poly[5] = new Vector2(+0, -1);
-                poly[6] = new Vector2(+1, -1);
-                poly[7] = new Vector2(+0.5f, +0);
+                {
+                    TPPLPoly poly = new TPPLPoly(8);
+                    poly[0] = new Vector2(+1, +1);
+                    poly[1] = new Vector2(+0, +1);
+                    poly[2] = new Vector2(-1, +1);
+                    poly[3] = new Vector2(-1, +0);
+                    poly[4] = new Vector2(-1, -1);
+                    poly[5] = new Vector2(+0, -1);
+                    poly[6] = new Vector2(+1, -1);
+                    poly[7] = new Vector2(+0.5f, +0);
 
-                poly.Orientation = OrientationEnum.TPPL_CCW;
+                    poly.Orientation = OrientationEnum.TPPL_CCW;
 
-                var polys = new List<TPPLPoly>();
-                polys.Add(poly);
+                    var polys = new List<TPPLPoly>();
+                    polys.Add(poly);
 
-                List<TPPLPoly> parts;
-                TPPLPartition.ConvexPartition_HM(polys, out parts);
+                    List<TPPLPoly> parts;
+                    TPPLPartition.ConvexPartition_HM(polys, out parts);
 
-                List<TPPLPoly> mergedPolis;
-                TPPLPartition.MergeConvex(parts, out mergedPolis);
+                    List<TPPLPoly> mergedPolis;
+                    TPPLPartition.MergeConvex(parts, out mergedPolis);
+                }
+
+                {
+                    Triangle[] tris = new Triangle[8];
+                    tris[0] = new Triangle(new Vector3(-1, 0, 1), new Vector3(-1, 0, 0), new Vector3(0, 0, 1));
+                    tris[1] = new Triangle(new Vector3(0, 0, 1), new Vector3(-1, 0, 0), new Vector3(0, 0, 0));
+                    tris[2] = new Triangle(new Vector3(0, 0, 1), new Vector3(0, 0, 0), new Vector3(1, 0, 1));
+                    tris[3] = new Triangle(new Vector3(1, 0, 1), new Vector3(0, 0, 0), new Vector3(0.5f, 0, 0));
+                    tris[4] = new Triangle(new Vector3(-1, 0, 0), new Vector3(-1, 0, -1), new Vector3(0, 0, 0));
+                    tris[5] = new Triangle(new Vector3(0, 0, 0), new Vector3(-1, 0, -1), new Vector3(0, 0, -1));
+                    tris[6] = new Triangle(new Vector3(0, 0, 0), new Vector3(0, 0, -1), new Vector3(0.5f, 0, 0));
+                    tris[7] = new Triangle(new Vector3(0.5f, 0, 0), new Vector3(0, 0, -1), new Vector3(1, 0, -1));
+
+                    NavMesh nm = NavMesh.Build(tris, 45, 0);
+                }
 #if DEBUG
                 cl.VisibleMouse = false;
                 cl.LockMouse = false;
