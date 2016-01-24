@@ -581,7 +581,7 @@ namespace Engine.Common
         /// <param name="lines">Line list</param>
         /// <param name="color">Color</param>
         /// <param name="v">Result vertices</param>
-        public static void CreateLineList(Line[] lines, Color4 color, out VertexData[] v)
+        public static void CreateLineList(Line3[] lines, Color4 color, out VertexData[] v)
         {
             //TODO: Vertex generation specifying data channels
 

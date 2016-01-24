@@ -1,7 +1,6 @@
 ﻿using Engine;
 using Engine.Common;
 using SharpDX;
-using System.Collections.Generic;
 
 namespace HeightmapTest
 {
@@ -16,7 +15,7 @@ namespace HeightmapTest
 #endif
             {
                 {
-                    TPPLPoly poly = new TPPLPoly(8);
+                    Polygon poly = new Polygon(8);
                     poly[0] = new Vector2(+1, +1);
                     poly[1] = new Vector2(+0, +1);
                     poly[2] = new Vector2(-1, +1);
@@ -26,16 +25,16 @@ namespace HeightmapTest
                     poly[6] = new Vector2(+1, -1);
                     poly[7] = new Vector2(+0.5f, +0);
 
-                    poly.Orientation = OrientationEnum.TPPL_CCW;
+                    poly.Orientation = GeometricOrientation.CounterClockwise;
 
-                    var polys = new List<TPPLPoly>();
-                    polys.Add(poly);
+                    Polygon[] parts;
+                    if (NavMesh.ConvexPartition(new[] { poly }, out parts))
+                    {
+                        Polygon[] mergedPolis;
+                        NavMesh.MergeConvex(parts, out mergedPolis);
 
-                    List<TPPLPoly> parts;
-                    TPPLPartition.ConvexPartition_HM(polys, out parts);
-
-                    List<TPPLPoly> mergedPolis;
-                    TPPLPartition.MergeConvex(parts, out mergedPolis);
+                        Line2[] edges = mergedPolis[0].GetEdges();
+                    }
                 }
 
                 {
@@ -49,7 +48,7 @@ namespace HeightmapTest
                     tris[6] = new Triangle(new Vector3(0, 0, 0), new Vector3(0, 0, -1), new Vector3(0.5f, 0, 0));
                     tris[7] = new Triangle(new Vector3(0.5f, 0, 0), new Vector3(0, 0, -1), new Vector3(1, 0, -1));
 
-                    NavMesh nm = NavMesh.Build(tris, 45, 0);
+                    NavMesh nm = NavMesh.Build(tris, 0);
                 }
 #if DEBUG
                 cl.VisibleMouse = false;

@@ -110,14 +110,14 @@ namespace Collada
             this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(rainEmitter, "raindrop.dds"));
 
             BoundingBox[] bboxes = this.ground.GetBoundingBoxes(5);
-            Line[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
+            Line3[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
 
             this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
             this.bboxesDrawer.Visible = false;
             this.bboxesDrawer.Opaque = false;
             this.bboxesDrawer.EnableAlphaBlending = true;
 
-            List<Line> squares = new List<Line>();
+            List<Line3> squares = new List<Line3>();
 
             var nodes = this.ground.GetNodes();
 
