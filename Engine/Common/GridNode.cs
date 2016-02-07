@@ -140,6 +140,7 @@ namespace Engine.Common
 
             this.Cost = cost;
             this.State = GraphNodeStates.Clear;
+            this.Center = (p0 + p1 + p2 + p3) / 4f;
         }
 
         /// <summary>
@@ -222,7 +223,7 @@ namespace Engine.Common
                 if (!gridNode.nodesDictionary.ContainsKey(headingOther))
                 {
                     gridNode.ConnectedNodes.Add(this);
-                    gridNode.nodesDictionary.Add(headingOther, this.ConnectedNodes.Count - 1);
+                    gridNode.nodesDictionary.Add(headingOther, gridNode.ConnectedNodes.Count - 1);
                 }
             }
         }
