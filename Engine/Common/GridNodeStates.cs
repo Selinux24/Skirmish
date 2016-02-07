@@ -2,9 +2,9 @@
 namespace Engine.Common
 {
     /// <summary>
-    /// Grid node sate
+    /// Graph node sate
     /// </summary>
-    public enum GridNodeStates : int
+    public enum GraphNodeStates : int
     {
         /// <summary>
         /// None

@@ -4,10 +4,12 @@ using SharpDX;
 
 namespace Engine.Common
 {
+    using Engine.PathFinding;
+
     /// <summary>
     /// Grid
     /// </summary>
-    public class Grid
+    public class Grid : IGraph
     {
         /// <summary>
         /// Collision info helper
@@ -253,10 +255,10 @@ namespace Engine.Common
         /// </summary>
         /// <param name="point">Point</param>
         /// <returns>Returns the node wich contains the specified point if exists</returns>
-        public GridNode FindNode(Vector3 point)
+        public IGraphNode FindNode(Vector3 point)
         {
             float minDistance = float.MaxValue;
-            GridNode bestNode = null;
+            IGraphNode bestNode = null;
 
             for (int i = 0; i < this.Nodes.Length; i++)
             {

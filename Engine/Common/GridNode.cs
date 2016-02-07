@@ -4,11 +4,29 @@ using SharpDX;
 
 namespace Engine.Common
 {
+    using Engine.PathFinding;
+
     /// <summary>
     /// Grid node
     /// </summary>
-    public class GridNode
+    public class GridNode : IGraphNode
     {
+        private List<IGraphNode> nodes = new List<IGraphNode>();
+        public IGraphNode[] Connections
+        {
+            get
+            {
+                return this.nodes.ToArray();
+            }
+        }
+        public IGraphNode this[int index]
+        {
+            get
+            {
+                return this.nodes[index];
+            }
+        }
+
         /// <summary>
         /// Connected nodes dictionary
         /// </summary>
@@ -60,11 +78,11 @@ namespace Engine.Common
         /// <summary>
         /// Node state
         /// </summary>
-        public GridNodeStates State = GridNodeStates.Clear;
+        public GraphNodeStates State { get; set; }
         /// <summary>
         /// Node passing cost
         /// </summary>
-        public float Cost;
+        public float Cost { get; set; }
         /// <summary>
         /// Center position
         /// </summary>
@@ -77,11 +95,11 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Gets inverse of heading
+        /// Gets opposite of heading
         /// </summary>
         /// <param name="heading">Heading</param>
-        /// <returns>Returns inverse of heading</returns>
-        public static Headings GetInverse(Headings heading)
+        /// <returns>Returns opposite of heading</returns>
+        public static Headings GetOpposite(Headings heading)
         {
             if (heading == Headings.North) return Headings.South;
             else if (heading == Headings.South) return Headings.North;
@@ -153,6 +171,7 @@ namespace Engine.Common
             else if (p3.X == maxX && p3.Z == minZ) this.SouthEast = p3;
 
             this.Cost = cost;
+            this.State = GraphNodeStates.Clear;
         }
 
         /// <summary>
@@ -224,10 +243,19 @@ namespace Engine.Common
 
             if (headingThis != Headings.None)
             {
-                Headings headingOther = GetInverse(headingThis);
+                Headings headingOther = GetOpposite(headingThis);
 
-                if (!this.ConnectedNodes.ContainsKey(headingThis)) this.ConnectedNodes.Add(headingThis, gridNode);
-                if (!gridNode.ConnectedNodes.ContainsKey(headingOther)) gridNode.ConnectedNodes.Add(headingOther, this);
+                if (!this.ConnectedNodes.ContainsKey(headingThis))
+                {
+                    this.ConnectedNodes.Add(headingThis, gridNode);
+                    this.nodes.Add(gridNode);
+                }
+
+                if (!gridNode.ConnectedNodes.ContainsKey(headingOther))
+                {
+                    gridNode.ConnectedNodes.Add(headingOther, this);
+                    gridNode.nodes.Add(this);
+                }
             }
         }
         /// <summary>

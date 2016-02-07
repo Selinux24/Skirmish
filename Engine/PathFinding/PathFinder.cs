@@ -31,10 +31,10 @@ namespace Engine.PathFinding
         /// <param name="heuristicMethod">Heuristic metod (Diagonal distance 2 by default)</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value (8 by default)</param>
         /// <returns>Returns the path from start to end</returns>
-        public static Path FindPath(Grid grid, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
+        public static Path FindPath(IGraph grid, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
         {
-            GridNode start = grid.FindNode(startPosition);
-            GridNode end = grid.FindNode(endPosition);
+            IGraphNode start = grid.FindNode(startPosition);
+            IGraphNode end = grid.FindNode(endPosition);
             if (start != null && end != null)
             {
                 PathCache cachedPath = Cache.Find(p => p.Start == start && p.End == end);
@@ -46,7 +46,7 @@ namespace Engine.PathFinding
                 else
                 {
                     //Calculate return path
-                    GridNode[] solvedList = CalcReturnPath(start, end, heuristicMethod, heuristicEstimateValue);
+                    IGraphNode[] solvedList = CalcReturnPath(start, end, heuristicMethod, heuristicEstimateValue);
                     if (solvedList != null && solvedList.Length > 0)
                     {
                         //Generate path
@@ -78,12 +78,12 @@ namespace Engine.PathFinding
         /// <param name="heuristicMethod">Heuristic metod</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value</param>
         /// <returns>Returns the path from start to end</returns>
-        private static GridNode[] CalcReturnPath(GridNode start, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
+        private static IGraphNode[] CalcReturnPath(IGraphNode start, IGraphNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
         {
             //New queue
-            PriorityQueue<GridNode, float> openPathsQueue = new PriorityQueue<GridNode, float>();
+            PriorityQueue<IGraphNode, float> openPathsQueue = new PriorityQueue<IGraphNode, float>();
             //Data dictionary
-            Dictionary<GridNode, PathFinderData> nodesData = new Dictionary<GridNode, PathFinderData>();
+            Dictionary<IGraphNode, PathFinderData> nodesData = new Dictionary<IGraphNode, PathFinderData>();
 
             //Add first node
             openPathsQueue.Enqueue(start, 1);
@@ -93,21 +93,21 @@ namespace Engine.PathFinding
             while (openPathsQueue.Count > 0)
             {
                 //Dequeue the node with lower priority
-                PriorityQueueItem<GridNode, float> item = openPathsQueue.Dequeue();
+                PriorityQueueItem<IGraphNode, float> item = openPathsQueue.Dequeue();
 
-                GridNode currentNode = item.Value;
+                IGraphNode currentNode = item.Value;
                 PathFinderData currentNodeData = nodesData[currentNode];
 
                 //If the node is not closed to continue the process
-                if (currentNodeData.State != GridNodeStates.Closed)
+                if (currentNodeData.State != GraphNodeStates.Closed)
                 {
                     //Set the node status Closed
-                    currentNodeData.State = GridNodeStates.Closed;
+                    currentNodeData.State = GraphNodeStates.Closed;
 
                     //If the current node is the destination node has found the way
                     if (currentNode == end)
                     {
-                        currentNodeData.State = GridNodeStates.Closed;
+                        currentNodeData.State = GraphNodeStates.Closed;
                         nodeFound = true;
 
                         break;
@@ -115,9 +115,9 @@ namespace Engine.PathFinding
                     else
                     {
                         //Search every possible direction from the current node
-                        for (int i = 1; i < 9; i++)
+                        for (int i = 1; i < currentNode.Connections.Length; i++)
                         {
-                            GridNode nextNode = currentNode[(Headings)i];
+                            IGraphNode nextNode = currentNode[i];
                             if (nextNode != null)
                             {
                                 if (!nodesData.ContainsKey(nextNode))
@@ -127,13 +127,13 @@ namespace Engine.PathFinding
 
                                 PathFinderData nextNodeData = nodesData[nextNode];
 
-                                if (nextNode.State == GridNodeStates.Closed)
+                                if (nextNode.State == GraphNodeStates.Closed)
                                 {
                                     //Impassable node
                                     continue;
                                 }
 
-                                if (nextNodeData.State == GridNodeStates.Closed)
+                                if (nextNodeData.State == GraphNodeStates.Closed)
                                 {
                                     //Closed node
                                     continue;
@@ -141,7 +141,7 @@ namespace Engine.PathFinding
 
                                 float newGone = currentNode.Cost + ((int)nextNodeData.State);
 
-                                if (nextNodeData.State == GridNodeStates.Clear)
+                                if (nextNodeData.State == GraphNodeStates.Clear)
                                 {
                                     if (nextNode.Cost < newGone)
                                     {
@@ -151,7 +151,7 @@ namespace Engine.PathFinding
 
                                 nextNodeData.NextNode = currentNode;
                                 nextNodeData.Cost = newGone;
-                                nextNodeData.State = GridNodeStates.Clear;
+                                nextNodeData.State = GraphNodeStates.Clear;
 
                                 //Calculate priority from next to end
                                 float heuristicValue = CalcHeuristic(
@@ -169,9 +169,9 @@ namespace Engine.PathFinding
             if (nodeFound)
             {
                 //We found a valid path
-                List<GridNode> solvedList = new List<GridNode>();
+                List<IGraphNode> solvedList = new List<IGraphNode>();
 
-                GridNode node = end;
+                IGraphNode node = end;
                 while (node != null)
                 {
                     solvedList.Insert(0, node);
@@ -251,15 +251,30 @@ namespace Engine.PathFinding
             /// <summary>
             /// Start node
             /// </summary>
-            public GridNode Start;
+            public IGraphNode Start;
             /// <summary>
             /// End node
             /// </summary>
-            public GridNode End;
+            public IGraphNode End;
             /// <summary>
             /// Path
             /// </summary>
             public Path Path;
         }
+    }
+
+    public interface IGraph
+    {
+        IGraphNode FindNode(Vector3 startPosition);
+    }
+
+    public interface IGraphNode
+    {
+        IGraphNode[] Connections { get; }
+        IGraphNode this[int index] { get; }
+
+        GraphNodeStates State { get; set; }
+        float Cost { get; set; }
+        Vector3 Center { get;  }
     }
 }

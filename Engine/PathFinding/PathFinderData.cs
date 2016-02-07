@@ -11,7 +11,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Node State
         /// </summary>
-        public GridNodeStates State = GridNodeStates.None;
+        public GraphNodeStates State = GraphNodeStates.None;
         /// <summary>
         /// Accumulated cost of the path
         /// </summary>
@@ -19,14 +19,14 @@ namespace Engine.PathFinding
         /// <summary>
         /// Next node
         /// </summary>
-        public GridNode NextNode = null;
+        public IGraphNode NextNode = null;
 
         /// <summary>
         /// Constructor
         /// </summary>
         public PathFinderData()
         {
-            this.State = GridNodeStates.None;
+            this.State = GraphNodeStates.None;
             this.Cost = 0;
             this.NextNode = null;
         }
@@ -37,7 +37,7 @@ namespace Engine.PathFinding
         public void Reset()
         {
             this.Cost = 0;
-            this.State = GridNodeStates.None;
+            this.State = GraphNodeStates.None;
             this.NextNode = null;
         }
         /// <summary>

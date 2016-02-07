@@ -18,7 +18,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Path nodes
         /// </summary>
-        public readonly List<GridNode> ReturnPath = new List<GridNode>();
+        public readonly List<IGraphNode> ReturnPath = new List<IGraphNode>();
         /// <summary>
         /// Start position
         /// </summary>
@@ -49,7 +49,7 @@ namespace Engine.PathFinding
         /// Constructor
         /// </summary>
         /// <param name="returnPath">Node list</param>
-        public Path(Vector3 startPosition, Vector3 endPosition, GridNode[] returnPath)
+        public Path(Vector3 startPosition, Vector3 endPosition, IGraphNode[] returnPath)
         {
             this.StartPosition = startPosition;
             this.EndPosition = endPosition;
