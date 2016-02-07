@@ -9,7 +9,7 @@ namespace Engine.PathFinding
     /// <summary>
     /// PathFinder path
     /// </summary>
-    public class Path
+    public class Path<T> where T : GraphNode<T>
     {
         /// <summary>
         /// Path identifier
@@ -18,7 +18,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Path nodes
         /// </summary>
-        public readonly List<IGraphNode> ReturnPath = new List<IGraphNode>();
+        public readonly List<T> ReturnPath = new List<T>();
         /// <summary>
         /// Start position
         /// </summary>
@@ -49,7 +49,7 @@ namespace Engine.PathFinding
         /// Constructor
         /// </summary>
         /// <param name="returnPath">Node list</param>
-        public Path(Vector3 startPosition, Vector3 endPosition, IGraphNode[] returnPath)
+        public Path(Vector3 startPosition, Vector3 endPosition, T[] returnPath)
         {
             this.StartPosition = startPosition;
             this.EndPosition = endPosition;

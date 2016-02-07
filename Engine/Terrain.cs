@@ -293,9 +293,9 @@ namespace Engine
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public Path FindPath(Vector3 from, Vector3 to)
+        public Path<GridNode> FindPath(Vector3 from, Vector3 to)
         {
-            return PathFinding.PathFinder.FindPath(this.grid, from, to);
+            return PathFinding.PathFinder<GridNode>.FindPath(this.grid, from, to);
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace Engine
         /// Gets the path finder grid nodes
         /// </summary>
         /// <returns>Returns the path finder grid nodes</returns>
-        public GridNode[] GetNodes()
+        public GraphNode<GridNode>[] GetNodes()
         {
             if (this.grid != null)
             {

@@ -5,7 +5,9 @@ using System.Linq;
 
 namespace Engine.Common
 {
-    public class NavMesh
+    using Engine.PathFinding;
+
+    public class NavMesh : IGraph<NavmeshNode>
     {
         class PartitionVertex
         {
@@ -47,7 +49,11 @@ namespace Engine.Common
                     Polygon[] mergedPolis;
                     if (NavMesh.MergeConvex(parts, out mergedPolis))
                     {
-                        result.Polygons = mergedPolis;
+                        result.Nodes = new NavmeshNode[mergedPolis.Length];
+                        for (int i = 0; i < result.Nodes.Length; i++)
+                        {
+                            result.Nodes[i] = new NavmeshNode(mergedPolis[i]);
+                        }
                     }
                 }
             }
@@ -565,7 +571,22 @@ namespace Engine.Common
                 v.IsEar = false;
             }
         }
+    }
 
-        public Polygon[] Polygons { get; private set; }
+
+    public class NavmeshNode : GraphNode<NavmeshNode>
+    {
+        private Polygon poly;
+
+        public NavmeshNode(Polygon poly)
+        {
+            this.poly = poly;
+        }
+
+
+        public override bool Contains(Vector3 point, out float distance)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

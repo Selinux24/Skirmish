@@ -9,28 +9,12 @@ namespace Engine.Common
     /// <summary>
     /// Grid node
     /// </summary>
-    public class GridNode : IGraphNode
+    public class GridNode : GraphNode<GridNode>
     {
-        private List<IGraphNode> nodes = new List<IGraphNode>();
-        public IGraphNode[] Connections
-        {
-            get
-            {
-                return this.nodes.ToArray();
-            }
-        }
-        public IGraphNode this[int index]
-        {
-            get
-            {
-                return this.nodes[index];
-            }
-        }
-
         /// <summary>
         /// Connected nodes dictionary
         /// </summary>
-        private Dictionary<Headings, GridNode> ConnectedNodes = new Dictionary<Headings, GridNode>();
+        private Dictionary<Headings, int> nodesDictionary = new Dictionary<Headings, int>();
 
         /// <summary>
         /// North West point
@@ -53,13 +37,15 @@ namespace Engine.Common
         /// </summary>
         /// <param name="heading">Heading</param>
         /// <returns>Returns connected node of specified heading if exists</returns>
-        public GridNode this[Headings heading]
+        public GraphNode<GridNode> this[Headings heading]
         {
             get
             {
-                if (this.ConnectedNodes.ContainsKey(heading))
+                if (this.nodesDictionary.ContainsKey(heading))
                 {
-                    return this.ConnectedNodes[heading];
+                    int index = this.nodesDictionary[heading];
+
+                    return this.ConnectedNodes[index];
                 }
 
                 return null;
@@ -73,24 +59,6 @@ namespace Engine.Common
             get
             {
                 return this.ConnectedNodes.Count == 8;
-            }
-        }
-        /// <summary>
-        /// Node state
-        /// </summary>
-        public GraphNodeStates State { get; set; }
-        /// <summary>
-        /// Node passing cost
-        /// </summary>
-        public float Cost { get; set; }
-        /// <summary>
-        /// Center position
-        /// </summary>
-        public Vector3 Center
-        {
-            get
-            {
-                return (this.NorthWest + this.NorthEast + this.SouthWest + this.SouthEast) * 0.25f;
             }
         }
 
@@ -245,16 +213,16 @@ namespace Engine.Common
             {
                 Headings headingOther = GetOpposite(headingThis);
 
-                if (!this.ConnectedNodes.ContainsKey(headingThis))
+                if (!this.nodesDictionary.ContainsKey(headingThis))
                 {
-                    this.ConnectedNodes.Add(headingThis, gridNode);
-                    this.nodes.Add(gridNode);
+                    this.ConnectedNodes.Add(gridNode);
+                    this.nodesDictionary.Add(headingThis, this.ConnectedNodes.Count - 1);
                 }
 
-                if (!gridNode.ConnectedNodes.ContainsKey(headingOther))
+                if (!gridNode.nodesDictionary.ContainsKey(headingOther))
                 {
-                    gridNode.ConnectedNodes.Add(headingOther, this);
-                    gridNode.nodes.Add(this);
+                    gridNode.ConnectedNodes.Add(this);
+                    gridNode.nodesDictionary.Add(headingOther, this.ConnectedNodes.Count - 1);
                 }
             }
         }
@@ -263,7 +231,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="point">Point to test</param>
         /// <returns>Returns whether this node contains specified point</returns>
-        public bool Contains(Vector3 point, out float distance)
+        public override bool Contains(Vector3 point, out float distance)
         {
             distance = float.MaxValue;
 

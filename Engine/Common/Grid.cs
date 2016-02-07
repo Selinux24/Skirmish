@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <summary>
     /// Grid
     /// </summary>
-    public class Grid : IGraph
+    public class Grid : IGraph<GridNode>
     {
         /// <summary>
         /// Collision info helper
@@ -39,10 +39,6 @@ namespace Engine.Common
         /// Node side
         /// </summary>
         private float NodeSide = 0;
-        /// <summary>
-        /// Grid nodes
-        /// </summary>
-        public GridNode[] Nodes;
 
         /// <summary>
         /// Build node list from triangles
@@ -249,31 +245,6 @@ namespace Engine.Common
             {
                 return false;
             }
-        }
-        /// <summary>
-        /// Gets node wich contains specified point
-        /// </summary>
-        /// <param name="point">Point</param>
-        /// <returns>Returns the node wich contains the specified point if exists</returns>
-        public IGraphNode FindNode(Vector3 point)
-        {
-            float minDistance = float.MaxValue;
-            IGraphNode bestNode = null;
-
-            for (int i = 0; i < this.Nodes.Length; i++)
-            {
-                float distance;
-                if (this.Nodes[i].Contains(point, out distance))
-                {
-                    if (distance < minDistance)
-                    {
-                        minDistance = distance;
-                        bestNode = this.Nodes[i];
-                    }
-                }
-            }
-
-            return bestNode;
         }
 
         /// <summary>

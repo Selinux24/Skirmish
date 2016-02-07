@@ -283,11 +283,9 @@ namespace Engine
                         FeatureLevel.Level_11_0,
                         FeatureLevel.Level_10_1,
                         FeatureLevel.Level_10_0,
-                        /* Windows 10 debugging opts error
                         FeatureLevel.Level_9_3,
                         FeatureLevel.Level_9_2, 
                         FeatureLevel.Level_9_1,
-                        */
                     },
                     new SwapChainDescription()
                     {

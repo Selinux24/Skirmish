@@ -512,7 +512,7 @@ namespace DeferredTest
             {
                 if (picked)
                 {
-                    Path p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
+                    var p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
                     if (p != null)
                     {
                         this.tank.Manipulator.Follow(p.GenerateBezierPath(), 0.2f);

@@ -6,7 +6,7 @@ namespace Engine.PathFinding
     /// <summary>
     /// Path node
     /// </summary>
-    class PathFinderData
+    class PathFinderData<T> where T : GraphNode<T>
     {
         /// <summary>
         /// Node State
@@ -19,7 +19,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Next node
         /// </summary>
-        public IGraphNode NextNode = null;
+        public T NextNode = null;
 
         /// <summary>
         /// Constructor

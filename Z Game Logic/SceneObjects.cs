@@ -753,7 +753,7 @@ namespace GameLogic
             if (ActionsManager.Move(this.skirmishGame, active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                Path path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set move animation clip
@@ -770,7 +770,7 @@ namespace GameLogic
             if (ActionsManager.Crawl(this.skirmishGame, active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                Path path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set crawl animation clip
@@ -787,7 +787,7 @@ namespace GameLogic
             if (ActionsManager.Run(this.skirmishGame, active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                Path path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
@@ -810,7 +810,7 @@ namespace GameLogic
                 Vector3 dir = Vector3.Normalize(activeMan.Position - passiveMan.Position);
                 Vector3 destination = passiveMan.Position + (dir * 3f);
 
-                Path path = this.terrain.FindPath(activeMan.Position, destination);
+                var path = this.terrain.FindPath(activeMan.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set assault animation clip
@@ -895,7 +895,7 @@ namespace GameLogic
             if (ActionsManager.FindCover(this.skirmishGame, active))
             {
                 //Run 3d actions
-                Path path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
@@ -912,7 +912,7 @@ namespace GameLogic
             if (ActionsManager.RunAway(this.skirmishGame, active))
             {
                 //Run 3d actions
-                Path path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
@@ -998,7 +998,7 @@ namespace GameLogic
             if (ActionsManager.Leave(this.skirmishGame, active))
             {
                 //Run 3d actions
-                Path path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip

@@ -272,22 +272,24 @@ namespace TerrainTest
             if (nodes != null && nodes.Length > 0)
             {
                 this.terrainGridDrawer = this.AddLineListDrawer(nodes.Length * 4);
-                this.terrainGridDrawer.EnableAlphaBlending = true;
+                //this.terrainGridDrawer.EnableAlphaBlending = true;
                 this.terrainGridDrawer.Visible = false;
 
                 Matrix m = Matrix.Translation(Vector3.Up * 0.5f);
 
                 for (int i = 0; i < nodes.Length; i++)
                 {
-                    float c = (nodes[i].Cost / MathUtil.PiOverFour);
+                    GridNode node = (GridNode)nodes[i];
+
+                    float c = (node.Cost / MathUtil.PiOverFour);
 
                     Color4 color = Color.Transparent;
 
-                    if (c > 0.66f) { color = new Color4(Color.Red.ToColor3(), 0.5f); }
-                    else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 0.5f); }
-                    else { color = new Color4(Color.Green.ToColor3(), 0.5f); }
+                    if (c > 0.66f) { color = new Color4(Color.Red.ToColor3(), 1f); }
+                    else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 1f); }
+                    else { color = new Color4(Color.Green.ToColor3(), 1f); }
 
-                    Vector3[] corners = nodes[i].GetCorners();
+                    Vector3[] corners = node.GetCorners();
 
                     this.terrainGridDrawer.AddLines(color, Line3.Transform(GeometryUtil.CreateWiredSquare(corners), m));
                 }
@@ -443,7 +445,7 @@ namespace TerrainTest
                 var cast = this.Lights.DirectionalLights[0].CastShadow;
 
                 this.Lights.DirectionalLights[0].CastShadow = !cast;
-                this.shadowMapDrawer.Visible = !cast;
+                this.shadowMapDrawer.Visible = this.shadowMapDrawer.Visible ? this.shadowMapDrawer.Visible : !cast;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
@@ -493,9 +495,26 @@ namespace TerrainTest
             {
                 if (picked)
                 {
-                    Path p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
+                    var p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
                     if (p != null)
                     {
+                        Matrix ml = Matrix.Translation(Vector3.Up * 1f);
+
+                        for (int i = 0; i < p.ReturnPath.Count; i++)
+                        {
+                            Line3 line;
+                            if (i == 0)
+                            {
+                                line = new Line3(p.StartPosition, p.ReturnPath[i].Center);
+                            }
+                            else
+                            {
+                                line = new Line3(p.ReturnPath[i - 1].Center, p.ReturnPath[i].Center);
+                            }
+
+                            this.terrainPointDrawer.AddLines(Color.Red, Line3.Transform(line, ml));
+                        }
+
                         this.tank.Manipulator.Follow(p.GenerateBezierPath(), 0.2f);
                     }
                 }

@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.Common
+namespace Engine.PathFinding
 {
     /// <summary>
     /// Graph node sate
