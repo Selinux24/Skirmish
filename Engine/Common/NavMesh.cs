@@ -7,398 +7,47 @@ namespace Engine.Common
 {
     public class NavMesh
     {
-        List<TPPLPoly> poligons = new List<TPPLPoly>();
+        class PartitionVertex
+        {
+            public bool IsActive;
+            public bool IsConvex;
+            public bool IsEar;
 
-        public static NavMesh Build(Triangle[] triangles, float size, float angle = MathUtil.PiOverFour)
+            public Vector2 Point;
+            public float Angle;
+            public PartitionVertex Previous;
+            public PartitionVertex Next;
+        }
+
+        public static NavMesh Build(Triangle[] triangles, float angle = MathUtil.PiOverFour)
         {
             NavMesh result = new NavMesh();
 
-            //Eliminar los triángulos por ángulo
-
-            //Identificar los bordes de los triángulos eliminados
-            //Son bordes los que coinciden con triángulos no eliminados
-
-            //Generar polígonos con los bordes
-            float a = MathUtil.DegreesToRadians(angle);
-            var tris = Array.FindAll(triangles, t => t.Inclination <= a);
+            var tris = Array.FindAll(triangles, t => t.Inclination <= angle);
             if (tris != null && tris.Length > 0)
             {
-                List<TPPLPoly> polys = new List<TPPLPoly>(tris.Length);
+                List<Polygon> polys = new List<Polygon>(tris.Length);
                 for (int i = 0; i < tris.Length; i++)
                 {
                     Triangle tri = tris[i];
-                    polys.Add(new TPPLPoly(
+
+                    Polygon poly = new Polygon(
                         new Vector2(tri.Point1.X, tri.Point1.Z),
                         new Vector2(tri.Point2.X, tri.Point2.Z),
-                        new Vector2(tri.Point3.X, tri.Point3.Z)));
+                        new Vector2(tri.Point3.X, tri.Point3.Z));
+
+                    poly.Orientation = GeometricOrientation.CounterClockwise;
+
+                    polys.Add(poly);
                 }
 
-                List<TPPLPoly> parts;
-                if (TPPLPartition.ConvexPartition_HM(polys, out parts))
+                Polygon[] parts;
+                if (NavMesh.ConvexPartition(polys.ToArray(), out parts))
                 {
-                    List<TPPLPoly> mergedPolis;
-                    if (TPPLPartition.MergeConvex(parts, out mergedPolis))
+                    Polygon[] mergedPolis;
+                    if (NavMesh.MergeConvex(parts, out mergedPolis))
                     {
-                        result.poligons = mergedPolis;
-                    }
-                }
-            }
-
-            return result;
-        }
-    }
-
-    public class Polygon
-    {
-        private List<Vector2> vertexList = new List<Vector2>();
-
-        public Vector2[] VertexList
-        {
-            get
-            {
-                return this.vertexList.ToArray();
-            }
-            set
-            {
-                this.vertexList.Clear();
-
-                if (value != null && value.Length > 0)
-                {
-                    this.vertexList.AddRange(value);
-                }
-            }
-        }
-
-        public void Add(Vector2 vertex1, Vector2 vertex2, Vector2 vertex3)
-        {
-            //Si un segmento coincide
-
-            //Si dos segmentos coinciden
-
-            //Si tres segmentos coinciden no añadir nada
-
-            //Si un vértice coincide
-
-            //Si dos vértices coinciden
-
-            //Si tres vértices coinciden
-        }
-
-        public bool Inside(Vector2 position, bool toleranceOnOutside = true)
-        {
-            Vector2 point = position;
-
-            const float epsilon = 0.5f;
-
-            bool inside = false;
-
-            // Must have 3 or more edges
-            if (this.vertexList.Count < 3) return false;
-
-            Vector2 oldPoint = this.vertexList[this.vertexList.Count - 1];
-            float oldSqDist = Vector2.DistanceSquared(oldPoint, point);
-
-            for (int i = 0; i < this.vertexList.Count; i++)
-            {
-                Vector2 newPoint = this.vertexList[i];
-                float newSqDist = Vector2.DistanceSquared(newPoint, point);
-
-                if (oldSqDist + newSqDist + 2.0f * System.Math.Sqrt(oldSqDist * newSqDist) - Vector2.DistanceSquared(newPoint, oldPoint) < epsilon)
-                    return toleranceOnOutside;
-
-                Vector2 left;
-                Vector2 right;
-                if (newPoint.X > oldPoint.X)
-                {
-                    left = oldPoint;
-                    right = newPoint;
-                }
-                else
-                {
-                    left = newPoint;
-                    right = oldPoint;
-                }
-
-                if (left.X < point.X && point.X <= right.X && (point.Y - left.Y) * (right.X - left.X) < (right.Y - left.Y) * (point.X - left.X))
-                    inside = !inside;
-
-                oldPoint = newPoint;
-                oldSqDist = newSqDist;
-            }
-
-            return inside;
-        }
-    }
-
-    public enum OrientationEnum : int
-    {
-        NONE = 0,
-        TPPL_CCW = 1,
-        TPPL_CW = -1
-    }
-
-    /// <summary>
-    /// Polygon implemented as an array of points with a 'hole' flag
-    /// </summary>
-    public class TPPLPoly
-    {
-        /// <summary>
-        /// Point array
-        /// </summary>
-        public Vector2[] Points { get; protected set; }
-        /// <summary>
-        /// Number of points
-        /// </summary>
-        public int Count { get; protected set; }
-        /// <summary>
-        /// Gets or sets whether the polygon has a hole or not
-        /// </summary>
-        public bool Hole { get; set; }
-        /// <summary>
-        /// Gets or sets the orientation of the polygon
-        /// </summary>
-        /// <returns>
-        /// TPPL_CCW : polygon vertices are in counter-clockwise order
-        /// TPPL_CW : polygon vertices are in clockwise order
-        /// NONE : the polygon has no (measurable) area
-        /// </returns>
-        public OrientationEnum Orientation
-        {
-            get
-            {
-                int i1, i2;
-                float area = 0;
-                for (i1 = 0; i1 < Count; i1++)
-                {
-                    i2 = i1 + 1;
-                    if (i2 == Count) i2 = 0;
-                    area += Points[i1].X * Points[i2].Y - Points[i1].Y * Points[i2].X;
-                }
-                if (area > 0) return OrientationEnum.TPPL_CCW;
-                if (area < 0) return OrientationEnum.TPPL_CW;
-                return OrientationEnum.NONE;
-            }
-            set
-            {
-                OrientationEnum polyorientation = this.Orientation;
-                if (polyorientation != OrientationEnum.NONE && (polyorientation != value))
-                {
-                    this.Invert();
-                }
-            }
-        }
-        /// <summary>
-        /// Gets the specified point by index
-        /// </summary>
-        /// <param name="i">Point index</param>
-        /// <returns>Returns the specified point by index</returns>
-        public Vector2 this[int i]
-        {
-            get
-            {
-                return this.Points[i];
-            }
-            set
-            {
-                this.Points[i] = value;
-            }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public TPPLPoly()
-        {
-            this.Points = null;
-            this.Count = 0;
-            this.Hole = false;
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="src">Source poly</param>
-        public TPPLPoly(TPPLPoly src)
-        {
-            this.Hole = src.Hole;
-            this.Count = src.Count;
-            this.Points = new Vector2[Count];
-            Array.Copy(src.Points, this.Points, Count);
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="numpoints">Number of points</param>
-        public TPPLPoly(int numpoints)
-        {
-            this.Init(numpoints);
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="p1">First point</param>
-        /// <param name="p2">Second point</param>
-        /// <param name="p3">Third point</param>
-        public TPPLPoly(Vector2 p1, Vector2 p2, Vector2 p3)
-        {
-            this.Triangle(p1, p2, p3);
-        }
-
-        /// <summary>
-        /// Adds a point to collection
-        /// </summary>
-        public bool Add(TPPLPoly poly, MergeInfo mergeInfo, bool convexResult = true)
-        {
-            if (this.Count == 0)
-            {
-                this.Points = poly.Points;
-                this.Count = poly.Count;
-                this.Hole = poly.Hole;
-                return true;
-            }
-            else
-            {
-                List<Vector2> v = new List<Vector2>(this.Points);
-                List<Vector2> toMerge = new List<Vector2>(poly.Count - 2);
-
-                //Find shared points in new poly
-                for (int i = 0; i < poly.Count; i++)
-                {
-                    if (i != mergeInfo.SharedOtherPoint1 && i != mergeInfo.SharedOtherPoint2)
-                    {
-                        toMerge.Add(poly[i]);
-                    }
-                }
-
-                v.InsertRange(mergeInfo.SharedThisPoint1 + 1, toMerge);
-
-                Vector2[] copy = v.ToArray();
-
-                if (!convexResult || copy.Length < 3)
-                {
-                    this.Points = copy;
-                    this.Count++;
-                    return true;
-                }
-                else if (IsConvex(copy))
-                {
-                    this.Points = copy;
-                    this.Count = copy.Length;
-                    this.Hole = false;
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
-        public static TPPLPoly Merge(TPPLPoly source, TPPLPoly poly, bool convexResult = true)
-        {
-            MergeInfo mergeInfo;
-            if (source.ShareAnEdgeWith(poly, out mergeInfo))
-            {
-                TPPLPoly newpoly = new TPPLPoly()
-                {
-                    Points = source.Points,
-                    Count = source.Count,
-                    Hole = source.Hole,
-                };
-
-                if (newpoly.Add(poly, mergeInfo, true))
-                {
-                    return newpoly;
-                }
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Clears the polygon points
-        /// </summary>
-        public void Clear()
-        {
-            this.Points = null;
-            this.Hole = false;
-            this.Count = 0;
-        }
-        /// <summary>
-        /// Inits the polygon with numpoints vertices
-        /// </summary>
-        /// <param name="numpoints">Number of points</param>
-        public void Init(int numpoints)
-        {
-            this.Clear();
-            this.Count = numpoints;
-            this.Points = new Vector2[numpoints];
-        }
-        /// <summary>
-        /// Creates a triangle with points p1,p2,p3
-        /// </summary>
-        /// <param name="p1">First point</param>
-        /// <param name="p2">Second point</param>
-        /// <param name="p3">Third point</param>
-        public void Triangle(Vector2 p1, Vector2 p2, Vector2 p3)
-        {
-            this.Init(3);
-            this.Points[0] = p1;
-            this.Points[1] = p2;
-            this.Points[2] = p3;
-        }
-        /// <summary>
-        /// Inverts the orfer of vertices
-        /// </summary>
-        public void Invert()
-        {
-            int i;
-            Vector2[] invpoints;
-
-            invpoints = new Vector2[Count];
-            for (i = 0; i < Count; i++)
-            {
-                invpoints[i] = this.Points[Count - i - 1];
-            }
-
-            this.Points = invpoints;
-        }
-
-        public bool IsConvex()
-        {
-            return IsConvex(this.Points);
-        }
-
-        public bool ShareAnEdgeWith(TPPLPoly poly, out MergeInfo mergeInfo)
-        {
-            bool result = false;
-            mergeInfo = null;
-
-            for (int i1 = 0; i1 < this.Points.Length; i1++)
-            {
-                int j1 = Array.IndexOf(poly.Points, this.Points[i1]);
-
-                if (j1 >= 0)
-                {
-                    int i2 = i1 + 1 < this.Points.Length ? i1 + 1 : 0;
-                    int j2 = j1 - 1 >= 0 ? j1 - 1 : poly.Points.Length - 1;
-
-                    if (this.Points[i2] == poly.Points[j2])
-                    {
-                        mergeInfo = new MergeInfo()
-                        {
-                            SharedThisPoint1 = i1,
-                            SharedThisPoint2 = i2,
-
-                            SharedOtherPoint1 = j1,
-                            SharedOtherPoint2 = j2,
-                        };
-
-                        if (result == false)
-                        {
-                            result = true;
-                        }
-                        else
-                        {
-                            result = false;
-                            break;
-                        }
+                        result.Polygons = mergedPolis;
                     }
                 }
             }
@@ -406,84 +55,28 @@ namespace Engine.Common
             return result;
         }
 
-        private static bool IsConvex(Vector2[] points)
+        public static bool MergeConvex(Polygon[] inpolys, out Polygon[] outpolys)
         {
-            int numreflex = 0;
-            for (int i11 = 0; i11 < points.Length; i11++)
-            {
-                int i12, i13;
-
-                if (i11 == 0) i12 = points.Length - 1; else i12 = i11 - 1;
-                if (i11 == (points.Length - 1)) i13 = 0; else i13 = i11 + 1;
-
-                if (IsReflex(points[i12], points[i11], points[i13]))
-                {
-                    numreflex = 1;
-                    break;
-                }
-            }
-
-            return numreflex == 0;
-        }
-
-        private static bool IsReflex(Vector2 p1, Vector2 p2, Vector2 p3)
-        {
-            float tmp = (p3.Y - p1.Y) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Y - p1.Y);
-
-            return tmp < 0;
-        }
-
-        public override string ToString()
-        {
-            string text = string.Format("Vertices: {0};", this.Count);
-            if (this.Count > 0)
-            {
-                text += " |";
-                Array.ForEach(this.Points, p => text += string.Format("{0}|", p));
-            }
-
-            return text;
-        }
-    };
-
-    public class MergeInfo
-    {
-        public int SharedThisPoint1;
-        public int SharedThisPoint2;
-
-        public int SharedOtherPoint1;
-        public int SharedOtherPoint2;
-    }
-
-    public class TPPLPartition
-    {
-        public static bool MergeConvex(List<TPPLPoly> inpolys, out List<TPPLPoly> outpolys)
-        {
-            //TODO: poly merge algorithm
-            // - Find longest shared edge poligons and try merge
-            // - If result still convex, merge done
-            // - Repeat
-
-            outpolys = new List<TPPLPoly>();
-
-            List<TPPLPoly> mergedPolys = new List<TPPLPoly>();
+            outpolys = null;
 
             bool merged = false;
+            List<Polygon> outPolyList = new List<Polygon>();
+            List<Polygon> mergedPolys = new List<Polygon>();
 
-            if (inpolys != null && inpolys.Count > 1)
+            if (inpolys != null && inpolys.Length > 1)
             {
-                for (int i = 0; i < inpolys.Count; i++)
+                for (int i = 0; i < inpolys.Length; i++)
                 {
                     if (mergedPolys.Contains(inpolys[i])) continue;
 
-                    TPPLPoly newpoly = inpolys[i];
+                    Polygon newpoly = inpolys[i];
 
-                    for (int j = i + 1; j < inpolys.Count; j++)
+                    for (int j = i + 1; j < inpolys.Length; j++)
                     {
                         if (mergedPolys.Contains(inpolys[j])) continue;
 
-                        var mergedpoly = TPPLPoly.Merge(newpoly, inpolys[j]);
-                        if (mergedpoly != null)
+                        Polygon mergedpoly;
+                        if (Polygon.Merge(newpoly, inpolys[j], true, out mergedpoly))
                         {
                             mergedPolys.Add(inpolys[j]);
                             newpoly = mergedpoly;
@@ -491,22 +84,23 @@ namespace Engine.Common
                         }
                     }
 
-                    outpolys.Add(newpoly);
+                    outPolyList.Add(newpoly);
                 }
 
                 if (merged)
                 {
-                    return MergeConvex(outpolys, out outpolys);
+                    return MergeConvex(outPolyList.ToArray(), out outpolys);
                 }
                 else
                 {
+                    outpolys = outPolyList.ToArray();
+
                     return true;
                 }
             }
 
             return false;
         }
-
         /// <summary>
         /// Simple heuristic procedure for removing holes from a list of polygons
         /// Works by creating a diagonal from the rightmost hole vertex to some visible vertex
@@ -521,135 +115,134 @@ namespace Engine.Common
         /// Vertices of all non-hole polys have to be in counter-clockwise order
         /// Vertices of all hole polys have to be in clockwise order
         /// </remarks>
-        public static bool RemoveHoles(List<TPPLPoly> inpolys, out List<TPPLPoly> outpolys)
+        public static bool RemoveHoles(Polygon[] inpolys, out Polygon[] outpolys)
         {
-            outpolys = new List<TPPLPoly>();
+            outpolys = null;
 
-            //check for trivial case (no holes)
-            if (!inpolys.Exists(p => p.Hole == true))
+            //Check for trivial case (no holes)
+            if (!Array.Exists(inpolys, p => p.Hole == true))
             {
-                outpolys.AddRange(inpolys);
+                outpolys = inpolys;
 
                 return true;
             }
 
-            List<TPPLPoly> polys = inpolys;
-            bool hasholes = false;
-            TPPLPoly holeiter = null;
-            int holepointindex = 0;
+            List<Polygon> polygonList = new List<Polygon>(inpolys);
+            bool hasHoles = false;
+            int holePointIndex = 0;
+            Polygon hole = null;
             while (true)
             {
-                //find the hole point with the largest x
-                hasholes = false;
-                foreach (var iter in polys)
+                //Find the hole point with the largest x
+                hasHoles = false;
+                foreach (var poly in polygonList)
                 {
-                    if (!iter.Hole) continue;
+                    if (!poly.Hole) continue;
 
-                    if (!hasholes)
+                    if (!hasHoles)
                     {
-                        hasholes = true;
-                        holeiter = iter;
-                        holepointindex = 0;
+                        hasHoles = true;
+                        hole = poly;
+                        holePointIndex = 0;
                     }
 
-                    for (int i = 0; i < iter.Count; i++)
+                    for (int i = 0; i < poly.Count; i++)
                     {
-                        if (iter[i].X > holeiter[holepointindex].X)
+                        if (poly[i].X > hole[holePointIndex].X)
                         {
-                            holeiter = iter;
-                            holepointindex = i;
+                            hole = poly;
+                            holePointIndex = i;
                         }
                     }
                 }
 
-                if (!hasholes) break;
+                if (!hasHoles) break;
 
-                TPPLPoly polyiter = null;
-                Vector2 holepoint = holeiter[holepointindex];
-                Vector2 bestpolypoint = Vector2.Zero;
-                bool pointfound = false;
-                int polypointindex = 0;
-                foreach (var iter in polys)
+                Vector2 holePoint = hole[holePointIndex];
+                Vector2 bestPolyPoint = Vector2.Zero;
+                Polygon bestPoly = null;
+                bool pointFound = false;
+                int polyPointIndex = 0;
+                foreach (var poly1 in polygonList)
                 {
-                    if (iter.Hole) continue;
+                    if (poly1.Hole) continue;
 
-                    for (int i = 0; i < iter.Count; i++)
+                    for (int i = 0; i < poly1.Count; i++)
                     {
-                        if (iter[i].X <= holepoint.X) continue;
+                        if (poly1[i].X <= holePoint.X) continue;
 
-                        if (!InCone(
-                            iter[(i + iter.Count - 1) % (iter.Count)],
-                            iter[i],
-                            iter[(i + 1) % (iter.Count)],
-                            holepoint))
+                        if (!GeometryUtil.InCone(
+                            poly1[(i + poly1.Count - 1) % (poly1.Count)],
+                            poly1[i],
+                            poly1[(i + 1) % (poly1.Count)],
+                            holePoint))
                         {
                             continue;
                         }
 
-                        Vector2 polypoint = iter[i];
-                        if (pointfound)
+                        Vector2 polyPoint = poly1[i];
+                        if (pointFound)
                         {
-                            Vector2 v1 = Vector2.Normalize(polypoint - holepoint);
-                            Vector2 v2 = Vector2.Normalize(bestpolypoint - holepoint);
+                            Vector2 v1 = Vector2.Normalize(polyPoint - holePoint);
+                            Vector2 v2 = Vector2.Normalize(bestPolyPoint - holePoint);
                             if (v2.X > v1.X) continue;
                         }
 
-                        bool pointvisible = true;
-                        foreach (var iter2 in polys)
+                        bool pointVisible = true;
+                        foreach (var poly2 in polygonList)
                         {
-                            if (iter2.Hole) continue;
+                            if (poly2.Hole) continue;
 
-                            for (int i2 = 0; i2 < iter2.Count; i2++)
+                            for (int i2 = 0; i2 < poly2.Count; i2++)
                             {
-                                Vector2 linep1 = iter2[i2];
-                                Vector2 linep2 = iter2[(i2 + 1) % (iter2.Count)];
-                                if (Intersects(holepoint, polypoint, linep1, linep2))
+                                Vector2 linep1 = poly2[i2];
+                                Vector2 linep2 = poly2[(i2 + 1) % (poly2.Count)];
+                                if (GeometryUtil.Intersects(holePoint, polyPoint, linep1, linep2))
                                 {
-                                    pointvisible = false;
+                                    pointVisible = false;
                                     break;
                                 }
                             }
-                            if (!pointvisible) break;
+
+                            if (!pointVisible) break;
                         }
-                        if (pointvisible)
+
+                        if (pointVisible)
                         {
-                            pointfound = true;
-                            bestpolypoint = polypoint;
-                            polyiter = iter;
-                            polypointindex = i;
+                            pointFound = true;
+                            bestPolyPoint = polyPoint;
+                            bestPoly = poly1;
+                            polyPointIndex = i;
                         }
                     }
                 }
 
-                if (!pointfound) return false;
+                if (!pointFound) return false;
 
                 {
-                    TPPLPoly newpoly = new TPPLPoly(holeiter.Count + polyiter.Count + 2);
+                    Polygon newpoly = new Polygon(hole.Count + bestPoly.Count + 2);
                     int i2 = 0;
-                    for (int i = 0; i <= polypointindex; i++)
+                    for (int i = 0; i <= polyPointIndex; i++)
                     {
-                        newpoly[i2] = polyiter[i];
+                        newpoly[i2] = bestPoly[i];
                         i2++;
                     }
-                    for (int i = 0; i <= holeiter.Count; i++)
+                    for (int i = 0; i <= hole.Count; i++)
                     {
-                        newpoly[i2] = holeiter[(i + holepointindex) % holeiter.Count];
+                        newpoly[i2] = hole[(i + holePointIndex) % hole.Count];
                         i2++;
                     }
-                    for (int i = polypointindex; i < polyiter.Count; i++)
+                    for (int i = polyPointIndex; i < bestPoly.Count; i++)
                     {
-                        newpoly[i2] = polyiter[i];
+                        newpoly[i2] = bestPoly[i];
                         i2++;
                     }
 
-                    polys.Add(newpoly);
+                    polygonList.Add(newpoly);
                 }
             }
 
-            foreach (var iter in polys)
-            {
-                outpolys.Add(iter);
-            }
+            outpolys = polygonList.ToArray();
 
             return true;
         }
@@ -670,21 +263,39 @@ namespace Engine.Common
         /// Vertices of all non-hole polys have to be in counter-clockwise order
         /// Vertices of all hole polys have to be in clockwise order
         /// </remarks>
-        public static bool ConvexPartition_HM(List<TPPLPoly> inpolys, out List<TPPLPoly> parts)
+        public static bool ConvexPartition(Polygon[] inpolys, out Polygon[] parts)
         {
-            parts = new List<TPPLPoly>();
+            parts = null;
 
-            List<TPPLPoly> outpolys;
-            if (!RemoveHoles(inpolys, out outpolys)) return false;
-
-            foreach (var iter in outpolys)
+            Polygon[] outpolys;
+            if (RemoveHoles(inpolys, out outpolys))
             {
-                List<TPPLPoly> polyParts;
-                if (!ConvexPartition_HM(iter, out polyParts)) return false;
-                if (polyParts.Count > 0) parts.AddRange(polyParts);
-            }
+                List<Polygon> partList = new List<Polygon>();
 
-            return true;
+                foreach (var poly in outpolys)
+                {
+                    Polygon[] polyParts;
+                    if (ConvexPartition(poly, out polyParts))
+                    {
+                        if (polyParts != null && polyParts.Length > 0)
+                        {
+                            partList.AddRange(polyParts);
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                parts = partList.ToArray();
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
         /// <summary>
         /// Partitions a polygon into convex polygons by using Hertel-Mehlhorn algorithm
@@ -702,98 +313,103 @@ namespace Engine.Common
         /// 
         /// Vertices have to be in counter-clockwise order
         /// </remarks>
-        private static bool ConvexPartition_HM(TPPLPoly poly, out List<TPPLPoly> parts)
+        private static bool ConvexPartition(Polygon poly, out Polygon[] parts)
         {
-            parts = new List<TPPLPoly>();
+            parts = null;
 
-            //check if the poly is already convex
-            if (poly.IsConvex())
+            if (poly.Convex)
             {
-                parts.Add(poly);
+                //Polygon already convex
+                parts = new Polygon[] { poly };
                 return true;
             }
-
-            List<TPPLPoly> triangles;
-            if (!Triangulate_EC(poly, out triangles)) return false;
-
-            for (int iter1 = 0; iter1 < triangles.Count; iter1++)
+            else
             {
-                TPPLPoly poly1 = triangles[iter1];
-                for (int i11 = 0; i11 < poly1.Count; i11++)
+                Polygon[] triangles;
+                if (Triangulate(poly, out triangles))
                 {
-                    Vector2 d1 = poly1[i11];
-                    int i12 = (i11 + 1) % (poly1.Count);
-                    Vector2 d2 = poly1[i12];
-
-                    TPPLPoly poly2 = null;
-                    int i21 = -1;
-                    int i22 = -1;
-                    bool isdiagonal = false;
-                    for (int iter2 = iter1; iter2 < triangles.Count(); iter2++)
+                    for (int i = 0; i < triangles.Length; i++)
                     {
-                        if (iter1 == iter2) continue;
-
-                        poly2 = triangles[iter2];
-
-                        for (i21 = 0; i21 < poly2.Count; i21++)
+                        Polygon tri1 = triangles[i];
+                        for (int i11 = 0; i11 < tri1.Count; i11++)
                         {
-                            if ((d2.X != poly2[i21].X) || (d2.Y != poly2[i21].Y)) continue;
+                            Vector2 d1 = tri1[i11];
+                            int i12 = (i11 + 1) % (tri1.Count);
+                            Vector2 d2 = tri1[i12];
 
-                            i22 = (i21 + 1) % (poly2.Count);
+                            Polygon tri2 = null;
+                            int i21 = -1;
+                            int i22 = -1;
+                            bool isdiagonal = false;
+                            for (int j = i; j < triangles.Count(); j++)
+                            {
+                                if (i == j) continue;
 
-                            if ((d1.X != poly2[i22].X) || (d1.Y != poly2[i22].Y)) continue;
+                                tri2 = triangles[j];
 
-                            isdiagonal = true;
+                                for (i21 = 0; i21 < tri2.Count; i21++)
+                                {
+                                    if ((d2.X != tri2[i21].X) || (d2.Y != tri2[i21].Y)) continue;
 
-                            break;
+                                    i22 = (i21 + 1) % (tri2.Count);
+
+                                    if ((d1.X != tri2[i22].X) || (d1.Y != tri2[i22].Y)) continue;
+
+                                    isdiagonal = true;
+
+                                    break;
+                                }
+
+                                if (isdiagonal) break;
+                            }
+
+                            if (!isdiagonal) continue;
+
+                            Vector2 p1, p2, p3;
+                            int i13, i23;
+
+                            if (i11 == 0) i13 = tri1.Count - 1; else i13 = i11 - 1;
+                            if (i22 == (tri2.Count - 1)) i23 = 0; else i23 = i22 + 1;
+                            p1 = tri1[i13];
+                            p2 = tri1[i11];
+                            p3 = tri2[i23];
+                            if (!GeometryUtil.IsConvex(p1, p2, p3)) continue;
+
+                            if (i12 == (tri1.Count - 1)) i13 = 0; else i13 = i12 + 1;
+                            if (i21 == 0) i23 = tri2.Count - 1; else i23 = i21 - 1;
+                            p1 = tri2[i23];
+                            p2 = tri1[i12];
+                            p3 = tri1[i13];
+                            if (!GeometryUtil.IsConvex(p1, p2, p3)) continue;
+
+                            Polygon newpoly = new Polygon(tri1.Count + tri2.Count - 2);
+                            int k = 0;
+                            for (int j = i12; j != i11; j = (j + 1) % (tri1.Count))
+                            {
+                                newpoly[k] = tri1[j];
+                                k++;
+                            }
+                            for (int j = i22; j != i21; j = (j + 1) % (tri2.Count))
+                            {
+                                newpoly[k] = tri2[j];
+                                k++;
+                            }
+
+                            tri1 = newpoly;
+                            i11 = -1;
+
+                            continue;
                         }
-                        if (isdiagonal) break;
-                    }
-                    if (!isdiagonal) continue;
-
-                    Vector2 p1, p2, p3;
-                    int i13, i23;
-
-                    if (i11 == 0) i13 = poly1.Count - 1; else i13 = i11 - 1;
-                    if (i22 == (poly2.Count - 1)) i23 = 0; else i23 = i22 + 1;
-                    p1 = poly1[i13];
-                    p2 = poly1[i11];
-                    p3 = poly2[i23];
-                    if (!IsConvex(p1, p2, p3)) continue;
-
-                    if (i12 == (poly1.Count - 1)) i13 = 0; else i13 = i12 + 1;
-                    if (i21 == 0) i23 = poly2.Count - 1; else i23 = i21 - 1;
-                    p1 = poly2[i23];
-                    p2 = poly1[i12];
-                    p3 = poly1[i13];
-                    if (!IsConvex(p1, p2, p3)) continue;
-
-                    TPPLPoly newpoly = new TPPLPoly(poly1.Count + poly2.Count - 2);
-                    int k = 0;
-                    for (int j = i12; j != i11; j = (j + 1) % (poly1.Count))
-                    {
-                        newpoly[k] = poly1[j];
-                        k++;
-                    }
-                    for (int j = i22; j != i21; j = (j + 1) % (poly2.Count))
-                    {
-                        newpoly[k] = poly2[j];
-                        k++;
                     }
 
-                    poly1 = newpoly;
-                    i11 = -1;
-
-                    continue;
+                    parts = triangles;
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
-
-            foreach (var iter1 in triangles)
-            {
-                parts.Add(iter1);
-            }
-
-            return true;
         }
         /// <summary>
         /// Triangulates a polygon by ear clipping
@@ -807,106 +423,115 @@ namespace Engine.Common
         /// Time complexity O(n^2), n is the number of vertices
         /// Space complexity: O(n)
         /// </remarks>
-        private static bool Triangulate_EC(TPPLPoly poly, out List<TPPLPoly> triangles)
+        private static bool Triangulate(Polygon poly, out Polygon[] triangles)
         {
-            triangles = new List<TPPLPoly>();
-
-            if (poly.Count < 3) return false;
-            if (poly.Count == 3)
+            if (poly.Count < 3)
             {
-                triangles.Add(poly);
+                //Impossible
+                triangles = null;
+                return false;
+            }
+            else if (poly.Count == 3)
+            {
+                //It's a triangle
+                triangles = new Polygon[] { poly };
                 return true;
             }
-
-            int numvertices = poly.Count;
-
-            PartitionVertex[] vertices = new PartitionVertex[numvertices];
-            for (int i = 0; i < numvertices; i++)
+            else
             {
-                vertices[i] = new PartitionVertex();
-            }
+                //Triangulate
 
-            for (int i = 0; i < numvertices; i++)
-            {
-                vertices[i].IsActive = true;
-                vertices[i].P = poly[i];
+                List<Polygon> triangleList = new List<Polygon>();
 
-                if (i == (numvertices - 1))
+                //Initialize one partition per vertex
+                PartitionVertex[] vPart = new PartitionVertex[poly.Count];
+                for (int i = 0; i < poly.Count; i++)
                 {
-                    vertices[i].Next = vertices[0];
-                }
-                else
-                {
-                    vertices[i].Next = vertices[i + 1];
+                    vPart[i] = new PartitionVertex();
                 }
 
-                if (i == 0)
+                for (int i = 0; i < poly.Count; i++)
                 {
-                    vertices[i].Previous = vertices[numvertices - 1];
-                }
-                else
-                {
-                    vertices[i].Previous = vertices[i - 1];
-                }
-            }
-            for (int i = 0; i < numvertices; i++)
-            {
-                UpdateVertex(vertices[i], vertices, numvertices);
-            }
+                    vPart[i].IsActive = true;
+                    vPart[i].Point = poly[i];
 
-            for (int i = 0; i < numvertices - 3; i++)
-            {
-                PartitionVertex ear = null;
-                bool earfound = false;
-
-                //find the most extruded ear
-                for (int j = 0; j < numvertices; j++)
-                {
-                    if (!vertices[j].IsActive) continue;
-                    if (!vertices[j].IsEar) continue;
-                    if (!earfound)
+                    if (i == (poly.Count - 1))
                     {
-                        earfound = true;
-                        ear = vertices[j];
+                        vPart[i].Next = vPart[0];
                     }
                     else
                     {
-                        if (vertices[j].Angle > ear.Angle)
-                        {
-                            ear = vertices[j];
-                        }
+                        vPart[i].Next = vPart[i + 1];
+                    }
+
+                    if (i == 0)
+                    {
+                        vPart[i].Previous = vPart[poly.Count - 1];
+                    }
+                    else
+                    {
+                        vPart[i].Previous = vPart[i - 1];
                     }
                 }
-                if (!earfound)
+
+                for (int i = 0; i < poly.Count; i++)
                 {
-                    vertices = null;
-                    return false;
+                    UpdateVertex(vPart[i], vPart, poly.Count);
                 }
 
-                TPPLPoly triangle = new TPPLPoly(ear.Previous.P, ear.P, ear.Next.P);
-                triangles.Add(triangle);
-
-                ear.IsActive = false;
-                ear.Previous.Next = ear.Next;
-                ear.Next.Previous = ear.Previous;
-
-                if (i == numvertices - 4) break;
-
-                UpdateVertex(ear.Previous, vertices, numvertices);
-                UpdateVertex(ear.Next, vertices, numvertices);
-            }
-            for (int i = 0; i < numvertices; i++)
-            {
-                if (vertices[i].IsActive)
+                for (int i = 0; i < poly.Count - 3; i++)
                 {
-                    TPPLPoly triangle = new TPPLPoly(vertices[i].Previous.P, vertices[i].P, vertices[i].Next.P);
-                    triangles.Add(triangle);
-                    break;
-                }
-            }
+                    PartitionVertex ear = null;
+                    bool earfound = false;
 
-            vertices = null;
-            return true;
+                    //Find the most extruded ear
+                    for (int j = 0; j < poly.Count; j++)
+                    {
+                        if (!vPart[j].IsActive) continue;
+
+                        if (!vPart[j].IsEar) continue;
+
+                        if (!earfound)
+                        {
+                            earfound = true;
+                            ear = vPart[j];
+                        }
+                        else if (vPart[j].Angle > ear.Angle)
+                        {
+                            ear = vPart[j];
+                        }
+                    }
+
+                    if (!earfound)
+                    {
+                        triangles = null;
+                        return false;
+                    }
+
+                    triangleList.Add(new Polygon(ear.Previous.Point, ear.Point, ear.Next.Point));
+
+                    ear.IsActive = false;
+                    ear.Previous.Next = ear.Next;
+                    ear.Next.Previous = ear.Previous;
+
+                    if (i == poly.Count - 4) break;
+
+                    UpdateVertex(ear.Previous, vPart, poly.Count);
+                    UpdateVertex(ear.Next, vPart, poly.Count);
+                }
+
+                for (int i = 0; i < poly.Count; i++)
+                {
+                    if (vPart[i].IsActive)
+                    {
+                        triangleList.Add(new Polygon(vPart[i].Previous.Point, vPart[i].Point, vPart[i].Next.Point));
+                        break;
+                    }
+                }
+
+                triangles = triangleList.ToArray();
+                return true;
+            }
         }
 
         private static void UpdateVertex(PartitionVertex v, PartitionVertex[] vertices, int numvertices)
@@ -914,21 +539,21 @@ namespace Engine.Common
             PartitionVertex v1 = v.Previous;
             PartitionVertex v3 = v.Next;
 
-            Vector2 vec1 = Vector2.Normalize(v1.P - v.P);
-            Vector2 vec3 = Vector2.Normalize(v3.P - v.P);
+            Vector2 vec1 = Vector2.Normalize(v1.Point - v.Point);
+            Vector2 vec3 = Vector2.Normalize(v3.Point - v.Point);
 
             v.Angle = vec1.X * vec3.X + vec1.Y * vec3.Y;
-            v.IsConvex = IsConvex(v1.P, v.P, v3.P);
+            v.IsConvex = GeometryUtil.IsConvex(v1.Point, v.Point, v3.Point);
 
             if (v.IsConvex)
             {
                 v.IsEar = true;
                 for (int i = 0; i < numvertices; i++)
                 {
-                    if ((vertices[i].P.X == v.P.X) && (vertices[i].P.Y == v.P.Y)) continue;
-                    if ((vertices[i].P.X == v1.P.X) && (vertices[i].P.Y == v1.P.Y)) continue;
-                    if ((vertices[i].P.X == v3.P.X) && (vertices[i].P.Y == v3.P.Y)) continue;
-                    if (IsInside(v1.P, v.P, v3.P, vertices[i].P))
+                    if ((vertices[i].Point.X == v.Point.X) && (vertices[i].Point.Y == v.Point.Y)) continue;
+                    if ((vertices[i].Point.X == v1.Point.X) && (vertices[i].Point.Y == v1.Point.Y)) continue;
+                    if ((vertices[i].Point.X == v3.Point.X) && (vertices[i].Point.Y == v3.Point.Y)) continue;
+                    if (GeometryUtil.IsInside(v1.Point, v.Point, v3.Point, vertices[i].Point))
                     {
                         v.IsEar = false;
                         break;
@@ -941,78 +566,6 @@ namespace Engine.Common
             }
         }
 
-        private static bool Intersects(Vector2 p11, Vector2 p12, Vector2 p21, Vector2 p22)
-        {
-            if ((p11.X == p21.X) && (p11.Y == p21.Y)) return false;
-            if ((p11.X == p22.X) && (p11.Y == p22.Y)) return false;
-            if ((p12.X == p21.X) && (p12.Y == p21.Y)) return false;
-            if ((p12.X == p22.X) && (p12.Y == p22.Y)) return false;
-
-            Vector2 v1ort, v2ort, v;
-            float dot11, dot12, dot21, dot22;
-
-            v1ort.X = p12.Y - p11.Y;
-            v1ort.Y = p11.X - p12.X;
-
-            v2ort.X = p22.Y - p21.Y;
-            v2ort.Y = p21.X - p22.X;
-
-            v = p21 - p11;
-            dot21 = v.X * v1ort.X + v.Y * v1ort.Y;
-            v = p22 - p11;
-            dot22 = v.X * v1ort.X + v.Y * v1ort.Y;
-
-            v = p11 - p21;
-            dot11 = v.X * v2ort.X + v.Y * v2ort.Y;
-            v = p12 - p21;
-            dot12 = v.X * v2ort.X + v.Y * v2ort.Y;
-
-            if (dot11 * dot12 > 0) return false;
-            if (dot21 * dot22 > 0) return false;
-
-            return true;
-        }
-
-        private static bool IsInside(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p)
-        {
-            if (IsConvex(p1, p, p2)) return false;
-            if (IsConvex(p2, p, p3)) return false;
-            if (IsConvex(p3, p, p1)) return false;
-            return true;
-        }
-        private static bool InCone(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p)
-        {
-            bool convex = IsConvex(p1, p2, p3);
-            if (convex)
-            {
-                if (!IsConvex(p1, p2, p)) return false;
-                if (!IsConvex(p2, p3, p)) return false;
-                return true;
-            }
-            else
-            {
-                if (IsConvex(p1, p2, p)) return true;
-                if (IsConvex(p2, p3, p)) return true;
-                return false;
-            }
-        }
-        private static bool IsConvex(Vector2 p1, Vector2 p2, Vector2 p3)
-        {
-            float tmp = (p3.Y - p1.Y) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Y - p1.Y);
-
-            return tmp > 0;
-        }
+        public Polygon[] Polygons { get; private set; }
     }
-
-    public class PartitionVertex
-    {
-        public bool IsActive;
-        public bool IsConvex;
-        public bool IsEar;
-
-        public Vector2 P;
-        public float Angle;
-        public PartitionVertex Previous;
-        public PartitionVertex Next;
-    };
 }

@@ -29,8 +29,8 @@ namespace TerrainTest
 
         private Skydom skydom = null;
         private Terrain terrain = null;
-        private List<Line> oks = new List<Line>();
-        private List<Line> errs = new List<Line>();
+        private List<Line3> oks = new List<Line3>();
+        private List<Line3> errs = new List<Line3>();
         private LineListDrawer terrainLineDrawer = null;
         private LineListDrawer terrainGridDrawer = null;
         private LineListDrawer terrainPointDrawer = null;
@@ -289,7 +289,7 @@ namespace TerrainTest
 
                     Vector3[] corners = nodes[i].GetCorners();
 
-                    this.terrainGridDrawer.AddLines(color, Line.Transform(GeometryUtil.CreateWiredSquare(corners), m));
+                    this.terrainGridDrawer.AddLines(color, Line3.Transform(GeometryUtil.CreateWiredSquare(corners), m));
                 }
             }
 
@@ -307,11 +307,11 @@ namespace TerrainTest
                     Vector3 pos;
                     if (this.terrain.FindTopGroundPosition(x, z, out pos))
                     {
-                        this.oks.Add(new Line(pos, pos + Vector3.Up));
+                        this.oks.Add(new Line3(pos, pos + Vector3.Up));
                     }
                     else
                     {
-                        this.errs.Add(new Line(x, 10, z, x, -10, z));
+                        this.errs.Add(new Line3(x, 10, z, x, -10, z));
                     }
                 }
             }
@@ -478,7 +478,7 @@ namespace TerrainTest
                             this.terrainPointDrawer.SetLines(Color.DarkCyan, GeometryUtil.CreateWiredTriangle(triangles));
                             if (positions.Length > 1)
                             {
-                                this.terrainPointDrawer.SetLines(Color.Cyan, new Line(positions[0], positions[positions.Length - 1]));
+                                this.terrainPointDrawer.SetLines(Color.Cyan, new Line3(positions[0], positions[positions.Length - 1]));
                             }
                         }
                     }
@@ -571,7 +571,7 @@ namespace TerrainTest
 
                     this.curveTime += time;
 
-                    this.curveLineDrawer.SetLines(this.velocityColor, new[] { new Line(p0, p1) });
+                    this.curveLineDrawer.SetLines(this.velocityColor, new[] { new Line3(p0, p1) });
 
                     this.help.Text = string.Format(
                         "Pitch {0:+00.00;-00.00}; Roll {1:+00.00;-00.00}; Delta {2:00.0000}; Segment {3} of {4}/{5:00.0000}/{6:00.0000}",

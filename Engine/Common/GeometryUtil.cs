@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.Common
 {
@@ -135,9 +135,9 @@ namespace Engine.Common
             return indices;
         }
 
-        public static Line[] CreateWiredTriangle(Triangle[] triangleList)
+        public static Line3[] CreateWiredTriangle(Triangle[] triangleList)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             for (int i = 0; i < triangleList.Length; i++)
             {
@@ -146,13 +146,13 @@ namespace Engine.Common
 
             return lines.ToArray();
         }
-        public static Line[] CreateWiredTriangle(Triangle triangle)
+        public static Line3[] CreateWiredTriangle(Triangle triangle)
         {
             return CreateWiredTriangle(triangle.GetCorners());
         }
-        public static Line[] CreateWiredTriangle(Vector3[] corners)
+        public static Line3[] CreateWiredTriangle(Vector3[] corners)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             int[] indexes = new int[6];
 
@@ -167,9 +167,9 @@ namespace Engine.Common
 
             return CreateFromVertices(corners, indexes);
         }
-        public static Line[] CreateWiredSquare(Vector3[] corners)
+        public static Line3[] CreateWiredSquare(Vector3[] corners)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             int[] indexes = new int[8];
 
@@ -187,9 +187,9 @@ namespace Engine.Common
 
             return CreateFromVertices(corners, indexes);
         }
-        public static Line[] CreateWiredBox(BoundingBox[] bboxList)
+        public static Line3[] CreateWiredBox(BoundingBox[] bboxList)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             for (int i = 0; i < bboxList.Length; i++)
             {
@@ -198,13 +198,13 @@ namespace Engine.Common
 
             return lines.ToArray();
         }
-        public static Line[] CreateWiredBox(BoundingBox bbox)
+        public static Line3[] CreateWiredBox(BoundingBox bbox)
         {
             return CreateWiredBox(bbox.GetCorners());
         }
-        public static Line[] CreateWiredBox(OrientedBoundingBox[] obboxList)
+        public static Line3[] CreateWiredBox(OrientedBoundingBox[] obboxList)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             for (int i = 0; i < obboxList.Length; i++)
             {
@@ -213,11 +213,11 @@ namespace Engine.Common
 
             return lines.ToArray();
         }
-        public static Line[] CreateWiredBox(OrientedBoundingBox obbox)
+        public static Line3[] CreateWiredBox(OrientedBoundingBox obbox)
         {
             return CreateWiredBox(obbox.GetCorners());
         }
-        public static Line[] CreateWiredBox(Vector3[] corners)
+        public static Line3[] CreateWiredBox(Vector3[] corners)
         {
             int[] indexes = new int[24];
 
@@ -240,9 +240,9 @@ namespace Engine.Common
 
             return CreateFromVertices(corners, indexes);
         }
-        public static Line[] CreateWiredSphere(BoundingSphere[] bsphList, int sliceCount, int stackCount)
+        public static Line3[] CreateWiredSphere(BoundingSphere[] bsphList, int sliceCount, int stackCount)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             for (int i = 0; i < bsphList.Length; i++)
             {
@@ -251,11 +251,11 @@ namespace Engine.Common
 
             return lines.ToArray();
         }
-        public static Line[] CreateWiredSphere(BoundingSphere bsph, int sliceCount, int stackCount)
+        public static Line3[] CreateWiredSphere(BoundingSphere bsph, int sliceCount, int stackCount)
         {
             return CreateWiredSphere(bsph.Center, bsph.Radius, sliceCount, stackCount);
         }
-        public static Line[] CreateWiredSphere(Vector3 center, float radius, int sliceCount, int stackCount)
+        public static Line3[] CreateWiredSphere(Vector3 center, float radius, int sliceCount, int stackCount)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<int> indexList = new List<int>();
@@ -294,11 +294,11 @@ namespace Engine.Common
 
             return CreateFromVertices(vertList.ToArray(), indexList.ToArray());
         }
-        public static Line[] CreateWiredFrustum(BoundingFrustum frustum)
+        public static Line3[] CreateWiredFrustum(BoundingFrustum frustum)
         {
             return CreateWiredBox(frustum.GetCorners());
         }
-        public static Line[] CreateWiredPyramid(BoundingFrustum frustum)
+        public static Line3[] CreateWiredPyramid(BoundingFrustum frustum)
         {
             FrustumCameraParams prms = frustum.GetCameraParams();
             Vector3[] corners = frustum.GetCorners();
@@ -327,20 +327,20 @@ namespace Engine.Common
 
             return CreateFromVertices(vertices, indexes);
         }
-        public static Line[] CreatePath(Vector3[] path)
+        public static Line3[] CreatePath(Vector3[] path)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             for (int i = 0; i < path.Length - 1; i++)
             {
-                lines.Add(new Line(path[i], path[i + 1]));
+                lines.Add(new Line3(path[i], path[i + 1]));
             }
 
             return lines.ToArray();
         }
-        public static Line[] CreateAxis(Matrix transform, float size)
+        public static Line3[] CreateAxis(Matrix transform, float size)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             Vector3 p = transform.TranslationVector;
 
@@ -352,35 +352,35 @@ namespace Engine.Common
             Vector3 c1 = (forward * 0.8f) + (left * 0.2f);
             Vector3 c2 = (forward * 0.8f) + (right * 0.2f);
 
-            lines.Add(new Line(p, up));
-            lines.Add(new Line(p, forward));
-            lines.Add(new Line(p, left));
+            lines.Add(new Line3(p, up));
+            lines.Add(new Line3(p, forward));
+            lines.Add(new Line3(p, left));
 
-            lines.Add(new Line(forward, c1));
-            lines.Add(new Line(forward, c2));
+            lines.Add(new Line3(forward, c1));
+            lines.Add(new Line3(forward, c2));
 
             return lines.ToArray();
         }
-        public static Line[] CreateCrossList(Vector3[] points, float size)
+        public static Line3[] CreateCrossList(Vector3[] points, float size)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             for (int i = 0; i < points.Length; i++)
             {
                 Vector3 p = points[i];
 
                 float h = size * 0.5f;
-                lines.Add(new Line(p + new Vector3(h, h, h), p - new Vector3(h, h, h)));
-                lines.Add(new Line(p + new Vector3(h, h, -h), p - new Vector3(h, h, -h)));
-                lines.Add(new Line(p + new Vector3(-h, h, h), p - new Vector3(-h, h, h)));
-                lines.Add(new Line(p + new Vector3(-h, h, -h), p - new Vector3(-h, h, -h)));
+                lines.Add(new Line3(p + new Vector3(h, h, h), p - new Vector3(h, h, h)));
+                lines.Add(new Line3(p + new Vector3(h, h, -h), p - new Vector3(h, h, -h)));
+                lines.Add(new Line3(p + new Vector3(-h, h, h), p - new Vector3(-h, h, h)));
+                lines.Add(new Line3(p + new Vector3(-h, h, -h), p - new Vector3(-h, h, -h)));
             }
 
             return lines.ToArray();
         }
-        public static Line[] CreateLineList(Vector3[] points)
+        public static Line3[] CreateLineList(Vector3[] points)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             Vector3 p0 = points[0];
 
@@ -388,7 +388,7 @@ namespace Engine.Common
             {
                 Vector3 p1 = points[i];
 
-                lines.Add(new Line(p0, p1));
+                lines.Add(new Line3(p0, p1));
 
                 p0 = p1;
             }
@@ -396,13 +396,13 @@ namespace Engine.Common
             return lines.ToArray();
         }
 
-        private static Line[] CreateFromVertices(Vector3[] vertices, int[] indices)
+        private static Line3[] CreateFromVertices(Vector3[] vertices, int[] indices)
         {
-            List<Line> lines = new List<Line>();
+            List<Line3> lines = new List<Line3>();
 
             for (int i = 0; i < indices.Length; i += 2)
             {
-                Line l = new Line()
+                Line3 l = new Line3()
                 {
                     Point1 = vertices[indices[i + 0]],
                     Point2 = vertices[indices[i + 1]],
@@ -412,6 +412,64 @@ namespace Engine.Common
             }
 
             return lines.ToArray();
+        }
+
+        public static bool Intersects(Vector2 p11, Vector2 p12, Vector2 p21, Vector2 p22)
+        {
+            if ((p11.X == p21.X) && (p11.Y == p21.Y)) return false;
+            if ((p11.X == p22.X) && (p11.Y == p22.Y)) return false;
+            if ((p12.X == p21.X) && (p12.Y == p21.Y)) return false;
+            if ((p12.X == p22.X) && (p12.Y == p22.Y)) return false;
+
+            Vector2 v1ort = new Vector2(p12.Y - p11.Y, p11.X - p12.X);
+            Vector2 v2ort = new Vector2(p22.Y - p21.Y, p21.X - p22.X);
+
+            Vector2 v;
+            v = p21 - p11;
+            float dot21 = v.X * v1ort.X + v.Y * v1ort.Y;
+            v = p22 - p11;
+            float dot22 = v.X * v1ort.X + v.Y * v1ort.Y;
+
+            if (dot21 * dot22 > 0) return false;
+
+            v = p11 - p21;
+            float dot11 = v.X * v2ort.X + v.Y * v2ort.Y;
+            v = p12 - p21;
+            float dot12 = v.X * v2ort.X + v.Y * v2ort.Y;
+
+            if (dot11 * dot12 > 0) return false;
+
+            return true;
+        }
+        public static bool IsInside(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p)
+        {
+            if (IsConvex(p1, p, p2)) return false;
+            if (IsConvex(p2, p, p3)) return false;
+            if (IsConvex(p3, p, p1)) return false;
+            return true;
+        }
+        public static bool InCone(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p)
+        {
+            if (IsConvex(p1, p2, p3))
+            {
+                if (!IsConvex(p1, p2, p)) return false;
+                if (!IsConvex(p2, p3, p)) return false;
+                return true;
+            }
+            else
+            {
+                if (IsConvex(p1, p2, p)) return true;
+                if (IsConvex(p2, p3, p)) return true;
+                return false;
+            }
+        }
+        public static bool IsReflex(Vector2 p1, Vector2 p2, Vector2 p3)
+        {
+            return ((p3.Y - p1.Y) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Y - p1.Y)) < 0;
+        }
+        public static bool IsConvex(Vector2 p1, Vector2 p2, Vector2 p3)
+        {
+            return ((p3.Y - p1.Y) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Y - p1.Y)) > 0;
         }
     }
 

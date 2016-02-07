@@ -304,6 +304,7 @@
     <Compile Include="Collada\VertexWeights.cs" />
     <Compile Include="Collada\Vertices.cs" />
     <Compile Include="Collada\VisualScene.cs" />
+    <Compile Include="Common\GeometricOrientation.cs" />
     <Compile Include="Common\NavMesh.cs" />
     <Compile Include="Common\VertexTerrain.cs" />
     <Compile Include="Common\GeometryUtil.cs" />
@@ -326,6 +327,8 @@
     <Compile Include="Effects\EffectNull.cs" />
     <Compile Include="LensFlare.cs" />
     <Compile Include="LevelOfDetailEnum.cs" />
+    <Compile Include="Line2.cs" />
+    <Compile Include="Polygon.cs" />
     <Compile Include="SceneRendererResultEnum.cs" />
     <Compile Include="Common\Skeleton.cs" />
     <Compile Include="Content\LoaderConversion.cs" />
@@ -349,7 +352,7 @@
     <Compile Include="Effects\DrawerPool.cs" />
     <Compile Include="Effects\EffectBasicShadow.cs" />
     <Compile Include="Headings.cs" />
-    <Compile Include="Line.cs" />
+    <Compile Include="Line3.cs" />
     <Compile Include="Common\VertexParticle.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalColor.cs" />
     <Compile Include="Common\VertexSkinnedPositionColor.cs" />

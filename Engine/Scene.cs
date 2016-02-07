@@ -656,7 +656,7 @@ namespace Engine
         /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(Line[] lines, Color4 color, int order = 0)
+        public LineListDrawer AddLineListDrawer(Line3[] lines, Color4 color, int order = 0)
         {
             LineListDrawer newModel = new LineListDrawer(this.Game, lines, color);
 

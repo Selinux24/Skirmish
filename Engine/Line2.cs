@@ -3,18 +3,18 @@
 namespace Engine
 {
     /// <summary>
-    /// Line
+    /// 2D Line
     /// </summary>
-    public struct Line
+    public class Line2
     {
         /// <summary>
         /// Start point
         /// </summary>
-        public Vector3 Point1;
+        public Vector2 Point1;
         /// <summary>
         /// End point
         /// </summary>
-        public Vector3 Point2;
+        public Vector2 Point2;
         /// <summary>
         /// Length
         /// </summary>
@@ -22,21 +22,21 @@ namespace Engine
         {
             get
             {
-                return Vector3.Distance(this.Point1, this.Point2);
+                return Vector2.Distance(this.Point1, this.Point2);
             }
         }
-
+   
         /// <summary>
         /// Transform line coordinates
         /// </summary>
         /// <param name="line">Line</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line</returns>
-        public static Line Transform(Line line, Matrix transform)
+        public static Line2 Transform(Line2 line, Matrix transform)
         {
-            return new Line(
-                Vector3.TransformCoordinate(line.Point1, transform),
-                Vector3.TransformCoordinate(line.Point2, transform));
+            return new Line2(
+                Vector2.TransformCoordinate(line.Point1, transform),
+                Vector2.TransformCoordinate(line.Point2, transform));
         }
         /// <summary>
         /// Transform line list coordinates
@@ -44,9 +44,9 @@ namespace Engine
         /// <param name="lines">Line list</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line list</returns>
-        public static Line[] Transform(Line[] lines, Matrix transform)
+        public static Line2[] Transform(Line2[] lines, Matrix transform)
         {
-            Line[] trnLines = new Line[lines.Length];
+            Line2[] trnLines = new Line2[lines.Length];
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -61,33 +61,22 @@ namespace Engine
         /// </summary>
         /// <param name="x1">X coordinate of start point</param>
         /// <param name="y1">Y coordinate of start point</param>
-        /// <param name="z1">Z coordinate of start point</param>
         /// <param name="x2">X coordinate of end point</param>
         /// <param name="y2">Y coordinate of end point</param>
-        /// <param name="z2">Z coordinate of end point</param>
-        public Line(float x1, float y1, float z1, float x2, float y2, float z2)
+        public Line2(float x1, float y1, float x2, float y2)
         {
-            this.Point1 = new Vector3(x1, y1, z1);
-            this.Point2 = new Vector3(x2, y2, z2);
+            this.Point1 = new Vector2(x1, y1);
+            this.Point2 = new Vector2(x2, y2);
         }
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="p1">Start point</param>
         /// <param name="p2">End point</param>
-        public Line(Vector3 p1, Vector3 p2)
+        public Line2(Vector2 p1, Vector2 p2)
         {
             this.Point1 = p1;
             this.Point2 = p2;
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        public Line(Ray ray)
-        {
-            this.Point1 = ray.Position;
-            this.Point2 = ray.Position + ray.Direction;
         }
 
         /// <summary>
@@ -97,5 +86,5 @@ namespace Engine
         {
             return string.Format("Vertex 1 {0}; Vertex 2 {1};", this.Point1, this.Point2);
         }
-    }
+ }
 }

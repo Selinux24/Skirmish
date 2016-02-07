@@ -24,7 +24,7 @@ namespace Engine
         /// <summary>
         /// Lines dictionary by color
         /// </summary>
-        private Dictionary<Color4, List<Line>> lineDictionary = new Dictionary<Color4, List<Line>>();
+        private Dictionary<Color4, List<Line3>> lineDictionary = new Dictionary<Color4, List<Line3>>();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>
@@ -36,12 +36,12 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="lines">Line list</param>
         /// <param name="color">Color</param>
-        public LineListDrawer(Game game, Line[] lines, Color4 color)
+        public LineListDrawer(Game game, Line3[] lines, Color4 color)
             : base(game, ModelContent.GenerateLineList(lines, color))
         {
             this.EnableAlphaBlending = true;
 
-            this.lineDictionary.Add(color, new List<Line>(lines));
+            this.lineDictionary.Add(color, new List<Line3>(lines));
 
             this.dictionaryChanged = true;
         }
@@ -51,7 +51,7 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="count">Maximum line count</param>
         public LineListDrawer(Game game, int count)
-            : base(game, ModelContent.GenerateLineList(new Line[count], Color.Transparent))
+            : base(game, ModelContent.GenerateLineList(new Line3[count], Color.Transparent))
         {
             this.EnableAlphaBlending = true;
 
@@ -84,7 +84,7 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="line">Line</param>
-        public void SetLines(Color4 color, Line line)
+        public void SetLines(Color4 color, Line3 line)
         {
             SetLines(color, new[] { line });
         }
@@ -93,13 +93,13 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Line list</param>
-        public void SetLines(Color4 color, Line[] lines)
+        public void SetLines(Color4 color, Line3[] lines)
         {
             if (lines != null && lines.Length > 0)
             {
                 if (!this.lineDictionary.ContainsKey(color))
                 {
-                    this.lineDictionary.Add(color, new List<Line>());
+                    this.lineDictionary.Add(color, new List<Line3>());
                 }
                 else
                 {
@@ -125,7 +125,7 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="line">Line</param>
-        public void AddLines(Color4 color, Line line)
+        public void AddLines(Color4 color, Line3 line)
         {
             AddLines(color, new[] { line });
         }
@@ -134,11 +134,11 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Line list</param>
-        public void AddLines(Color4 color, Line[] lines)
+        public void AddLines(Color4 color, Line3[] lines)
         {
             if (!this.lineDictionary.ContainsKey(color))
             {
-                this.lineDictionary.Add(color, new List<Line>());
+                this.lineDictionary.Add(color, new List<Line3>());
             }
 
             this.lineDictionary[color].AddRange(lines);
@@ -178,7 +178,7 @@ namespace Engine
 
                 foreach (Color4 color in this.lineDictionary.Keys)
                 {
-                    List<Line> lines = this.lineDictionary[color];
+                    List<Line3> lines = this.lineDictionary[color];
                     if (lines.Count > 0)
                     {
                         for (int i = 0; i < lines.Count; i++)

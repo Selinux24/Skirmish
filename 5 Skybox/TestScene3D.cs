@@ -213,7 +213,7 @@ namespace Skybox
 
             #endregion
 
-            Line[] sphereLines = GeometryUtil.CreateWiredSphere(new BoundingSphere(), this.bsphSlices, this.bsphStacks);
+            Line3[] sphereLines = GeometryUtil.CreateWiredSphere(new BoundingSphere(), this.bsphSlices, this.bsphStacks);
             this.bsphLightsDrawer = this.AddLineListDrawer(sphereLines.Length * 5);
             this.bsphLightsDrawer.Visible = false;
 
