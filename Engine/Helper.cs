@@ -77,6 +77,23 @@ namespace Engine
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
         /// <returns>Returns angle value</returns>
+        public static float Angle(Vector2 one, Vector2 two)
+        {
+            //Get the dot product
+            float dot = Vector2.Dot(one, two);
+
+            // Divide the dot by the product of the magnitudes of the vectors
+            dot = dot / (one.Length() * two.Length());
+
+            //Get the arc cosin of the angle, you now have your angle in radians 
+            return (float)Math.Acos(dot);
+        }
+        /// <summary>
+        /// Gets angle between two vectors
+        /// </summary>
+        /// <param name="one">First vector</param>
+        /// <param name="two">Second vector</param>
+        /// <returns>Returns angle value</returns>
         public static float Angle(Vector3 one, Vector3 two)
         {
             //Get the dot product

@@ -25,6 +25,14 @@ namespace Engine
                 return Vector2.Distance(this.Point1, this.Point2);
             }
         }
+
+        public Vector2 Direction
+        {
+            get
+            {
+                return Vector2.Normalize(this.Point2 - this.Point1);
+            }
+        }
    
         /// <summary>
         /// Transform line coordinates

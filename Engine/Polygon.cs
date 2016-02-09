@@ -11,12 +11,24 @@ namespace Engine
     /// </summary>
     public class Polygon
     {
-        struct SharedEdge
+        public struct SharedEdge
         {
             public int SharedFirstPoint1;
             public int SharedFirstPoint2;
             public int SharedSecondPoint1;
             public int SharedSecondPoint2;
+        }
+
+        public static Polygon FromTriangle(Triangle tri, GeometricOrientation orientation = GeometricOrientation.CounterClockwise)
+        {
+            Polygon poly = new Polygon(
+                new Vector2(tri.Point1.X, tri.Point1.Z),
+                new Vector2(tri.Point2.X, tri.Point2.Z),
+                new Vector2(tri.Point3.X, tri.Point3.Z));
+
+            poly.Orientation = orientation;
+
+            return poly;
         }
 
         public static GeometricOrientation GetOrientation(Vector2[] points)
@@ -103,6 +115,46 @@ namespace Engine
 
             return result;
         }
+
+
+
+        public static bool GetSharedEdges(Polygon first, Polygon second, out SharedEdge[] sharedEdges)
+        {
+            bool result = false;
+
+            sharedEdges = null;
+
+            List<SharedEdge> resultList = new List<SharedEdge>();
+
+            for (int fp1 = 0; fp1 < first.points.Length; fp1++)
+            {
+                int sp1 = Array.IndexOf(second.points, first.points[fp1]);
+                if (sp1 >= 0)
+                {
+                    int fp2 = fp1 + 1 < first.points.Length ? fp1 + 1 : 0;
+                    int sp2 = sp1 - 1 >= 0 ? sp1 - 1 : second.points.Length - 1;
+
+                    if (first.points[fp2] == second.points[sp2])
+                    {
+                        resultList.Add(new SharedEdge()
+                        {
+                            SharedFirstPoint1 = fp1,
+                            SharedFirstPoint2 = fp2,
+                            SharedSecondPoint1 = sp1,
+                            SharedSecondPoint2 = sp2,
+                        });
+
+                        result = true;
+                    }
+                }
+            }
+
+            sharedEdges = resultList.ToArray();
+
+            return result;
+        }
+
+
 
         private Vector2[] points = null;
         private GeometricOrientation orientation = GeometricOrientation.None;
@@ -325,6 +377,25 @@ namespace Engine
             }
 
             return text;
+        }
+
+        public bool Contains(Vector2 point)
+        {
+            return Array.Exists(this.points, p => p == point);
+        }
+
+        public void Remove(Vector2[] list)
+        {
+            List<Vector2> tmp = new List<Vector2>(this.points);
+
+            foreach (var item in list)
+            {
+                tmp.Remove(item);
+            }
+
+            this.points = tmp.ToArray();
+
+            this.Update();
         }
     }
 }

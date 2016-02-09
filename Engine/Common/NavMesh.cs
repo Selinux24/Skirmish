@@ -21,6 +21,13 @@ namespace Engine.Common
             public PartitionVertex Next;
         }
 
+        class ConnectionInfo
+        {
+            public int Poly1;
+            public int Poly2;
+            public Line2 Segment;
+        }
+
         public static NavMesh Build(Triangle[] triangles, float angle = MathUtil.PiOverFour)
         {
             NavMesh result = new NavMesh();
@@ -28,34 +35,88 @@ namespace Engine.Common
             var tris = Array.FindAll(triangles, t => t.Inclination <= angle);
             if (tris != null && tris.Length > 0)
             {
-                List<Polygon> polys = new List<Polygon>(tris.Length);
+                Polygon[] polys = new Polygon[tris.Length];
+
                 for (int i = 0; i < tris.Length; i++)
                 {
-                    Triangle tri = tris[i];
-
-                    Polygon poly = new Polygon(
-                        new Vector2(tri.Point1.X, tri.Point1.Z),
-                        new Vector2(tri.Point2.X, tri.Point2.Z),
-                        new Vector2(tri.Point3.X, tri.Point3.Z));
-
-                    poly.Orientation = GeometricOrientation.CounterClockwise;
-
-                    polys.Add(poly);
+                    polys[i] = Polygon.FromTriangle(tris[i], GeometricOrientation.CounterClockwise);
                 }
 
+                NavmeshNode[] nodes = null;
+
                 Polygon[] parts;
-                if (NavMesh.ConvexPartition(polys.ToArray(), out parts))
+                if (NavMesh.ConvexPartition(polys, out parts))
                 {
                     Polygon[] mergedPolis;
                     if (NavMesh.MergeConvex(parts, out mergedPolis))
                     {
-                        result.Nodes = new NavmeshNode[mergedPolis.Length];
-                        for (int i = 0; i < result.Nodes.Length; i++)
+                        nodes = new NavmeshNode[mergedPolis.Length];
+
+                        for (int i = 0; i < nodes.Length; i++)
                         {
-                            result.Nodes[i] = new NavmeshNode(mergedPolis[i]);
+                            nodes[i] = new NavmeshNode(mergedPolis[i]);
+                        }
+
+                        if (nodes.Length > 1)
+                        {
+                            //Remove unused vertices from polygons
+                            for (int i = 0; i < nodes.Length; i++)
+                            {
+                                Polygon poly1 = nodes[i].Poly;
+
+                                List<Vector2> toRemove = new List<Vector2>();
+
+                                var edges = poly1.GetEdges();
+                                for (int ii = 1; ii < edges.Length; ii++)
+                                {
+                                    if (edges[ii - 1].Direction == edges[ii].Direction)
+                                    {
+                                        //Shared point
+                                        Vector2 shared = edges[ii].Point1;
+
+                                        if (!Array.Exists(nodes, n => n != nodes[i] && n.Poly.Contains(shared)))
+                                        {
+                                            //To Remove
+                                            toRemove.Add(shared);
+                                        }
+                                    }
+                                }
+
+                                poly1.Remove(toRemove.ToArray());
+                            }
+
+                            //Connect nodes
+                            for (int i = 0; i < nodes.Length; i++)
+                            {
+                                Polygon poly1 = nodes[i].Poly;
+
+                                for (int x = i + 1; x < nodes.Length; x++)
+                                {
+                                    Polygon poly2 = nodes[x].Poly;
+
+                                    //Get shared edges
+                                    Polygon.SharedEdge[] sharedEdges;
+                                    if (Polygon.GetSharedEdges(poly1, poly2, out sharedEdges))
+                                    {
+                                        for (int s = 0; s < sharedEdges.Length; s++)
+                                        {
+                                            //Save join
+                                            result.connections.Add(new ConnectionInfo()
+                                            {
+                                                Poly1 = i,
+                                                Poly2 = x,
+                                                Segment = new Line2(poly1[sharedEdges[s].SharedFirstPoint1], poly1[sharedEdges[s].SharedFirstPoint2]),
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+
                         }
                     }
                 }
+
+                result.Nodes = nodes;
             }
 
             return result;
@@ -571,16 +632,20 @@ namespace Engine.Common
                 v.IsEar = false;
             }
         }
+
+
+
+        private List<ConnectionInfo> connections = new List<ConnectionInfo>();
     }
 
 
     public class NavmeshNode : GraphNode<NavmeshNode>
     {
-        private Polygon poly;
+        public Polygon Poly;
 
         public NavmeshNode(Polygon poly)
         {
-            this.poly = poly;
+            this.Poly = poly;
         }
 
 
