@@ -115,9 +115,6 @@ namespace Engine
 
             return result;
         }
-
-
-
         public static bool GetSharedEdges(Polygon first, Polygon second, out SharedEdge[] sharedEdges)
         {
             bool result = false;
@@ -153,8 +150,6 @@ namespace Engine
 
             return result;
         }
-
-
 
         private Vector2[] points = null;
         private GeometricOrientation orientation = GeometricOrientation.None;
@@ -396,6 +391,54 @@ namespace Engine
             this.points = tmp.ToArray();
 
             this.Update();
+        }
+
+        public void Remove(int[] list)
+        {
+            List<Vector2> tmp = new List<Vector2>(this.points);
+
+            foreach (var item in list)
+            {
+                tmp.Remove(this.points[item]);
+            }
+
+            this.points = tmp.ToArray();
+
+            this.Update();
+        }
+
+        internal static SharedEdge Simplify(SharedEdge[] sharedEdges, ref Polygon poly1, ref Polygon poly2)
+        {
+            if (sharedEdges == null || sharedEdges.Length == 0) return new SharedEdge();
+
+            if (sharedEdges.Length == 1)
+            {
+                return sharedEdges[0];
+            }
+            else
+            {
+                int[] points1 = new int[sharedEdges.Length - 1];
+                int[] points2 = new int[sharedEdges.Length - 1];
+
+                for (int i = 0; i < sharedEdges.Length - 1; i++)
+                {
+                    points1[i] = sharedEdges[i].SharedFirstPoint2;
+                    points2[i] = sharedEdges[i].SharedSecondPoint2;
+                }
+
+                poly1.Remove(points1);
+                poly2.Remove(points2);
+
+                SharedEdge edge;
+                if (Polygon.ShareAnEdgeWith(poly1, poly2, out edge))
+                {
+                    return edge;
+                }
+                else
+                {
+                    throw new Exception("Bad shared edge collection");
+                }
+            }
         }
     }
 }
