@@ -398,6 +398,11 @@ namespace Engine
             this.Update();
         }
 
+        public void RemoveUnused()
+        {
+            RemoveUnused(new Vector2[] { });
+        }
+
         public void RemoveUnused(Vector2[] exclusions)
         {
             List<Vector2> toRemove = new List<Vector2>();
