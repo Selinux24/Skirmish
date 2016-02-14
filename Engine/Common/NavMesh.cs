@@ -59,36 +59,12 @@ namespace Engine.Common
 
                         if (nodes.Length > 1)
                         {
-                            //Remove unused vertices from polygons
-                            for (int i = 0; i < nodes.Length; i++)
-                            {
-                                Polygon poly1 = nodes[i].Poly;
-
-                                List<Vector2> toRemove = new List<Vector2>();
-
-                                var edges = poly1.GetEdges();
-                                for (int ii = 1; ii < edges.Length; ii++)
-                                {
-                                    if (edges[ii - 1].Direction == edges[ii].Direction)
-                                    {
-                                        //Shared point
-                                        Vector2 shared = edges[ii].Point1;
-
-                                        if (!Array.Exists(nodes, n => n != nodes[i] && n.Poly.Contains(shared)))
-                                        {
-                                            //To Remove
-                                            toRemove.Add(shared);
-                                        }
-                                    }
-                                }
-
-                                poly1.Remove(toRemove.ToArray());
-                            }
-
                             //Connect nodes
                             for (int i = 0; i < nodes.Length; i++)
                             {
                                 Polygon poly1 = nodes[i].Poly;
+
+                                List<Vector2> exclusions = new List<Vector2>();
 
                                 for (int x = i + 1; x < nodes.Length; x++)
                                 {
@@ -98,20 +74,51 @@ namespace Engine.Common
                                     Polygon.SharedEdge[] sharedEdges;
                                     if (Polygon.GetSharedEdges(poly1, poly2, out sharedEdges))
                                     {
-                                        for (int s = 0; s < sharedEdges.Length; s++)
+                                        if (sharedEdges.Length > 1)
                                         {
-                                            //Save join
+                                            Vector2 v1 = poly1[sharedEdges[0].SharedFirstPoint1];
+                                            Vector2 v2 = poly1[sharedEdges[sharedEdges.Length - 1].SharedFirstPoint2];
+
                                             result.connections.Add(new ConnectionInfo()
                                             {
                                                 Poly1 = i,
                                                 Poly2 = x,
-                                                Segment = new Line2(poly1[sharedEdges[s].SharedFirstPoint1], poly1[sharedEdges[s].SharedFirstPoint2]),
+                                                Segment = new Line2(v1, v2),
                                             });
+
+                                            exclusions.Add(v1);
+                                            exclusions.Add(v2);
+
+                                            List<Vector2> toRemove = new List<Vector2>();
+
+                                            for (int s = 0; s < sharedEdges.Length - 1; s++)
+                                            {
+                                                toRemove.Add(poly1[sharedEdges[s].SharedFirstPoint2]);
+                                            }
+
+                                            poly1.Remove(toRemove.ToArray());
+                                            poly2.Remove(toRemove.ToArray());
+                                        }
+                                        else
+                                        {
+                                            Vector2 v1 = poly1[sharedEdges[0].SharedFirstPoint1];
+                                            Vector2 v2 = poly1[sharedEdges[0].SharedFirstPoint2];
+
+                                            result.connections.Add(new ConnectionInfo()
+                                            {
+                                                Poly1 = i,
+                                                Poly2 = x,
+                                                Segment = new Line2(v1, v2),
+                                            });
+
+                                            exclusions.Add(v1);
+                                            exclusions.Add(v2);
                                         }
                                     }
                                 }
-                            }
 
+                                poly1.RemoveUnused(exclusions.ToArray());
+                            }
                         }
                     }
                 }
@@ -633,7 +640,79 @@ namespace Engine.Common
             }
         }
 
+        internal static void Test()
+        {
+            {
+                Polygon poly = new Polygon(8);
+                poly[0] = new Vector2(+1, +1);
+                poly[1] = new Vector2(+0, +1);
+                poly[2] = new Vector2(-1, +1);
+                poly[3] = new Vector2(-1, +0);
+                poly[4] = new Vector2(-1, -1);
+                poly[5] = new Vector2(+0, -1);
+                poly[6] = new Vector2(+1, -1);
+                poly[7] = new Vector2(+0.5f, +0);
 
+                poly.Orientation = GeometricOrientation.CounterClockwise;
+
+                Polygon[] parts;
+                if (NavMesh.ConvexPartition(new[] { poly }, out parts))
+                {
+                    Polygon[] mergedPolis;
+                    NavMesh.MergeConvex(parts, out mergedPolis);
+
+                    Line2[] edges = mergedPolis[0].GetEdges();
+                }
+            }
+
+            {
+                Triangle[] tris = new Triangle[8];
+                tris[0] = new Triangle(new Vector3(-1, 0, 1), new Vector3(-1, 0, 0), new Vector3(0, 0, 1));
+                tris[1] = new Triangle(new Vector3(0, 0, 1), new Vector3(-1, 0, 0), new Vector3(0, 0, 0));
+                tris[2] = new Triangle(new Vector3(0, 0, 1), new Vector3(0, 0, 0), new Vector3(1, 0, 1));
+                tris[3] = new Triangle(new Vector3(1, 0, 1), new Vector3(0, 0, 0), new Vector3(0.5f, 0, 0));
+                tris[4] = new Triangle(new Vector3(-1, 0, 0), new Vector3(-1, 0, -1), new Vector3(0, 0, 0));
+                tris[5] = new Triangle(new Vector3(0, 0, 0), new Vector3(-1, 0, -1), new Vector3(0, 0, -1));
+                tris[6] = new Triangle(new Vector3(0, 0, 0), new Vector3(0, 0, -1), new Vector3(0.5f, 0, 0));
+                tris[7] = new Triangle(new Vector3(0.5f, 0, 0), new Vector3(0, 0, -1), new Vector3(1, 0, -1));
+
+                NavMesh nm = NavMesh.Build(tris, 0);
+            }
+
+            {
+                Triangle[] tris = new Triangle[6];
+                tris[0] = new Triangle(new Vector3(-1, 0, 1), new Vector3(-1, 0, 0), new Vector3(0, 0, 1));
+                tris[1] = new Triangle(new Vector3(0, 0, 1), new Vector3(-1, 0, 0), new Vector3(0, 0, 0));
+                tris[2] = new Triangle(new Vector3(0, 0, 1), new Vector3(0, 0, 0), new Vector3(1, 0, 1));
+                tris[3] = new Triangle(new Vector3(1, 0, 1), new Vector3(0, 0, 0), new Vector3(0.5f, 0, 0));
+                tris[4] = new Triangle(new Vector3(0, 0, 0), new Vector3(0, 0, -1), new Vector3(0.5f, 0, 0));
+                tris[5] = new Triangle(new Vector3(0.5f, 0, 0), new Vector3(0, 0, -1), new Vector3(1, 0, -1));
+
+                NavMesh nm = NavMesh.Build(tris, 0);
+            }
+
+            {
+                Triangle[] tris = new Triangle[16];
+                tris[0] = new Triangle(new Vector3(-2, 0, 2), new Vector3(-2, 0, 1), new Vector3(-1, 0, 2));
+                tris[1] = new Triangle(new Vector3(-2, 0, 1), new Vector3(-1, 0, 1), new Vector3(-1, 0, 2));
+                tris[2] = new Triangle(new Vector3(-1, 0, 2), new Vector3(-1, 0, 1), new Vector3(1, 0, 2));
+                tris[3] = new Triangle(new Vector3(-1, 0, 1), new Vector3(1, 0, 1), new Vector3(1, 0, 2));
+                tris[4] = new Triangle(new Vector3(1, 0, 2), new Vector3(1, 0, 1), new Vector3(2, 0, 2));
+                tris[5] = new Triangle(new Vector3(1, 0, 1), new Vector3(2, 0, 1), new Vector3(2, 0, 2));
+                tris[6] = new Triangle(new Vector3(-2, 0, 1), new Vector3(-2, 0, -1), new Vector3(-1, 0, 1));
+                tris[7] = new Triangle(new Vector3(-2, 0, -1), new Vector3(-1, 0, -1), new Vector3(-1, 0, 1));
+                tris[8] = new Triangle(new Vector3(1, 0, 1), new Vector3(1, 0, -1), new Vector3(2, 0, 1));
+                tris[9] = new Triangle(new Vector3(1, 0, -1), new Vector3(2, 0, -1), new Vector3(2, 0, 1));
+                tris[10] = new Triangle(new Vector3(-2, 0, -1), new Vector3(-2, 0, -2), new Vector3(-1, 0, -1));
+                tris[11] = new Triangle(new Vector3(-2, 0, -2), new Vector3(-1, 0, -2), new Vector3(-1, 0, -1));
+                tris[12] = new Triangle(new Vector3(-1, 0, -1), new Vector3(-1, 0, -2), new Vector3(1, 0, -1));
+                tris[13] = new Triangle(new Vector3(-1, 0, -2), new Vector3(1, 0, -2), new Vector3(1, 0, -1));
+                tris[14] = new Triangle(new Vector3(1, 0, -1), new Vector3(1, 0, -2), new Vector3(2, 0, -1));
+                tris[15] = new Triangle(new Vector3(1, 0, -2), new Vector3(2, 0, -2), new Vector3(2, 0, -1));
+
+                NavMesh nm = NavMesh.Build(tris, 0);
+            }
+        }
 
         private List<ConnectionInfo> connections = new List<ConnectionInfo>();
     }

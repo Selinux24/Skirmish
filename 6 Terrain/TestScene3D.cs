@@ -19,6 +19,7 @@ namespace TerrainTest
         private bool useDebugTex = false;
         private SpriteTexture shadowMapDrawer = null;
         private ShaderResourceView debugTex = null;
+        private Matrix m = Matrix.Translation(Vector3.Up * 0.1f);
 
         private TextDrawer title = null;
         private TextDrawer load = null;
@@ -275,8 +276,6 @@ namespace TerrainTest
                 //this.terrainGridDrawer.EnableAlphaBlending = true;
                 this.terrainGridDrawer.Visible = false;
 
-                Matrix m = Matrix.Translation(Vector3.Up * 0.5f);
-
                 for (int i = 0; i < nodes.Length; i++)
                 {
                     GridNode node = (GridNode)nodes[i];
@@ -291,7 +290,7 @@ namespace TerrainTest
 
                     Vector3[] corners = node.GetCorners();
 
-                    this.terrainGridDrawer.AddLines(color, Line3.Transform(GeometryUtil.CreateWiredSquare(corners), m));
+                    this.terrainGridDrawer.AddLines(color, Line3.Transform(GeometryUtil.CreateWiredSquare(corners), this.m));
                 }
             }
 
@@ -476,11 +475,11 @@ namespace TerrainTest
                         Triangle[] triangles;
                         if (this.terrain.FindAllGroundPosition(position.X, position.Z, out positions, out triangles))
                         {
-                            this.terrainPointDrawer.SetLines(Color.Magenta, GeometryUtil.CreateCrossList(positions, 1f));
-                            this.terrainPointDrawer.SetLines(Color.DarkCyan, GeometryUtil.CreateWiredTriangle(triangles));
+                            this.terrainPointDrawer.SetLines(Color.Magenta, Line3.Transform(GeometryUtil.CreateCrossList(positions, 1f), this.m));
+                            this.terrainPointDrawer.SetLines(Color.DarkCyan, Line3.Transform(GeometryUtil.CreateWiredTriangle(triangles), this.m));
                             if (positions.Length > 1)
                             {
-                                this.terrainPointDrawer.SetLines(Color.Cyan, new Line3(positions[0], positions[positions.Length - 1]));
+                                this.terrainPointDrawer.SetLines(Color.Cyan, Line3.Transform(new Line3(positions[0], positions[positions.Length - 1]), this.m));
                             }
                         }
                     }
@@ -498,7 +497,7 @@ namespace TerrainTest
                     var p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
                     if (p != null)
                     {
-                        Matrix ml = Matrix.Translation(Vector3.Up * 1f);
+                        Line3[] lines = new Line3[p.ReturnPath.Count];
 
                         for (int i = 0; i < p.ReturnPath.Count; i++)
                         {
@@ -512,8 +511,10 @@ namespace TerrainTest
                                 line = new Line3(p.ReturnPath[i - 1].Center, p.ReturnPath[i].Center);
                             }
 
-                            this.terrainPointDrawer.AddLines(Color.Red, Line3.Transform(line, ml));
+                            lines[i] = line;
                         }
+
+                        this.terrainPointDrawer.SetLines(Color.Red, Line3.Transform(lines, this.m));
 
                         this.tank.Manipulator.Follow(p.GenerateBezierPath(), 0.2f);
                     }
@@ -610,10 +611,10 @@ namespace TerrainTest
                 }
             }
 
-            Matrix m = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
+            Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
             BoundingSphere sph = this.helicopter.GetBoundingSphere();
 
-            this.curveLineDrawer.SetLines(this.hAxisColor, GeometryUtil.CreateAxis(m, 5f));
+            this.curveLineDrawer.SetLines(this.hAxisColor, GeometryUtil.CreateAxis(rot, 5f));
 
             this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.20f), GeometryUtil.CreateWiredSphere(sph, 50, 20));
 

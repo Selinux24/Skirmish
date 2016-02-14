@@ -397,5 +397,30 @@ namespace Engine
 
             this.Update();
         }
+
+        public void RemoveUnused()
+        {
+            RemoveUnused(new Vector2[] { });
+        }
+
+        public void RemoveUnused(Vector2[] exclusions)
+        {
+            List<Vector2> toRemove = new List<Vector2>();
+
+            Line2[] edges = this.GetEdges();
+
+            for (int i = 1; i < edges.Length; i++)
+            {
+                if (edges[i - 1].Direction == edges[i].Direction)
+                {
+                    if (!Array.Exists(exclusions, e => e == edges[i].Point1))
+                    {
+                        toRemove.Add(edges[i].Point1);
+                    }
+                }
+            }
+
+            if (toRemove.Count > 0) this.Remove(toRemove.ToArray());
+        }
     }
 }
