@@ -50,18 +50,6 @@ namespace HeightmapTest
 
                     NavMesh nm = NavMesh.Build(tris, 0);
                 }
-
-                {
-                    Triangle[] tris = new Triangle[6];
-                    tris[0] = new Triangle(new Vector3(-1, 0, 1), new Vector3(-1, 0, 0), new Vector3(0, 0, 1));
-                    tris[1] = new Triangle(new Vector3(0, 0, 1), new Vector3(-1, 0, 0), new Vector3(0, 0, 0));
-                    tris[2] = new Triangle(new Vector3(0, 0, 1), new Vector3(0, 0, 0), new Vector3(1, 0, 1));
-                    tris[3] = new Triangle(new Vector3(1, 0, 1), new Vector3(0, 0, 0), new Vector3(0.5f, 0, 0));
-                    tris[4] = new Triangle(new Vector3(0, 0, 0), new Vector3(0, 0, -1), new Vector3(0.5f, 0, 0));
-                    tris[5] = new Triangle(new Vector3(0.5f, 0, 0), new Vector3(0, 0, -1), new Vector3(1, 0, -1));
-
-                    NavMesh nm = NavMesh.Build(tris, 0);
-                }
 #if DEBUG
                 cl.VisibleMouse = false;
                 cl.LockMouse = false;

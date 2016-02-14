@@ -59,6 +59,33 @@ namespace Engine.Common
 
                         if (nodes.Length > 1)
                         {
+                            //Remove unused vertices from polygons
+                            for (int i = 0; i < nodes.Length; i++)
+                            {
+                                Polygon poly1 = nodes[i].Poly;
+
+                                List<Vector2> toRemove = new List<Vector2>();
+
+                                var edges = poly1.GetEdges();
+                                for (int ii = 1; ii < edges.Length; ii++)
+                                {
+                                    if (edges[ii - 1].Direction == edges[ii].Direction)
+                                    {
+                                        //Shared point
+                                        Vector2 shared = edges[ii].Point1;
+
+                                        if (!Array.Exists(nodes, n => n != nodes[i] && n.Poly.Contains(shared)))
+                                        {
+                                            //To Remove
+                                            toRemove.Add(shared);
+                                        }
+                                    }
+                                }
+
+                                poly1.Remove(toRemove.ToArray());
+                            }
+
+                            //Connect nodes
                             for (int i = 0; i < nodes.Length; i++)
                             {
                                 Polygon poly1 = nodes[i].Poly;
@@ -71,21 +98,20 @@ namespace Engine.Common
                                     Polygon.SharedEdge[] sharedEdges;
                                     if (Polygon.GetSharedEdges(poly1, poly2, out sharedEdges))
                                     {
-                                        //Simplify shared edges (always in the same line)
-                                        Polygon.SharedEdge edge = Polygon.Simplify(sharedEdges, ref poly1, ref poly2);
-
-                                        //Add the connection
-                                        result.connections.Add(new ConnectionInfo()
+                                        for (int s = 0; s < sharedEdges.Length; s++)
                                         {
-                                            Poly1 = i,
-                                            Poly2 = x,
-                                            Segment = new Line2(poly1[edge.SharedFirstPoint1], poly1[edge.SharedFirstPoint2]),
-                                        });
+                                            //Save join
+                                            result.connections.Add(new ConnectionInfo()
+                                            {
+                                                Poly1 = i,
+                                                Poly2 = x,
+                                                Segment = new Line2(poly1[sharedEdges[s].SharedFirstPoint1], poly1[sharedEdges[s].SharedFirstPoint2]),
+                                            });
+                                        }
                                     }
                                 }
                             }
 
-                            //TODO: remove unused points (not in connection)
                         }
                     }
                 }
