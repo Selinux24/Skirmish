@@ -1,15 +1,13 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.PathFinding
 {
-    using Engine.Common;
-
     /// <summary>
     /// PathFinder path
     /// </summary>
-    public class Path<T> where T : GraphNode<T>
+    public class Path
     {
         /// <summary>
         /// Path identifier
@@ -18,7 +16,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Path nodes
         /// </summary>
-        public readonly List<T> ReturnPath = new List<T>();
+        public readonly List<IGraphNode> ReturnPath = new List<IGraphNode>();
         /// <summary>
         /// Start position
         /// </summary>
@@ -49,7 +47,7 @@ namespace Engine.PathFinding
         /// Constructor
         /// </summary>
         /// <param name="returnPath">Node list</param>
-        public Path(Vector3 startPosition, Vector3 endPosition, T[] returnPath)
+        public Path(Vector3 startPosition, Vector3 endPosition, IGraphNode[] returnPath)
         {
             this.StartPosition = startPosition;
             this.EndPosition = endPosition;

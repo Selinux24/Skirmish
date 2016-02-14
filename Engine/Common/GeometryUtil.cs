@@ -187,6 +187,25 @@ namespace Engine.Common
 
             return CreateFromVertices(corners, indexes);
         }
+        public static Line3[] CreateWiredPolygon(Vector3[] points)
+        {
+            List<Line3> lines = new List<Line3>();
+
+            int[] indexes = new int[points.Length * 2];
+
+            int i1 = 0;
+            int i2 = 1;
+            for (int i = 0; i < points.Length; i++)
+            {
+                indexes[i1] = i + 0;
+                indexes[i2] = i == points.Length - 1 ? 0 : i + 1;
+
+                i1 += 2;
+                i2 += 2;
+            }
+
+            return CreateFromVertices(points, indexes);
+        }
         public static Line3[] CreateWiredBox(BoundingBox[] bboxList)
         {
             List<Line3> lines = new List<Line3>();
@@ -414,8 +433,13 @@ namespace Engine.Common
             return lines.ToArray();
         }
 
-        public static bool Intersects(Vector2 p11, Vector2 p12, Vector2 p21, Vector2 p22)
+        public static bool Intersects(Vector3 v11, Vector3 v12, Vector3 v21, Vector3 v22)
         {
+            Vector2 p11 = new Vector2(v11.X, v11.Z);
+            Vector2 p12 = new Vector2(v12.X, v12.Z);
+            Vector2 p21 = new Vector2(v21.X, v21.Z);
+            Vector2 p22 = new Vector2(v22.X, v22.Z);
+
             if ((p11.X == p21.X) && (p11.Y == p21.Y)) return false;
             if ((p11.X == p22.X) && (p11.Y == p22.Y)) return false;
             if ((p12.X == p21.X) && (p12.Y == p21.Y)) return false;
@@ -441,14 +465,14 @@ namespace Engine.Common
 
             return true;
         }
-        public static bool IsInside(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p)
+        public static bool IsInside(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p)
         {
             if (IsConvex(p1, p, p2)) return false;
             if (IsConvex(p2, p, p3)) return false;
             if (IsConvex(p3, p, p1)) return false;
             return true;
         }
-        public static bool InCone(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p)
+        public static bool InCone(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p)
         {
             if (IsConvex(p1, p2, p3))
             {
@@ -463,13 +487,13 @@ namespace Engine.Common
                 return false;
             }
         }
-        public static bool IsReflex(Vector2 p1, Vector2 p2, Vector2 p3)
+        public static bool IsReflex(Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            return ((p3.Y - p1.Y) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Y - p1.Y)) < 0;
+            return ((p3.Z - p1.Z) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Z - p1.Z)) < 0;
         }
-        public static bool IsConvex(Vector2 p1, Vector2 p2, Vector2 p3)
+        public static bool IsConvex(Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            return ((p3.Y - p1.Y) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Y - p1.Y)) > 0;
+            return ((p3.Z - p1.Z) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Z - p1.Z)) > 0;
         }
     }
 

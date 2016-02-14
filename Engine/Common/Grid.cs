@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <summary>
     /// Grid
     /// </summary>
-    public class Grid : IGraph<GridNode>
+    public class Grid : Graph
     {
         /// <summary>
         /// Collision info helper

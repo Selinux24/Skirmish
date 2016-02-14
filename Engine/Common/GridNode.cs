@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.Common
 {
@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <summary>
     /// Grid node
     /// </summary>
-    public class GridNode : GraphNode<GridNode>
+    public class GridNode : GraphNode
     {
         /// <summary>
         /// Connected nodes dictionary
@@ -37,7 +37,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="heading">Heading</param>
         /// <returns>Returns connected node of specified heading if exists</returns>
-        public GraphNode<GridNode> this[Headings heading]
+        public GridNode this[Headings heading]
         {
             get
             {
@@ -45,7 +45,7 @@ namespace Engine.Common
                 {
                     int index = this.nodesDictionary[heading];
 
-                    return this.ConnectedNodes[index];
+                    return (GridNode)this.ConnectedNodes[index];
                 }
 
                 return null;
@@ -250,7 +250,7 @@ namespace Engine.Common
         /// Get four node corners
         /// </summary>
         /// <returns>Returns four node corners</returns>
-        public Vector3[] GetCorners()
+        public override Vector3[] GetPoints()
         {
             return new[]
             {

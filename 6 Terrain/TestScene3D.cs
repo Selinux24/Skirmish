@@ -19,7 +19,7 @@ namespace TerrainTest
         private bool useDebugTex = false;
         private SpriteTexture shadowMapDrawer = null;
         private ShaderResourceView debugTex = null;
-        private Matrix m = Matrix.Translation(Vector3.Up * 0.1f);
+        private Matrix m = Matrix.Translation(Vector3.Up * 3f);
 
         private TextDrawer title = null;
         private TextDrawer load = null;
@@ -134,6 +134,7 @@ namespace TerrainTest
                 },
                 PathFinder = new TerrainDescription.PathFinderDescription()
                 {
+                    GraphType = GraphTypes.NavMesh,
                     NodeSize = 2f,
                     NodeInclination = MathUtil.DegreesToRadians(35),
                 },
@@ -276,9 +277,9 @@ namespace TerrainTest
                 //this.terrainGridDrawer.EnableAlphaBlending = true;
                 this.terrainGridDrawer.Visible = false;
 
-                for (int i = 0; i < nodes.Length; i++)
+                for (int i = 0; i < 20; i++)
                 {
-                    GridNode node = (GridNode)nodes[i];
+                    IGraphNode node = nodes[i];
 
                     float c = (node.Cost / MathUtil.PiOverFour);
 
@@ -288,9 +289,9 @@ namespace TerrainTest
                     else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 1f); }
                     else { color = new Color4(Color.Green.ToColor3(), 1f); }
 
-                    Vector3[] corners = node.GetCorners();
+                    Vector3[] edges = node.GetPoints();
 
-                    this.terrainGridDrawer.AddLines(color, Line3.Transform(GeometryUtil.CreateWiredSquare(corners), this.m));
+                    this.terrainGridDrawer.AddLines(color, Line3.Transform(GeometryUtil.CreateWiredPolygon(edges), this.m));
                 }
             }
 

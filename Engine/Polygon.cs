@@ -13,25 +13,22 @@ namespace Engine
     {
         public struct SharedEdge
         {
-            public int SharedFirstPoint1;
-            public int SharedFirstPoint2;
-            public int SharedSecondPoint1;
-            public int SharedSecondPoint2;
+            public int FirstPoint1;
+            public int FirstPoint2;
+            public int SecondPoint1;
+            public int SecondPoint2;
         }
 
         public static Polygon FromTriangle(Triangle tri, GeometricOrientation orientation = GeometricOrientation.CounterClockwise)
         {
-            Polygon poly = new Polygon(
-                new Vector2(tri.Point1.X, tri.Point1.Z),
-                new Vector2(tri.Point2.X, tri.Point2.Z),
-                new Vector2(tri.Point3.X, tri.Point3.Z));
+            Polygon poly = new Polygon(tri.Point1, tri.Point2, tri.Point3);
 
             poly.Orientation = orientation;
 
             return poly;
         }
 
-        public static GeometricOrientation GetOrientation(Vector2[] points)
+        public static GeometricOrientation GetOrientation(Vector3[] points)
         {
             float area = 0;
             for (int i1 = 0; i1 < points.Length; i1++)
@@ -39,14 +36,14 @@ namespace Engine
                 int i2 = i1 + 1;
                 if (i2 == points.Length) i2 = 0;
 
-                area += points[i1].X * points[i2].Y - points[i1].Y * points[i2].X;
+                area += points[i1].X * points[i2].Z - points[i1].Z * points[i2].X;
             }
             if (area > 0) return GeometricOrientation.CounterClockwise;
             if (area < 0) return GeometricOrientation.Clockwise;
 
             return GeometricOrientation.None;
         }
-        public static bool IsConvex(Vector2[] points)
+        public static bool IsConvex(Vector3[] points)
         {
             int numreflex = 0;
             for (int i11 = 0; i11 < points.Length; i11++)
@@ -95,10 +92,10 @@ namespace Engine
 
                     if (first.points[fp2] == second.points[sp2])
                     {
-                        sharedEdge.SharedFirstPoint1 = fp1;
-                        sharedEdge.SharedFirstPoint2 = fp2;
-                        sharedEdge.SharedSecondPoint1 = sp1;
-                        sharedEdge.SharedSecondPoint2 = sp2;
+                        sharedEdge.FirstPoint1 = fp1;
+                        sharedEdge.FirstPoint2 = fp2;
+                        sharedEdge.SecondPoint1 = sp1;
+                        sharedEdge.SecondPoint2 = sp2;
 
                         if (result == false)
                         {
@@ -115,9 +112,6 @@ namespace Engine
 
             return result;
         }
-
-
-
         public static bool GetSharedEdges(Polygon first, Polygon second, out SharedEdge[] sharedEdges)
         {
             bool result = false;
@@ -138,10 +132,10 @@ namespace Engine
                     {
                         resultList.Add(new SharedEdge()
                         {
-                            SharedFirstPoint1 = fp1,
-                            SharedFirstPoint2 = fp2,
-                            SharedSecondPoint1 = sp1,
-                            SharedSecondPoint2 = sp2,
+                            FirstPoint1 = fp1,
+                            FirstPoint2 = fp2,
+                            SecondPoint1 = sp1,
+                            SecondPoint2 = sp2,
                         });
 
                         result = true;
@@ -154,15 +148,31 @@ namespace Engine
             return result;
         }
 
+        public static bool PointInPoly(Polygon poly, Vector3 point)
+        {
+            bool c = false;
 
+            for (int i = 0, j = poly.Count - 1; i < poly.Count; j = i++)
+            {
+                Vector3 vi = poly[i];
+                Vector3 vj = poly[j];
+                if (((vi.Z > point.Z) != (vj.Z > point.Z)) &&
+                    (point.X < (vj.X - vi.X) * (point.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+                {
+                    c = !c;
+                }
+            }
 
-        private Vector2[] points = null;
+            return c;
+        }
+
+        private Vector3[] points = null;
         private GeometricOrientation orientation = GeometricOrientation.None;
 
         /// <summary>
         /// Point array
         /// </summary>
-        public Vector2[] Points
+        public Vector3[] Points
         {
             get
             {
@@ -201,7 +211,7 @@ namespace Engine
             {
                 if (this.orientation != GeometricOrientation.None && (this.orientation != value))
                 {
-                    Vector2[] invpoints = new Vector2[this.Count];
+                    Vector3[] invpoints = new Vector3[this.Count];
 
                     for (int i = 0; i < this.Count; i++)
                     {
@@ -218,7 +228,7 @@ namespace Engine
         /// </summary>
         /// <param name="i">Point index</param>
         /// <returns>Returns the specified point by index</returns>
-        public Vector2 this[int i]
+        public Vector3 this[int i]
         {
             get
             {
@@ -250,7 +260,7 @@ namespace Engine
         /// <param name="count">Number or vertices</param>
         public Polygon(int count)
         {
-            this.Points = new Vector2[count];
+            this.Points = new Vector3[count];
             this.Hole = false;
         }
         /// <summary>
@@ -259,7 +269,7 @@ namespace Engine
         /// <param name="p1">First point</param>
         /// <param name="p2">Second point</param>
         /// <param name="p3">Third point</param>
-        public Polygon(Vector2 p1, Vector2 p2, Vector2 p3)
+        public Polygon(Vector3 p1, Vector3 p2, Vector3 p3)
         {
             this.Points = new[] { p1, p2, p3 };
             this.Hole = false;
@@ -270,7 +280,9 @@ namespace Engine
         /// <param name="source">Source poly</param>
         public Polygon(Polygon source)
         {
-            this.Points = source.Points;
+            this.Points = new Vector3[source.Points.Length];
+            Array.Copy(source.points, this.points, source.Points.Length);
+
             this.Hole = source.Hole;
         }
 
@@ -303,21 +315,21 @@ namespace Engine
             }
             else
             {
-                List<Vector2> v = new List<Vector2>(this.points);
-                List<Vector2> toMerge = new List<Vector2>(poly.Count - 2);
+                List<Vector3> v = new List<Vector3>(this.points);
+                List<Vector3> toMerge = new List<Vector3>(poly.Count - 2);
 
                 //Find shared points in new poly
                 for (int i = 0; i < poly.Count; i++)
                 {
-                    if (i != mergeInfo.SharedSecondPoint1 && i != mergeInfo.SharedSecondPoint2)
+                    if (i != mergeInfo.SecondPoint1 && i != mergeInfo.SecondPoint2)
                     {
                         toMerge.Add(poly[i]);
                     }
                 }
 
-                v.InsertRange(mergeInfo.SharedFirstPoint1 + 1, toMerge);
+                v.InsertRange(mergeInfo.FirstPoint1 + 1, toMerge);
 
-                Vector2[] copy = v.ToArray();
+                Vector3[] copy = v.ToArray();
 
                 if (!mergeConvex || copy.Length < 3 || Polygon.IsConvex(copy))
                 {
@@ -340,19 +352,19 @@ namespace Engine
             this.Hole = false;
         }
 
-        public Line2[] GetEdges()
+        public Line3[] GetEdges()
         {
-            Line2[] edges = new Line2[this.points.Length];
+            Line3[] edges = new Line3[this.points.Length];
 
             for (int i = 0; i < this.points.Length; i++)
             {
                 if (i < this.points.Length - 1)
                 {
-                    edges[i] = new Line2(this.points[i], this.points[i + 1]);
+                    edges[i] = new Line3(this.points[i], this.points[i + 1]);
                 }
                 else
                 {
-                    edges[i] = new Line2(this.points[i], this.points[0]);
+                    edges[i] = new Line3(this.points[i], this.points[0]);
                 }
             }
 
@@ -379,14 +391,14 @@ namespace Engine
             return text;
         }
 
-        public bool Contains(Vector2 point)
+        public bool Contains(Vector3 point)
         {
             return Array.Exists(this.points, p => p == point);
         }
 
-        public void Remove(Vector2[] list)
+        public void Remove(Vector3[] list)
         {
-            List<Vector2> tmp = new List<Vector2>(this.points);
+            List<Vector3> tmp = new List<Vector3>(this.points);
 
             foreach (var item in list)
             {
@@ -400,18 +412,25 @@ namespace Engine
 
         public void RemoveUnused()
         {
-            RemoveUnused(new Vector2[] { });
+            RemoveUnused(new Vector3[] { });
         }
 
-        public void RemoveUnused(Vector2[] exclusions)
+        public void RemoveUnused(Vector3[] exclusions)
         {
-            List<Vector2> toRemove = new List<Vector2>();
+            List<Vector3> toRemove = new List<Vector3>();
 
-            Line2[] edges = this.GetEdges();
+            Line3[] edges = this.GetEdges();
 
             for (int i = 1; i < edges.Length; i++)
             {
-                if (edges[i - 1].Direction == edges[i].Direction)
+                Line3 edge1 = edges[i - 1];
+                Line3 edge2 = edges[i];
+
+                //Project
+                Line2 pEdge1 = new Line2(new Vector2(edge1.Point1.X, edge1.Point1.Z), new Vector2(edge1.Point2.X, edge1.Point2.Z));
+                Line2 pEdge2 = new Line2(new Vector2(edge2.Point1.X, edge2.Point1.Z), new Vector2(edge2.Point2.X, edge2.Point2.Z));
+
+                if (pEdge1.Direction == pEdge2.Direction)
                 {
                     if (!Array.Exists(exclusions, e => e == edges[i].Point1))
                     {

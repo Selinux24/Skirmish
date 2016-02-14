@@ -125,7 +125,7 @@ namespace Collada
             {
                 GridNode node = (GridNode)nodes[i];
 
-                squares.AddRange(GeometryUtil.CreateWiredSquare(node.GetCorners()));
+                squares.AddRange(GeometryUtil.CreateWiredSquare(node.GetPoints()));
             }
 
             this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));

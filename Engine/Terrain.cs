@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -29,7 +28,7 @@ namespace Engine
         /// <summary>
         /// Grid used for pathfinding
         /// </summary>
-        private Grid grid = null;
+        private IGraph graph = null;
 
         /// <summary>
         /// Constructor
@@ -57,13 +56,22 @@ namespace Engine
 
             if (description != null && description.PathFinder != null)
             {
-                BoundingBox bbox = this.terrain.GetBoundingBox();
+                if (description.PathFinder.GraphType == GraphTypes.Grid)
+                {
+                    BoundingBox bbox = this.terrain.GetBoundingBox();
 
-                this.grid = Grid.Build(
-                    bbox,
-                    triangles,
-                    description.PathFinder.NodeSize,
-                    description.PathFinder.NodeInclination);
+                    this.graph = Grid.Build(
+                        bbox,
+                        triangles,
+                        description.PathFinder.NodeSize,
+                        description.PathFinder.NodeInclination);
+                }
+                else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
+                {
+                    this.graph = NavMesh.Build(
+                        triangles,
+                        description.PathFinder.NodeInclination);
+                }
             }
         }
         /// <summary>
@@ -293,9 +301,9 @@ namespace Engine
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public Path<GridNode> FindPath(Vector3 from, Vector3 to)
+        public Path FindPath(Vector3 from, Vector3 to)
         {
-            return PathFinding.PathFinder<GridNode>.FindPath(this.grid, from, to);
+            return PathFinding.PathFinder.FindPath(this.graph, from, to);
         }
 
         /// <summary>
@@ -348,11 +356,11 @@ namespace Engine
         /// Gets the path finder grid nodes
         /// </summary>
         /// <returns>Returns the path finder grid nodes</returns>
-        public GraphNode<GridNode>[] GetNodes()
+        public IGraphNode[] GetNodes()
         {
-            if (this.grid != null)
+            if (this.graph != null)
             {
-                return this.grid.Nodes;
+                return this.graph.Nodes;
             }
 
             return null;
@@ -537,6 +545,10 @@ namespace Engine
         /// </summary>
         public class PathFinderDescription
         {
+            /// <summary>
+            /// Graph type
+            /// </summary>
+            public GraphTypes GraphType = GraphTypes.Grid;
             /// <summary>
             /// Path node side size
             /// </summary>

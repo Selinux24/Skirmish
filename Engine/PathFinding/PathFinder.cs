@@ -1,16 +1,15 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.PathFinding
 {
     using Engine.Collections;
-    using Engine.Common;
 
     /// <summary>
     /// Path finder class
     /// </summary>
-    public static class PathFinder<T> where T : GraphNode<T>
+    public static class PathFinder
     {
         /// <summary>
         /// Constant for second diagonal distance method
@@ -31,26 +30,26 @@ namespace Engine.PathFinding
         /// <param name="heuristicMethod">Heuristic metod (Diagonal distance 2 by default)</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value (8 by default)</param>
         /// <returns>Returns the path from start to end</returns>
-        public static Path<T> FindPath(IGraph<T> grid, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
+        public static Path FindPath(IGraph grid, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
         {
-            T start = grid.FindNode(startPosition);
-            T end = grid.FindNode(endPosition);
+            IGraphNode start = grid.FindNode(startPosition);
+            IGraphNode end = grid.FindNode(endPosition);
             if (start != null && end != null)
             {
                 PathCache cachedPath = Cache.Find(p => p.Start == start && p.End == end);
                 if (cachedPath != null)
                 {
                     //Return path
-                    return new Path<T>(startPosition, endPosition, cachedPath.Path.ReturnPath.ToArray());
+                    return new Path(startPosition, endPosition, cachedPath.Path.ReturnPath.ToArray());
                 }
                 else
                 {
                     //Calculate return path
-                    T[] solvedList = CalcReturnPath(start, end, heuristicMethod, heuristicEstimateValue);
+                    IGraphNode[] solvedList = CalcReturnPath(start, end, heuristicMethod, heuristicEstimateValue);
                     if (solvedList != null && solvedList.Length > 0)
                     {
                         //Generate path
-                        var path = new Path<T>(startPosition, endPosition, solvedList);
+                        var path = new Path(startPosition, endPosition, solvedList);
 
                         //Update queue
                         if (Cache.Count >= 10) Cache.RemoveAt(0);
@@ -78,25 +77,25 @@ namespace Engine.PathFinding
         /// <param name="heuristicMethod">Heuristic metod</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value</param>
         /// <returns>Returns the path from start to end</returns>
-        private static T[] CalcReturnPath(T start, T end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
+        private static IGraphNode[] CalcReturnPath(IGraphNode start, IGraphNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
         {
             //New queue
-            PriorityQueue<T, float> openPathsQueue = new PriorityQueue<T, float>();
+            PriorityQueue<IGraphNode, float> openPathsQueue = new PriorityQueue<IGraphNode, float>();
             //Data dictionary
-            Dictionary<T, PathFinderData<T>> nodesData = new Dictionary<T, PathFinderData<T>>();
+            Dictionary<IGraphNode, PathFinderData> nodesData = new Dictionary<IGraphNode, PathFinderData>();
 
             //Add first node
             openPathsQueue.Enqueue(start, 1);
-            nodesData.Add(start, new PathFinderData<T>());
+            nodesData.Add(start, new PathFinderData());
 
             bool nodeFound = false;
             while (openPathsQueue.Count > 0)
             {
                 //Dequeue the node with lower priority
-                PriorityQueueItem<T, float> item = openPathsQueue.Dequeue();
+                PriorityQueueItem<IGraphNode, float> item = openPathsQueue.Dequeue();
 
-                T currentNode = item.Value;
-                PathFinderData<T> currentNodeData = nodesData[currentNode];
+                IGraphNode currentNode = item.Value;
+                PathFinderData currentNodeData = nodesData[currentNode];
 
                 //If the node is not closed to continue the process
                 if (currentNodeData.State != GraphNodeStates.Closed)
@@ -117,15 +116,15 @@ namespace Engine.PathFinding
                         //Search every possible direction from the current node
                         for (int i = 1; i < currentNode.Connections.Length; i++)
                         {
-                            T nextNode = (T)currentNode[i];
+                            IGraphNode nextNode = currentNode[i];
                             if (nextNode != null)
                             {
                                 if (!nodesData.ContainsKey(nextNode))
                                 {
-                                    nodesData.Add(nextNode, new PathFinderData<T>());
+                                    nodesData.Add(nextNode, new PathFinderData());
                                 }
 
-                                PathFinderData<T> nextNodeData = nodesData[nextNode];
+                                PathFinderData nextNodeData = nodesData[nextNode];
 
                                 if (nextNode.State == GraphNodeStates.Closed)
                                 {
@@ -169,9 +168,9 @@ namespace Engine.PathFinding
             if (nodeFound)
             {
                 //We found a valid path
-                List<T> solvedList = new List<T>();
+                List<IGraphNode> solvedList = new List<IGraphNode>();
 
-                T node = end;
+                IGraphNode node = end;
                 while (node != null)
                 {
                     solvedList.Insert(0, node);
@@ -251,97 +250,15 @@ namespace Engine.PathFinding
             /// <summary>
             /// Start node
             /// </summary>
-            public GraphNode<T> Start;
+            public IGraphNode Start;
             /// <summary>
             /// End node
             /// </summary>
-            public GraphNode<T> End;
+            public IGraphNode End;
             /// <summary>
             /// Path
             /// </summary>
-            public Path<T> Path;
+            public Path Path;
         }
-    }
-
-    public abstract class IGraph<T> where T : GraphNode<T>
-    {
-        /// <summary>
-        /// Graph node list
-        /// </summary>
-        public T[] Nodes;
-
-        /// <summary>
-        /// Gets node wich contains specified point
-        /// </summary>
-        /// <param name="point">Point</param>
-        /// <returns>Returns the node wich contains the specified point if exists</returns>
-        public T FindNode(Vector3 point)
-        {
-            float minDistance = float.MaxValue;
-            T bestNode = null;
-
-            for (int i = 0; i < this.Nodes.Length; i++)
-            {
-                float distance;
-                if (this.Nodes[i].Contains(point, out distance))
-                {
-                    if (distance < minDistance)
-                    {
-                        minDistance = distance;
-                        bestNode = this.Nodes[i];
-                    }
-                }
-            }
-
-            return bestNode;
-        }
-    }
-
-    public abstract class GraphNode<T>
-    {
-        protected List<GraphNode<T>> ConnectedNodes = new List<GraphNode<T>>();
-
-        /// <summary>
-        /// Gets the connected node list
-        /// </summary>
-        public GraphNode<T>[] Connections
-        {
-            get
-            {
-                return this.ConnectedNodes.ToArray();
-            }
-        }
-        /// <summary>
-        /// Gets a connected node by index
-        /// </summary>
-        /// <param name="index">Node index</param>
-        /// <returns>Returns the connected node by index</returns>
-        public GraphNode<T> this[int index]
-        {
-            get
-            {
-                return this.ConnectedNodes[index];
-            }
-        }
-
-        /// <summary>
-        /// Node state
-        /// </summary>
-        public GraphNodeStates State { get; set; }
-        /// <summary>
-        /// Node passing cost
-        /// </summary>
-        public float Cost { get; set; }
-        /// <summary>
-        /// Center position
-        /// </summary>
-        public Vector3 Center { get; protected set; }
-
-        /// <summary>
-        /// Gets whether this node contains specified point
-        /// </summary>
-        /// <param name="point">Point to test</param>
-        /// <returns>Returns whether this node contains specified point</returns>
-        public abstract bool Contains(Vector3 point, out float distance);
     }
 }
