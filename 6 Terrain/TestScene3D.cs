@@ -19,6 +19,7 @@ namespace TerrainTest
         private bool useDebugTex = false;
         private SpriteTexture shadowMapDrawer = null;
         private ShaderResourceView debugTex = null;
+        private int gridIndex = 0;
         private Matrix m = Matrix.Translation(Vector3.Up * 3f);
 
         private TextDrawer title = null;
@@ -126,7 +127,7 @@ namespace TerrainTest
                 ContentPath = resources,
                 Model = new TerrainDescription.ModelDescription()
                 {
-                    ModelFileName = "two_levels.dae",
+                    ModelFileName = "terrain.dae",
                 },
                 Quadtree = new TerrainDescription.QuadtreeDescription()
                 {
@@ -262,6 +263,8 @@ namespace TerrainTest
                 Height = height,
                 Channel = SpriteTextureChannelsEnum.Red,
             });
+            this.shadowMapDrawer.Visible = false;
+            this.shadowMapDrawer.DeferredEnabled = false;
 
             this.debugTex = this.Device.LoadTexture(@"Resources\uvtest.png");
 
@@ -269,31 +272,10 @@ namespace TerrainTest
 
             #region DEBUG Path finding Grid
 
-            var nodes = this.terrain.GetNodes();
-
-            if (nodes != null && nodes.Length > 0)
-            {
-                this.terrainGridDrawer = this.AddLineListDrawer(nodes.Length * 4);
-                //this.terrainGridDrawer.EnableAlphaBlending = true;
-                this.terrainGridDrawer.Visible = false;
-
-                for (int i = 0; i < nodes.Length; i++)
-                {
-                    IGraphNode node = nodes[i];
-
-                    float c = (node.Cost / MathUtil.PiOverFour);
-
-                    Color4 color = Color.Transparent;
-
-                    if (c > 0.66f) { color = new Color4(Color.Red.ToColor3(), 1f); }
-                    else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 1f); }
-                    else { color = new Color4(Color.Green.ToColor3(), 1f); }
-
-                    Vector3[] edges = node.GetPoints();
-
-                    this.terrainGridDrawer.AddLines(color, Line3.Transform(GeometryUtil.CreateWiredPolygon(edges), this.m));
-                }
-            }
+            this.terrainGridDrawer = this.AddLineListDrawer(10000);
+            this.terrainGridDrawer.EnableAlphaBlending = true;
+            this.terrainGridDrawer.Visible = false;
+            this.terrainGridDrawer.DeferredEnabled = false;
 
             #endregion
 
@@ -429,6 +411,18 @@ namespace TerrainTest
             {
                 this.terrainPointDrawer.Visible = this.terrainGridDrawer.Visible = !this.terrainGridDrawer.Visible;
             }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Add))
+            {
+                this.gridIndex++;
+                this.UpdateGridDrawer();
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
+            {
+                this.gridIndex--;
+                this.UpdateGridDrawer();
+            }
+
 
             if (this.Game.Input.KeyJustReleased(Keys.F3))
             {
@@ -665,6 +659,53 @@ namespace TerrainTest
             }
 
             #endregion
+        }
+
+        private void UpdateGridDrawer()
+        {
+            var nodes = this.terrain.GetNodes();
+            if (nodes != null && nodes.Length > 0)
+            {
+                if (this.gridIndex < 0)
+                {
+                    this.terrainGridDrawer.ClearLines();
+
+                    for (int i = 0; i < nodes.Length; i++)
+                    {
+                        IGraphNode node = nodes[i];
+
+                        float c = (node.Cost / MathUtil.PiOverFour);
+
+                        Color4 color = Color.Transparent;
+
+                        if (c > 0.66f) { color = new Color4(Color.Red.ToColor3(), 1f); }
+                        else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 1f); }
+                        else { color = new Color4(Color.Green.ToColor3(), 1f); }
+
+                        Vector3[] edges = node.GetPoints();
+
+                        this.terrainGridDrawer.AddLines(color, Line3.Transform(GeometryUtil.CreateWiredPolygon(edges), this.m));
+                    }
+                }
+                else if (this.gridIndex < nodes.Length)
+                {
+                    this.terrainGridDrawer.ClearLines();
+
+                    IGraphNode node = nodes[this.gridIndex];
+
+                    float c = (node.Cost / MathUtil.PiOverFour);
+
+                    Color4 color = Color.Transparent;
+
+                    if (c > 0.66f) { color = new Color4(Color.Red.ToColor3(), 1f); }
+                    else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 1f); }
+                    else { color = new Color4(Color.Green.ToColor3(), 1f); }
+
+                    Vector3[] edges = node.GetPoints();
+
+                    this.terrainGridDrawer.SetLines(color, Line3.Transform(GeometryUtil.CreateWiredPolygon(edges), this.m));
+                }
+            }
         }
 
         public override void Draw(GameTime gameTime)

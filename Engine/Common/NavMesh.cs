@@ -184,7 +184,11 @@ namespace Engine.Common
         {
             NavMesh result = new NavMesh();
 
-            var tris = Array.FindAll(triangles, t => t.Inclination <= angle);
+            var tris = Array.FindAll(triangles, t =>
+            {
+                return (t.Point1 != t.Point2 && t.Point2 != t.Point3 && t.Point1 != t.Point3);
+            });
+            //var tris = Array.FindAll(triangles, t => t.Inclination >= angle);
             if (tris != null && tris.Length > 0)
             {
                 Polygon[] polys = Polygon.FromTriangleList(tris, GeometricOrientation.CounterClockwise);
@@ -308,6 +312,8 @@ namespace Engine.Common
                     mergedList.Add(current);
 
                     Polygon newPoly = new Polygon(current);
+                    List<int> indexes = new List<int>();
+                    indexes.Add(i);
 
                     bool marker = true;
                     while (marker)
@@ -331,6 +337,7 @@ namespace Engine.Common
                                 merged = true;
 
                                 marker = true;
+                                indexes.Add(Array.IndexOf(input, joints[j]));
                             }
                         }
                     }
