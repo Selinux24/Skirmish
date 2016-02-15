@@ -277,7 +277,7 @@ namespace TerrainTest
                 //this.terrainGridDrawer.EnableAlphaBlending = true;
                 this.terrainGridDrawer.Visible = false;
 
-                for (int i = 0; i < 20; i++)
+                for (int i = 0; i < nodes.Length; i++)
                 {
                     IGraphNode node = nodes[i];
 

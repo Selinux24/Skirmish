@@ -11,14 +11,35 @@ namespace Engine
     /// </summary>
     public class Polygon
     {
+        /// <summary>
+        /// Shared edge struct
+        /// </summary>
         public struct SharedEdge
         {
+            /// <summary>
+            /// First edge point index in first polygon
+            /// </summary>
             public int FirstPoint1;
+            /// <summary>
+            /// Second edge point index in first polygon
+            /// </summary>
             public int FirstPoint2;
+            /// <summary>
+            /// First edge point index in second polygon
+            /// </summary>
             public int SecondPoint1;
+            /// <summary>
+            /// Second edge point index in second polygon
+            /// </summary>
             public int SecondPoint2;
         }
 
+        /// <summary>
+        /// Generates a polygon from a triangle
+        /// </summary>
+        /// <param name="tri">Triangle</param>
+        /// <param name="orientation">Orientation for the new polygon</param>
+        /// <returns>Returns the new generated polygon</returns>
         public static Polygon FromTriangle(Triangle tri, GeometricOrientation orientation = GeometricOrientation.CounterClockwise)
         {
             Polygon poly = new Polygon(tri.Point1, tri.Point2, tri.Point3);
@@ -27,7 +48,28 @@ namespace Engine
 
             return poly;
         }
+        /// <summary>
+        /// Generates a polygon array from a triangle array
+        /// </summary>
+        /// <param name="tris">Triangle array</param>
+        /// <param name="orientation">Orientation for the new polygons of the array</param>
+        /// <returns>Returns the new generated polygon array</returns>
+        public static Polygon[] FromTriangleList(Triangle[] tris, GeometricOrientation orientation = GeometricOrientation.CounterClockwise)
+        {
+            Polygon[] polys = new Polygon[tris.Length];
 
+            for (int i = 0; i < tris.Length; i++)
+            {
+                polys[i] = Polygon.FromTriangle(tris[i], orientation);
+            }
+
+            return polys;
+        }
+        /// <summary>
+        /// Gets the geometric orientarion of the specified polygon definition array
+        /// </summary>
+        /// <param name="points">Point array</param>
+        /// <returns>Returns the geometric orientarion of the point array</returns>
         public static GeometricOrientation GetOrientation(Vector3[] points)
         {
             float area = 0;
@@ -43,6 +85,11 @@ namespace Engine
 
             return GeometricOrientation.None;
         }
+        /// <summary>
+        /// Gets whether the polygon definied by the point array is convex or not
+        /// </summary>
+        /// <param name="points">Polygon definition array</param>
+        /// <returns>Returns true if the polygon defined by the point array is convex</returns>
         public static bool IsConvex(Vector3[] points)
         {
             int numreflex = 0;
@@ -60,15 +107,23 @@ namespace Engine
 
             return numreflex == 0;
         }
+        /// <summary>
+        /// Merge two polygons
+        /// </summary>
+        /// <param name="first">First polygon</param>
+        /// <param name="second">Second polygon</param>
+        /// <param name="mergeConvex">Sets if the new polygon must be convex or not</param>
+        /// <param name="mergedPolygon">The merged polygon</param>
+        /// <returns>Returns true if the merge operation finished correctly</returns>
         public static bool Merge(Polygon first, Polygon second, bool mergeConvex, out Polygon mergedPolygon)
         {
             mergedPolygon = null;
 
-            SharedEdge sharedEdge;
-            if (ShareAnEdgeWith(first, second, out sharedEdge))
+            SharedEdge[] sharedEdges;
+            if (GetSharedEdges(first, second, out sharedEdges))
             {
                 Polygon newpoly = new Polygon(first);
-                if (newpoly.Merge(second, sharedEdge, mergeConvex))
+                if (newpoly.Merge(second, sharedEdges, mergeConvex))
                 {
                     mergedPolygon = newpoly;
                     return true;
@@ -77,41 +132,13 @@ namespace Engine
 
             return false;
         }
-        private static bool ShareAnEdgeWith(Polygon first, Polygon second, out SharedEdge sharedEdge)
-        {
-            bool result = false;
-            sharedEdge = new SharedEdge();
-
-            for (int fp1 = 0; fp1 < first.points.Length; fp1++)
-            {
-                int sp1 = Array.IndexOf(second.points, first.points[fp1]);
-                if (sp1 >= 0)
-                {
-                    int fp2 = fp1 + 1 < first.points.Length ? fp1 + 1 : 0;
-                    int sp2 = sp1 - 1 >= 0 ? sp1 - 1 : second.points.Length - 1;
-
-                    if (first.points[fp2] == second.points[sp2])
-                    {
-                        sharedEdge.FirstPoint1 = fp1;
-                        sharedEdge.FirstPoint2 = fp2;
-                        sharedEdge.SecondPoint1 = sp1;
-                        sharedEdge.SecondPoint2 = sp2;
-
-                        if (result == false)
-                        {
-                            result = true;
-                        }
-                        else
-                        {
-                            result = false;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
+        /// <summary>
+        /// Gets the shared edges between the polygons
+        /// </summary>
+        /// <param name="first">First polygon</param>
+        /// <param name="second">Second polygon</param>
+        /// <param name="sharedEdges">Returns a shared edge array</param>
+        /// <returns>Returns true if the polygons share edges</returns>
         public static bool GetSharedEdges(Polygon first, Polygon second, out SharedEdge[] sharedEdges)
         {
             bool result = false;
@@ -147,7 +174,12 @@ namespace Engine
 
             return result;
         }
-
+        /// <summary>
+        /// Gets whether the specified polygon contains the point projected into it
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <param name="point">Point</param>
+        /// <returns>Returns true if the polygon contains the point projected into it</returns>
         public static bool PointInPoly(Polygon poly, Vector3 point)
         {
             bool c = false;
@@ -166,7 +198,13 @@ namespace Engine
             return c;
         }
 
+        /// <summary>
+        /// Polygon point list
+        /// </summary>
         private Vector3[] points = null;
+        /// <summary>
+        /// Polygon orientation
+        /// </summary>
         private GeometricOrientation orientation = GeometricOrientation.None;
 
         /// <summary>
@@ -245,6 +283,10 @@ namespace Engine
         /// Gets or sets whether the polygon has a hole or not
         /// </summary>
         public bool Hole { get; set; }
+        /// <summary>
+        /// Gets the polygon center
+        /// </summary>
+        public Vector3 Center { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -294,18 +336,23 @@ namespace Engine
             this.Count = 0;
             this.Convex = false;
             this.orientation = GeometricOrientation.None;
+            this.Center = Vector3.Zero;
 
             if (this.points != null && this.points.Length > 0)
             {
                 this.Count = this.points.Length;
                 this.Convex = IsConvex(this.points);
                 this.orientation = GetOrientation(this.points);
+
+                Vector3 sum = Vector3.Zero;
+                Array.ForEach(this.points, p => sum += p);
+                this.Center = sum / (float)this.points.Length;
             }
         }
         /// <summary>
         /// Adds a point to collection
         /// </summary>
-        private bool Merge(Polygon poly, SharedEdge mergeInfo, bool mergeConvex)
+        private bool Merge(Polygon poly, SharedEdge[] sharedEdges, bool mergeConvex)
         {
             if (this.Count == 0)
             {
@@ -315,26 +362,36 @@ namespace Engine
             }
             else
             {
-                List<Vector3> v = new List<Vector3>(this.points);
-                List<Vector3> toMerge = new List<Vector3>(poly.Count - 2);
+                List<Vector3> tmp = new List<Vector3>(this.points);
 
-                //Find shared points in new poly
-                for (int i = 0; i < poly.Count; i++)
+                //Index to insert into
+                int index = sharedEdges[0].FirstPoint1 + 1;
+                if (index == this.Count) index = 0;
+
+                //Vertices to insert and to remove
+                int toInsert = 0;
+                Vector3[] verticesToInsert = new Vector3[poly.Count - (sharedEdges.Length + 1)];
+                for (int p = 0; p < poly.Count; p++)
                 {
-                    if (i != mergeInfo.SecondPoint1 && i != mergeInfo.SecondPoint2)
+                    if (!Array.Exists(sharedEdges, s => p == s.SecondPoint1 || p == s.SecondPoint2))
                     {
-                        toMerge.Add(poly[i]);
+                        verticesToInsert[toInsert++] = poly[p];
                     }
                 }
 
-                v.InsertRange(mergeInfo.FirstPoint1 + 1, toMerge);
-
-                Vector3[] copy = v.ToArray();
-
-                if (!mergeConvex || copy.Length < 3 || Polygon.IsConvex(copy))
+                if (sharedEdges.Length - 1 > 0)
                 {
-                    this.Points = copy;
+                    tmp.RemoveRange(index, sharedEdges.Length - 1);
+                }
+
+                tmp.InsertRange(index, verticesToInsert);
+
+                if (!mergeConvex || tmp.Count < 3 || Polygon.IsConvex(tmp.ToArray()))
+                {
+                    this.points = tmp.ToArray();
                     this.Hole = false;
+                    this.Update();
+
                     return true;
                 }
 
@@ -351,7 +408,10 @@ namespace Engine
             this.Count = 0;
             this.Hole = false;
         }
-
+        /// <summary>
+        /// Get the array of edges
+        /// </summary>
+        /// <returns>Returns the array of edges</returns>
         public Line3[] GetEdges()
         {
             Line3[] edges = new Line3[this.points.Length];
@@ -370,32 +430,19 @@ namespace Engine
 
             return edges;
         }
-
-        public override string ToString()
-        {
-            string text = string.Format("Vertices: {0};", this.Count);
-
-            if (this.Count > 0)
-            {
-                string tmp = "";
-                Array.ForEach(this.points, p =>
-                {
-                    if (!string.IsNullOrEmpty(tmp)) tmp += " | ";
-
-                    tmp += string.Format("{0}", p);
-                });
-
-                text += " " + tmp;
-            }
-
-            return text;
-        }
-
+        /// <summary>
+        /// Gets whether the prolygon contains the specified point into the point list
+        /// </summary>
+        /// <param name="point">Point</param>
+        /// <returns>Returns true if the polygon contains the specified point into the point list</returns>
         public bool Contains(Vector3 point)
         {
             return Array.Exists(this.points, p => p == point);
         }
-
+        /// <summary>
+        /// Remove the specified vertex list from the polygon point list
+        /// </summary>
+        /// <param name="list">Vertex list</param>
         public void Remove(Vector3[] list)
         {
             List<Vector3> tmp = new List<Vector3>(this.points);
@@ -409,12 +456,17 @@ namespace Engine
 
             this.Update();
         }
-
+        /// <summary>
+        /// Remove unused vertices from the polygon point list
+        /// </summary>
         public void RemoveUnused()
         {
             RemoveUnused(new Vector3[] { });
         }
-
+        /// <summary>
+        /// Remove unused vertices from the polygon point list
+        /// </summary>
+        /// <param name="exclusions">Operation excluded vertices</param>
         public void RemoveUnused(Vector3[] exclusions)
         {
             List<Vector3> toRemove = new List<Vector3>();
@@ -440,6 +492,30 @@ namespace Engine
             }
 
             if (toRemove.Count > 0) this.Remove(toRemove.ToArray());
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            string text = string.Format("Vertices: {0};", this.Count);
+
+            if (this.Count > 0)
+            {
+                string tmp = "";
+                Array.ForEach(this.points, p =>
+                {
+                    if (!string.IsNullOrEmpty(tmp)) tmp += " | ";
+
+                    tmp += string.Format("{0}", p);
+                });
+
+                text += " " + tmp;
+            }
+
+            return text;
         }
     }
 }

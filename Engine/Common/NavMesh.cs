@@ -42,6 +42,47 @@ namespace Engine.Common
         public static void Test()
         {
             {
+                int side = 8;
+                int index = 0;
+
+                Vector3[] points = new Vector3[(side + 1) * (side + 1)];
+
+                index = 0;
+                for (float y = 0; y < side + 1; y++)
+                {
+                    for (float x = 0; x < side + 1; x++)
+                    {
+                        points[index++] = new Vector3(x - ((float)side / 2f), 0, -(y - ((float)side / 2f)));
+                    }
+                }
+
+                int hole = 2;
+
+                Triangle[] tris = new Triangle[(side * side * 2) - 2];
+
+                index = 0;
+                for (int y = 0; y < side; y++)
+                {
+                    for (int x = 0; x < side; x++)
+                    {
+                        if (y == hole && x == hole) continue;
+
+                        int i0 = ((y + 0) * (side + 1)) + x;
+                        int i1 = ((y + 1) * (side + 1)) + x;
+                        int i2 = ((y + 0) * (side + 1)) + x + 1;
+                        int i3 = ((y + 1) * (side + 1)) + x + 1;
+
+                        tris[index++] = new Triangle(points[i0], points[i1], points[i2]);
+                        tris[index++] = new Triangle(points[i1], points[i3], points[i2]);
+                    }
+                }
+
+                NavMesh nm = NavMesh.Build(tris, 0);
+            }
+
+
+
+            {
                 Polygon poly = new Polygon(8);
                 poly[0] = new Vector3(+1, 0, +1);
                 poly[1] = new Vector3(+0, 0, +1);
@@ -143,16 +184,10 @@ namespace Engine.Common
         {
             NavMesh result = new NavMesh();
 
-            var tris = Array.FindAll(triangles, t => t.Inclination >= angle);
-            //var tris = triangles;
+            var tris = Array.FindAll(triangles, t => t.Inclination <= angle);
             if (tris != null && tris.Length > 0)
             {
-                Polygon[] polys = new Polygon[tris.Length];
-
-                for (int i = 0; i < tris.Length; i++)
-                {
-                    polys[i] = Polygon.FromTriangle(tris[i], GeometricOrientation.CounterClockwise);
-                }
+                Polygon[] polys = Polygon.FromTriangleList(tris, GeometricOrientation.CounterClockwise);
 
                 IGraphNode[] nodes = null;
 
@@ -162,74 +197,82 @@ namespace Engine.Common
                     Polygon[] mergedPolis;
                     if (NavMesh.MergeConvex(parts, out mergedPolis))
                     {
-                        nodes = new NavmeshNode[mergedPolis.Length];
-
-                        for (int i = 0; i < nodes.Length; i++)
+                        nodes = NavmeshNode.FromPolygonArray(mergedPolis);
+                        if (nodes != null)
                         {
-                            nodes[i] = new NavmeshNode(mergedPolis[i]);
-                        }
-
-                        if (nodes.Length > 1)
-                        {
-                            //Connect nodes
-                            for (int i = 0; i < nodes.Length; i++)
+                            if (nodes.Length == 1)
                             {
-                                Polygon poly1 = ((NavmeshNode)nodes[i]).Poly;
+                                #region Simplify
 
-                                List<Vector3> exclusions = new List<Vector3>();
+                                Polygon poly = ((NavmeshNode)nodes[0]).Poly;
 
-                                for (int x = i + 1; x < nodes.Length; x++)
+                                poly.RemoveUnused();
+
+                                #endregion
+                            }
+                            else if (nodes.Length > 1)
+                            {
+                                #region Connect nodes
+
+                                for (int i = 0; i < nodes.Length; i++)
                                 {
-                                    Polygon poly2 = ((NavmeshNode)nodes[x]).Poly;
+                                    Polygon poly1 = ((NavmeshNode)nodes[i]).Poly;
 
-                                    //Get shared edges
-                                    Polygon.SharedEdge[] sharedEdges;
-                                    if (Polygon.GetSharedEdges(poly1, poly2, out sharedEdges))
+                                    List<Vector3> exclusions = new List<Vector3>();
+
+                                    for (int x = i + 1; x < nodes.Length; x++)
                                     {
-                                        if (sharedEdges.Length > 1)
+                                        Polygon poly2 = ((NavmeshNode)nodes[x]).Poly;
+
+                                        //Get shared edges
+                                        Polygon.SharedEdge[] sharedEdges;
+                                        if (Polygon.GetSharedEdges(poly1, poly2, out sharedEdges))
                                         {
-                                            Vector3 v1 = poly1[sharedEdges[0].FirstPoint1];
-                                            Vector3 v2 = poly1[sharedEdges[sharedEdges.Length - 1].FirstPoint2];
-
-                                            result.connections.Add(new ConnectionInfo()
+                                            if (sharedEdges.Length > 1)
                                             {
-                                                Poly1 = i,
-                                                Poly2 = x,
-                                                Segment = new Line3(v1, v2),
-                                            });
+                                                Vector3 v1 = poly1[sharedEdges[0].FirstPoint1];
+                                                Vector3 v2 = poly1[sharedEdges[sharedEdges.Length - 1].FirstPoint2];
 
-                                            exclusions.Add(v1);
-                                            exclusions.Add(v2);
+                                                result.connections.Add(new ConnectionInfo()
+                                                {
+                                                    Poly1 = i,
+                                                    Poly2 = x,
+                                                    Segment = new Line3(v1, v2),
+                                                });
 
-                                            List<Vector3> toRemove = new List<Vector3>();
+                                                exclusions.AddRange(new[] { v1, v2 });
 
-                                            for (int s = 0; s < sharedEdges.Length - 1; s++)
-                                            {
-                                                toRemove.Add(poly1[sharedEdges[s].FirstPoint2]);
+                                                List<Vector3> toRemove = new List<Vector3>();
+
+                                                for (int s = 0; s < sharedEdges.Length - 1; s++)
+                                                {
+                                                    toRemove.Add(poly1[sharedEdges[s].FirstPoint2]);
+                                                }
+
+                                                poly1.Remove(toRemove.ToArray());
+                                                poly2.Remove(toRemove.ToArray());
                                             }
-
-                                            poly1.Remove(toRemove.ToArray());
-                                            poly2.Remove(toRemove.ToArray());
-                                        }
-                                        else
-                                        {
-                                            Vector3 v1 = poly1[sharedEdges[0].FirstPoint1];
-                                            Vector3 v2 = poly1[sharedEdges[0].FirstPoint2];
-
-                                            result.connections.Add(new ConnectionInfo()
+                                            else
                                             {
-                                                Poly1 = i,
-                                                Poly2 = x,
-                                                Segment = new Line3(v1, v2),
-                                            });
+                                                Vector3 v1 = poly1[sharedEdges[0].FirstPoint1];
+                                                Vector3 v2 = poly1[sharedEdges[0].FirstPoint2];
 
-                                            exclusions.Add(v1);
-                                            exclusions.Add(v2);
+                                                result.connections.Add(new ConnectionInfo()
+                                                {
+                                                    Poly1 = i,
+                                                    Poly2 = x,
+                                                    Segment = new Line3(v1, v2),
+                                                });
+
+                                                exclusions.AddRange(new[] { v1, v2 });
+                                            }
                                         }
                                     }
+
+                                    poly1.RemoveUnused(exclusions.ToArray());
                                 }
 
-                                poly1.RemoveUnused(exclusions.ToArray());
+                                #endregion
                             }
                         }
                     }
@@ -243,62 +286,65 @@ namespace Engine.Common
         /// <summary>
         /// Merge a list of convex polygons
         /// </summary>
-        /// <param name="inpolys">Input polygons</param>
-        /// <param name="outpolys">Output polygons</param>
+        /// <param name="input">Input polygons</param>
+        /// <param name="output">Output polygons</param>
         /// <returns>Returns a list of convex polygons</returns>
-        public static bool MergeConvex(Polygon[] inpolys, out Polygon[] outpolys)
+        public static bool MergeConvex(Polygon[] input, out Polygon[] output)
         {
-            outpolys = null;
+            output = null;
 
             bool merged = false;
-            List<Polygon> outPolyList = new List<Polygon>();
-            List<Polygon> mergedPolys = new List<Polygon>();
+            List<Polygon> outputList = new List<Polygon>();
+            List<Polygon> mergedList = new List<Polygon>();
 
-            if (inpolys != null && inpolys.Length > 1)
+            if (input != null && input.Length > 1)
             {
-                for (int i = 0; i < inpolys.Length; i++)
+                for (int i = 0; i < input.Length; i++)
                 {
-                    if (mergedPolys.Contains(inpolys[i])) continue;
+                    Polygon current = input[i];
 
-                    Polygon newpoly = inpolys[i];
+                    if (mergedList.Contains(current)) continue;
 
-                    //Find polys
-                    Polygon[] joints = Array.FindAll(inpolys, p => p != inpolys[i] && (Array.Exists(p.Points, pp => inpolys[i].Contains(pp))));
+                    mergedList.Add(current);
 
-                    //Polygon[] debugP = new Polygon[joints.Length];
-                    //for (int j = 0; j < joints.Length; j++)
-                    //{
-                    //    debugP[j] = new Polygon(joints[j]);
+                    Polygon newPoly = new Polygon(current);
 
-                    //    for (int p = 0; p < debugP[j].Count; p++)
-                    //    {
-                    //        debugP[j][p] -= inpolys[i][0];
-                    //    }
-                    //}                    
-
-                    for (int j = 0; j < joints.Length; j++)
+                    bool marker = true;
+                    while (marker)
                     {
-                        if (mergedPolys.Contains(joints[j])) continue;
+                        marker = false;
 
-                        Polygon mergedpoly;
-                        if (Polygon.Merge(newpoly, joints[j], true, out mergedpoly))
+                        //Find polys
+                        Polygon[] joints = Array.FindAll(input, j =>
+                            (j != current) &&
+                            (!mergedList.Contains(j)) &&
+                            (Array.Exists(newPoly.Points, pp => j.Contains(pp))));
+                        for (int j = 0; j < joints.Length; j++)
                         {
-                            mergedPolys.Add(joints[j]);
-                            newpoly = mergedpoly;
-                            merged = true;
+                            Polygon toMerge = joints[j];
+
+                            Polygon mergedPoly;
+                            if (Polygon.Merge(newPoly, toMerge, true, out mergedPoly))
+                            {
+                                newPoly = mergedPoly;
+                                mergedList.Add(toMerge);
+                                merged = true;
+
+                                marker = true;
+                            }
                         }
                     }
 
-                    outPolyList.Add(newpoly);
+                    outputList.Add(newPoly);
                 }
 
-                if (merged)
+                if (merged && outputList.Count > 1)
                 {
-                    return MergeConvex(outPolyList.ToArray(), out outpolys);
+                    return MergeConvex(outputList.ToArray(), out output);
                 }
                 else
                 {
-                    outpolys = outPolyList.ToArray();
+                    output = outputList.ToArray();
 
                     return true;
                 }
