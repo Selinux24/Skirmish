@@ -42,7 +42,7 @@ namespace Engine.Common
         public static void Test()
         {
             {
-                int side = 8;
+                int side = 1;
                 int index = 0;
 
                 Vector3[] points = new Vector3[(side + 1) * (side + 1)];
@@ -58,7 +58,7 @@ namespace Engine.Common
 
                 int hole = 2;
 
-                Triangle[] tris = new Triangle[(side * side * 2) - 2];
+                Triangle[] tris = new Triangle[(side * side * 2)];
 
                 index = 0;
                 for (int y = 0; y < side; y++)
@@ -184,11 +184,27 @@ namespace Engine.Common
         {
             NavMesh result = new NavMesh();
 
+            BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetCorners());
+
+            //Remove dups
             var tris = Array.FindAll(triangles, t =>
             {
                 return (t.Point1 != t.Point2 && t.Point2 != t.Point3 && t.Point1 != t.Point3);
             });
-            //var tris = Array.FindAll(triangles, t => t.Inclination >= angle);
+
+            //Remove by inclination
+            //tris = Array.FindAll(triangles, t => t.Inclination >= angle);
+
+            Array.ForEach(tris, t => {  bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(t.GetCorners())); });
+
+            //Sort by position
+            Array.Sort(tris, (t1, t2) => {
+                float d1 = Vector3.DistanceSquared(bbox.Minimum, t1.Center);
+                float d2 = Vector3.DistanceSquared(bbox.Minimum, t2.Center);
+
+                return d1.CompareTo(d2);
+            });
+
             if (tris != null && tris.Length > 0)
             {
                 Polygon[] polys = Polygon.FromTriangleList(tris, GeometricOrientation.CounterClockwise);

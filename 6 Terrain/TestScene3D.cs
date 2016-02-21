@@ -58,7 +58,7 @@ namespace TerrainTest
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
         {
-
+           
         }
 
         public override void Initialize()
@@ -589,14 +589,15 @@ namespace TerrainTest
                     this.curveLineDrawer.SetLines(this.velocityColor, new[] { new Line3(p0, p1) });
 
                     this.help.Text = string.Format(
-                        "Pitch {0:+00.00;-00.00}; Roll {1:+00.00;-00.00}; Delta {2:00.0000}; Segment {3} of {4}/{5:00.0000}/{6:00.0000}",
+                        "Pitch {0:+00.00;-00.00}; Roll {1:+00.00;-00.00}; Delta {2:00.0000}; Segment {3} of {4}/{5:00.0000}/{6:00.0000}; Index {7}",
                         MathUtil.RadiansToDegrees(pitch),
                         MathUtil.RadiansToDegrees(roll),
                         pitch / MathUtil.PiOverFour,
                         segment + 1,
                         this.curve.Count,
                         segmentDistance,
-                        segmentDelta);
+                        segmentDelta,
+                        this.gridIndex);
                 }
                 else
                 {

@@ -352,43 +352,44 @@ namespace Engine
         /// <summary>
         /// Adds a point to collection
         /// </summary>
-        private bool Merge(Polygon poly, SharedEdge[] sharedEdges, bool mergeConvex)
+        private bool Merge(Polygon other, SharedEdge[] sharedEdges, bool mergeConvex)
         {
             if (this.Count == 0)
             {
-                this.Points = poly.Points;
-                this.Hole = poly.Hole;
+                this.points = other.Points;
+                this.Hole = other.Hole;
+                this.Update();
+
                 return true;
             }
             else
             {
-                List<Vector3> tmp = new List<Vector3>(this.points);
+                List<Vector3> tmp1 = new List<Vector3>(this.points);
+                List<Vector3> tmp2 = new List<Vector3>(other.points);
 
-                //Index to insert into
-                int index = sharedEdges[0].FirstPoint1 + 1;
-                if (index == this.Count) index = 0;
-
-                //Vertices to insert and to remove
-                int toInsert = 0;
-                Vector3[] verticesToInsert = new Vector3[poly.Count - (sharedEdges.Length + 1)];
-                for (int p = 0; p < poly.Count; p++)
+                //Remove middle shared points from this poly
+                //Remove all shared points from other poly
+                for (int i = 0; i < sharedEdges.Length; i++)
                 {
-                    if (!Array.Exists(sharedEdges, s => p == s.SecondPoint1 || p == s.SecondPoint2))
+                    if (i == 0)
                     {
-                        verticesToInsert[toInsert++] = poly[p];
+                        tmp2.Remove(other.points[sharedEdges[i].SecondPoint1]);
                     }
+
+                    if (i < sharedEdges.Length - 1)
+                    {
+                        tmp1.Remove(this.points[sharedEdges[i].FirstPoint2]);
+                    }
+
+                    tmp2.Remove(other.points[sharedEdges[i].SecondPoint2]);
                 }
 
-                if (sharedEdges.Length - 1 > 0)
-                {
-                    tmp.RemoveRange(index, sharedEdges.Length - 1);
-                }
+                //Adds other poly to this poly at first shared index
+                tmp1.InsertRange(sharedEdges[0].FirstPoint1 + 1, tmp2);
 
-                tmp.InsertRange(index, verticesToInsert);
-
-                if (!mergeConvex || tmp.Count < 3 || Polygon.IsConvex(tmp.ToArray()))
+                if (!mergeConvex || tmp1.Count < 3 || Polygon.IsConvex(tmp1.ToArray()))
                 {
-                    this.points = tmp.ToArray();
+                    this.points = tmp1.ToArray();
                     this.Hole = false;
                     this.Update();
 
