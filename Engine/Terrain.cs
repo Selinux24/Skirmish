@@ -68,9 +68,23 @@ namespace Engine
                 }
                 else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
                 {
-                    this.graph = NavMesh.Build(
-                        triangles,
-                        description.PathFinder.NodeInclination);
+                    string hashCode = Helper.Md5Sum(triangles);
+
+                    string fileName = hashCode + ".nmi";
+
+                    var files = ContentManager.FindContent(description.ContentPath, fileName, false);
+                    if (files != null && files.Length == 1)
+                    {
+                        this.graph = NavMesh.Load(files[0]);
+                    }
+                    else
+                    {
+                        this.graph = NavMesh.Build(
+                            triangles,
+                            description.PathFinder.NodeInclination);
+
+                        NavMesh.Save(System.IO.Path.Combine(description.ContentPath, fileName), (NavMesh)this.graph);
+                    }
                 }
             }
         }

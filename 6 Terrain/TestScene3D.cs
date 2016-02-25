@@ -58,7 +58,7 @@ namespace TerrainTest
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
         {
-           
+
         }
 
         public override void Initialize()

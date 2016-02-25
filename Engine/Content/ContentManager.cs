@@ -145,7 +145,7 @@ namespace Engine.Content
         /// Content source can be a folder or a zip file
         /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
         /// </remarks>
-        public static MemoryStream[] FindContent(string contentSource, string resourcePath)
+        public static MemoryStream[] FindContent(string contentSource, string resourcePath, bool throwException = true)
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
@@ -181,7 +181,7 @@ namespace Engine.Content
 
                             return msList;
                         }
-                        else
+                        else if (throwException)
                         {
                             throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePath);
                         }
@@ -201,17 +201,19 @@ namespace Engine.Content
                         {
                             return res;
                         }
-                        else
+                        else if (throwException)
                         {
                             throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePath);
                         }
                     }
                 }
-                else
+                else if (throwException)
                 {
                     throw new DirectoryNotFoundException(string.Format("El origen de contenido [{0}] no existe", resourcePath));
                 }
             }
+
+            return null;
         }
         /// <summary>
         /// Finds content
@@ -222,7 +224,7 @@ namespace Engine.Content
         /// <remarks>
         /// Content source can be a folder or a zip file
         /// </remarks>
-        public static MemoryStream[] FindContent(string contentSource, string[] resourcePaths)
+        public static MemoryStream[] FindContent(string contentSource, string[] resourcePaths, bool throwException = true)
         {
             List<MemoryStream> res = new List<MemoryStream>();
 
@@ -235,7 +237,7 @@ namespace Engine.Content
                     {
                         res.AddRange(resourceRes);
                     }
-                    else
+                    else if (throwException)
                     {
                         throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePaths[i]);
                     }

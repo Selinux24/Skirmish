@@ -1,8 +1,10 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.PathFinding
 {
+    [Serializable]
     public abstract class GraphNode : IGraphNode
     {
         protected List<IGraphNode> ConnectedNodes = new List<IGraphNode>();

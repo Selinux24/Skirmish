@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Engine
 {
@@ -497,6 +499,33 @@ namespace Engine
         public static T Convert<T>(this object input)
         {
             return (T)System.Convert.ChangeType(input, typeof(T));
+        }
+
+        /// <summary>
+        /// Create an md5 sum string of this string
+        /// </summary>
+        public static string Md5Sum(string content)
+        {
+            Encoder enc = Encoding.Unicode.GetEncoder();
+            byte[] tmp = new byte[content.Length * 2];
+            enc.GetBytes(content.ToCharArray(), 0, content.Length, tmp, 0, true);
+
+            byte[] result = null;
+            using (MD5 md5 = new MD5CryptoServiceProvider())
+            {
+                result = md5.ComputeHash(tmp);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            Array.ForEach(result, r => sb.Append(r.ToString("X2")));
+            return sb.ToString();
+        }
+
+        public static string Md5Sum(Triangle[] triangles)
+        {
+            StringBuilder text = new StringBuilder();
+            Array.ForEach(triangles, t => { text.Append(t.ToString()); });
+            return Helper.Md5Sum(text.ToString());
         }
     }
 }

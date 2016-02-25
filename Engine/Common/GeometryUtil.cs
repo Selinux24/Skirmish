@@ -489,11 +489,15 @@ namespace Engine.Common
         }
         public static bool IsReflex(Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            return ((p3.Z - p1.Z) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Z - p1.Z)) < 0;
+            return OP(p1, p2, p3) < 0;
         }
         public static bool IsConvex(Vector3 p1, Vector3 p2, Vector3 p3)
         {
-            return ((p3.Z - p1.Z) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Z - p1.Z)) > 0;
+            return OP(p1, p2, p3) > 0;
+        }
+        private static float OP(Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            return ((p3.Z - p1.Z) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Z - p1.Z));
         }
     }
 

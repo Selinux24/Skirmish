@@ -319,6 +319,15 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="points">Points</param>
+        public Polygon(Vector3[] points)
+        {
+            this.Points = points;
+            this.Hole = false;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="source">Source poly</param>
         public Polygon(Polygon source)
         {

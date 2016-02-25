@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.IO;
 
 namespace Engine.Common
 {
@@ -26,21 +28,40 @@ namespace Engine.Common
             public PartitionVertex Previous;
             public PartitionVertex Next;
         }
-        /// <summary>
-        /// Polygon connection info
-        /// </summary>
-        class ConnectionInfo
-        {
-            public int Poly1;
-            public int Poly2;
-            public Line3 Segment;
-        }
 
         /// <summary>
         /// Static test method
         /// </summary>
         public static void Test()
         {
+            {
+                Polygon poly1 = new Polygon(new[]{
+                    new Vector3(1,0,-3),
+                    new Vector3(2,0,-3),
+                    new Vector3(2,0,-2),
+                    new Vector3(2,0,-1),
+                    new Vector3(2,0,0),
+                    new Vector3(1,0,-1),
+                    new Vector3(0,0,-2),
+                    new Vector3(0,0,-3),
+                });
+
+                Polygon poly2 = new Polygon(new[]{
+                    new Vector3(0,0,-2),
+                    new Vector3(1,0,-1),
+                    new Vector3(2,0,0),
+                    new Vector3(1,0,0),
+                    new Vector3(0,0,0),
+                    new Vector3(0,0,-1),
+                });
+
+                Polygon poly;
+                if (Polygon.Merge(poly1, poly2, true, out poly))
+                {
+
+                }
+            }
+
             {
                 int side = 1;
                 int index = 0;
@@ -184,6 +205,8 @@ namespace Engine.Common
         {
             NavMesh result = new NavMesh();
 
+            result.HashCode = Helper.Md5Sum(triangles);
+
             BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetCorners());
 
             //Remove dups
@@ -195,10 +218,11 @@ namespace Engine.Common
             //Remove by inclination
             //tris = Array.FindAll(triangles, t => t.Inclination >= angle);
 
-            Array.ForEach(tris, t => {  bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(t.GetCorners())); });
+            Array.ForEach(tris, t => { bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(t.GetCorners())); });
 
             //Sort by position
-            Array.Sort(tris, (t1, t2) => {
+            Array.Sort(tris, (t1, t2) =>
+            {
                 float d1 = Vector3.DistanceSquared(bbox.Minimum, t1.Center);
                 float d2 = Vector3.DistanceSquared(bbox.Minimum, t2.Center);
 
@@ -253,7 +277,7 @@ namespace Engine.Common
                                                 Vector3 v1 = poly1[sharedEdges[0].FirstPoint1];
                                                 Vector3 v2 = poly1[sharedEdges[sharedEdges.Length - 1].FirstPoint2];
 
-                                                result.connections.Add(new ConnectionInfo()
+                                                result.connections.Add(new NavMeshConnectionInfo()
                                                 {
                                                     Poly1 = i,
                                                     Poly2 = x,
@@ -277,7 +301,7 @@ namespace Engine.Common
                                                 Vector3 v1 = poly1[sharedEdges[0].FirstPoint1];
                                                 Vector3 v2 = poly1[sharedEdges[0].FirstPoint2];
 
-                                                result.connections.Add(new ConnectionInfo()
+                                                result.connections.Add(new NavMeshConnectionInfo()
                                                 {
                                                     Poly1 = i,
                                                     Poly2 = x,
@@ -845,10 +869,105 @@ namespace Engine.Common
             }
         }
 
+        public static void Save(string fileName, NavMesh nm)
+        {
+            using (var fs = File.OpenWrite(fileName))
+            {
+                using (var wr = new BinaryWriter(fs, Encoding.UTF8))
+                {
+                    wr.Write(nm.Nodes.Length);
+
+                    foreach (NavmeshNode node in nm.Nodes)
+                    {
+                        wr.Write(node.Poly.Count);
+                        for (int i = 0; i < node.Poly.Count; i++)
+                        {
+                            wr.Write(node.Poly[i].X);
+                            wr.Write(node.Poly[i].Y);
+                            wr.Write(node.Poly[i].Z);
+                        }
+                    }
+                }
+            }
+        }
+
+        public static NavMesh Load(string fileName)
+        {
+            using (var fs = File.OpenRead(fileName))
+            {
+                using (var rd = new BinaryReader(fs, Encoding.UTF8))
+                {
+                    return Load(rd);
+                }
+            }
+        }
+
+        public static NavMesh Load(MemoryStream stream)
+        {
+            using (var rd = new BinaryReader(stream, Encoding.UTF8))
+            {
+                return Load(rd);
+            }
+        }
+
+        public static NavMesh Load(BinaryReader rd)
+        {
+            NavMesh nm = new NavMesh();
+
+            var nodeCount = rd.ReadInt32();
+            NavmeshNode[] nodes = new NavmeshNode[nodeCount];
+
+            for (int n = 0; n < nodeCount; n++)
+            {
+                var vCount = rd.ReadInt32();
+                Vector3[] points = new Vector3[vCount];
+
+                for (int p = 0; p < vCount; p++)
+                {
+                    points[p] = new Vector3(rd.ReadSingle(), rd.ReadSingle(), rd.ReadSingle());
+                }
+
+                nodes[n] = new NavmeshNode(new Polygon(points));
+            }
+
+            nm.Nodes = nodes;
+
+            return nm;
+        }
+
         /// <summary>
         /// Polygon connection list
         /// </summary>
-        private List<ConnectionInfo> connections = new List<ConnectionInfo>();
+        private List<NavMeshConnectionInfo> connections = new List<NavMeshConnectionInfo>();
+
+        /// <summary>
+        /// Hash code
+        /// </summary>
+        public string HashCode;
+        /// <summary>
+        /// Connectios
+        /// </summary>
+        public NavMeshConnectionInfo[] Connections
+        {
+            get
+            {
+                return this.connections.ToArray();
+            }
+            set
+            {
+                this.connections.Clear();
+
+                if (value != null && value.Length > 0)
+                {
+                    this.connections.AddRange(value);
+                }
+            }
+        }
+
+        protected NavMesh()
+        {
+
+        }
 
         /// <summary>
         /// Gets text representation of instance
@@ -857,6 +976,33 @@ namespace Engine.Common
         public override string ToString()
         {
             return string.Format("Nodes {0}; Connections {1};", this.Nodes.Length, this.connections.Count);
+        }
+    }
+
+    /// <summary>
+    /// Polygon connection info
+    /// </summary>
+    public class NavMeshConnectionInfo
+    {
+        /// <summary>
+        /// First polygon index
+        /// </summary>
+        public int Poly1;
+        /// <summary>
+        /// Second polygon index
+        /// </summary>
+        public int Poly2;
+        /// <summary>
+        /// Connection segment
+        /// </summary>
+        public Line3 Segment;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public NavMeshConnectionInfo()
+        {
+
         }
     }
 }
