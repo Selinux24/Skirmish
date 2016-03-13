@@ -229,16 +229,16 @@ namespace Engine.Effects
             this.PositionNormalTextureTangent = this.Effect.GetTechniqueByName("PositionNormalTextureTangentI");
             this.PositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("PositionNormalTextureTangentSkinnedI");
 
-            this.AddInputLayout(this.PositionColor, VertexPositionColor.GetInput().Join(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.PositionColorSkinned, VertexSkinnedPositionColor.GetInput().Join(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.PositionNormalColor, VertexPositionNormalColor.GetInput().Join(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.PositionNormalColorSkinned, VertexSkinnedPositionNormalColor.GetInput().Join(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.PositionTexture, VertexPositionTexture.GetInput().Join(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.PositionTextureSkinned, VertexSkinnedPositionTexture.GetInput().Join(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.PositionNormalTexture, VertexPositionNormalTexture.GetInput().Join(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.PositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput().Join(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.PositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput().Join(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.PositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput().Join(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionColor, VertexPositionColor.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionColorSkinned, VertexSkinnedPositionColor.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalColor, VertexPositionNormalColor.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalColorSkinned, VertexSkinnedPositionNormalColor.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionTexture, VertexPositionTexture.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionTextureSkinned, VertexSkinnedPositionTexture.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalTexture, VertexPositionNormalTexture.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.PositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput().Merge(VertexInstancingData.GetInput()));
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();

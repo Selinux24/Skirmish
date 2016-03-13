@@ -12,31 +12,60 @@ namespace Engine.Common
         /// <summary>
         /// Generates a navigation node array from a polygon array
         /// </summary>
+        /// <param name="parent">Parent navigation mesh</param>
         /// <param name="list">Polygon array</param>
         /// <returns>Returns the generated node array</returns>
-        public static NavmeshNode[] FromPolygonArray(Polygon[] list)
+        public static NavmeshNode[] FromPolygonArray(NavMesh parent, Polygon[] list)
         {
             var nodes = new NavmeshNode[list.Length];
 
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new NavmeshNode(list[i]);
+                nodes[i] = new NavmeshNode(parent, list[i]);
             }
 
             return nodes;
         }
 
         /// <summary>
+        /// Parent navigation mesh
+        /// </summary>
+        private NavMesh NavigationMesh;
+        /// <summary>
         /// Internal polygon
         /// </summary>
         public Polygon Poly;
+        /// <summary>
+        /// Gets node connections
+        /// </summary>
+        public override IGraphNode[] Connections
+        {
+            get
+            {
+                return this.NavigationMesh.GetConnections(this);
+            }
+        }
+        /// <summary>
+        /// Gets a connection by index
+        /// </summary>
+        /// <param name="index">Node index</param>
+        /// <returns>Returns the connected node at index</returns>
+        public override IGraphNode this[int index]
+        {
+            get
+            {
+                return this.NavigationMesh.GetConnections(this)[index];
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="parent">Parent</param>
         /// <param name="poly">Polygon</param>
-        public NavmeshNode(Polygon poly)
+        public NavmeshNode(NavMesh parent, Polygon poly)
         {
+            this.NavigationMesh = parent;
             this.Poly = poly;
             this.Center = poly.Center;
         }

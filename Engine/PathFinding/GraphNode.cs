@@ -4,15 +4,21 @@ using System.Collections.Generic;
 
 namespace Engine.PathFinding
 {
+    /// <summary>
+    /// Graph node
+    /// </summary>
     [Serializable]
     public abstract class GraphNode : IGraphNode
     {
+        /// <summary>
+        /// Connections to this node list
+        /// </summary>
         protected List<IGraphNode> ConnectedNodes = new List<IGraphNode>();
 
         /// <summary>
         /// Gets the connected node list
         /// </summary>
-        public IGraphNode[] Connections
+        public virtual IGraphNode[] Connections
         {
             get
             {
@@ -24,7 +30,7 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="index">Node index</param>
         /// <returns>Returns the connected node by index</returns>
-        public IGraphNode this[int index]
+        public virtual IGraphNode this[int index]
         {
             get
             {
@@ -51,7 +57,10 @@ namespace Engine.PathFinding
         /// <param name="point">Point to test</param>
         /// <returns>Returns whether this node contains specified point</returns>
         public abstract bool Contains(Vector3 point, out float distance);
-
+        /// <summary>
+        /// Gets the point list of this node perimeter
+        /// </summary>
+        /// <returns>Returns the point list of this node perimeter</returns>
         public abstract Vector3[] GetPoints();
     }
 }

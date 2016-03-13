@@ -26,7 +26,7 @@ namespace Engine
         /// </summary>
         private Billboard[] vegetation = null;
         /// <summary>
-        /// Grid used for pathfinding
+        /// Graph used for pathfinding
         /// </summary>
         private IGraph graph = null;
 
@@ -68,11 +68,9 @@ namespace Engine
                 }
                 else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
                 {
-                    string hashCode = Helper.Md5Sum(triangles);
+                    string hashCode = triangles.GetMd5Sum();
 
-                    string fileName = hashCode + ".nmi";
-
-                    var files = ContentManager.FindContent(description.ContentPath, fileName, false);
+                    var files = ContentManager.FindContent(description.ContentPath, hashCode + ".nmi", false);
                     if (files != null && files.Length == 1)
                     {
                         this.graph = NavMesh.Load(files[0]);
@@ -82,8 +80,6 @@ namespace Engine
                         this.graph = NavMesh.Build(
                             triangles,
                             description.PathFinder.NodeInclination);
-
-                        NavMesh.Save(System.IO.Path.Combine(description.ContentPath, fileName), (NavMesh)this.graph);
                     }
                 }
             }
@@ -315,7 +311,7 @@ namespace Engine
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public Path FindPath(Vector3 from, Vector3 to)
+        public PathFinderPath FindPath(Vector3 from, Vector3 to)
         {
             return PathFinding.PathFinder.FindPath(this.graph, from, to);
         }

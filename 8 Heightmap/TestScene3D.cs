@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.PathFinding;
 using SharpDX;
 using System;
 using System.Diagnostics;
@@ -152,6 +153,10 @@ namespace HeightmapTest
                 Quadtree = new TerrainDescription.QuadtreeDescription()
                 {
 
+                },
+                PathFinder = new TerrainDescription.PathFinderDescription()
+                {
+                    GraphType = GraphTypes.NavMesh,
                 },
                 Textures = new TerrainDescription.TexturesDescription()
                 {

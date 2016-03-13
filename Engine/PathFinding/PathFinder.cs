@@ -30,7 +30,7 @@ namespace Engine.PathFinding
         /// <param name="heuristicMethod">Heuristic metod (Diagonal distance 2 by default)</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value (8 by default)</param>
         /// <returns>Returns the path from start to end</returns>
-        public static Path FindPath(IGraph grid, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
+        public static PathFinderPath FindPath(IGraph grid, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
         {
             IGraphNode start = grid.FindNode(startPosition);
             IGraphNode end = grid.FindNode(endPosition);
@@ -40,7 +40,7 @@ namespace Engine.PathFinding
                 if (cachedPath != null)
                 {
                     //Return path
-                    return new Path(startPosition, endPosition, cachedPath.Path.ReturnPath.ToArray());
+                    return new PathFinderPath(startPosition, endPosition, cachedPath.Path.ReturnPath.ToArray());
                 }
                 else
                 {
@@ -49,7 +49,7 @@ namespace Engine.PathFinding
                     if (solvedList != null && solvedList.Length > 0)
                     {
                         //Generate path
-                        var path = new Path(startPosition, endPosition, solvedList);
+                        var path = new PathFinderPath(startPosition, endPosition, solvedList);
 
                         //Update queue
                         if (Cache.Count >= 10) Cache.RemoveAt(0);
@@ -258,7 +258,7 @@ namespace Engine.PathFinding
             /// <summary>
             /// Path
             /// </summary>
-            public Path Path;
+            public PathFinderPath Path;
         }
     }
 }

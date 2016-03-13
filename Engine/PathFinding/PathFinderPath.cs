@@ -7,7 +7,7 @@ namespace Engine.PathFinding
     /// <summary>
     /// PathFinder path
     /// </summary>
-    public class Path
+    public class PathFinderPath
     {
         /// <summary>
         /// Path identifier
@@ -47,7 +47,7 @@ namespace Engine.PathFinding
         /// Constructor
         /// </summary>
         /// <param name="returnPath">Node list</param>
-        public Path(Vector3 startPosition, Vector3 endPosition, IGraphNode[] returnPath)
+        public PathFinderPath(Vector3 startPosition, Vector3 endPosition, IGraphNode[] returnPath)
         {
             this.StartPosition = startPosition;
             this.EndPosition = endPosition;

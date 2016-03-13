@@ -14,6 +14,7 @@ namespace Engine
     using Engine.Content;
     using Engine.Effects;
     using Engine.Helpers;
+    using Engine.PathFinding;
 
     public class Terrain2 : Drawable
     {
@@ -1145,6 +1146,10 @@ namespace Engine
         /// </summary>
         private QuadTree quadTree = null;
         /// <summary>
+        /// Graph used for pathfinding
+        /// </summary>
+        private IGraph graph = null;
+        /// <summary>
         /// Patch dictionary
         /// </summary>
         private TerrainPatchDictionary patches = null;
@@ -1281,6 +1286,37 @@ namespace Engine
                 game,
                 vertices,
                 description);
+
+            //Intialize Pathfinding Graph
+            if (description != null && description.PathFinder != null)
+            {
+                if (description.PathFinder.GraphType == GraphTypes.Grid)
+                {
+                    BoundingBox bbox = this.GetBoundingBox();
+
+                    this.graph = Grid.Build(
+                        bbox,
+                        vertices, indices,
+                        description.PathFinder.NodeSize,
+                        description.PathFinder.NodeInclination);
+                }
+                else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
+                {
+                    string hashCode = vertices.GetMd5Sum();
+
+                    var files = ContentManager.FindContent(description.ContentPath, hashCode + ".nmi", false);
+                    if (files != null && files.Length == 1)
+                    {
+                        this.graph = NavMesh.Load(files[0]);
+                    }
+                    else
+                    {
+                        this.graph = NavMesh.Build(
+                            vertices, indices,
+                            description.PathFinder.NodeInclination);
+                    }
+                }
+            }
 
             //Initialize patch dictionary
             this.patches = new TerrainPatchDictionary(

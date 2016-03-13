@@ -385,7 +385,7 @@
     <Compile Include="Minimap.cs" />
     <Compile Include="MouseButtons.cs" />
     <Compile Include="PathFinding\HeuristicMethods.cs" />
-    <Compile Include="PathFinding\Path.cs" />
+    <Compile Include="PathFinding\PathFinderPath.cs" />
     <Compile Include="PathFinding\PathFinder.cs" />
     <Compile Include="PathFinding\PathFinderData.cs" />
     <Compile Include="ShadowMap.cs" />

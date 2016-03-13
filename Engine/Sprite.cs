@@ -154,10 +154,10 @@ namespace Engine
         public Sprite(Game game, SpriteDescription description)
             : base(game, ModelContent.GenerateSprite(description.ContentPath, description.Textures), false, 0, false, false)
         {
-            this.renderWidth = game.Form.RenderWidth.Pair();
-            this.renderHeight = game.Form.RenderHeight.Pair();
-            this.sourceWidth = description.Width <= 0 ? this.renderWidth : description.Width.Pair();
-            this.sourceHeight = description.Height <= 0 ? this.renderHeight : description.Height.Pair();
+            this.renderWidth = game.Form.RenderWidth.NextPair();
+            this.renderHeight = game.Form.RenderHeight.NextPair();
+            this.sourceWidth = description.Width <= 0 ? this.renderWidth : description.Width.NextPair();
+            this.sourceHeight = description.Height <= 0 ? this.renderHeight : description.Height.NextPair();
             this.viewProjection = Sprite.CreateViewOrthoProjection(this.renderWidth, this.renderHeight);
 
             this.Width = this.sourceWidth;
@@ -236,8 +236,8 @@ namespace Engine
         /// </summary>
         public virtual void Resize()
         {
-            int width = this.Game.Form.RenderWidth.Pair();
-            int height = this.Game.Form.RenderHeight.Pair();
+            int width = this.Game.Form.RenderWidth.NextPair();
+            int height = this.Game.Form.RenderHeight.NextPair();
 
             this.viewProjection = Sprite.CreateViewOrthoProjection(width, height);
 
@@ -246,8 +246,8 @@ namespace Engine
                 float w = width / (float)this.renderWidth;
                 float h = height / (float)this.renderHeight;
 
-                this.Width = ((int)(this.sourceWidth * w)).Pair();
-                this.Height = ((int)(this.sourceHeight * h)).Pair();
+                this.Width = ((int)(this.sourceWidth * w)).NextPair();
+                this.Height = ((int)(this.sourceHeight * h)).NextPair();
             }
         }
     }

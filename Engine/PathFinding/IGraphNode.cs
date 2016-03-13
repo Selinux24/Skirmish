@@ -34,7 +34,10 @@ namespace Engine.PathFinding
         /// <param name="point">Point to test</param>
         /// <returns>Returns whether this node contains specified point</returns>
         bool Contains(Vector3 point, out float distance);
-
+        /// <summary>
+        /// Gets the point list of this node perimeter
+        /// </summary>
+        /// <returns>Returns the point list of this node perimeter</returns>
         Vector3[] GetPoints();
     }
 }

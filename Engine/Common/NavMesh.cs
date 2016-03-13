@@ -198,6 +198,30 @@ namespace Engine.Common
         /// <summary>
         /// Navigation Mesh Build
         /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        /// <param name="angle">Maximum angle of node</param>
+        /// <returns>Returns a navigation mesh</returns>
+        public static NavMesh Build(VertexData[] vertices, uint[] indices, float angle = MathUtil.PiOverFour)
+        {
+            int tris = indices.Length / 3;
+
+            Triangle[] triangles = new Triangle[tris];
+
+            int index = 0;
+            for (int i = 0; i < tris; i++)
+            {
+                triangles[i] = new Triangle(
+                    vertices[indices[index++]].Position.Value,
+                    vertices[indices[index++]].Position.Value,
+                    vertices[indices[index++]].Position.Value);
+            }
+
+            return Build(triangles, angle);
+        }
+        /// <summary>
+        /// Navigation Mesh Build
+        /// </summary>
         /// <param name="triangles">List of triangles</param>
         /// <param name="angle">Maximum angle of node</param>
         /// <returns>Returns a navigation mesh</returns>
@@ -205,7 +229,7 @@ namespace Engine.Common
         {
             NavMesh result = new NavMesh();
 
-            result.HashCode = Helper.Md5Sum(triangles);
+            result.HashCode = triangles.GetMd5Sum();
 
             BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetCorners());
 
@@ -241,7 +265,7 @@ namespace Engine.Common
                     Polygon[] mergedPolis;
                     if (NavMesh.MergeConvex(parts, out mergedPolis))
                     {
-                        nodes = NavmeshNode.FromPolygonArray(mergedPolis);
+                        nodes = NavmeshNode.FromPolygonArray(result, mergedPolis);
                         if (nodes != null)
                         {
                             if (nodes.Length == 1)
@@ -279,8 +303,8 @@ namespace Engine.Common
 
                                                 result.connections.Add(new NavMeshConnectionInfo()
                                                 {
-                                                    Poly1 = i,
-                                                    Poly2 = x,
+                                                    First = i,
+                                                    Second = x,
                                                     Segment = new Line3(v1, v2),
                                                 });
 
@@ -303,8 +327,8 @@ namespace Engine.Common
 
                                                 result.connections.Add(new NavMeshConnectionInfo()
                                                 {
-                                                    Poly1 = i,
-                                                    Poly2 = x,
+                                                    First = i,
+                                                    Second = x,
                                                     Segment = new Line3(v1, v2),
                                                 });
 
@@ -868,7 +892,11 @@ namespace Engine.Common
                 v.IsEar = false;
             }
         }
-
+        /// <summary>
+        /// Save navigation mesh to file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <param name="nm">Navigation mesh</param>
         public static void Save(string fileName, NavMesh nm)
         {
             using (var fs = File.OpenWrite(fileName))
@@ -887,10 +915,28 @@ namespace Engine.Common
                             wr.Write(node.Poly[i].Z);
                         }
                     }
+
+                    wr.Write(nm.Connections.Length);
+
+                    foreach (NavMeshConnectionInfo connection in nm.Connections)
+                    {
+                        wr.Write(connection.First);
+                        wr.Write(connection.Second);
+                        wr.Write(connection.Segment.Point1.X);
+                        wr.Write(connection.Segment.Point1.Y);
+                        wr.Write(connection.Segment.Point1.Z);
+                        wr.Write(connection.Segment.Point2.X);
+                        wr.Write(connection.Segment.Point2.Y);
+                        wr.Write(connection.Segment.Point2.Z);
+                    }
                 }
             }
         }
-
+        /// <summary>
+        /// Load navigation mesh from file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <returns>Returns the loaded navigation mesh</returns>
         public static NavMesh Load(string fileName)
         {
             using (var fs = File.OpenRead(fileName))
@@ -901,7 +947,11 @@ namespace Engine.Common
                 }
             }
         }
-
+        /// <summary>
+        /// Load navigation mesh from memory stream
+        /// </summary>
+        /// <param name="stream">Memory stream</param>
+        /// <returns>Returns the loaded navigation mesh</returns>
         public static NavMesh Load(MemoryStream stream)
         {
             using (var rd = new BinaryReader(stream, Encoding.UTF8))
@@ -909,7 +959,11 @@ namespace Engine.Common
                 return Load(rd);
             }
         }
-
+        /// <summary>
+        /// Load navigation mesh from a binary reader
+        /// </summary>
+        /// <param name="rd">File Binary reader</param>
+        /// <returns>Returns the loaded navigation mesh</returns>
         public static NavMesh Load(BinaryReader rd)
         {
             NavMesh nm = new NavMesh();
@@ -927,10 +981,30 @@ namespace Engine.Common
                     points[p] = new Vector3(rd.ReadSingle(), rd.ReadSingle(), rd.ReadSingle());
                 }
 
-                nodes[n] = new NavmeshNode(new Polygon(points));
+                nodes[n] = new NavmeshNode(nm, new Polygon(points));
             }
 
             nm.Nodes = nodes;
+
+            var connectionCount = rd.ReadInt32();
+            NavMeshConnectionInfo[] connections = new NavMeshConnectionInfo[connectionCount];
+
+            for (int n = 0; n < connectionCount; n++)
+            {
+                var poly1 = rd.ReadInt32();
+                var poly2 = rd.ReadInt32();
+                var point1 = new Vector3(rd.ReadSingle(), rd.ReadSingle(), rd.ReadSingle());
+                var point2 = new Vector3(rd.ReadSingle(), rd.ReadSingle(), rd.ReadSingle());
+
+                connections[n] = new NavMeshConnectionInfo()
+                {
+                    First = poly1,
+                    Second = poly2,
+                    Segment = new Line3(point1, point2),
+                };
+            }
+
+            nm.Connections = connections;
 
             return nm;
         }
@@ -964,11 +1038,45 @@ namespace Engine.Common
             }
         }
 
-        protected NavMesh()
+        /// <summary>
+        /// Gets a list of connected nodes from specified node
+        /// </summary>
+        /// <param name="node">Node</param>
+        /// <returns>Returns a list of connected nodes from specified node</returns>
+        public IGraphNode[] GetConnections(IGraphNode node)
         {
+            int index = Array.IndexOf(this.Nodes, node);
+            if (index >= 0)
+            {
+                //Find all connections for the specified node index
+                var conns = this.connections.FindAll(c => c.First == index || c.Second == index);
+                if (conns != null && conns.Count > 0)
+                {
+                    var result = new List<IGraphNode>();
 
+                    for (int i = 0; i < conns.Count; i++)
+                    {
+                        if (conns[i].First != index)
+                        {
+                            //Add first connection node to result
+                            var n1 = this.Nodes[conns[i].First];
+                            if (!result.Contains(n1)) result.Add(n1);
+                        }
+
+                        if (conns[i].Second != index)
+                        {
+                            //Add second connection node to result
+                            var n2 = this.Nodes[conns[i].Second];
+                            if (!result.Contains(n2)) result.Add(n2);
+                        }
+                    }
+
+                    return result.ToArray();
+                }
+            }
+
+            return new IGraphNode[] { };
         }
-
         /// <summary>
         /// Gets text representation of instance
         /// </summary>
@@ -985,24 +1093,25 @@ namespace Engine.Common
     public class NavMeshConnectionInfo
     {
         /// <summary>
-        /// First polygon index
+        /// First node index
         /// </summary>
-        public int Poly1;
+        public int First;
         /// <summary>
-        /// Second polygon index
+        /// Second node index
         /// </summary>
-        public int Poly2;
+        public int Second;
         /// <summary>
         /// Connection segment
         /// </summary>
         public Line3 Segment;
 
         /// <summary>
-        /// Constructor
+        /// Gets text representation of instance
         /// </summary>
-        public NavMeshConnectionInfo()
+        /// <returns>Returns text representation</returns>
+        public override string ToString()
         {
-
+            return string.Format("First: {0}; Second: {1}; Segment: {2}", this.First, this.Second, this.Segment);
         }
     }
 }

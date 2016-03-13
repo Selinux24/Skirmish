@@ -223,8 +223,8 @@ namespace Engine
             this.inputLayout = DrawerPool.EffectFont.GetInputLayout(this.technique);
 
             this.viewProjection = Sprite.CreateViewOrthoProjection(
-                game.Form.RenderWidth.Pair(),
-                game.Form.RenderHeight.Pair());
+                game.Form.RenderWidth.NextPair(),
+                game.Form.RenderHeight.NextPair());
 
             this.fontMap = FontMap.Map(game.Graphics.Device, font, size);
 
@@ -294,8 +294,8 @@ namespace Engine
         public void Resize()
         {
             this.viewProjection = Sprite.CreateViewOrthoProjection(
-                this.Game.Form.RenderWidth.Pair(),
-                this.Game.Form.RenderHeight.Pair());
+                this.Game.Form.RenderWidth.NextPair(),
+                this.Game.Form.RenderHeight.NextPair());
         }
 
         /// <summary>

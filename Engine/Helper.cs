@@ -58,13 +58,13 @@ namespace Engine
             return array;
         }
         /// <summary>
-        /// Joins two arrays
+        /// Merge two arrays
         /// </summary>
         /// <typeparam name="T">Type of array</typeparam>
         /// <param name="array1">First array</param>
         /// <param name="array2">Second array</param>
-        /// <returns>Returns an array with both array values</returns>
-        public static T[] Join<T>(this T[] array1, T[] array2)
+        /// <returns>Returns an array with both array values merged</returns>
+        public static T[] Merge<T>(this T[] array1, T[] array2)
         {
             T[] newArray = new T[array1.Length + array2.Length];
 
@@ -73,6 +73,251 @@ namespace Engine
 
             return newArray;
         }
+        /// <summary>
+        /// Concatenates the members of a collection of type T, using the specified separator between each member.
+        /// </summary>
+        /// <typeparam name="T">Collection type</typeparam>
+        /// <param name="list">Collection</param>
+        /// <param name="separator">The string to use as a separator</param>
+        /// <returns>A string that consists of the members of values delimited by the separator string</returns>
+        public static string Join<T>(this ICollection<T> list, string separator = "")
+        {
+            List<string> res = new List<string>();
+
+            list.ToList().ForEach(a => res.Add(a.ToString()));
+
+            return string.Join(separator, res);
+        }
+        /// <summary>
+        /// Performs distinc selection over the result of the provided function
+        /// </summary>
+        /// <typeparam name="TSource">Source type</typeparam>
+        /// <typeparam name="TKey">Function result type</typeparam>
+        /// <param name="source">Source collection</param>
+        /// <param name="getKey">Selection function</param>
+        /// <returns>Returns a collection of distinct function results</returns>
+        public static IEnumerable<TKey> Distinct<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> getKey)
+        {
+            Dictionary<TKey, TSource> dictionary = new Dictionary<TKey, TSource>();
+
+            foreach (TSource item in source)
+            {
+                TKey key = getKey(item);
+
+                if (!dictionary.ContainsKey(key))
+                {
+                    dictionary.Add(key, item);
+                }
+            }
+
+            return dictionary.Select(item => item.Key);
+        }
+        /// <summary>
+        /// Cast object as specified type
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="input">Object to cast as type</param>
+        /// <returns>Return object casted as type</returns>
+        public static T Cast<T>(this object input)
+        {
+            return (T)input;
+        }
+        /// <summary>
+        /// Convert object to specified type
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="input">Object to convert to type</param>
+        /// <returns>Return object converted to type</returns>
+        public static T Convert<T>(this object input)
+        {
+            return (T)System.Convert.ChangeType(input, typeof(T));
+        }
+        /// <summary>
+        /// Dispose disposable object
+        /// </summary>
+        /// <param name="obj">Disposable object</param>
+        public static void Dispose(IDisposable obj)
+        {
+            if (obj != null)
+            {
+                obj.Dispose();
+            }
+        }
+        /// <summary>
+        /// Dispose disposable objects array
+        /// </summary>
+        /// <param name="array">Disposable objects array</param>
+        public static void Dispose(IEnumerable<IDisposable> array)
+        {
+            if (array != null && array.Count() > 0)
+            {
+                foreach (var item in array)
+                {
+                    Helper.Dispose(item);
+                }
+            }
+        }
+        /// <summary>
+        /// Dispose disposable objects dictionary
+        /// </summary>
+        /// <param name="dictionary">Disposable objects dictionary</param>
+        public static void Dispose(IDictionary dictionary)
+        {
+            if (dictionary != null && dictionary.Count > 0)
+            {
+                foreach (var item in dictionary.Values)
+                {
+                    if (item is IDisposable)
+                    {
+                        Helper.Dispose((IDisposable)item);
+                    }
+                    else if (item is IEnumerable<IDisposable>)
+                    {
+                        Helper.Dispose((IEnumerable<IDisposable>)item);
+                    }
+                    else if (item is IDictionary)
+                    {
+                        Helper.Dispose((IDictionary)item);
+                    }
+                }
+
+                dictionary.Clear();
+            }
+        }
+        /// <summary>
+        /// Writes stream to memory
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <returns>Returns a memory stream</returns>
+        public static MemoryStream WriteToMemory(this Stream stream)
+        {
+            MemoryStream ms = new MemoryStream();
+
+            stream.CopyTo(ms);
+
+            ms.Position = 0;
+
+            return ms;
+        }
+        /// <summary>
+        /// Writes file to memory
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <returns>Returns a memory stream</returns>
+        public static MemoryStream WriteToMemory(this string fileName)
+        {
+            using (var stream = File.OpenRead(fileName))
+            {
+                return stream.WriteToMemory();
+            }
+        }
+        /// <summary>
+        /// Create the md5 sum string of the specified string
+        /// </summary>
+        /// <param name="content">String</param>
+        /// <returns>Returns the md5 sum string of the specified string</returns>
+        public static string GetMd5Sum(this string content)
+        {
+            byte[] tmp = new byte[content.Length * 2];
+            Encoding.Unicode.GetEncoder().GetBytes(content.ToCharArray(), 0, content.Length, tmp, 0, true);
+
+            byte[] result = null;
+            using (MD5 md5 = new MD5CryptoServiceProvider())
+            {
+                result = md5.ComputeHash(tmp);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            Array.ForEach(result, r => sb.Append(r.ToString("X2")));
+            return sb.ToString();
+        }
+        /// <summary>
+        /// Create the md5 sum string of the specified enumerable collection
+        /// </summary>
+        /// <param name="list">Enumerable collection</param>
+        /// <returns>Returns the md5 sum string of the enumerable collection</returns>
+        public static string GetMd5Sum<T>(this T obj)
+        {
+            return obj.ToString().GetMd5Sum();
+        }
+        /// <summary>
+        /// Create the md5 sum string of the specified enumerable collection
+        /// </summary>
+        /// <param name="list">Enumerable collection</param>
+        /// <returns>Returns the md5 sum string of the enumerable collection</returns>
+        public static string GetMd5Sum<T>(this IEnumerable<T> list)
+        {
+            StringBuilder text = new StringBuilder();
+            Array.ForEach(list.ToArray(), i => { text.Append(i.ToString()); });
+            return text.ToString().GetMd5Sum();
+        }
+        /// <summary>
+        /// Gets the maximum value of the collection 
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="array">Array of parameters</param>
+        /// <returns>Return the maximum value of the collection</returns>
+        public static T Max<T>(params T[] array) where T : IComparable<T>
+        {
+            T res = default(T);
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (i == 0)
+                {
+                    res = array[i];
+                }
+                else if (res.CompareTo(array[i]) < 0)
+                {
+                    res = array[i];
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets the minimum value of the collection 
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="array">Array of parameters</param>
+        /// <returns>Return the minimum value of the collection</returns>
+        public static T Min<T>(params T[] array) where T : IComparable<T>
+        {
+            T res = default(T);
+
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (i == 0)
+                {
+                    res = array[i];
+                }
+                else if (res.CompareTo(array[i]) > 0)
+                {
+                    res = array[i];
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets next pair of even number, if even
+        /// </summary>
+        /// <param name="num">Number</param>
+        /// <returns>Returns next pair</returns>
+        public static int NextPair(this int num)
+        {
+            return num = num * 0.5f != (int)(num * 0.5f) ? num + 1 : num;
+        }
+        /// <summary>
+        /// Gets next odd of even number, if even
+        /// </summary>
+        /// <param name="num">Number</param>
+        /// <returns>Returns next odd</returns>
+        public static int NextOdd(this int num)
+        {
+            return num = num * 0.5f != (int)(num * 0.5f) ? num : num + 1;
+        }
+
         /// <summary>
         /// Gets angle between two vectors
         /// </summary>
@@ -112,12 +357,12 @@ namespace Engine
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
-        /// <param name="pn">Plane normal</param>
+        /// <param name="planeNormal">Plane normal</param>
         /// <returns>Returns angle value</returns>
         /// <remarks>Result signed</remarks>
-        public static float Angle(Vector3 one, Vector3 two, Vector3 pn)
+        public static float Angle(Vector3 one, Vector3 two, Vector3 planeNormal)
         {
-            Plane p = new Plane(pn, 0);
+            Plane p = new Plane(planeNormal, 0);
 
             float dot = MathUtil.Clamp(Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two)), 0, 1);
 
@@ -237,181 +482,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Dispose disposable object
-        /// </summary>
-        /// <param name="obj">Disposable object</param>
-        public static void Dispose(IDisposable obj)
-        {
-            if (obj != null)
-            {
-                obj.Dispose();
-            }
-        }
-        /// <summary>
-        /// Dispose disposable objects array
-        /// </summary>
-        /// <param name="array">Disposable objects array</param>
-        public static void Dispose(IEnumerable<IDisposable> array)
-        {
-            if (array != null && array.Count() > 0)
-            {
-                foreach (var item in array)
-                {
-                    Helper.Dispose(item);
-                }
-            }
-        }
-        /// <summary>
-        /// Dispose disposable objects dictionary
-        /// </summary>
-        /// <param name="dictionary">Disposable objects dictionary</param>
-        public static void Dispose(IDictionary dictionary)
-        {
-            if (dictionary != null && dictionary.Count > 0)
-            {
-                foreach (var item in dictionary.Values)
-                {
-                    if (item is IDisposable)
-                    {
-                        Helper.Dispose((IDisposable)item);
-                    }
-                    else if (item is IEnumerable<IDisposable>)
-                    {
-                        Helper.Dispose((IEnumerable<IDisposable>)item);
-                    }
-                    else if (item is IDictionary)
-                    {
-                        Helper.Dispose((IDictionary)item);
-                    }
-                }
-
-                dictionary.Clear();
-            }
-        }
-        /// <summary>
-        /// Gets the maximum value of the collection 
-        /// </summary>
-        /// <typeparam name="T">Type</typeparam>
-        /// <param name="array">Array of parameters</param>
-        /// <returns>Return the maximum value of the collection</returns>
-        public static T Max<T>(params T[] array) where T : IComparable<T>
-        {
-            T res = default(T);
-
-            for (int i = 0; i < array.Length; i++)
-            {
-                if (i == 0)
-                {
-                    res = array[i];
-                }
-                else if (res.CompareTo(array[i]) < 0)
-                {
-                    res = array[i];
-                }
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Gets the minimum value of the collection 
-        /// </summary>
-        /// <typeparam name="T">Type</typeparam>
-        /// <param name="array">Array of parameters</param>
-        /// <returns>Return the minimum value of the collection</returns>
-        public static T Min<T>(params T[] array) where T : IComparable<T>
-        {
-            T res = default(T);
-
-            for (int i = 0; i < array.Length; i++)
-            {
-                if (i == 0)
-                {
-                    res = array[i];
-                }
-                else if (res.CompareTo(array[i]) > 0)
-                {
-                    res = array[i];
-                }
-            }
-
-            return res;
-        }
-        /// <summary>
-        /// Concatenates the members of a collection of type T, using the specified separator between each member.
-        /// </summary>
-        /// <typeparam name="T">Collection type</typeparam>
-        /// <param name="list">Collection</param>
-        /// <param name="separator">The string to use as a separator</param>
-        /// <returns>A string that consists of the members of values delimited by the separator string</returns>
-        public static string Join<T>(this ICollection<T> list, string separator = "")
-        {
-            List<string> res = new List<string>();
-
-            list.ToList().ForEach(a => res.Add(a.ToString()));
-
-            return string.Join(separator, res);
-        }
-        /// <summary>
-        /// Performs distinc selection over the result of the provided function
-        /// </summary>
-        /// <typeparam name="TSource">Source type</typeparam>
-        /// <typeparam name="TKey">Function result type</typeparam>
-        /// <param name="source">Source collection</param>
-        /// <param name="getKey">Selection function</param>
-        /// <returns>Returns a collection of distinct function results</returns>
-        public static IEnumerable<TKey> Distinct<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> getKey)
-        {
-            Dictionary<TKey, TSource> dictionary = new Dictionary<TKey, TSource>();
-
-            foreach (TSource item in source)
-            {
-                TKey key = getKey(item);
-
-                if (!dictionary.ContainsKey(key))
-                {
-                    dictionary.Add(key, item);
-                }
-            }
-
-            return dictionary.Select(item => item.Key);
-        }
-        /// <summary>
-        /// Gets next pair of even number, if even
-        /// </summary>
-        /// <param name="num">Number</param>
-        /// <returns>Returns next pair</returns>
-        public static int Pair(this int num)
-        {
-            return num = num * 0.5f != (int)(num * 0.5f) ? num + 1 : num;
-        }
-        /// <summary>
-        /// Writes stream to memory
-        /// </summary>
-        /// <param name="stream">Stream</param>
-        /// <returns>Returns a memory stream</returns>
-        public static MemoryStream WriteToMemory(this Stream stream)
-        {
-            MemoryStream ms = new MemoryStream();
-
-            stream.CopyTo(ms);
-
-            ms.Position = 0;
-
-            return ms;
-        }
-        /// <summary>
-        /// Writes file to memory
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        /// <returns>Returns a memory stream</returns>
-        public static MemoryStream WriteToMemory(this string fileName)
-        {
-            using (var stream = File.OpenRead(fileName))
-            {
-                return stream.WriteToMemory();
-            }
-        }
-        /// <summary>
         /// Generates a bounding box from a triangle list
         /// </summary>
         /// <param name="triangles">Triangle list</param>
@@ -479,53 +549,6 @@ namespace Engine
             }
 
             return res;
-        }
-        /// <summary>
-        /// Cast object as specified type
-        /// </summary>
-        /// <typeparam name="T">Type</typeparam>
-        /// <param name="input">Object to cast as type</param>
-        /// <returns>Return object casted as type</returns>
-        public static T Cast<T>(this object input)
-        {
-            return (T)input;
-        }
-        /// <summary>
-        /// Convert object to specified type
-        /// </summary>
-        /// <typeparam name="T">Type</typeparam>
-        /// <param name="input">Object to convert to type</param>
-        /// <returns>Return object converted to type</returns>
-        public static T Convert<T>(this object input)
-        {
-            return (T)System.Convert.ChangeType(input, typeof(T));
-        }
-
-        /// <summary>
-        /// Create an md5 sum string of this string
-        /// </summary>
-        public static string Md5Sum(string content)
-        {
-            Encoder enc = Encoding.Unicode.GetEncoder();
-            byte[] tmp = new byte[content.Length * 2];
-            enc.GetBytes(content.ToCharArray(), 0, content.Length, tmp, 0, true);
-
-            byte[] result = null;
-            using (MD5 md5 = new MD5CryptoServiceProvider())
-            {
-                result = md5.ComputeHash(tmp);
-            }
-
-            StringBuilder sb = new StringBuilder();
-            Array.ForEach(result, r => sb.Append(r.ToString("X2")));
-            return sb.ToString();
-        }
-
-        public static string Md5Sum(Triangle[] triangles)
-        {
-            StringBuilder text = new StringBuilder();
-            Array.ForEach(triangles, t => { text.Append(t.ToString()); });
-            return Helper.Md5Sum(text.ToString());
         }
     }
 }

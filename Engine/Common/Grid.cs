@@ -41,6 +41,32 @@ namespace Engine.Common
         private float NodeSide = 0;
 
         /// <summary>
+        /// Build node list from geometry
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        /// <param name="size">Node size</param>
+        /// <param name="angle">Maximum angle of node</param>
+        /// <returns>Returns generated grid node list</returns>
+        public static Grid Build(BoundingBox bbox, VertexData[] vertices, uint[] indices, float size, float angle = MathUtil.PiOverFour)
+        {
+            int tris = indices.Length / 3;
+
+            Triangle[] triangles = new Triangle[tris];
+
+            int index = 0;
+            for (int i = 0; i < tris; i++)
+            {
+                triangles[i] = new Triangle(
+                    vertices[indices[index++]].Position.Value,
+                    vertices[indices[index++]].Position.Value,
+                    vertices[indices[index++]].Position.Value);
+            }
+
+            return Build(bbox, triangles, size, angle);
+        }
+        /// <summary>
         /// Build node list from triangles
         /// </summary>
         /// <param name="bbox">Bounding box</param>
