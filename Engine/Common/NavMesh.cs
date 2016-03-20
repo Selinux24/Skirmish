@@ -265,14 +265,14 @@ namespace Engine.Common
                     Polygon[] mergedPolis;
                     if (NavMesh.MergeConvex(parts, out mergedPolis))
                     {
-                        nodes = NavmeshNode.FromPolygonArray(result, mergedPolis);
+                        nodes = NavMeshNode.FromPolygonArray(result, mergedPolis);
                         if (nodes != null)
                         {
                             if (nodes.Length == 1)
                             {
                                 #region Simplify
 
-                                Polygon poly = ((NavmeshNode)nodes[0]).Poly;
+                                Polygon poly = ((NavMeshNode)nodes[0]).Poly;
 
                                 poly.RemoveUnused();
 
@@ -284,13 +284,13 @@ namespace Engine.Common
 
                                 for (int i = 0; i < nodes.Length; i++)
                                 {
-                                    Polygon poly1 = ((NavmeshNode)nodes[i]).Poly;
+                                    Polygon poly1 = ((NavMeshNode)nodes[i]).Poly;
 
                                     List<Vector3> exclusions = new List<Vector3>();
 
                                     for (int x = i + 1; x < nodes.Length; x++)
                                     {
-                                        Polygon poly2 = ((NavmeshNode)nodes[x]).Poly;
+                                        Polygon poly2 = ((NavMeshNode)nodes[x]).Poly;
 
                                         //Get shared edges
                                         Polygon.SharedEdge[] sharedEdges;
@@ -905,7 +905,7 @@ namespace Engine.Common
                 {
                     wr.Write(nm.Nodes.Length);
 
-                    foreach (NavmeshNode node in nm.Nodes)
+                    foreach (NavMeshNode node in nm.Nodes)
                     {
                         wr.Write(node.Poly.Count);
                         for (int i = 0; i < node.Poly.Count; i++)
@@ -969,7 +969,7 @@ namespace Engine.Common
             NavMesh nm = new NavMesh();
 
             var nodeCount = rd.ReadInt32();
-            NavmeshNode[] nodes = new NavmeshNode[nodeCount];
+            NavMeshNode[] nodes = new NavMeshNode[nodeCount];
 
             for (int n = 0; n < nodeCount; n++)
             {
@@ -981,7 +981,7 @@ namespace Engine.Common
                     points[p] = new Vector3(rd.ReadSingle(), rd.ReadSingle(), rd.ReadSingle());
                 }
 
-                nodes[n] = new NavmeshNode(nm, new Polygon(points));
+                nodes[n] = new NavMeshNode(nm, new Polygon(points));
             }
 
             nm.Nodes = nodes;

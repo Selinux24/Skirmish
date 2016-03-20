@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Navigation mesh node
     /// </summary>
-    public class NavmeshNode : GraphNode
+    public class NavMeshNode : GraphNode
     {
         /// <summary>
         /// Generates a navigation node array from a polygon array
@@ -15,13 +15,13 @@ namespace Engine.Common
         /// <param name="parent">Parent navigation mesh</param>
         /// <param name="list">Polygon array</param>
         /// <returns>Returns the generated node array</returns>
-        public static NavmeshNode[] FromPolygonArray(NavMesh parent, Polygon[] list)
+        public static NavMeshNode[] FromPolygonArray(NavMesh parent, Polygon[] list)
         {
-            var nodes = new NavmeshNode[list.Length];
+            var nodes = new NavMeshNode[list.Length];
 
             for (int i = 0; i < nodes.Length; i++)
             {
-                nodes[i] = new NavmeshNode(parent, list[i]);
+                nodes[i] = new NavMeshNode(parent, list[i]);
             }
 
             return nodes;
@@ -63,7 +63,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="parent">Parent</param>
         /// <param name="poly">Polygon</param>
-        public NavmeshNode(NavMesh parent, Polygon poly)
+        public NavMeshNode(NavMesh parent, Polygon poly)
         {
             this.NavigationMesh = parent;
             this.Poly = poly;

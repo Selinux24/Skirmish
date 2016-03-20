@@ -197,6 +197,56 @@ namespace Engine
 
             return c;
         }
+        /// <summary>
+        /// Clips a polygon to a plane using the Sutherland-Hodgman algorithm.
+        /// </summary>
+        /// <param name="inVertices">The input array of vertices.</param>
+        /// <param name="outVertices">The output array of vertices.</param>
+        /// <param name="distances">A buffer that stores intermediate data</param>
+        /// <param name="numVerts">The number of vertices to read from the arrays.</param>
+        /// <param name="planeX">The clip plane's X component.</param>
+        /// <param name="planeZ">The clip plane's Z component.</param>
+        /// <param name="planeD">The clip plane's D component.</param>
+        /// <returns>The number of vertices stored in outVertices.</returns>
+        public static int ClipPolygonToPlane(Polygon poly, float planeX, float planeZ, float planeD, out Polygon outPoly)
+        {
+            Vector3[] inVertices = poly.points;
+            Vector3[] outVertices = new Vector3[poly.Count];
+            float[] distances = new float[poly.Count];
+
+            for (int i = 0; i < poly.Count; i++)
+            {
+                distances[i] = planeX * inVertices[i].X + planeZ * inVertices[i].Z + planeD;
+            }
+
+            int m = 0;
+            Vector3 temp;
+            for (int i = 0, j = poly.Count - 1; i < poly.Count; j = i, i++)
+            {
+                bool inj = distances[j] >= 0;
+                bool ini = distances[i] >= 0;
+
+                if (inj != ini)
+                {
+                    float s = distances[j] / (distances[j] - distances[i]);
+
+                    Vector3.Subtract(ref inVertices[i], ref inVertices[j], out temp);
+                    Vector3.Multiply(ref temp, s, out temp);
+                    Vector3.Add(ref inVertices[j], ref temp, out outVertices[m]);
+                    m++;
+                }
+
+                if (ini)
+                {
+                    outVertices[m] = inVertices[i];
+                    m++;
+                }
+            }
+
+            outPoly = new Polygon(outVertices);
+
+            return m;
+        }
 
         /// <summary>
         /// Polygon point list
