@@ -68,6 +68,23 @@ namespace Engine
                 }
                 else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
                 {
+                    BoundingBox bbox = this.terrain.GetBoundingBox();
+
+                    var fh = new Geometry.Heightfield(bbox, 0.3f, 0.2f);
+
+                    fh.RasterizeTriangles(triangles, Geometry.Area.Default);
+                    fh.FilterLedgeSpans(1, 1);
+                    fh.FilterLowHangingWalkableObstacles(1);
+                    fh.FilterWalkableLowHeightSpans(1);
+
+                    var ch = new Geometry.CompactHeightfield(fh, 1, 1);
+
+                    ch.Erode(1);
+                    ch.BuildDistanceField();
+                    ch.BuildRegions(0, 8, 20);
+
+                    var contourSet = ch.BuildContourSet(1.8f, 12, Geometry.ContourBuildFlags.None);
+
                     string hashCode = triangles.GetMd5Sum();
 
                     var files = ContentManager.FindContent(description.ContentPath, hashCode + ".nmi", false);

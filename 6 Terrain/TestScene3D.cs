@@ -99,6 +99,7 @@ namespace TerrainTest
             {
                 ContentPath = resources,
                 ModelFileName = "cursor.dae",
+                DeferredEnabled = false,
             });
             sw.Stop();
             loadingText += string.Format("cursor3D: {0} ", sw.Elapsed.TotalSeconds);
@@ -302,6 +303,7 @@ namespace TerrainTest
 
             this.terrainLineDrawer = this.AddLineListDrawer(oks.Count + errs.Count);
             this.terrainLineDrawer.Visible = false;
+            this.terrainLineDrawer.DeferredEnabled = false;
 
             if (this.oks.Count > 0)
             {
@@ -318,6 +320,7 @@ namespace TerrainTest
 
             this.terrainPointDrawer = this.AddLineListDrawer(1000);
             this.terrainPointDrawer.Visible = false;
+            this.terrainPointDrawer.DeferredEnabled = false;
 
             #endregion
 
@@ -325,6 +328,7 @@ namespace TerrainTest
 
             this.helicopterLineDrawer = this.AddLineListDrawer(1000);
             this.helicopterLineDrawer.Visible = false;
+            this.helicopterLineDrawer.DeferredEnabled = false;
 
             #endregion
 
@@ -332,6 +336,7 @@ namespace TerrainTest
 
             this.curveLineDrawer = this.AddLineListDrawer(20000);
             this.curveLineDrawer.Visible = false;
+            this.curveLineDrawer.DeferredEnabled = false;
             this.curveLineDrawer.SetLines(this.wAxisColor, GeometryUtil.CreateAxis(Matrix.Identity, 20f));
 
             this.DEBUGComputePath();

@@ -211,7 +211,7 @@ namespace Engine
         public static int ClipPolygonToPlane(Polygon poly, float planeX, float planeZ, float planeD, out Polygon outPoly)
         {
             Vector3[] inVertices = poly.points;
-            Vector3[] outVertices = new Vector3[poly.Count];
+            Vector3[] outVertices = new Vector3[7];
             float[] distances = new float[poly.Count];
 
             for (int i = 0; i < poly.Count; i++)
@@ -220,7 +220,6 @@ namespace Engine
             }
 
             int m = 0;
-            Vector3 temp;
             for (int i = 0, j = poly.Count - 1; i < poly.Count; j = i, i++)
             {
                 bool inj = distances[j] >= 0;
@@ -230,22 +229,21 @@ namespace Engine
                 {
                     float s = distances[j] / (distances[j] - distances[i]);
 
+                    Vector3 temp;
                     Vector3.Subtract(ref inVertices[i], ref inVertices[j], out temp);
                     Vector3.Multiply(ref temp, s, out temp);
-                    Vector3.Add(ref inVertices[j], ref temp, out outVertices[m]);
-                    m++;
+                    Vector3.Add(ref inVertices[j], ref temp, out outVertices[m++]);
                 }
 
                 if (ini)
                 {
-                    outVertices[m] = inVertices[i];
-                    m++;
+                    outVertices[m++] = inVertices[i];
                 }
             }
 
-            outPoly = new Polygon(outVertices);
+            outPoly = new Polygon(outVertices, 0, m);
 
-            return m;
+            return outPoly.Count;
         }
 
         /// <summary>
@@ -358,21 +356,23 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="p1">First point</param>
-        /// <param name="p2">Second point</param>
-        /// <param name="p3">Third point</param>
-        public Polygon(Vector3 p1, Vector3 p2, Vector3 p3)
+        /// <param name="points">Points</param>
+        public Polygon(params Vector3[] points)
         {
-            this.Points = new[] { p1, p2, p3 };
+            this.Points = points;
             this.Hole = false;
         }
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="points">Points</param>
-        public Polygon(Vector3[] points)
+        /// <param name="index">Source index</param>
+        /// <param name="length">Total length</param>
+        public Polygon(Vector3[] points, int index, int length)
         {
-            this.Points = points;
+            Vector3[] tmp = new Vector3[length];
+            Array.Copy(points, index, tmp, 0, length); 
+            this.Points = tmp;
             this.Hole = false;
         }
         /// <summary>

@@ -499,6 +499,125 @@ namespace Engine.Common
         {
             return ((p3.Z - p1.Z) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Z - p1.Z));
         }
+
+
+
+        /// <summary>
+        /// Find the 3D distance between a point (x, y, z) and a segment PQ
+        /// </summary>
+        /// <param name="pt">The coordinate of the point.</param>
+        /// <param name="p">The coordinate of point P in the segment PQ.</param>
+        /// <param name="q">The coordinate of point Q in the segment PQ.</param>
+        /// <returns>The distance between the point and the segment.</returns>
+        internal static float PointToSegmentSquared(ref Vector3 pt, ref Vector3 p, ref Vector3 q)
+        {
+            //distance from P to Q
+            Vector3 pq = q - p;
+
+            //disance from P to the lone point
+            float dx = pt.X - p.X;
+            float dy = pt.Y - p.Y;
+            float dz = pt.Z - p.Z;
+
+            float segmentMagnitudeSquared = pq.LengthSquared();
+            float t = pq.X * dx + pq.Y * dy + pq.Z * dz;
+
+            if (segmentMagnitudeSquared > 0)
+                t /= segmentMagnitudeSquared;
+
+            //keep t between 0 and 1
+            if (t < 0)
+                t = 0;
+            else if (t > 1)
+                t = 1;
+
+            dx = p.X + t * pq.X - pt.X;
+            dy = p.Y + t * pq.Y - pt.Y;
+            dz = p.Z + t * pq.Z - pt.Z;
+
+            return dx * dx + dy * dy + dz * dz;
+        }
+        /// <summary>
+        /// Find the 2d distance between a point (x, z) and a segment PQ, where P is (px, pz) and Q is (qx, qz).
+        /// </summary>
+        /// <param name="x">The X coordinate of the point.</param>
+        /// <param name="z">The Z coordinate of the point.</param>
+        /// <param name="px">The X coordinate of point P in the segment PQ.</param>
+        /// <param name="pz">The Z coordinate of point P in the segment PQ.</param>
+        /// <param name="qx">The X coordinate of point Q in the segment PQ.</param>
+        /// <param name="qz">The Z coordinate of point Q in the segment PQ.</param>
+        /// <returns>The distance between the point and the segment.</returns>
+        internal static float PointToSegment2DSquared(int x, int z, int px, int pz, int qx, int qz)
+        {
+            float segmentDeltaX = qx - px;
+            float segmentDeltaZ = qz - pz;
+            float dx = x - px;
+            float dz = z - pz;
+            float segmentMagnitudeSquared = segmentDeltaX * segmentDeltaX + segmentDeltaZ * segmentDeltaZ;
+            float t = segmentDeltaX * dx + segmentDeltaZ * dz;
+
+            //normalize?
+            if (segmentMagnitudeSquared > 0)
+                t /= segmentMagnitudeSquared;
+
+            //0 < t < 1
+            if (t < 0)
+                t = 0;
+            else if (t > 1)
+                t = 1;
+
+            dx = px + t * segmentDeltaX - x;
+            dz = pz + t * segmentDeltaZ - z;
+
+            return dx * dx + dz * dz;
+        }
+        /// <summary>
+        /// Find the 2d distance between a point and a segment PQ
+        /// </summary>
+        /// <param name="pt">The coordinate of the point.</param>
+        /// <param name="p">The coordinate of point P in the segment PQ.</param>
+        /// <param name="q">The coordinate of point Q in the segment PQ.</param>
+        /// <returns>The distance between the point and the segment.</returns>
+        internal static float PointToSegment2DSquared(ref Vector3 pt, ref Vector3 p, ref Vector3 q)
+        {
+            float t = 0;
+            return PointToSegment2DSquared(ref pt, ref p, ref q, out t);
+        }
+        /// <summary>
+        /// Find the 2d distance between a point and a segment PQ
+        /// </summary>
+        /// <param name="pt">The coordinate of the point.</param>
+        /// <param name="p">The coordinate of point P in the segment PQ.</param>
+        /// <param name="q">The coordinate of point Q in the segment PQ.</param>
+        /// <param name="t">Parameterization ratio t</param>
+        /// <returns>The distance between the point and the segment.</returns>
+        internal static float PointToSegment2DSquared(ref Vector3 pt, ref Vector3 p, ref Vector3 q, out float t)
+        {
+            //distance from P to Q in the xz plane
+            float segmentDeltaX = q.X - p.X;
+            float segmentDeltaZ = q.Z - p.Z;
+
+            //distance from P to lone point in xz plane
+            float dx = pt.X - p.X;
+            float dz = pt.Z - p.Z;
+
+            float segmentMagnitudeSquared = segmentDeltaX * segmentDeltaX + segmentDeltaZ * segmentDeltaZ;
+            t = segmentDeltaX * dx + segmentDeltaZ * dz;
+
+            if (segmentMagnitudeSquared > 0)
+                t /= segmentMagnitudeSquared;
+
+            //keep t between 0 and 1
+            if (t < 0)
+                t = 0;
+            else if (t > 1)
+                t = 1;
+
+            dx = p.X + t * segmentDeltaX - pt.X;
+            dz = p.Z + t * segmentDeltaZ - pt.Z;
+
+            return dx * dx + dz * dz;
+        }
     }
 
     public enum IndexBufferShapeEnum : int
