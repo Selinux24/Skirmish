@@ -128,7 +128,7 @@ namespace TerrainTest
                 ContentPath = resources,
                 Model = new TerrainDescription.ModelDescription()
                 {
-                    ModelFileName = "terrain.dae",
+                    ModelFileName = "two_levels.dae",
                 },
                 Quadtree = new TerrainDescription.QuadtreeDescription()
                 {
