@@ -70,34 +70,44 @@ namespace Engine
                 {
                     BoundingBox bbox = this.terrain.GetBoundingBox();
 
-                    var fh = new Geometry.Heightfield(bbox, 0.3f, 0.2f);
+                    float cellSize = 0.3f;
+                    float cellHeight = 0.2f;
+                    int walkableHeight = 1;
+                    int walkableClimb = 1;
 
+                    var fh = new Geometry.Heightfield(bbox, cellSize, cellHeight);
                     fh.RasterizeTriangles(triangles, Geometry.Area.Default);
-                    fh.FilterLedgeSpans(1, 1);
-                    fh.FilterLowHangingWalkableObstacles(1);
-                    fh.FilterWalkableLowHeightSpans(1);
+                    fh.FilterLedgeSpans(walkableHeight * 10, walkableClimb * 2);
+                    fh.FilterLowHangingWalkableObstacles(walkableClimb * 2);
+                    fh.FilterWalkableLowHeightSpans(walkableHeight * 10);
 
-                    var ch = new Geometry.CompactHeightfield(fh, 1, 1);
+                    int radius = 1;
+                    int borderSize = 0;
+                    int minRegionArea = 16;
+                    int mergeRegionArea = 40;
 
-                    ch.Erode(1);
+                    var ch = new Geometry.CompactHeightfield(fh, walkableHeight, walkableClimb);
+                    ch.Erode(radius);
                     ch.BuildDistanceField();
-                    ch.BuildRegions(0, 8, 20);
+                    ch.BuildRegions(borderSize, minRegionArea, mergeRegionArea);
 
-                    var contourSet = ch.BuildContourSet(1.8f, 12, Geometry.ContourBuildFlags.None);
+                    float maxError = 1.8f;
+                    int maxEdgeLength = 24;
 
-                    string hashCode = triangles.GetMd5Sum();
+                    var cs = ch.BuildContourSet(maxError, maxEdgeLength, Geometry.ContourBuildFlags.None);
 
-                    var files = ContentManager.FindContent(description.ContentPath, hashCode + ".nmi", false);
-                    if (files != null && files.Length == 1)
-                    {
-                        this.graph = NavMesh.Load(files[0]);
-                    }
-                    else
-                    {
-                        this.graph = NavMesh.Build(
-                            triangles,
-                            description.PathFinder.NodeInclination);
-                    }
+                    int vertsPerPoly = 6;
+
+                    var pm = new Geometry.PolyMesh(cs, cellSize, cellHeight, borderSize, vertsPerPoly);
+
+                    int sampleDist = 6;
+                    int sampleMaxError = 1;
+
+                    var pmd = new Geometry.PolyMeshDetail(pm, ch, sampleDist, sampleMaxError);
+
+                    float maxClimb = 0.9f;
+
+                    this.graph = NavMesh.Build(pm, pmd, null, cellSize, cellHeight, vertsPerPoly, maxClimb);
                 }
             }
         }

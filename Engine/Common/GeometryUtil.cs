@@ -618,6 +618,447 @@ namespace Engine.Common
 
             return dx * dx + dz * dz;
         }
+
+        internal static float PointToPolygonSquared(Vector3 point, Vector3[] verts, int vertCount)
+        {
+            float dmin = float.MaxValue;
+            bool c = false;
+
+            for (int i = 0, j = vertCount - 1; i < vertCount; j = i++)
+            {
+                Vector3 vi = verts[i];
+                Vector3 vj = verts[j];
+
+                if (((vi.Z > point.Z) != (vj.Z > point.Z)) && (point.X < (vj.X - vi.X) * (point.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+                    c = !c;
+
+                dmin = Math.Min(dmin, PointToSegment2DSquared(ref point, ref vj, ref vi));
+            }
+
+            return c ? -dmin : dmin;
+        }
+        /// <summary>
+        /// Finds the distance between a point and triangle ABC.
+        /// </summary>
+        /// <param name="p">A point.</param>
+        /// <param name="a">The first vertex of the triangle.</param>
+        /// <param name="b">The second vertex of the triangle.</param>
+        /// <param name="c">The third vertex of the triangle.</param>
+        /// <returns>The distnace between the point and the triangle.</returns>
+        internal static float PointToTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c)
+        {
+            //If the point lies inside the triangle, return the interpolated y-coordinate
+            float h;
+            if (PointToTriangle(p, a, b, c, out h))
+            {
+                return Math.Abs(h - p.Y);
+            }
+
+            return float.MaxValue;
+        }
+        /// <summary>
+        /// Finds the distance between a point and triangle ABC.
+        /// </summary>
+        /// <param name="p">A point.</param>
+        /// <param name="a">The first vertex of the triangle.</param>
+        /// <param name="b">The second vertex of the triangle.</param>
+        /// <param name="c">The third vertex of the triangle.</param>
+        /// <param name="height">The height between the point and the triangle.</param>
+        /// <returns>A value indicating whether the point is contained within the triangle.</returns>
+        internal static bool PointToTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out float height)
+        {
+            Vector3 v0 = c - a;
+            Vector3 v1 = b - a;
+            Vector3 v2 = p - a;
+
+            Vector2 v20 = new Vector2(v0.X, v0.Z);
+            Vector2 v21 = new Vector2(v1.X, v1.Z);
+            Vector2 v22 = new Vector2(v2.X, v2.Z);
+
+            float dot00, dot01, dot02, dot11, dot12;
+
+            Vector2.Dot(ref v20, ref v20, out dot00);
+            Vector2.Dot(ref v20, ref v21, out dot01);
+            Vector2.Dot(ref v20, ref v22, out dot02);
+            Vector2.Dot(ref v21, ref v21, out dot11);
+            Vector2.Dot(ref v21, ref v22, out dot12);
+
+            //compute barycentric coordinates
+            float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+            float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+            float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+            const float EPS = 1E-4f;
+
+            //if point lies inside triangle, return interpolated y-coordinate
+            if (u >= -EPS && v >= -EPS && (u + v) <= 1 + EPS)
+            {
+                height = a.Y + v0.Y * u + v1.Y * v;
+                return true;
+            }
+
+            height = float.MaxValue;
+            return false;
+        }
+
+
+
+
+        /// <summary>
+        /// Calculates the component-wise minimum of two vectors.
+        /// </summary>
+        /// <param name="left">A vector.</param>
+        /// <param name="right">Another vector.</param>
+        /// <param name="result">The component-wise minimum of the two vectors.</param>
+        internal static void ComponentMin(ref Vector3 left, ref Vector3 right, out Vector3 result)
+        {
+#if OPENTK || STANDALONE
+			Vector3.ComponentMin(ref left, ref right, out result);
+#elif UNITY3D
+			result = Vector3.Min(left, right);
+#else
+            Vector3.Min(ref left, ref right, out result);
+#endif
+        }
+        /// <summary>
+        /// Calculates the component-wise maximum of two vectors.
+        /// </summary>
+        /// <param name="left">A vector.</param>
+        /// <param name="right">Another vector.</param>
+        /// <param name="result">The component-wise maximum of the two vectors.</param>
+        internal static void ComponentMax(ref Vector3 left, ref Vector3 right, out Vector3 result)
+        {
+#if OPENTK || STANDALONE
+			Vector3.ComponentMax(ref left, ref right, out result);
+#elif UNITY3D
+			result = Vector3.Min(left, right);
+#else
+            Vector3.Max(ref left, ref right, out result);
+#endif
+        }
+        /// <summary>
+        /// Calculates the distance between two points on the XZ plane.
+        /// </summary>
+        /// <param name="a">A point.</param>
+        /// <param name="b">Another point.</param>
+        /// <returns>The distance between the two points.</returns>
+        internal static float Distance2D(Vector3 a, Vector3 b)
+        {
+            float result;
+            Distance2D(ref a, ref b, out result);
+            return result;
+        }
+        /// <summary>
+        /// Calculates the distance between two points on the XZ plane.
+        /// </summary>
+        /// <param name="a">A point.</param>
+        /// <param name="b">Another point.</param>
+        /// <param name="dist">The distance between the two points.</param>
+        internal static void Distance2D(ref Vector3 a, ref Vector3 b, out float dist)
+        {
+            float dx = b.X - a.X;
+            float dz = b.Z - a.Z;
+            dist = (float)Math.Sqrt(dx * dx + dz * dz);
+        }
+        /// <summary>
+        /// Calculates the dot product of two vectors projected onto the XZ plane.
+        /// </summary>
+        /// <param name="left">A vector.</param>
+        /// <param name="right">Another vector</param>
+        /// <param name="result">The dot product of the two vectors.</param>
+        internal static void Dot2D(ref Vector3 left, ref Vector3 right, out float result)
+        {
+            result = left.X * right.X + left.Z * right.Z;
+        }
+        /// <summary>
+        /// Calculates the dot product of two vectors projected onto the XZ plane.
+        /// </summary>
+        /// <param name="left">A vector.</param>
+        /// <param name="right">Another vector</param>
+        /// <returns>The dot product</returns>
+        internal static float Dot2D(ref Vector3 left, ref Vector3 right)
+        {
+            return left.X * right.X + left.Z * right.Z;
+        }
+        /// <summary>
+        /// Calculates the cross product of two vectors (formed from three points)
+        /// </summary>
+        /// <param name="p1">The first point</param>
+        /// <param name="p2">The second point</param>
+        /// <param name="p3">The third point</param>
+        /// <returns>The 2d cross product</returns>
+        internal static float Cross2D(Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            float result;
+            Cross2D(ref p1, ref p2, ref p3, out result);
+            return result;
+        }
+        /// <summary>
+        /// Calculates the cross product of two vectors (formed from three points)
+        /// </summary>
+        /// <param name="p1">The first point</param>
+        /// <param name="p2">The second point</param>
+        /// <param name="p3">The third point</param>
+        /// <param name="result">The 2d cross product</param>
+        internal static void Cross2D(ref Vector3 p1, ref Vector3 p2, ref Vector3 p3, out float result)
+        {
+            float u1 = p2.X - p1.X;
+            float v1 = p2.Z - p1.Z;
+            float u2 = p3.X - p1.X;
+            float v2 = p3.Z - p1.Z;
+
+            result = u1 * v2 - v1 * u2;
+        }
+        /// <summary>
+        /// Calculates the perpendicular dot product of two vectors projected onto the XZ plane.
+        /// </summary>
+        /// <param name="a">A vector.</param>
+        /// <param name="b">Another vector.</param>
+        /// <param name="result">The perpendicular dot product on the XZ plane.</param>
+        internal static void PerpDotXZ(ref Vector3 a, ref Vector3 b, out float result)
+        {
+            result = a.X * b.Z - a.Z * b.X;
+        }
+
+        internal static void CalculateSlopeAngle(ref Vector3 vec, out float angle)
+        {
+            Vector3 up = Vector3.UnitY;
+            float dot;
+            Vector3.Dot(ref vec, ref up, out dot);
+            angle = (float)Math.Acos(dot);
+        }
+
+
+
+        /// <summary>
+        /// Determine whether a ray (origin, dir) is intersecting a segment AB.
+        /// </summary>
+        /// <param name="origin">The origin of the ray.</param>
+        /// <param name="dir">The direction of the ray.</param>
+        /// <param name="a">The endpoint A of segment AB.</param>
+        /// <param name="b">The endpoint B of segment AB.</param>
+        /// <param name="t">The parameter t</param>
+        /// <returns>A value indicating whether the ray is intersecting with the segment.</returns>
+        public static bool RaySegment(Vector3 origin, Vector3 dir, Vector3 a, Vector3 b, out float t)
+        {
+            //default if not intersectng
+            t = 0;
+
+            Vector3 v = b - a;
+            Vector3 w = origin - a;
+
+            float d;
+
+            GeometryUtil.PerpDotXZ(ref dir, ref v, out d);
+            d *= -1;
+            if (Math.Abs(d) < 1e-6f)
+                return false;
+
+            d = 1.0f / d;
+            GeometryUtil.PerpDotXZ(ref v, ref w, out t);
+            t *= -d;
+            if (t < 0 || t > 1)
+                return false;
+
+            float s;
+            GeometryUtil.PerpDotXZ(ref dir, ref w, out s);
+            s *= -d;
+            if (s < 0 || s > 1)
+                return false;
+
+            return true;
+        }
+        /// <summary>
+        /// Determines whether two 2D segments AB and CD are intersecting.
+        /// </summary>
+        /// <param name="a">The endpoint A of segment AB.</param>
+        /// <param name="b">The endpoint B of segment AB.</param>
+        /// <param name="c">The endpoint C of segment CD.</param>
+        /// <param name="d">The endpoint D of segment CD.</param>
+        /// <returns>A value indicating whether the two segments are intersecting.</returns>
+        internal static bool SegmentSegment2D(ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d)
+        {
+            float a1, a2, a3;
+
+            GeometryUtil.Cross2D(ref a, ref b, ref d, out a1);
+            GeometryUtil.Cross2D(ref a, ref b, ref c, out a2);
+
+            if (a1 * a2 < 0.0f)
+            {
+                GeometryUtil.Cross2D(ref c, ref d, ref a, out a3);
+                float a4 = a3 + a2 - a1;
+
+                if (a3 * a4 < 0.0f)
+                    return true;
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Determines whether two 2D segments AB and CD are intersecting.
+        /// </summary>
+        /// <param name="a">The endpoint A of segment AB.</param>
+        /// <param name="b">The endpoint B of segment AB.</param>
+        /// <param name="c">The endpoint C of segment CD.</param>
+        /// <param name="d">The endpoint D of segment CD.</param>
+        /// <param name="s">The normalized dot product between CD and AC on the XZ plane.</param>
+        /// <param name="t">The normalized dot product between AB and AC on the XZ plane.</param>
+        /// <returns>A value indicating whether the two segments are intersecting.</returns>
+        internal static bool SegmentSegment2D(ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d, out float s, out float t)
+        {
+            Vector3 u = b - a;
+            Vector3 v = d - c;
+            Vector3 w = a - c;
+
+            float magnitude;
+            GeometryUtil.PerpDotXZ(ref u, ref v, out magnitude);
+
+            if (Math.Abs(magnitude) < 1e-6f)
+            {
+                //TODO is NaN the best value to set here?
+                s = float.NaN;
+                t = float.NaN;
+                return false;
+            }
+
+            GeometryUtil.PerpDotXZ(ref v, ref w, out s);
+            GeometryUtil.PerpDotXZ(ref u, ref w, out t);
+            s /= magnitude;
+            t /= magnitude;
+
+            return true;
+        }
+        /// <summary>
+        /// Determines whether two polygons A and B are intersecting
+        /// </summary>
+        /// <param name="polya">Polygon A's vertices</param>
+        /// <param name="npolya">Number of vertices for polygon A</param>
+        /// <param name="polyb">Polygon B's vertices</param>
+        /// <param name="npolyb">Number of vertices for polygon B</param>
+        /// <returns>True if intersecting, false if not</returns>
+        internal static bool PolyPoly2D(Vector3[] polya, int npolya, Vector3[] polyb, int npolyb)
+        {
+            const float EPS = 1E-4f;
+
+            for (int i = 0, j = npolya - 1; i < npolya; j = i++)
+            {
+                Vector3 va = polya[j];
+                Vector3 vb = polya[i];
+                Vector3 n = new Vector3(va.X - vb.X, 0.0f, va.Z - vb.Z);
+                float amin, amax, bmin, bmax;
+                ProjectPoly(n, polya, npolya, out amin, out amax);
+                ProjectPoly(n, polyb, npolyb, out bmin, out bmax);
+                if (!OverlapRange(amin, amax, bmin, bmax, EPS))
+                {
+                    //found separating axis
+                    return false;
+                }
+            }
+
+            for (int i = 0, j = npolyb - 1; i < npolyb; j = i++)
+            {
+                Vector3 va = polyb[j];
+                Vector3 vb = polyb[i];
+                Vector3 n = new Vector3(va.X - vb.X, 0.0f, va.Z - vb.Z);
+                float amin, amax, bmin, bmax;
+                ProjectPoly(n, polya, npolya, out amin, out amax);
+                ProjectPoly(n, polyb, npolyb, out bmin, out bmax);
+                if (!OverlapRange(amin, amax, bmin, bmax, EPS))
+                {
+                    //found separating axis
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Determines whether the segment interesects with the polygon.
+        /// </summary>
+        /// <param name="p0">Segment's first endpoint</param>
+        /// <param name="p1">Segment's second endpoint</param>
+        /// <param name="verts">Polygon's vertices</param>
+        /// <param name="nverts">The number of vertices in the polygon</param>
+        /// <param name="tmin">Parameter t minimum</param>
+        /// <param name="tmax">Parameter t maximum</param>
+        /// <param name="segMin">Minimum vertex index</param>
+        /// <param name="segMax">Maximum vertex index</param>
+        /// <returns>True if intersect, false if not</returns>
+        internal static bool SegmentPoly2D(Vector3 p0, Vector3 p1, Vector3[] verts, int nverts, out float tmin, out float tmax, out int segMin, out int segMax)
+        {
+            const float Epsilon = 0.00000001f;
+
+            tmin = 0;
+            tmax = 1;
+            segMin = -1;
+            segMax = -1;
+
+            Vector3 dir = p1 - p0;
+
+            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
+            {
+                Vector3 edge = verts[i] - verts[j];
+                Vector3 diff = p0 - verts[j];
+                float n = edge.Z * diff.X - edge.X * diff.Z;
+                float d = dir.Z * edge.X - dir.X * edge.Z;
+                if (Math.Abs(d) < Epsilon)
+                {
+                    //S is nearly parallel to this edge
+                    if (n < 0)
+                        return false;
+                    else
+                        continue;
+                }
+
+                float t = n / d;
+                if (d < 0)
+                {
+                    //segment S is entering across this edge
+                    if (t > tmin)
+                    {
+                        tmin = t;
+                        segMin = j;
+
+                        //S enters after leaving the polygon
+                        if (tmin > tmax)
+                            return false;
+                    }
+                }
+                else
+                {
+                    //segment S is leaving across this edge
+                    if (t < tmax)
+                    {
+                        tmax = t;
+                        segMax = j;
+
+                        //S leaves before entering the polygon
+                        if (tmax < tmin)
+                            return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        internal static void ProjectPoly(Vector3 axis, Vector3[] poly, int npoly, out float rmin, out float rmax)
+        {
+            GeometryUtil.Dot2D(ref axis, ref poly[0], out rmin);
+            GeometryUtil.Dot2D(ref axis, ref poly[0], out rmax);
+            for (int i = 1; i < npoly; i++)
+            {
+                float d;
+                GeometryUtil.Dot2D(ref axis, ref poly[i], out d);
+                rmin = Math.Min(rmin, d);
+                rmax = Math.Max(rmax, d);
+            }
+        }
+
+        internal static bool OverlapRange(float amin, float amax, float bmin, float bmax, float eps)
+        {
+            return ((amin + eps) > bmax || (amax - eps) < bmin) ? false : true;
+        }
     }
 
     public enum IndexBufferShapeEnum : int

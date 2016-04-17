@@ -79,7 +79,7 @@ namespace Engine.Geometry
             maxTris = 0;
             maxVertsPerContour = 0;
 
-            foreach (var c in contours)
+            foreach (var c in this.contours)
             {
                 int vertCount = c.Vertices.Length;
 
@@ -94,17 +94,17 @@ namespace Engine.Geometry
         /// <param name="item">The contour to add</param>
         public void Add(Contour item)
         {
-            if (item.IsNull)
-                throw new ArgumentException("Contour is null (less than 3 vertices)");
-
-            contours.Add(item);
+            if (item != null && !item.IsNull)
+            {
+                this.contours.Add(item);
+            }
         }
         /// <summary>
         /// Clear the set of contours.
         /// </summary>
         public void Clear()
         {
-            contours.Clear();
+            this.contours.Clear();
         }
         /// <summary>
         /// Checks if a specified <see cref="ContourSet"/> is contained in the <see cref="ContourSet"/>.
@@ -113,7 +113,7 @@ namespace Engine.Geometry
         /// <returns>A value indicating whether the set contains the specified contour.</returns>
         public bool Contains(Contour item)
         {
-            return contours.Contains(item);
+            return this.contours.Contains(item);
         }
         /// <summary>
         /// Copies the <see cref="Contour"/>s in the set to an array.
@@ -122,7 +122,7 @@ namespace Engine.Geometry
         /// <param name="arrayIndex">The zero-based index in array at which copying begins.</param>
         public void CopyTo(Contour[] array, int arrayIndex)
         {
-            contours.CopyTo(array, arrayIndex);
+            this.contours.CopyTo(array, arrayIndex);
         }
         /// <summary>
         /// Returns an enumerator that iterates through the entire <see cref="ContourSet"/>.
@@ -130,7 +130,7 @@ namespace Engine.Geometry
         /// <returns>An enumerator.</returns>
         public IEnumerator<Contour> GetEnumerator()
         {
-            return contours.GetEnumerator();
+            return this.contours.GetEnumerator();
         }
         /// <summary>
         /// (Not implemented) Remove a contour from the set
@@ -139,7 +139,7 @@ namespace Engine.Geometry
         /// <returns>throw InvalidOperatorException</returns>
         bool ICollection<Contour>.Remove(Contour item)
         {
-            throw new InvalidOperationException();
+            return this.contours.Remove(item);
         }
         /// <summary>
         /// Gets an enumerator that iterates through the set
@@ -147,7 +147,7 @@ namespace Engine.Geometry
         /// <returns>The enumerator</returns>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return this.GetEnumerator();
         }
     }
     /// <summary>
@@ -164,12 +164,12 @@ namespace Engine.Geometry
         /// <param name="indexB">The nearest index on contour B.</param>
         private static void GetClosestIndices(Contour a, Contour b, out int indexA, out int indexB)
         {
+            indexA = -1;
+            indexB = -1;
+
             int closestDistance = int.MaxValue;
             int lengthA = a.Vertices.Length;
             int lengthB = b.Vertices.Length;
-
-            indexA = -1;
-            indexB = -1;
 
             for (int i = 0; i < lengthA; i++)
             {
@@ -549,11 +549,17 @@ namespace Engine.Geometry
     [Flags]
     public enum ContourBuildFlags
     {
-        /// <summary>Build normally.</summary>
+        /// <summary>
+        /// Build normally.
+        /// </summary>
         None = 0,
-        /// <summary>Tessellate solid edges during contour simplification.</summary>
+        /// <summary>
+        /// Tessellate solid edges during contour simplification.
+        /// </summary>
         TessellateWallEdges = 0x01,
-        /// <summary>Tessellate edges between areas during contour simplification.</summary>
+        /// <summary>
+        /// Tessellate edges between areas during contour simplification.
+        /// </summary>
         TessellateAreaEdges = 0x02
     }
     /// <summary>

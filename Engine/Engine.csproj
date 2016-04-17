@@ -314,6 +314,8 @@
     <Compile Include="Geometry\CompactHeightfield.cs" />
     <Compile Include="Geometry\ContourSet.cs" />
     <Compile Include="Geometry\Heightfield.cs" />
+    <Compile Include="Geometry\PolyMesh.cs" />
+    <Compile Include="Geometry\PolyMeshDetail.cs" />
     <Compile Include="PathFinding\Graph.cs" />
     <Compile Include="PathFinding\GraphNode.cs" />
     <Compile Include="PathFinding\GraphNodeStates.cs" />
