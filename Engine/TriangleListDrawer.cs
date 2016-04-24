@@ -14,7 +14,7 @@ namespace Engine
         /// <summary>
         /// Line list mesh
         /// </summary>
-        private Mesh triangleListMesh
+        private Mesh mesh
         {
             get
             {
@@ -24,7 +24,7 @@ namespace Engine
         /// <summary>
         /// Triangle dictionary by color
         /// </summary>
-        private Dictionary<Color4, List<Triangle>> triangleDictionary = new Dictionary<Color4, List<Triangle>>();
+        private Dictionary<Color4, List<Triangle>> dictionary = new Dictionary<Color4, List<Triangle>>();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>
@@ -41,8 +41,7 @@ namespace Engine
         {
             this.EnableAlphaBlending = true;
 
-            this.triangleDictionary.Add(color, new List<Triangle>(triangles));
-
+            this.dictionary.Add(color, new List<Triangle>(triangles));
             this.dictionaryChanged = true;
         }
         /// <summary>
@@ -63,7 +62,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            if (this.triangleDictionary.Count > 0)
+            if (this.dictionary.Count > 0)
             {
                 this.WriteDataInBuffer();
             }
@@ -88,24 +87,24 @@ namespace Engine
         {
             if (triangle != null && triangle.Length > 0)
             {
-                if (!this.triangleDictionary.ContainsKey(color))
+                if (!this.dictionary.ContainsKey(color))
                 {
-                    this.triangleDictionary.Add(color, new List<Triangle>());
+                    this.dictionary.Add(color, new List<Triangle>());
                 }
                 else
                 {
-                    this.triangleDictionary[color].Clear();
+                    this.dictionary[color].Clear();
                 }
 
-                this.triangleDictionary[color].AddRange(triangle);
+                this.dictionary[color].AddRange(triangle);
 
                 this.dictionaryChanged = true;
             }
             else
             {
-                if (this.triangleDictionary.ContainsKey(color))
+                if (this.dictionary.ContainsKey(color))
                 {
-                    this.triangleDictionary.Remove(color);
+                    this.dictionary.Remove(color);
 
                     this.dictionaryChanged = true;
                 }
@@ -118,12 +117,12 @@ namespace Engine
         /// <param name="lines">Triangle list</param>
         public void AddTriangles(Color4 color, Triangle[] triangle)
         {
-            if (!this.triangleDictionary.ContainsKey(color))
+            if (!this.dictionary.ContainsKey(color))
             {
-                this.triangleDictionary.Add(color, new List<Triangle>());
+                this.dictionary.Add(color, new List<Triangle>());
             }
 
-            this.triangleDictionary[color].AddRange(triangle);
+            this.dictionary[color].AddRange(triangle);
 
             this.dictionaryChanged = true;
         }
@@ -131,11 +130,11 @@ namespace Engine
         /// Remove by color
         /// </summary>
         /// <param name="color">Color</param>
-        public void ClearTriangles(Color4 color)
+        public void Clear(Color4 color)
         {
-            if (this.triangleDictionary.ContainsKey(color))
+            if (this.dictionary.ContainsKey(color))
             {
-                this.triangleDictionary.Remove(color);
+                this.dictionary.Remove(color);
             }
 
             this.dictionaryChanged = true;
@@ -143,9 +142,9 @@ namespace Engine
         /// <summary>
         /// Remove all
         /// </summary>
-        public void ClearTriangles()
+        public void Clear()
         {
-            this.triangleDictionary.Clear();
+            this.dictionary.Clear();
 
             this.dictionaryChanged = true;
         }
@@ -158,26 +157,21 @@ namespace Engine
             {
                 List<IVertexData> data = new List<IVertexData>();
 
-                foreach (Color4 color in this.triangleDictionary.Keys)
+                foreach (Color4 color in this.dictionary.Keys)
                 {
-                    List<Triangle> triangles = this.triangleDictionary[color];
+                    List<Triangle> triangles = this.dictionary[color];
                     if (triangles.Count > 0)
                     {
                         for (int i = 0; i < triangles.Count; i++)
                         {
                             data.Add(new VertexPositionColor() { Position = triangles[i].Point1, Color = color });
                             data.Add(new VertexPositionColor() { Position = triangles[i].Point2, Color = color });
-
-                            data.Add(new VertexPositionColor() { Position = triangles[i].Point2, Color = color });
                             data.Add(new VertexPositionColor() { Position = triangles[i].Point3, Color = color });
-
-                            data.Add(new VertexPositionColor() { Position = triangles[i].Point3, Color = color });
-                            data.Add(new VertexPositionColor() { Position = triangles[i].Point1, Color = color });
                         }
                     }
                 }
 
-                this.triangleListMesh.WriteVertexData(this.DeviceContext, data.ToArray());
+                this.mesh.WriteVertexData(this.DeviceContext, data.ToArray());
 
                 this.dictionaryChanged = false;
             }

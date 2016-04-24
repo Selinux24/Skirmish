@@ -1302,19 +1302,9 @@ namespace Engine
                 }
                 else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
                 {
-                    string hashCode = vertices.GetMd5Sum();
-
-                    var files = ContentManager.FindContent(description.ContentPath, hashCode + ".nmi", false);
-                    if (files != null && files.Length == 1)
-                    {
-                        this.graph = NavMesh.Load(files[0]);
-                    }
-                    else
-                    {
-                        this.graph = NavMesh.Build(
-                            vertices, indices,
-                            description.PathFinder.NodeInclination);
-                    }
+                    this.graph = NavMesh.Build(
+                        vertices, indices,
+                        description.PathFinder.NodeInclination);
                 }
             }
 

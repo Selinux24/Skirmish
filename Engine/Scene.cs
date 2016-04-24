@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-#if DEBUG
-using System.Diagnostics;
-#endif
 using SharpDX;
 using SharpDX.Direct3D11;
 
@@ -427,8 +424,8 @@ namespace Engine
                     description.ContentPath,
                     description.Heightmap.HeightmapFileName,
                     description.Textures.TexturesLR,
-                    description.Heightmap.CellSize, 
-                    description.Heightmap.MaximumHeight, 
+                    description.Heightmap.CellSize,
+                    description.Heightmap.MaximumHeight,
                     transform);
             }
 
@@ -474,7 +471,7 @@ namespace Engine
 
             return newModel;
         }
-        
+
         /// <summary>
         /// Adds new mini-map
         /// </summary>

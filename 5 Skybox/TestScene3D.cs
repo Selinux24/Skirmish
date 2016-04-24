@@ -111,7 +111,7 @@ namespace Skybox
             };
             this.ruins = this.AddTerrain(desc, false);
 
-            this.bboxGlobalDrawer = this.AddLineListDrawer(GeometryUtil.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
+            this.bboxGlobalDrawer = this.AddLineListDrawer(Line3.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
             this.bboxGlobalDrawer.Visible = false;
 
             this.pickedTri = this.AddTriangleListDrawer(1);
@@ -213,7 +213,7 @@ namespace Skybox
 
             #endregion
 
-            Line3[] sphereLines = GeometryUtil.CreateWiredSphere(new BoundingSphere(), this.bsphSlices, this.bsphStacks);
+            Line3[] sphereLines = Line3.CreateWiredSphere(new BoundingSphere(), this.bsphSlices, this.bsphStacks);
             this.bsphLightsDrawer = this.AddLineListDrawer(sphereLines.Length * 5);
             this.bsphLightsDrawer.Visible = false;
 
@@ -266,7 +266,7 @@ namespace Skybox
             {
                 this.bsphLightsDrawer.SetLines(
                     light.LightColor,
-                    GeometryUtil.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
+                    Line3.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
             }
 
             #endregion

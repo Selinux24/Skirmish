@@ -609,12 +609,7 @@ namespace Engine.Common
             {
                 vList.Add(VertexData.CreateVertexPositionColor(triangles[i].Point1, color));
                 vList.Add(VertexData.CreateVertexPositionColor(triangles[i].Point2, color));
-
-                vList.Add(VertexData.CreateVertexPositionColor(triangles[i].Point2, color));
                 vList.Add(VertexData.CreateVertexPositionColor(triangles[i].Point3, color));
-
-                vList.Add(VertexData.CreateVertexPositionColor(triangles[i].Point3, color));
-                vList.Add(VertexData.CreateVertexPositionColor(triangles[i].Point1, color));
             }
 
             v = vList.ToArray();

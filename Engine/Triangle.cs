@@ -102,7 +102,7 @@ namespace Engine
         /// </summary>
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
-        /// <returns>Return the triangle list</returns>
+        /// <returns>Returns the triangle list</returns>
         public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Vector3[] vertices)
         {
             List<Triangle> triangleList = new List<Triangle>();
@@ -132,7 +132,7 @@ namespace Engine
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
-        /// <returns>Return the triangle list</returns>
+        /// <returns>Returns the triangle list</returns>
         public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Vector3[] vertices, uint[] indices)
         {
             List<Triangle> triangleList = new List<Triangle>();
@@ -149,12 +149,35 @@ namespace Engine
                     triangleList.Add(tri);
                 }
             }
-            else if (topology == PrimitiveTopology.TriangleStrip || topology == PrimitiveTopology.TriangleStripWithAdjacency)
+            else
             {
                 throw new NotImplementedException();
             }
 
             return triangleList.ToArray();
+        }
+        /// <summary>
+        /// Generate a triangle list from polygon
+        /// </summary>
+        /// <param name="poly">Polygon</param>
+        /// <returns>Returns the triangle list</returns>
+        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Polygon poly)
+        {
+            if (topology == PrimitiveTopology.TriangleList || topology == PrimitiveTopology.TriangleListWithAdjacency)
+            {
+                Triangle[] triList = new Triangle[poly.Count - 2];
+
+                for (int i = 0; i < triList.Length; i++)
+                {
+                    triList[i] = new Triangle(poly[0], poly[i + 1], poly[i + 2]);
+                }
+
+                return triList;
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
         /// <summary>
         /// Transform triangle coordinates

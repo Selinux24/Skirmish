@@ -1,11 +1,12 @@
-﻿using Engine;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using Engine;
 using Engine.Common;
+using Engine.Content;
 using Engine.Helpers;
 using Engine.PathFinding;
 using SharpDX;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace TerrainTest
@@ -34,8 +35,8 @@ namespace TerrainTest
         private List<Line3> oks = new List<Line3>();
         private List<Line3> errs = new List<Line3>();
         private LineListDrawer terrainLineDrawer = null;
-        private LineListDrawer terrainGridDrawer = null;
         private LineListDrawer terrainPointDrawer = null;
+        private TriangleListDrawer terrainGridDrawer = null;
 
         private ModelInstanced obelisk = null;
 
@@ -184,12 +185,12 @@ namespace TerrainTest
             {
                 this.helicopter.Manipulator.Position,
                 this.helicopter.Manipulator.Position + (Vector3.Up * 5f) + (this.helicopter.Manipulator.Forward * 10f),
-                this.GetRandomPoint(this.heightOffset),
-                this.GetRandomPoint(this.heightOffset),
-                this.GetRandomPoint(this.heightOffset),
-                this.GetRandomPoint(this.heightOffset),
-                this.GetRandomPoint(this.heightOffset),
-                this.GetRandomPoint(this.heightOffset),
+                this.DEBUGGetRandomPoint(this.heightOffset),
+                this.DEBUGGetRandomPoint(this.heightOffset),
+                this.DEBUGGetRandomPoint(this.heightOffset),
+                this.DEBUGGetRandomPoint(this.heightOffset),
+                this.DEBUGGetRandomPoint(this.heightOffset),
+                this.DEBUGGetRandomPoint(this.heightOffset),
             };
 
             this.curve.SetControlPoints(cPoints, 1, 10, 0.33f);
@@ -273,7 +274,7 @@ namespace TerrainTest
 
             #region DEBUG Path finding Grid
 
-            this.terrainGridDrawer = this.AddLineListDrawer(10000);
+            this.terrainGridDrawer = this.AddTriangleListDrawer(10000);
             this.terrainGridDrawer.EnableAlphaBlending = true;
             this.terrainGridDrawer.Visible = false;
             this.terrainGridDrawer.DeferredEnabled = false;
@@ -337,7 +338,7 @@ namespace TerrainTest
             this.curveLineDrawer = this.AddLineListDrawer(20000);
             this.curveLineDrawer.Visible = false;
             this.curveLineDrawer.DeferredEnabled = false;
-            this.curveLineDrawer.SetLines(this.wAxisColor, GeometryUtil.CreateAxis(Matrix.Identity, 20f));
+            this.curveLineDrawer.SetLines(this.wAxisColor, Line3.CreateAxis(Matrix.Identity, 20f));
 
             this.DEBUGComputePath();
 
@@ -414,60 +415,66 @@ namespace TerrainTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F2))
             {
-                this.terrainPointDrawer.Visible = this.terrainGridDrawer.Visible = !this.terrainGridDrawer.Visible;
+                this.terrainGridDrawer.Visible = !this.terrainGridDrawer.Visible;
             }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Add))
-            {
-                this.gridIndex++;
-                this.UpdateGridDrawer();
-            }
-            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
-            {
-                this.gridIndex--;
-                this.UpdateGridDrawer();
-            }
-
 
             if (this.Game.Input.KeyJustReleased(Keys.F3))
             {
-                this.curveLineDrawer.Visible = !this.curveLineDrawer.Visible;
+                this.terrainPointDrawer.Visible = !this.terrainPointDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F4))
             {
-                this.helicopterLineDrawer.Visible = !this.helicopterLineDrawer.Visible;
+                this.curveLineDrawer.Visible = !this.curveLineDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                var cast = this.Lights.DirectionalLights[0].CastShadow;
-
-                this.Lights.DirectionalLights[0].CastShadow = !cast;
-                this.shadowMapDrawer.Visible = this.shadowMapDrawer.Visible ? this.shadowMapDrawer.Visible : !cast;
+                this.helicopterLineDrawer.Visible = !this.helicopterLineDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
-                this.shadowMapDrawer.Visible = !this.shadowMapDrawer.Visible;
+                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F7))
+            {
+                this.shadowMapDrawer.Visible = !this.shadowMapDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F8))
             {
                 this.useDebugTex = !this.useDebugTex;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Add))
             {
+                this.gridIndex++;
+                this.DEBUGUpdateGridDrawer();
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
+            {
+                this.gridIndex--;
+                this.DEBUGUpdateGridDrawer();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Right))
+            {
                 this.helicopter.TextureIndex++;
-                if (this.helicopter.TextureIndex > 2) this.helicopter.TextureIndex = 0;
+                if (this.helicopter.TextureIndex > 2) this.helicopter.TextureIndex = 2;
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            {
+                this.helicopter.TextureIndex--;
+                if (this.helicopter.TextureIndex < 0) this.helicopter.TextureIndex = 0;
             }
 
             if (this.Game.Input.LeftMouseButtonPressed)
             {
                 if (this.terrainGridDrawer.Visible)
                 {
-                    this.terrainPointDrawer.ClearLines();
+                    this.terrainPointDrawer.Clear();
 
                     if (picked)
                     {
@@ -475,8 +482,8 @@ namespace TerrainTest
                         Triangle[] triangles;
                         if (this.terrain.FindAllGroundPosition(position.X, position.Z, out positions, out triangles))
                         {
-                            this.terrainPointDrawer.SetLines(Color.Magenta, Line3.Transform(GeometryUtil.CreateCrossList(positions, 1f), this.m));
-                            this.terrainPointDrawer.SetLines(Color.DarkCyan, Line3.Transform(GeometryUtil.CreateWiredTriangle(triangles), this.m));
+                            this.terrainPointDrawer.SetLines(Color.Magenta, Line3.Transform(Line3.CreateCrossList(positions, 1f), this.m));
+                            this.terrainPointDrawer.SetLines(Color.DarkCyan, Line3.Transform(Line3.CreateWiredTriangle(triangles), this.m));
                             if (positions.Length > 1)
                             {
                                 this.terrainPointDrawer.SetLines(Color.Cyan, Line3.Transform(new Line3(positions[0], positions[positions.Length - 1]), this.m));
@@ -531,9 +538,9 @@ namespace TerrainTest
                 this.v = 0.01f;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Add))
+            if (this.Game.Input.KeyJustReleased(Keys.C))
             {
-                this.curve.AddPoint(this.GetRandomPoint(this.heightOffset));
+                this.curve.AddPoint(this.DEBUGGetRandomPoint(this.heightOffset));
 
                 this.DEBUGComputePath();
             }
@@ -606,7 +613,7 @@ namespace TerrainTest
                 }
                 else
                 {
-                    this.curve.AddPoint(this.GetRandomPoint(this.heightOffset));
+                    this.curve.AddPoint(this.DEBUGGetRandomPoint(this.heightOffset));
 
                     this.DEBUGComputePath();
                 }
@@ -615,9 +622,9 @@ namespace TerrainTest
             Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
             BoundingSphere sph = this.helicopter.GetBoundingSphere();
 
-            this.curveLineDrawer.SetLines(this.hAxisColor, GeometryUtil.CreateAxis(rot, 5f));
+            this.curveLineDrawer.SetLines(this.hAxisColor, Line3.CreateAxis(rot, 5f));
 
-            this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.20f), GeometryUtil.CreateWiredSphere(sph, 50, 20));
+            this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.20f), Line3.CreateWiredSphere(sph, 50, 20));
 
             #endregion
 
@@ -667,53 +674,6 @@ namespace TerrainTest
             #endregion
         }
 
-        private void UpdateGridDrawer()
-        {
-            var nodes = this.terrain.GetNodes();
-            if (nodes != null && nodes.Length > 0)
-            {
-                if (this.gridIndex < 0)
-                {
-                    this.terrainGridDrawer.ClearLines();
-
-                    for (int i = 0; i < nodes.Length; i++)
-                    {
-                        IGraphNode node = nodes[i];
-
-                        float c = (node.Cost / MathUtil.PiOverFour);
-
-                        Color4 color = Color.Transparent;
-
-                        if (c > 0.66f) { color = new Color4(Color.Red.ToColor3(), 1f); }
-                        else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 1f); }
-                        else { color = new Color4(Color.Green.ToColor3(), 1f); }
-
-                        Vector3[] edges = node.GetPoints();
-
-                        this.terrainGridDrawer.AddLines(color, Line3.Transform(GeometryUtil.CreateWiredPolygon(edges), this.m));
-                    }
-                }
-                else if (this.gridIndex < nodes.Length)
-                {
-                    this.terrainGridDrawer.ClearLines();
-
-                    IGraphNode node = nodes[this.gridIndex];
-
-                    float c = (node.Cost / MathUtil.PiOverFour);
-
-                    Color4 color = Color.Transparent;
-
-                    if (c > 0.66f) { color = new Color4(Color.Red.ToColor3(), 1f); }
-                    else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 1f); }
-                    else { color = new Color4(Color.Green.ToColor3(), 1f); }
-
-                    Vector3[] edges = node.GetPoints();
-
-                    this.terrainGridDrawer.SetLines(color, Line3.Transform(GeometryUtil.CreateWiredPolygon(edges), this.m));
-                }
-            }
-        }
-
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
@@ -734,12 +694,12 @@ namespace TerrainTest
                 path.Add(pos);
             }
 
-            this.curveLineDrawer.SetLines(this.curvesColor, GeometryUtil.CreatePath(path.ToArray()));
-            this.curveLineDrawer.SetLines(this.pointsColor, GeometryUtil.CreateCrossList(this.curve.Points, 0.5f));
-            this.curveLineDrawer.SetLines(this.segmentsColor, GeometryUtil.CreatePath(this.curve.Points));
+            this.curveLineDrawer.SetLines(this.curvesColor, Line3.CreatePath(path.ToArray()));
+            this.curveLineDrawer.SetLines(this.pointsColor, Line3.CreateCrossList(this.curve.Points, 0.5f));
+            this.curveLineDrawer.SetLines(this.segmentsColor, Line3.CreatePath(this.curve.Points));
         }
 
-        private Vector3 GetRandomPoint(Vector3 offset)
+        private Vector3 DEBUGGetRandomPoint(Vector3 offset)
         {
             BoundingBox bbox = this.terrain.GetBoundingBox();
 
@@ -752,6 +712,67 @@ namespace TerrainTest
                 {
                     return p + offset;
                 }
+            }
+        }
+
+        private void DEBUGUpdateGridDrawer()
+        {
+            var nodes = this.terrain.GetNodes();
+            if (nodes != null && nodes.Length > 0)
+            {
+                if (this.gridIndex <= -1)
+                {
+                    this.gridIndex = -1;
+
+                    this.terrainGridDrawer.Clear();
+
+                    for (int i = 0; i < nodes.Length; i++)
+                    {
+                        IGraphNode node = nodes[i];
+
+                        float c = (node.Cost / MathUtil.PiOverFour);
+
+                        Color4 color = Color.Transparent;
+
+                        if (c > 0.66f) { color = new Color4(Color.Red.ToColor3(), 0.55f); }
+                        else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 0.55f); }
+                        else { color = new Color4(Color.Green.ToColor3(), 0.55f); }
+
+                        Polygon poly = ((NavMeshNode)node).Poly;
+
+                        this.terrainGridDrawer.AddTriangles(color, Triangle.Transform(Triangle.ComputeTriangleList(SharpDX.Direct3D.PrimitiveTopology.TriangleList, poly), this.m));
+                    }
+                }
+                else
+                {
+                    if (this.gridIndex >= nodes.Length)
+                    {
+                        this.gridIndex = nodes.Length - 1;
+                    }
+
+                    if (this.gridIndex < nodes.Length)
+                    {
+                        this.terrainGridDrawer.Clear();
+
+                        IGraphNode node = nodes[this.gridIndex];
+
+                        float c = (node.Cost / MathUtil.PiOverFour);
+
+                        Color4 color = Color.Transparent;
+
+                        if (c > 0.66f) { color = new Color4(Color.Red.ToColor3(), 0.55f); }
+                        else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 0.55f); }
+                        else { color = new Color4(Color.Green.ToColor3(), 0.55f); }
+
+                        Polygon poly = ((NavMeshNode)node).Poly;
+
+                        this.terrainGridDrawer.SetTriangles(color, Triangle.Transform(Triangle.ComputeTriangleList(SharpDX.Direct3D.PrimitiveTopology.TriangleList, poly), this.m));
+                    }
+                }
+            }
+            else
+            {
+                this.gridIndex = -1;
             }
         }
     }

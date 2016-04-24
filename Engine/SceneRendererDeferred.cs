@@ -22,6 +22,8 @@ namespace Engine
     /// </summary>
     public class SceneRendererDeferred : ISceneRenderer
     {
+        private const int ShadowMapSize = 4096;
+
         /// <summary>
         /// Light geometry
         /// </summary>
@@ -159,7 +161,7 @@ namespace Engine
 
             this.UpdateRectangleAndView();
 
-            this.shadowMapper = new ShadowMap(game, 2048, 2048);
+            this.shadowMapper = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
             this.geometryBuffer = new GBuffer(game);
             this.lightBuffer = new LightBuffer(game);
 

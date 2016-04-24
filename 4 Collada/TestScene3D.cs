@@ -110,7 +110,7 @@ namespace Collada
             this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(rainEmitter, "raindrop.dds"));
 
             BoundingBox[] bboxes = this.ground.GetBoundingBoxes(5);
-            Line3[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
+            Line3[] listBoxes = Line3.CreateWiredBox(bboxes);
 
             this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
             this.bboxesDrawer.Visible = false;
@@ -125,7 +125,7 @@ namespace Collada
             {
                 GridNode node = (GridNode)nodes[i];
 
-                squares.AddRange(GeometryUtil.CreateWiredSquare(node.GetPoints()));
+                squares.AddRange(Line3.CreateWiredSquare(node.GetPoints()));
             }
 
             this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));

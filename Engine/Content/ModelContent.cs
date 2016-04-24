@@ -361,7 +361,7 @@ namespace Engine.Content
         /// <param name="vertices">Vertex list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent Generate(PrimitiveTopology topology, VertexTypes vertexType, VertexData[] vertices, MaterialContent material)
+        public static ModelContent Generate(PrimitiveTopology topology, VertexTypes vertexType, VertexData[] vertices, MaterialContent material = null)
         {
             return Generate(topology, vertexType, vertices, null, material);
         }
@@ -374,13 +374,16 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent Generate(PrimitiveTopology topology, VertexTypes vertexType, VertexData[] vertices, uint[] indices, MaterialContent material)
+        public static ModelContent Generate(PrimitiveTopology topology, VertexTypes vertexType, VertexData[] vertices, uint[] indices, MaterialContent material = null)
         {
             ModelContent modelContent = new ModelContent();
 
-            modelContent.Images.Import(ref material);
+            if (material != null)
+            {
+                modelContent.Images.Import(ref material);
 
-            modelContent.Materials.Add(ModelContent.DefaultMaterial, material);
+                modelContent.Materials.Add(ModelContent.DefaultMaterial, material);
+            }
 
             SubMeshContent geo = new SubMeshContent()
             {
@@ -388,10 +391,10 @@ namespace Engine.Content
                 VertexType = vertexType,
                 Vertices = vertices,
                 Indices = indices,
-                Material = ModelContent.DefaultMaterial,
+                Material = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial,
             };
 
-            modelContent.Geometry.Add(ModelContent.StaticMesh, ModelContent.DefaultMaterial, geo);
+            modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
             modelContent.Optimize();
 
             return modelContent;
@@ -401,10 +404,18 @@ namespace Engine.Content
         /// </summary>
         /// <param name="lines">Lines</param>
         /// <param name="color">Color</param>
+        /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateLineList(Line3[] lines, Color4 color)
+        public static ModelContent GenerateLineList(Line3[] lines, Color4 color, MaterialContent material = null)
         {
             ModelContent modelContent = new ModelContent();
+
+            if (material != null)
+            {
+                modelContent.Images.Import(ref material);
+
+                modelContent.Materials.Add(ModelContent.DefaultMaterial, material);
+            }
 
             VertexData[] verts = null;
             VertexData.CreateLineList(lines, color, out verts);
@@ -414,10 +425,10 @@ namespace Engine.Content
                 Topology = PrimitiveTopology.LineList,
                 VertexType = VertexTypes.PositionColor,
                 Vertices = verts,
-                Material = ModelContent.NoMaterial,
+                Material = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial,
             };
 
-            modelContent.Geometry.Add(ModelContent.StaticMesh, ModelContent.NoMaterial, geo);
+            modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
             modelContent.Optimize();
 
             return modelContent;
@@ -427,23 +438,31 @@ namespace Engine.Content
         /// </summary>
         /// <param name="triangles">Triangles</param>
         /// <param name="color">Color</param>
+        /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateTriangleList(Triangle[] triangles, Color4 color)
+        public static ModelContent GenerateTriangleList(Triangle[] triangles, Color4 color, MaterialContent material = null)
         {
             ModelContent modelContent = new ModelContent();
+
+            if (material != null)
+            {
+                modelContent.Images.Import(ref material);
+
+                modelContent.Materials.Add(ModelContent.DefaultMaterial, material);
+            }
 
             VertexData[] verts = null;
             VertexData.CreateTriangleList(triangles, color, out verts);
 
             SubMeshContent geo = new SubMeshContent()
             {
-                Topology = PrimitiveTopology.LineList,
+                Topology = PrimitiveTopology.TriangleList,
                 VertexType = VertexTypes.PositionColor,
                 Vertices = verts,
-                Material = ModelContent.NoMaterial,
+                Material = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial,
             };
 
-            modelContent.Geometry.Add(ModelContent.StaticMesh, ModelContent.NoMaterial, geo);
+            modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
             modelContent.Optimize();
 
             return modelContent;
@@ -523,7 +542,7 @@ namespace Engine.Content
 
             #region Find billboard positions
 
-            for (int i = 0; i< triList.Length; i++)
+            for (int i = 0; i < triList.Length; i++)
             {
                 Triangle tri = triList[i];
 

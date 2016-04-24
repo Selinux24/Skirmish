@@ -1,9 +1,9 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
-using System.IO;
+using SharpDX;
 
 namespace Engine.Common
 {
@@ -229,8 +229,6 @@ namespace Engine.Common
         {
             NavMesh result = new NavMesh();
 
-            result.HashCode = triangles.GetMd5Sum();
-
             BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetCorners());
 
             //Remove dups
@@ -375,7 +373,34 @@ namespace Engine.Common
                 nodes[nodeIndex++] = new NavMeshNode(res, new Polygon(points));
             }
 
+            List<NavMeshConnectionInfo> connections = new List<NavMeshConnectionInfo>();
+
+            foreach (var node in nodes)
+            {
+                var conns = Array.FindAll(nodes, n =>
+                {
+                    Polygon.SharedEdge[] sharedEdges;
+                    if (n != node && Polygon.GetSharedEdges(node.Poly, n.Poly, out sharedEdges))
+                    {
+                        var nc = new NavMeshConnectionInfo()
+                        {
+                            First = Array.IndexOf(nodes, node),
+                            Second = Array.IndexOf(nodes, n),
+                        };
+
+                        connections.Add(nc);
+
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                });
+            }
+
             res.Nodes = nodes;
+            res.Connections = connections.ToArray();
 
             return res;
         }
@@ -920,132 +945,12 @@ namespace Engine.Common
                 v.IsEar = false;
             }
         }
-        /// <summary>
-        /// Save navigation mesh to file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        /// <param name="nm">Navigation mesh</param>
-        public static void Save(string fileName, NavMesh nm)
-        {
-            using (var fs = File.OpenWrite(fileName))
-            {
-                using (var wr = new BinaryWriter(fs, Encoding.UTF8))
-                {
-                    wr.Write(nm.Nodes.Length);
-
-                    foreach (NavMeshNode node in nm.Nodes)
-                    {
-                        wr.Write(node.Poly.Count);
-                        for (int i = 0; i < node.Poly.Count; i++)
-                        {
-                            wr.Write(node.Poly[i].X);
-                            wr.Write(node.Poly[i].Y);
-                            wr.Write(node.Poly[i].Z);
-                        }
-                    }
-
-                    wr.Write(nm.Connections.Length);
-
-                    foreach (NavMeshConnectionInfo connection in nm.Connections)
-                    {
-                        wr.Write(connection.First);
-                        wr.Write(connection.Second);
-                        wr.Write(connection.Segment.Point1.X);
-                        wr.Write(connection.Segment.Point1.Y);
-                        wr.Write(connection.Segment.Point1.Z);
-                        wr.Write(connection.Segment.Point2.X);
-                        wr.Write(connection.Segment.Point2.Y);
-                        wr.Write(connection.Segment.Point2.Z);
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Load navigation mesh from file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        /// <returns>Returns the loaded navigation mesh</returns>
-        public static NavMesh Load(string fileName)
-        {
-            using (var fs = File.OpenRead(fileName))
-            {
-                using (var rd = new BinaryReader(fs, Encoding.UTF8))
-                {
-                    return Load(rd);
-                }
-            }
-        }
-        /// <summary>
-        /// Load navigation mesh from memory stream
-        /// </summary>
-        /// <param name="stream">Memory stream</param>
-        /// <returns>Returns the loaded navigation mesh</returns>
-        public static NavMesh Load(MemoryStream stream)
-        {
-            using (var rd = new BinaryReader(stream, Encoding.UTF8))
-            {
-                return Load(rd);
-            }
-        }
-        /// <summary>
-        /// Load navigation mesh from a binary reader
-        /// </summary>
-        /// <param name="rd">File Binary reader</param>
-        /// <returns>Returns the loaded navigation mesh</returns>
-        public static NavMesh Load(BinaryReader rd)
-        {
-            NavMesh nm = new NavMesh();
-
-            var nodeCount = rd.ReadInt32();
-            NavMeshNode[] nodes = new NavMeshNode[nodeCount];
-
-            for (int n = 0; n < nodeCount; n++)
-            {
-                var vCount = rd.ReadInt32();
-                Vector3[] points = new Vector3[vCount];
-
-                for (int p = 0; p < vCount; p++)
-                {
-                    points[p] = new Vector3(rd.ReadSingle(), rd.ReadSingle(), rd.ReadSingle());
-                }
-
-                nodes[n] = new NavMeshNode(nm, new Polygon(points));
-            }
-
-            nm.Nodes = nodes;
-
-            var connectionCount = rd.ReadInt32();
-            NavMeshConnectionInfo[] connections = new NavMeshConnectionInfo[connectionCount];
-
-            for (int n = 0; n < connectionCount; n++)
-            {
-                var poly1 = rd.ReadInt32();
-                var poly2 = rd.ReadInt32();
-                var point1 = new Vector3(rd.ReadSingle(), rd.ReadSingle(), rd.ReadSingle());
-                var point2 = new Vector3(rd.ReadSingle(), rd.ReadSingle(), rd.ReadSingle());
-
-                connections[n] = new NavMeshConnectionInfo()
-                {
-                    First = poly1,
-                    Second = poly2,
-                    Segment = new Line3(point1, point2),
-                };
-            }
-
-            nm.Connections = connections;
-
-            return nm;
-        }
 
         /// <summary>
         /// Polygon connection list
         /// </summary>
         private List<NavMeshConnectionInfo> connections = new List<NavMeshConnectionInfo>();
 
-        /// <summary>
-        /// Hash code
-        /// </summary>
-        public string HashCode;
         /// <summary>
         /// Connectios
         /// </summary>

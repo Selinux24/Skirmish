@@ -15,6 +15,8 @@ namespace Engine
     /// </summary>
     public class SceneRendererForward : ISceneRenderer
     {
+        private const int ShadowMapSize = 4096;
+
         /// <summary>
         /// Shadow mapper
         /// </summary>
@@ -60,7 +62,7 @@ namespace Engine
         {
             this.Game = game;
 
-            this.shadowMapper = new ShadowMap(game, 2048, 2048);
+            this.shadowMapper = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
 
             this.UpdateContext = new UpdateContext()
             {

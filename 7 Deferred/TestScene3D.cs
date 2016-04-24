@@ -273,7 +273,7 @@ namespace DeferredTest
 
             #region Light Sphere Marker
 
-            Line3[] axis = GeometryUtil.CreateAxis(Matrix.Identity, 5f);
+            Line3[] axis = Line3.CreateAxis(Matrix.Identity, 5f);
 
             this.lineDrawer = this.AddLineListDrawer(axis, Color.Red);
             this.lineDrawer.Opaque = false;

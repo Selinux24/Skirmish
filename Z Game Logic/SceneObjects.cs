@@ -599,7 +599,7 @@ namespace GameLogic
         }
         private void SetFrustum()
         {
-            this.lineDrawer.SetLines(this.frstColor, GeometryUtil.CreateWiredFrustum(this.Camera.Frustum));
+            this.lineDrawer.SetLines(this.frstColor, Line3.CreateWiredFrustum(this.Camera.Frustum));
         }
 
         private void NewGame()
@@ -729,7 +729,7 @@ namespace GameLogic
             BoundingSphere bsph = this.soldierModels[soldier].GetBoundingSphere();
 
             this.Camera.LookTo(bsph.Center, CameraTranslations.Quick);
-            this.lineDrawer.SetLines(this.bsphColor, GeometryUtil.CreateWiredSphere(bsph, this.bsphSlices, this.bsphStacks));
+            this.lineDrawer.SetLines(this.bsphColor, Line3.CreateWiredSphere(bsph, this.bsphSlices, this.bsphStacks));
         }
         private void UpdateSoldierStates()
         {

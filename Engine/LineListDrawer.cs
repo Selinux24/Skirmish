@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine
 {
@@ -14,7 +14,7 @@ namespace Engine
         /// <summary>
         /// Line list mesh
         /// </summary>
-        private Mesh lineListMesh
+        private Mesh mesh
         {
             get
             {
@@ -24,27 +24,12 @@ namespace Engine
         /// <summary>
         /// Lines dictionary by color
         /// </summary>
-        private Dictionary<Color4, List<Line3>> lineDictionary = new Dictionary<Color4, List<Line3>>();
+        private Dictionary<Color4, List<Line3>> dictionary = new Dictionary<Color4, List<Line3>>();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>
         private bool dictionaryChanged = false;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="lines">Line list</param>
-        /// <param name="color">Color</param>
-        public LineListDrawer(Game game, Line3[] lines, Color4 color)
-            : base(game, ModelContent.GenerateLineList(lines, color))
-        {
-            this.EnableAlphaBlending = true;
-
-            this.lineDictionary.Add(color, new List<Line3>(lines));
-
-            this.dictionaryChanged = true;
-        }
         /// <summary>
         /// Constructor
         /// </summary>
@@ -58,12 +43,42 @@ namespace Engine
             this.dictionaryChanged = false;
         }
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="lines">Line list</param>
+        /// <param name="color">Color</param>
+        public LineListDrawer(Game game, Line3[] lines, Color4 color)
+            : base(game, ModelContent.GenerateLineList(lines, color))
+        {
+            this.EnableAlphaBlending = true;
+
+            this.dictionary.Add(color, new List<Line3>(lines));
+            this.dictionaryChanged = true;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="color">Color</param>
+        public LineListDrawer(Game game, Triangle[] triangles, Color4 color)
+            : base(game, ModelContent.GenerateLineList(Line3.CreateWiredTriangle(triangles), color))
+        {
+            this.EnableAlphaBlending = true;
+
+            var lines = Line3.CreateWiredTriangle(triangles);
+
+            this.dictionary.Add(color, new List<Line3>(lines));
+            this.dictionaryChanged = true;
+        }
+        /// <summary>
         /// Update content
         /// </summary>
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            if (this.lineDictionary.Count > 0)
+            if (this.dictionary.Count > 0)
             {
                 this.WriteDataInBuffer();
             }
@@ -97,24 +112,24 @@ namespace Engine
         {
             if (lines != null && lines.Length > 0)
             {
-                if (!this.lineDictionary.ContainsKey(color))
+                if (!this.dictionary.ContainsKey(color))
                 {
-                    this.lineDictionary.Add(color, new List<Line3>());
+                    this.dictionary.Add(color, new List<Line3>());
                 }
                 else
                 {
-                    this.lineDictionary[color].Clear();
+                    this.dictionary[color].Clear();
                 }
 
-                this.lineDictionary[color].AddRange(lines);
+                this.dictionary[color].AddRange(lines);
 
                 this.dictionaryChanged = true;
             }
             else
             {
-                if (this.lineDictionary.ContainsKey(color))
+                if (this.dictionary.ContainsKey(color))
                 {
-                    this.lineDictionary.Remove(color);
+                    this.dictionary.Remove(color);
 
                     this.dictionaryChanged = true;
                 }
@@ -136,12 +151,60 @@ namespace Engine
         /// <param name="lines">Line list</param>
         public void AddLines(Color4 color, Line3[] lines)
         {
-            if (!this.lineDictionary.ContainsKey(color))
+            if (!this.dictionary.ContainsKey(color))
             {
-                this.lineDictionary.Add(color, new List<Line3>());
+                this.dictionary.Add(color, new List<Line3>());
             }
 
-            this.lineDictionary[color].AddRange(lines);
+            this.dictionary[color].AddRange(lines);
+
+            this.dictionaryChanged = true;
+        }
+        /// <summary>
+        /// Set triangle list
+        /// </summary>
+        /// <param name="color">Color</param>
+        /// <param name="lines">Triangle list</param>
+        public void SetTriangles(Color4 color, Triangle[] triangles)
+        {
+            if (triangles != null && triangles.Length > 0)
+            {
+                if (!this.dictionary.ContainsKey(color))
+                {
+                    this.dictionary.Add(color, new List<Line3>());
+                }
+                else
+                {
+                    this.dictionary[color].Clear();
+                }
+
+                this.dictionary[color].AddRange(Line3.CreateWiredTriangle(triangles));
+
+                this.dictionaryChanged = true;
+            }
+            else
+            {
+                if (this.dictionary.ContainsKey(color))
+                {
+                    this.dictionary.Remove(color);
+
+                    this.dictionaryChanged = true;
+                }
+            }
+        }
+        /// <summary>
+        /// Add triangles to list
+        /// </summary>
+        /// <param name="color">Color</param>
+        /// <param name="lines">Triangle list</param>
+        public void AddTriangles(Color4 color, Triangle[] triangles)
+        {
+            if (!this.dictionary.ContainsKey(color))
+            {
+                this.dictionary.Add(color, new List<Line3>());
+            }
+
+            this.dictionary[color].AddRange(Line3.CreateWiredTriangle(triangles));
 
             this.dictionaryChanged = true;
         }
@@ -149,11 +212,11 @@ namespace Engine
         /// Remove by color
         /// </summary>
         /// <param name="color">Color</param>
-        public void ClearLines(Color4 color)
+        public void Clear(Color4 color)
         {
-            if (this.lineDictionary.ContainsKey(color))
+            if (this.dictionary.ContainsKey(color))
             {
-                this.lineDictionary.Remove(color);
+                this.dictionary.Remove(color);
             }
 
             this.dictionaryChanged = true;
@@ -161,9 +224,9 @@ namespace Engine
         /// <summary>
         /// Remove all
         /// </summary>
-        public void ClearLines()
+        public void Clear()
         {
-            this.lineDictionary.Clear();
+            this.dictionary.Clear();
 
             this.dictionaryChanged = true;
         }
@@ -176,9 +239,9 @@ namespace Engine
             {
                 List<IVertexData> data = new List<IVertexData>();
 
-                foreach (Color4 color in this.lineDictionary.Keys)
+                foreach (Color4 color in this.dictionary.Keys)
                 {
-                    List<Line3> lines = this.lineDictionary[color];
+                    List<Line3> lines = this.dictionary[color];
                     if (lines.Count > 0)
                     {
                         for (int i = 0; i < lines.Count; i++)
@@ -189,7 +252,7 @@ namespace Engine
                     }
                 }
 
-                this.lineListMesh.WriteVertexData(this.DeviceContext, data.ToArray());
+                this.mesh.WriteVertexData(this.DeviceContext, data.ToArray());
 
                 this.dictionaryChanged = false;
             }
