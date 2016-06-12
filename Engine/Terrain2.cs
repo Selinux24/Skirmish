@@ -1302,9 +1302,9 @@ namespace Engine
                 }
                 else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
                 {
-                    this.graph = NavMesh.Build(
-                        vertices, indices,
-                        description.PathFinder.NodeInclination);
+                    BoundingBox bbox = this.GetBoundingBox();
+
+                    this.graph = NavMesh.Test(bbox, vertices, indices);
                 }
             }
 

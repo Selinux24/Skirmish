@@ -404,6 +404,71 @@ namespace Engine.Common
 
             return res;
         }
+
+        public static NavMesh Test(BoundingBox bbox, VertexData[] vertices, uint[] indices)
+        {
+            int tris = indices.Length / 3;
+
+            Triangle[] triangles = new Triangle[tris];
+
+            int index = 0;
+            for (int i = 0; i < tris; i++)
+            {
+                triangles[i] = new Triangle(
+                    vertices[indices[index++]].Position.Value,
+                    vertices[indices[index++]].Position.Value,
+                    vertices[indices[index++]].Position.Value);
+            }
+
+            return Test(bbox, triangles);
+        }
+
+        public static NavMesh Test(BoundingBox bbox, Triangle[] triangles)
+        {
+            //float cellSize = 0.3f;
+            //float cellHeight = 0.2f;
+
+            float diagonal = Vector2.Distance(new Vector2(bbox.Maximum.X, bbox.Maximum.Z), new Vector2(bbox.Minimum.X, bbox.Minimum.Z));
+
+            float cellSize = diagonal / 512f;
+            float cellHeight = cellSize * 0.66f;
+            int walkableHeight = 1;
+            int walkableClimb = 1;
+
+            var fh = new Geometry.Heightfield(bbox, cellSize, cellHeight);
+            fh.RasterizeTriangles(triangles, Geometry.Area.Default);
+            fh.FilterLedgeSpans(walkableHeight * 10, walkableClimb * 2);
+            fh.FilterLowHangingWalkableObstacles(walkableClimb * 2);
+            fh.FilterWalkableLowHeightSpans(walkableHeight * 10);
+
+            int radius = 1;
+            int borderSize = 0;
+            int minRegionArea = 16;
+            int mergeRegionArea = 40;
+
+            var ch = new Geometry.CompactHeightfield(fh, walkableHeight, walkableClimb);
+            ch.Erode(radius);
+            ch.BuildDistanceField();
+            ch.BuildRegions(borderSize, minRegionArea, mergeRegionArea);
+
+            float maxError = 1.8f;
+            int maxEdgeLength = 24;
+
+            var cs = ch.BuildContourSet(maxError, maxEdgeLength, Geometry.ContourBuildFlags.None);
+
+            int vertsPerPoly = 6;
+
+            var pm = new Geometry.PolyMesh(cs, cellSize, cellHeight, borderSize, vertsPerPoly);
+
+            int sampleDist = 6;
+            int sampleMaxError = 1;
+
+            var pmd = new Geometry.PolyMeshDetail(pm, ch, sampleDist, sampleMaxError);
+
+            float maxClimb = 0.9f;
+
+            return NavMesh.Build(pm, pmd, null, cellSize, cellHeight, vertsPerPoly, maxClimb);
+        }
         /// <summary>
         /// Merge a list of convex polygons
         /// </summary>
