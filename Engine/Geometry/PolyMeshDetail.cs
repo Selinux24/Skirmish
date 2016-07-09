@@ -418,8 +418,7 @@ namespace Engine.Geometry
                 maxhw = Math.Max(maxhw, xmax - xmin);
                 maxhh = Math.Max(maxhh, zmax - zmin);
 
-                //XXXXXXXXXXXXXXXXXXXXXXXXX
-                bounds[i] = new Rectangle(xmin, zmin, xmax, zmax);
+                bounds[i] = new Rectangle(xmin, zmin, xmax - xmin, zmax - zmin);
             }
 
             HeightPatch hp = new HeightPatch(0, 0, maxhw, maxhh);
@@ -448,8 +447,8 @@ namespace Engine.Geometry
                 }
 
                 //get height data from area of polygon
-                BBox2i bound = bounds[i];
-                hp.Resize(bound.Min.X, bound.Min.Y, bound.Max.X - bound.Min.X, bound.Max.Y - bound.Min.Y);
+                var bound = bounds[i];
+                hp.Resize(bound.Left, bound.Top, bound.Width, bound.Height);
                 GetHeightData(compactField, p, npoly, mesh.Verts, mesh.BorderSize, hp);
 
                 List<Vector3> tempVerts = new List<Vector3>();
