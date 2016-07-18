@@ -861,7 +861,10 @@ namespace Engine
         {
             this.StopTranslations();
 
-            Quaternion r = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
+            //Smooth rotation
+            Quaternion sourceRotation = Quaternion.RotationAxis(axis, 0);
+            Quaternion targetRotation = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
+            Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
 
             Vector3 fw = Vector3.Transform(this.freeForward, r);
 
