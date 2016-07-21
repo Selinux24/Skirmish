@@ -78,8 +78,7 @@ namespace Engine.Geometry
 
             if (hasConnections)
             {
-                //contour has some portals to other regions
-                //add new point to every location where region changes
+                //contour has some portals to other regions add new point to every location where region changes
                 for (int i = 0, end = rawVerts.Count; i < end; i++)
                 {
                     int ii = (i + 1) % end;
@@ -223,11 +222,15 @@ namespace Engine.Geometry
 
                     //wall edges
                     if (tesselateWallEdges && rawVerts[ci].RegionId.Id == 0)
+                    {
                         tess = true;
+                    }
 
                     //edges between areas
                     if (tesselateAreaEdges && RegionId.HasFlags(rawVerts[ci].RegionId, RegionFlags.AreaBorder))
+                    {
                         tess = true;
+                    }
 
                     if (tess)
                     {
@@ -242,9 +245,13 @@ namespace Engine.Geometry
                             if (n > 1)
                             {
                                 if (bx > ax || (bx == ax && bz > az))
+                                {
                                     maxi = (int)(ai + n / 2) % numPoints;
+                                }
                                 else
+                                {
                                     maxi = (int)(ai + (n + 1) / 2) % numPoints;
+                                }
                             }
                         }
                     }
@@ -286,7 +293,9 @@ namespace Engine.Geometry
             {
                 int ni = i + 1;
                 if (ni >= simplified.Count)
+                {
                     ni = 0;
+                }
 
                 if (simplified[i].X == simplified[ni].X &&
                     simplified[i].Z == simplified[ni].Z)

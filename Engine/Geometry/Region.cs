@@ -42,7 +42,7 @@ namespace Engine.Geometry
         {
             get
             {
-                return RegionId.HasFlags(Id, RegionFlags.Border);
+                return RegionId.HasFlags(this.Id, RegionFlags.Border);
             }
         }
         /// <summary>
@@ -52,7 +52,7 @@ namespace Engine.Geometry
         {
             get
             {
-                return Id.IsNull || IsBorder;
+                return this.Id.IsNull || this.IsBorder;
             }
         }
 
@@ -62,14 +62,14 @@ namespace Engine.Geometry
         /// <param name="idNum">The id</param>
         public Region(int idNum)
         {
-            SpanCount = 0;
-            Id = new RegionId(idNum);
-            AreaType = 0;
-            Remap = false;
-            Visited = false;
+            this.SpanCount = 0;
+            this.Id = new RegionId(idNum);
+            this.AreaType = 0x00;
+            this.Remap = false;
+            this.Visited = false;
 
-            Connections = new List<RegionId>();
-            FloorRegions = new List<RegionId>();
+            this.Connections = new List<RegionId>();
+            this.FloorRegions = new List<RegionId>();
         }
 
         /// <summary>
@@ -77,19 +77,21 @@ namespace Engine.Geometry
         /// </summary>
         public void RemoveAdjacentNeighbors()
         {
-            if (Connections.Count <= 1)
+            if (this.Connections.Count <= 1)
+            {
                 return;
+            }
 
             // Remove adjacent duplicates.
-            for (int i = 0; i < Connections.Count; i++)
+            for (int i = 0; i < this.Connections.Count; i++)
             {
                 //get the next i
-                int ni = (i + 1) % Connections.Count;
+                int ni = (i + 1) % this.Connections.Count;
 
                 //remove duplicate if found
-                if (Connections[i] == Connections[ni])
+                if (this.Connections[i] == this.Connections[ni])
                 {
-                    Connections.RemoveAt(i);
+                    this.Connections.RemoveAt(i);
                     i--;
                 }
             }
@@ -103,25 +105,29 @@ namespace Engine.Geometry
         {
             //replace the connections
             bool neiChanged = false;
-            for (int i = 0; i < Connections.Count; ++i)
+            for (int i = 0; i < this.Connections.Count; ++i)
             {
-                if (Connections[i] == oldId)
+                if (this.Connections[i] == oldId)
                 {
-                    Connections[i] = newId;
+                    this.Connections[i] = newId;
                     neiChanged = true;
                 }
             }
 
             //replace the floors
-            for (int i = 0; i < FloorRegions.Count; ++i)
+            for (int i = 0; i < this.FloorRegions.Count; ++i)
             {
-                if (FloorRegions[i] == oldId)
-                    FloorRegions[i] = newId;
+                if (this.FloorRegions[i] == oldId)
+                {
+                    this.FloorRegions[i] = newId;
+                }
             }
 
             //make sure to remove adjacent neighbors
             if (neiChanged)
-                RemoveAdjacentNeighbors();
+            {
+                this.RemoveAdjacentNeighbors();
+            }
         }
         /// <summary>
         /// Determine whether this region can merge with another region.
@@ -131,24 +137,32 @@ namespace Engine.Geometry
         public bool CanMergeWith(Region otherRegion)
         {
             //make sure areas are the same
-            if (AreaType != otherRegion.AreaType)
+            if (this.AreaType != otherRegion.AreaType)
+            {
                 return false;
+            }
 
             //count the number of connections to the other region
             int n = 0;
-            for (int i = 0; i < Connections.Count; i++)
+            for (int i = 0; i < this.Connections.Count; i++)
             {
-                if (Connections[i] == otherRegion.Id)
+                if (this.Connections[i] == otherRegion.Id)
+                {
                     n++;
+                }
             }
 
             //make sure there's only one connection
             if (n > 1)
+            {
                 return false;
+            }
 
             //make sure floors are separate
-            if (FloorRegions.Contains(otherRegion.Id))
+            if (this.FloorRegions.Contains(otherRegion.Id))
+            {
                 return false;
+            }
 
             return true;
         }
@@ -158,8 +172,10 @@ namespace Engine.Geometry
         /// <param name="n">The value of the floor</param>
         public void AddUniqueFloorRegion(RegionId n)
         {
-            if (!FloorRegions.Contains(n))
-                FloorRegions.Add(n);
+            if (!this.FloorRegions.Contains(n))
+            {
+                this.FloorRegions.Add(n);
+            }
         }
         /// <summary>
         /// Merge two regions into one. Needs good testing
@@ -173,9 +189,10 @@ namespace Engine.Geometry
 
             // Duplicate current neighborhood.
             List<RegionId> thisConnected = new List<RegionId>();
-            for (int i = 0; i < Connections.Count; ++i)
-                thisConnected.Add(Connections[i]);
-            List<RegionId> otherConnected = otherRegion.Connections;
+            for (int i = 0; i < this.Connections.Count; ++i)
+            {
+                thisConnected.Add(this.Connections[i]);
+            }
 
             // Find insertion point on this region
             int insertInThis = -1;
@@ -189,9 +206,12 @@ namespace Engine.Geometry
             }
 
             if (insertInThis == -1)
+            {
                 return false;
+            }
 
             // Find insertion point on the other region
+            List<RegionId> otherConnected = otherRegion.Connections;
             int insertInOther = -1;
             for (int i = 0; i < otherConnected.Count; ++i)
             {
@@ -203,21 +223,30 @@ namespace Engine.Geometry
             }
 
             if (insertInOther == -1)
+            {
                 return false;
+            }
 
             // Merge neighbors.
-            Connections = new List<RegionId>();
+            this.Connections = new List<RegionId>();
             for (int i = 0, ni = thisConnected.Count; i < ni - 1; ++i)
-                Connections.Add(thisConnected[(insertInThis + 1 + i) % ni]);
+            {
+                this.Connections.Add(thisConnected[(insertInThis + 1 + i) % ni]);
+            }
 
             for (int i = 0, ni = otherConnected.Count; i < ni - 1; ++i)
-                Connections.Add(otherConnected[(insertInOther + 1 + i) % ni]);
+            {
+                this.Connections.Add(otherConnected[(insertInOther + 1 + i) % ni]);
+            }
 
-            RemoveAdjacentNeighbors();
+            this.RemoveAdjacentNeighbors();
 
             for (int j = 0; j < otherRegion.FloorRegions.Count; ++j)
-                AddUniqueFloorRegion(otherRegion.FloorRegions[j]);
-            SpanCount += otherRegion.SpanCount;
+            {
+                this.AddUniqueFloorRegion(otherRegion.FloorRegions[j]);
+            }
+
+            this.SpanCount += otherRegion.SpanCount;
             otherRegion.SpanCount = 0;
             otherRegion.Connections.Clear();
 
@@ -229,12 +258,13 @@ namespace Engine.Geometry
         /// <returns>True if connected, false if not</returns>
         public bool IsConnectedToBorder()
         {
-            // Region is connected to border if
-            // one of the neighbors is null id.
-            for (int i = 0; i < Connections.Count; ++i)
+            // Region is connected to border if one of the neighbors is null id.
+            for (int i = 0; i < this.Connections.Count; ++i)
             {
-                if (Connections[i] == 0)
+                if (this.Connections[i] == 0)
+                {
                     return true;
+                }
             }
 
             return false;

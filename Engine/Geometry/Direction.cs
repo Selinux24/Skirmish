@@ -30,8 +30,8 @@ namespace Engine.Geometry
     /// </summary>
     public static class DirectionExtensions
     {
-        private static readonly int[] OffsetsX = { -1, 0, 1, 0 };
-        private static readonly int[] OffsetsY = { 0, 1, 0, -1 };
+        private static readonly int[] OffsetsX = { -1, +0, +1, +0 };
+        private static readonly int[] OffsetsY = { +0, +1, +0, -1 };
 
         /// <summary>
         /// Gets an X offset.

@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine.Geometry
 {
@@ -197,18 +197,34 @@ namespace Engine.Geometry
             }
         }
 
-        //9 x 2
+        /// <summary>
+        /// 9 x 2
+        /// </summary>
         private static readonly int[] VertexOffset =
 		{
-			0, 0,
+			+0, +0,
 			-1, -1,
-			0, -1,
-			1, -1,
-			1, 0,
-			1, 1,
-			0, 1,
-			-1, 1,
-			-1, 0
+			+0, -1,
+			+1, -1,
+			+1, +0,
+			+1, +1,
+			+0, +1,
+			-1, +1,
+			-1, +0
+		};
+        /// <summary>
+        /// Counterclockwise direction starting from west, ending in northwest
+        /// </summary>
+        private static readonly int[] CCWOffsets =
+		{
+			-1, +0,
+			-1, -1,
+			+0, -1,
+			+1, -1,
+			+1, +0,
+			+1, +1,
+			+0, +1,
+			-1, +1
 		};
 
         /// <summary>
@@ -229,17 +245,24 @@ namespace Engine.Geometry
                 Vector3 pt2 = vb;
 
                 //the vertices pt1 (va) and pt2 (vb) are extremely close to the polygon edge
-                if (GeometryUtil.PointToSegment2DSquared(ref pt1, ref vpoly[j], ref vpoly[i]) < thrSqr
-                    && GeometryUtil.PointToSegment2DSquared(ref pt2, ref vpoly[j], ref vpoly[i]) < thrSqr)
+                if (GeometryUtil.PointToSegment2DSquared(ref pt1, ref vpoly[j], ref vpoly[i]) < thrSqr &&
+                    GeometryUtil.PointToSegment2DSquared(ref pt2, ref vpoly[j], ref vpoly[i]) < thrSqr)
+                {
                     return 1;
+                }
             }
 
             return 0;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="verts"></param>
+        /// <returns></returns>
         private static float PolyMinExtent(Vector3[] verts)
         {
             float minDist = float.MaxValue;
+
             for (int i = 0; i < verts.Length; i++)
             {
                 int ni = (i + 1) % verts.Length;
@@ -250,7 +273,9 @@ namespace Engine.Geometry
                 for (int j = 0; j < verts.Length; j++)
                 {
                     if (j == i || j == ni)
+                    {
                         continue;
+                    }
 
                     float d = GeometryUtil.PointToSegment2DSquared(ref verts[j], ref p0, ref p1);
                     maxEdgeDist = Math.Max(maxEdgeDist, d);
@@ -282,10 +307,18 @@ namespace Engine.Geometry
             return i + 1 < n ? i + 1 : 0;
         }
 
-        private MeshData[] meshes;
-        private Vector3[] verts;
-        private TriangleData[] tris;
-
+        /// <summary>
+        /// Gets the mesh data		
+        /// </summary>
+        public MeshData[] Meshes { get; private set; }
+        /// <summary>
+        /// Gets the vertex data
+        /// </summary>
+        public Vector3[] Verts { get; private set; }
+        /// <summary>
+        /// Gets the triangle data
+        /// </summary>
+        public TriangleData[] Tris { get; private set; }
         /// <summary>
         /// Gets the number of meshes (MeshData)
         /// </summary>
@@ -293,10 +326,12 @@ namespace Engine.Geometry
         {
             get
             {
-                if (meshes == null)
+                if (this.Meshes == null)
+                {
                     return 0;
+                }
 
-                return meshes.Length;
+                return this.Meshes.Length;
             }
         }
         /// <summary>
@@ -306,10 +341,12 @@ namespace Engine.Geometry
         {
             get
             {
-                if (verts == null)
+                if (this.Verts == null)
+                {
                     return 0;
+                }
 
-                return verts.Length;
+                return this.Verts.Length;
             }
         }
         /// <summary>
@@ -319,40 +356,12 @@ namespace Engine.Geometry
         {
             get
             {
-                if (tris == null)
+                if (this.Tris == null)
+                {
                     return 0;
+                }
 
-                return tris.Length;
-            }
-        }
-        /// <summary>
-        /// Gets the mesh data		
-        /// </summary>
-        public MeshData[] Meshes
-        {
-            get
-            {
-                return meshes;
-            }
-        }
-        /// <summary>
-        /// Gets the vertex data
-        /// </summary>
-        public Vector3[] Verts
-        {
-            get
-            {
-                return verts;
-            }
-        }
-        /// <summary>
-        /// Gets the triangle data
-        /// </summary>
-        public TriangleData[] Tris
-        {
-            get
-            {
-                return tris;
+                return this.Tris.Length;
             }
         }
 
@@ -371,7 +380,9 @@ namespace Engine.Geometry
         public PolyMeshDetail(PolyMesh mesh, CompactHeightfield compactField, float sampleDist, float sampleMaxError)
         {
             if (mesh.VertCount == 0 || mesh.PolyCount == 0)
+            {
                 return;
+            }
 
             Vector3 origin = mesh.Bounds.Minimum;
 
@@ -397,7 +408,9 @@ namespace Engine.Geometry
                 {
                     var pj = p.Vertices[j];
                     if (pj == PolyMesh.NullId)
+                    {
                         break;
+                    }
 
                     var v = mesh.Verts[pj];
 
@@ -413,7 +426,9 @@ namespace Engine.Geometry
                 zmax = Math.Min(compactField.Length, zmax + 1);
 
                 if (xmin >= xmax || zmin >= zmax)
+                {
                     continue;
+                }
 
                 maxhw = Math.Max(maxhw, xmax - xmin);
                 maxhh = Math.Max(maxhh, zmax - zmin);
@@ -423,7 +438,7 @@ namespace Engine.Geometry
 
             HeightPatch hp = new HeightPatch(0, 0, maxhw, maxhh);
 
-            this.meshes = new MeshData[mesh.PolyCount];
+            this.Meshes = new MeshData[mesh.PolyCount];
 
             for (int i = 0; i < mesh.PolyCount; i++)
             {
@@ -435,7 +450,9 @@ namespace Engine.Geometry
                 {
                     int pvi = p.Vertices[j];
                     if (pvi == PolyMesh.NullId)
+                    {
                         break;
+                    }
 
                     PolyVertex pv = mesh.Verts[pvi];
                     Vector3 v = new Vector3(pv.X, pv.Y, pv.Z);
@@ -447,15 +464,14 @@ namespace Engine.Geometry
                 }
 
                 //get height data from area of polygon
-                var bound = bounds[i];
-                hp.Resize(bound.Left, bound.Top, bound.Width, bound.Height);
-                GetHeightData(compactField, p, npoly, mesh.Verts, mesh.BorderSize, hp);
+                hp.Resize(bounds[i]);
+                this.GetHeightData(compactField, p, npoly, mesh.Verts, mesh.BorderSize, hp);
 
                 List<Vector3> tempVerts = new List<Vector3>();
                 List<TriangleData> tempTris = new List<TriangleData>(128);
                 List<EdgeInfo> edges = new List<EdgeInfo>(16);
                 List<SamplingData> samples = new List<SamplingData>(128);
-                BuildPolyDetail(poly, npoly, sampleDist, sampleMaxError, compactField, hp, tempVerts, tempTris, edges, samples);
+                this.BuildPolyDetail(poly, npoly, sampleDist, sampleMaxError, compactField, hp, tempVerts, tempTris, edges, samples);
 
                 //more detail verts
                 for (int j = 0; j < tempVerts.Count; j++)
@@ -482,10 +498,10 @@ namespace Engine.Geometry
                 }
 
                 //save data
-                this.meshes[i].VertexIndex = storedVertices.Count;
-                this.meshes[i].VertexCount = tempVerts.Count;
-                this.meshes[i].TriangleIndex = storedTriangles.Count;
-                this.meshes[i].TriangleCount = tempTris.Count;
+                this.Meshes[i].VertexIndex = storedVertices.Count;
+                this.Meshes[i].VertexCount = tempVerts.Count;
+                this.Meshes[i].TriangleIndex = storedTriangles.Count;
+                this.Meshes[i].TriangleCount = tempTris.Count;
 
                 //store vertices
                 storedVertices.AddRange(tempVerts);
@@ -497,33 +513,19 @@ namespace Engine.Geometry
                 }
             }
 
-            this.verts = storedVertices.ToArray();
-            this.tris = storedTriangles.ToArray();
+            this.Verts = storedVertices.ToArray();
+            this.Tris = storedTriangles.ToArray();
         }
-
-        #region Black Magic
 
         /// <summary>
-        /// Offset for the x-coordinate
+        /// 
         /// </summary>
-        /// <param name="i">Starting number</param>
-        /// <returns>A new offset</returns>
-        private static float GetJitterX(int i)
-        {
-            return (((i * 0x8da6b343) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
-        /// <summary>
-        /// Offset for the y-coordinate
-        /// </summary>
-        /// <param name="i">Starting number</param>
-        /// <returns>A new offset</returns>
-        private static float GetJitterY(int i)
-        {
-            return (((i * 0xd8163841) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
-        }
-
-        #endregion
-
+        /// <param name="compactField"></param>
+        /// <param name="poly"></param>
+        /// <param name="polyCount"></param>
+        /// <param name="verts"></param>
+        /// <param name="borderSize"></param>
+        /// <param name="hp"></param>
         private void GetHeightData(CompactHeightfield compactField, PolyMesh.Polygon poly, int polyCount, PolyVertex[] verts, int borderSize, HeightPatch hp)
         {
             var stack = new List<CompactSpanReference>();
@@ -564,7 +566,9 @@ namespace Engine.Geometry
                             }
 
                             if (border)
+                            {
                                 stack.Add(new CompactSpanReference(hx, hy, i));
+                            }
 
                             break;
                         }
@@ -573,7 +577,9 @@ namespace Engine.Geometry
             }
 
             if (empty)
+            {
                 GetHeightDataSeedsFromVertices(compactField, poly, polyCount, verts, borderSize, hp, stack);
+            }
 
             const int RetractSize = 256;
             int head = 0;
@@ -589,12 +595,16 @@ namespace Engine.Geometry
                     if (stack.Count > RetractSize)
                     {
                         for (int i = 0; i < stack.Count - RetractSize; i++)
+                        {
                             stack[i] = stack[i + RetractSize];
+                        }
                     }
 
                     int targetSize = stack.Count % RetractSize;
                     while (stack.Count > targetSize)
+                    {
                         stack.RemoveAt(stack.Count - 1);
+                    }
                 }
 
                 //loop in all four directions
@@ -602,7 +612,9 @@ namespace Engine.Geometry
                 {
                     //skip
                     if (!cs.IsConnected(dir))
+                    {
                         continue;
+                    }
 
                     int ax = cell.X + dir.GetHorizontalOffset();
                     int ay = cell.Y + dir.GetVerticalOffset();
@@ -610,11 +622,15 @@ namespace Engine.Geometry
                     int hy = ay - hp.Y - borderSize;
 
                     if (hx < 0 || hx >= hp.Width || hy < 0 || hy >= hp.Length)
+                    {
                         continue;
+                    }
 
                     //only continue if height is unset
                     if (hp.IsSet(hy * hp.Width + hx))
+                    {
                         continue;
+                    }
 
                     //get new span
                     int ai = compactField.Cells[ay * compactField.Width + ax].StartIndex + CompactSpan.GetConnection(ref cs, dir);
@@ -657,7 +673,9 @@ namespace Engine.Geometry
 
                     //skip if out of bounds
                     if (ax < hp.X || ax >= hp.X + hp.Width || az < hp.Y || az >= hp.Y + hp.Length)
+                    {
                         continue;
+                    }
 
                     //get new cell
                     CompactCell c = compactField.Cells[(az + borderSize) * compactField.Width + (ax + borderSize)];
@@ -726,7 +744,9 @@ namespace Engine.Geometry
                 {
                     //skip if disconnected
                     if (!cs.IsConnected(dir))
+                    {
                         continue;
+                    }
 
                     //get neighbor
                     int ax = cell.X + dir.GetHorizontalOffset();
@@ -734,10 +754,14 @@ namespace Engine.Geometry
 
                     //skip if out of bounds
                     if (ax < hp.X || ax >= (hp.X + hp.Width) || ay < hp.Y || ay >= (hp.Y + hp.Length))
+                    {
                         continue;
+                    }
 
                     if (hp[(ay - hp.Y) * hp.Width + (ax - hp.X)] != 0)
+                    {
                         continue;
+                    }
 
                     //get the new index
                     int ai = compactField.Cells[(ay + borderSize) * compactField.Width + (ax + borderSize)].StartIndex + CompactSpan.GetConnection(ref cs, dir);
@@ -790,7 +814,9 @@ namespace Engine.Geometry
 
             //fill up vertex array
             for (int i = 0; i < numMeshVerts; ++i)
+            {
                 verts.Add(polyMeshVerts[i]);
+            }
 
             float cs = compactField.CellSize;
             float ics = 1.0f / cs;
@@ -832,10 +858,14 @@ namespace Engine.Geometry
                     int nn = 1 + (int)Math.Floor(d / sampleDist);
 
                     if (nn >= MAX_VERTS_PER_EDGE)
+                    {
                         nn = MAX_VERTS_PER_EDGE - 1;
+                    }
 
                     if (verts.Count + nn >= MAX_VERTS)
+                    {
                         nn = MAX_VERTS - 1 - verts.Count;
+                    }
 
                     for (int k = 0; k <= nn; k++)
                     {
@@ -881,7 +911,9 @@ namespace Engine.Geometry
                         {
                             //shift data to the right
                             for (int m = nidx; m > k; m--)
+                            {
                                 idx[m] = idx[m - 1];
+                            }
 
                             //set new value
                             idx[k + 1] = maxi;
@@ -961,7 +993,9 @@ namespace Engine.Geometry
 
                         //make sure samples aren't too close to edge
                         if (GeometryUtil.PointToPolygonSquared(pt, polyMeshVerts, numMeshVerts) > -sampleDist * 0.5f)
+                        {
                             continue;
+                        }
 
                         SamplingData sd = new SamplingData(x, GetHeight(pt, ics, compactField.CellHeight, hp), z, false);
                         samples.Add(sd);
@@ -972,7 +1006,9 @@ namespace Engine.Geometry
                 for (int iter = 0; iter < samples.Count; iter++)
                 {
                     if (verts.Count >= MAX_VERTS)
+                    {
                         break;
+                    }
 
                     //find sample with most error
                     Vector3 bestPt = Vector3.Zero;
@@ -983,17 +1019,21 @@ namespace Engine.Geometry
                     {
                         SamplingData sd = samples[i];
                         if (sd.IsSampled)
+                        {
                             continue;
+                        }
 
                         //jitter sample location to remove effects of bad triangulation
                         Vector3 pt;
-                        pt.X = sd.X * sampleDist + GetJitterX(i) * compactField.CellSize * 0.1f;
+                        pt.X = sd.X * sampleDist + Helper.GetJitterX(i) * compactField.CellSize * 0.1f;
                         pt.Y = sd.Y * compactField.CellHeight;
-                        pt.Z = sd.Z * sampleDist + GetJitterY(i) * compactField.CellSize * 0.1f;
+                        pt.Z = sd.Z * sampleDist + Helper.GetJitterY(i) * compactField.CellSize * 0.1f;
                         float d = DistanceToTriMesh(pt, verts, tris);
 
                         if (d < 0)
+                        {
                             continue;
+                        }
 
                         if (d > bestDistance)
                         {
@@ -1004,7 +1044,9 @@ namespace Engine.Geometry
                     }
 
                     if (bestDistance <= sampleMaxError || bestIndex == -1)
+                    {
                         break;
+                    }
 
                     SamplingData bsd = samples[bestIndex];
                     bsd.IsSampled = true;
@@ -1042,36 +1084,28 @@ namespace Engine.Geometry
             int iz = (int)Math.Floor(loc.Z * invCellSize + 0.01f);
             ix = MathUtil.Clamp(ix - hp.X, 0, hp.Width - 1);
             iz = MathUtil.Clamp(iz - hp.Y, 0, hp.Length - 1);
+          
             int h;
-
             if (!hp.TryGetHeight(ix, iz, out h))
             {
-                //go in counterclockwise direction starting from west, ending in northwest
-                int[] off =
-				{
-					-1,  0,
-					-1, -1,
-					 0, -1,
-					 1, -1,
-					 1,  0,
-					 1,  1,
-					 0,  1,
-					-1,  1
-				};
-
                 float dmin = float.MaxValue;
 
+                //go in counterclockwise direction starting from west, ending in northwest
                 for (int i = 0; i < 8; i++)
                 {
-                    int nx = ix + off[i * 2 + 0];
-                    int nz = iz + off[i * 2 + 1];
+                    int nx = ix + CCWOffsets[i * 2 + 0];
+                    int nz = iz + CCWOffsets[i * 2 + 1];
 
                     if (nx < 0 || nz < 0 || nx >= hp.Width || nz >= hp.Length)
+                    {
                         continue;
+                    }
 
                     int nh;
                     if (!hp.TryGetHeight(nx, nz, out nh))
+                    {
                         continue;
+                    }
 
                     float d = Math.Abs(nh * cellHeight - loc.Y);
                     if (d < dmin)
@@ -1084,12 +1118,19 @@ namespace Engine.Geometry
 
             return h;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="hull"></param>
+        /// <param name="tris"></param>
         private void TriangulateHull(List<Vector3> pts, List<int> hull, List<TriangleData> tris)
         {
-            int start = 0, left = 1, right = hull.Count - 1;
-
+            int start = 0;
+            int left = 1;
+            int right = hull.Count - 1;
             float dmin = 0;
+
             for (int i = 0; i < hull.Count; i++)
             {
                 int pi = Prev(i, hull.Count);
@@ -1126,14 +1167,13 @@ namespace Engine.Geometry
                 Vector3 nvleft = pts[hull[nleft]];
                 Vector3 cvright = pts[hull[right]];
                 Vector3 nvright = pts[hull[nright]];
-
-                float dleft = 0, dright = 0;
+                float dleft = 0;
+                float dright = 0;
                 float dtmp;
                 GeometryUtil.Distance2D(ref cvleft, ref nvleft, out dtmp);
                 dleft += dtmp;
                 GeometryUtil.Distance2D(ref nvleft, ref cvright, out dtmp);
                 dleft += dtmp;
-
                 GeometryUtil.Distance2D(ref cvright, ref nvright, out dtmp);
                 dright += dtmp;
                 GeometryUtil.Distance2D(ref cvleft, ref nvright, out dtmp);
@@ -1160,19 +1200,25 @@ namespace Engine.Geometry
         /// <param name="edges">The edge connections formed.</param>
         private void DelaunayHull(List<Vector3> pts, List<int> hull, List<TriangleData> tris, List<EdgeInfo> edges)
         {
-            int nfaces = 0;
             edges.Clear();
 
             for (int i = 0, j = hull.Count - 1; i < hull.Count; j = i++)
+            {
                 AddEdge(edges, hull[j], hull[i], (int)EdgeValues.Hull, (int)EdgeValues.Undefined);
+            }
 
+            int nfaces = 0;
             for (int i = 0; i < edges.Count; i++)
             {
                 if (edges[i].LeftFace == (int)EdgeValues.Undefined)
+                {
                     CompleteFacet(pts, edges, ref nfaces, i);
+                }
 
                 if (edges[i].RightFace == (int)EdgeValues.Undefined)
+                {
                     CompleteFacet(pts, edges, ref nfaces, i);
+                }
             }
 
             /*int currentEdge = 0;
@@ -1189,7 +1235,9 @@ namespace Engine.Geometry
             //create triangles
             tris.Clear();
             for (int i = 0; i < nfaces; i++)
+            {
                 tris.Add(new TriangleData(-1, -1, -1, -1));
+            }
 
             for (int i = 0; i < edges.Count; i++)
             {
@@ -1292,7 +1340,9 @@ namespace Engine.Geometry
             for (int u = 0; u < pts.Count; u++)
             {
                 if (u == s || u == t)
+                {
                     continue;
+                }
 
                 cross = GeometryUtil.Cross2D(pts[s], pts[t], pts[u]);
                 if (cross > EPS)
@@ -1387,7 +1437,9 @@ namespace Engine.Geometry
                 return edges.Count - 1;
             }
             else
+            {
                 return e;
+            }
         }
         /// <summary>
         /// Search for an edge within the edge list
@@ -1402,7 +1454,9 @@ namespace Engine.Geometry
             {
                 EdgeInfo e = edges[i];
                 if ((e.EndPt0 == s && e.EndPt1 == t) || (e.EndPt0 == t && e.EndPt1 == s))
+                {
                     return i;
+                }
             }
 
             return -1;
@@ -1426,11 +1480,15 @@ namespace Engine.Geometry
 
                 //same or connected edges do not overlap
                 if (s0 == s1 || s0 == t1 || t0 == s1 || t0 == t1)
+                {
                     continue;
+                }
 
                 Vector3 ps0 = pts[s0], pt0 = pts[t0];
                 if (GeometryUtil.SegmentSegment2D(ref ps0, ref pt0, ref ps1, ref pt1))
+                {
                     return true;
+                }
             }
 
             return false;
@@ -1466,12 +1524,14 @@ namespace Engine.Geometry
                 float dx = p1.X - c.X;
                 float dy = p1.Z - c.Z;
                 r = (float)Math.Sqrt(dx * dx + dy * dy);
+
                 return true;
             }
 
             c.X = p1.X;
             c.Z = p1.Z;
             r = 0;
+
             return false;
         }
         /// <summary>
@@ -1492,11 +1552,15 @@ namespace Engine.Geometry
                 Vector3 vc = verts[tris[i].VertexHash2];
                 float d = GeometryUtil.PointToTriangle(p, va, vb, vc);
                 if (d < dmin)
+                {
                     dmin = d;
+                }
             }
 
             if (dmin == float.MaxValue)
+            {
                 return -1;
+            }
 
             return dmin;
         }

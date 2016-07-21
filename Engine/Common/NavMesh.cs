@@ -1156,10 +1156,6 @@ namespace Engine.Common
             /// </summary>
             public int[] Neis { get; set; }
             /// <summary>
-            /// Gets or sets a user defined polygon flags
-            /// </summary>
-            public object Tag { get; set; }
-            /// <summary>
             /// Gets or sets the number of vertices
             /// </summary>
             public int VertCount { get; set; }
@@ -1400,7 +1396,6 @@ namespace Engine.Common
             {
                 result.NavPolys[i] = new Poly();
                 result.NavPolys[i].VertCount = 0;
-                result.NavPolys[i].Tag = polyMesh.Polys[i].Tag;
                 result.NavPolys[i].Area = polyMesh.Polys[i].Area;
                 result.NavPolys[i].PolyType = PolygonType.Ground;
                 result.NavPolys[i].Verts = new int[vertsPerPoly];
@@ -1449,7 +1444,6 @@ namespace Engine.Common
                         result.NavPolys[offMeshPolyBase + n].Verts = new int[vertsPerPoly];
                         result.NavPolys[offMeshPolyBase + n].Verts[0] = offMeshVertsBase + (n * 2 + 0);
                         result.NavPolys[offMeshPolyBase + n].Verts[1] = offMeshVertsBase + (n * 2 + 1);
-                        result.NavPolys[offMeshPolyBase + n].Tag = offMeshCons[i].Flags;
                         result.NavPolys[offMeshPolyBase + n].Area = polyMesh.Polys[offMeshCons[i].Poly].Area;
                         result.NavPolys[offMeshPolyBase + n].PolyType = PolygonType.OffMeshConnection;
                         n++;

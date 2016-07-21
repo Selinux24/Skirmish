@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
@@ -147,14 +146,21 @@ namespace Engine.Geometry
         public static bool Intersect(ref PolyVertex a, ref PolyVertex b, ref PolyVertex c, ref PolyVertex d)
         {
             if (IntersectProp(ref a, ref b, ref c, ref d))
+            {
                 return true;
-            else if (IsBetween(ref a, ref b, ref c)
-                || IsBetween(ref a, ref b, ref d)
-                || IsBetween(ref c, ref d, ref a)
-                || IsBetween(ref c, ref d, ref b))
+            }
+            else if (
+                IsBetween(ref a, ref b, ref c) ||
+                IsBetween(ref a, ref b, ref d) ||
+                IsBetween(ref c, ref d, ref a) ||
+                IsBetween(ref c, ref d, ref b))
+            {
                 return true;
+            }
             else
+            {
                 return false;
+            }
         }
         /// <summary>
         /// True if and only if segments AB and CD intersect properly.
@@ -170,14 +176,17 @@ namespace Engine.Geometry
         public static bool IntersectProp(ref PolyVertex a, ref PolyVertex b, ref PolyVertex c, ref PolyVertex d)
         {
             //eliminate improper cases
-            if (IsCollinear(ref a, ref b, ref c)
-                || IsCollinear(ref a, ref b, ref d)
-                || IsCollinear(ref c, ref d, ref a)
-                || IsCollinear(ref c, ref d, ref b))
+            if (IsCollinear(ref a, ref b, ref c) ||
+                IsCollinear(ref a, ref b, ref d) ||
+                IsCollinear(ref c, ref d, ref a) ||
+                IsCollinear(ref c, ref d, ref b))
+            {
                 return false;
+            }
 
-            return (!IsLeft(ref a, ref b, ref c) ^ !IsLeft(ref a, ref b, ref d))
-                && (!IsLeft(ref c, ref d, ref a) ^ !IsLeft(ref c, ref d, ref b));
+            return
+                (!IsLeft(ref a, ref b, ref c) ^ !IsLeft(ref a, ref b, ref d)) &&
+                (!IsLeft(ref c, ref d, ref a) ^ !IsLeft(ref c, ref d, ref b));
         }
         /// <summary>
         /// True if and only if A, B, and C are collinear and point C lies on closed segment AB
@@ -189,12 +198,18 @@ namespace Engine.Geometry
         public static bool IsBetween(ref PolyVertex a, ref PolyVertex b, ref PolyVertex c)
         {
             if (!IsCollinear(ref a, ref b, ref c))
+            {
                 return false;
+            }
 
             if (a.X != b.X)
+            {
                 return ((a.X <= c.X) && (c.X <= b.X)) || ((a.X >= c.X) && (c.X >= b.X));
+            }
             else
+            {
                 return ((a.Z <= c.Z) && (c.Z <= b.Z)) || ((a.Z >= c.Z) && (c.Z >= b.Z));
+            }
         }
         /// <summary>
         /// True if and only if points A, B, and C are collinear.
@@ -274,9 +289,9 @@ namespace Engine.Geometry
         /// <param name="z">The Z coordinate.</param>
         public PolyVertex(int x, int y, int z)
         {
-            X = x;
-            Y = y;
-            Z = z;
+            this.X = x;
+            this.Y = y;
+            this.Z = z;
         }
 
         /// <summary>
@@ -286,7 +301,7 @@ namespace Engine.Geometry
         /// <returns>A value indicating whether the two vertices are equal.</returns>
         public bool Equals(PolyVertex other)
         {
-            return X == other.X && Y == other.Y && Z == other.Z;
+            return this.X == other.X && this.Y == other.Y && this.Z == other.Z;
         }
         /// <summary>
         /// Compares an object with this instance for equality.
@@ -297,7 +312,9 @@ namespace Engine.Geometry
         {
             PolyVertex? p = obj as PolyVertex?;
             if (p.HasValue)
+            {
                 return this.Equals(p.Value);
+            }
 
             return false;
         }
@@ -308,7 +325,7 @@ namespace Engine.Geometry
         public override int GetHashCode()
         {
             //TODO write a better hashcode
-            return X.GetHashCode() ^ Y.GetHashCode() ^ Z.GetHashCode();
+            return this.X.GetHashCode() ^ this.Y.GetHashCode() ^ this.Z.GetHashCode();
         }
         /// <summary>
         /// Gets a human-readable version of the vertex.
@@ -316,7 +333,7 @@ namespace Engine.Geometry
         /// <returns>A string.</returns>
         public override string ToString()
         {
-            return "(" + X + ", " + Y + ", " + Z + ")";
+            return string.Format("X: {0}; Y: {1}; Z: {2}", this.X, this.Y, this.Z);
         }
     }
 }

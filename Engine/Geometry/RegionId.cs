@@ -25,9 +25,10 @@ namespace Engine.Geometry
         /// <returns>A new instance of the <see cref="RegionId"/> struct with the specified data.</returns>
         public static RegionId FromRawBits(int bits)
         {
-            RegionId id;
-            id.bits = bits;
-            return id;
+            return new RegionId()
+            {
+                bits = bits
+            };
         }
         /// <summary>
         /// Creates a new <see cref="RegionId"/> with extra flags.
@@ -38,7 +39,9 @@ namespace Engine.Geometry
         public static RegionId WithFlags(RegionId region, RegionFlags flags)
         {
             if ((RegionFlags)((int)flags & ~MaskId) != flags)
+            {
                 throw new ArgumentException("flags", "The provide region flags are invalid.");
+            }
 
             RegionFlags newFlags = region.Flags | flags;
             return RegionId.FromRawBits((region.bits & MaskId) | (int)newFlags);
@@ -61,7 +64,9 @@ namespace Engine.Geometry
         public static RegionId WithoutFlags(RegionId region, RegionFlags flags)
         {
             if ((RegionFlags)((int)flags & ~MaskId) != flags)
+            {
                 throw new ArgumentException("flags", "The provide region flags are invalid.");
+            }
 
             RegionFlags newFlags = region.Flags & ~flags;
             return RegionId.FromRawBits((region.bits & MaskId) | (int)newFlags);
@@ -218,6 +223,7 @@ namespace Engine.Geometry
         public RegionId(int id)
             : this(id, 0)
         {
+
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="RegionId"/> struct.
@@ -229,10 +235,14 @@ namespace Engine.Geometry
             int masked = id & MaskId;
 
             if (masked != id)
+            {
                 throw new ArgumentOutOfRangeException("id", "The provided id is outside of the valid range. The 3 most significant bits must be 0. Maybe you wanted RegionId.FromRawBits()?");
+            }
 
             if ((RegionFlags)((int)flags & ~MaskId) != flags)
+            {
                 throw new ArgumentException("flags", "The provide region flags are invalid.");
+            }
 
             bits = masked | (int)flags;
         }
@@ -248,11 +258,17 @@ namespace Engine.Geometry
             bool otherNull = other.IsNull;
 
             if (thisNull && otherNull)
+            {
                 return true;
+            }
             else if (thisNull ^ otherNull)
+            {
                 return false;
+            }
             else
+            {
                 return this.bits == other.bits;
+            }
         }
         /// <summary>
         /// Compares this instance with another an intenger for equality, including flags.
@@ -261,8 +277,10 @@ namespace Engine.Geometry
         /// <returns>A value indicating whether the two instances are equal.</returns>
         public bool Equals(int other)
         {
-            RegionId otherId;
-            otherId.bits = other;
+            RegionId otherId = new RegionId()
+            {
+                bits = other
+            };
 
             return this.Equals(otherId);
         }
@@ -277,11 +295,17 @@ namespace Engine.Geometry
             var intObj = obj as int?;
 
             if (regObj.HasValue)
+            {
                 return this.Equals(regObj.Value);
+            }
             else if (intObj.HasValue)
+            {
                 return this.Equals(intObj.Value);
+            }
             else
+            {
                 return false;
+            }
         }
         /// <summary>
         /// Gets a unique hash code for this instance.
@@ -289,8 +313,7 @@ namespace Engine.Geometry
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
-            if (IsNull)
-                return 0;
+            if (IsNull) return 0;
 
             return bits.GetHashCode();
         }
@@ -300,7 +323,7 @@ namespace Engine.Geometry
         /// <returns>A string representing this instance.</returns>
         public override string ToString()
         {
-            return "{ Id: " + Id + ", Flags: " + Flags + "}";
+            return string.Format("Id: {0}; Flags: {0}", this.Id, this.Flags);
         }
     }
 }

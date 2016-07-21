@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using SharpDX;
 
 namespace Engine.Geometry
 {

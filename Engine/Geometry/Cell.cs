@@ -1,8 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using SharpDX;
 
 namespace Engine.Geometry
 {
@@ -17,7 +17,6 @@ namespace Engine.Geometry
         /// Gets the height of the cell in number of voxels.
         /// </summary>
         public int Height { get; private set; }
-
         /// <summary>
         /// Gets the number of spans in the cell.
         /// </summary>

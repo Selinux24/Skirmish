@@ -1,4 +1,5 @@
 ﻿using System;
+using SharpDX;
 
 namespace Engine.Geometry
 {
@@ -12,49 +13,27 @@ namespace Engine.Geometry
         /// </summary>
         public const int UnsetHeight = -1;
 
-        private int xmin, ymin, width, length;
+        /// <summary>
+        /// Patch data
+        /// </summary>
         private int[] data;
 
         /// <summary>
         /// Gets the X coordinate of the patch.
         /// </summary>
-        public int X
-        {
-            get
-            {
-                return xmin;
-            }
-        }
+        public int X { get; private set; }
         /// <summary>
         /// Gets the Y coordinate of the patch.
         /// </summary>
-        public int Y
-        {
-            get
-            {
-                return ymin;
-            }
-        }
+        public int Y { get; private set; }
         /// <summary>
         /// Gets the width of the patch.
         /// </summary>
-        public int Width
-        {
-            get
-            {
-                return width;
-            }
-        }
+        public int Width { get; private set; }
         /// <summary>
         /// Gets the length of the patch.
         /// </summary>
-        public int Length
-        {
-            get
-            {
-                return length;
-            }
-        }
+        public int Length { get; private set; }
         /// <summary>
         /// Gets or sets the height at a specified index.
         /// </summary>
@@ -64,12 +43,12 @@ namespace Engine.Geometry
         {
             get
             {
-                return data[index];
+                return this.data[index];
             }
 
             set
             {
-                data[index] = value;
+                this.data[index] = value;
             }
         }
         /// <summary>
@@ -82,12 +61,11 @@ namespace Engine.Geometry
         {
             get
             {
-                return data[y * width + x];
+                return this.data[y * this.Width + x];
             }
-
             set
             {
-                data[y * width + x] = value;
+                this.data[y * this.Width + x] = value;
             }
         }
 
@@ -101,15 +79,17 @@ namespace Engine.Geometry
         public HeightPatch(int x, int y, int width, int length)
         {
             if (x < 0 || y < 0 || width <= 0 || length <= 0)
+            {
                 throw new ArgumentOutOfRangeException("Invalid bounds.");
+            }
 
-            this.xmin = x;
-            this.ymin = y;
-            this.width = width;
-            this.length = length;
+            this.X = x;
+            this.Y = y;
+            this.Width = width;
+            this.Length = length;
 
             this.data = new int[width * length];
-            Clear();
+            this.Clear();
         }
 
         /// <summary>
@@ -119,7 +99,7 @@ namespace Engine.Geometry
         /// <returns>A value indicating whether or not the height value at the index is set.</returns>
         public bool IsSet(int index)
         {
-            return data[index] != UnsetHeight;
+            return this.data[index] != UnsetHeight;
         }
         /// <summary>
         /// Gets the height value at a specified index. A return value indicates whether the height value is set.
@@ -147,27 +127,28 @@ namespace Engine.Geometry
         /// <summary>
         /// Resizes the patch. Only works if the new size is smaller than or equal to the initial size.
         /// </summary>
-        /// <param name="x">The new X coordinate.</param>
-        /// <param name="y">The new Y coordinate.</param>
-        /// <param name="width">The new width.</param>
-        /// <param name="length">The new length.</param>
-        public void Resize(int x, int y, int width, int length)
+        /// <param name="rect">Rectangle</param>
+        public void Resize(Rectangle rect)
         {
-            if (data.Length < width * length)
+            if (this.data.Length < rect.Width * rect.Height)
+            {
                 throw new ArgumentException("Only resizing down is allowed right now.");
+            }
 
-            this.xmin = x;
-            this.ymin = y;
-            this.width = width;
-            this.length = length;
+            this.X = rect.Left;
+            this.Y = rect.Top;
+            this.Width = rect.Width;
+            this.Length = rect.Height;
         }
         /// <summary>
         /// Clears the <see cref="HeightPatch"/> by unsetting every value.
         /// </summary>
         public void Clear()
         {
-            for (int i = 0; i < data.Length; i++)
-                data[i] = UnsetHeight;
+            for (int i = 0; i < this.data.Length; i++)
+            {
+                this.data[i] = UnsetHeight;
+            }
         }
         /// <summary>
         /// Sets all of the height values to the same value.
@@ -175,8 +156,10 @@ namespace Engine.Geometry
         /// <param name="h">The height to apply to all values.</param>
         public void SetAll(int h)
         {
-            for (int i = 0; i < data.Length; i++)
-                data[i] = h;
+            for (int i = 0; i < this.data.Length; i++)
+            {
+                this.data[i] = h;
+            }
         }
     }
 }

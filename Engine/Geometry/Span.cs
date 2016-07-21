@@ -37,10 +37,9 @@ namespace Engine.Geometry
         /// <param name="min">The lowest value in the span.</param>
         /// <param name="max">The highest value in the span.</param>
         public Span(int min, int max)
+            : this(min, max, Area.Null)
         {
-            this.Minimum = min;
-            this.Maximum = max;
-            this.Area = Area.Null;
+
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Span"/> struct.

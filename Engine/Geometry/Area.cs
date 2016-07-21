@@ -13,7 +13,7 @@ namespace Engine.Geometry
         /// <summary>
         /// The null area is one that is considered unwalkable.
         /// </summary>
-        public static readonly Area Null = new Area(0);
+        public static readonly Area Null = new Area(0x00);
         /// <summary>
         /// This is a default <see cref="Area"/> in the event that the user does not provide one.
         /// </summary>
@@ -66,7 +66,7 @@ namespace Engine.Geometry
         {
             get
             {
-                return Id != 0;
+                return this.Id != 0x00;
             }
         }
 
@@ -105,14 +105,18 @@ namespace Engine.Geometry
         public override bool Equals(object obj)
         {
             var areaObj = obj as Area?;
-            var byteObj = obj as byte?;
-
             if (areaObj.HasValue)
+            {
                 return this.Equals(areaObj.Value);
-            else if (byteObj.HasValue)
+            }
+
+            var byteObj = obj as byte?;
+            if (byteObj.HasValue)
+            {
                 return this.Equals(byteObj.Value);
-            else
-                return false;
+            }
+            
+            return false;
         }
         /// <summary>
         /// Generates a hashcode unique to the <see cref="Id"/> of this instance.
@@ -120,7 +124,7 @@ namespace Engine.Geometry
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
-            return Id.GetHashCode();
+            return this.Id.GetHashCode();
         }
         /// <summary>
         /// Converts this instance to a human-readable string.
@@ -128,10 +132,14 @@ namespace Engine.Geometry
         /// <returns>A string representing this instance.</returns>
         public override string ToString()
         {
-            if (Id == 0)
+            if (this.Id == 0x00)
+            {
                 return "Null/Unwalkable";
+            }
             else
-                return Id.ToString();
+            {
+                return this.Id.ToString();
+            }
         }
     }
 }

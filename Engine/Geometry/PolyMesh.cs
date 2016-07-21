@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine.Geometry
 {
@@ -86,11 +86,6 @@ namespace Engine.Geometry
             /// </summary>
             /// <value>The region identifier.</value>
             public RegionId RegionId { get; set; }
-            /// <summary>
-            /// Gets or sets a tag for this instance.
-            /// </summary>
-            /// <value>Any object to tag this instance with.</value>
-            public object Tag { get; set; }
             /// <summary>
             /// Gets the the number of vertex.
             /// </summary>

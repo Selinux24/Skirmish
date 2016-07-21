@@ -1,11 +1,11 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using SharpDX;
 
 namespace Engine
 {
@@ -22,6 +22,9 @@ namespace Engine
             0.0f, -0.5f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.5f, 0.5f, 0.0f, 1.0f);
+
+        public const uint PRIMEX = 0x8da6b343;
+        public const uint PRIMEY = 0xd8163841;
 
         /// <summary>
         /// Generate an array initialized to defaultValue
@@ -549,6 +552,24 @@ namespace Engine
             }
 
             return res;
+        }
+        /// <summary>
+        /// Offset for the x-coordinate
+        /// </summary>
+        /// <param name="i">Starting number</param>
+        /// <returns>A new offset</returns>
+        public static float GetJitterX(int i)
+        {
+            return (((i * PRIMEX) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
+        }
+        /// <summary>
+        /// Offset for the y-coordinate
+        /// </summary>
+        /// <param name="i">Starting number</param>
+        /// <returns>A new offset</returns>
+        public static float GetJitterY(int i)
+        {
+            return (((i * PRIMEY) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
         }
     }
 }
