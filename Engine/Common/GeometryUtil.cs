@@ -343,6 +343,41 @@ namespace Engine.Common
             return c ? -dmin : dmin;
         }
         /// <summary>
+        /// Finds the squared distance between a point and the nearest edge of a polygon.
+        /// </summary>
+        /// <param name="pt">A point.</param>
+        /// <param name="verts">A set of vertices that define a polygon.</param>
+        /// <param name="nverts">The number of vertices to use from <c>verts</c>.</param>
+        /// <returns>The squared distance between a point and the nearest edge of a polygon.</returns>
+        internal static float PointToPolygonEdgeSquared(Vector3 pt, Vector3[] verts, int nverts)
+        {
+            float dmin = float.MaxValue;
+            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
+            {
+                dmin = Math.Min(dmin, PointToSegment2DSquared(ref pt, ref verts[j], ref verts[i]));
+            }
+
+            return PointInPoly(pt, verts, nverts) ? -dmin : dmin;
+        }
+        /// <summary>
+        /// Finds the distance between a point and the nearest edge of a polygon.
+        /// </summary>
+        /// <param name="pt">A point.</param>
+        /// <param name="verts">A set of vertices that define a polygon.</param>
+        /// <param name="nverts">The number of vertices to use from <c>verts</c>.</param>
+        /// <param name="edgeDist">A buffer for edge distances to be stored in.</param>
+        /// <param name="edgeT">A buffer for parametrization ratios to be stored in.</param>
+        /// <returns>A value indicating whether the point is contained in the polygon.</returns>
+        internal static bool PointToPolygonEdgeSquared(Vector3 pt, Vector3[] verts, int nverts, float[] edgeDist, float[] edgeT)
+        {
+            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
+            {
+                edgeDist[j] = PointToSegment2DSquared(ref pt, ref verts[j], ref verts[i], out edgeT[j]);
+            }
+
+            return PointInPoly(pt, verts, nverts);
+        }
+        /// <summary>
         /// Finds the distance between a point and triangle ABC.
         /// </summary>
         /// <param name="p">A point.</param>
@@ -404,6 +439,31 @@ namespace Engine.Common
 
             height = float.MaxValue;
             return false;
+        }
+        /// <summary>
+        /// Determines whether a point is inside a polygon.
+        /// </summary>
+        /// <param name="pt">A point.</param>
+        /// <param name="verts">A set of vertices that define a polygon.</param>
+        /// <param name="nverts">The number of vertices to use from <c>verts</c>.</param>
+        /// <returns>A value indicating whether the point is contained within the polygon.</returns>
+        internal static bool PointInPoly(Vector3 pt, Vector3[] verts, int nverts)
+        {
+            bool c = false;
+
+            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
+            {
+                Vector3 vi = verts[i];
+                Vector3 vj = verts[j];
+
+                if (((vi.Z > pt.Z) != (vj.Z > pt.Z)) &&
+                    (pt.X < (vj.X - vi.X) * (pt.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+                {
+                    c = !c;
+                }
+            }
+
+            return c;
         }
 
         /// <summary>
