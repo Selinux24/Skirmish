@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine.Common
 {
@@ -13,21 +13,89 @@ namespace Engine.Common
     /// </summary>
     public class NavMeshBuilder
     {
-        public static NavMeshBuilder Build(
-            Geometry.PolyMesh polyMesh,
-            Geometry.PolyMeshDetail polyMeshDetail,
+        private PolyMesh polyMesh;
+        private PolyMeshDetail polyMeshDetail;
+        private float cellSize;
+        private float cellHeight;
+        private int vertsPerPoly;
+        private float maxClimb;
+
+        /// <summary>
+        /// Gets the file header
+        /// </summary>
+        public PathfindingCommon.NavMeshInfo Header { get; private set; }
+        /// <summary>
+        /// Gets the PolyMesh vertices
+        /// </summary>
+        public Vector3[] NavVerts { get; private set; }
+        /// <summary>
+        /// Gets the PolyMesh polygons
+        /// </summary>
+        public Poly[] NavPolys { get; private set; }
+        /// <summary>
+        /// Gets the PolyMeshDetail mesh data (the indices of the vertices and triagles)
+        /// </summary>
+        public PolyMeshDetail.MeshData[] NavDMeshes { get; private set; }
+        /// <summary>
+        /// Gets the PolyMeshDetail vertices
+        /// </summary>
+        public Vector3[] NavDVerts { get; private set; }
+        /// <summary>
+        /// Gets the PolyMeshDetail triangles
+        /// </summary>
+        public PolyMeshDetail.TriangleData[] NavDTris { get; private set; }
+        /// <summary>
+        /// Gets the bounding volume tree
+        /// </summary>
+        public BVTree NavBvTree { get; private set; }
+        /// <summary>
+        /// Gets the offmesh connection data
+        /// </summary>
+        public OffMeshConnection[] OffMeshCons { get; private set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NavMeshBuilder" /> class.
+        /// Add all the PolyMesh and PolyMeshDetail attributes to the Navigation Mesh.
+        /// Then, add Off-Mesh connection support.
+        /// </summary>
+        /// <param name="polyMesh">The PolyMesh</param>
+        /// <param name="polyMeshDetail">The PolyMeshDetail</param>
+        /// <param name="offMeshCons">Offmesh connection data</param>
+        /// <param name="settings">The settings used to build.</param>
+        public NavMeshBuilder(
+            PolyMesh polyMesh,
+            PolyMeshDetail polyMeshDetail,
             OffMeshConnection[] offMeshCons,
-            float cellSize, float cellHeight, int vertsPerPoly, float maxClimb)
+            NavMeshGenerationSettings settings)
+            : this(polyMesh, polyMeshDetail, offMeshCons, settings.CellSize, settings.CellHeight, settings.VertsPerPoly, settings.MaxClimb, settings.BuildBoundingVolumeTree, settings.AgentHeight, settings.AgentRadius) { }
+
+        public NavMeshBuilder(
+            PolyMesh polyMesh,
+            PolyMeshDetail polyMeshDetail,
+            OffMeshConnection[] offMeshCons,
+            float cellSize, float cellHeight, int vertsPerPoly, float maxClimb, bool buildBoundingVolumeTree, float agentHeight, float agentRadius)
         {
-            NavMeshBuilder result = new NavMeshBuilder();
+            if (vertsPerPoly > PathfindingCommon.VERTS_PER_POLYGON)
+            {
+                throw new InvalidOperationException("The number of vertices per polygon is above SharpNav's limit");
+            }
+            if (polyMesh.VertCount == 0)
+            {
+                throw new InvalidOperationException("The provided PolyMesh has no vertices.");
+            }
+            if (polyMesh.PolyCount == 0)
+            {
+                throw new InvalidOperationException("The provided PolyMesh has not polys.");
+            }
 
-            #region Classify off-mesh connection points
+            int nvp = vertsPerPoly;
 
-            BoundarySide[] offMeshSides = new BoundarySide[offMeshCons != null ? offMeshCons.Length * 2 : 0];
+            //classify off-mesh connection points
+            BoundarySide[] offMeshSides = new BoundarySide[offMeshCons.Length * 2];
             int storedOffMeshConCount = 0;
             int offMeshConLinkCount = 0;
 
-            if (offMeshCons != null && offMeshCons.Length > 0)
+            if (offMeshCons.Length > 0)
             {
                 //find height bounds
                 float hmin = float.MaxValue;
@@ -35,30 +103,22 @@ namespace Engine.Common
 
                 if (polyMeshDetail != null)
                 {
-                    #region With detailed mesh
-
                     for (int i = 0; i < polyMeshDetail.VertCount; i++)
                     {
                         float h = polyMeshDetail.Verts[i].Y;
                         hmin = Math.Min(hmin, h);
                         hmax = Math.Max(hmax, h);
                     }
-
-                    #endregion
                 }
                 else
                 {
-                    #region With mesh
-
                     for (int i = 0; i < polyMesh.VertCount; i++)
                     {
-                        var iv = polyMesh.Verts[i];
+                        PolyVertex iv = polyMesh.Verts[i];
                         float h = polyMesh.Bounds.Minimum.Y + iv.Y * cellHeight;
                         hmin = Math.Min(hmin, h);
                         hmax = Math.Max(hmax, h);
                     }
-
-                    #endregion
                 }
 
                 hmin -= maxClimb;
@@ -85,32 +145,46 @@ namespace Engine.Common
                     }
 
                     //count number of links to allocate
-                    if (offMeshSides[i * 2 + 0] == BoundarySide.Internal) offMeshConLinkCount++;
-                    if (offMeshSides[i * 2 + 1] == BoundarySide.Internal) offMeshConLinkCount++;
-                    if (offMeshSides[i * 2 + 0] == BoundarySide.Internal) storedOffMeshConCount++;
+                    if (offMeshSides[i * 2 + 0] == BoundarySide.Internal)
+                    {
+                        offMeshConLinkCount++;
+                    }
+                    if (offMeshSides[i * 2 + 1] == BoundarySide.Internal)
+                    {
+                        offMeshConLinkCount++;
+                    }
+                    if (offMeshSides[i * 2 + 0] == BoundarySide.Internal)
+                    {
+                        storedOffMeshConCount++;
+                    }
                 }
             }
 
-            #endregion
+            //off-mesh connections stored as polygons, adjust values
+            int totPolyCount = polyMesh.PolyCount + storedOffMeshConCount;
+            int totVertCount = polyMesh.VertCount + storedOffMeshConCount * 2;
 
-            #region Find portal edges
-
+            //find portal edges
             int edgeCount = 0;
             int portalCount = 0;
             for (int i = 0; i < polyMesh.PolyCount; i++)
             {
-                var p = polyMesh.Polys[i];
-                for (int j = 0; j < vertsPerPoly; j++)
+                PolyMesh.Polygon p = polyMesh.Polys[i];
+                for (int j = 0; j < nvp; j++)
                 {
-                    if (p.Vertices[j] != Geometry.PolyMesh.NullId)
+                    if (p.Vertices[j] == PolyMesh.NullId)
                     {
-                        edgeCount++;
+                        break;
+                    }
 
-                        if (Geometry.PolyMesh.IsBoundaryEdge(p.NeighborEdges[j]))
+                    edgeCount++;
+
+                    if (PolyMesh.IsBoundaryEdge(p.NeighborEdges[j]))
+                    {
+                        int dir = p.NeighborEdges[j] % 16;
+                        if (dir != 15)
                         {
-                            int dir = p.NeighborEdges[j] % 16;
-
-                            if (dir != 15) portalCount++;
+                            portalCount++;
                         }
                     }
                 }
@@ -118,15 +192,11 @@ namespace Engine.Common
 
             int maxLinkCount = edgeCount + portalCount * 2 + offMeshConLinkCount * 2;
 
-            #endregion
-
-            //Find unique detail vertices
+            //find unique detail vertices
             int uniqueDetailVertCount = 0;
             int detailTriCount = 0;
             if (polyMeshDetail != null)
             {
-                #region With detailed mesh
-
                 detailTriCount = polyMeshDetail.TrisCount;
                 for (int i = 0; i < polyMesh.PolyCount; i++)
                 {
@@ -134,13 +204,9 @@ namespace Engine.Common
                     int numPolyVerts = polyMesh.Polys[i].VertexCount;
                     uniqueDetailVertCount += numDetailVerts - numPolyVerts;
                 }
-
-                #endregion
             }
             else
             {
-                #region With mesh
-
                 uniqueDetailVertCount = 0;
                 detailTriCount = 0;
                 for (int i = 0; i < polyMesh.PolyCount; i++)
@@ -148,160 +214,151 @@ namespace Engine.Common
                     int numPolyVerts = polyMesh.Polys[i].VertexCount;
                     uniqueDetailVertCount += numPolyVerts - 2;
                 }
-
-                #endregion
             }
+
+            //allocate data
+            this.Header = new PathfindingCommon.NavMeshInfo();
+            this.NavVerts = new Vector3[totVertCount];
+            this.NavPolys = new Poly[totPolyCount];
+            this.NavDMeshes = new PolyMeshDetail.MeshData[polyMesh.PolyCount];
+            this.NavDVerts = new Vector3[uniqueDetailVertCount];
+            this.NavDTris = new PolyMeshDetail.TriangleData[detailTriCount];
+            this.OffMeshCons = new OffMeshConnection[storedOffMeshConCount];
 
             //store header
             //HACK TiledNavMesh should figure out the X/Y/layer instead of the user maybe?
-            //result.header = new PathfindingCommon.NavMeshInfo();
-            //header.X = 0;
-            //header.Y = 0;
-            //header.Layer = 0;
-            //header.PolyCount = totPolyCount;
-            //header.VertCount = totVertCount;
-            //header.MaxLinkCount = maxLinkCount;
-            //header.Bounds = polyMesh.Bounds;
-            //header.DetailMeshCount = polyMesh.PolyCount;
-            //header.DetailVertCount = uniqueDetailVertCount;
-            //header.DetailTriCount = detailTriCount;
-            //header.OffMeshBase = polyMesh.PolyCount;
-            //header.WalkableHeight = settings.AgentHeight;
-            //header.WalkableRadius = settings.AgentRadius;
-            //header.WalkableClimb = maxClimb;
-            //header.OffMeshConCount = storedOffMeshConCount;
-            //header.BvNodeCount = settings.BuildBoundingVolumeTree ? polyMesh.PolyCount * 2 : 0;
-            //header.BvQuantFactor = 1f / cellSize;
+            this.Header.X = 0;
+            this.Header.Y = 0;
+            this.Header.Layer = 0;
+            this.Header.PolyCount = totPolyCount;
+            this.Header.VertCount = totVertCount;
+            this.Header.MaxLinkCount = maxLinkCount;
+            this.Header.Bounds = polyMesh.Bounds;
+            this.Header.DetailMeshCount = polyMesh.PolyCount;
+            this.Header.DetailVertCount = uniqueDetailVertCount;
+            this.Header.DetailTriCount = detailTriCount;
+            this.Header.OffMeshBase = polyMesh.PolyCount;
+            this.Header.WalkableHeight = agentHeight;
+            this.Header.WalkableRadius = agentRadius;
+            this.Header.WalkableClimb = maxClimb;
+            this.Header.OffMeshConCount = storedOffMeshConCount;
+            this.Header.BvNodeCount = buildBoundingVolumeTree ? polyMesh.PolyCount * 2 : 0;
+            this.Header.BvQuantFactor = 1f / cellSize;
 
-            //off-mesh connections stored as polygons, adjust values
             int offMeshVertsBase = polyMesh.VertCount;
             int offMeshPolyBase = polyMesh.PolyCount;
-            int totPolyCount = polyMesh.PolyCount + storedOffMeshConCount;
-            int totVertCount = polyMesh.VertCount + storedOffMeshConCount * 2;
 
-            //Allocate data
-            result.NavVerts = new Vector3[totVertCount];
-            result.NavPolys = new Poly[totPolyCount];
-            result.navDMeshes = new Geometry.PolyMeshDetail.MeshData[polyMesh.PolyCount];
-            result.navDVerts = new Vector3[uniqueDetailVertCount];
-            result.navDTris = new Geometry.PolyMeshDetail.TriangleData[detailTriCount];
-            result.offMeshConnections = new OffMeshConnection[storedOffMeshConCount];
-
-            #region Store vertices
-
+            //store vertices
             for (int i = 0; i < polyMesh.VertCount; i++)
             {
-                var iv = polyMesh.Verts[i];
-                result.NavVerts[i].X = polyMesh.Bounds.Minimum.X + iv.X * cellSize;
-                result.NavVerts[i].Y = polyMesh.Bounds.Minimum.Y + iv.Y * cellHeight;
-                result.NavVerts[i].Z = polyMesh.Bounds.Minimum.Z + iv.Z * cellSize;
+                PolyVertex iv = polyMesh.Verts[i];
+                this.NavVerts[i].X = polyMesh.Bounds.Minimum.X + iv.X * cellSize;
+                this.NavVerts[i].Y = polyMesh.Bounds.Minimum.Y + iv.Y * cellHeight;
+                this.NavVerts[i].Z = polyMesh.Bounds.Minimum.Z + iv.Z * cellSize;
             }
 
-            #endregion
-
-            #region Off-mesh link vertices
-
-            if (offMeshCons != null && offMeshCons.Length > 0)
+            //off-mesh link vertices
+            int n = 0;
+            for (int i = 0; i < offMeshCons.Length; i++)
             {
-                int n = 0;
-                for (int i = 0; i < offMeshCons.Length; i++)
+                //only store connections which start from this tile
+                if (offMeshSides[i * 2 + 0] == BoundarySide.Internal)
                 {
-                    //only store connections which start from this tile
-                    if (offMeshSides[i * 2 + 0] == BoundarySide.Internal)
-                    {
-                        result.NavVerts[offMeshVertsBase + (n * 2 + 0)] = offMeshCons[i].Pos0;
-                        result.NavVerts[offMeshVertsBase + (n * 2 + 1)] = offMeshCons[i].Pos1;
-                        n++;
-                    }
+                    this.NavVerts[offMeshVertsBase + (n * 2 + 0)] = offMeshCons[i].Pos0;
+                    this.NavVerts[offMeshVertsBase + (n * 2 + 1)] = offMeshCons[i].Pos1;
+                    n++;
                 }
             }
 
-            #endregion
-
-            #region Store vertices
-
+            //store polygons
             for (int i = 0; i < polyMesh.PolyCount; i++)
             {
-                result.NavPolys[i] = new Poly();
-                result.NavPolys[i].VertCount = 0;
-                result.NavPolys[i].Area = polyMesh.Polys[i].Area;
-                result.NavPolys[i].PolyType = PolygonType.Ground;
-                result.NavPolys[i].Verts = new int[vertsPerPoly];
-                result.NavPolys[i].Neis = new int[vertsPerPoly];
-
-                for (int j = 0; j < vertsPerPoly; j++)
+                this.NavPolys[i] = new Poly();
+                this.NavPolys[i].VertCount = 0;
+                this.NavPolys[i].Area = polyMesh.Polys[i].Area;
+                this.NavPolys[i].PolyType = PolygonType.Ground;
+                this.NavPolys[i].Verts = new int[nvp];
+                this.NavPolys[i].Neis = new int[nvp];
+                for (int j = 0; j < nvp; j++)
                 {
-                    if (polyMesh.Polys[i].Vertices[j] != Geometry.PolyMesh.NullId)
+                    if (polyMesh.Polys[i].Vertices[j] == PolyMesh.NullId)
                     {
-                        result.NavPolys[i].Verts[j] = polyMesh.Polys[i].Vertices[j];
-                        if (Geometry.PolyMesh.IsBoundaryEdge(polyMesh.Polys[i].NeighborEdges[j]))
-                        {
-                            //border or portal edge
-                            int dir = polyMesh.Polys[i].NeighborEdges[j] % 16;
-                            if (dir == 0xf) result.NavPolys[i].Neis[j] = 0; //border
-                            else if (dir == 0) result.NavPolys[i].Neis[j] = Link.External | 4; //portal x-
-                            else if (dir == 1) result.NavPolys[i].Neis[j] = Link.External | 2; //portal z+
-                            else if (dir == 2) result.NavPolys[i].Neis[j] = Link.External | 0; //portal x+
-                            else if (dir == 3) result.NavPolys[i].Neis[j] = Link.External | 6; //portal z-
-                        }
-                        else
-                        {
-                            //normal connection
-                            result.NavPolys[i].Neis[j] = polyMesh.Polys[i].NeighborEdges[j] + 1;
-                        }
-
-                        result.NavPolys[i].VertCount++;
+                        break;
                     }
+
+                    this.NavPolys[i].Verts[j] = polyMesh.Polys[i].Vertices[j];
+                    if (PolyMesh.IsBoundaryEdge(polyMesh.Polys[i].NeighborEdges[j]))
+                    {
+                        //border or portal edge
+                        int dir = polyMesh.Polys[i].NeighborEdges[j] % 16;
+                        if (dir == 0xf) //border
+                        {
+                            this.NavPolys[i].Neis[j] = 0;
+                        }
+                        else if (dir == 0) //portal x-
+                        {
+                            this.NavPolys[i].Neis[j] = Link.External | 4;
+                        }
+                        else if (dir == 1) //portal z+
+                        {
+                            this.NavPolys[i].Neis[j] = Link.External | 2;
+                        }
+                        else if (dir == 2) //portal x+
+                        {
+                            this.NavPolys[i].Neis[j] = Link.External | 0;
+                        }
+                        else if (dir == 3) //portal z-
+                        {
+                            this.NavPolys[i].Neis[j] = Link.External | 6;
+                        }
+                    }
+                    else
+                    {
+                        //normal connection
+                        this.NavPolys[i].Neis[j] = polyMesh.Polys[i].NeighborEdges[j] + 1;
+                    }
+
+                    this.NavPolys[i].VertCount++;
                 }
             }
 
-            #endregion
-
-            #region Off-mesh connection vertices
-
-            if (offMeshCons != null && offMeshCons.Length > 0)
+            //off-mesh connection vertices
+            n = 0;
+            for (int i = 0; i < offMeshCons.Length; i++)
             {
-                int n = 0;
-                for (int i = 0; i < offMeshCons.Length; i++)
+                //only store connections which start from this tile
+                if (offMeshSides[i * 2 + 0] == BoundarySide.Internal)
                 {
-                    //only store connections which start from this tile
-                    if (offMeshSides[i * 2 + 0] == BoundarySide.Internal)
-                    {
-                        result.NavPolys[offMeshPolyBase + n] = new Poly();
-                        result.NavPolys[offMeshPolyBase + n].VertCount = 2;
-                        result.NavPolys[offMeshPolyBase + n].Verts = new int[vertsPerPoly];
-                        result.NavPolys[offMeshPolyBase + n].Verts[0] = offMeshVertsBase + (n * 2 + 0);
-                        result.NavPolys[offMeshPolyBase + n].Verts[1] = offMeshVertsBase + (n * 2 + 1);
-                        result.NavPolys[offMeshPolyBase + n].Area = polyMesh.Polys[offMeshCons[i].Poly].Area;
-                        result.NavPolys[offMeshPolyBase + n].PolyType = PolygonType.OffMeshConnection;
-                        n++;
-                    }
+                    this.NavPolys[offMeshPolyBase + n] = new Poly();
+                    this.NavPolys[offMeshPolyBase + n].VertCount = 2;
+                    this.NavPolys[offMeshPolyBase + n].Verts = new int[nvp];
+                    this.NavPolys[offMeshPolyBase + n].Verts[0] = offMeshVertsBase + (n * 2 + 0);
+                    this.NavPolys[offMeshPolyBase + n].Verts[1] = offMeshVertsBase + (n * 2 + 1);
+                    this.NavPolys[offMeshPolyBase + n].Area = polyMesh.Polys[offMeshCons[i].Poly].Area; //HACK is this correct?
+                    this.NavPolys[offMeshPolyBase + n].PolyType = PolygonType.OffMeshConnection;
+                    n++;
                 }
             }
-
-            #endregion
 
             //store detail meshes and vertices
             if (polyMeshDetail != null)
             {
-                #region With detailed mesh
-
                 int vbase = 0;
                 List<Vector3> storedDetailVerts = new List<Vector3>();
                 for (int i = 0; i < polyMesh.PolyCount; i++)
                 {
                     int vb = polyMeshDetail.Meshes[i].VertexIndex;
                     int numDetailVerts = polyMeshDetail.Meshes[i].VertexCount;
-                    int numPolyVerts = result.NavPolys[i].VertCount;
-                    result.navDMeshes[i].VertexIndex = vbase;
-                    result.navDMeshes[i].VertexCount = numDetailVerts - numPolyVerts;
-                    result.navDMeshes[i].TriangleIndex = polyMeshDetail.Meshes[i].TriangleIndex;
-                    result.navDMeshes[i].TriangleCount = polyMeshDetail.Meshes[i].TriangleCount;
+                    int numPolyVerts = this.NavPolys[i].VertCount;
+                    this.NavDMeshes[i].VertexIndex = vbase;
+                    this.NavDMeshes[i].VertexCount = numDetailVerts - numPolyVerts;
+                    this.NavDMeshes[i].TriangleIndex = polyMeshDetail.Meshes[i].TriangleIndex;
+                    this.NavDMeshes[i].TriangleCount = polyMeshDetail.Meshes[i].TriangleCount;
 
                     //Copy detail vertices 
                     //first 'nv' verts are equal to nav poly verts
                     //the rest are detail verts
-                    for (int j = 0; j < result.navDMeshes[i].VertexCount; j++)
+                    for (int j = 0; j < this.NavDMeshes[i].VertexCount; j++)
                     {
                         storedDetailVerts.Add(polyMeshDetail.Verts[vb + numPolyVerts + j]);
                     }
@@ -309,100 +366,79 @@ namespace Engine.Common
                     vbase += numDetailVerts - numPolyVerts;
                 }
 
-                result.navDVerts = storedDetailVerts.ToArray();
+                this.NavDVerts = storedDetailVerts.ToArray();
 
                 //store triangles
                 for (int j = 0; j < polyMeshDetail.TrisCount; j++)
                 {
-                    result.navDTris[j] = polyMeshDetail.Tris[j];
+                    this.NavDTris[j] = polyMeshDetail.Tris[j];
                 }
-
-                #endregion
             }
             else
             {
-                #region With mesh
-
                 //create dummy detail mesh by triangulating polys
                 int tbase = 0;
                 for (int i = 0; i < polyMesh.PolyCount; i++)
                 {
-                    int numPolyVerts = result.NavPolys[i].VertCount;
-                    result.navDMeshes[i].VertexIndex = 0;
-                    result.navDMeshes[i].VertexCount = 0;
-                    result.navDMeshes[i].TriangleIndex = tbase;
-                    result.navDMeshes[i].TriangleCount = numPolyVerts - 2;
+                    int numPolyVerts = this.NavPolys[i].VertCount;
+                    this.NavDMeshes[i].VertexIndex = 0;
+                    this.NavDMeshes[i].VertexCount = 0;
+                    this.NavDMeshes[i].TriangleIndex = tbase;
+                    this.NavDMeshes[i].TriangleCount = numPolyVerts - 2;
 
                     //triangulate polygon
                     for (int j = 2; j < numPolyVerts; j++)
                     {
-                        result.navDTris[tbase].VertexHash0 = 0;
-                        result.navDTris[tbase].VertexHash1 = j - 1;
-                        result.navDTris[tbase].VertexHash2 = j;
+                        this.NavDTris[tbase].VertexHash0 = 0;
+                        this.NavDTris[tbase].VertexHash1 = j - 1;
+                        this.NavDTris[tbase].VertexHash2 = j;
 
                         //bit for each edge that belongs to the poly boundary
-                        result.navDTris[tbase].Flags = 1 << 2;
-                        if (j == 2) result.navDTris[tbase].Flags |= 1 << 0;
-                        if (j == numPolyVerts - 1) result.navDTris[tbase].Flags |= 1 << 4;
+                        this.NavDTris[tbase].Flags = 1 << 2;
+                        if (j == 2)
+                        {
+                            this.NavDTris[tbase].Flags |= 1 << 0;
+                        }
+                        if (j == numPolyVerts - 1)
+                        {
+                            this.NavDTris[tbase].Flags |= 1 << 4;
+                        }
 
                         tbase++;
                     }
                 }
-
-                #endregion
             }
 
-            #region Store off-mesh connections
-
-            if (offMeshCons != null && offMeshCons.Length > 0)
+            //store and create BV tree
+            if (buildBoundingVolumeTree)
             {
-                int n = 0;
-                for (int i = 0; i < result.offMeshConnections.Length; i++)
+                //build tree
+                this.NavBvTree = new BVTree(polyMesh.Verts, polyMesh.Polys, nvp, cellSize, cellHeight);
+            }
+
+            //store off-mesh connections
+            n = 0;
+            for (int i = 0; i < this.OffMeshCons.Length; i++)
+            {
+                //only store connections which start from this tile
+                if (offMeshSides[i * 2 + 0] == BoundarySide.Internal)
                 {
-                    //only store connections which start from this tile
-                    if (offMeshSides[i * 2 + 0] == BoundarySide.Internal)
-                    {
-                        result.offMeshConnections[n] = new OffMeshConnection();
+                    this.OffMeshCons[n] = new OffMeshConnection();
 
-                        result.offMeshConnections[n].Poly = offMeshPolyBase + n;
+                    this.OffMeshCons[n].Poly = offMeshPolyBase + n;
 
-                        //copy connection end points
-                        result.offMeshConnections[n].Pos0 = offMeshCons[i].Pos0;
-                        result.offMeshConnections[n].Pos1 = offMeshCons[i].Pos1;
+                    //copy connection end points
+                    this.OffMeshCons[n].Pos0 = offMeshCons[i].Pos0;
+                    this.OffMeshCons[n].Pos1 = offMeshCons[i].Pos1;
 
-                        result.offMeshConnections[n].Radius = offMeshCons[i].Radius;
-                        result.offMeshConnections[n].Flags = offMeshCons[i].Flags;
-                        result.offMeshConnections[n].Side = offMeshSides[i * 2 + 1];
-                        result.offMeshConnections[n].Tag = offMeshCons[i].Tag;
+                    this.OffMeshCons[n].Radius = offMeshCons[i].Radius;
+                    this.OffMeshCons[n].Flags = offMeshCons[i].Flags;
+                    this.OffMeshCons[n].Side = offMeshSides[i * 2 + 1];
+                    this.OffMeshCons[n].Tag = offMeshCons[i].Tag;
 
-                        n++;
-                    }
+                    n++;
                 }
             }
-
-            #endregion
-
-            return result;
         }
-
-        private PathfindingCommon.NavMeshInfo header;
-        private Geometry.PolyMeshDetail.MeshData[] navDMeshes;
-        private Vector3[] navDVerts;
-        private Geometry.PolyMeshDetail.TriangleData[] navDTris;
-        //private BVTree navBvTree;
-        private OffMeshConnection[] offMeshConnections;
-
-        /// <summary>
-        /// Gets the file header
-        /// </summary>
-        public PathfindingCommon.NavMeshInfo Header
-        {
-            get
-            {
-                return header;
-            }
-        }
-        public Vector3[] NavVerts;
-        public Poly[] NavPolys;
     }
 }

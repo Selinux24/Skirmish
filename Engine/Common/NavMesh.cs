@@ -1,7 +1,7 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharpDX;
 
 namespace Engine.Common
 {
@@ -351,11 +351,21 @@ namespace Engine.Common
         public static NavMesh Build(
             Geometry.PolyMesh polyMesh, Geometry.PolyMeshDetail polyMeshDetail,
             OffMeshConnection[] offMeshCons,
-            float cellSize, float cellHeight, int vertsPerPoly, float maxClimb)
+            float cellSize, float cellHeight, int vertsPerPoly, float maxClimb, bool buildBoundingVolumeTree, float agentHeight, float agentRadius)
         {
             var res = new NavMesh();
 
-            var builder = NavMeshBuilder.Build(polyMesh, polyMeshDetail, offMeshCons, cellSize, cellHeight, vertsPerPoly, maxClimb);
+            var builder = new NavMeshBuilder(
+                polyMesh,
+                polyMeshDetail,
+                offMeshCons,
+                cellSize,
+                cellHeight,
+                vertsPerPoly,
+                maxClimb,
+                buildBoundingVolumeTree,
+                agentHeight,
+                agentRadius);
 
             NavMeshNode[] nodes = new NavMeshNode[builder.NavPolys.Length];
             int nodeIndex = 0;
@@ -465,7 +475,10 @@ namespace Engine.Common
 
             float maxClimb = 0.9f;
 
-            return NavMesh.Build(pm, pmd, null, cellSize, cellHeight, vertsPerPoly, maxClimb);
+            bool buildBoundingVolumeTree = false;
+            float agentHeight = 2f;
+            float agentRadius = 0.6f;
+            return NavMesh.Build(pm, pmd, null, cellSize, cellHeight, vertsPerPoly, maxClimb, buildBoundingVolumeTree, agentHeight, agentRadius);
         }
         /// <summary>
         /// Merge a list of convex polygons

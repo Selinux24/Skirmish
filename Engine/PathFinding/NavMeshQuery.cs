@@ -1,29 +1,42 @@
-﻿using Engine.Collections;
-using Engine.Common;
-using Engine.Geometry;
-using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SharpDX;
 
 namespace Engine.PathFinding
 {
+    using Engine.Collections;
+    using Engine.Common;
+    using Engine.Geometry;
+
     /// <summary>
     /// Do pathfinding calculations on the TiledNavMesh
     /// </summary>
     public class NavMeshQuery
     {
+        private struct QueryData
+        {
+            public bool Status;
+            public Node LastBestNode;
+            public float LastBestNodeCost;
+            public NavPoint Start, End;
+        }
+
+        public struct SegInterval
+        {
+            public PolyId Reference;
+            public int TMin, TMax;
+        }
+
         private const float H_SCALE = 0.999f;
 
-        private TiledNavMesh nav;
         private float[] areaCost;
         private NodePool tinyNodePool;
         private NodePool nodePool;
         private PriorityQueue<Node> openList;
         private QueryData query;
         private Random rand;
+        
+        public TiledNavMesh NavMesh { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NavMeshQuery"/> class.
@@ -34,7 +47,6 @@ namespace Engine.PathFinding
             : this(nav, maxNodes, new Random())
         {
         }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="NavMeshQuery"/> class.
         /// </summary>
@@ -43,15 +55,17 @@ namespace Engine.PathFinding
         /// <param name="rand">A random number generator for use in methods like <see cref="NavMeshQuery.FindRandomPoint()"/></param>
         public NavMeshQuery(TiledNavMesh nav, int maxNodes, Random rand)
         {
-            this.nav = nav;
+            this.NavMesh = nav;
 
-            areaCost = new float[byte.MaxValue + 1];
-            for (int i = 0; i < areaCost.Length; i++)
-                areaCost[i] = 1.0f;
+            this.areaCost = new float[byte.MaxValue + 1];
+            for (int i = 0; i < this.areaCost.Length; i++)
+            {
+                this.areaCost[i] = 1.0f;
+            }
 
-            nodePool = new NodePool(maxNodes/*, MathHelper.NextPowerOfTwo(maxNodes / 4)*/);
-            tinyNodePool = new NodePool(64/*, 32*/);
-            openList = new PriorityQueue<Node>(maxNodes);
+            this.nodePool = new NodePool(maxNodes/*, MathHelper.NextPowerOfTwo(maxNodes / 4)*/);
+            this.tinyNodePool = new NodePool(64/*, 32*/);
+            this.openList = new PriorityQueue<Node>(maxNodes);
 
             this.rand = rand;
         }
@@ -65,17 +79,8 @@ namespace Engine.PathFinding
         /// <returns>Cost</returns>
         public float GetCost(Vector3 pa, Vector3 pb, Poly curPoly)
         {
-            return (pa - pb).Length() * areaCost[(int)curPoly.Area.Id];
+            return (pa - pb).Length() * this.areaCost[(int)curPoly.Area.Id];
         }
-
-        public TiledNavMesh NavMesh
-        {
-            get
-            {
-                return nav;
-            }
-        }
-
         /// <summary>
         /// Finds a random point on a polygon.
         /// </summary>
@@ -89,7 +94,6 @@ namespace Engine.PathFinding
             this.FindRandomPointOnPoly(tile, poly, polyRef, out result);
             return result;
         }
-
         /// <summary>
         /// Finds a random point on a polygon.
         /// </summary>
@@ -102,7 +106,9 @@ namespace Engine.PathFinding
             Vector3[] verts = new Vector3[PathfindingCommon.VERTS_PER_POLYGON];
             float[] areas = new float[PathfindingCommon.VERTS_PER_POLYGON];
             for (int j = 0; j < poly.VertCount; j++)
+            {
                 verts[j] = tile.Verts[poly.Verts[j]];
+            }
 
             float s = (float)rand.NextDouble();
             float t = (float)rand.NextDouble();
@@ -112,11 +118,12 @@ namespace Engine.PathFinding
             //TODO bad state again.
             float h = 0.0f;
             if (!GetPolyHeight(polyRef, randomPt, ref h))
+            {
                 throw new InvalidOperationException("Outside bounds?");
+            }
 
             randomPt.Y = h;
         }
-
         /// <summary>
         /// Finds a random point somewhere in the navigation mesh.
         /// </summary>
@@ -127,7 +134,6 @@ namespace Engine.PathFinding
             this.FindRandomPoint(out result);
             return result;
         }
-
         /// <summary>
         /// Finds a random point somewhere in the navigation mesh.
         /// </summary>
@@ -135,37 +141,45 @@ namespace Engine.PathFinding
         public void FindRandomPoint(out NavPoint randomPoint)
         {
             //TODO we're object-oriented, can prevent this state from ever happening.
-            if (nav == null)
+            if (this.NavMesh == null)
+            {
                 throw new InvalidOperationException("TODO prevent this state from ever occuring");
+            }
 
             //randomly pick one tile
             //assume all tiles cover roughly the same area
             MeshTile tile = null;
             float tsum = 0.0f;
 
-            for (int i = 0; i < nav.TileCount; i++)
+            for (int i = 0; i < this.NavMesh.TileCount; i++)
             {
-                MeshTile t = nav[i];
+                MeshTile t = this.NavMesh[i];
 
                 if (t == null)
+                {
                     continue;
+                }
 
                 //choose random tile using reservoir sampling
                 float area = 1.0f;
                 tsum += area;
                 float u = (float)rand.NextDouble();
                 if (u * tsum <= area)
+                {
                     tile = t;
+                }
             }
 
             //TODO why?
             if (tile == null)
+            {
                 throw new InvalidOperationException("No tiles?");
+            }
 
             //randomly pick one polygon weighted by polygon area
             Poly poly = null;
             PolyId polyRef = PolyId.Null;
-            PolyId polyBase = nav.GetTileRef(tile);
+            PolyId polyBase = this.NavMesh.GetTileRef(tile);
 
             float areaSum = 0.0f;
             for (int i = 0; i < tile.PolyCount; i++)
@@ -174,17 +188,19 @@ namespace Engine.PathFinding
 
                 //don't return off-mesh connection polygons
                 if (p.PolyType != PolygonType.Ground)
+                {
                     continue;
+                }
 
                 PolyId reference;
-                nav.IdManager.SetPolyIndex(ref polyBase, i, out reference);
+                this.NavMesh.IdManager.SetPolyIndex(ref polyBase, i, out reference);
 
                 //calculate area of polygon
                 float polyArea = 0.0f;
                 float area;
                 for (int j = 2; j < p.VertCount; j++)
                 {
-                    Triangle3.Area2D(ref tile.Verts[p.Verts[0]], ref tile.Verts[p.Verts[j - 1]], ref tile.Verts[p.Verts[j]], out area);
+                    Triangle.Area2D(ref tile.Verts[p.Verts[0]], ref tile.Verts[p.Verts[j - 1]], ref tile.Verts[p.Verts[j]], out area);
                     polyArea += area;
                 }
 
@@ -200,7 +216,9 @@ namespace Engine.PathFinding
 
             //TODO why?
             if (poly == null)
+            {
                 throw new InvalidOperationException("No polys?");
+            }
 
             //randomRef = polyRef;
             Vector3 randomPt;
@@ -208,7 +226,6 @@ namespace Engine.PathFinding
 
             randomPoint = new NavPoint(polyRef, randomPt);
         }
-
         /// <summary>
         /// Finds a random point in a NavMesh connected to a specified point on the same mesh.
         /// </summary>
@@ -216,9 +233,8 @@ namespace Engine.PathFinding
         /// <param name="randomPoint">A random point connected to <c>connectedTo</c>.</param>
         public void FindRandomConnectedPoint(NavPoint connectedTo, out NavPoint randomPoint)
         {
-            FindRandomPointAroundCircle(connectedTo, 0, out randomPoint);
+            this.FindRandomPointAroundCircle(connectedTo, 0, out randomPoint);
         }
-
         /// <summary>
         /// Finds a random point in a NavMesh connected to a specified point on the same mesh.
         /// </summary>
@@ -227,10 +243,9 @@ namespace Engine.PathFinding
         public NavPoint FindRandomConnectedPoint(NavPoint connectedTo)
         {
             NavPoint result;
-            FindRandomConnectedPoint(connectedTo, out result);
+            this.FindRandomConnectedPoint(connectedTo, out result);
             return result;
         }
-
         /// <summary>
         /// Finds a random point in a NavMesh within a specified circle.
         /// </summary>
@@ -243,7 +258,6 @@ namespace Engine.PathFinding
             this.FindRandomPointAroundCircle(center, radius, out result);
             return result;
         }
-
         /// <summary>
         /// Finds a random point in a NavMesh within a specified circle.
         /// </summary>
@@ -253,19 +267,25 @@ namespace Engine.PathFinding
         public void FindRandomPointAroundCircle(NavPoint center, float radius, out NavPoint randomPoint)
         {
             //TODO fix state
-            if (nav == null || nodePool == null || openList == null)
+            if (this.NavMesh == null || this.nodePool == null || this.openList == null)
+            {
                 throw new InvalidOperationException("Something null");
+            }
 
             //validate input
             if (center.Polygon == PolyId.Null)
+            {
                 throw new ArgumentOutOfRangeException("startRef", "Null poly reference");
+            }
 
-            if (!nav.IsValidPolyRef(center.Polygon))
+            if (!this.NavMesh.IsValidPolyRef(center.Polygon))
+            {
                 throw new ArgumentException("startRef", "Poly reference is not valid for this navmesh");
+            }
 
             MeshTile startTile;
             Poly startPoly;
-            nav.TryGetTileAndPolyByRefUnsafe(center.Polygon, out startTile, out startPoly);
+            this.NavMesh.TryGetTileAndPolyByRefUnsafe(center.Polygon, out startTile, out startPoly);
 
             nodePool.Clear();
             openList.Clear();
@@ -296,7 +316,7 @@ namespace Engine.PathFinding
                 PolyId bestRef = bestNode.Id;
                 MeshTile bestTile;
                 Poly bestPoly;
-                nav.TryGetTileAndPolyByRefUnsafe(bestRef, out bestTile, out bestPoly);
+                this.NavMesh.TryGetTileAndPolyByRefUnsafe(bestRef, out bestTile, out bestPoly);
 
                 //place random locations on ground
                 if (bestPoly.PolyType == PolygonType.Ground)
@@ -306,7 +326,7 @@ namespace Engine.PathFinding
                     float area;
                     for (int j = 2; j < bestPoly.VertCount; j++)
                     {
-                        Triangle3.Area2D(ref bestTile.Verts[bestPoly.Verts[0]], ref bestTile.Verts[bestPoly.Verts[j - 1]], ref bestTile.Verts[bestPoly.Verts[j]], out area);
+                        Triangle.Area2D(ref bestTile.Verts[bestPoly.Verts[0]], ref bestTile.Verts[bestPoly.Verts[j - 1]], ref bestTile.Verts[bestPoly.Verts[j]], out area);
                         polyArea += area;
                     }
 
@@ -326,9 +346,13 @@ namespace Engine.PathFinding
                 MeshTile parentTile;
                 Poly parentPoly;
                 if (bestNode.ParentIdx != 0)
+                {
                     parentRef = nodePool.GetNodeAtIdx(bestNode.ParentIdx).Id;
+                }
                 if (parentRef != PolyId.Null)
-                    nav.TryGetTileAndPolyByRefUnsafe(parentRef, out parentTile, out parentPoly);
+                {
+                    this.NavMesh.TryGetTileAndPolyByRefUnsafe(parentRef, out parentTile, out parentPoly);
+                }
 
                 foreach (Link link in bestPoly.Links)
                 {
@@ -336,72 +360,87 @@ namespace Engine.PathFinding
 
                     //skip invalid neighbors and do not follow back to parent
                     if (neighborRef == PolyId.Null || neighborRef == parentRef)
+                    {
                         continue;
+                    }
 
                     //expand to neighbor
                     MeshTile neighborTile;
                     Poly neighborPoly;
-                    nav.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
+                    this.NavMesh.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
 
                     //find edge and calculate distance to edge
                     Vector3 va = new Vector3();
                     Vector3 vb = new Vector3();
-                    if (!GetPortalPoints(bestRef, bestPoly, bestTile, neighborRef, neighborPoly, neighborTile, ref va, ref vb))
+                    if (!this.GetPortalPoints(bestRef, bestPoly, bestTile, neighborRef, neighborPoly, neighborTile, ref va, ref vb))
+                    {
                         continue;
+                    }
 
                     //if circle isn't touching next polygon, skip it
                     if (doRadiusCheck)
                     {
                         float tseg;
-                        float distSqr = Distance.PointToSegment2DSquared(ref center.Position, ref va, ref vb, out tseg);
+                        float distSqr = GeometryUtil.PointToSegment2DSquared(ref center.Position, ref va, ref vb, out tseg);
                         if (distSqr > radiusSqr)
+                        {
                             continue;
+                        }
                     }
 
                     Node neighborNode = nodePool.GetNode(neighborRef);
                     if (neighborNode == null)
+                    {
                         continue;
+                    }
 
-                    if (IsInClosedList(neighborNode))
+                    if (this.IsInClosedList(neighborNode))
+                    {
                         continue;
+                    }
 
                     //cost
                     if (neighborNode.Flags == 0)
+                    {
                         neighborNode.Pos = Vector3.Lerp(va, vb, 0.5f);
+                    }
 
                     float total = bestNode.total + (bestNode.Pos - neighborNode.Pos).Length();
 
                     //node is already in open list and new result is worse, so skip
-                    if (IsInOpenList(neighborNode) && total >= neighborNode.total)
+                    if (this.IsInOpenList(neighborNode) && total >= neighborNode.total)
+                    {
                         continue;
+                    }
 
                     neighborNode.Id = neighborRef;
                     neighborNode.Flags = RemoveNodeFlagClosed(neighborNode);
                     neighborNode.ParentIdx = nodePool.GetNodeIdx(bestNode);
                     neighborNode.total = total;
 
-                    if (IsInOpenList(neighborNode))
+                    if (this.IsInOpenList(neighborNode))
                     {
-                        openList.Modify(neighborNode);
+                        this.openList.Modify(neighborNode);
                     }
                     else
                     {
                         neighborNode.Flags = NodeFlags.Open;
-                        openList.Push(neighborNode);
+                        this.openList.Push(neighborNode);
                     }
                 }
             }
 
             //TODO invalid state.
             if (randomPoly == null)
+            {
                 throw new InvalidOperationException("Poly null?");
+            }
 
             Vector3 randomPt;
-            FindRandomPointOnPoly(randomTile, randomPoly, randomPolyRef, out randomPt);
+            this.FindRandomPointOnPoly(randomTile, randomPoly, randomPolyRef, out randomPt);
 
             randomPoint = new NavPoint(randomPolyRef, randomPt);
         }
-
         /// <summary>
         /// Find a path from the start polygon to the end polygon.
         /// -If the end polygon can't be reached, the last polygon will be nearest the end polygon
@@ -423,15 +462,21 @@ namespace Engine.PathFinding
             Vector3 endPos = endPt.Position;
 
             if (startRef == PolyId.Null || endRef == PolyId.Null)
+            {
                 return false;
+            }
 
             //path can't store any elements
             if (path.Capacity == 0)
+            {
                 return false;
+            }
 
             //validate input
-            if (!nav.IsValidPolyRef(startRef) || !nav.IsValidPolyRef(endRef))
+            if (!this.NavMesh.IsValidPolyRef(startRef) || !this.NavMesh.IsValidPolyRef(endRef))
+            {
                 return false;
+            }
 
             //special case: both start and end are in the same polygon
             if (startRef == endRef)
@@ -473,16 +518,20 @@ namespace Engine.PathFinding
                 PolyId bestRef = bestNode.Id;
                 MeshTile bestTile;
                 Poly bestPoly;
-                nav.TryGetTileAndPolyByRefUnsafe(bestRef, out bestTile, out bestPoly);
+                this.NavMesh.TryGetTileAndPolyByRefUnsafe(bestRef, out bestTile, out bestPoly);
 
                 //get parent poly and tile
                 PolyId parentRef = PolyId.Null;
                 MeshTile parentTile;
                 Poly parentPoly;
                 if (bestNode.ParentIdx != 0)
+                {
                     parentRef = nodePool.GetNodeAtIdx(bestNode.ParentIdx).Id;
+                }
                 if (parentRef != PolyId.Null)
-                    nav.TryGetTileAndPolyByRefUnsafe(parentRef, out parentTile, out parentPoly);
+                {
+                    this.NavMesh.TryGetTileAndPolyByRefUnsafe(parentRef, out parentTile, out parentPoly);
+                }
 
                 //examine neighbors
                 foreach (Link link in bestPoly.Links)
@@ -491,21 +540,25 @@ namespace Engine.PathFinding
 
                     //skip invalid ids and do not expand back to where we came from
                     if (neighborRef == PolyId.Null || neighborRef == parentRef)
+                    {
                         continue;
+                    }
 
                     //get neighbor poly and tile
                     MeshTile neighborTile;
                     Poly neighborPoly;
-                    nav.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
+                    this.NavMesh.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
 
                     Node neighborNode = nodePool.GetNode(neighborRef);
                     if (neighborNode == null)
+                    {
                         continue;
+                    }
 
                     //if node is visited the first time, calculate node position
                     if (neighborNode.Flags == 0)
                     {
-                        GetEdgeMidPoint(bestRef, bestPoly, bestTile, neighborRef, neighborPoly, neighborTile, ref neighborNode.Pos);
+                        this.GetEdgeMidPoint(bestRef, bestPoly, bestTile, neighborRef, neighborPoly, neighborTile, ref neighborNode.Pos);
                     }
 
                     //calculate cost and heuristic
@@ -534,12 +587,16 @@ namespace Engine.PathFinding
                     float total = cost + heuristic;
 
                     //the node is already in open list and new result is worse, skip
-                    if (IsInOpenList(neighborNode) && total >= neighborNode.total)
+                    if (this.IsInOpenList(neighborNode) && total >= neighborNode.total)
+                    {
                         continue;
+                    }
 
                     //the node is already visited and processesd, and the new result is worse, skip
-                    if (IsInClosedList(neighborNode) && total >= neighborNode.total)
+                    if (this.IsInClosedList(neighborNode) && total >= neighborNode.total)
+                    {
                         continue;
+                    }
 
                     //add or update the node
                     neighborNode.ParentIdx = nodePool.GetNodeIdx(bestNode);
@@ -548,16 +605,16 @@ namespace Engine.PathFinding
                     neighborNode.cost = cost;
                     neighborNode.total = total;
 
-                    if (IsInOpenList(neighborNode))
+                    if (this.IsInOpenList(neighborNode))
                     {
                         //already in open, update node location
-                        openList.Modify(neighborNode);
+                        this.openList.Modify(neighborNode);
                     }
                     else
                     {
                         //put the node in the open list
-                        SetNodeFlagOpen(ref neighborNode);
-                        openList.Push(neighborNode);
+                        this.SetNodeFlagOpen(ref neighborNode);
+                        this.openList.Push(neighborNode);
                     }
 
                     //update nearest node to target so far
@@ -575,7 +632,9 @@ namespace Engine.PathFinding
             {
                 path.Add(node.Id);
                 if (path.Count >= path.Capacity)
+                {
                     break;
+                }
 
                 node = nodePool.GetNodeAtIdx(node.ParentIdx);
             }
@@ -586,7 +645,6 @@ namespace Engine.PathFinding
 
             return true;
         }
-
         /// <summary>
         /// Add vertices and portals to a regular path computed from the method FindPath().
         /// </summary>
@@ -606,20 +664,24 @@ namespace Engine.PathFinding
             straightPathCount = 0;
 
             if (path.Length == 0)
+            {
                 return false;
+            }
 
             bool stat = false;
 
             Vector3 closestStartPos = new Vector3();
-            ClosestPointOnPolyBoundary(path[0], startPos, ref closestStartPos);
+            this.ClosestPointOnPolyBoundary(path[0], startPos, ref closestStartPos);
 
             Vector3 closestEndPos = new Vector3();
-            ClosestPointOnPolyBoundary(path[pathSize - 1], endPos, ref closestEndPos);
+            this.ClosestPointOnPolyBoundary(path[pathSize - 1], endPos, ref closestEndPos);
 
-            stat = AppendVertex(closestStartPos, PathfindingCommon.STRAIGHTPATH_START, path[0], straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
+            stat = this.AppendVertex(closestStartPos, PathfindingCommon.STRAIGHTPATH_START, path[0], straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
 
             if (!stat)
+            {
                 return true;
+            }
 
             if (pathSize > 1)
             {
@@ -645,11 +707,11 @@ namespace Engine.PathFinding
                     if (i + 1 < pathSize)
                     {
                         //next portal
-                        if (GetPortalPoints(path[i], path[i + 1], ref left, ref right, ref fromType, ref toType) == false)
+                        if (this.GetPortalPoints(path[i], path[i + 1], ref left, ref right, ref fromType, ref toType) == false)
                         {
                             //failed to get portal points means path[i + 1] is an invalid polygon
                             //clamp end point to path[i] and return path so far
-                            if (ClosestPointOnPolyBoundary(path[i], endPos, ref closestEndPos) == false)
+                            if (this.ClosestPointOnPolyBoundary(path[i], endPos, ref closestEndPos) == false)
                             {
                                 //first polygon is invalid
                                 return false;
@@ -658,10 +720,10 @@ namespace Engine.PathFinding
                             if ((options & (PathBuildFlags.AreaCrossingVertices | PathBuildFlags.AllCrossingVertices)) != 0)
                             {
                                 //append portals
-                                stat = AppendPortals(apexIndex, i, closestEndPos, path, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath, options);
+                                stat = this.AppendPortals(apexIndex, i, closestEndPos, path, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath, options);
                             }
 
-                            stat = AppendVertex(closestEndPos, 0, path[i], straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
+                            stat = this.AppendVertex(closestEndPos, 0, path[i], straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
 
                             return true;
                         }
@@ -670,8 +732,10 @@ namespace Engine.PathFinding
                         if (i == 0)
                         {
                             float t;
-                            if (Distance.PointToSegment2DSquared(ref portalApex, ref left, ref right, out t) < 0.001 * 0.001)
+                            if (GeometryUtil.PointToSegment2DSquared(ref portalApex, ref left, ref right, out t) < 0.001f * 0.001f)
+                            {
                                 continue;
+                            }
                         }
                     }
                     else
@@ -685,10 +749,10 @@ namespace Engine.PathFinding
 
                     //right vertex
                     float triArea2D;
-                    Triangle3.Area2D(ref portalApex, ref portalRight, ref right, out triArea2D);
+                    Triangle.Area2D(ref portalApex, ref portalRight, ref right, out triArea2D);
                     if (triArea2D <= 0.0)
                     {
-                        Triangle3.Area2D(ref portalApex, ref portalLeft, ref right, out triArea2D);
+                        Triangle.Area2D(ref portalApex, ref portalLeft, ref right, out triArea2D);
                         if (portalApex == portalRight || triArea2D > 0.0)
                         {
                             portalRight = right;
@@ -701,10 +765,12 @@ namespace Engine.PathFinding
                             //append portals along current straight path segment
                             if ((options & (PathBuildFlags.AreaCrossingVertices | PathBuildFlags.AllCrossingVertices)) != 0)
                             {
-                                stat = AppendPortals(apexIndex, leftIndex, portalLeft, path, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath, options);
+                                stat = this.AppendPortals(apexIndex, leftIndex, portalLeft, path, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath, options);
 
                                 if (stat != true)
+                                {
                                     return true;
+                                }
                             }
 
                             portalApex = portalLeft;
@@ -712,17 +778,23 @@ namespace Engine.PathFinding
 
                             int flags = 0;
                             if (leftPolyRef == PolyId.Null)
+                            {
                                 flags = PathfindingCommon.STRAIGHTPATH_END;
+                            }
                             else if (leftPolyType == PolygonType.OffMeshConnection)
+                            {
                                 flags = PathfindingCommon.STRAIGHTPATH_OFFMESH_CONNECTION;
+                            }
 
                             PolyId reference = leftPolyRef;
 
                             //append or update vertex
-                            stat = AppendVertex(portalApex, flags, reference, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
+                            stat = this.AppendVertex(portalApex, flags, reference, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
 
                             if (stat != true)
+                            {
                                 return true;
+                            }
 
                             portalLeft = portalApex;
                             portalRight = portalApex;
@@ -737,10 +809,10 @@ namespace Engine.PathFinding
                     }
 
                     //left vertex
-                    Triangle3.Area2D(ref portalApex, ref portalLeft, ref left, out triArea2D);
+                    Triangle.Area2D(ref portalApex, ref portalLeft, ref left, out triArea2D);
                     if (triArea2D >= 0.0)
                     {
-                        Triangle3.Area2D(ref portalApex, ref portalRight, ref left, out triArea2D);
+                        Triangle.Area2D(ref portalApex, ref portalRight, ref left, out triArea2D);
                         if (portalApex == portalLeft || triArea2D < 0.0f)
                         {
                             portalLeft = left;
@@ -752,10 +824,12 @@ namespace Engine.PathFinding
                         {
                             if ((options & (PathBuildFlags.AreaCrossingVertices | PathBuildFlags.AllCrossingVertices)) != 0)
                             {
-                                stat = AppendPortals(apexIndex, rightIndex, portalRight, path, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath, options);
+                                stat = this.AppendPortals(apexIndex, rightIndex, portalRight, path, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath, options);
 
                                 if (stat != true)
+                                {
                                     return true;
+                                }
                             }
 
                             portalApex = portalRight;
@@ -763,17 +837,23 @@ namespace Engine.PathFinding
 
                             int flags = 0;
                             if (rightPolyRef == PolyId.Null)
+                            {
                                 flags = PathfindingCommon.STRAIGHTPATH_END;
+                            }
                             else if (rightPolyType == PolygonType.OffMeshConnection)
+                            {
                                 flags = PathfindingCommon.STRAIGHTPATH_OFFMESH_CONNECTION;
+                            }
 
                             PolyId reference = rightPolyRef;
 
                             //append or update vertex
-                            stat = AppendVertex(portalApex, flags, reference, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
+                            stat = this.AppendVertex(portalApex, flags, reference, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
 
                             if (stat != true)
+                            {
                                 return true;
+                            }
 
                             portalLeft = portalApex;
                             portalRight = portalApex;
@@ -791,18 +871,19 @@ namespace Engine.PathFinding
                 //append portals along the current straight line segment
                 if ((options & (PathBuildFlags.AreaCrossingVertices | PathBuildFlags.AllCrossingVertices)) != 0)
                 {
-                    stat = AppendPortals(apexIndex, pathSize - 1, closestEndPos, path, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath, options);
+                    stat = this.AppendPortals(apexIndex, pathSize - 1, closestEndPos, path, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath, options);
 
                     if (stat != true)
+                    {
                         return true;
+                    }
                 }
             }
 
-            stat = AppendVertex(closestEndPos, PathfindingCommon.STRAIGHTPATH_END, PolyId.Null, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
+            stat = this.AppendVertex(closestEndPos, PathfindingCommon.STRAIGHTPATH_END, PolyId.Null, straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
 
             return true;
         }
-
         /// <summary>
         /// This method is optimized for small delta movement and a small number of polygons.
         /// If movement distance is too large, the result will form an incomplete path.
@@ -814,18 +895,28 @@ namespace Engine.PathFinding
         /// <returns>True, if point found. False, if otherwise.</returns>
         public bool MoveAlongSurface(NavPoint startPoint, Vector3 endPos, ref Vector3 resultPos, List<PolyId> visited)
         {
-            if (nav == null)
+            if (this.NavMesh == null)
+            {
                 return false;
+            }
+
             if (tinyNodePool == null)
+            {
                 return false;
+            }
 
             visited.Clear();
 
             //validate input
             if (startPoint.Polygon == PolyId.Null)
+            {
                 return false;
-            if (!nav.IsValidPolyRef(startPoint.Polygon))
+            }
+
+            if (!this.NavMesh.IsValidPolyRef(startPoint.Polygon))
+            {
                 return false;
+            }
 
             int MAX_STACK = 48;
             Queue<Node> nodeQueue = new Queue<Node>(MAX_STACK);
@@ -860,15 +951,17 @@ namespace Engine.PathFinding
                 PolyId curRef = curNode.Id;
                 MeshTile curTile;
                 Poly curPoly;
-                nav.TryGetTileAndPolyByRefUnsafe(curRef, out curTile, out curPoly);
+                this.NavMesh.TryGetTileAndPolyByRefUnsafe(curRef, out curTile, out curPoly);
 
                 //collect vertices
                 int nverts = curPoly.VertCount;
                 for (int i = 0; i < nverts; i++)
+                {
                     verts[i] = curTile.Verts[curPoly.Verts[i]];
+                }
 
                 //if target is inside poly, stop search
-                if (Containment.PointInPoly(endPos, verts, nverts))
+                if (GeometryUtil.PointInPoly(endPos, verts, nverts))
                 {
                     bestNode = curNode;
                     bestPos = endPos;
@@ -892,10 +985,12 @@ namespace Engine.PathFinding
                                 {
                                     MeshTile neiTile;
                                     Poly neiPoly;
-                                    nav.TryGetTileAndPolyByRefUnsafe(link.Reference, out neiTile, out neiPoly);
+                                    this.NavMesh.TryGetTileAndPolyByRefUnsafe(link.Reference, out neiTile, out neiPoly);
 
                                     if (neis.Count < neis.Capacity)
+                                    {
                                         neis.Add(link.Reference);
+                                    }
                                 }
                             }
                         }
@@ -903,8 +998,8 @@ namespace Engine.PathFinding
                     else if (curPoly.Neis[j] != 0)
                     {
                         int idx = curPoly.Neis[j] - 1;
-                        PolyId reference = nav.GetTileRef(curTile);
-                        nav.IdManager.SetPolyIndex(ref reference, idx, out reference);
+                        PolyId reference = this.NavMesh.GetTileRef(curTile);
+                        this.NavMesh.IdManager.SetPolyIndex(ref reference, idx, out reference);
                         neis.Add(reference); //internal edge, encode id
                     }
 
@@ -912,7 +1007,7 @@ namespace Engine.PathFinding
                     {
                         //wall edge, calculate distance
                         float tseg = 0;
-                        float distSqr = Distance.PointToSegment2DSquared(ref endPos, ref verts[j], ref verts[i], out tseg);
+                        float distSqr = GeometryUtil.PointToSegment2DSquared(ref endPos, ref verts[j], ref verts[i], out tseg);
                         if (distSqr < bestDist)
                         {
                             //update nearest distance
@@ -928,16 +1023,22 @@ namespace Engine.PathFinding
                             //skip if no node can be allocated
                             Node neighborNode = tinyNodePool.GetNode(neis[k]);
                             if (neighborNode == null)
+                            {
                                 continue;
+                            }
 
                             //skip if already visited
                             if ((neighborNode.Flags & NodeFlags.Closed) != 0)
+                            {
                                 continue;
+                            }
 
                             //skip the link if too far from search constraint
-                            float distSqr = Distance.PointToSegment2DSquared(ref searchPos, ref verts[j], ref verts[i]);
+                            float distSqr = GeometryUtil.PointToSegment2DSquared(ref searchPos, ref verts[j], ref verts[i]);
                             if (distSqr > searchRadSqr)
+                            {
                                 continue;
+                            }
 
                             //mark the node as visited and push to queue
                             if (nodeQueue.Count < MAX_STACK)
@@ -952,7 +1053,9 @@ namespace Engine.PathFinding
             }
 
             if ((endPos - bestPos).Length() > 1f)
+            {
                 return false;
+            }
 
             if (bestNode != null)
             {
@@ -962,7 +1065,9 @@ namespace Engine.PathFinding
                 {
                     visited.Add(node.Id);
                     if (visited.Count >= visited.Capacity)
+                    {
                         break;
+                    }
 
                     node = tinyNodePool.GetNodeAtIdx(node.ParentIdx);
                 }
@@ -976,7 +1081,6 @@ namespace Engine.PathFinding
 
             return true;
         }
-
         /// <summary>
         /// Initialize a sliced path, which is used mostly for crowd pathfinding.
         /// </summary>
@@ -987,10 +1091,14 @@ namespace Engine.PathFinding
         {
             //validate input
             if (startPoint.Polygon == PolyId.Null || endPoint.Polygon == PolyId.Null)
+            {
                 return false;
+            }
 
-            if (!nav.IsValidPolyRef(startPoint.Polygon) || !nav.IsValidPolyRef(endPoint.Polygon))
+            if (!this.NavMesh.IsValidPolyRef(startPoint.Polygon) || !this.NavMesh.IsValidPolyRef(endPoint.Polygon))
+            {
                 return false;
+            }
 
             if (startPoint.Polygon == endPoint.Polygon)
             {
@@ -1022,7 +1130,6 @@ namespace Engine.PathFinding
 
             return query.Status;
         }
-
         /// <summary>
         /// Update the sliced path as agents move across the path.
         /// </summary>
@@ -1031,13 +1138,15 @@ namespace Engine.PathFinding
         /// <returns>True if updated, false if not</returns>
         public bool UpdateSlicedFindPath(int maxIter, ref int doneIters)
         {
-            if (query.Status != true)
-                return query.Status;
+            if (this.query.Status != true)
+            {
+                return this.query.Status;
+            }
 
             //make sure the request is still valid
-            if (!nav.IsValidPolyRef(query.Start.Polygon) || !nav.IsValidPolyRef(query.End.Polygon))
+            if (!this.NavMesh.IsValidPolyRef(this.query.Start.Polygon) || !this.NavMesh.IsValidPolyRef(this.query.End.Polygon))
             {
-                query.Status = false;
+                this.query.Status = false;
                 return false;
             }
 
@@ -1048,27 +1157,27 @@ namespace Engine.PathFinding
 
                 //remove node from open list and put it in closed list
                 Node bestNode = openList.Pop();
-                SetNodeFlagClosed(ref bestNode);
+                this.SetNodeFlagClosed(ref bestNode);
 
                 //reached the goal, stop searching
-                if (bestNode.Id == query.End.Polygon)
+                if (bestNode.Id == this.query.End.Polygon)
                 {
-                    query.LastBestNode = bestNode;
-                    query.Status = true;
+                    this.query.LastBestNode = bestNode;
+                    this.query.Status = true;
                     doneIters = iter;
-                    return query.Status;
+                    return this.query.Status;
                 }
 
                 //get current poly and tile
                 PolyId bestRef = bestNode.Id;
                 MeshTile bestTile;
                 Poly bestPoly;
-                if (nav.TryGetTileAndPolyByRef(bestRef, out bestTile, out bestPoly) == false)
+                if (this.NavMesh.TryGetTileAndPolyByRef(bestRef, out bestTile, out bestPoly) == false)
                 {
                     //the polygon has disappeared during the sliced query, fail
-                    query.Status = false;
+                    this.query.Status = false;
                     doneIters = iter;
-                    return query.Status;
+                    return this.query.Status;
                 }
 
                 //get parent poly and tile
@@ -1076,15 +1185,18 @@ namespace Engine.PathFinding
                 MeshTile parentTile;
                 Poly parentPoly;
                 if (bestNode.ParentIdx != 0)
+                {
                     parentRef = nodePool.GetNodeAtIdx(bestNode.ParentIdx).Id;
+                }
+
                 if (parentRef != PolyId.Null)
                 {
-                    if (nav.TryGetTileAndPolyByRef(parentRef, out parentTile, out parentPoly) == false)
+                    if (this.NavMesh.TryGetTileAndPolyByRef(parentRef, out parentTile, out parentPoly) == false)
                     {
                         //the polygon has disappeared during the sliced query, fail
-                        query.Status = false;
+                        this.query.Status = false;
                         doneIters = iter;
-                        return query.Status;
+                        return this.query.Status;
                     }
                 }
 
@@ -1094,20 +1206,24 @@ namespace Engine.PathFinding
 
                     //skip invalid ids and do not expand back to where we came from
                     if (neighborRef == PolyId.Null || neighborRef == parentRef)
+                    {
                         continue;
+                    }
 
                     //get neighbor poly and tile
                     MeshTile neighborTile;
                     Poly neighborPoly;
-                    nav.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
+                    this.NavMesh.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
 
                     Node neighborNode = nodePool.GetNode(neighborRef);
                     if (neighborNode == null)
+                    {
                         continue;
+                    }
 
                     if (neighborNode.Flags == 0)
                     {
-                        GetEdgeMidPoint(bestRef, bestPoly, bestTile, neighborRef, neighborPoly, neighborTile, ref neighborNode.Pos);
+                        this.GetEdgeMidPoint(bestRef, bestPoly, bestTile, neighborRef, neighborPoly, neighborTile, ref neighborNode.Pos);
                     }
 
                     //calculate cost and heuristic
@@ -1115,11 +1231,11 @@ namespace Engine.PathFinding
                     float heuristic = 0;
 
                     //special case for last node
-                    if (neighborRef == query.End.Polygon)
+                    if (neighborRef == this.query.End.Polygon)
                     {
                         //cost
                         float curCost = GetCost(bestNode.Pos, neighborNode.Pos, bestPoly);
-                        float endCost = GetCost(neighborNode.Pos, query.End.Position, neighborPoly);
+                        float endCost = GetCost(neighborNode.Pos, this.query.End.Position, neighborPoly);
 
                         cost = bestNode.cost + curCost + endCost;
                         heuristic = 0;
@@ -1130,18 +1246,22 @@ namespace Engine.PathFinding
                         float curCost = GetCost(bestNode.Pos, neighborNode.Pos, bestPoly);
 
                         cost = bestNode.cost + curCost;
-                        heuristic = (neighborNode.Pos - query.End.Position).Length() * H_SCALE;
+                        heuristic = (neighborNode.Pos - this.query.End.Position).Length() * H_SCALE;
                     }
 
                     float total = cost + heuristic;
 
                     //the node is already in open list and new result is worse, skip
-                    if (IsInOpenList(neighborNode) && total >= neighborNode.total)
+                    if (this.IsInOpenList(neighborNode) && total >= neighborNode.total)
+                    {
                         continue;
+                    }
 
                     //the node is already visited and processesd, and the new result is worse, skip
-                    if (IsInClosedList(neighborNode) && total >= neighborNode.total)
+                    if (this.IsInClosedList(neighborNode) && total >= neighborNode.total)
+                    {
                         continue;
+                    }
 
                     //add or update the node
                     neighborNode.ParentIdx = nodePool.GetNodeIdx(bestNode);
@@ -1150,38 +1270,37 @@ namespace Engine.PathFinding
                     neighborNode.cost = cost;
                     neighborNode.total = total;
 
-                    if (IsInOpenList(neighborNode))
+                    if (this.IsInOpenList(neighborNode))
                     {
                         //already in open, update node location
-                        openList.Modify(neighborNode);
+                        this.openList.Modify(neighborNode);
                     }
                     else
                     {
                         //put the node in the open list
-                        SetNodeFlagOpen(ref neighborNode);
-                        openList.Push(neighborNode);
+                        this.SetNodeFlagOpen(ref neighborNode);
+                        this.openList.Push(neighborNode);
                     }
 
                     //update nearest node to target so far
-                    if (heuristic < query.LastBestNodeCost)
+                    if (heuristic < this.query.LastBestNodeCost)
                     {
-                        query.LastBestNodeCost = heuristic;
-                        query.LastBestNode = neighborNode;
+                        this.query.LastBestNodeCost = heuristic;
+                        this.query.LastBestNode = neighborNode;
                     }
                 }
             }
 
             //exhausted all nodes, but could not find path
-            if (openList.Empty())
+            if (this.openList.Empty())
             {
-                query.Status = true;
+                this.query.Status = true;
             }
 
             doneIters = iter;
 
-            return query.Status;
+            return this.query.Status;
         }
-
         /// <summary>
         /// Save the sliced path 
         /// </summary>
@@ -1193,28 +1312,28 @@ namespace Engine.PathFinding
         {
             pathCount = 0;
 
-            if (query.Status == false)
+            if (this.query.Status == false)
             {
-                query = new QueryData();
+                this.query = new QueryData();
                 return false;
             }
 
             int n = 0;
 
-            if (query.Start.Polygon == query.End.Polygon)
+            if (this.query.Start.Polygon == this.query.End.Polygon)
             {
                 //special case: the search starts and ends at the same poly
-                path[n++] = query.Start.Polygon;
+                path[n++] = this.query.Start.Polygon;
             }
             else
             {
                 //reverse the path
                 Node prev = null;
-                Node node = query.LastBestNode;
+                Node node = this.query.LastBestNode;
                 do
                 {
-                    Node next = nodePool.GetNodeAtIdx(node.ParentIdx);
-                    node.ParentIdx = nodePool.GetNodeIdx(prev);
+                    Node next = this.nodePool.GetNodeAtIdx(node.ParentIdx);
+                    node.ParentIdx = this.nodePool.GetNodeIdx(prev);
                     prev = node;
                     node = next;
                 }
@@ -1226,22 +1345,23 @@ namespace Engine.PathFinding
                 {
                     path[n++] = node.Id;
                     if (n >= maxPath)
+                    {
                         break;
+                    }
 
-                    node = nodePool.GetNodeAtIdx(node.ParentIdx);
+                    node = this.nodePool.GetNodeAtIdx(node.ParentIdx);
                 }
                 while (node != null);
             }
 
             //reset query
-            query = new QueryData();
+            this.query = new QueryData();
 
             //remember to update the path length
             pathCount = n;
 
             return true;
         }
-
         /// <summary>
         /// Save a partial path
         /// </summary>
@@ -1260,18 +1380,18 @@ namespace Engine.PathFinding
                 return false;
             }
 
-            if (query.Status == false)
+            if (this.query.Status == false)
             {
-                query = new QueryData();
+                this.query = new QueryData();
                 return false;
             }
 
             int n = 0;
 
-            if (query.Start.Polygon == query.End.Polygon)
+            if (this.query.Start.Polygon == this.query.End.Polygon)
             {
                 //special case: the search starts and ends at the same poly
-                path[n++] = query.Start.Polygon;
+                path[n++] = this.query.Start.Polygon;
             }
             else
             {
@@ -1280,21 +1400,23 @@ namespace Engine.PathFinding
                 Node node = null;
                 for (int i = existingSize - 1; i >= 0; i--)
                 {
-                    node = nodePool.FindNode(existing[i]);
+                    node = this.nodePool.FindNode(existing[i]);
                     if (node != null)
+                    {
                         break;
+                    }
                 }
 
                 if (node == null)
                 {
-                    node = query.LastBestNode;
+                    node = this.query.LastBestNode;
                 }
 
                 //reverse the path
                 do
                 {
-                    Node next = nodePool.GetNodeAtIdx(node.ParentIdx);
-                    node.ParentIdx = nodePool.GetNodeIdx(prev);
+                    Node next = this.nodePool.GetNodeAtIdx(node.ParentIdx);
+                    node.ParentIdx = this.nodePool.GetNodeIdx(prev);
                     prev = node;
                     node = next;
                 }
@@ -1310,13 +1432,13 @@ namespace Engine.PathFinding
                         break;
                     }
 
-                    node = nodePool.GetNodeAtIdx(node.ParentIdx);
+                    node = this.nodePool.GetNodeAtIdx(node.ParentIdx);
                 }
                 while (node != null);
             }
 
             //reset query
-            query = new QueryData();
+            this.query = new QueryData();
 
             //remember to update the path length
             pathCount = n;
@@ -1330,8 +1452,10 @@ namespace Engine.PathFinding
             pathCount = 0;
 
             //validate input
-            if (startPoint.Polygon == PolyId.Null || !nav.IsValidPolyRef(startPoint.Polygon))
+            if (startPoint.Polygon == PolyId.Null || !this.NavMesh.IsValidPolyRef(startPoint.Polygon))
+            {
                 return false;
+            }
 
             PolyId curRef = startPoint.Polygon;
             Vector3[] verts = new Vector3[PathfindingCommon.VERTS_PER_POLYGON];
@@ -1344,7 +1468,7 @@ namespace Engine.PathFinding
                 //cast ray against current polygon
                 MeshTile tile;
                 Poly poly;
-                nav.TryGetTileAndPolyByRefUnsafe(curRef, out tile, out poly);
+                this.NavMesh.TryGetTileAndPolyByRefUnsafe(curRef, out tile, out poly);
 
                 //collect vertices
                 int nv = 0;
@@ -1356,7 +1480,7 @@ namespace Engine.PathFinding
 
                 float tmin, tmax;
                 int segMin, segMax;
-                if (!Intersection.SegmentPoly2D(startPoint.Position, endPos, verts, nv, out tmin, out tmax, out segMin, out segMax))
+                if (!GeometryUtil.SegmentPoly2D(startPoint.Position, endPos, verts, nv, out tmin, out tmax, out segMin, out segMax))
                 {
                     //could not hit the polygon, keep the old t and report hit
                     pathCount = n;
@@ -1365,11 +1489,15 @@ namespace Engine.PathFinding
 
                 //keep track of furthest t so far
                 if (tmax > t)
+                {
                     t = tmax;
+                }
 
                 //store visited polygons
                 if (n < maxPath)
+                {
                     path[n++] = curRef;
+                }
 
                 //ray end is completely inside the polygon
                 if (segMax == -1)
@@ -1386,16 +1514,20 @@ namespace Engine.PathFinding
                 {
                     //find link which contains the edge
                     if (link.Edge != segMax)
+                    {
                         continue;
+                    }
 
                     //get pointer to the next polygon
                     MeshTile nextTile;
                     Poly nextPoly;
-                    nav.TryGetTileAndPolyByRefUnsafe(link.Reference, out nextTile, out nextPoly);
+                    this.NavMesh.TryGetTileAndPolyByRefUnsafe(link.Reference, out nextTile, out nextPoly);
 
                     //skip off-mesh connection
                     if (nextPoly.PolyType == PolygonType.OffMeshConnection)
+                    {
                         continue;
+                    }
 
                     //if the link is internal, just return the ref
                     if (link.Side == BoundarySide.Internal)
@@ -1494,7 +1626,6 @@ namespace Engine.PathFinding
 
             return true;
         }
-
         /// <summary>
         /// Store polygons that are within a certain range from the current polygon
         /// </summary>
@@ -1510,8 +1641,10 @@ namespace Engine.PathFinding
             resultCount = 0;
 
             //validate input
-            if (centerPoint.Polygon == PolyId.Null || !nav.IsValidPolyRef(centerPoint.Polygon))
+            if (centerPoint.Polygon == PolyId.Null || !this.NavMesh.IsValidPolyRef(centerPoint.Polygon))
+            {
                 return false;
+            }
 
             int MAX_STACK = 48;
             Node[] stack = new Node[MAX_STACK];
@@ -1543,14 +1676,16 @@ namespace Engine.PathFinding
                 //pop front
                 Node curNode = stack[0];
                 for (int i = 0; i < nstack - 1; i++)
+                {
                     stack[i] = stack[i + 1];
+                }
                 nstack--;
 
                 //get poly and tile
                 PolyId curRef = curNode.Id;
                 MeshTile curTile;
                 Poly curPoly;
-                nav.TryGetTileAndPolyByRefUnsafe(curRef, out curTile, out curPoly);
+                this.NavMesh.TryGetTileAndPolyByRefUnsafe(curRef, out curTile, out curPoly);
 
                 foreach (Link link in curPoly.Links)
                 {
@@ -1558,37 +1693,49 @@ namespace Engine.PathFinding
 
                     //skip invalid neighbors
                     if (neighborRef == PolyId.Null)
+                    {
                         continue;
+                    }
 
                     //skip if cannot allocate more nodes
                     Node neighborNode = tinyNodePool.GetNode(neighborRef);
                     if (neighborNode == null)
+                    {
                         continue;
+                    }
 
                     //skip visited
                     if ((neighborNode.Flags & NodeFlags.Closed) != 0)
+                    {
                         continue;
+                    }
 
                     //expand to neighbor
                     MeshTile neighborTile;
                     Poly neighborPoly;
-                    nav.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
+                    this.NavMesh.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
 
                     //skip off-mesh connections
                     if (neighborPoly.PolyType == PolygonType.OffMeshConnection)
+                    {
                         continue;
+                    }
 
                     //find edge and calculate distance to edge
                     Vector3 va = new Vector3();
                     Vector3 vb = new Vector3();
                     if (!GetPortalPoints(curRef, curPoly, curTile, neighborRef, neighborPoly, neighborTile, ref va, ref vb))
+                    {
                         continue;
+                    }
 
                     //if the circle is not touching the next polygon, skip it
                     float tseg;
-                    float distSqr = Distance.PointToSegment2DSquared(ref centerPoint.Position, ref va, ref vb, out tseg);
+                    float distSqr = GeometryUtil.PointToSegment2DSquared(ref centerPoint.Position, ref va, ref vb, out tseg);
                     if (distSqr > radiusSqr)
+                    {
                         continue;
+                    }
 
                     //mark node visited
                     neighborNode.Flags |= NodeFlags.Closed;
@@ -1599,7 +1746,9 @@ namespace Engine.PathFinding
                     //collect vertices of the neighbor poly
                     int npa = neighborPoly.VertCount;
                     for (int k = 0; k < npa; k++)
+                    {
                         pa[k] = neighborTile.Verts[neighborPoly.Verts[k]];
+                    }
 
                     bool overlap = false;
                     for (int j = 0; j < n; j++)
@@ -1618,19 +1767,23 @@ namespace Engine.PathFinding
                         }
 
                         if (connected)
+                        {
                             continue;
+                        }
 
                         //potentially overlapping
                         MeshTile pastTile;
                         Poly pastPoly;
-                        nav.TryGetTileAndPolyByRefUnsafe(pastRef, out pastTile, out pastPoly);
+                        this.NavMesh.TryGetTileAndPolyByRefUnsafe(pastRef, out pastTile, out pastPoly);
 
                         //get vertices and test overlap
                         int npb = pastPoly.VertCount;
                         for (int k = 0; k < npb; k++)
+                        {
                             pb[k] = pastTile.Verts[pastPoly.Verts[k]];
+                        }
 
-                        if (Intersection.PolyPoly2D(pa, npa, pb, npb))
+                        if (GeometryUtil.PolyPoly2D(pa, npa, pb, npb))
                         {
                             overlap = true;
                             break;
@@ -1638,7 +1791,9 @@ namespace Engine.PathFinding
                     }
 
                     if (overlap)
+                    {
                         continue;
+                    }
 
                     //store poly
                     if (n < maxResult)
@@ -1659,7 +1814,6 @@ namespace Engine.PathFinding
 
             return true;
         }
-
         /// <summary>
         /// Insert a segment into the array
         /// </summary>
@@ -1672,14 +1826,18 @@ namespace Engine.PathFinding
         public void InsertInterval(SegInterval[] ints, ref int nints, int maxInts, int tmin, int tmax, PolyId reference)
         {
             if (nints + 1 > maxInts)
+            {
                 return;
+            }
 
             //find insertion point
             int idx = 0;
             while (idx < nints)
             {
                 if (tmax <= ints[idx].TMin)
+                {
                     break;
+                }
                 idx++;
             }
 
@@ -1687,7 +1845,9 @@ namespace Engine.PathFinding
             if (nints - idx > 0)
             {
                 for (int i = 0; i < nints - idx; i++)
+                {
                     ints[idx + 1 + i] = ints[idx + i];
+                }
             }
 
             //store
@@ -1696,7 +1856,6 @@ namespace Engine.PathFinding
             ints[idx].TMax = tmax;
             nints++;
         }
-
         /// <summary>
         /// Get edge midpoint between two prolygons
         /// </summary>
@@ -1712,14 +1871,15 @@ namespace Engine.PathFinding
         {
             Vector3 left = new Vector3();
             Vector3 right = new Vector3();
-            if (!GetPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, ref left, ref right))
+            if (!this.GetPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, ref left, ref right))
+            {
                 return false;
+            }
 
             mid = (left + right) * 0.5f;
 
             return true;
         }
-
         /// <summary>
         /// Find points on the left and right side.
         /// </summary>
@@ -1734,19 +1894,22 @@ namespace Engine.PathFinding
         {
             MeshTile fromTile;
             Poly fromPoly;
-            if (nav.TryGetTileAndPolyByRef(from, out fromTile, out fromPoly) == false)
+            if (this.NavMesh.TryGetTileAndPolyByRef(from, out fromTile, out fromPoly) == false)
+            {
                 return false;
+            }
             fromType = fromPoly.PolyType;
 
             MeshTile toTile;
             Poly toPoly;
-            if (nav.TryGetTileAndPolyByRef(to, out toTile, out toPoly) == false)
+            if (this.NavMesh.TryGetTileAndPolyByRef(to, out toTile, out toPoly) == false)
+            {
                 return false;
+            }
             toType = toPoly.PolyType;
 
-            return GetPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, ref left, ref right);
+            return this.GetPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, ref left, ref right);
         }
-
         /// <summary>
         /// Find points on the left and right side.
         /// </summary>
@@ -1773,7 +1936,9 @@ namespace Engine.PathFinding
             }
 
             if (link == null)
+            {
                 return false;
+            }
 
             //handle off-mesh connections
             if (fromPoly.PolyType == PolygonType.OffMeshConnection)
@@ -1832,7 +1997,6 @@ namespace Engine.PathFinding
 
             return true;
         }
-
         /// <summary>
         /// Given a point on the polygon, find the closest point
         /// </summary>
@@ -1842,22 +2006,27 @@ namespace Engine.PathFinding
         /// <returns>True, if point found. False, if otherwise.</returns>
         public bool ClosestPointOnPoly(PolyId reference, Vector3 pos, ref Vector3 closest)
         {
-            if (nav == null)
+            if (this.NavMesh == null)
+            {
                 return false;
+            }
 
             MeshTile tile;
             Poly poly;
 
-            if (nav.TryGetTileAndPolyByRef(reference, out tile, out poly) == false)
+            if (this.NavMesh.TryGetTileAndPolyByRef(reference, out tile, out poly) == false)
+            {
                 return false;
+            }
 
             if (tile == null)
+            {
                 return false;
+            }
 
             tile.ClosestPointOnPoly(poly, pos, ref closest);
             return true;
         }
-
         /// <summary>
         /// Given a point on the polygon, find the closest point
         /// </summary>
@@ -1873,10 +2042,14 @@ namespace Engine.PathFinding
 
             MeshTile tile;
             Poly poly;
-            if (!nav.TryGetTileAndPolyByRef(reference, out tile, out poly))
+            if (!this.NavMesh.TryGetTileAndPolyByRef(reference, out tile, out poly))
+            {
                 return false;
+            }
             if (tile == null)
+            {
                 return false;
+            }
 
             if (poly.PolyType == PolygonType.OffMeshConnection)
             {
@@ -1907,10 +2080,12 @@ namespace Engine.PathFinding
             float[] edgeT = new float[PathfindingCommon.VERTS_PER_POLYGON];
             int numPolyVerts = poly.VertCount;
             for (int i = 0; i < numPolyVerts; i++)
+            {
                 verts[i] = tile.Verts[poly.Verts[i]];
+            }
 
             closest = pos;
-            if (!Distance.PointToPolygonEdgeSquared(pos, verts, numPolyVerts, edgeDistance, edgeT))
+            if (!GeometryUtil.PointToPolygonEdgeSquared(pos, verts, numPolyVerts, edgeDistance, edgeT))
             {
                 //Point is outside the polygon
                 //Clamp to nearest edge
@@ -1941,22 +2116,34 @@ namespace Engine.PathFinding
                 Vector3 va, vb, vc;
 
                 if (t.VertexHash0 < poly.VertCount)
+                {
                     va = tile.Verts[poly.Verts[t.VertexHash0]];
+                }
                 else
+                {
                     va = tile.DetailVerts[pd.VertexIndex + (t.VertexHash0 - poly.VertCount)];
+                }
 
                 if (t.VertexHash1 < poly.VertCount)
+                {
                     vb = tile.Verts[poly.Verts[t.VertexHash1]];
+                }
                 else
+                {
                     vb = tile.DetailVerts[pd.VertexIndex + (t.VertexHash1 - poly.VertCount)];
+                }
 
                 if (t.VertexHash2 < poly.VertCount)
+                {
                     vc = tile.Verts[poly.Verts[t.VertexHash2]];
+                }
                 else
+                {
                     vc = tile.DetailVerts[pd.VertexIndex + (t.VertexHash2 - poly.VertCount)];
+                }
 
                 float h;
-                if (Distance.PointToTriangle(pos, va, vb, vc, out h))
+                if (GeometryUtil.PointToTriangle(pos, va, vb, vc, out h))
                 {
                     closest.Y = h;
                     break;
@@ -1965,7 +2152,6 @@ namespace Engine.PathFinding
 
             return true;
         }
-
         /// <summary>
         /// Given a point on a polygon, find the closest point which lies on the polygon boundary.
         /// </summary>
@@ -1977,13 +2163,15 @@ namespace Engine.PathFinding
         {
             MeshTile tile;
             Poly poly;
-            if (nav.TryGetTileAndPolyByRef(reference, out tile, out poly) == false)
+            if (this.NavMesh.TryGetTileAndPolyByRef(reference, out tile, out poly) == false)
+            {
                 return false;
+            }
 
             tile.ClosestPointOnPolyBoundary(poly, pos, out closest);
+
             return true;
         }
-
         /// <summary>
         /// Add a vertex to the straight path.
         /// </summary>
@@ -2003,10 +2191,14 @@ namespace Engine.PathFinding
                 //the vertices are equal
                 //update flags and polys
                 if (straightPathFlags.Length != 0)
+                {
                     straightPathFlags[straightPathCount - 1] = flags;
+                }
 
                 if (straightPathRefs.Length != 0)
+                {
                     straightPathRefs[straightPathCount - 1] = reference;
+                }
             }
             else
             {
@@ -2014,10 +2206,14 @@ namespace Engine.PathFinding
                 straightPath[straightPathCount] = pos;
 
                 if (straightPathFlags.Length != 0)
+                {
                     straightPathFlags[straightPathCount] = flags;
+                }
 
                 if (straightPathRefs.Length != 0)
+                {
                     straightPathRefs[straightPathCount] = reference;
+                }
 
                 straightPathCount++;
 
@@ -2029,7 +2225,6 @@ namespace Engine.PathFinding
 
             return true;
         }
-
         /// <summary>
         /// Update the vertices on the straight path
         /// </summary>
@@ -2056,43 +2251,52 @@ namespace Engine.PathFinding
                 PolyId from = path[i];
                 MeshTile fromTile;
                 Poly fromPoly;
-                if (nav.TryGetTileAndPolyByRef(from, out fromTile, out fromPoly) == false)
+                if (this.NavMesh.TryGetTileAndPolyByRef(from, out fromTile, out fromPoly) == false)
+                {
                     return false;
+                }
 
                 PolyId to = path[i + 1];
                 MeshTile toTile;
                 Poly toPoly;
-                if (nav.TryGetTileAndPolyByRef(to, out toTile, out toPoly) == false)
+                if (this.NavMesh.TryGetTileAndPolyByRef(to, out toTile, out toPoly) == false)
+                {
                     return false;
+                }
 
                 Vector3 left = new Vector3();
                 Vector3 right = new Vector3();
-                if (GetPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, ref left, ref right) == false)
+                if (this.GetPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, ref left, ref right) == false)
+                {
                     break;
+                }
 
                 if ((options & PathBuildFlags.AreaCrossingVertices) != 0)
                 {
                     //skip intersection if only area crossings are requested
                     if (fromPoly.Area == toPoly.Area)
+                    {
                         continue;
+                    }
                 }
 
                 //append intersection
                 float s, t;
-                if (Intersection.SegmentSegment2D(ref startPos, ref endPos, ref left, ref right, out s, out t))
+                if (GeometryUtil.SegmentSegment2D(ref startPos, ref endPos, ref left, ref right, out s, out t))
                 {
                     Vector3 pt = Vector3.Lerp(left, right, t);
 
-                    stat = AppendVertex(pt, 0, path[i + 1], straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
+                    stat = this.AppendVertex(pt, 0, path[i + 1], straightPath, straightPathFlags, straightPathRefs, ref straightPathCount, maxStraightPath);
 
                     if (stat != true)
+                    {
                         return true;
+                    }
                 }
             }
 
             return true;
         }
-
         /// <summary>
         /// Return false if the provided position is outside the xz-bounds.
         /// </summary>
@@ -2102,13 +2306,17 @@ namespace Engine.PathFinding
         /// <returns>True, if height found. False, if otherwise.</returns>
         public bool GetPolyHeight(PolyId reference, Vector3 pos, ref float height)
         {
-            if (nav == null)
+            if (this.NavMesh == null)
+            {
                 return false;
+            }
 
             MeshTile tile;
             Poly poly;
-            if (!nav.TryGetTileAndPolyByRef(reference, out tile, out poly))
+            if (!this.NavMesh.TryGetTileAndPolyByRef(reference, out tile, out poly))
+            {
                 return false;
+            }
 
             //off-mesh connections don't have detail polygons
             if (poly.PolyType == PolygonType.OffMeshConnection)
@@ -2140,7 +2348,6 @@ namespace Engine.PathFinding
 
             return false;
         }
-
         /// <summary>
         /// Find the nearest poly within a certain range.
         /// </summary>
@@ -2153,7 +2360,6 @@ namespace Engine.PathFinding
             this.FindNearestPoly(ref center, ref extents, out result);
             return result;
         }
-
         /// <summary>
         /// Find the nearest poly within a certain range.
         /// </summary>
@@ -2168,8 +2374,10 @@ namespace Engine.PathFinding
 
             // Get nearby polygons from proximity grid.
             List<PolyId> polys = new List<PolyId>(128);
-            if (!QueryPolygons(ref center, ref extents, polys))
+            if (!this.QueryPolygons(ref center, ref extents, polys))
+            {
                 throw new InvalidOperationException("no nearby polys?");
+            }
 
             float nearestDistanceSqr = float.MaxValue;
             for (int i = 0; i < polys.Count; i++)
@@ -2177,7 +2385,7 @@ namespace Engine.PathFinding
                 PolyId reference = polys[i];
                 Vector3 closestPtPoly;
                 bool posOverPoly;
-                ClosestPointOnPoly(reference, center, out closestPtPoly, out posOverPoly);
+                this.ClosestPointOnPoly(reference, center, out closestPtPoly, out posOverPoly);
 
                 // If a point is directly over a polygon and closer than
                 // climb height, favor that instead of straight line nearest point.
@@ -2187,7 +2395,7 @@ namespace Engine.PathFinding
                 {
                     MeshTile tile;
                     Poly poly;
-                    nav.TryGetTileAndPolyByRefUnsafe(polys[i], out tile, out poly);
+                    this.NavMesh.TryGetTileAndPolyByRefUnsafe(polys[i], out tile, out poly);
                     d = Math.Abs(diff.Y) - tile.WalkableClimb;
                     d = d > 0 ? d * d : 0;
                 }
@@ -2203,7 +2411,6 @@ namespace Engine.PathFinding
                 }
             }
         }
-
         /// <summary>
         /// Finds nearby polygons within a certain range.
         /// </summary>
@@ -2217,16 +2424,16 @@ namespace Engine.PathFinding
             Vector3 bmax = center + extent;
 
             int minx, miny, maxx, maxy;
-            nav.CalcTileLoc(ref bmin, out minx, out miny);
-            nav.CalcTileLoc(ref bmax, out maxx, out maxy);
+            this.NavMesh.CalcTileLoc(ref bmin, out minx, out miny);
+            this.NavMesh.CalcTileLoc(ref bmax, out maxx, out maxy);
 
-            BBox3 bounds = new BBox3(bmin, bmax);
+            BoundingBox bounds = new BoundingBox(bmin, bmax);
             int n = 0;
             for (int y = miny; y <= maxy; y++)
             {
                 for (int x = minx; x <= maxx; x++)
                 {
-                    foreach (MeshTile neighborTile in nav.GetTilesAt(x, y))
+                    foreach (MeshTile neighborTile in this.NavMesh.GetTilesAt(x, y))
                     {
                         n += neighborTile.QueryPolygons(bounds, polys);
                         if (n >= polys.Capacity)
@@ -2244,9 +2451,12 @@ namespace Engine.PathFinding
         {
             MeshTile tile;
             Poly poly;
-            bool status = nav.TryGetTileAndPolyByRef(reference, out tile, out poly);
+            bool status = this.NavMesh.TryGetTileAndPolyByRef(reference, out tile, out poly);
             if (status == false)
+            {
                 return false;
+            }
+
             return true;
         }
 
@@ -2274,20 +2484,6 @@ namespace Engine.PathFinding
         public NodeFlags RemoveNodeFlagClosed(Node node)
         {
             return node.Flags & ~NodeFlags.Closed;
-        }
-
-        private struct QueryData
-        {
-            public bool Status;
-            public Node LastBestNode;
-            public float LastBestNodeCost;
-            public NavPoint Start, End;
-        }
-
-        public struct SegInterval
-        {
-            public PolyId Reference;
-            public int TMin, TMax;
         }
     }
 }

@@ -1,9 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SharpDX;
 
 namespace Engine.PathFinding
 {
@@ -271,7 +268,7 @@ namespace Engine.PathFinding
                     }
 
                     PolyId id;
-                    idManager.SetPolyIndex(ref baseRef, p.Neis[j] - 1, out id);
+                    this.idManager.SetPolyIndex(ref baseRef, p.Neis[j] - 1, out id);
 
                     //Initialize a new link
                     Link link = new Link();
@@ -289,12 +286,12 @@ namespace Engine.PathFinding
         public void BaseOffMeshLinks()
         {
             //Base off-mesh connection start points
-            for (int i = 0; i < OffMeshConnectionCount; i++)
+            for (int i = 0; i < this.OffMeshConnectionCount; i++)
             {
                 int con = i;
-                OffMeshConnection omc = OffMeshConnections[con];
+                OffMeshConnection omc = this.OffMeshConnections[con];
 
-                Vector3 extents = new Vector3(omc.Radius, WalkableClimb, omc.Radius);
+                Vector3 extents = new Vector3(omc.Radius, this.WalkableClimb, omc.Radius);
 
                 //Find polygon to connect to
                 Vector3 p = omc.Pos0;
@@ -307,7 +304,7 @@ namespace Engine.PathFinding
 
                 //Do extra checks
                 if ((nearestPt.X - p.X) * (nearestPt.X - p.X) + (nearestPt.Z - p.Z) * (nearestPt.Z - p.Z) >
-                    OffMeshConnections[con].Radius * OffMeshConnections[con].Radius)
+                    this.OffMeshConnections[con].Radius * this.OffMeshConnections[con].Radius)
                 {
                     continue;
                 }
@@ -315,18 +312,18 @@ namespace Engine.PathFinding
                 Poly poly = this.Polys[omc.Poly];
 
                 //Make sure location is on current mesh
-                Verts[poly.Verts[0]] = nearestPt;
+                this.Verts[poly.Verts[0]] = nearestPt;
 
-                Link link = new Link();
-                link.Reference = reference;
-                link.Edge = 0;
-                link.Side = BoundarySide.Internal;
-                poly.Links.Add(link);
+                Link link1 = new Link();
+                link1.Reference = reference;
+                link1.Edge = 0;
+                link1.Side = BoundarySide.Internal;
+                poly.Links.Add(link1);
 
                 //Start end-point always conects back to off-mesh connection
-                int landPolyIdx = idManager.DecodePolyIndex(ref reference);
+                int landPolyIdx = this.idManager.DecodePolyIndex(ref reference);
                 PolyId id;
-                idManager.SetPolyIndex(ref baseRef, OffMeshConnections[con].Poly, out id);
+                this.idManager.SetPolyIndex(ref baseRef, OffMeshConnections[con].Poly, out id);
 
                 Link link2 = new Link();
                 link2.Reference = id;
@@ -343,27 +340,27 @@ namespace Engine.PathFinding
         public void ConnectExtLinks(MeshTile target, BoundarySide side)
         {
             //Connect border links
-            for (int i = 0; i < PolyCount; i++)
+            for (int i = 0; i < this.PolyCount; i++)
             {
-                int numPolyVerts = Polys[i].VertCount;
+                int numPolyVerts = this.Polys[i].VertCount;
 
                 for (int j = 0; j < numPolyVerts; j++)
                 {
                     //Skip non-portal edges
-                    if ((Polys[i].Neis[j] & Link.External) == 0)
+                    if ((this.Polys[i].Neis[j] & Link.External) == 0)
                     {
                         continue;
                     }
 
-                    BoundarySide dir = (BoundarySide)(Polys[i].Neis[j] & 0xff);
+                    BoundarySide dir = (BoundarySide)(this.Polys[i].Neis[j] & 0xff);
                     if (side != BoundarySide.Internal && dir != side)
                     {
                         continue;
                     }
 
                     //Create new links
-                    Vector3 va = Verts[Polys[i].Verts[j]];
-                    Vector3 vb = Verts[Polys[i].Verts[(j + 1) % numPolyVerts]];
+                    Vector3 va = this.Verts[this.Polys[i].Verts[j]];
+                    Vector3 vb = this.Verts[this.Polys[i].Verts[(j + 1) % numPolyVerts]];
                     List<PolyId> nei = new List<PolyId>(4);
                     List<float> neia = new List<float>(4 * 2);
                     target.FindConnectingPolys(va, vb, dir.GetOpposite(), nei, neia);
@@ -375,7 +372,7 @@ namespace Engine.PathFinding
                         link.Reference = nei[k];
                         link.Edge = j;
                         link.Side = dir;
-                        Polys[i].Links.Add(link);
+                        this.Polys[i].Links.Add(link);
 
                         //Compress portal limits to a value
                         if (dir == BoundarySide.PlusX || dir == BoundarySide.MinusX)
@@ -444,7 +441,7 @@ namespace Engine.PathFinding
                 //Find polygon to connect to
                 Vector3 p = targetCon.Pos1;
                 Vector3 nearestPt = new Vector3();
-                PolyId reference = FindNearestPoly(p, extents, ref nearestPt);
+                PolyId reference = this.FindNearestPoly(p, extents, ref nearestPt);
                 if (reference == PolyId.Null)
                 {
                     continue;
@@ -470,16 +467,16 @@ namespace Engine.PathFinding
                 //link target poly to off-mesh connection
                 if ((targetCon.Flags & OffMeshConnectionFlags.Bidirectional) != 0)
                 {
-                    int landPolyIdx = idManager.DecodePolyIndex(ref reference);
+                    int landPolyIdx = this.idManager.DecodePolyIndex(ref reference);
                     PolyId id;
                     id = target.baseRef;
-                    idManager.SetPolyIndex(ref id, targetCon.Poly, out id);
+                    this.idManager.SetPolyIndex(ref id, targetCon.Poly, out id);
 
                     Link bidiLink = new Link();
                     bidiLink.Reference = id;
                     bidiLink.Edge = 0xff;
                     bidiLink.Side = side;
-                    Polys[landPolyIdx].Links.Add(bidiLink);
+                    this.Polys[landPolyIdx].Links.Add(bidiLink);
                 }
             }
         }
@@ -503,22 +500,22 @@ namespace Engine.PathFinding
             Vector2 bmax = Vector2.Zero;
 
             //Iterate through all the tile's polygons
-            for (int i = 0; i < PolyCount; i++)
+            for (int i = 0; i < this.PolyCount; i++)
             {
-                int numPolyVerts = Polys[i].VertCount;
+                int numPolyVerts = this.Polys[i].VertCount;
 
                 //Iterate through all the vertices
                 for (int j = 0; j < numPolyVerts; j++)
                 {
                     //Skip edges which do not point to the right side
-                    if (Polys[i].Neis[j] != (Link.External | (int)side))
+                    if (this.Polys[i].Neis[j] != (Link.External | (int)side))
                     {
                         continue;
                     }
 
                     //Grab two adjacent vertices
-                    Vector3 vc = Verts[Polys[i].Verts[j]];
-                    Vector3 vd = Verts[Polys[i].Verts[(j + 1) % numPolyVerts]];
+                    Vector3 vc = this.Verts[this.Polys[i].Verts[j]];
+                    Vector3 vd = this.Verts[this.Polys[i].Verts[(j + 1) % numPolyVerts]];
                     float bpos = GetSlabCoord(vc, side);
 
                     //Segments are not close enough
@@ -543,7 +540,7 @@ namespace Engine.PathFinding
                         conarea.Add(Math.Min(amax.X, bmax.X));
 
                         PolyId id;
-                        idManager.SetPolyIndex(ref baseRef, i, out id);
+                        this.idManager.SetPolyIndex(ref baseRef, i, out id);
                         con.Add(id);
                     }
 
@@ -578,7 +575,7 @@ namespace Engine.PathFinding
             {
                 PolyId reference = polys[i];
                 Vector3 closestPtPoly = new Vector3();
-                ClosestPointOnPoly(idManager.DecodePolyIndex(ref reference), center, ref closestPtPoly);
+                this.ClosestPointOnPoly(this.idManager.DecodePolyIndex(ref reference), center, ref closestPtPoly);
                 float d = (center - closestPtPoly).LengthSquared();
                 if (d < nearestDistanceSqr)
                 {
@@ -601,15 +598,11 @@ namespace Engine.PathFinding
         {
             if (BVTree.Count != 0)
             {
-                int node = 0;
-                int end = BvNodeCount;
+                //Clamp query box to world box
                 Vector3 tbmin = Bounds.Minimum;
                 Vector3 tbmax = Bounds.Maximum;
-
-                //Clamp query box to world box
                 Vector3 qbmin = qbounds.Minimum;
                 Vector3 qbmax = qbounds.Maximum;
-                PolyBounds b;
                 float bminx = MathUtil.Clamp(qbmin.X, tbmin.X, tbmax.X) - tbmin.X;
                 float bminy = MathUtil.Clamp(qbmin.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
                 float bminz = MathUtil.Clamp(qbmin.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
@@ -619,24 +612,27 @@ namespace Engine.PathFinding
 
                 const int MinMask = unchecked((int)0xfffffffe);
 
-                b.Min.X = (int)(bminx * BvQuantFactor) & MinMask;
-                b.Min.Y = (int)(bminy * BvQuantFactor) & MinMask;
-                b.Min.Z = (int)(bminz * BvQuantFactor) & MinMask;
-                b.Max.X = (int)(bmaxx * BvQuantFactor + 1) | 1;
-                b.Max.Y = (int)(bmaxy * BvQuantFactor + 1) | 1;
-                b.Max.Z = (int)(bmaxz * BvQuantFactor + 1) | 1;
+                PolyBounds b;
+                b.Min.X = (int)(bminx * this.BvQuantFactor) & MinMask;
+                b.Min.Y = (int)(bminy * this.BvQuantFactor) & MinMask;
+                b.Min.Z = (int)(bminz * this.BvQuantFactor) & MinMask;
+                b.Max.X = (int)(bmaxx * this.BvQuantFactor + 1) | 1;
+                b.Max.Y = (int)(bmaxy * this.BvQuantFactor + 1) | 1;
+                b.Max.Z = (int)(bmaxz * this.BvQuantFactor + 1) | 1;
 
                 //traverse tree
+                int node = 0;
+                int end = this.BvNodeCount;
                 while (node < end)
                 {
-                    BVTree.Node bvNode = BVTree[node];
+                    BVTree.Node bvNode = this.BVTree[node];
                     bool overlap = PolyBounds.Overlapping(ref b, ref bvNode.Bounds);
                     bool isLeafNode = bvNode.Index >= 0;
 
                     if (isLeafNode && overlap)
                     {
                         PolyId polyRef;
-                        idManager.SetPolyIndex(ref baseRef, bvNode.Index, out polyRef);
+                        this.idManager.SetPolyIndex(ref baseRef, bvNode.Index, out polyRef);
                         polys.Add(polyRef);
                     }
 
@@ -657,27 +653,29 @@ namespace Engine.PathFinding
             {
                 BoundingBox b;
 
-                for (int i = 0; i < PolyCount; i++)
+                for (int i = 0; i < this.PolyCount; i++)
                 {
-                    var poly = Polys[i];
+                    var poly = this.Polys[i];
 
                     //don't return off-mesh connection polygons
                     if (poly.PolyType == PolygonType.OffMeshConnection)
+                    {
                         continue;
+                    }
 
                     //calculate polygon bounds
-                    b.Maximum = b.Minimum = Verts[poly.Verts[0]];
+                    b.Maximum = b.Minimum = this.Verts[poly.Verts[0]];
                     for (int j = 1; j < poly.VertCount; j++)
                     {
-                        Vector3 v = Verts[poly.Verts[j]];
-                        Vector3.ComponentMin(ref b.Minimum, ref v, out b.Minimum);
-                        Vector3.ComponentMax(ref b.Maximum, ref v, out b.Maximum);
+                        Vector3 v = this.Verts[poly.Verts[j]];
+                        GeometryUtil.ComponentMin(ref b.Minimum, ref v, out b.Minimum);
+                        GeometryUtil.ComponentMax(ref b.Maximum, ref v, out b.Maximum);
                     }
 
                     if (qbounds.Contains(ref b) != ContainmentType.Disjoint)
                     {
                         PolyId polyRef;
-                        idManager.SetPolyIndex(ref baseRef, i, out polyRef);
+                        this.idManager.SetPolyIndex(ref baseRef, i, out polyRef);
                         polys.Add(polyRef);
                     }
                 }
@@ -694,16 +692,16 @@ namespace Engine.PathFinding
         public void ClosestPointOnPoly(Poly poly, Vector3 pos, ref Vector3 closest)
         {
             int indexPoly = 0;
-            for (int i = 0; i < Polys.Length; i++)
+            for (int i = 0; i < this.Polys.Length; i++)
             {
-                if (Polys[i] == poly)
+                if (this.Polys[i] == poly)
                 {
                     indexPoly = i;
                     break;
                 }
             }
 
-            ClosestPointOnPoly(indexPoly, pos, ref closest);
+            this.ClosestPointOnPoly(indexPoly, pos, ref closest);
         }
         /// <summary>
         /// Given a point, find the closest point on that poly.
@@ -713,20 +711,22 @@ namespace Engine.PathFinding
         /// <param name="closest">Reference to the closest point</param>
         public void ClosestPointOnPoly(int indexPoly, Vector3 pos, ref Vector3 closest)
         {
-            Poly poly = Polys[indexPoly];
+            Poly poly = this.Polys[indexPoly];
 
             //Off-mesh connections don't have detail polygons
-            if (Polys[indexPoly].PolyType == PolygonType.OffMeshConnection)
+            if (this.Polys[indexPoly].PolyType == PolygonType.OffMeshConnection)
             {
-                ClosestPointOnPolyOffMeshConnection(poly, pos, out closest);
+                this.ClosestPointOnPolyOffMeshConnection(poly, pos, out closest);
                 return;
             }
 
-            ClosestPointOnPolyBoundary(poly, pos, out closest);
+            this.ClosestPointOnPolyBoundary(poly, pos, out closest);
 
             float h;
-            if (ClosestHeight(indexPoly, pos, out h))
+            if (this.ClosestHeight(indexPoly, pos, out h))
+            {
                 closest.Y = h;
+            }
         }
         /// <summary>
         /// Given a point, find the closest point on that poly.
@@ -743,7 +743,7 @@ namespace Engine.PathFinding
             int numPolyVerts = poly.VertCount;
             for (int i = 0; i < numPolyVerts; i++)
             {
-                verts[i] = Verts[poly.Verts[i]];
+                verts[i] = this.Verts[poly.Verts[i]];
             }
 
             bool inside = GeometryUtil.PointToPolygonEdgeSquared(pos, verts, numPolyVerts, edgeDistance, edgeT);
@@ -781,11 +781,11 @@ namespace Engine.PathFinding
         /// <returns>True, if a height is found. False, if otherwise.</returns>
         public bool ClosestHeight(int indexPoly, Vector3 pos, out float h)
         {
-            Poly poly = Polys[indexPoly];
-            PolyMeshDetail.MeshData pd = DetailMeshes[indexPoly];
+            Poly poly = this.Polys[indexPoly];
+            PolyMeshDetail.MeshData pd = this.DetailMeshes[indexPoly];
 
             //find height at the location
-            for (int j = 0; j < DetailMeshes[indexPoly].TriangleCount; j++)
+            for (int j = 0; j < this.DetailMeshes[indexPoly].TriangleCount; j++)
             {
                 PolyMeshDetail.TriangleData t = DetailTris[pd.TriangleIndex + j];
                 Vector3[] v = new Vector3[3];
@@ -794,11 +794,11 @@ namespace Engine.PathFinding
                 {
                     if (t[k] < poly.VertCount)
                     {
-                        v[k] = Verts[poly.Verts[t[k]]];
+                        v[k] = this.Verts[poly.Verts[t[k]]];
                     }
                     else
                     {
-                        v[k] = DetailVerts[pd.VertexIndex + (t[k] - poly.VertCount)];
+                        v[k] = this.DetailVerts[pd.VertexIndex + (t[k] - poly.VertCount)];
                     }
                 }
 
@@ -820,8 +820,8 @@ namespace Engine.PathFinding
         /// <param name="closest">Resulting point that is closest.</param>
         public void ClosestPointOnPolyOffMeshConnection(Poly poly, Vector3 pos, out Vector3 closest)
         {
-            Vector3 v0 = Verts[poly.Verts[0]];
-            Vector3 v1 = Verts[poly.Verts[1]];
+            Vector3 v0 = this.Verts[poly.Verts[0]];
+            Vector3 v1 = this.Verts[poly.Verts[1]];
             float d0 = (pos - v0).Length();
             float d1 = (pos - v1).Length();
             float u = d0 / (d0 + d1);
@@ -854,16 +854,16 @@ namespace Engine.PathFinding
             {
                 int h1 = (int)2166136261;
                 int h2 = (int)16777619;
-                h1 = (h1 * h2) ^ Location.X;
-                h1 = (h1 * h2) ^ Location.Y;
-                h1 = (h1 * h2) ^ Layer;
+                h1 = (h1 * h2) ^ this.Location.X;
+                h1 = (h1 * h2) ^ this.Location.Y;
+                h1 = (h1 * h2) ^ this.Layer;
                 return h1;
             }
         }
 
         public override string ToString()
         {
-            return "{ Location: " + Location.ToString() + ", Layer: " + Layer.ToString() + "}";
+            return string.Format("Location: {0}; Layer: {1};", this.Location, this.Layer);
         }
     }
 }

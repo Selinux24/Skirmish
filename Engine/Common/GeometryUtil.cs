@@ -593,6 +593,112 @@ namespace Engine.Common
             Vector3.Dot(ref vec, ref up, out dot);
             angle = (float)Math.Acos(dot);
         }
+        /// <summary>
+        /// Calculates the next highest power of two.
+        /// </summary>
+        /// <remarks>
+        /// This is a minimal method meant to be fast. There is a known edge case where an input of 0 will output 0
+        /// instead of the mathematically correct value of 1. It will not be fixed.
+        /// </remarks>
+        /// <param name="v">A value.</param>
+        /// <returns>The next power of two after the value.</returns>
+        internal static int NextPowerOfTwo(int v)
+        {
+            v--;
+            v |= v >> 1;
+            v |= v >> 2;
+            v |= v >> 4;
+            v |= v >> 8;
+            v |= v >> 16;
+            v++;
+
+            return v;
+        }
+        /// <summary>
+        /// Calculates the next highest power of two.
+        /// </summary>
+        /// <remarks>
+        /// This is a minimal method meant to be fast. There is a known edge case where an input of 0 will output 0
+        /// instead of the mathematically correct value of 1. It will not be fixed.
+        /// </remarks>
+        /// <param name="v">A value.</param>
+        /// <returns>The next power of two after the value.</returns>
+        internal static uint NextPowerOfTwo(uint v)
+        {
+            v--;
+            v |= v >> 1;
+            v |= v >> 2;
+            v |= v >> 4;
+            v |= v >> 8;
+            v |= v >> 16;
+            v++;
+
+            return v;
+        }
+        /// <summary>
+        /// Calculates the binary logarithm of the input.
+        /// </summary>
+        /// <remarks>
+        /// Inputs 0 and below have undefined output.
+        /// </remarks>
+        /// <param name="v">A value.</param>
+        /// <returns>The binary logarithm of v.</returns>
+        internal static int Log2(int v)
+        {
+            int r;
+            int shift;
+
+            r = (v > 0xffff) ? 1 << 4 : 0 << 4;
+            v >>= r;
+
+            shift = (v > 0xff) ? 1 << 3 : 0 << 3;
+            v >>= shift;
+            r |= shift;
+
+            shift = (v > 0xf) ? 1 << 2 : 0 << 2;
+            v >>= shift;
+            r |= shift;
+
+            shift = (v > 0x3) ? 1 << 1 : 0 << 1;
+            v >>= shift;
+            r |= shift;
+
+            r |= v >> 1;
+
+            return r;
+        }
+        /// <summary>
+        /// Calculates the binary logarithm of the input.
+        /// </summary>
+        /// <remarks>
+        /// An input of 0 has an undefined output.
+        /// </remarks>
+        /// <param name="v">A value.</param>
+        /// <returns>The binary logarithm of v.</returns>
+        internal static uint Log2(uint v)
+        {
+            uint r;
+            int shift;
+
+            r = (uint)((v > 0xffff) ? 1 << 4 : 0 << 4);
+            v >>= (int)r;
+
+            shift = (v > 0xff) ? 1 << 3 : 0 << 3;
+            v >>= shift;
+            r |= (uint)shift;
+
+            shift = (v > 0xf) ? 1 << 2 : 0 << 2;
+            v >>= shift;
+            r |= (uint)shift;
+
+            shift = (v > 0x3) ? 1 << 1 : 0 << 1;
+            v >>= shift;
+            r |= (uint)shift;
+
+            r |= v >> 1;
+
+            return r;
+        }
 
         /// <summary>
         /// Determine whether a ray (origin, dir) is intersecting a segment AB.

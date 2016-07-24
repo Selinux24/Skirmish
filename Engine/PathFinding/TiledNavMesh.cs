@@ -1,25 +1,19 @@
-﻿using Engine.Common;
-using Engine.Geometry;
-using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SharpDX;
 
 namespace Engine.PathFinding
 {
+    using Engine.Common;
+    using Engine.Geometry;
+
     /// <summary>
     /// A TiledNavMesh is a continuous region, which is used for pathfinding. 
     /// </summary>
     public class TiledNavMesh
     {
-        private Vector3 origin;
-        private float tileWidth, tileHeight;
-        private int maxTiles;
-        private int maxPolys;
-
         //TODO if we want to be able to remove tiles, turn tileList into a dict of <int, MeshTile>
         //     and add an int that always increases so that we don't have bad refs when somemthing
         //     is removed from tileList and all the indices after it change.
@@ -31,78 +25,26 @@ namespace Engine.PathFinding
         private Dictionary<MeshTile, PolyId> tileRefs;
         private List<MeshTile> tileList;
 
-        private PolyIdManager idManager;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="TiledNavMesh"/> class.
+        /// 
         /// </summary>
-        /// <param name="data">The Navigation Mesh data</param>
-        public TiledNavMesh(NavMeshBuilder data)
-        {
-            this.origin = data.Header.Bounds.Minimum;
-            this.tileWidth = data.Header.Bounds.Maximum.X - data.Header.Bounds.Minimum.X;
-            this.tileHeight = data.Header.Bounds.Maximum.Z - data.Header.Bounds.Minimum.Z;
-            this.maxTiles = 1;
-            this.maxPolys = data.Header.PolyCount;
-
-            //init tiles
-            tileSet = new Dictionary<Point, List<MeshTile>>();
-            tileRefs = new Dictionary<MeshTile, PolyId>();
-            tileList = new List<MeshTile>();
-
-            //init ID generator values
-            int tileBits = MathHelper.Log2(MathHelper.NextPowerOfTwo(maxTiles));
-            int polyBits = MathHelper.Log2(MathHelper.NextPowerOfTwo(maxPolys));
-
-            //only allow 31 salt bits, since salt mask is calculated using 32-bit int and it will overflow
-            int saltBits = Math.Min(31, 32 - tileBits - polyBits);
-
-            //TODO handle this in a sane way/do we need this?
-            if (saltBits < 10)
-                return;
-
-            idManager = new PolyIdManager(polyBits, tileBits, saltBits);
-
-            AddTile(data);
-        }
-
-        public TiledNavMesh(Vector3 origin, float tileWidth, float tileHeight, int maxTiles, int maxPolys)
-        {
-            this.origin = origin;
-            this.tileWidth = tileWidth;
-            this.tileHeight = tileHeight;
-            this.maxTiles = maxTiles;
-            this.maxPolys = maxPolys;
-
-            //init tiles
-            tileSet = new Dictionary<Vector2i, List<MeshTile>>();
-            tileRefs = new Dictionary<MeshTile, PolyId>();
-            tileList = new List<MeshTile>();
-
-            //init ID generator values
-            int tileBits = MathHelper.Log2(MathHelper.NextPowerOfTwo(maxTiles));
-            int polyBits = MathHelper.Log2(MathHelper.NextPowerOfTwo(maxPolys));
-
-            //only allow 31 salt bits, since salt mask is calculated using 32-bit int and it will overflow
-            int saltBits = Math.Min(31, 32 - tileBits - polyBits);
-
-            //TODO handle this in a sane way/do we need this?
-            if (saltBits < 10)
-                return;
-
-            idManager = new PolyIdManager(polyBits, tileBits, saltBits);
-        }
-
-        public Vector3 Origin { get { return origin; } }
-
-        public float TileWidth { get { return tileWidth; } }
-
-        public float TileHeight { get { return tileHeight; } }
-
-        public float MaxTiles { get { return maxTiles; } }
-
-        public float MaxPolys { get { return maxPolys; } }
-
+        public Vector3 Origin { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public float TileWidth { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public float TileHeight { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int MaxTiles { get; private set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int MaxPolys { get; private set; }
         /// <summary>
         /// Gets the maximum number of tiles that can be stored
         /// </summary>
@@ -113,15 +55,10 @@ namespace Engine.PathFinding
                 return tileList.Count;
             }
         }
-
-        public PolyIdManager IdManager
-        {
-            get
-            {
-                return idManager;
-            }
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        public PolyIdManager IdManager { get; private set; }
         /// <summary>
         /// Gets the mesh tile at a specified index.
         /// </summary>
@@ -134,15 +71,24 @@ namespace Engine.PathFinding
                 return new ReadOnlyCollection<MeshTile>(tileSet[location]);
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
         public ReadOnlyCollection<MeshTile> this[int x, int y]
         {
             get
             {
-                return this[new Vector2i(x, y)];
+                return this[new Point(x, y)];
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reference"></param>
+        /// <returns></returns>
         public MeshTile this[int reference]
         {
             get
@@ -150,26 +96,94 @@ namespace Engine.PathFinding
                 return tileList[reference];
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public MeshTile this[PolyId id]
         {
             get
             {
-                int index = idManager.DecodeTileIndex(ref id);
+                int index = this.IdManager.DecodeTileIndex(ref id);
                 return this[index];
             }
         }
-
         /// <summary>
         /// Gets or sets user data for this navmesh.
         /// </summary>
         public object Tag { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TiledNavMesh"/> class.
+        /// </summary>
+        /// <param name="data">The Navigation Mesh data</param>
+        public TiledNavMesh(NavMeshBuilder data)
+        {
+            this.Origin = data.Header.Bounds.Minimum;
+            this.TileWidth = data.Header.Bounds.Maximum.X - data.Header.Bounds.Minimum.X;
+            this.TileHeight = data.Header.Bounds.Maximum.Z - data.Header.Bounds.Minimum.Z;
+            this.MaxTiles = 1;
+            this.MaxPolys = data.Header.PolyCount;
+
+            //init tiles
+            this.tileSet = new Dictionary<Point, List<MeshTile>>();
+            this.tileRefs = new Dictionary<MeshTile, PolyId>();
+            this.tileList = new List<MeshTile>();
+
+            //init ID generator values
+            int tileBits = GeometryUtil.Log2(GeometryUtil.NextPowerOfTwo(this.MaxTiles));
+            int polyBits = GeometryUtil.Log2(GeometryUtil.NextPowerOfTwo(this.MaxPolys));
+
+            //only allow 31 salt bits, since salt mask is calculated using 32-bit int and it will overflow
+            int saltBits = Math.Min(31, 32 - tileBits - polyBits);
+
+            //TODO handle this in a sane way/do we need this?
+            if (saltBits < 10)
+            {
+                return;
+            }
+
+            this.IdManager = new PolyIdManager(polyBits, tileBits, saltBits);
+
+            this.AddTile(data);
+        }
+
+        public TiledNavMesh(Vector3 origin, float tileWidth, float tileHeight, int maxTiles, int maxPolys)
+        {
+            this.Origin = origin;
+            this.TileWidth = tileWidth;
+            this.TileHeight = tileHeight;
+            this.MaxTiles = maxTiles;
+            this.MaxPolys = maxPolys;
+
+            //init tiles
+            this.tileSet = new Dictionary<Point, List<MeshTile>>();
+            this.tileRefs = new Dictionary<MeshTile, PolyId>();
+            this.tileList = new List<MeshTile>();
+
+            //init ID generator values
+            int tileBits = GeometryUtil.Log2(GeometryUtil.NextPowerOfTwo(this.MaxTiles));
+            int polyBits = GeometryUtil.Log2(GeometryUtil.NextPowerOfTwo(this.MaxPolys));
+
+            //only allow 31 salt bits, since salt mask is calculated using 32-bit int and it will overflow
+            int saltBits = Math.Min(31, 32 - tileBits - polyBits);
+
+            //TODO handle this in a sane way/do we need this?
+            if (saltBits < 10)
+            {
+                return;
+            }
+
+            this.IdManager = new PolyIdManager(polyBits, tileBits, saltBits);
+        }
+
+
         public void AddTileAt(MeshTile tile, PolyId id)
         {
             //TODO more error checking, what if tile already exists?
 
-            Vector2i loc = tile.Location;
+            Point loc = tile.Location;
             List<MeshTile> locList;
             if (!tileSet.TryGetValue(loc, out locList))
             {
@@ -184,16 +198,17 @@ namespace Engine.PathFinding
 
             tileRefs.Add(tile, id);
 
-            int index = idManager.DecodeTileIndex(ref id);
+            int index = this.IdManager.DecodeTileIndex(ref id);
 
             //HACK this is pretty bad but only way to insert at index
             //TODO tileIndex should have a level of indirection from the list?
             while (index >= tileList.Count)
+            {
                 tileList.Add(null);
+            }
 
             tileList[index] = tile;
         }
-
         /// <summary>
         /// Build a tile and link all the polygons togther, both internally and externally.
         /// Make sure to link off-mesh connections as well.
@@ -208,14 +223,18 @@ namespace Engine.PathFinding
 
             //make sure location is free
             if (GetTileAt(header.X, header.Y, header.Layer) != null)
+            {
                 return PolyId.Null;
+            }
 
             PolyId newTileId = GetNextTileRef();
-            MeshTile tile = new MeshTile(new Vector2i(header.X, header.Y), header.Layer, idManager, newTileId);
-            tile.Salt = idManager.DecodeSalt(ref newTileId);
+            MeshTile tile = new MeshTile(new Point(header.X, header.Y), header.Layer, this.IdManager, newTileId);
+            tile.Salt = this.IdManager.DecodeSalt(ref newTileId);
 
             if (header.BvNodeCount == 0)
+            {
                 tile.BVTree = null;
+            }
 
             //patch header
             tile.Verts = data.NavVerts;
@@ -275,9 +294,8 @@ namespace Engine.PathFinding
         {
             //Salt is 1 for first version. As tiles get edited, change salt.
             //Salt can't be 0, otherwise the first poly of tile 0 is incorrectly seen as PolyId.Null.
-            return idManager.Encode(1, tileList.Count, 0);
+            return this.IdManager.Encode(1, tileList.Count, 0);
         }
-
         /// <summary>
         /// Retrieve the endpoints of the offmesh connection at the specified polygon
         /// </summary>
@@ -291,21 +309,33 @@ namespace Engine.PathFinding
             int salt = 0, indexTile = 0, indexPoly = 0;
 
             if (polyRef == PolyId.Null)
+            {
                 return false;
+            }
 
             //get current polygon
-            idManager.Decode(ref polyRef, out indexPoly, out indexTile, out salt);
-            if (indexTile >= maxTiles)
+            this.IdManager.Decode(ref polyRef, out indexPoly, out indexTile, out salt);
+            if (indexTile >= this.MaxTiles)
+            {
                 return false;
+            }
+
             if (tileList[indexTile].Salt != salt)
+            {
                 return false;
+            }
+
             MeshTile tile = tileList[indexTile];
             if (indexPoly >= tile.PolyCount)
+            {
                 return false;
-            Poly poly = tile.Polys[indexPoly];
+            }
 
+            Poly poly = tile.Polys[indexPoly];
             if (poly.PolyType != PolygonType.OffMeshConnection)
+            {
                 return false;
+            }
 
             int idx0 = 0, idx1 = 1;
 
@@ -329,7 +359,6 @@ namespace Engine.PathFinding
 
             return true;
         }
-
         /// <summary>
         /// Get the tile reference
         /// </summary>
@@ -346,7 +375,6 @@ namespace Engine.PathFinding
 
             return id;
         }
-
         /// <summary>
         /// Find the tile at a specific location.
         /// </summary>
@@ -356,9 +384,8 @@ namespace Engine.PathFinding
         /// <returns>The MeshTile at the specified location.</returns>
         public MeshTile GetTileAt(int x, int y, int layer)
         {
-            return GetTileAt(new Vector2i(x, y), layer);
+            return GetTileAt(new Point(x, y), layer);
         }
-
         /// <summary>
         /// Find the tile at a specific location.
         /// </summary>
@@ -374,7 +401,6 @@ namespace Engine.PathFinding
 
             return list.Find(t => t.Layer == layer);
         }
-
         /// <summary>
         /// Find and add a tile if it is found
         /// </summary>
@@ -383,7 +409,7 @@ namespace Engine.PathFinding
         /// <returns>A read-only collection of tiles at the specified coordinate</returns>
         public IEnumerable<MeshTile> GetTilesAt(int x, int y)
         {
-            return GetTilesAt(new Vector2i(x, y));
+            return GetTilesAt(new Point(x, y));
         }
 
         public IEnumerable<MeshTile> GetTilesAt(Point location)
@@ -400,7 +426,6 @@ namespace Engine.PathFinding
         {
             return GetNeighborTilesAt(location.X, location.Y, side);
         }
-
         /// <summary>
         /// Gets the neighboring tile at that position
         /// </summary>
@@ -453,7 +478,6 @@ namespace Engine.PathFinding
 
             return GetTilesAt(nx, ny);
         }
-
         /// <summary>
         /// Retrieve the tile and poly based off of a polygon reference
         /// </summary>
@@ -467,28 +491,36 @@ namespace Engine.PathFinding
             poly = null;
 
             if (reference == PolyId.Null)
+            {
                 return false;
+            }
 
             //Get tile and poly indices
             int salt, polyIndex, tileIndex;
-            idManager.Decode(ref reference, out polyIndex, out tileIndex, out salt);
+            this.IdManager.Decode(ref reference, out polyIndex, out tileIndex, out salt);
 
             //Make sure indices are valid
-            if (tileIndex >= maxTiles)
+            if (tileIndex >= this.MaxTiles)
+            {
                 return false;
+            }
 
             if (tileList[tileIndex].Salt != salt)
+            {
                 return false;
+            }
 
             if (polyIndex >= tileList[tileIndex].PolyCount)
+            {
                 return false;
+            }
 
             //Retrieve tile and poly
             tile = tileList[tileIndex];
             poly = tileList[tileIndex].Polys[polyIndex];
+
             return true;
         }
-
         /// <summary>
         /// Only use this function if it is known that the provided polygon reference is valid.
         /// </summary>
@@ -498,11 +530,10 @@ namespace Engine.PathFinding
         public void TryGetTileAndPolyByRefUnsafe(PolyId reference, out MeshTile tile, out Poly poly)
         {
             int salt, polyIndex, tileIndex;
-            idManager.Decode(ref reference, out polyIndex, out tileIndex, out salt);
+            this.IdManager.Decode(ref reference, out polyIndex, out tileIndex, out salt);
             tile = tileList[tileIndex];
             poly = tileList[tileIndex].Polys[polyIndex];
         }
-
         /// <summary>
         /// Check if polygon reference is valid.
         /// </summary>
@@ -511,23 +542,30 @@ namespace Engine.PathFinding
         public bool IsValidPolyRef(PolyId reference)
         {
             if (reference == PolyId.Null)
+            {
                 return false;
+            }
 
             int salt, polyIndex, tileIndex;
-            idManager.Decode(ref reference, out polyIndex, out tileIndex, out salt);
+            this.IdManager.Decode(ref reference, out polyIndex, out tileIndex, out salt);
 
-            if (tileIndex >= maxTiles)
+            if (tileIndex >= this.MaxTiles)
+            {
                 return false;
+            }
 
             if (tileList[tileIndex].Salt != salt)
+            {
                 return false;
+            }
 
             if (polyIndex >= tileList[tileIndex].PolyCount)
+            {
                 return false;
+            }
 
             return true;
         }
-
         /// <summary>
         /// Calculates the tile location.
         /// </summary>
@@ -536,8 +574,8 @@ namespace Engine.PathFinding
         /// <param name="ty">The tile's y-coordinate</param>
         public void CalcTileLoc(ref Vector3 pos, out int tx, out int ty)
         {
-            tx = (int)Math.Floor((pos.X - origin.X) / tileWidth);
-            ty = (int)Math.Floor((pos.Z - origin.Z) / tileHeight);
+            tx = (int)Math.Floor((pos.X - this.Origin.X) / this.TileWidth);
+            ty = (int)Math.Floor((pos.Z - this.Origin.Z) / this.TileHeight);
         }
     }
 }
