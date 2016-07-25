@@ -109,10 +109,6 @@ namespace Engine.PathFinding
                 return this[index];
             }
         }
-        /// <summary>
-        /// Gets or sets user data for this navmesh.
-        /// </summary>
-        public object Tag { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TiledNavMesh"/> class.
@@ -219,7 +215,7 @@ namespace Engine.PathFinding
         public PolyId AddTile(NavMeshBuilder data)
         {
             //make sure data is in right format
-            PathfindingCommon.NavMeshInfo header = data.Header;
+            var header = data.Header;
 
             //make sure location is free
             if (GetTileAt(header.X, header.Y, header.Layer) != null)

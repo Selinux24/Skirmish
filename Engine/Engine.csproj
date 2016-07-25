@@ -312,6 +312,7 @@
     <Compile Include="Common\NavMeshBuilder.cs" />
     <Compile Include="Common\NavMeshConnectionInfo.cs" />
     <Compile Include="Common\NavMeshGenerationSettings.cs" />
+    <Compile Include="Common\NavMeshInfo.cs" />
     <Compile Include="Common\NavMeshNode.cs" />
     <Compile Include="Common\OffMeshConnection.cs" />
     <Compile Include="Common\VertexTerrain.cs" />
@@ -346,8 +347,6 @@
     <Compile Include="Geometry\RegionId.cs" />
     <Compile Include="Geometry\Span.cs" />
     <Compile Include="Geometry\SpanReference.cs" />
-    <Compile Include="PathFinding\Graph.cs" />
-    <Compile Include="PathFinding\GraphNode.cs" />
     <Compile Include="PathFinding\GraphNodeStates.cs" />
     <Compile Include="Common\HeightMap.cs" />
     <Compile Include="Common\IBufferData.cs" />
@@ -428,7 +427,7 @@
     <Compile Include="Minimap.cs" />
     <Compile Include="MouseButtons.cs" />
     <Compile Include="PathFinding\HeuristicMethods.cs" />
-    <Compile Include="PathFinding\PathFinderPath.cs" />
+    <Compile Include="PathFinding\PathFindingPath.cs" />
     <Compile Include="PathFinding\PathFinder.cs" />
     <Compile Include="PathFinding\PathFinderData.cs" />
     <Compile Include="ShadowMap.cs" />

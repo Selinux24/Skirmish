@@ -46,8 +46,8 @@ namespace Engine
             this.terrain.Opaque = this.Opaque = description.Opaque;
             this.terrain.DeferredEnabled = description.DeferredEnabled;
 
-            BoundingSphere bsph = this.terrain.GetBoundingSphere();
-            Triangle[] triangles = this.terrain.GetTriangles();
+            var bsph = this.terrain.GetBoundingSphere();
+            var triangles = this.terrain.GetTriangles();
 
             if (description != null && description.Quadtree != null)
             {
@@ -58,7 +58,7 @@ namespace Engine
             {
                 if (description.PathFinder.GraphType == GraphTypes.Grid)
                 {
-                    BoundingBox bbox = this.terrain.GetBoundingBox();
+                    var bbox = this.terrain.GetBoundingBox();
 
                     this.graph = Grid.Build(
                         bbox,
@@ -68,9 +68,7 @@ namespace Engine
                 }
                 else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
                 {
-                    BoundingBox bbox = this.terrain.GetBoundingBox();
-
-                    this.graph = NavMesh.Test(bbox, triangles);
+                    this.graph = NavMesh.Build(triangles);
                 }
             }
         }
@@ -301,9 +299,9 @@ namespace Engine
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public PathFinderPath FindPath(Vector3 from, Vector3 to)
+        public PathFindingPath FindPath(Vector3 from, Vector3 to)
         {
-            return PathFinding.PathFinder.FindPath(this.graph, from, to);
+            return this.graph.FindPath(from, to);
         }
 
         /// <summary>
@@ -358,12 +356,14 @@ namespace Engine
         /// <returns>Returns the path finder grid nodes</returns>
         public IGraphNode[] GetNodes()
         {
+            IGraphNode[] nodes = null;
+
             if (this.graph != null)
             {
-                return this.graph.Nodes;
+                nodes = this.graph.GetNodes();
             }
 
-            return null;
+            return nodes;
         }
         /// <summary>
         /// Gets triangle list

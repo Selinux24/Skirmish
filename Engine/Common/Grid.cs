@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <summary>
     /// Grid
     /// </summary>
-    public class Grid : Graph
+    public class Grid : IGraph
     {
         /// <summary>
         /// Collision info helper
@@ -39,6 +39,36 @@ namespace Engine.Common
         /// Node side
         /// </summary>
         private float NodeSide = 0;
+
+        /// <summary>
+        /// Graph node list
+        /// </summary>
+        public GridNode[] Nodes { get; set; }
+        /// <summary>
+        /// Gets node wich contains specified point
+        /// </summary>
+        /// <param name="point">Point</param>
+        /// <returns>Returns the node wich contains the specified point if exists</returns>
+        public GridNode FindNode(Vector3 point)
+        {
+            float minDistance = float.MaxValue;
+            GridNode bestNode = null;
+
+            for (int i = 0; i < this.Nodes.Length; i++)
+            {
+                float distance;
+                if (this.Nodes[i].Contains(point, out distance))
+                {
+                    if (distance < minDistance)
+                    {
+                        minDistance = distance;
+                        bestNode = this.Nodes[i];
+                    }
+                }
+            }
+
+            return bestNode;
+        }
 
         /// <summary>
         /// Build node list from geometry
@@ -273,6 +303,15 @@ namespace Engine.Common
             }
         }
 
+        public IGraphNode[] GetNodes()
+        {
+            return Array.ConvertAll(this.Nodes, (n) => { return (IGraphNode)n; });
+        }
+
+        public PathFindingPath FindPath(Vector3 from, Vector3 to)
+        {
+            return PathFinder.FindPath(this, from, to);
+        }
         /// <summary>
         /// Gets text representation of instance
         /// </summary>

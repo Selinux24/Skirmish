@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Navigation mesh node
     /// </summary>
-    public class NavMeshNode : GraphNode
+    public class NavMeshNode : IGraphNode
     {
         /// <summary>
         /// Generates a navigation node array from a polygon array
@@ -36,27 +36,17 @@ namespace Engine.Common
         /// </summary>
         public Polygon Poly;
         /// <summary>
-        /// Gets node connections
+        /// Node state
         /// </summary>
-        public override IGraphNode[] Connections
-        {
-            get
-            {
-                return this.NavigationMesh.GetConnections(this);
-            }
-        }
+        public GraphNodeStates State { get; set; }
         /// <summary>
-        /// Gets a connection by index
+        /// Node passing cost
         /// </summary>
-        /// <param name="index">Node index</param>
-        /// <returns>Returns the connected node at index</returns>
-        public override IGraphNode this[int index]
-        {
-            get
-            {
-                return this.NavigationMesh.GetConnections(this)[index];
-            }
-        }
+        public float Cost { get; set; }
+        /// <summary>
+        /// Center position
+        /// </summary>
+        public Vector3 Center { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -71,31 +61,24 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Gets whether the node contains the projected point
+        /// Gets whether this node contains specified point
         /// </summary>
-        /// <param name="point">Point</param>
-        /// <param name="distance">Distance to point</param>
-        /// <returns>Returns true if the node contains the projected point</returns>
-        public override bool Contains(Vector3 point, out float distance)
+        /// <param name="point">Point to test</param>
+        /// <returns>Returns whether this node contains specified point</returns>
+        public bool Contains(Vector3 point, out float distance)
         {
             distance = 0;
 
-            if (Polygon.PointInPoly(this.Poly, point))
-            {
-                return true;
-            }
-
-            return false;
+            return this.Poly.Contains(point);
         }
         /// <summary>
-        /// Gets the point list of the navigation mesh borders
+        /// Get four node corners
         /// </summary>
-        /// <returns>Returns the point list of the navigation mesh borders</returns>
-        public override Vector3[] GetPoints()
+        /// <returns>Returns four node corners</returns>
+        public Vector3[] GetPoints()
         {
             return this.Poly.Points;
         }
-
         /// <summary>
         /// Gets the text representation of the instance
         /// </summary>

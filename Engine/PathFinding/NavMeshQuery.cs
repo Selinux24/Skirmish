@@ -113,7 +113,7 @@ namespace Engine.PathFinding
             float s = (float)rand.NextDouble();
             float t = (float)rand.NextDouble();
 
-            PathfindingCommon.RandomPointInConvexPoly(verts, poly.VertCount, areas, s, t, out randomPt);
+            GeometryUtil.RandomPointInConvexPoly(verts, poly.VertCount, areas, s, t, out randomPt);
 
             //TODO bad state again.
             float h = 0.0f;
@@ -462,12 +462,6 @@ namespace Engine.PathFinding
             Vector3 endPos = endPt.Position;
 
             if (startRef == PolyId.Null || endRef == PolyId.Null)
-            {
-                return false;
-            }
-
-            //path can't store any elements
-            if (path.Capacity == 0)
             {
                 return false;
             }

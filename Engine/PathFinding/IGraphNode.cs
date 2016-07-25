@@ -5,17 +5,6 @@ namespace Engine.PathFinding
     public interface IGraphNode
     {
         /// <summary>
-        /// Gets the connected node list
-        /// </summary>
-        IGraphNode[] Connections { get; }
-        /// <summary>
-        /// Gets a connected node by index
-        /// </summary>
-        /// <param name="index">Node index</param>
-        /// <returns>Returns the connected node by index</returns>
-        IGraphNode this[int index] { get; }
-
-        /// <summary>
         /// Node state
         /// </summary>
         GraphNodeStates State { get; }

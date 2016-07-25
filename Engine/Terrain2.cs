@@ -1292,7 +1292,7 @@ namespace Engine
             {
                 if (description.PathFinder.GraphType == GraphTypes.Grid)
                 {
-                    BoundingBox bbox = this.GetBoundingBox();
+                    var bbox = this.GetBoundingBox();
 
                     this.graph = Grid.Build(
                         bbox,
@@ -1302,9 +1302,7 @@ namespace Engine
                 }
                 else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
                 {
-                    BoundingBox bbox = this.GetBoundingBox();
-
-                    this.graph = NavMesh.Test(bbox, vertices, indices);
+                    this.graph = NavMesh.Build(vertices, indices);
                 }
             }
 

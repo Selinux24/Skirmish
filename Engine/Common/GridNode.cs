@@ -9,13 +9,52 @@ namespace Engine.Common
     /// <summary>
     /// Grid node
     /// </summary>
-    public class GridNode : GraphNode
+    public class GridNode : IGraphNode
     {
         /// <summary>
         /// Connected nodes dictionary
         /// </summary>
         private Dictionary<Headings, int> nodesDictionary = new Dictionary<Headings, int>();
 
+        /// <summary>
+        /// Connections to this node list
+        /// </summary>
+        protected List<GridNode> ConnectedNodes = new List<GridNode>();
+
+        /// <summary>
+        /// Gets the connected node list
+        /// </summary>
+        public GridNode[] Connections
+        {
+            get
+            {
+                return this.ConnectedNodes.ToArray();
+            }
+        }
+        /// <summary>
+        /// Gets a connected node by index
+        /// </summary>
+        /// <param name="index">Node index</param>
+        /// <returns>Returns the connected node by index</returns>
+        public GridNode this[int index]
+        {
+            get
+            {
+                return this.ConnectedNodes[index];
+            }
+        }
+        /// <summary>
+        /// Node state
+        /// </summary>
+        public GraphNodeStates State { get; set; }
+        /// <summary>
+        /// Node passing cost
+        /// </summary>
+        public float Cost { get; set; }
+        /// <summary>
+        /// Center position
+        /// </summary>
+        public Vector3 Center { get; protected set; }
         /// <summary>
         /// North West point
         /// </summary>
@@ -232,7 +271,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="point">Point to test</param>
         /// <returns>Returns whether this node contains specified point</returns>
-        public override bool Contains(Vector3 point, out float distance)
+        public bool Contains(Vector3 point, out float distance)
         {
             distance = float.MaxValue;
 
@@ -250,7 +289,7 @@ namespace Engine.Common
         /// Get four node corners
         /// </summary>
         /// <returns>Returns four node corners</returns>
-        public override Vector3[] GetPoints()
+        public Vector3[] GetPoints()
         {
             return new[]
             {

@@ -1,6 +1,8 @@
 ﻿
 namespace Engine.PathFinding
 {
+    using Engine.Common;
+
     /// <summary>
     /// Path node
     /// </summary>
@@ -17,7 +19,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Next node
         /// </summary>
-        public IGraphNode NextNode = null;
+        public GridNode NextNode = null;
 
         /// <summary>
         /// Constructor

@@ -944,6 +944,57 @@ namespace Engine.Common
         {
             return ((amin + eps) > bmax || (amax - eps) < bmin) ? false : true;
         }
+
+        /// <summary>
+        /// Generate an accurate sample of random points in the convex polygon and pick a point.
+        /// </summary>
+        /// <param name="pts">The polygon's points data</param>
+        /// <param name="npts">The number of points</param>
+        /// <param name="areas">The triangle areas</param>
+        /// <param name="s">A random float</param>
+        /// <param name="t">Another random float</param>
+        /// <param name="pt">The resulting point</param>
+        public static void RandomPointInConvexPoly(Vector3[] pts, int npts, float[] areas, float s, float t, out Vector3 pt)
+        {
+            //Calculate triangle areas
+            float areaSum = 0.0f;
+            float area;
+            for (int i = 2; i < npts; i++)
+            {
+                Triangle.Area2D(ref pts[0], ref pts[i - 1], ref pts[i], out area);
+                areaSum += Math.Max(0.001f, area);
+                areas[i] = area;
+            }
+
+            //Find sub triangle weighted by area
+            float threshold = s * areaSum;
+            float accumulatedArea = 0.0f;
+            float u = 0.0f;
+            int triangleVertex = 0;
+            for (int i = 2; i < npts; i++)
+            {
+                float currentArea = areas[i];
+                if (threshold >= accumulatedArea && threshold < (accumulatedArea + currentArea))
+                {
+                    u = (threshold - accumulatedArea) / currentArea;
+                    triangleVertex = i;
+                    break;
+                }
+
+                accumulatedArea += currentArea;
+            }
+
+            float v = (float)Math.Sqrt(t);
+
+            float a = 1 - v;
+            float b = (1 - u) * v;
+            float c = u * v;
+            Vector3 pointA = pts[0];
+            Vector3 pointB = pts[triangleVertex - 1];
+            Vector3 pointC = pts[triangleVertex];
+
+            pt = a * pointA + b * pointB + c * pointC;
+        }
     }
 
     public enum IndexBufferShapeEnum : int

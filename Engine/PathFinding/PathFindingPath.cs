@@ -4,10 +4,12 @@ using System.Collections.Generic;
 
 namespace Engine.PathFinding
 {
+    using Engine.Common;
+
     /// <summary>
     /// PathFinder path
     /// </summary>
-    public class PathFinderPath
+    public class PathFindingPath
     {
         /// <summary>
         /// Path identifier
@@ -16,7 +18,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Path nodes
         /// </summary>
-        public readonly List<IGraphNode> ReturnPath = new List<IGraphNode>();
+        public readonly List<Vector3> ReturnPath = new List<Vector3>();
         /// <summary>
         /// Start position
         /// </summary>
@@ -36,7 +38,7 @@ namespace Engine.PathFinding
 
                 for (int i = 0; i < this.ReturnPath.Count - 1; i++)
                 {
-                    distance += Vector3.Distance(this.ReturnPath[i].Center, this.ReturnPath[i + 1].Center);
+                    distance += Vector3.Distance(this.ReturnPath[i], this.ReturnPath[i + 1]);
                 }
 
                 return distance;
@@ -47,7 +49,7 @@ namespace Engine.PathFinding
         /// Constructor
         /// </summary>
         /// <param name="returnPath">Node list</param>
-        public PathFinderPath(Vector3 startPosition, Vector3 endPosition, IGraphNode[] returnPath)
+        public PathFindingPath(Vector3 startPosition, Vector3 endPosition, Vector3[] returnPath)
         {
             this.StartPosition = startPosition;
             this.EndPosition = endPosition;
@@ -71,16 +73,16 @@ namespace Engine.PathFinding
 
             for (int i = 1; i < this.ReturnPath.Count - 1; i++)
             {
-                Vector3 position = this.ReturnPath[i].Center;
+                Vector3 position = this.ReturnPath[i];
 
                 if (i > 0)
                 {
-                    Vector3 previousPosition = this.ReturnPath[i - 1].Center;
+                    Vector3 previousPosition = this.ReturnPath[i - 1];
 
                     distanceAcum += Vector3.Distance(position, previousPosition);
                 }
 
-                curve.AddPosition(this.ReturnPath[i].Center);
+                curve.AddPosition(this.ReturnPath[i]);
             }
 
             distanceAcum += Vector3.Distance(this.EndPosition, curve.Points[curve.Points.Length - 1]);
@@ -105,11 +107,11 @@ namespace Engine.PathFinding
 
             for (int i = 0; i < this.ReturnPath.Count; i++)
             {
-                Vector3 position = this.ReturnPath[i].Center;
+                Vector3 position = this.ReturnPath[i];
 
                 if (i > 0)
                 {
-                    Vector3 previousPosition = this.ReturnPath[i - 1].Center;
+                    Vector3 previousPosition = this.ReturnPath[i - 1];
 
                     distanceAcum += Vector3.Distance(position, previousPosition);
                 }
@@ -121,7 +123,7 @@ namespace Engine.PathFinding
                     break;
                 }
 
-                curve.AddPosition(this.ReturnPath[i].Center);
+                curve.AddPosition(this.ReturnPath[i]);
             }
 
             distance = distanceAcum;
@@ -142,14 +144,14 @@ namespace Engine.PathFinding
 
             for (int i = 1; i < this.ReturnPath.Count - 1; i++)
             {
-                Vector3 position = this.ReturnPath[i].Center;
+                Vector3 position = this.ReturnPath[i];
 
                 if (i > 0)
                 {
-                    Vector3 previousPosition = this.ReturnPath[i - 1].Center;
+                    Vector3 previousPosition = this.ReturnPath[i - 1];
                 }
 
-                positions.Add(this.ReturnPath[i].Center);
+                positions.Add(this.ReturnPath[i]);
             }
 
             positions.Add(this.EndPosition);

@@ -511,11 +511,11 @@ namespace TerrainTest
                             Line3 line;
                             if (i == 0)
                             {
-                                line = new Line3(p.StartPosition, p.ReturnPath[i].Center);
+                                line = new Line3(p.StartPosition, p.ReturnPath[i]);
                             }
                             else
                             {
-                                line = new Line3(p.ReturnPath[i - 1].Center, p.ReturnPath[i].Center);
+                                line = new Line3(p.ReturnPath[i - 1], p.ReturnPath[i]);
                             }
 
                             lines[i] = line;
