@@ -1,6 +1,6 @@
 ﻿using Engine;
 using Engine.Common;
-using Engine.PathFinding;
+using Engine.PathFinding.AStar;
 using SharpDX;
 using System;
 using System.Diagnostics;
@@ -88,8 +88,11 @@ namespace DeferredTest
                 },
                 PathFinder = new TerrainDescription.PathFinderDescription()
                 {
-                    NodeSize = 2f,
-                    NodeInclination = MathUtil.DegreesToRadians(35),
+                    Settings = new GridGenerationSettings()
+                    {
+                        NodeSize = 2f,
+                        NodeInclination = MathUtil.DegreesToRadians(35),
+                    },
                 },
                 Vegetation = new TerrainDescription.VegetationDescription()
                 {

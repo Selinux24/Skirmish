@@ -56,20 +56,7 @@ namespace Engine
 
             if (description != null && description.PathFinder != null)
             {
-                if (description.PathFinder.GraphType == GraphTypes.Grid)
-                {
-                    var bbox = this.terrain.GetBoundingBox();
-
-                    this.graph = Grid.Build(
-                        bbox,
-                        triangles,
-                        description.PathFinder.NodeSize,
-                        description.PathFinder.NodeInclination);
-                }
-                else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
-                {
-                    this.graph = NavMesh.Build(triangles);
-                }
+                this.graph = PathFinder.Build(description.PathFinder.Settings, triangles);
             }
         }
         /// <summary>
@@ -548,15 +535,7 @@ namespace Engine
             /// <summary>
             /// Graph type
             /// </summary>
-            public GraphTypes GraphType = GraphTypes.Grid;
-            /// <summary>
-            /// Path node side size
-            /// </summary>
-            public float NodeSize = 10f;
-            /// <summary>
-            /// Path node maximum inclination
-            /// </summary>
-            public float NodeInclination = MathUtil.PiOverFour;
+            public PathFinderSettings Settings = null;
         }
 
         /// <summary>

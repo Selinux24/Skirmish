@@ -2,16 +2,10 @@
 
 namespace Engine.PathFinding
 {
-    public interface IGraphNode
+    using Engine.Common;
+
+    public interface IGraphNode : IValueWithCost
     {
-        /// <summary>
-        /// Node state
-        /// </summary>
-        GraphNodeStates State { get; }
-        /// <summary>
-        /// Node passing cost
-        /// </summary>
-        float Cost { get; }
         /// <summary>
         /// Center position
         /// </summary>

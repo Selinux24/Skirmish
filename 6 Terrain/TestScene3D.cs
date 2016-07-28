@@ -1,18 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Engine;
-using Engine.Common;
-using Engine.Content;
+﻿using Engine;
 using Engine.Helpers;
 using Engine.PathFinding;
+using Engine.PathFinding.NavMesh;
 using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace TerrainTest
 {
     public class TestScene3D : Scene
     {
+        private const int MaxPickingTest = 1000;
+        private const int MaxGridDrawer = 10000;
+
         private Random rnd = new Random();
 
         private bool follow = false;
@@ -137,9 +139,7 @@ namespace TerrainTest
                 },
                 PathFinder = new TerrainDescription.PathFinderDescription()
                 {
-                    GraphType = GraphTypes.NavMesh,
-                    NodeSize = 2f,
-                    NodeInclination = MathUtil.DegreesToRadians(35),
+                    Settings = NavigationMeshGenerationSettings.Default,
                 },
                 Vegetation = new TerrainDescription.VegetationDescription()
                 {
@@ -274,7 +274,7 @@ namespace TerrainTest
 
             #region DEBUG Path finding Grid
 
-            this.terrainGridDrawer = this.AddTriangleListDrawer(10000);
+            this.terrainGridDrawer = this.AddTriangleListDrawer(MaxGridDrawer);
             this.terrainGridDrawer.EnableAlphaBlending = true;
             this.terrainGridDrawer.Visible = false;
             this.terrainGridDrawer.DeferredEnabled = false;
@@ -319,7 +319,7 @@ namespace TerrainTest
 
             #region DEBUG Picking test
 
-            this.terrainPointDrawer = this.AddLineListDrawer(1000);
+            this.terrainPointDrawer = this.AddLineListDrawer(MaxPickingTest);
             this.terrainPointDrawer.Visible = false;
             this.terrainPointDrawer.DeferredEnabled = false;
 
@@ -504,9 +504,11 @@ namespace TerrainTest
                     var p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
                     if (p != null)
                     {
-                        Line3[] lines = new Line3[p.ReturnPath.Count];
+                        int count = Math.Min(p.ReturnPath.Count, MaxPickingTest);
 
-                        for (int i = 0; i < p.ReturnPath.Count; i++)
+                        Line3[] lines = new Line3[count];
+
+                        for (int i = 0; i < count; i++)
                         {
                             Line3 line;
                             if (i == 0)
@@ -738,7 +740,7 @@ namespace TerrainTest
                         else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 0.55f); }
                         else { color = new Color4(Color.Green.ToColor3(), 0.55f); }
 
-                        Polygon poly = ((NavMeshNode)node).Poly;
+                        Polygon poly = ((NavigationMeshNode)node).Poly;
 
                         this.terrainGridDrawer.AddTriangles(color, Triangle.Transform(Triangle.ComputeTriangleList(SharpDX.Direct3D.PrimitiveTopology.TriangleList, poly), this.m));
                     }
@@ -764,7 +766,7 @@ namespace TerrainTest
                         else if (c > 0.33f) { color = new Color4(Color.Yellow.ToColor3(), 0.55f); }
                         else { color = new Color4(Color.Green.ToColor3(), 0.55f); }
 
-                        Polygon poly = ((NavMeshNode)node).Poly;
+                        Polygon poly = ((NavigationMeshNode)node).Poly;
 
                         this.terrainGridDrawer.SetTriangles(color, Triangle.Transform(Triangle.ComputeTriangleList(SharpDX.Direct3D.PrimitiveTopology.TriangleList, poly), this.m));
                     }

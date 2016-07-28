@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 namespace Engine.PathFinding
 {
-    using Engine.Common;
-
     /// <summary>
     /// PathFinder path
     /// </summary>

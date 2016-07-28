@@ -1,6 +1,6 @@
 ﻿using Engine;
 using Engine.Common;
-using Engine.PathFinding;
+using Engine.PathFinding.AStar;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -136,7 +136,10 @@ namespace GameLogic
                 ContentPath = "Resources3D",
                 PathFinder = new TerrainDescription.PathFinderDescription()
                 {
-                    NodeSize = 5f,
+                    Settings = new GridGenerationSettings()
+                    {
+                        NodeSize = 5f,
+                    },
                 },
                 Opaque = true,
             });

@@ -1,5 +1,5 @@
 ﻿using Engine;
-using Engine.PathFinding;
+using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
 using System.Diagnostics;
@@ -156,7 +156,7 @@ namespace HeightmapTest
                 },
                 PathFinder = new TerrainDescription.PathFinderDescription()
                 {
-                    GraphType = GraphTypes.NavMesh,
+                    Settings = NavigationMeshGenerationSettings.Default,
                 },
                 Textures = new TerrainDescription.TexturesDescription()
                 {

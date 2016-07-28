@@ -1290,20 +1290,7 @@ namespace Engine
             //Intialize Pathfinding Graph
             if (description != null && description.PathFinder != null)
             {
-                if (description.PathFinder.GraphType == GraphTypes.Grid)
-                {
-                    var bbox = this.GetBoundingBox();
-
-                    this.graph = Grid.Build(
-                        bbox,
-                        vertices, indices,
-                        description.PathFinder.NodeSize,
-                        description.PathFinder.NodeInclination);
-                }
-                else if (description.PathFinder.GraphType == GraphTypes.NavMesh)
-                {
-                    this.graph = NavMesh.Build(vertices, indices);
-                }
+                this.graph = PathFinder.Build(description.PathFinder.Settings, vertices, indices);
             }
 
             //Initialize patch dictionary

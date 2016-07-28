@@ -53,16 +53,6 @@ namespace Engine.Common
                 if (haltByCount)
                 {
                     node.Triangles = nodeTriangles;
-
-                    //Set path finder
-                    if (description.PathFinder != null)
-                    {
-                        node.Grid = Grid.Build(
-                            bbox,
-                            nodeTriangles,
-                            description.PathFinder.NodeSize,
-                            description.PathFinder.NodeInclination);
-                    }
                 }
                 else
                 {
@@ -275,10 +265,6 @@ namespace Engine.Common
         /// Local model
         /// </summary>
         public Model Model = null;
-        /// <summary>
-        /// Local pathfinding grid
-        /// </summary>
-        public Grid Grid = null;
         /// <summary>
         /// Node vertices
         /// </summary>

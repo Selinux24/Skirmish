@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Common;
+using Engine.PathFinding.AStar;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -82,7 +83,10 @@ namespace Collada
                 },
                 PathFinder = new TerrainDescription.PathFinderDescription()
                 {
-                    NodeSize = 20f,
+                    Settings = new GridGenerationSettings()
+                    {
+                        NodeSize = 20f,
+                    },
                 },
                 Opaque = true,
             };
