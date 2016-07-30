@@ -7,7 +7,7 @@ using System.Linq;
 namespace Engine.PathFinding.NavMesh
 {
     /// <summary>
-    /// A set of contours around the regions of a <see cref="CompactHeightfield"/>, used as the edges of a
+    /// A set of contours around the regions of a <see cref="CompactHeightField"/>, used as the edges of a
     /// <see cref="PolyMesh"/>.
     /// </summary>
     public class ContourSet : ICollection<Contour>
@@ -22,11 +22,11 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public BoundingBox Bounds { get; private set; }
         /// <summary>
-        /// Gets the width of the set, not including the border size specified in <see cref="CompactHeightfield"/>.
+        /// Gets the width of the set, not including the border size specified in <see cref="CompactHeightField"/>.
         /// </summary>
         public int Width { get; private set; }
         /// <summary>
-        /// Gets the height of the set, not including the border size specified in <see cref="CompactHeightfield"/>.
+        /// Gets the height of the set, not including the border size specified in <see cref="CompactHeightField"/>.
         /// </summary>
         public int Height { get; private set; }
         /// <summary>

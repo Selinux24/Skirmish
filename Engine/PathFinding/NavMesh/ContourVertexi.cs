@@ -4,10 +4,10 @@ using System.Runtime.InteropServices;
 namespace Engine.PathFinding.NavMesh
 {
     /// <summary>
-    /// A <see cref="ContourVertex"/> is a vertex that stores 3 integer coordinates and a region ID, and is used to build <see cref="Contour"/>s.
+    /// A <see cref="ContourVertexi"/> is a vertex that stores 3 integer coordinates and a region ID, and is used to build <see cref="Contour"/>s.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct ContourVertex
+    public struct ContourVertexi
     {
         /// <summary>
         /// Gets the leftness of a triangle formed from 3 contour vertices.
@@ -16,7 +16,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="b">The second vertex.</param>
         /// <param name="c">The third vertex.</param>
         /// <returns>A value indicating the leftness of the triangle.</returns>
-        public static bool IsLeft(ref ContourVertex a, ref ContourVertex b, ref ContourVertex c)
+        public static bool IsLeft(ref ContourVertexi a, ref ContourVertexi b, ref ContourVertexi c)
         {
             int area;
             Area2D(ref a, ref b, ref c, out area);
@@ -29,7 +29,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="b">Point B of triangle ABC.</param>
         /// <param name="c">Point C of triangle ABC.</param>
         /// <param name="area">The 2D area of the triangle.</param>
-        public static void Area2D(ref ContourVertex a, ref ContourVertex b, ref ContourVertex c, out int area)
+        public static void Area2D(ref ContourVertexi a, ref ContourVertexi b, ref ContourVertexi c, out int area)
         {
             area = (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z);
         }
@@ -52,13 +52,13 @@ namespace Engine.PathFinding.NavMesh
         public RegionId RegionId;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ContourVertex"/> struct.
+        /// Initializes a new instance of the <see cref="ContourVertexi"/> struct.
         /// </summary>
         /// <param name="x">The X coordinate.</param>
         /// <param name="y">The Y coordinate.</param>
         /// <param name="z">The Z coordinate.</param>
         /// <param name="region">The region ID.</param>
-        public ContourVertex(int x, int y, int z, RegionId region)
+        public ContourVertexi(int x, int y, int z, RegionId region)
         {
             this.X = x;
             this.Y = y;
@@ -70,7 +70,7 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="vec">The array of X,Y,Z coordinates.</param>
         /// <param name="region">The Region ID.</param>
-        public ContourVertex(Vector3 vec, RegionId region)
+        public ContourVertexi(Vector3 vec, RegionId region)
         {
             this.X = (int)vec.X;
             this.Y = (int)vec.Y;
@@ -78,11 +78,11 @@ namespace Engine.PathFinding.NavMesh
             this.RegionId = region;
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ContourVertex"/> struct as a copy.
+        /// Initializes a new instance of the <see cref="ContourVertexi"/> struct as a copy.
         /// </summary>
         /// <param name="vert">The original vertex.</param>
         /// <param name="index">The index of the original vertex, which is temporarily stored in the <see cref="RegionId"/> field.</param>
-        public ContourVertex(ContourVertex vert, int index)
+        public ContourVertexi(ContourVertexi vert, int index)
         {
             this.X = vert.X;
             this.Y = vert.Y;
@@ -90,11 +90,11 @@ namespace Engine.PathFinding.NavMesh
             this.RegionId = new RegionId(index);
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="ContourVertex"/> struct as a copy.
+        /// Initializes a new instance of the <see cref="ContourVertexi"/> struct as a copy.
         /// </summary>
         /// <param name="vert">The original vertex.</param>
         /// <param name="region">The region that the vertex belongs to.</param>
-        public ContourVertex(ContourVertex vert, RegionId region)
+        public ContourVertexi(ContourVertexi vert, RegionId region)
         {
             this.X = vert.X;
             this.Y = vert.Y;

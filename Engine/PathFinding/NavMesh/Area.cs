@@ -18,7 +18,7 @@ namespace Engine.PathFinding.NavMesh
         /// This is a default <see cref="Area"/> in the event that the user does not provide one.
         /// </summary>
         /// <remarks>
-        /// If a user only applies IDs to some parts of a <see cref="Heightfield"/>, they will most likely choose low
+        /// If a user only applies IDs to some parts of a <see cref="HeightField"/>, they will most likely choose low
         /// integer values. Choosing the maximum value makes it unlikely for the "default" area to collide with any
         /// user-defined areas.
         /// </remarks>

@@ -11,7 +11,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A TiledNavMesh is a continuous region, which is used for pathfinding. 
     /// </summary>
-    public class TiledNavMesh
+    public class TiledNavigationMesh
     {
         private Dictionary<Point, List<MeshTile>> tileSet;
         private Dictionary<MeshTile, int> tileRefs;
@@ -91,10 +91,10 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TiledNavMesh"/> class.
+        /// Initializes a new instance of the <see cref="TiledNavigationMesh"/> class.
         /// </summary>
         /// <param name="data">The Navigation Mesh data</param>
-        public TiledNavMesh(NavigationMeshBuilder data)
+        public TiledNavigationMesh(NavigationMeshBuilder data)
         {
             this.Origin = data.Header.Bounds.Minimum;
             this.TileWidth = data.Header.Bounds.Maximum.X - data.Header.Bounds.Minimum.X;
@@ -125,36 +125,11 @@ namespace Engine.PathFinding.NavMesh
             this.AddTile(data);
         }
 
-        public TiledNavMesh(Vector3 origin, float tileWidth, float tileHeight, int maxTiles, int maxPolys)
-        {
-            this.Origin = origin;
-            this.TileWidth = tileWidth;
-            this.TileHeight = tileHeight;
-            this.MaxTiles = maxTiles;
-            this.MaxPolys = maxPolys;
-
-            //init tiles
-            this.tileSet = new Dictionary<Point, List<MeshTile>>();
-            this.tileRefs = new Dictionary<MeshTile, int>();
-            this.tileList = new List<MeshTile>();
-
-            //init ID generator values
-            int tileBits = GeometryUtil.Log2(GeometryUtil.NextPowerOfTwo(this.MaxTiles));
-            int polyBits = GeometryUtil.Log2(GeometryUtil.NextPowerOfTwo(this.MaxPolys));
-
-            //only allow 31 salt bits, since salt mask is calculated using 32-bit int and it will overflow
-            int saltBits = Math.Min(31, 32 - tileBits - polyBits);
-
-            //TODO handle this in a sane way/do we need this?
-            if (saltBits < 10)
-            {
-                return;
-            }
-
-            this.IdManager = new PolyIdManager(polyBits, tileBits, saltBits);
-        }
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="tile"></param>
+        /// <param name="id"></param>
         public void AddTileAt(MeshTile tile, int id)
         {
             //TODO more error checking, what if tile already exists?
@@ -265,7 +240,10 @@ namespace Engine.PathFinding.NavMesh
 
             return newTileId;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public int GetNextTileRef()
         {
             //Salt is 1 for first version. As tiles get edited, change salt.
@@ -308,7 +286,7 @@ namespace Engine.PathFinding.NavMesh
             }
 
             Poly poly = tile.Polys[indexPoly];
-            if (poly.PolyType != PolygonType.OffMeshConnection)
+            if (poly.PolyType != PolyType.OffMeshConnection)
             {
                 return false;
             }
@@ -330,8 +308,8 @@ namespace Engine.PathFinding.NavMesh
                 }
             }
 
-            startPos = tile.Verts[poly.Verts[idx0]];
-            endPos = tile.Verts[poly.Verts[idx1]];
+            startPos = tile.Verts[poly.Vertices[idx0]];
+            endPos = tile.Verts[poly.Vertices[idx1]];
 
             return true;
         }
@@ -402,7 +380,11 @@ namespace Engine.PathFinding.NavMesh
         {
             return GetTilesAt(new Point(x, y));
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="location"></param>
+        /// <returns></returns>
         public IEnumerable<MeshTile> GetTilesAt(Point location)
         {
             //Find tile based off hash
@@ -414,7 +396,12 @@ namespace Engine.PathFinding.NavMesh
 
             return new ReadOnlyCollection<MeshTile>(list);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="location"></param>
+        /// <param name="side"></param>
+        /// <returns></returns>
         public IEnumerable<MeshTile> GetNeighborTilesAt(Point location, BoundarySide side)
         {
             return GetNeighborTilesAt(location.X, location.Y, side);

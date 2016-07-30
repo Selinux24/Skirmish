@@ -7,11 +7,11 @@ using System.Linq;
 namespace Engine.PathFinding.NavMesh
 {
     /// <summary>
-    /// A cell is a column of voxels represented in <see cref="Span"/>s.
+    /// A cell is a column of voxels represented in <see cref="HeightFieldSpan"/>s.
     /// </summary>
-    public class Cell
+    public class HeightFieldCell
     {
-        private List<Span> spans = new List<Span>();
+        private List<HeightFieldSpan> spans = new List<HeightFieldSpan>();
 
         /// <summary>
         /// Gets the height of the cell in number of voxels.
@@ -38,10 +38,10 @@ namespace Engine.PathFinding.NavMesh
             }
         }
         /// <summary>
-        /// Gets a readonly list of all the <see cref="Span"/>s contained in the cell.
+        /// Gets a readonly list of all the <see cref="HeightFieldSpan"/>s contained in the cell.
         /// </summary>
         /// <value>A readonly list of spans.</value>
-        public ReadOnlyCollection<Span> Spans
+        public ReadOnlyCollection<HeightFieldSpan> Spans
         {
             get
             {
@@ -49,11 +49,11 @@ namespace Engine.PathFinding.NavMesh
             }
         }
         /// <summary>
-        /// Gets a modifiable list of all the <see cref="Span"/>s contained in the cell.
-        /// Should only be used for filtering in <see cref="Heightfield"/>.
+        /// Gets a modifiable list of all the <see cref="HeightFieldSpan"/>s contained in the cell.
+        /// Should only be used for filtering in <see cref="HeightField"/>.
         /// </summary>
         /// <value>A list of spans for modification.</value>
-        internal List<Span> MutableSpans
+        internal List<HeightFieldSpan> MutableSpans
         {
             get
             {
@@ -61,16 +61,16 @@ namespace Engine.PathFinding.NavMesh
             }
         }
         /// <summary>
-        /// Gets the <see cref="Span"/> that contains the specified voxel.
+        /// Gets the <see cref="HeightFieldSpan"/> that contains the specified voxel.
         /// </summary>
         /// <param name="location">The voxel to search for.</param>
         /// <returns>The span containing the voxel. Null if the voxel is empty.</returns>
-        public Span? this[int location]
+        public HeightFieldSpan? this[int location]
         {
             get
             {
                 //Iterate the list of spans
-                foreach (Span s in this.spans)
+                foreach (HeightFieldSpan s in this.spans)
                 {
                     if (s.Minimum > location)
                     {
@@ -87,20 +87,20 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Cell"/> class.
+        /// Initializes a new instance of the <see cref="HeightFieldCell"/> class.
         /// </summary>
         /// <param name="height">The number of voxels in the column.</param>
-        public Cell(int height)
+        public HeightFieldCell(int height)
         {
             this.Height = height;
         }
 
         /// <summary>
-        /// Adds a <see cref="Span"/> to the cell.
+        /// Adds a <see cref="HeightFieldSpan"/> to the cell.
         /// </summary>
         /// <param name="span">A span.</param>
         /// <exception cref="ArgumentException">Thrown if an invalid span is provided.</exception>
-        public void AddSpan(Span span)
+        public void AddSpan(HeightFieldSpan span)
         {
             if (span.Minimum > span.Maximum)
             {
@@ -119,7 +119,7 @@ namespace Engine.PathFinding.NavMesh
                 {
                     //Check whether the current span is below, or overlapping existing spans.
                     //If the span is completely above the current span the loop will continue.
-                    Span cur = this.spans[i];
+                    HeightFieldSpan cur = this.spans[i];
                     if (cur.Minimum > span.Maximum)
                     {
                         //The new span is below the current one and is not intersecting.

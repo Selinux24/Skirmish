@@ -6,7 +6,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// Stores height data in a grid.
     /// </summary>
-    public class HeightPatch
+    public class HeightFieldPatch
     {
         /// <summary>
         /// The value used when a height value has not yet been set.
@@ -70,13 +70,13 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HeightPatch"/> class.
+        /// Initializes a new instance of the <see cref="HeightFieldPatch"/> class.
         /// </summary>
         /// <param name="x">The initial X coordinate of the patch.</param>
         /// <param name="y">The initial Y coordinate of the patch.</param>
         /// <param name="width">The width of the patch.</param>
         /// <param name="length">The length of the patch.</param>
-        public HeightPatch(int x, int y, int width, int length)
+        public HeightFieldPatch(int x, int y, int width, int length)
         {
             if (x < 0 || y < 0 || width <= 0 || length <= 0)
             {
@@ -141,7 +141,7 @@ namespace Engine.PathFinding.NavMesh
             this.Length = rect.Height;
         }
         /// <summary>
-        /// Clears the <see cref="HeightPatch"/> by unsetting every value.
+        /// Clears the <see cref="HeightFieldPatch"/> by unsetting every value.
         /// </summary>
         public void Clear()
         {

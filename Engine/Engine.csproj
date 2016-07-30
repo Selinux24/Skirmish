@@ -308,8 +308,8 @@
     <Compile Include="Common\IValueWithCost.cs" />
     <Compile Include="PathFinding\AStar\GridGenerationSettings.cs" />
     <Compile Include="PathFinding\NavMesh\BoundarySide.cs" />
-    <Compile Include="PathFinding\NavMesh\BVNode.cs" />
-    <Compile Include="PathFinding\NavMesh\BVTree.cs" />
+    <Compile Include="PathFinding\NavMesh\BoundingVolumeTreeNode.cs" />
+    <Compile Include="PathFinding\NavMesh\BoundingVolumeTree.cs" />
     <Compile Include="Common\GeometricOrientation.cs" />
     <Compile Include="PathFinding\NavMesh\Link.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMesh.cs" />
@@ -317,30 +317,28 @@
     <Compile Include="PathFinding\NavMesh\NavigationMeshGenerationSettings.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMeshInfo.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMeshNode.cs" />
-    <Compile Include="PathFinding\NavMesh\NodeFlags.cs" />
     <Compile Include="PathFinding\NavMesh\OffMeshConnection.cs" />
     <Compile Include="Common\VertexTerrain.cs" />
     <Compile Include="Common\GeometryUtil.cs" />
     <Compile Include="PathFinding\AStar\Grid.cs" />
     <Compile Include="PathFinding\AStar\GridNode.cs" />
     <Compile Include="PathFinding\NavMesh\Area.cs" />
-    <Compile Include="PathFinding\NavMesh\Cell.cs" />
-    <Compile Include="PathFinding\NavMesh\CompactCell.cs" />
-    <Compile Include="PathFinding\NavMesh\CompactHeightfield.cs" />
-    <Compile Include="PathFinding\NavMesh\CompactSpan.cs" />
-    <Compile Include="PathFinding\NavMesh\CompactSpanReference.cs" />
+    <Compile Include="PathFinding\NavMesh\HeightFieldCell.cs" />
+    <Compile Include="PathFinding\NavMesh\CompactHeightFieldCell.cs" />
+    <Compile Include="PathFinding\NavMesh\CompactHeightField.cs" />
+    <Compile Include="PathFinding\NavMesh\CompactHeightFieldSpan.cs" />
+    <Compile Include="PathFinding\NavMesh\CompactHeightFieldSpanReference.cs" />
     <Compile Include="PathFinding\NavMesh\Contour.cs" />
     <Compile Include="PathFinding\NavMesh\ContourBuildFlags.cs" />
     <Compile Include="PathFinding\NavMesh\ContourSet.cs" />
-    <Compile Include="PathFinding\NavMesh\ContourVertex.cs" />
+    <Compile Include="PathFinding\NavMesh\ContourVertexi.cs" />
     <Compile Include="PathFinding\NavMesh\Direction.cs" />
-    <Compile Include="PathFinding\NavMesh\EdgeFlags.cs" />
-    <Compile Include="PathFinding\NavMesh\Heightfield.cs" />
-    <Compile Include="PathFinding\NavMesh\HeightPatch.cs" />
+    <Compile Include="PathFinding\NavMesh\HeightField.cs" />
+    <Compile Include="PathFinding\NavMesh\HeightFieldPatch.cs" />
     <Compile Include="PathFinding\NavMesh\OffMeshConnectionFlags.cs" />
     <Compile Include="PathFinding\NavMesh\Poly.cs" />
     <Compile Include="PathFinding\NavMesh\BoundingBoxi.cs" />
-    <Compile Include="PathFinding\NavMesh\PolygonType.cs" />
+    <Compile Include="PathFinding\NavMesh\PolyType.cs" />
     <Compile Include="PathFinding\NavMesh\PolyIdManager.cs" />
     <Compile Include="PathFinding\NavMesh\PolyMesh.cs" />
     <Compile Include="PathFinding\NavMesh\PolyMeshDetail.cs" />
@@ -348,8 +346,8 @@
     <Compile Include="PathFinding\NavMesh\Region.cs" />
     <Compile Include="PathFinding\NavMesh\RegionFlags.cs" />
     <Compile Include="PathFinding\NavMesh\RegionId.cs" />
-    <Compile Include="PathFinding\NavMesh\Span.cs" />
-    <Compile Include="PathFinding\NavMesh\SpanReference.cs" />
+    <Compile Include="PathFinding\NavMesh\HeightFieldSpan.cs" />
+    <Compile Include="PathFinding\NavMesh\HeightFieldSpanReference.cs" />
     <Compile Include="PathFinding\AStar\GridNodeStates.cs" />
     <Compile Include="Common\HeightMap.cs" />
     <Compile Include="Common\IBufferData.cs" />
@@ -374,10 +372,8 @@
     <Compile Include="PathFinding\NavMesh\MeshTile.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMeshQuery.cs" />
     <Compile Include="PathFinding\NavMesh\PathPoint.cs" />
-    <Compile Include="PathFinding\NavMesh\Node.cs" />
-    <Compile Include="PathFinding\NavMesh\NodePool.cs" />
     <Compile Include="PathFinding\NavMesh\PathBuildFlags.cs" />
-    <Compile Include="PathFinding\NavMesh\TiledNavMesh.cs" />
+    <Compile Include="PathFinding\NavMesh\TiledNavigationMesh.cs" />
     <Compile Include="PathFinding\PathFinder.cs" />
     <Compile Include="PathFinding\PathFinderSettings.cs" />
     <Compile Include="Polygon.cs" />
@@ -430,7 +426,7 @@
     <Compile Include="Keys.cs" />
     <Compile Include="Minimap.cs" />
     <Compile Include="MouseButtons.cs" />
-    <Compile Include="PathFinding\AStar\HeuristicMethods.cs" />
+    <Compile Include="PathFinding\HeuristicMethods.cs" />
     <Compile Include="PathFinding\PathFindingPath.cs" />
     <Compile Include="PathFinding\AStar\AStarQuery.cs" />
     <Compile Include="PathFinding\AStar\AStarQueryData.cs" />
@@ -556,9 +552,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Geometry\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\SharpDX.2.6.3\build\SharpDX.targets" Condition="Exists('..\packages\SharpDX.2.6.3\build\SharpDX.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

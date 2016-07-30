@@ -22,6 +22,12 @@ namespace Engine.PathFinding.NavMesh
         public int TileBits { get; private set; }
         public int SaltBits { get; private set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="polyBits"></param>
+        /// <param name="tileBits"></param>
+        /// <param name="saltBits"></param>
         public PolyIdManager(int polyBits, int tileBits, int saltBits)
         {
             this.PolyBits = polyBits;
@@ -36,6 +42,13 @@ namespace Engine.PathFinding.NavMesh
             this.saltOffset = polyBits + tileBits;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="salt"></param>
+        /// <param name="tileIndex"></param>
+        /// <param name="polyIndex"></param>
+        /// <returns></returns>
         public int Encode(int salt, int tileIndex, int polyIndex)
         {
             int id;
@@ -59,7 +72,12 @@ namespace Engine.PathFinding.NavMesh
 
             result = ((salt << saltOffset) | (tileIndex << tileOffset) | polyIndex);
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="polyBase"></param>
+        /// <param name="newPoly"></param>
+        /// <param name="result"></param>
         public void SetPolyIndex(ref int polyBase, int newPoly, out int result)
         {
             newPoly &= polyMask;

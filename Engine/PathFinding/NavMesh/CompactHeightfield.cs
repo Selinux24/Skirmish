@@ -7,18 +7,18 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A more memory-compact heightfield that stores open spans of voxels instead of closed ones.
     /// </summary>
-    public class CompactHeightfield
+    public class CompactHeightField
     {
         /// <summary>
-        /// Gets the width of the <see cref="CompactHeightfield"/> in voxel units.
+        /// Gets the width of the <see cref="CompactHeightField"/> in voxel units.
         /// </summary>
         public int Width { get; private set; }
         /// <summary>
-        /// Gets the height of the <see cref="CompactHeightfield"/> in voxel units.
+        /// Gets the height of the <see cref="CompactHeightField"/> in voxel units.
         /// </summary>
         public int Height { get; private set; }
         /// <summary>
-        /// Gets the length of the <see cref="CompactHeightfield"/> in voxel units.
+        /// Gets the length of the <see cref="CompactHeightField"/> in voxel units.
         /// </summary>
         public int Length { get; private set; }
         /// <summary>
@@ -54,27 +54,27 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the cells.
         /// </summary>
-        public CompactCell[] Cells { get; private set; }
+        public CompactHeightFieldCell[] Cells { get; private set; }
         /// <summary>
         /// Gets the spans.
         /// </summary>
-        public CompactSpan[] Spans { get; private set; }
+        public CompactHeightFieldSpan[] Spans { get; private set; }
         /// <summary>
         /// Gets the area flags.
         /// </summary>
         public Area[] Areas { get; private set; }
 
         /// <summary>
-        /// Gets an <see cref="IEnumerable{T}"/> of <see cref="CompactSpan"/> of the spans at a specified coordiante.
+        /// Gets an <see cref="IEnumerable{T}"/> of <see cref="CompactHeightFieldSpan"/> of the spans at a specified coordiante.
         /// </summary>
         /// <param name="x">The X coordinate.</param>
         /// <param name="y">The Y coordinate.</param>
-        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="CompactSpan"/>.</returns>
-        public IEnumerable<CompactSpan> this[int x, int y]
+        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="CompactHeightFieldSpan"/>.</returns>
+        public IEnumerable<CompactHeightFieldSpan> this[int x, int y]
         {
             get
             {
-                CompactCell c = this.Cells[y * this.Width + x];
+                CompactHeightFieldCell c = this.Cells[y * this.Width + x];
 
                 int end = c.StartIndex + c.Count;
                 for (int i = c.StartIndex; i < end; i++)
@@ -84,15 +84,15 @@ namespace Engine.PathFinding.NavMesh
             }
         }
         /// <summary>
-        /// Gets an <see cref="IEnumerable{T}"/> of <see cref="CompactSpan"/>s at a specified index.
+        /// Gets an <see cref="IEnumerable{T}"/> of <see cref="CompactHeightFieldSpan"/>s at a specified index.
         /// </summary>
         /// <param name="i">The index.</param>
-        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="CompactSpan"/>.</returns>
-        public IEnumerable<CompactSpan> this[int i]
+        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="CompactHeightFieldSpan"/>.</returns>
+        public IEnumerable<CompactHeightFieldSpan> this[int i]
         {
             get
             {
-                CompactCell c = this.Cells[i];
+                CompactHeightFieldCell c = this.Cells[i];
 
                 int end = c.StartIndex + c.Count;
                 for (int j = c.StartIndex; j < end; j++)
@@ -102,11 +102,11 @@ namespace Engine.PathFinding.NavMesh
             }
         }
         /// <summary>
-        /// Gets the <see cref="CompactSpan"/> specified by the reference.
+        /// Gets the <see cref="CompactHeightFieldSpan"/> specified by the reference.
         /// </summary>
-        /// <param name="spanRef">A reference to a span in this <see cref="CompactHeightfield"/>.</param>
+        /// <param name="spanRef">A reference to a span in this <see cref="CompactHeightField"/>.</param>
         /// <returns>The referenced span.</returns>
-        public CompactSpan this[CompactSpanReference spanRef]
+        public CompactHeightFieldSpan this[CompactHeightFieldSpanReference spanRef]
         {
             get
             {
@@ -115,12 +115,12 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompactHeightfield"/> class.
+        /// Initializes a new instance of the <see cref="CompactHeightField"/> class.
         /// </summary>
-        /// <param name="field">A <see cref="Heightfield"/> to build from.</param>
+        /// <param name="field">A <see cref="HeightField"/> to build from.</param>
         /// <param name="walkableHeight">The maximum difference in height to filter.</param>
         /// <param name="walkableClimb">The maximum difference in slope to filter.</param>
-        public CompactHeightfield(Heightfield field, int walkableHeight, int walkableClimb)
+        public CompactHeightField(HeightField field, int walkableHeight, int walkableClimb)
         {
             this.Bounds = field.Bounds;
             this.Width = field.Width;
@@ -130,8 +130,8 @@ namespace Engine.PathFinding.NavMesh
             this.CellHeight = field.CellHeight;
 
             int spanCount = field.SpanCount;
-            this.Cells = new CompactCell[this.Width * this.Length];
-            this.Spans = new CompactSpan[spanCount];
+            this.Cells = new CompactHeightFieldCell[this.Width * this.Length];
+            this.Spans = new CompactHeightFieldSpan[spanCount];
             this.Areas = new Area[spanCount];
 
             //iterate over the Heightfield's cells
@@ -145,7 +145,7 @@ namespace Engine.PathFinding.NavMesh
                     continue;
                 }
 
-                CompactCell c = new CompactCell(spanIndex, 0);
+                CompactHeightFieldCell c = new CompactHeightFieldCell(spanIndex, 0);
 
                 //convert the closed spans to open spans
                 int lastInd = fs.Count - 1;
@@ -154,8 +154,8 @@ namespace Engine.PathFinding.NavMesh
                     var s = fs[j];
                     if (s.Area.IsWalkable)
                     {
-                        CompactSpan res;
-                        CompactSpan.FromMinMax(s.Maximum, fs[j + 1].Minimum, out res);
+                        CompactHeightFieldSpan res;
+                        CompactHeightFieldSpan.FromMinMax(s.Maximum, fs[j + 1].Minimum, out res);
                         this.Spans[spanIndex] = res;
                         this.Areas[spanIndex] = s.Area;
                         spanIndex++;
@@ -167,7 +167,7 @@ namespace Engine.PathFinding.NavMesh
                 var lastS = fs[lastInd];
                 if (lastS.Area.IsWalkable)
                 {
-                    this.Spans[spanIndex] = new CompactSpan(fs[lastInd].Maximum, int.MaxValue);
+                    this.Spans[spanIndex] = new CompactHeightFieldSpan(fs[lastInd].Maximum, int.MaxValue);
                     this.Areas[spanIndex] = lastS.Area;
                     spanIndex++;
                     c.Count++;
@@ -181,10 +181,10 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = 0; x < this.Width; x++)
                 {
-                    CompactCell c = this.Cells[z * this.Width + x];
+                    CompactHeightFieldCell c = this.Cells[z * this.Width + x];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
-                        CompactSpan s = this.Spans[i];
+                        CompactHeightFieldSpan s = this.Spans[i];
 
                         for (var dir = Direction.West; dir <= Direction.South; dir++)
                         {
@@ -196,20 +196,20 @@ namespace Engine.PathFinding.NavMesh
                                 continue;
                             }
 
-                            CompactCell dc = this.Cells[dz * this.Width + dx];
+                            CompactHeightFieldCell dc = this.Cells[dz * this.Width + dx];
                             for (int j = dc.StartIndex, cellEnd = dc.StartIndex + dc.Count; j < cellEnd; j++)
                             {
-                                CompactSpan ds = this.Spans[j];
+                                CompactHeightFieldSpan ds = this.Spans[j];
 
                                 int overlapBottom, overlapTop;
-                                CompactSpan.OverlapMin(ref s, ref ds, out overlapBottom);
-                                CompactSpan.OverlapMax(ref s, ref ds, out overlapTop);
+                                CompactHeightFieldSpan.OverlapMin(ref s, ref ds, out overlapBottom);
+                                CompactHeightFieldSpan.OverlapMax(ref s, ref ds, out overlapTop);
 
                                 //Make sure that the agent can walk to the next span and that the span isn't a huge drop or climb
                                 if ((overlapTop - overlapBottom) >= walkableHeight && Math.Abs(ds.Minimum - s.Minimum) <= walkableClimb)
                                 {
                                     int con = j - dc.StartIndex;
-                                    CompactSpan.SetConnection(dir, con, ref this.Spans[i]);
+                                    CompactHeightFieldSpan.SetConnection(dir, con, ref this.Spans[i]);
                                     break;
                                 }
                             }
@@ -288,10 +288,10 @@ namespace Engine.PathFinding.NavMesh
 
             const int LogStackCount = 3;
             const int StackCount = 1 << LogStackCount;
-            List<CompactSpanReference>[] stacks = new List<CompactSpanReference>[StackCount];
+            List<CompactHeightFieldSpanReference>[] stacks = new List<CompactHeightFieldSpanReference>[StackCount];
             for (int i = 0; i < stacks.Length; i++)
             {
-                stacks[i] = new List<CompactSpanReference>(1024);
+                stacks[i] = new List<CompactHeightFieldSpanReference>(1024);
             }
 
             RegionId[] regions = new RegionId[this.Spans.Length];
@@ -369,7 +369,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="source">The original stack</param>
         /// <param name="destination">The new stack</param>
         /// <param name="regions">Region ids</param>
-        private static void AppendStacks(List<CompactSpanReference> source, List<CompactSpanReference> destination, RegionId[] regions)
+        private static void AppendStacks(List<CompactHeightFieldSpanReference> source, List<CompactHeightFieldSpanReference> destination, RegionId[] regions)
         {
             for (int j = 0; j < source.Count; j++)
             {
@@ -404,10 +404,10 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = 0; x < this.Width; x++)
                 {
-                    CompactCell c = this.Cells[x + y * this.Width];
+                    CompactHeightFieldCell c = this.Cells[x + y * this.Width];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
-                        CompactSpanReference spanRef = new CompactSpanReference(x, y, i);
+                        CompactHeightFieldSpanReference spanRef = new CompactHeightFieldSpanReference(x, y, i);
 
                         //HACK since the border region flag makes r negative, I changed r == 0 to r <= 0. Figure out exactly what maxRegionId's purpose is and see if Region.IsBorderOrNull is all we need.
                         int r = (int)regionIds[i];
@@ -661,10 +661,10 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = 0; x < this.Width; x++)
                 {
-                    CompactCell c = this.Cells[y * this.Width + x];
+                    CompactHeightFieldCell c = this.Cells[y * this.Width + x];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
-                        CompactSpan s = this.Spans[i];
+                        CompactHeightFieldSpan s = this.Spans[i];
                         Area area = this.Areas[i];
 
                         bool isBoundary = false;
@@ -678,7 +678,7 @@ namespace Engine.PathFinding.NavMesh
                             {
                                 int dx = x + dir.GetHorizontalOffset();
                                 int dy = y + dir.GetVerticalOffset();
-                                int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, dir);
+                                int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
                                 if (area != this.Areas[di])
                                 {
                                     isBoundary = true;
@@ -700,18 +700,18 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = 0; x < this.Width; x++)
                 {
-                    CompactCell c = this.Cells[y * this.Width + x];
+                    CompactHeightFieldCell c = this.Cells[y * this.Width + x];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
-                        CompactSpan s = this.Spans[i];
+                        CompactHeightFieldSpan s = this.Spans[i];
 
                         if (s.IsConnected(Direction.West))
                         {
                             //(-1, 0)
                             int dx = x + Direction.West.GetHorizontalOffset();
                             int dy = y + Direction.West.GetVerticalOffset();
-                            int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, Direction.West);
-                            CompactSpan ds = this.Spans[di];
+                            int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, Direction.West);
+                            CompactHeightFieldSpan ds = this.Spans[di];
                             if (src[di] + 2 < src[i])
                             {
                                 src[i] = src[di] + 2;
@@ -722,7 +722,7 @@ namespace Engine.PathFinding.NavMesh
                             {
                                 int ddx = dx + Direction.South.GetHorizontalOffset();
                                 int ddy = dy + Direction.South.GetVerticalOffset();
-                                int ddi = this.Cells[ddx + ddy * this.Width].StartIndex + CompactSpan.GetConnection(ref ds, Direction.South);
+                                int ddi = this.Cells[ddx + ddy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref ds, Direction.South);
                                 if (src[ddi] + 3 < src[i])
                                 {
                                     src[i] = src[ddi] + 3;
@@ -735,8 +735,8 @@ namespace Engine.PathFinding.NavMesh
                             //(0, -1)
                             int dx = x + Direction.South.GetHorizontalOffset();
                             int dy = y + Direction.South.GetVerticalOffset();
-                            int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, Direction.South);
-                            CompactSpan ds = this.Spans[di];
+                            int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, Direction.South);
+                            CompactHeightFieldSpan ds = this.Spans[di];
                             if (src[di] + 2 < src[i])
                             {
                                 src[i] = src[di] + 2;
@@ -747,7 +747,7 @@ namespace Engine.PathFinding.NavMesh
                             {
                                 int ddx = dx + Direction.East.GetHorizontalOffset();
                                 int ddy = dy + Direction.East.GetVerticalOffset();
-                                int ddi = this.Cells[ddx + ddy * this.Width].StartIndex + CompactSpan.GetConnection(ref ds, Direction.East);
+                                int ddi = this.Cells[ddx + ddy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref ds, Direction.East);
                                 if (src[ddi] + 3 < src[i])
                                 {
                                     src[i] = src[ddi] + 3;
@@ -763,18 +763,18 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = this.Width - 1; x >= 0; x--)
                 {
-                    CompactCell c = this.Cells[y * this.Width + x];
+                    CompactHeightFieldCell c = this.Cells[y * this.Width + x];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
-                        CompactSpan s = this.Spans[i];
+                        CompactHeightFieldSpan s = this.Spans[i];
 
                         if (s.IsConnected(Direction.East))
                         {
                             //(1, 0)
                             int dx = x + Direction.East.GetHorizontalOffset();
                             int dy = y + Direction.East.GetVerticalOffset();
-                            int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, Direction.East);
-                            CompactSpan ds = this.Spans[di];
+                            int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, Direction.East);
+                            CompactHeightFieldSpan ds = this.Spans[di];
                             if (src[di] + 2 < src[i])
                             {
                                 src[i] = src[di] + 2;
@@ -785,7 +785,7 @@ namespace Engine.PathFinding.NavMesh
                             {
                                 int ddx = dx + Direction.North.GetHorizontalOffset();
                                 int ddy = dy + Direction.North.GetVerticalOffset();
-                                int ddi = this.Cells[ddx + ddy * this.Width].StartIndex + CompactSpan.GetConnection(ref ds, Direction.North);
+                                int ddi = this.Cells[ddx + ddy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref ds, Direction.North);
                                 if (src[ddi] + 3 < src[i])
                                 {
                                     src[i] = src[ddi] + 3;
@@ -798,8 +798,8 @@ namespace Engine.PathFinding.NavMesh
                             //(0, 1)
                             int dx = x + Direction.North.GetHorizontalOffset();
                             int dy = y + Direction.North.GetVerticalOffset();
-                            int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, Direction.North);
-                            CompactSpan ds = this.Spans[di];
+                            int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, Direction.North);
+                            CompactHeightFieldSpan ds = this.Spans[di];
                             if (src[di] + 2 < src[i])
                             {
                                 src[i] = src[di] + 2;
@@ -810,7 +810,7 @@ namespace Engine.PathFinding.NavMesh
                             {
                                 int ddx = dx + Direction.West.GetHorizontalOffset();
                                 int ddy = dy + Direction.West.GetVerticalOffset();
-                                int ddi = this.Cells[ddx + ddy * this.Width].StartIndex + CompactSpan.GetConnection(ref ds, Direction.West);
+                                int ddi = this.Cells[ddx + ddy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref ds, Direction.West);
                                 if (src[ddi] + 3 < src[i])
                                 {
                                     src[i] = src[ddi] + 3;
@@ -842,10 +842,10 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = 0; x < this.Width; x++)
                 {
-                    CompactCell c = this.Cells[y * this.Width + x];
+                    CompactHeightFieldCell c = this.Cells[y * this.Width + x];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
-                        CompactSpan s = this.Spans[i];
+                        CompactHeightFieldSpan s = this.Spans[i];
                         int cellDist = buffer[i];
 
                         //if the distance is below the threshold, skip the span.
@@ -862,17 +862,17 @@ namespace Engine.PathFinding.NavMesh
                             {
                                 int dx = x + dir.GetHorizontalOffset();
                                 int dy = y + dir.GetVerticalOffset();
-                                int di = this.Cells[dy * this.Width + dx].StartIndex + CompactSpan.GetConnection(ref s, dir);
+                                int di = this.Cells[dy * this.Width + dx].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
 
                                 d += buffer[di];
 
-                                CompactSpan ds = this.Spans[di];
+                                CompactHeightFieldSpan ds = this.Spans[di];
                                 Direction dir2 = dir.NextClockwise();
                                 if (ds.IsConnected(dir2))
                                 {
                                     int dx2 = dx + dir2.GetHorizontalOffset();
                                     int dy2 = dy + dir2.GetVerticalOffset();
-                                    int di2 = this.Cells[dy2 * this.Width + dx2].StartIndex + CompactSpan.GetConnection(ref ds, dir2);
+                                    int di2 = this.Cells[dy2 * this.Width + dx2].StartIndex + CompactHeightFieldSpan.GetConnection(ref ds, dir2);
 
                                     d += buffer[di2];
                                 }
@@ -904,7 +904,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="stack">A stack of span references that are being expanded.</param>
         /// <param name="regionBuffer">A buffer to store region IDs. Must be at least the same size as <c>regions</c>.</param>
         /// <param name="distanceBuffer">A buffer to store flood distances. Must be at least the same size as <c>floodDistances</c>.</param>
-        private void ExpandRegions(RegionId[] regions, int[] floodDistances, int maxIterations, int level, List<CompactSpanReference> stack = null, RegionId[] regionBuffer = null, int[] distanceBuffer = null)
+        private void ExpandRegions(RegionId[] regions, int[] floodDistances, int maxIterations, int level, List<CompactHeightFieldSpanReference> stack = null, RegionId[] regionBuffer = null, int[] distanceBuffer = null)
         {
             //generate buffers if they're not passed in or if they're too small.
             if (regionBuffer == null || regionBuffer.Length < regions.Length)
@@ -924,19 +924,19 @@ namespace Engine.PathFinding.NavMesh
             //find cells that are being expanded to.
             if (stack == null)
             {
-                stack = new List<CompactSpanReference>();
+                stack = new List<CompactHeightFieldSpanReference>();
                 for (int y = 0; y < this.Length; y++)
                 {
                     for (int x = 0; x < this.Width; x++)
                     {
-                        CompactCell c = this.Cells[x + y * this.Width];
+                        CompactHeightFieldCell c = this.Cells[x + y * this.Width];
                         for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                         {
                             //a cell is being expanded to if it's distance is greater than the current level,
                             //but no region has been asigned yet. It must also not be in a null area.
                             if (this.Distances[i] >= level && regions[i] == 0 && this.Areas[i].IsWalkable)
                             {
-                                stack.Add(new CompactSpanReference(x, y, i));
+                                stack.Add(new CompactHeightFieldSpanReference(x, y, i));
                             }
                         }
                     }
@@ -948,7 +948,7 @@ namespace Engine.PathFinding.NavMesh
                 {
                     if (regions[stack[j].Index] != 0)
                     {
-                        stack[j] = CompactSpanReference.Null;
+                        stack[j] = CompactHeightFieldSpanReference.Null;
                     }
                 }
             }
@@ -965,7 +965,7 @@ namespace Engine.PathFinding.NavMesh
 
                 for (int j = 0; j < stack.Count; j++)
                 {
-                    CompactSpanReference spanRef = stack[j];
+                    CompactHeightFieldSpanReference spanRef = stack[j];
                     int x = spanRef.X;
                     int y = spanRef.Y;
                     int i = spanRef.Index;
@@ -979,7 +979,7 @@ namespace Engine.PathFinding.NavMesh
 
                     RegionId r = regions[i];
                     Area area = this.Areas[i];
-                    CompactSpan s = this.Spans[i];
+                    CompactHeightFieldSpan s = this.Spans[i];
 
                     //search direct neighbors for the one with the smallest distance value
                     int minDist = int.MaxValue;
@@ -992,7 +992,7 @@ namespace Engine.PathFinding.NavMesh
 
                         int dx = x + dir.GetHorizontalOffset();
                         int dy = y + dir.GetVerticalOffset();
-                        int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, dir);
+                        int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
 
                         if (this.Areas[di] != area)
                         {
@@ -1020,7 +1020,7 @@ namespace Engine.PathFinding.NavMesh
                         distanceBuffer[i] = minDist;
 
                         //mark this item in the stack as assigned for the next iteration.
-                        stack[j] = CompactSpanReference.Null;
+                        stack[j] = CompactHeightFieldSpanReference.Null;
                     }
                     else
                     {
@@ -1060,11 +1060,11 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="level">current level</param>
         /// <param name="start">A reference to the starting span.</param>
         /// <returns>Always true.</returns>
-        private bool FloodRegion(RegionId[] regions, int[] floodDistances, int regionIndex, int level, ref CompactSpanReference start)
+        private bool FloodRegion(RegionId[] regions, int[] floodDistances, int regionIndex, int level, ref CompactHeightFieldSpanReference start)
         {
             //TODO this method should always return true, make it not return a bool?
             //flood fill mark region
-            Stack<CompactSpanReference> stack = new Stack<CompactSpanReference>();
+            Stack<CompactHeightFieldSpanReference> stack = new Stack<CompactHeightFieldSpanReference>();
             stack.Push(start);
 
             Area area = this.Areas[start.Index];
@@ -1076,8 +1076,8 @@ namespace Engine.PathFinding.NavMesh
 
             while (stack.Count > 0)
             {
-                CompactSpanReference cell = stack.Pop();
-                CompactSpan cs = this.Spans[cell.Index];
+                CompactHeightFieldSpanReference cell = stack.Pop();
+                CompactHeightFieldSpan cs = this.Spans[cell.Index];
 
                 //check if any of the neighbors already have a valid reigon set
                 RegionId ar = RegionId.Null;
@@ -1088,7 +1088,7 @@ namespace Engine.PathFinding.NavMesh
                     {
                         int dx = cell.X + dir.GetHorizontalOffset();
                         int dy = cell.Y + dir.GetVerticalOffset();
-                        int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref cs, dir);
+                        int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref cs, dir);
 
                         if (this.Areas[di] != area)
                         {
@@ -1109,13 +1109,13 @@ namespace Engine.PathFinding.NavMesh
                             break;
                         }
 
-                        CompactSpan ds = this.Spans[di];
+                        CompactHeightFieldSpan ds = this.Spans[di];
                         Direction dir2 = dir.NextClockwise();
                         if (ds.IsConnected(dir2))
                         {
                             int dx2 = dx + dir2.GetHorizontalOffset();
                             int dy2 = dy + dir2.GetVerticalOffset();
-                            int di2 = this.Cells[dx2 + dy2 * this.Width].StartIndex + CompactSpan.GetConnection(ref ds, dir2);
+                            int di2 = this.Cells[dx2 + dy2 * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref ds, dir2);
 
                             if (this.Areas[di2] != area)
                             {
@@ -1147,7 +1147,7 @@ namespace Engine.PathFinding.NavMesh
                     {
                         int dx = cell.X + dir.GetHorizontalOffset();
                         int dy = cell.Y + dir.GetVerticalOffset();
-                        int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref cs, dir);
+                        int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref cs, dir);
 
                         if (this.Areas[di] != area)
                         {
@@ -1158,7 +1158,7 @@ namespace Engine.PathFinding.NavMesh
                         {
                             regions[di] = new RegionId(regionIndex);
                             floodDistances[di] = 0;
-                            stack.Push(new CompactSpanReference(dx, dy, di));
+                            stack.Push(new CompactHeightFieldSpanReference(dx, dy, di));
                         }
                     }
                 }
@@ -1174,16 +1174,16 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="spanRef">A reference to the span connected to the edge.</param>
         /// <param name="dir">The direction of the edge.</param>
         /// <returns>A value indicating whether the described edge is solid.</returns>
-        private bool IsSolidEdge(RegionId[] regions, ref CompactSpanReference spanRef, Direction dir)
+        private bool IsSolidEdge(RegionId[] regions, ref CompactHeightFieldSpanReference spanRef, Direction dir)
         {
-            CompactSpan s = this.Spans[spanRef.Index];
+            CompactHeightFieldSpan s = this.Spans[spanRef.Index];
             RegionId r = RegionId.Null;
 
             if (s.IsConnected(dir))
             {
                 int dx = spanRef.X + dir.GetHorizontalOffset();
                 int dy = spanRef.Y + dir.GetVerticalOffset();
-                int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, dir);
+                int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
                 r = regions[di];
             }
 
@@ -1201,19 +1201,19 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="spanRef">The span to start walking from.</param>
         /// <param name="dir">The direction to start walking in.</param>
         /// <param name="cont">A collection of regions to append to.</param>
-        private void WalkContour(RegionId[] regions, CompactSpanReference spanRef, Direction dir, List<RegionId> cont)
+        private void WalkContour(RegionId[] regions, CompactHeightFieldSpanReference spanRef, Direction dir, List<RegionId> cont)
         {
             Direction startDir = dir;
             int starti = spanRef.Index;
 
-            CompactSpan ss = this.Spans[starti];
+            CompactHeightFieldSpan ss = this.Spans[starti];
             RegionId curReg = RegionId.Null;
 
             if (ss.IsConnected(dir))
             {
                 int dx = spanRef.X + dir.GetHorizontalOffset();
                 int dy = spanRef.Y + dir.GetVerticalOffset();
-                int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref ss, dir);
+                int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref ss, dir);
                 curReg = regions[di];
             }
 
@@ -1222,7 +1222,7 @@ namespace Engine.PathFinding.NavMesh
             int iter = 0;
             while (++iter < 40000)
             {
-                CompactSpan s = this.Spans[spanRef.Index];
+                CompactHeightFieldSpan s = this.Spans[spanRef.Index];
 
                 if (IsSolidEdge(regions, ref spanRef, dir))
                 {
@@ -1232,7 +1232,7 @@ namespace Engine.PathFinding.NavMesh
                     {
                         int dx = spanRef.X + dir.GetHorizontalOffset();
                         int dy = spanRef.Y + dir.GetVerticalOffset();
-                        int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, dir);
+                        int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
                         r = regions[di];
                     }
 
@@ -1252,8 +1252,8 @@ namespace Engine.PathFinding.NavMesh
 
                     if (s.IsConnected(dir))
                     {
-                        CompactCell dc = this.Cells[dx + dy * this.Width];
-                        di = dc.StartIndex + CompactSpan.GetConnection(ref s, dir);
+                        CompactHeightFieldCell dc = this.Cells[dx + dy * this.Width];
+                        di = dc.StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
                     }
 
                     if (di == -1)
@@ -1262,7 +1262,7 @@ namespace Engine.PathFinding.NavMesh
                         return;
                     }
 
-                    spanRef = new CompactSpanReference(dx, dy, di);
+                    spanRef = new CompactHeightFieldSpanReference(dx, dy, di);
                     dir = dir.NextCounterClockwise(); //rotate counterclockwise
                 }
 
@@ -1307,7 +1307,7 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = left; x < right; x++)
                 {
-                    CompactCell c = this.Cells[x + y * this.Width];
+                    CompactHeightFieldCell c = this.Cells[x + y * this.Width];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
                         if (this.Areas[i].IsWalkable)
@@ -1326,7 +1326,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="startlevel">Starting level</param>
         /// <param name="numStacks">The number of layers</param>
         /// <param name="logLevelsPerStack">log base 2 of stack levels</param>
-        private void SortCellsByLevel(RegionId[] regions, List<CompactSpanReference>[] stacks, int startlevel, int numStacks, int logLevelsPerStack)
+        private void SortCellsByLevel(RegionId[] regions, List<CompactHeightFieldSpanReference>[] stacks, int startlevel, int numStacks, int logLevelsPerStack)
         {
             startlevel = startlevel >> logLevelsPerStack;
             for (int j = 0; j < numStacks; j++)
@@ -1338,7 +1338,7 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = 0; x < this.Width; x++)
                 {
-                    CompactCell c = this.Cells[y * this.Width + x];
+                    CompactHeightFieldCell c = this.Cells[y * this.Width + x];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
                         if (!this.Areas[i].IsWalkable || !regions[i].IsNull)
@@ -1358,7 +1358,7 @@ namespace Engine.PathFinding.NavMesh
                             sId = 0;
                         }
 
-                        stacks[sId].Add(new CompactSpanReference(x, y, i));
+                        stacks[sId].Add(new CompactHeightFieldSpanReference(x, y, i));
                     }
                 }
             }
@@ -1398,10 +1398,10 @@ namespace Engine.PathFinding.NavMesh
                 for (int x = 0; x < this.Width; x++)
                 {
                     //loop through all the spans in the cell
-                    CompactCell c = this.Cells[x + z * this.Width];
+                    CompactHeightFieldCell c = this.Cells[x + z * this.Width];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
-                        CompactSpan s = this.Spans[i];
+                        CompactHeightFieldSpan s = this.Spans[i];
 
                         //set the flag to 0 if the region is a border region or null.
                         if (s.Region.IsNull || RegionId.HasFlags(s.Region, RegionFlags.Border))
@@ -1419,7 +1419,7 @@ namespace Engine.PathFinding.NavMesh
                             {
                                 int dx = x + dir.GetHorizontalOffset();
                                 int dz = z + dir.GetVerticalOffset();
-                                int di = this.Cells[dx + dz * this.Width].StartIndex + CompactSpan.GetConnection(ref s, dir);
+                                int di = this.Cells[dx + dz * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
                                 r = this.Spans[di].Region;
                             }
 
@@ -1438,14 +1438,14 @@ namespace Engine.PathFinding.NavMesh
                 }
             }
 
-            var verts = new List<ContourVertex>();
-            var simplified = new List<ContourVertex>();
+            var verts = new List<ContourVertexi>();
+            var simplified = new List<ContourVertexi>();
 
             for (int z = 0; z < this.Length; z++)
             {
                 for (int x = 0; x < this.Width; x++)
                 {
-                    CompactCell c = this.Cells[x + z * this.Width];
+                    CompactHeightFieldCell c = this.Cells[x + z * this.Width];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
                         //flags is either 0000 or 1111
@@ -1457,7 +1457,7 @@ namespace Engine.PathFinding.NavMesh
                             continue;
                         }
 
-                        var spanRef = new CompactSpanReference(x, z, i);
+                        var spanRef = new CompactHeightFieldSpanReference(x, z, i);
                         RegionId reg = this[spanRef].Region;
                         if (reg.IsNull || RegionId.HasFlags(reg, RegionFlags.Border))
                         {
@@ -1526,7 +1526,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="spanReference">A referecne to the span to start walking from.</param>
         /// <param name="flags">An array of flags determinining </param>
         /// <param name="points">The vertices of a contour.</param>
-        private void WalkContour(CompactSpanReference spanReference, EdgeFlags[] flags, List<ContourVertex> points)
+        private void WalkContour(CompactHeightFieldSpanReference spanReference, EdgeFlags[] flags, List<ContourVertexi> points)
         {
             Direction dir = Direction.West;
 
@@ -1571,12 +1571,12 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     RegionId r = RegionId.Null;
-                    CompactSpan s = this[spanReference];
+                    CompactHeightFieldSpan s = this[spanReference];
                     if (s.IsConnected(dir))
                     {
                         int dx = spanReference.X + dir.GetHorizontalOffset();
                         int dy = spanReference.Y + dir.GetVerticalOffset();
-                        int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, dir);
+                        int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
                         r = this.Spans[di].Region;
                         if (area != this.Areas[di])
                         {
@@ -1596,7 +1596,7 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     //save the point
-                    points.Add(new ContourVertex(px, py, pz, r));
+                    points.Add(new ContourVertexi(px, py, pz, r));
 
                     EdgeFlagsHelper.RemoveEdge(ref flags[spanReference.Index], dir);	// remove visited edges
                     dir = dir.NextClockwise();			// rotate clockwise
@@ -1608,11 +1608,11 @@ namespace Engine.PathFinding.NavMesh
                     int dx = spanReference.X + dir.GetHorizontalOffset();
                     int dy = spanReference.Y + dir.GetVerticalOffset();
 
-                    CompactSpan s = this[spanReference];
+                    CompactHeightFieldSpan s = this[spanReference];
                     if (s.IsConnected(dir))
                     {
-                        CompactCell dc = this.Cells[dx + dy * this.Width];
-                        di = dc.StartIndex + CompactSpan.GetConnection(ref s, dir);
+                        CompactHeightFieldCell dc = this.Cells[dx + dy * this.Width];
+                        di = dc.StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
                     }
 
                     if (di == -1)
@@ -1622,7 +1622,7 @@ namespace Engine.PathFinding.NavMesh
                         throw new InvalidOperationException("Something went wrong");
                     }
 
-                    spanReference = new CompactSpanReference(dx, dy, di);
+                    spanReference = new CompactHeightFieldSpanReference(dx, dy, di);
                     dir = dir.NextCounterClockwise(); // rotate counterclockwise
                 }
 
@@ -1639,11 +1639,11 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="dir">The direction to get the corner height from.</param>
         /// <param name="isBorderVertex">Determine whether the vertex is a border or not.</param>
         /// <returns>The corner height.</returns>
-        private int GetCornerHeight(CompactSpanReference sr, Direction dir, out bool isBorderVertex)
+        private int GetCornerHeight(CompactHeightFieldSpanReference sr, Direction dir, out bool isBorderVertex)
         {
             isBorderVertex = false;
 
-            CompactSpan s = this[sr];
+            CompactHeightFieldSpan s = this[sr];
             int cornerHeight = s.Minimum;
             Direction dirp = dir.NextClockwise(); //new clockwise direction
 
@@ -1659,8 +1659,8 @@ namespace Engine.PathFinding.NavMesh
                 //get neighbor span
                 int dx = sr.X + dir.GetHorizontalOffset();
                 int dy = sr.Y + dir.GetVerticalOffset();
-                int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, dir);
-                CompactSpan ds = this.Spans[di];
+                int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
+                CompactHeightFieldSpan ds = this.Spans[di];
 
                 cornerHeight = Math.Max(cornerHeight, ds.Minimum);
                 cornerRegs[1] = this.Spans[di].Region;
@@ -1671,8 +1671,8 @@ namespace Engine.PathFinding.NavMesh
                 {
                     int dx2 = dx + dirp.GetHorizontalOffset();
                     int dy2 = dy + dirp.GetVerticalOffset();
-                    int di2 = this.Cells[dx2 + dy2 * this.Width].StartIndex + CompactSpan.GetConnection(ref ds, dirp);
-                    CompactSpan ds2 = this.Spans[di2];
+                    int di2 = this.Cells[dx2 + dy2 * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref ds, dirp);
+                    CompactHeightFieldSpan ds2 = this.Spans[di2];
 
                     cornerHeight = Math.Max(cornerHeight, ds2.Minimum);
                     cornerRegs[2] = ds2.Region;
@@ -1685,8 +1685,8 @@ namespace Engine.PathFinding.NavMesh
             {
                 int dx = sr.X + dirp.GetHorizontalOffset();
                 int dy = sr.Y + dirp.GetVerticalOffset();
-                int di = this.Cells[dx + dy * this.Width].StartIndex + CompactSpan.GetConnection(ref s, dirp);
-                CompactSpan ds = this.Spans[di];
+                int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dirp);
+                CompactHeightFieldSpan ds = this.Spans[di];
 
                 cornerHeight = Math.Max(cornerHeight, ds.Minimum);
                 cornerRegs[3] = ds.Region;
@@ -1697,8 +1697,8 @@ namespace Engine.PathFinding.NavMesh
                 {
                     int dx2 = dx + dir.GetHorizontalOffset();
                     int dy2 = dy + dir.GetVerticalOffset();
-                    int di2 = this.Cells[dx2 + dy2 * this.Width].StartIndex + CompactSpan.GetConnection(ref ds, dir);
-                    CompactSpan ds2 = this.Spans[di2];
+                    int di2 = this.Cells[dx2 + dy2 * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref ds, dir);
+                    CompactHeightFieldSpan ds2 = this.Spans[di2];
 
                     cornerHeight = Math.Max(cornerHeight, ds2.Minimum);
                     cornerRegs[2] = ds2.Region;
@@ -1733,5 +1733,84 @@ namespace Engine.PathFinding.NavMesh
 
             return cornerHeight;
         }
+
+        #region Helper classes
+
+        /// <summary>
+        /// An enum similar to <see cref="Direction"/>, but with the ability to store multiple directions.
+        /// </summary>
+        [Flags]
+        private enum EdgeFlags : byte
+        {
+            /// <summary>
+            /// No edges are selected.
+            /// </summary>
+            None = 0x0,
+            /// <summary>
+            /// The west edge is selected.
+            /// </summary>
+            West = 0x1,
+            /// <summary>
+            /// The north edge is selected.
+            /// </summary>
+            North = 0x2,
+            /// <summary>
+            /// The east edge is selected.
+            /// </summary>
+            East = 0x4,
+            /// <summary>
+            /// The south edge is selected.
+            /// </summary>
+            South = 0x8,
+            /// <summary>
+            /// All of the edges are selected.
+            /// </summary>
+            All = West | North | East | South
+        }
+
+        /// <summary>
+        /// A static class with helper functions to modify instances of the <see cref="EdgeFlags"/> enum.
+        /// </summary>
+        private static class EdgeFlagsHelper
+        {
+            /// <summary>
+            /// Adds an edge in a specified direction to an instance of <see cref="EdgeFlags"/>.
+            /// </summary>
+            /// <param name="edges">An existing set of edges.</param>
+            /// <param name="dir">The direction to add.</param>
+            public static void AddEdge(ref EdgeFlags edges, Direction dir)
+            {
+                edges |= (EdgeFlags)(1 << (int)dir);
+            }
+            /// <summary>
+            /// Flips the set of edges in an instance of <see cref="EdgeFlags"/>.
+            /// </summary>
+            /// <param name="edges">An existing set of edges.</param>
+            public static void FlipEdges(ref EdgeFlags edges)
+            {
+                edges ^= EdgeFlags.All;
+            }
+            /// <summary>
+            /// Determines whether an instance of <see cref="EdgeFlags"/> includes an edge in a specified direction.
+            /// </summary>
+            /// <param name="edges">A set of edges.</param>
+            /// <param name="dir">The direction to check for an edge.</param>
+            /// <returns>A value indicating whether the set of edges contains an edge in the specified direction.</returns>
+            public static bool IsConnected(ref EdgeFlags edges, Direction dir)
+            {
+                return (edges & (EdgeFlags)(1 << (int)dir)) != EdgeFlags.None;
+            }
+            /// <summary>
+            /// Removes an edge from an instance of <see cref="EdgeFlags"/>.
+            /// </summary>
+            /// <param name="edges">A set of edges.</param>
+            /// <param name="dir">The direction to remove.</param>
+            public static void RemoveEdge(ref EdgeFlags edges, Direction dir)
+            {
+                edges &= (EdgeFlags)(~(1 << (int)dir));
+            }
+        }
+
+        #endregion
     }
 }

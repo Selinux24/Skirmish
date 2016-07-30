@@ -4,18 +4,18 @@ using System.Runtime.InteropServices;
 namespace Engine.PathFinding.NavMesh
 {
     /// <summary>
-    /// A reference to a <see cref="CompactSpan"/> in a <see cref="CompactHeightfield"/>.
+    /// A reference to a <see cref="CompactHeightFieldSpan"/> in a <see cref="CompactHeightField"/>.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct CompactSpanReference : IEquatable<CompactSpanReference>
+    public struct CompactHeightFieldSpanReference : IEquatable<CompactHeightFieldSpanReference>
     {
         /// <summary>
         /// A "null" reference is one with a negative index.
         /// </summary>
-        public static readonly CompactSpanReference Null = new CompactSpanReference(0, 0, -1);
+        public static readonly CompactHeightFieldSpanReference Null = new CompactHeightFieldSpanReference(0, 0, -1);
 
         /// <summary>
-        /// Compares two instances of <see cref="CompactSpanReference"/> for equality.
+        /// Compares two instances of <see cref="CompactHeightFieldSpanReference"/> for equality.
         /// </summary>
         /// <remarks>
         /// If both references have a negative <see cref="Index"/>, they are considered equal, as both would be considered "null".
@@ -23,7 +23,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="left">A reference.</param>
         /// <param name="right">Another reference.</param>
         /// <returns>A value indicating whether the two references are equal.</returns>
-        public static bool operator ==(CompactSpanReference left, CompactSpanReference right)
+        public static bool operator ==(CompactHeightFieldSpanReference left, CompactHeightFieldSpanReference right)
         {
             //A negative index is considered null.
             //these two cases quickly compare null references.
@@ -40,7 +40,7 @@ namespace Engine.PathFinding.NavMesh
             return false;
         }
         /// <summary>
-        /// Compare two instances of <see cref="CompactSpanReference"/> for inequality.
+        /// Compare two instances of <see cref="CompactHeightFieldSpanReference"/> for inequality.
         /// </summary>
         /// <remarks>
         /// If both references have a negative <see cref="Index"/>, they are considered equal, as both would be considered "null".
@@ -48,7 +48,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="left">A reference.</param>
         /// <param name="right">Another reference.</param>
         /// <returns>A value indicating whether the two references are not equal.</returns>
-        public static bool operator !=(CompactSpanReference left, CompactSpanReference right)
+        public static bool operator !=(CompactHeightFieldSpanReference left, CompactHeightFieldSpanReference right)
         {
             return !(left == right);
         }
@@ -67,12 +67,12 @@ namespace Engine.PathFinding.NavMesh
         public readonly int Index;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompactSpanReference"/> struct.
+        /// Initializes a new instance of the <see cref="CompactHeightFieldSpanReference"/> struct.
         /// </summary>
         /// <param name="x">The X coordinate.</param>
         /// <param name="y">The Y coordinate.</param>
         /// <param name="i">The index of the span in the spans array.</param>
-        public CompactSpanReference(int x, int y, int i)
+        public CompactHeightFieldSpanReference(int x, int y, int i)
         {
             this.X = x;
             this.Y = y;
@@ -80,11 +80,11 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Compares this instance to another instance of <see cref="CompactSpanReference"/> for equality.
+        /// Compares this instance to another instance of <see cref="CompactHeightFieldSpanReference"/> for equality.
         /// </summary>
-        /// <param name="other">Another instance of <see cref="CompactSpanReference"/>.</param>
+        /// <param name="other">Another instance of <see cref="CompactHeightFieldSpanReference"/>.</param>
         /// <returns>A value indicating whether this instance and another instance are equal.</returns>
-        public bool Equals(CompactSpanReference other)
+        public bool Equals(CompactHeightFieldSpanReference other)
         {
             return this == other;
         }
@@ -95,7 +95,7 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public override bool Equals(object obj)
         {
-            CompactSpanReference? r = obj as CompactSpanReference?;
+            CompactHeightFieldSpanReference? r = obj as CompactHeightFieldSpanReference?;
             if (r.HasValue)
                 return this == r.Value;
             return false;

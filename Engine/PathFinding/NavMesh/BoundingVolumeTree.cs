@@ -6,16 +6,16 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A tree of bounding volumes.
     /// </summary>
-    public class BVTree
+    public class BoundingVolumeTree
     {
-        private static readonly BVNode.CompareX XComparer = new BVNode.CompareX();
-        private static readonly BVNode.CompareY YComparer = new BVNode.CompareY();
-        private static readonly BVNode.CompareZ ZComparer = new BVNode.CompareZ();
+        private static readonly BoundingVolumeTreeNode.CompareX XComparer = new BoundingVolumeTreeNode.CompareX();
+        private static readonly BoundingVolumeTreeNode.CompareY YComparer = new BoundingVolumeTreeNode.CompareY();
+        private static readonly BoundingVolumeTreeNode.CompareZ ZComparer = new BoundingVolumeTreeNode.CompareZ();
 
         /// <summary>
         /// Nodes in the tree
         /// </summary>
-        private BVNode[] nodes;
+        private BoundingVolumeTreeNode[] nodes;
         /// <summary>
         /// Gets the number of nodes in the tree.
         /// </summary>
@@ -31,7 +31,7 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="index">The index.</param>
         /// <returns>The node at the index.</returns>
-        public BVNode this[int index]
+        public BoundingVolumeTreeNode this[int index]
         {
             get
             {
@@ -46,13 +46,13 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="minIndex">The first bounding box in the list to get the extends of.</param>
         /// <param name="maxIndex">The last bounding box in the list to get the extends of.</param>
         /// <param name="bounds">The extends of all the bounding boxes.</param>
-        private static void CalcExtends(List<BVNode> items, int minIndex, int maxIndex, out BoundingBoxi bounds)
+        private static void CalcExtends(List<BoundingVolumeTreeNode> items, int minIndex, int maxIndex, out BoundingBoxi bounds)
         {
             bounds = items[minIndex].Bounds;
 
             for (int i = minIndex + 1; i < maxIndex; i++)
             {
-                BVNode it = items[i];
+                BoundingVolumeTreeNode it = items[i];
                 Vertexi.ComponentMin(ref it.Bounds.Min, ref bounds.Min, out bounds.Min);
                 Vertexi.ComponentMax(ref it.Bounds.Max, ref bounds.Max, out bounds.Max);
             }
@@ -76,29 +76,32 @@ namespace Engine.PathFinding.NavMesh
             }
 
             if (z > max)
+            {
                 axis = 2;
+            }
 
             return axis;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BVTree"/> class.
+        /// Initializes a new instance of the <see cref="BoundingVolumeTree"/> class.
         /// </summary>
         /// <param name="verts">A set of vertices.</param>
         /// <param name="polys">A set of polygons composed of the vertices in <c>verts</c>.</param>
         /// <param name="nvp">The maximum number of vertices per polygon.</param>
         /// <param name="cellSize">The size of a cell.</param>
         /// <param name="cellHeight">The height of a cell.</param>
-        public BVTree(Vertexi[] verts, PolyMesh.Polygon[] polys, int nvp, float cellSize, float cellHeight)
+        public BoundingVolumeTree(Vertexi[] verts, PolyMesh.Polygon[] polys, int nvp, float cellSize, float cellHeight)
         {
-            nodes = new BVNode[polys.Length * 2];
-            var items = new List<BVNode>();
+            this.nodes = new BoundingVolumeTreeNode[polys.Length * 2];
+
+            var items = new List<BoundingVolumeTreeNode>();
 
             for (int i = 0; i < polys.Length; i++)
             {
                 PolyMesh.Polygon p = polys[i];
 
-                BVNode temp;
+                BoundingVolumeTreeNode temp;
                 temp.Index = i;
                 temp.Bounds.Min = temp.Bounds.Max = verts[p.Vertices[0]];
 
@@ -106,7 +109,9 @@ namespace Engine.PathFinding.NavMesh
                 {
                     int vi = p.Vertices[j];
                     if (vi == PolyMesh.NullId)
+                    {
                         break;
+                    }
 
                     var v = verts[vi];
                     Vertexi.ComponentMin(ref temp.Bounds.Min, ref v, out temp.Bounds.Min);
@@ -119,7 +124,7 @@ namespace Engine.PathFinding.NavMesh
                 items.Add(temp);
             }
 
-            Subdivide(items, 0, items.Count, 0);
+            this.Subdivide(items, 0, items.Count, 0);
         }
 
         /// <summary>
@@ -130,7 +135,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="maxIndex">The last index to consier (recursively).</param>
         /// <param name="curNode">The current node to look at.</param>
         /// <returns>The current node at the end of each method.</returns>
-        private int Subdivide(List<BVNode> items, int minIndex, int maxIndex, int curNode)
+        private int Subdivide(List<BoundingVolumeTreeNode> items, int minIndex, int maxIndex, int curNode)
         {
             int numIndex = maxIndex - minIndex;
             int curIndex = curNode;
@@ -140,12 +145,14 @@ namespace Engine.PathFinding.NavMesh
 
             //Check if the current node is a leaf node
             if (numIndex == 1)
-                nodes[oldNode] = items[minIndex];
+            {
+                this.nodes[oldNode] = items[minIndex];
+            }
             else
             {
                 BoundingBoxi bounds;
                 CalcExtends(items, minIndex, maxIndex, out bounds);
-                nodes[oldNode].Bounds = bounds;
+                this.nodes[oldNode].Bounds = bounds;
 
                 int axis = LongestAxis((int)(bounds.Max.X - bounds.Min.X), (int)(bounds.Max.Y - bounds.Min.Y), (int)(bounds.Max.Z - bounds.Min.Z));
 
@@ -166,14 +173,15 @@ namespace Engine.PathFinding.NavMesh
 
                 int splitIndex = minIndex + (numIndex / 2);
 
-                curNode = Subdivide(items, minIndex, splitIndex, curNode);
-                curNode = Subdivide(items, splitIndex, maxIndex, curNode);
+                curNode = this.Subdivide(items, minIndex, splitIndex, curNode);
+                curNode = this.Subdivide(items, splitIndex, maxIndex, curNode);
 
                 int escapeIndex = curNode - curIndex;
-                nodes[oldNode].Index = -escapeIndex;
+                this.nodes[oldNode].Index = -escapeIndex;
             }
 
             return curNode;
         }
     }
 }
+

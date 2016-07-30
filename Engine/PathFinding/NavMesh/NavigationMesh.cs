@@ -14,7 +14,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// 
         /// </summary>
-        protected TiledNavMesh TiledNavigationMesh = null;
+        protected TiledNavigationMesh TiledNavigationMesh = null;
         /// <summary>
         /// 
         /// </summary>
@@ -59,13 +59,13 @@ namespace Engine.PathFinding.NavMesh
             BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetCorners());
             Array.ForEach(triangles, tri => bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(tri.GetCorners())));
 
-            var fh = new Heightfield(bbox, settings.CellSize, settings.CellHeight);
+            var fh = new HeightField(bbox, settings.CellSize, settings.CellHeight);
             fh.RasterizeTriangles(triangles, Area.Default);
             fh.FilterLedgeSpans(settings.VoxelAgentHeight, settings.VoxelMaxClimb);
             fh.FilterLowHangingWalkableObstacles(settings.VoxelMaxClimb);
             fh.FilterWalkableLowHeightSpans(settings.VoxelAgentHeight);
 
-            var ch = new CompactHeightfield(fh, settings.VoxelAgentHeight, settings.VoxelMaxClimb);
+            var ch = new CompactHeightField(fh, settings.VoxelAgentHeight, settings.VoxelMaxClimb);
             ch.Erode(settings.VoxelAgentRadius);
             ch.BuildDistanceField();
             ch.BuildRegions(0, settings.MinRegionSize, settings.MergedRegionSize);
@@ -89,7 +89,7 @@ namespace Engine.PathFinding.NavMesh
                 settings.AgentRadius);
 
             var nm = new NavigationMesh();
-            nm.TiledNavigationMesh = new TiledNavMesh(builder);
+            nm.TiledNavigationMesh = new TiledNavigationMesh(builder);
             nm.Query = new NavigationMeshQuery(nm.TiledNavigationMesh, 2048);
             nm.Nodes = new NavigationMeshNode[pmd.MeshCount];
 
@@ -149,15 +149,15 @@ namespace Engine.PathFinding.NavMesh
                 {
                     //find location to steer towards
                     Vector3 steerPos = new Vector3();
-                    int steerPosFlag = 0;
+                    NavigationMeshQuery.StraightPathFlags steerPosFlag = 0;
                     int steerPosRef = 0;
                     if (!GetSteerTarget(this.Query, iterPos, targetPos, SLOP, polys, npolys, ref steerPos, ref steerPosFlag, ref steerPosRef))
                     {
                         break;
                     }
 
-                    bool endOfPath = (steerPosFlag & NavigationMeshQuery.STRAIGHTPATH_END) != 0 ? true : false;
-                    bool offMeshConnection = (steerPosFlag & NavigationMeshQuery.STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ? true : false;
+                    bool endOfPath = ((int)steerPosFlag & (int)NavigationMeshQuery.StraightPathFlags.End) != 0 ? true : false;
+                    bool offMeshConnection = ((int)steerPosFlag & (int)NavigationMeshQuery.StraightPathFlags.OffMeshConnection) != 0 ? true : false;
 
                     //find movement delta
                     Vector3 delta = steerPos - iterPos;
@@ -246,13 +246,13 @@ namespace Engine.PathFinding.NavMesh
             int[] path, 
             int pathSize,
             ref Vector3 steerPos, 
-            ref int steerPosFlag,
+            ref NavigationMeshQuery.StraightPathFlags steerPosFlag,
             ref int steerPosRef)
         {
             int MAX_STEER_POINTS = 3;
-            Vector3[] steerPath = new Vector3[MAX_STEER_POINTS];
-            int[] steerPathFlags = new int[MAX_STEER_POINTS];
-            int[] steerPathPolys = new int[MAX_STEER_POINTS];
+            var steerPath = new Vector3[MAX_STEER_POINTS];
+            var steerPathFlags = new NavigationMeshQuery.StraightPathFlags[MAX_STEER_POINTS];
+            var steerPathPolys = new int[MAX_STEER_POINTS];
             int nsteerPath = 0;
             navMeshQuery.FindStraightPath(
                 startPos, endPos, 
@@ -270,7 +270,7 @@ namespace Engine.PathFinding.NavMesh
             int ns = 0;
             while (ns < nsteerPath)
             {
-                if ((steerPathFlags[ns] & NavigationMeshQuery.STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
+                if (((int)steerPathFlags[ns] & (int)NavigationMeshQuery.StraightPathFlags.OffMeshConnection) != 0 ||
                     !InRange(steerPath[ns], startPos, minTargetDist, 1000.0f))
                 {
                     break;

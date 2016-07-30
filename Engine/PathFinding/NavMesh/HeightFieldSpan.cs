@@ -3,10 +3,10 @@
 namespace Engine.PathFinding.NavMesh
 {
     /// <summary>
-    /// A span is a range of integers which represents a range of voxels in a <see cref="Cell"/>.
+    /// A span is a range of integers which represents a range of voxels in a <see cref="HeightFieldCell"/>.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Span
+    public struct HeightFieldSpan
     {
         /// <summary>
         /// The lowest value in the span.
@@ -32,22 +32,22 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Span"/> struct.
+        /// Initializes a new instance of the <see cref="HeightFieldSpan"/> struct.
         /// </summary>
         /// <param name="min">The lowest value in the span.</param>
         /// <param name="max">The highest value in the span.</param>
-        public Span(int min, int max)
+        public HeightFieldSpan(int min, int max)
             : this(min, max, Area.Null)
         {
 
         }
         /// <summary>
-        /// Initializes a new instance of the <see cref="Span"/> struct.
+        /// Initializes a new instance of the <see cref="HeightFieldSpan"/> struct.
         /// </summary>
         /// <param name="min">The lowest value in the span.</param>
         /// <param name="max">The highest value in the span.</param>
         /// <param name="area">The area flags for the span.</param>
-        public Span(int min, int max, Area area)
+        public HeightFieldSpan(int min, int max, Area area)
         {
             this.Minimum = min;
             this.Maximum = max;

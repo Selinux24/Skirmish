@@ -36,8 +36,8 @@ namespace Engine.PathFinding.NavMesh
                     int vertB = j;
 
                     //vertB must be infront of vertA
-                    if (ContourVertex.IsLeft(ref a.Vertices[vertAPrev], ref a.Vertices[vertA], ref b.Vertices[vertB]) &&
-                        ContourVertex.IsLeft(ref a.Vertices[vertA], ref a.Vertices[vertANext], ref b.Vertices[vertB]))
+                    if (ContourVertexi.IsLeft(ref a.Vertices[vertAPrev], ref a.Vertices[vertA], ref b.Vertices[vertB]) &&
+                        ContourVertexi.IsLeft(ref a.Vertices[vertA], ref a.Vertices[vertANext], ref b.Vertices[vertB]))
                     {
                         int dx = b.Vertices[vertB].X - a.Vertices[vertA].X;
                         int dz = b.Vertices[vertB].Z - a.Vertices[vertA].Z;
@@ -60,7 +60,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="maxError">Maximum error allowed</param>
         /// <param name="maxEdgeLen">The maximum edge length allowed</param>
         /// <param name="buildFlags">Flags determines how to split the long edges</param>
-        public static void Simplify(List<ContourVertex> rawVerts, List<ContourVertex> simplified, float maxError, int maxEdgeLen, ContourBuildFlags buildFlags)
+        public static void Simplify(List<ContourVertexi> rawVerts, List<ContourVertexi> simplified, float maxError, int maxEdgeLen, ContourBuildFlags buildFlags)
         {
             bool tesselateWallEdges = (buildFlags & ContourBuildFlags.TessellateWallEdges) == ContourBuildFlags.TessellateWallEdges;
             bool tesselateAreaEdges = (buildFlags & ContourBuildFlags.TessellateAreaEdges) == ContourBuildFlags.TessellateAreaEdges;
@@ -87,7 +87,7 @@ namespace Engine.PathFinding.NavMesh
 
                     if (differentRegions || areaBorders)
                     {
-                        simplified.Add(new ContourVertex(rawVerts[i], i));
+                        simplified.Add(new ContourVertexi(rawVerts[i], i));
                     }
                 }
             }
@@ -131,8 +131,8 @@ namespace Engine.PathFinding.NavMesh
                 }
 
                 //save the points
-                simplified.Add(new ContourVertex(lowerLeftX, lowerLeftY, lowerLeftZ, lowerLeftI));
-                simplified.Add(new ContourVertex(upperRightX, upperRightY, upperRightZ, upperRightI));
+                simplified.Add(new ContourVertexi(lowerLeftX, lowerLeftY, lowerLeftZ, lowerLeftI));
+                simplified.Add(new ContourVertexi(upperRightX, upperRightY, upperRightZ, upperRightI));
             }
 
             //add points until all points are within error tolerance of simplified slope
@@ -189,7 +189,7 @@ namespace Engine.PathFinding.NavMesh
                 //If max deviation is larger than accepted error, add new point
                 if (maxi != -1 && maxDeviation > (maxError * maxError))
                 {
-                    simplified.Insert(i + 1, new ContourVertex(rawVerts[maxi], maxi));
+                    simplified.Insert(i + 1, new ContourVertexi(rawVerts[maxi], maxi));
                 }
                 else
                 {
@@ -259,7 +259,7 @@ namespace Engine.PathFinding.NavMesh
                     //add new point
                     if (maxi != -1)
                     {
-                        simplified.Insert(i + 1, new ContourVertex(rawVerts[maxi], maxi));
+                        simplified.Insert(i + 1, new ContourVertexi(rawVerts[maxi], maxi));
                     }
                     else
                     {
@@ -270,7 +270,7 @@ namespace Engine.PathFinding.NavMesh
 
             for (int i = 0; i < simplified.Count; i++)
             {
-                ContourVertex sv = simplified[i];
+                ContourVertexi sv = simplified[i];
 
                 //take edge vertex flag from current raw point and neighbor region from next raw point
                 int ai = ((int)sv.RegionId + 1) % numPoints;
@@ -286,7 +286,7 @@ namespace Engine.PathFinding.NavMesh
         /// Removes degenerate segments from a simplified contour.
         /// </summary>
         /// <param name="simplified">The simplified contour.</param>
-        public static void RemoveDegenerateSegments(List<ContourVertex> simplified)
+        public static void RemoveDegenerateSegments(List<ContourVertexi> simplified)
         {
             //remove adjacent vertices which are equal on the xz-plane
             for (int i = 0; i < simplified.Count; i++)
@@ -310,7 +310,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the simplified vertices of the contour.
         /// </summary>
-        public ContourVertex[] Vertices { get; private set; }
+        public ContourVertexi[] Vertices { get; private set; }
         /// <summary>
         /// Gets the area ID of the contour.
         /// </summary>
@@ -330,7 +330,7 @@ namespace Engine.PathFinding.NavMesh
                 int area = 0;
                 for (int i = 0, j = Vertices.Length - 1; i < Vertices.Length; j = i++)
                 {
-                    ContourVertex vi = Vertices[i], vj = Vertices[j];
+                    ContourVertexi vi = Vertices[i], vj = Vertices[j];
                     area += vi.X * vj.Z - vj.X * vi.Z;
                 }
 
@@ -360,7 +360,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="region">The region ID of the contour.</param>
         /// <param name="area">The area ID of the contour.</param>
         /// <param name="borderSize">The size of the border.</param>
-        public Contour(List<ContourVertex> verts, RegionId region, Area area, int borderSize)
+        public Contour(List<ContourVertexi> verts, RegionId region, Area area, int borderSize)
         {
             this.Vertices = verts.ToArray();
             this.RegionId = region;
@@ -390,7 +390,7 @@ namespace Engine.PathFinding.NavMesh
             GetClosestIndices(this, contour, out ia, out ib);
 
             //create a list with the capacity set to the max number of possible verts to avoid expanding the list.
-            var newVerts = new List<ContourVertex>(Vertices.Length + contour.Vertices.Length + 2);
+            var newVerts = new List<ContourVertexi>(Vertices.Length + contour.Vertices.Length + 2);
 
             //copy contour A
             for (int i = 0; i <= lengthA; i++)

@@ -4,10 +4,10 @@ using System.Runtime.InteropServices;
 namespace Engine.PathFinding.NavMesh
 {
     /// <summary>
-    /// Represents a voxel span in a <see cref="CompactHeightfield"/>.
+    /// Represents a voxel span in a <see cref="CompactHeightField"/>.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct CompactSpan
+    public struct CompactHeightFieldSpan
     {
         /// <summary>
         /// A constant that means there is no connection for the values <see cref="ConnectionWest"/>,
@@ -21,7 +21,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="left">The first CompactSpan</param>
         /// <param name="right">The second CompactSpan</param>
         /// <param name="min">The minimum of the overlapping ComapctSpans</param>
-        public static void OverlapMin(ref CompactSpan left, ref CompactSpan right, out int min)
+        public static void OverlapMin(ref CompactHeightFieldSpan left, ref CompactHeightFieldSpan right, out int min)
         {
             min = Math.Max(left.Minimum, right.Minimum);
         }
@@ -31,7 +31,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="left">The first CompactSpan</param>
         /// <param name="right">The second CompactSpan</param>
         /// <param name="max">The maximum of the overlapping CompactSpans</param>
-        public static void OverlapMax(ref CompactSpan left, ref CompactSpan right, out int max)
+        public static void OverlapMax(ref CompactHeightFieldSpan left, ref CompactHeightFieldSpan right, out int max)
         {
             if (left.Height == int.MaxValue)
             {
@@ -46,24 +46,24 @@ namespace Engine.PathFinding.NavMesh
                 max = Math.Min(left.Minimum + left.Height, right.Minimum + right.Height);
         }
         /// <summary>
-        /// Creates a <see cref="CompactSpan"/> from a minimum boundary and a maximum boundary.
+        /// Creates a <see cref="CompactHeightFieldSpan"/> from a minimum boundary and a maximum boundary.
         /// </summary>
         /// <param name="min">The minimum.</param>
         /// <param name="max">The maximum.</param>
-        /// <returns>A <see cref="CompactSpan"/>.</returns>
-        public static CompactSpan FromMinMax(int min, int max)
+        /// <returns>A <see cref="CompactHeightFieldSpan"/>.</returns>
+        public static CompactHeightFieldSpan FromMinMax(int min, int max)
         {
-            CompactSpan s;
+            CompactHeightFieldSpan s;
             FromMinMax(min, max, out s);
             return s;
         }
         /// <summary>
-        /// Creates a <see cref="CompactSpan"/> from a minimum boundary and a maximum boundary.
+        /// Creates a <see cref="CompactHeightFieldSpan"/> from a minimum boundary and a maximum boundary.
         /// </summary>
         /// <param name="min">The minimum.</param>
         /// <param name="max">The maximum.</param>
-        /// <param name="span">A <see cref="CompactSpan"/>.</param>
-        public static void FromMinMax(int min, int max, out CompactSpan span)
+        /// <param name="span">A <see cref="CompactHeightFieldSpan"/>.</param>
+        public static void FromMinMax(int min, int max, out CompactHeightFieldSpan span)
         {
             span.Minimum = min;
             span.Height = max - min;
@@ -78,8 +78,8 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="dir">The direction of the cell.</param>
         /// <param name="i">The index of the span in the neighboring cell.</param>
-        /// <param name="s">The <see cref="CompactSpan"/> to set the data for.</param>
-        public static void SetConnection(Direction dir, int i, ref CompactSpan s)
+        /// <param name="s">The <see cref="CompactHeightFieldSpan"/> to set the data for.</param>
+        public static void SetConnection(Direction dir, int i, ref CompactHeightFieldSpan s)
         {
             if (i >= NotConnected)
                 throw new ArgumentOutOfRangeException("Index of connecting span is too high to be stored. Try increasing cell height.", "i");
@@ -106,8 +106,8 @@ namespace Engine.PathFinding.NavMesh
         /// Un-sets connection data from a neighboring cell.
         /// </summary>
         /// <param name="dir">The direction of the cell.</param>
-        /// <param name="s">The <see cref="CompactSpan"/> to set the data for.</param>
-        public static void UnsetConnection(Direction dir, ref CompactSpan s)
+        /// <param name="s">The <see cref="CompactHeightFieldSpan"/> to set the data for.</param>
+        public static void UnsetConnection(Direction dir, ref CompactHeightFieldSpan s)
         {
             switch (dir)
             {
@@ -130,10 +130,10 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the connection data for a neighboring cell in a specified direction.
         /// </summary>
-        /// <param name="s">The <see cref="CompactSpan"/> to get the connection data from.</param>
+        /// <param name="s">The <see cref="CompactHeightFieldSpan"/> to get the connection data from.</param>
         /// <param name="dir">The direction.</param>
         /// <returns>The index of the span in the neighboring cell.</returns>
-        public static int GetConnection(ref CompactSpan s, Direction dir)
+        public static int GetConnection(ref CompactHeightFieldSpan s, Direction dir)
         {
             switch (dir)
             {
@@ -220,11 +220,11 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CompactSpan"/> struct.
+        /// Initializes a new instance of the <see cref="CompactHeightFieldSpan"/> struct.
         /// </summary>
         /// <param name="minimum">The span minimum.</param>
         /// <param name="height">The number of voxels the span contains.</param>
-        public CompactSpan(int minimum, int height)
+        public CompactHeightFieldSpan(int minimum, int height)
         {
             this.Minimum = minimum;
             this.Height = height;

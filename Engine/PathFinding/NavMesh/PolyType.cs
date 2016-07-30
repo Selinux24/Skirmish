@@ -6,7 +6,7 @@ namespace Engine.PathFinding.NavMesh
     /// Flags representing the type of a navmesh polygon.
     /// </summary>
     [Flags]
-    public enum PolygonType : byte
+    public enum PolyType : byte
     {
         /// <summary>
         /// A polygon that is part of the navmesh.

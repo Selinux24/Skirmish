@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 namespace Engine.PathFinding.NavMesh
 {
     /// <summary>
-    /// A Heightfield represents a "voxel" grid represented as a 2-dimensional grid of <see cref="Cell"/>s.
+    /// A Heightfield represents a "voxel" grid represented as a 2-dimensional grid of <see cref="HeightFieldCell"/>s.
     /// </summary>
-    public class Heightfield
+    public class HeightField
     {
-        private Cell[] cells;
+        private HeightFieldCell[] cells;
 
         /// <summary>
         /// Gets the number of cells in the X direction.
@@ -92,12 +92,12 @@ namespace Engine.PathFinding.NavMesh
             }
         }
         /// <summary>
-        /// Gets the <see cref="Cell"/> at the specified coordinate.
+        /// Gets the <see cref="HeightFieldCell"/> at the specified coordinate.
         /// </summary>
         /// <param name="x">The x coordinate.</param>
         /// <param name="y">The y coordinate.</param>
         /// <returns>The cell at [x, y].</returns>
-        public Cell this[int x, int y]
+        public HeightFieldCell this[int x, int y]
         {
             get
             {
@@ -105,11 +105,11 @@ namespace Engine.PathFinding.NavMesh
             }
         }
         /// <summary>
-        /// Gets the <see cref="Cell"/> at the specified index.
+        /// Gets the <see cref="HeightFieldCell"/> at the specified index.
         /// </summary>
         /// <param name="i">The index.</param>
         /// <returns>The cell at index i.</returns>
-        public Cell this[int i]
+        public HeightFieldCell this[int i]
         {
             get
             {
@@ -118,11 +118,11 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Gets the <see cref="Span"/> at the reference.
+        /// Gets the <see cref="HeightFieldSpan"/> at the reference.
         /// </summary>
         /// <param name="spanRef">A reference to a span.</param>
         /// <returns>The span at the reference.</returns>
-        public Span this[SpanReference spanRef]
+        public HeightFieldSpan this[HeightFieldSpanReference spanRef]
         {
             get
             {
@@ -131,12 +131,12 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Heightfield"/> class.
+        /// Initializes a new instance of the <see cref="HeightField"/> class.
         /// </summary>
         /// <param name="b">The world-space bounds.</param>
         /// <param name="cellSize">The world-space size of each cell in the XZ plane.</param>
         /// <param name="cellHeight">The world-space height of each cell.</param>
-        public Heightfield(BoundingBox b, float cellSize, float cellHeight)
+        public HeightField(BoundingBox b, float cellSize, float cellHeight)
         {
             this.CellSizeXZ = cellSize;
             this.CellHeight = cellHeight;
@@ -154,10 +154,10 @@ namespace Engine.PathFinding.NavMesh
             max.Z = min.Z + this.Length * cellSize;
             this.Bounds = new BoundingBox(min, max);
 
-            cells = new Cell[this.Width * this.Length];
+            cells = new HeightFieldCell[this.Width * this.Length];
             for (int i = 0; i < cells.Length; i++)
             {
-                cells[i] = new Cell(this.Height);
+                cells[i] = new HeightFieldCell(this.Height);
             }
         }
 
@@ -174,7 +174,7 @@ namespace Engine.PathFinding.NavMesh
             //Loop through every cell in the Heightfield
             for (int i = 0; i < this.cells.Length; i++)
             {
-                Cell c = this.cells[i];
+                HeightFieldCell c = this.cells[i];
 
                 //Store the first span's data as the "previous" data
                 var spans = c.MutableSpans;
@@ -185,7 +185,7 @@ namespace Engine.PathFinding.NavMesh
                 //Iterate over all the spans in the cell
                 for (int j = 0; j < spans.Count; j++)
                 {
-                    Span span = spans[j];
+                    var span = spans[j];
                     bool walkable = span.Area != Area.Null;
 
                     //If the current span isn't walkable but there's a walkable span right below it, mark this span as walkable too.
@@ -216,14 +216,14 @@ namespace Engine.PathFinding.NavMesh
         {
             for (int i = 0; i < this.cells.Length; i++)
             {
-                Cell c = cells[i];
+                HeightFieldCell c = cells[i];
 
                 var spans = c.MutableSpans;
 
                 //Iterate over all spans
                 for (int j = 0; j < spans.Count - 1; j++)
                 {
-                    Span currentSpan = spans[j];
+                    HeightFieldSpan currentSpan = spans[j];
 
                     //Too low, not enough space to walk through
                     if ((spans[j + 1].Minimum - currentSpan.Maximum) <= walkableHeight)
@@ -247,14 +247,14 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = 0; x < this.Width; x++)
                 {
-                    Cell c = cells[x + y * this.Width];
+                    HeightFieldCell c = cells[x + y * this.Width];
 
                     var spans = c.MutableSpans;
 
                     //Examine all the spans in each cell
                     for (int i = 0; i < spans.Count; i++)
                     {
-                        Span currentSpan = spans[i];
+                        HeightFieldSpan currentSpan = spans[i];
 
                         // Process only walkable spans.
                         if (currentSpan.Area != Area.Null)
@@ -282,7 +282,7 @@ namespace Engine.PathFinding.NavMesh
                                 }
 
                                 // From minus infinity to the first span.
-                                Cell neighborCell = cells[dy * this.Width + dx];
+                                HeightFieldCell neighborCell = cells[dy * this.Width + dx];
                                 var neighborSpans = neighborCell.MutableSpans;
                                 int neighborBottom = -walkableClimb;
                                 int neighborTop = neighborSpans.Count > 0 ? neighborSpans[0].Minimum : int.MaxValue;
@@ -296,7 +296,7 @@ namespace Engine.PathFinding.NavMesh
                                 // Rest of the spans.
                                 for (int j = 0; j < neighborSpans.Count; j++)
                                 {
-                                    Span currentNeighborSpan = neighborSpans[j];
+                                    HeightFieldSpan currentNeighborSpan = neighborSpans[j];
 
                                     neighborBottom = currentNeighborSpan.Maximum;
                                     neighborTop = (j == neighborSpans.Count - 1) ? int.MaxValue : neighborSpans[j + 1].Minimum;
@@ -471,7 +471,7 @@ namespace Engine.PathFinding.NavMesh
                     int spanMax = (int)Math.Ceiling(polyMax * invCellHeight);
 
                     //add the span
-                    cells[z * this.Width + x].AddSpan(new Span(spanMin, spanMax, area));
+                    cells[z * this.Width + x].AddSpan(new HeightFieldSpan(spanMin, spanMax, area));
                 }
             }
         }

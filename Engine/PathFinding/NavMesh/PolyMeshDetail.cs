@@ -183,17 +183,17 @@ namespace Engine.PathFinding.NavMesh
         /// Initializes a new instance of the <see cref="PolyMeshDetail"/> class.
         /// </summary>
         /// <remarks>
-        /// <see cref="PolyMeshDetail"/> uses a <see cref="CompactHeightfield"/> to add in details to a
+        /// <see cref="PolyMeshDetail"/> uses a <see cref="CompactHeightField"/> to add in details to a
         /// <see cref="PolyMesh"/>. This detail is triangulated into a new mesh and can be used to approximate height in the walkable
         /// areas of a scene.
         /// </remarks>
         /// <param name="mesh">The <see cref="PolyMesh"/>.</param>
-        /// <param name="compactField">The <see cref="CompactHeightfield"/> used to add height detail.</param>
+        /// <param name="compactField">The <see cref="CompactHeightField"/> used to add height detail.</param>
         /// <param name="sampleDist">The sampling distance.</param>
         /// <param name="sampleMaxError">The maximum sampling error allowed.</param>
-        public PolyMeshDetail(PolyMesh mesh, CompactHeightfield compactField, float sampleDist, float sampleMaxError)
+        public PolyMeshDetail(PolyMesh mesh, CompactHeightField compactField, float sampleDist, float sampleMaxError)
         {
-            if (mesh.VertCount == 0 || mesh.PolyCount == 0)
+            if (mesh.VertexCount == 0 || mesh.PolyCount == 0)
             {
                 return;
             }
@@ -203,7 +203,7 @@ namespace Engine.PathFinding.NavMesh
             int maxhw = 0, maxhh = 0;
 
             Rectangle[] bounds = new Rectangle[mesh.PolyCount];
-            Vector3[] poly = new Vector3[mesh.NumVertsPerPoly];
+            Vector3[] poly = new Vector3[mesh.VerticesPerPoly];
 
             var storedVertices = new List<Vector3>();
             var storedTriangles = new List<TriangleData>();
@@ -218,7 +218,7 @@ namespace Engine.PathFinding.NavMesh
                 int zmin = compactField.Length;
                 int zmax = 0;
 
-                for (int j = 0; j < mesh.NumVertsPerPoly; j++)
+                for (int j = 0; j < mesh.VerticesPerPoly; j++)
                 {
                     var pj = p.Vertices[j];
                     if (pj == PolyMesh.NullId)
@@ -226,7 +226,7 @@ namespace Engine.PathFinding.NavMesh
                         break;
                     }
 
-                    var v = mesh.Verts[pj];
+                    var v = mesh.Vertices[pj];
 
                     xmin = Math.Min(xmin, v.X);
                     xmax = Math.Max(xmax, v.X);
@@ -250,7 +250,7 @@ namespace Engine.PathFinding.NavMesh
                 bounds[i] = new Rectangle(xmin, zmin, xmax - xmin, zmax - zmin);
             }
 
-            HeightPatch hp = new HeightPatch(0, 0, maxhw, maxhh);
+            HeightFieldPatch hp = new HeightFieldPatch(0, 0, maxhw, maxhh);
 
             this.Meshes = new MeshData[mesh.PolyCount];
 
@@ -260,7 +260,7 @@ namespace Engine.PathFinding.NavMesh
 
                 //store polygon vertices for processing
                 int npoly = 0;
-                for (int j = 0; j < mesh.NumVertsPerPoly; j++)
+                for (int j = 0; j < mesh.VerticesPerPoly; j++)
                 {
                     int pvi = p.Vertices[j];
                     if (pvi == PolyMesh.NullId)
@@ -268,7 +268,7 @@ namespace Engine.PathFinding.NavMesh
                         break;
                     }
 
-                    Vertexi pv = mesh.Verts[pvi];
+                    Vertexi pv = mesh.Vertices[pvi];
                     Vector3 v = new Vector3(pv.X, pv.Y, pv.Z);
                     v.X *= mesh.CellSize;
                     v.Y *= mesh.CellHeight;
@@ -279,7 +279,7 @@ namespace Engine.PathFinding.NavMesh
 
                 //get height data from area of polygon
                 hp.Resize(bounds[i]);
-                this.GetHeightData(compactField, p, npoly, mesh.Verts, mesh.BorderSize, hp);
+                this.GetHeightData(compactField, p, npoly, mesh.Vertices, mesh.BorderSize, hp);
 
                 List<Vector3> tempVerts = new List<Vector3>();
                 List<TriangleData> tempTris = new List<TriangleData>(128);
@@ -340,9 +340,9 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="verts"></param>
         /// <param name="borderSize"></param>
         /// <param name="hp"></param>
-        private void GetHeightData(CompactHeightfield compactField, PolyMesh.Polygon poly, int polyCount, Vertexi[] verts, int borderSize, HeightPatch hp)
+        private void GetHeightData(CompactHeightField compactField, PolyMesh.Polygon poly, int polyCount, Vertexi[] verts, int borderSize, HeightFieldPatch hp)
         {
-            var stack = new List<CompactSpanReference>();
+            var stack = new List<CompactHeightFieldSpanReference>();
             bool empty = true;
             hp.Clear();
 
@@ -369,7 +369,7 @@ namespace Engine.PathFinding.NavMesh
                                 {
                                     int ax = hx + dir.GetHorizontalOffset();
                                     int ay = hy + dir.GetVerticalOffset();
-                                    int ai = compactField.Cells[ay * compactField.Width + ax].StartIndex + CompactSpan.GetConnection(ref span, dir);
+                                    int ai = compactField.Cells[ay * compactField.Width + ax].StartIndex + CompactHeightFieldSpan.GetConnection(ref span, dir);
 
                                     if (compactField.Spans[ai].Region != poly.RegionId)
                                     {
@@ -381,7 +381,7 @@ namespace Engine.PathFinding.NavMesh
 
                             if (border)
                             {
-                                stack.Add(new CompactSpanReference(hx, hy, i));
+                                stack.Add(new CompactHeightFieldSpanReference(hx, hy, i));
                             }
 
                             break;
@@ -447,12 +447,12 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     //get new span
-                    int ai = compactField.Cells[ay * compactField.Width + ax].StartIndex + CompactSpan.GetConnection(ref cs, dir);
-                    CompactSpan ds = compactField.Spans[ai];
+                    int ai = compactField.Cells[ay * compactField.Width + ax].StartIndex + CompactHeightFieldSpan.GetConnection(ref cs, dir);
+                    CompactHeightFieldSpan ds = compactField.Spans[ai];
 
                     hp[hx, hy] = ds.Minimum;
 
-                    stack.Add(new CompactSpanReference(ax, ay, ai));
+                    stack.Add(new CompactHeightFieldSpanReference(ax, ay, ai));
                 }
             }
         }
@@ -466,14 +466,14 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="borderSize">Heightfield border size</param>
         /// <param name="hp">HeightPatch which extracts heightfield data</param>
         /// <param name="stack">Temporary stack of CompactSpanReferences</param>
-        private void GetHeightDataSeedsFromVertices(CompactHeightfield compactField, PolyMesh.Polygon poly, int polyCount, Vertexi[] verts, int borderSize, HeightPatch hp, List<CompactSpanReference> stack)
+        private void GetHeightDataSeedsFromVertices(CompactHeightField compactField, PolyMesh.Polygon poly, int polyCount, Vertexi[] verts, int borderSize, HeightFieldPatch hp, List<CompactHeightFieldSpanReference> stack)
         {
             hp.SetAll(0);
 
             //use poly vertices as seed points
             for (int j = 0; j < polyCount; j++)
             {
-                var csr = new CompactSpanReference(0, 0, -1);
+                var csr = new CompactHeightFieldSpanReference(0, 0, -1);
                 int dmin = int.MaxValue;
 
                 var v = verts[poly.Vertices[j]];
@@ -492,18 +492,18 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     //get new cell
-                    CompactCell c = compactField.Cells[(az + borderSize) * compactField.Width + (ax + borderSize)];
+                    CompactHeightFieldCell c = compactField.Cells[(az + borderSize) * compactField.Width + (ax + borderSize)];
 
                     //loop through all the spans
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
-                        CompactSpan s = compactField.Spans[i];
+                        CompactHeightFieldSpan s = compactField.Spans[i];
 
                         //find minimum y-distance
                         int d = Math.Abs(ay - s.Minimum);
                         if (d < dmin)
                         {
-                            csr = new CompactSpanReference(ax, az, i);
+                            csr = new CompactHeightFieldSpanReference(ax, az, i);
                             dmin = d;
                         }
                     }
@@ -551,7 +551,7 @@ namespace Engine.PathFinding.NavMesh
                     break;
                 }
 
-                CompactSpan cs = compactField[cell];
+                CompactHeightFieldSpan cs = compactField[cell];
 
                 //check all four directions
                 for (var dir = Direction.West; dir <= Direction.South; dir++)
@@ -578,14 +578,14 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     //get the new index
-                    int ai = compactField.Cells[(ay + borderSize) * compactField.Width + (ax + borderSize)].StartIndex + CompactSpan.GetConnection(ref cs, dir);
+                    int ai = compactField.Cells[(ay + borderSize) * compactField.Width + (ax + borderSize)].StartIndex + CompactHeightFieldSpan.GetConnection(ref cs, dir);
 
                     //save data
                     int idx = (ay - hp.Y) * hp.Width + (ax - hp.X);
                     hp[idx] = 1;
 
                     //push to stack
-                    stack.Add(new CompactSpanReference(ax, ay, ai));
+                    stack.Add(new CompactHeightFieldSpanReference(ax, ay, ai));
                 }
             }
 
@@ -599,10 +599,10 @@ namespace Engine.PathFinding.NavMesh
 
                 //set new heightpatch data
                 int idx = (c.Y - hp.Y) * hp.Width + (c.X - hp.X);
-                CompactSpan cs = compactField.Spans[c.Index];
+                CompactHeightFieldSpan cs = compactField.Spans[c.Index];
                 hp[idx] = cs.Minimum;
 
-                stack[i] = new CompactSpanReference(c.X + borderSize, c.Y + borderSize, c.Index);
+                stack[i] = new CompactHeightFieldSpanReference(c.X + borderSize, c.Y + borderSize, c.Index);
             }
         }
         /// <summary>
@@ -618,7 +618,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="tris">Detail triangles</param>
         /// <param name="edges">The edge array</param>
         /// <param name="samples">The samples array</param>
-        private void BuildPolyDetail(Vector3[] polyMeshVerts, int numMeshVerts, float sampleDist, float sampleMaxError, CompactHeightfield compactField, HeightPatch hp, List<Vector3> verts, List<TriangleData> tris, List<EdgeInfo> edges, List<SamplingData> samples)
+        private void BuildPolyDetail(Vector3[] polyMeshVerts, int numMeshVerts, float sampleDist, float sampleMaxError, CompactHeightField compactField, HeightFieldPatch hp, List<Vector3> verts, List<TriangleData> tris, List<EdgeInfo> edges, List<SamplingData> samples)
         {
             const int MAX_VERTS = 127;
             const int MAX_TRIS = 255;
@@ -892,7 +892,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="cellHeight">Cell height</param>
         /// <param name="hp">Height patch</param>
         /// <returns>The height</returns>
-        private int GetHeight(Vector3 loc, float invCellSize, float cellHeight, HeightPatch hp)
+        private int GetHeight(Vector3 loc, float invCellSize, float cellHeight, HeightFieldPatch hp)
         {
             int ix = (int)Math.Floor(loc.X * invCellSize + 0.01f);
             int iz = (int)Math.Floor(loc.Z * invCellSize + 0.01f);
@@ -1379,6 +1379,8 @@ namespace Engine.PathFinding.NavMesh
             return dmin;
         }
 
+        #region Helper Classes
+
         /// <summary>
         /// Determines whether an edge has been created or not.
         /// </summary>
@@ -1564,5 +1566,7 @@ namespace Engine.PathFinding.NavMesh
                 this.IsSampled = isSampled;
             }
         }
+
+        #endregion
     }
 }
