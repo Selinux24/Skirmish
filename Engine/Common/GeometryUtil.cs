@@ -995,6 +995,36 @@ namespace Engine.Common
 
             pt = a * pointA + b * pointB + c * pointC;
         }
+
+        /// <summary>
+        /// Checks if a and b are almost equals, taking into account the magnitude of floating point numbers (unlike SharpDX.MathUtil.WithinEpsilon(System.Single,System.Single,System.Single) method). See Remarks.
+        /// See remarks
+        /// </summary>
+        /// <param name="a">The left value to compare</param>
+        /// <param name="b">The right value to compare</param>
+        /// <returns>true if a almost equal to b, false otherwise</returns>
+        /// <remarks>The code is using the technique described by Bruce Dawson in Comparing Floating point numbers 2012 edition</remarks>
+        public static bool NearEqual(Vector3 a, Vector3 b)
+        {
+            return
+                MathUtil.NearEqual(a.X, b.X) &&
+                MathUtil.NearEqual(a.Y, b.Y) &&
+                MathUtil.NearEqual(a.Z, b.Z);
+        }
+        /// <summary>
+        /// Checks if a - b are almost equals within a float epsilon.
+        /// </summary>
+        /// <param name="a">The left value to compare</param>
+        /// <param name="b">The right value to compare</param>
+        /// <param name="epsilon">Epsilon value</param>
+        /// <returns>true if a almost equal to b within a float epsilon, false otherwise</returns>
+        public static bool WithinEpsilon(Vector3 a, Vector3 b, float epsilon)
+        {
+            return
+                MathUtil.WithinEpsilon(a.X, b.X, epsilon) &&
+                MathUtil.WithinEpsilon(a.Y, b.Y, epsilon) &&
+                MathUtil.WithinEpsilon(a.Z, b.Z, epsilon);
+        }
     }
 
     public enum IndexBufferShapeEnum : int

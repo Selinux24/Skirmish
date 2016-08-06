@@ -305,6 +305,7 @@
     <Compile Include="Collada\Vertices.cs" />
     <Compile Include="Collada\VisualScene.cs" />
     <Compile Include="Collections\PriorityDictionary.cs" />
+    <Compile Include="Common\IGround.cs" />
     <Compile Include="Common\IValueWithCost.cs" />
     <Compile Include="PathFinding\AStar\GridGenerationSettings.cs" />
     <Compile Include="PathFinding\NavMesh\BoundarySide.cs" />
@@ -352,7 +353,7 @@
     <Compile Include="Common\HeightMap.cs" />
     <Compile Include="Common\IBufferData.cs" />
     <Compile Include="Common\IControl.cs" />
-    <Compile Include="Common\IPath.cs" />
+    <Compile Include="Common\ICurve.cs" />
     <Compile Include="Common\ISceneRenderer.cs" />
     <Compile Include="Common\IScreenFitted.cs" />
     <Compile Include="Collections\PriorityQueue.cs" />

@@ -9,7 +9,7 @@ namespace Engine
     /// <summary>
     /// Path of bezier curves
     /// </summary>
-    public class BezierPath : IPath
+    public class BezierPath : ICurve
     {
         private List<Vector3> originalControlPoints = new List<Vector3>();
         private float? originalMinSqrDistance = null;

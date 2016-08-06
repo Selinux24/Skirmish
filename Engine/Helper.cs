@@ -413,6 +413,18 @@ namespace Engine
         {
             Vector3 up = Vector3.Up;
 
+            return LookAt(eyePosition, target, up, yAxisOnly);
+        }
+        /// <summary>
+        /// Look at target
+        /// </summary>
+        /// <param name="eyePosition">Eye position</param>
+        /// <param name="target">Target</param>
+        /// <param name="up">Up vector</param>
+        /// <param name="yAxisOnly">Restricts the rotation axis to Y only</param>
+        /// <returns>Returns rotation quaternion</returns>
+        public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, Vector3 up, bool yAxisOnly = true)
+        {
             if (Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target)) == 1f)
             {
                 up = Vector3.Left;

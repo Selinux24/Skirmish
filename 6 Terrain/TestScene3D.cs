@@ -1,11 +1,11 @@
-﻿using Engine;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using Engine;
 using Engine.Helpers;
 using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace TerrainTest
@@ -89,7 +89,7 @@ namespace TerrainTest
 
             #region Models
 
-            string resources = @"Resources\Resources.zip";
+            string resources = @"Resources";
 
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -126,7 +126,7 @@ namespace TerrainTest
             #region Terrain
 
             sw.Restart();
-            this.terrain = this.AddTerrain(new TerrainDescription()
+            var terrainDescription = new TerrainDescription()
             {
                 ContentPath = resources,
                 Model = new TerrainDescription.ModelDescription()
@@ -152,8 +152,11 @@ namespace TerrainTest
                     MaxSize = Vector2.One * 3.50f,
                 },
                 Opaque = true,
-            });
+            };
+            var scale = Matrix.Scaling(1f);
+            this.terrain = this.AddTerrain(terrainDescription, scale);
             sw.Stop();
+
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
@@ -163,13 +166,14 @@ namespace TerrainTest
             #region Helicopter
 
             sw.Restart();
-            this.helicopter = this.AddModel(new ModelDescription()
+            var heliDesc = new ModelDescription()
             {
                 ContentPath = resources,
                 ModelFileName = "helicopter.dae",
                 Opaque = true,
                 TextureIndex = 2,
-            });
+            };
+            this.helicopter = this.AddModel(heliDesc, Matrix.RotationY(0));
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -203,7 +207,7 @@ namespace TerrainTest
             this.tank = this.AddModel(new ModelDescription()
             {
                 ContentPath = resources,
-                ModelFileName = "tank.dae",
+                ModelFileName = "Leopard.dae",
                 Opaque = true,
             });
             sw.Stop();
@@ -525,7 +529,7 @@ namespace TerrainTest
 
                         this.terrainPointDrawer.SetLines(Color.Red, Line3.Transform(lines, this.m));
 
-                        this.tank.Manipulator.Follow(p.GenerateBezierPath(), 0.2f);
+                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.1f, this.terrain);
                     }
                 }
             }

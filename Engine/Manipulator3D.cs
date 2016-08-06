@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using SharpDX;
 
 namespace Engine
@@ -121,22 +120,38 @@ namespace Engine
         {
             get
             {
-                return this.following != null;
+                return this.curve != null;
             }
         }
 
         /// <summary>
+        /// Ground
+        /// </summary>
+        private IGround ground = null;
+        /// <summary>
         /// Following path
         /// </summary>
-        private IPath following = null;
+        private ICurve curve = null;
         /// <summary>
         /// Path time
         /// </summary>
-        private float followingTime = 0f;
+        private float curveTime = 0f;
         /// <summary>
         /// Following time delta
         /// </summary>
-        private float followinfTimeDelta = 1f;
+        private float curveTimeDelta = 1f;
+        /// <summary>
+        /// Target
+        /// </summary>
+        private Vector3[] path = null;
+        /// <summary>
+        /// Target position
+        /// </summary>
+        private int pathTarget = -1;
+        /// <summary>
+        /// Path velocity
+        /// </summary>
+        private float pathVelocity = 0f;
 
         /// <summary>
         /// Contructor
@@ -155,13 +170,15 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            if (this.following != null)
+            if (this.curve != null)
             {
-                if (this.followingTime <= this.following.Length)
-                {
-                    Vector3 newPosition = this.following.GetPosition(this.followingTime);
+                #region Following a curve
 
-                    if (this.followingTime != 0f)
+                if (this.curveTime <= this.curve.Length)
+                {
+                    Vector3 newPosition = this.curve.GetPosition(this.curveTime);
+
+                    if (this.curveTime != 0f)
                     {
                         Vector3 view = Vector3.Normalize(this.position - newPosition);
 
@@ -169,13 +186,58 @@ namespace Engine
                         this.LookAt(newPosition + view);
                     }
 
-                    this.followingTime += gameTime.ElapsedMilliseconds * 0.01f * this.followinfTimeDelta;
+                    this.curveTime += gameTime.ElapsedMilliseconds * 0.01f * this.curveTimeDelta;
                 }
                 else
                 {
-                    this.following = null;
-                    this.followingTime = 0f;
+                    this.curve = null;
+                    this.curveTime = 0f;
                 }
+
+                #endregion
+            }
+            else if (this.path != null)
+            {
+                #region Following a path
+
+                if (this.pathTarget < this.path.Length)
+                {
+                    Vector3 p = this.path[this.pathTarget];
+
+                    if (GeometryUtil.WithinEpsilon(this.position, p, this.pathVelocity))
+                    {
+                        this.pathTarget++;
+                    }
+                    else
+                    {
+                        Vector3 newPosition = this.position + (Vector3.Normalize(p - this.position) * this.pathVelocity);
+                        Vector3 newNormal = this.Up;
+
+                        if (this.ground != null)
+                        {
+                            Vector3 pos;
+                            Triangle tri;
+                            if (this.ground.FindNearestGroundPosition(newPosition, out pos, out tri))
+                            {
+                                newPosition = pos;
+                                newNormal = tri.Normal;
+                            }
+                        }
+
+                        Vector3 view = Vector3.Normalize(this.position - newPosition);
+
+                        this.position = newPosition;
+                        this.LookAt(newPosition + view, newNormal, false, 0.1f);
+                    }
+                }
+                else
+                {
+                    this.path = null;
+                    this.pathVelocity = 0f;
+                    this.pathTarget = -1;
+                }
+
+                #endregion
             }
 
             this.UpdateLocalTransform();
@@ -474,15 +536,26 @@ namespace Engine
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
         public void LookAt(Vector3 target, bool yAxisOnly = true, float interpolationAmount = 0)
         {
+            LookAt(target, Vector3.Up, yAxisOnly, interpolationAmount);
+        }
+        /// <summary>
+        /// Look at target
+        /// </summary>
+        /// <param name="target">Target</param>
+        /// <param name="up">Up vector</param>
+        /// <param name="yAxisOnly">Rotate Y axis only</param>
+        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
+        public void LookAt(Vector3 target, Vector3 up, bool yAxisOnly = true, float interpolationAmount = 0)
+        {
             if (!Vector3.NearEqual(this.position, target, new Vector3(MathUtil.ZeroTolerance)))
             {
                 if (interpolationAmount == 0)
                 {
-                    this.rotation = Helper.LookAt(this.position, target, yAxisOnly);
+                    this.rotation = Helper.LookAt(this.position, target, up, yAxisOnly);
                 }
                 else
                 {
-                    this.rotation = Quaternion.Slerp(this.rotation, Helper.LookAt(this.position, target, yAxisOnly), interpolationAmount);
+                    this.rotation = Quaternion.Slerp(this.rotation, Helper.LookAt(this.position, target, up, yAxisOnly), interpolationAmount);
                 }
 
                 this.SetUpdateNeeded(true);
@@ -508,15 +581,28 @@ namespace Engine
         }
 
         /// <summary>
+        /// Follow specified curve
+        /// </summary>
+        /// <param name="curve">Path</param>
+        /// <param name="delta">Delta to apply to time increment</param>
+        public void Follow(ICurve curve, float delta = 1f)
+        {
+            this.curve = curve;
+            this.curveTime = 0f;
+            this.curveTimeDelta = delta;
+        }
+        /// <summary>
         /// Follow specified path
         /// </summary>
-        /// <param name="path">Path</param>
-        /// <param name="delta">Delta to apply to time increment</param>
-        public void Follow(IPath path, float delta = 1f)
+        /// <param name="path">Path to follow</param>
+        /// <param name="velocity">Velocity</param>
+        /// <param name="ground">Terrain</param>
+        public void Follow(Vector3[] path, float velocity, IGround ground)
         {
-            this.following = path;
-            this.followingTime = 0f;
-            this.followinfTimeDelta = delta;
+            this.path = path;
+            this.pathTarget = 0;
+            this.pathVelocity = velocity;
+            this.ground = ground;
         }
 
         /// <summary>

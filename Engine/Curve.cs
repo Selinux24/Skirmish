@@ -9,7 +9,7 @@ namespace Engine
     /// <summary>
     /// 3D curve
     /// </summary>
-    public class Curve : IPath
+    public class Curve : ICurve
     {
         /// <summary>
         /// Control points

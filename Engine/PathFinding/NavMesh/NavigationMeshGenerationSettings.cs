@@ -13,23 +13,7 @@ namespace Engine.PathFinding.NavMesh
         {
             get
             {
-                return new NavigationMeshGenerationSettings()
-                {
-                    CellSize = 0.3f,
-                    CellHeight = 0.2f,
-                    MaxClimb = 0.9f,
-                    AgentHeight = 2.0f,
-                    AgentRadius = 0.6f,
-                    MinRegionSize = 8,
-                    MergedRegionSize = 20,
-                    MaxEdgeLength = 12,
-                    MaxEdgeError = 1.8f,
-                    VertsPerPoly = 6,
-                    SampleDistance = 6,
-                    MaxSampleError = 1,
-
-                    BuildBoundingVolumeTree = true,
-                };
+                return new NavigationMeshGenerationSettings();
             }
         }
 
@@ -127,7 +111,20 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public NavigationMeshGenerationSettings()
         {
-            //TODO now that this is public set reasonable defaults.
+            this.CellSize = 0.3f;
+            this.CellHeight = 0.2f;
+            this.MaxClimb = 1f;
+            this.AgentHeight = 2.0f;
+            this.AgentRadius = 0.6f;
+            this.MinRegionSize = 8;
+            this.MergedRegionSize = 20;
+            this.MaxEdgeLength = 12;
+            this.MaxEdgeError = 1.8f;
+            this.ContourFlags = ContourBuildFlags.None;
+            this.VertsPerPoly = 6;
+            this.SampleDistance = 6;
+            this.MaxSampleError = 1;
+            this.BuildBoundingVolumeTree = true;
         }
     }
 }

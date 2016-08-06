@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using SharpDX;
 
 namespace Engine
 {
@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Terrain model
     /// </summary>
-    public class Terrain : Drawable
+    public class Terrain : Drawable, IGround
     {
         /// <summary>
         /// Quadtree used for picking
@@ -227,6 +227,63 @@ namespace Engine
             return this.PickAll(ref ray, out positions, out triangles);
         }
         /// <summary>
+        /// Gets nearest ground position to "from" position
+        /// </summary>
+        /// <param name="from">Position from</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindNearestGroundPosition(Vector3 from, out Vector3 position)
+        {
+            Triangle tri;
+            return FindNearestGroundPosition(from, out position, out tri);
+        }
+        /// <summary>
+        /// Gets nearest ground position to "from" position
+        /// </summary>
+        /// <param name="from">Position from</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindNearestGroundPosition(Vector3 from, out Vector3 position, out Triangle triangle)
+        {
+            BoundingBox bbox = this.GetBoundingBox();
+
+            Ray ray = new Ray()
+            {
+                Position = new Vector3(from.X, bbox.Maximum.Y + 0.01f, from.Z),
+                Direction = Vector3.Down,
+            };
+
+            Vector3[] positions;
+            Triangle[] tris;
+            if (this.PickAll(ref ray, out positions, out tris))
+            {
+                int index = -1;
+                float distance = float.MaxValue;
+                for (int i = 0; i < positions.Length; i++)
+                {
+                    float d = Vector3.DistanceSquared(from, positions[i]);
+                    if (d <= distance)
+                    {
+                        index = i;
+                        distance = d;
+                    }
+                }
+
+                position = positions[index];
+                triangle = tris[index];
+
+                return true;
+            }
+            else
+            {
+                position = Vector3.Zero;
+                triangle = new Triangle();
+
+                return false;
+            }
+        }
+        /// <summary>
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
@@ -288,7 +345,20 @@ namespace Engine
         /// <returns>Return path if exists</returns>
         public PathFindingPath FindPath(Vector3 from, Vector3 to)
         {
-            return this.graph.FindPath(from, to);
+            var path = this.graph.FindPath(from, to);
+            if (path != null)
+            {
+                for (int i = 0; i < path.ReturnPath.Count; i++)
+                {
+                    Vector3 position;
+                    if (FindNearestGroundPosition(path.ReturnPath[i], out position))
+                    {
+                        path.ReturnPath[i] = position;
+                    }
+                }
+            }
+
+            return path;
         }
 
         /// <summary>
@@ -297,13 +367,13 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere()
         {
-            if (this.pickingQuadtree == null)
+            if (this.pickingQuadtree != null)
             {
-                return this.terrain.GetBoundingSphere();
+                return this.pickingQuadtree.BoundingSphere;
             }
             else
             {
-                return this.pickingQuadtree.BoundingSphere;
+                return this.terrain.GetBoundingSphere();
             }
         }
         /// <summary>
@@ -312,13 +382,13 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox()
         {
-            if (this.pickingQuadtree == null)
+            if (this.pickingQuadtree != null)
             {
-                return this.terrain.GetBoundingBox();
+                return this.pickingQuadtree.BoundingBox;
             }
             else
             {
-                return this.pickingQuadtree.BoundingBox;
+                return this.terrain.GetBoundingBox();
             }
         }
         /// <summary>
@@ -358,14 +428,7 @@ namespace Engine
         /// <returns>Returns triangle list. Empty if the vertex type hasn't position channel</returns>
         public Triangle[] GetTriangles()
         {
-            if (this.pickingQuadtree == null)
-            {
-                return this.terrain.GetTriangles();
-            }
-            else
-            {
-                return null;
-            }
+            return this.terrain.GetTriangles();
         }
     }
 
