@@ -588,7 +588,7 @@ namespace TerrainTest
                     pitch = MathUtil.Clamp(pitch, -MathUtil.PiOverFour, MathUtil.PiOverFour);
                     roll = MathUtil.Clamp(roll, -MathUtil.PiOverFour, MathUtil.PiOverFour);
 
-                    roll *= pitch / MathUtil.PiOverFour;
+                    roll *= pitch * 50f;
 
                     Quaternion r =
                         Helper.LookAt(p1, p0) *

@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine.PathFinding
 {
@@ -61,11 +61,11 @@ namespace Engine.PathFinding
         /// Generates a curve that goes through the nodes of the way
         /// </summary>
         /// <returns>Returns the 3D curve generated</returns>
-        public Curve GenerateCurve()
+        public Curve3D GenerateCurve()
         {
-            Curve curve = new Curve();
+            Curve3D curve = new Curve3D();
 
-            curve.AddPosition(this.StartPosition);
+            curve.AddPosition(0, this.StartPosition);
 
             float distanceAcum = 0;
 
@@ -80,12 +80,14 @@ namespace Engine.PathFinding
                     distanceAcum += Vector3.Distance(position, previousPosition);
                 }
 
-                curve.AddPosition(this.ReturnPath[i]);
+                curve.AddPosition(distanceAcum, this.ReturnPath[i]);
             }
 
-            distanceAcum += Vector3.Distance(this.EndPosition, curve.Points[curve.Points.Length - 1]);
+            distanceAcum += Vector3.Distance(this.EndPosition, curve.GetKey(curve.KeyCount - 1));
 
-            curve.AddPosition(this.EndPosition);
+            curve.AddPosition(distanceAcum, this.EndPosition);
+
+            curve.SetTangents();
 
             return curve;
         }
@@ -95,11 +97,11 @@ namespace Engine.PathFinding
         /// <param name="maximumDistance">Maximum distance</param>
         /// <param name="distance">Total result distance</param>
         /// <returns>Returns the 3D curve generated</returns>
-        public Curve GenerateCurve(float maximumDistance, out float distance)
+        public Curve3D GenerateCurve(float maximumDistance, out float distance)
         {
             distance = 0;
 
-            Curve curve = new Curve();
+            Curve3D curve = new Curve3D();
 
             float distanceAcum = 0;
 
@@ -117,11 +119,11 @@ namespace Engine.PathFinding
                 if (distanceAcum > maximumDistance)
                 {
                     //Reached the maximum distance
-                    distance = maximumDistance;
+                    distanceAcum = maximumDistance;
                     break;
                 }
 
-                curve.AddPosition(this.ReturnPath[i]);
+                curve.AddPosition(distanceAcum, this.ReturnPath[i]);
             }
 
             distance = distanceAcum;
