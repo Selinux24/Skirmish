@@ -760,7 +760,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set move animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.GenerateCurve());
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
 
                     this.GoToSoldier(active);
                 }
@@ -777,7 +777,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set crawl animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.GenerateCurve());
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
 
                     this.GoToSoldier(active);
                 }
@@ -794,7 +794,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.GenerateCurve());
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
 
                     this.GoToSoldier(active);
                 }
@@ -817,7 +817,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set assault animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.GenerateCurve());
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
 
                     this.GoToSoldier(active);
                 }
@@ -902,7 +902,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.GenerateCurve());
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
 
                     this.GoToSoldier(active);
                 }
@@ -919,7 +919,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.GenerateCurve());
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
 
                     this.GoToSoldier(active);
                 }
@@ -1005,7 +1005,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.GenerateCurve());
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
 
                     this.GoToSoldier(active);
                 }

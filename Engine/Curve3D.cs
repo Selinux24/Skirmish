@@ -50,7 +50,17 @@ namespace Engine
 
         public float Length
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                float length = 0;
+
+                for (int i = 1; i < this.KeyCount; i++)
+                {
+                    length += Vector3.DistanceSquared(this.GetKey(i - 1), this.GetKey(i));
+                }
+
+                return (float)Math.Sqrt(length);
+            }
         }
 
         public Vector3 GetPosition(float time)

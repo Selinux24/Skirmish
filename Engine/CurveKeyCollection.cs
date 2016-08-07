@@ -23,20 +23,20 @@ namespace Engine
 
             if (this.Count == 0)
             {
-                this.Add(item);
+                base.Add(item);
                 return;
             }
 
-            for (int i = 0; i < this.Count; i++)
+            for (int i = 0; i < base.Count; i++)
             {
-                if (item.Position < this[i].Position)
+                if (item.Position < base[i].Position)
                 {
-                    this.Insert(i, item);
+                    base.Insert(i, item);
                     return;
                 }
             }
 
-            this.Add(item);
+            base.Add(item);
         }
     }
 }
