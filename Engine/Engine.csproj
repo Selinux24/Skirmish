@@ -313,6 +313,7 @@
     <Compile Include="CurveKeyCollection.cs" />
     <Compile Include="CurveLoopType.cs" />
     <Compile Include="CurveTangent.cs" />
+    <Compile Include="Ground.cs" />
     <Compile Include="PathFinding\AStar\GridGenerationSettings.cs" />
     <Compile Include="PathFinding\NavMesh\BoundarySide.cs" />
     <Compile Include="PathFinding\NavMesh\BoundingVolumeTreeNode.cs" />
@@ -440,6 +441,7 @@
     <Compile Include="ShadowMap.cs" />
     <Compile Include="SpriteButton.cs" />
     <Compile Include="Terrain2.cs" />
+    <Compile Include="TerrainDescription.cs" />
     <Compile Include="TriangleListDrawer.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
     <Compile Include="Effects\EffectParticles.cs" />

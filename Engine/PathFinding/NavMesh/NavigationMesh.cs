@@ -132,30 +132,49 @@ namespace Engine.PathFinding.NavMesh
             List<int> path = new List<int>();
             if (this.Query.FindPath(ref startPt, ref endPt, path))
             {
-                var smoothPath = new List<Vector3>();
+                var points = new List<Vector3>();
 
-                smoothPath.Add(from);
+                points.Add(from);
 
                 Vector3 startPos = new Vector3();
-                this.Query.ClosestPointOnPoly(startPt.Polygon, startPt.Position, ref startPos);
-                smoothPath.Add(startPos);
+                if (this.Query.ClosestPointOnPoly(startPt.Polygon, startPt.Position, ref startPos))
+                {
+                    points.Add(startPos);
+                }
+                else
+                {
+                    return null;
+                }
 
                 var last = startPos;
                 for (int i = 1; i < path.Count - 1; i++)
                 {
                     Vector3 pointPos = new Vector3();
-                    this.Query.ClosestPointOnPoly(path[i], last, ref pointPos);
-                    smoothPath.Add(pointPos);
+                    if (this.Query.ClosestPointOnPoly(path[i], last, ref pointPos))
+                    {
+                        points.Add(pointPos);
+                    }
+                    else
+                    {
+                        return null;
+                    }
+
                     last = pointPos;
                 }
 
                 Vector3 targetPos = new Vector3();
-                this.Query.ClosestPointOnPoly(path[path.Count - 1], last, ref targetPos);
-                smoothPath.Add(targetPos);
+                if (this.Query.ClosestPointOnPoly(path[path.Count - 1], last, ref targetPos))
+                {
+                    points.Add(targetPos);
+                }
+                else
+                {
+                    return null;
+                }
 
-                smoothPath.Add(to);
+                points.Add(to);
 
-                res = new PathFindingPath(from, to, smoothPath.ToArray());
+                res = new PathFindingPath(from, to, points.ToArray());
             }
 
             return res;

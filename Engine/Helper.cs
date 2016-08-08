@@ -522,6 +522,33 @@ namespace Engine
             return bbox;
         }
         /// <summary>
+        /// Gets the x maganitude of the current bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the x maganitude of the current bounding box</returns>
+        public static float GetX(this BoundingBox bbox)
+        {
+            return bbox.Maximum.X - bbox.Minimum.X;
+        }
+        /// <summary>
+        /// Gets the y maganitude of the current bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the y maganitude of the current bounding box</returns>
+        public static float GetY(this BoundingBox bbox)
+        {
+            return bbox.Maximum.Y - bbox.Minimum.Y;
+        }
+        /// <summary>
+        /// Gets the z maganitude of the current bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the z maganitude of the current bounding box</returns>
+        public static float GetZ(this BoundingBox bbox)
+        {
+            return bbox.Maximum.Z - bbox.Minimum.Z;
+        }
+        /// <summary>
         /// Generates a bounding sphere from a triangle list
         /// </summary>
         /// <param name="triangles">Triangle list</param>

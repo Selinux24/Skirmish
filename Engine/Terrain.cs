@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using SharpDX;
 
 namespace Engine
@@ -10,17 +11,20 @@ namespace Engine
     /// <summary>
     /// Terrain model
     /// </summary>
-    public class Terrain : Drawable, IGround
+    public class Terrain : Ground
     {
         /// <summary>
         /// Quadtree used for picking
         /// </summary>
         private QuadTree pickingQuadtree = null;
-
         /// <summary>
         /// Geometry
         /// </summary>
         private Model terrain = null;
+        /// <summary>
+        /// Terrain attached objects
+        /// </summary>
+        private List<ModelBase> terrainObjects = new List<ModelBase>();
         /// <summary>
         /// Vegetation
         /// </summary>
@@ -29,6 +33,11 @@ namespace Engine
         /// Graph used for pathfinding
         /// </summary>
         private IGraph graph = null;
+
+        /// <summary>
+        /// Instance description used for creation
+        /// </summary>
+        public readonly TerrainDescription Description = null;
 
         /// <summary>
         /// Constructor
@@ -40,23 +49,17 @@ namespace Engine
         public Terrain(Game game, ModelContent content, string contentFolder, TerrainDescription description)
             : base(game)
         {
-            this.DeferredEnabled = description.DeferredEnabled;
+            this.Description = description;
+
+            this.DeferredEnabled = this.Description.DeferredEnabled;
 
             this.terrain = new Model(game, content);
-            this.terrain.Opaque = this.Opaque = description.Opaque;
-            this.terrain.DeferredEnabled = description.DeferredEnabled;
+            this.terrain.Opaque = this.Opaque = this.Description.Opaque;
+            this.terrain.DeferredEnabled = this.Description.DeferredEnabled;
 
-            var bsph = this.terrain.GetBoundingSphere();
-            var triangles = this.terrain.GetTriangles();
-
-            if (description != null && description.Quadtree != null)
+            if (!this.Description.DelayGeneration)
             {
-                this.pickingQuadtree = QuadTree.Build(game, triangles, description);
-            }
-
-            if (description != null && description.PathFinder != null)
-            {
-                this.graph = PathFinder.Build(description.PathFinder.Settings, triangles);
+                this.UpdateInternals();
             }
         }
         /// <summary>
@@ -130,159 +133,31 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindTopGroundPosition(float x, float z, out Vector3 position)
+        public void UpdateInternals()
         {
-            Triangle tri;
-            return FindTopGroundPosition(x, z, out position, out tri);
-        }
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindTopGroundPosition(float x, float z, out Vector3 position, out Triangle triangle)
-        {
-            BoundingBox bbox = this.GetBoundingBox();
+            var triangles = this.GetTriangles();
 
-            Ray ray = new Ray()
+            if (this.Description != null && this.Description.Quadtree != null)
             {
-                Position = new Vector3(x, bbox.Maximum.Y + 0.1f, z),
-                Direction = Vector3.Down,
-            };
-
-            return this.PickNearest(ref ray, out position, out triangle);
-        }
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindFirstGroundPosition(float x, float z, out Vector3 position)
-        {
-            Triangle tri;
-            return FindFirstGroundPosition(x, z, out position, out tri);
-        }
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindFirstGroundPosition(float x, float z, out Vector3 position, out Triangle triangle)
-        {
-            BoundingBox bbox = this.GetBoundingBox();
-
-            Ray ray = new Ray()
-            {
-                Position = new Vector3(x, bbox.Maximum.Y + 0.1f, z),
-                Direction = Vector3.Down,
-            };
-
-            return this.PickFirst(ref ray, out position, out triangle);
-        }
-        /// <summary>
-        /// Gets ground positions giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="positions">Ground positions if exists</param>
-        /// <returns>Returns true if ground positions found</returns>
-        public bool FindAllGroundPosition(float x, float z, out Vector3[] positions)
-        {
-            Triangle[] triangles;
-            return FindAllGroundPosition(x, z, out positions, out triangles);
-        }
-        /// <summary>
-        /// Gets all ground positions giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="positions">Ground positions if exists</param>
-        /// <param name="triangles">Triangles found</param>
-        /// <returns>Returns true if ground positions found</returns>
-        public bool FindAllGroundPosition(float x, float z, out Vector3[] positions, out Triangle[] triangles)
-        {
-            BoundingBox bbox = this.GetBoundingBox();
-
-            Ray ray = new Ray()
-            {
-                Position = new Vector3(x, bbox.Maximum.Y + 0.01f, z),
-                Direction = Vector3.Down,
-            };
-
-            return this.PickAll(ref ray, out positions, out triangles);
-        }
-        /// <summary>
-        /// Gets nearest ground position to "from" position
-        /// </summary>
-        /// <param name="from">Position from</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindNearestGroundPosition(Vector3 from, out Vector3 position)
-        {
-            Triangle tri;
-            return FindNearestGroundPosition(from, out position, out tri);
-        }
-        /// <summary>
-        /// Gets nearest ground position to "from" position
-        /// </summary>
-        /// <param name="from">Position from</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindNearestGroundPosition(Vector3 from, out Vector3 position, out Triangle triangle)
-        {
-            BoundingBox bbox = this.GetBoundingBox();
-
-            Ray ray = new Ray()
-            {
-                Position = new Vector3(from.X, bbox.Maximum.Y + 0.01f, from.Z),
-                Direction = Vector3.Down,
-            };
-
-            Vector3[] positions;
-            Triangle[] tris;
-            if (this.PickAll(ref ray, out positions, out tris))
-            {
-                int index = -1;
-                float distance = float.MaxValue;
-                for (int i = 0; i < positions.Length; i++)
-                {
-                    float d = Vector3.DistanceSquared(from, positions[i]);
-                    if (d <= distance)
-                    {
-                        index = i;
-                        distance = d;
-                    }
-                }
-
-                position = positions[index];
-                triangle = tris[index];
-
-                return true;
+                this.pickingQuadtree = QuadTree.Build(this.Game, triangles, this.Description);
             }
-            else
-            {
-                position = Vector3.Zero;
-                triangle = new Triangle();
 
-                return false;
+            if (this.Description != null && this.Description.PathFinder != null)
+            {
+                this.graph = PathFinder.Build(this.Description.PathFinder.Settings, triangles);
             }
         }
+
+        public void AttachObject(ModelBase model, bool updateInternals = true)
+        {
+            this.terrainObjects.Add(model);
+
+            if (updateInternals)
+            {
+                this.UpdateInternals();
+            }
+        }
+
         /// <summary>
         /// Pick nearest position
         /// </summary>
@@ -290,7 +165,7 @@ namespace Engine
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public override bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
         {
             if (this.pickingQuadtree != null)
             {
@@ -308,7 +183,7 @@ namespace Engine
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public override bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
         {
             if (this.pickingQuadtree != null)
             {
@@ -326,7 +201,7 @@ namespace Engine
         /// <param name="positions">Picked positions if exists</param>
         /// <param name="triangles">Picked triangles if exists</param>
         /// <returns>Returns true if picked positions found</returns>
-        public bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
+        public override bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
         {
             if (this.pickingQuadtree != null)
             {
@@ -343,7 +218,7 @@ namespace Engine
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public PathFindingPath FindPath(Vector3 from, Vector3 to)
+        public override PathFindingPath FindPath(Vector3 from, Vector3 to)
         {
             var path = this.graph.FindPath(from, to);
             if (path != null)
@@ -360,12 +235,11 @@ namespace Engine
 
             return path;
         }
-
         /// <summary>
         /// Gets bounding sphere
         /// </summary>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere()
+        public override BoundingSphere GetBoundingSphere()
         {
             if (this.pickingQuadtree != null)
             {
@@ -373,14 +247,34 @@ namespace Engine
             }
             else
             {
-                return this.terrain.GetBoundingSphere();
+                BoundingSphere sph = this.terrain.GetBoundingSphere();
+
+                for (int i = 0; i < this.terrainObjects.Count; i++)
+                {
+                    var curr = this.terrainObjects[i];
+
+                    if (curr is Model)
+                    {
+                        BoundingSphere.Merge(sph, ((Model)curr).GetBoundingSphere());
+                    }
+
+                    if (curr is ModelInstanced)
+                    {
+                        for (int m = 0; m < ((ModelInstanced)curr).Instances.Length; m++)
+                        {
+                            BoundingSphere.Merge(sph, ((ModelInstanced)curr).Instances[m].GetBoundingSphere());
+                        }
+                    }
+                }
+
+                return sph;
             }
         }
         /// <summary>
         /// Gets bounding box
         /// </summary>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox()
+        public override BoundingBox GetBoundingBox()
         {
             if (this.pickingQuadtree != null)
             {
@@ -388,9 +282,30 @@ namespace Engine
             }
             else
             {
-                return this.terrain.GetBoundingBox();
+                BoundingBox bbox = this.terrain.GetBoundingBox();
+
+                for (int i = 0; i < this.terrainObjects.Count; i++)
+                {
+                    var curr = this.terrainObjects[i];
+
+                    if (curr is Model)
+                    {
+                        BoundingBox.Merge(bbox, ((Model)curr).GetBoundingBox());
+                    }
+
+                    if (curr is ModelInstanced)
+                    {
+                        for (int m = 0; m < ((ModelInstanced)curr).Instances.Length; m++)
+                        {
+                            BoundingBox.Merge(bbox, ((ModelInstanced)curr).Instances[m].GetBoundingBox());
+                        }
+                    }
+                }
+
+                return bbox;
             }
         }
+
         /// <summary>
         /// Gets terrain bounding boxes at specified level
         /// </summary>
@@ -404,8 +319,60 @@ namespace Engine
             }
             else
             {
-                return new[] { this.terrain.GetBoundingBox() };
+                List<BoundingBox> res = new List<BoundingBox>();
+
+                res.Add(this.terrain.GetBoundingBox());
+
+                for (int i = 0; i < this.terrainObjects.Count; i++)
+                {
+                    var curr = this.terrainObjects[i];
+
+                    if (curr is Model)
+                    {
+                        res.Add(((Model)curr).GetBoundingBox());
+                    }
+
+                    if (curr is ModelInstanced)
+                    {
+                        for (int m = 0; m < ((ModelInstanced)curr).Instances.Length; m++)
+                        {
+                            res.Add(((ModelInstanced)curr).Instances[m].GetBoundingBox());
+                        }
+                    }
+                }
+
+                return res.ToArray();
             }
+        }
+        /// <summary>
+        /// Gets triangle list
+        /// </summary>
+        /// <returns>Returns triangle list. Empty if the vertex type hasn't position channel</returns>
+        public Triangle[] GetTriangles()
+        {
+            List<Triangle> tris = new List<Triangle>();
+
+            tris.AddRange(this.terrain.GetTriangles());
+
+            for (int i = 0; i < this.terrainObjects.Count; i++)
+            {
+                var curr = this.terrainObjects[i];
+
+                if (curr is Model)
+                {
+                    tris.AddRange(((Model)curr).GetTriangles());
+                }
+
+                if (curr is ModelInstanced)
+                {
+                    for (int m = 0; m < ((ModelInstanced)curr).Instances.Length; m++)
+                    {
+                        tris.AddRange(((ModelInstanced)curr).Instances[m].GetTriangles());
+                    }
+                }
+            }
+
+            return tris.ToArray();
         }
         /// <summary>
         /// Gets the path finder grid nodes
@@ -422,221 +389,5 @@ namespace Engine
 
             return nodes;
         }
-        /// <summary>
-        /// Gets triangle list
-        /// </summary>
-        /// <returns>Returns triangle list. Empty if the vertex type hasn't position channel</returns>
-        public Triangle[] GetTriangles()
-        {
-            return this.terrain.GetTriangles();
-        }
-    }
-
-    /// <summary>
-    /// Terrain description
-    /// </summary>
-    public class TerrainDescription
-    {
-        /// <summary>
-        /// Model description
-        /// </summary>
-        public class ModelDescription
-        {
-            /// <summary>
-            /// Model file name
-            /// </summary>
-            public string ModelFileName = null;
-        }
-        /// <summary>
-        /// Heightmap description
-        /// </summary>
-        public class HeightmapDescription
-        {
-            /// <summary>
-            /// Content path
-            /// </summary>
-            public string ContentPath = "Heightmap";
-            /// <summary>
-            /// Height map file name
-            /// </summary>
-            public string HeightmapFileName = null;
-            /// <summary>
-            /// Color map file name
-            /// </summary>
-            public string ColormapFileName = null;
-            /// <summary>
-            /// Cell size
-            /// </summary>
-            public float CellSize = 1;
-            /// <summary>
-            /// Maximum height
-            /// </summary>
-            public float MaximumHeight = 1;
-        }
-        /// <summary>
-        /// Terrain textures
-        /// </summary>
-        public class TexturesDescription
-        {
-            /// <summary>
-            /// Content path
-            /// </summary>
-            public string ContentPath = "Textures";
-            /// <summary>
-            /// High resolution textures
-            /// </summary>
-            public string[] TexturesHR = null;
-            /// <summary>
-            /// Low resolution textures
-            /// </summary>
-            public string[] TexturesLR = null;
-            /// <summary>
-            /// Normal maps
-            /// </summary>
-            public string[] NormalMaps = null;
-            /// <summary>
-            /// Slope ranges
-            /// </summary>
-            public Vector2 SlopeRanges = Vector2.Zero;
-        }
-        /// <summary>
-        /// Vegetation
-        /// </summary>
-        public class VegetationDescription
-        {
-            /// <summary>
-            /// Content path
-            /// </summary>
-            public string ContentPath = "Vegetation";
-            /// <summary>
-            /// Drawing radius for vegetation
-            /// </summary>
-            public float StartRadius = 0f;
-            /// <summary>
-            /// Drawing radius for vegetation
-            /// </summary>
-            public float EndRadius = 0f;
-            /// <summary>
-            /// Seed for random position generation
-            /// </summary>
-            public int Seed = 0;
-            /// <summary>
-            /// Vegetation saturation per triangle
-            /// </summary>
-            public float Saturation = 0.1f;
-            /// <summary>
-            /// Is opaque
-            /// </summary>
-            public bool Opaque = true;
-            /// <summary>
-            /// Can be renderer by the deferred renderer
-            /// </summary>
-            public bool DeferredEnabled = true;
-
-            /// <summary>
-            /// Texture names array for vegetation
-            /// </summary>
-            public string[] VegetarionTextures = null;
-            /// <summary>
-            /// Vegetation sprite minimum size
-            /// </summary>
-            public Vector2 MinSize = Vector2.One;
-            /// <summary>
-            /// Vegetation sprite maximum size
-            /// </summary>
-            public Vector2 MaxSize = Vector2.One * 2f;
-        }
-        /// <summary>
-        /// Quadtree description
-        /// </summary>
-        public class QuadtreeDescription
-        {
-            /// <summary>
-            /// Maximum triangle count per node
-            /// </summary>
-            private int maxTrianglesPerNode = 0;
-
-            /// <summary>
-            /// Maximum triangle count per node
-            /// </summary>
-            public int MaxTrianglesPerNode
-            {
-                get
-                {
-                    return this.maxTrianglesPerNode;
-                }
-                set
-                {
-                    this.maxTrianglesPerNode = value;
-
-                    float v = (float)Math.Pow((Math.Sqrt(value / 2) + 1), 2);
-                    int vi = (int)v;
-
-                    if (v != (float)vi) throw new ArgumentException("Bad triangles per node count.");
-
-                    this.MaxVerticesByNode = vi;
-                }
-            }
-            /// <summary>
-            /// Maximum vertex count per node
-            /// </summary>
-            public int MaxVerticesByNode { get; protected set; }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public QuadtreeDescription()
-            {
-                this.MaxTrianglesPerNode = 2048;
-            }
-        }
-        /// <summary>
-        /// Path finder grid description
-        /// </summary>
-        public class PathFinderDescription
-        {
-            /// <summary>
-            /// Graph type
-            /// </summary>
-            public PathFinderSettings Settings = null;
-        }
-
-        /// <summary>
-        /// Content path
-        /// </summary>
-        public string ContentPath = "Resources";
-        /// <summary>
-        /// Model
-        /// </summary>
-        public ModelDescription Model = null;
-        /// <summary>
-        /// Heightmap
-        /// </summary>
-        public HeightmapDescription Heightmap = null;
-        /// <summary>
-        /// Textures
-        /// </summary>
-        public TexturesDescription Textures = null;
-        /// <summary>
-        /// Vegetation collection
-        /// </summary>
-        public VegetationDescription Vegetation = null;
-        /// <summary>
-        /// Quadtree
-        /// </summary>
-        public QuadtreeDescription Quadtree = null;
-        /// <summary>
-        /// Path finder
-        /// </summary>
-        public PathFinderDescription PathFinder = null;
-
-        /// <summary>
-        /// Is Opaque
-        /// </summary>
-        public bool Opaque = true;
-        /// <summary>
-        /// Can be renderer by the deferred renderer
-        /// </summary>
-        public bool DeferredEnabled = true;
     }
 }

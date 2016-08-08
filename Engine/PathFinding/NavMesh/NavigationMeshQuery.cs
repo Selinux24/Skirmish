@@ -2026,7 +2026,6 @@ namespace Engine.PathFinding.NavMesh
 
             MeshTile tile;
             Poly poly;
-
             if (this.navigationMesh.TryGetTileAndPolyByRef(reference, out tile, out poly) == false)
             {
                 return false;
@@ -2038,6 +2037,7 @@ namespace Engine.PathFinding.NavMesh
             }
 
             tile.ClosestPointOnPoly(poly, pos, ref closest);
+
             return true;
         }
         /// <summary>

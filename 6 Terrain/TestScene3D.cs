@@ -123,46 +123,6 @@ namespace TerrainTest
 
             #endregion
 
-            #region Terrain
-
-            sw.Restart();
-            var terrainDescription = new TerrainDescription()
-            {
-                ContentPath = resources,
-                Model = new TerrainDescription.ModelDescription()
-                {
-                    ModelFileName = "two_levels.dae",
-                },
-                Quadtree = new TerrainDescription.QuadtreeDescription()
-                {
-                    MaxTrianglesPerNode = 2048,
-                },
-                PathFinder = new TerrainDescription.PathFinderDescription()
-                {
-                    Settings = NavigationMeshGenerationSettings.Default,
-                },
-                Vegetation = new TerrainDescription.VegetationDescription()
-                {
-                    VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
-                    Saturation = 0.5f,
-                    Opaque = true,
-                    StartRadius = 0f,
-                    EndRadius = 300f,
-                    MinSize = Vector2.One * 2.50f,
-                    MaxSize = Vector2.One * 3.50f,
-                },
-                Opaque = true,
-            };
-            var scale = Matrix.Scaling(1f);
-            this.terrain = this.AddTerrain(terrainDescription, scale);
-            sw.Stop();
-
-            loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
-
-            this.SceneVolume = this.terrain.GetBoundingSphere();
-
-            #endregion
-
             #region Helicopter
 
             sw.Restart();
@@ -177,10 +137,111 @@ namespace TerrainTest
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
+            this.helicopter.Manipulator.SetScale(0.75f);
+
+            #endregion
+
+            #region Tank
+
+            sw.Restart();
+            this.tank = this.AddModel(new ModelDescription()
+            {
+                ContentPath = resources,
+                ModelFileName = "Leopard.dae",
+                Opaque = true,
+            });
+            sw.Stop();
+            loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.tank.Manipulator.SetScale(2);
+
+            #endregion
+
+            #region Obelisk
+
+            sw.Restart();
+            this.obelisk = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = resources,
+                ModelFileName = "obelisk.dae",
+                Opaque = true,
+                Instances = 4,
+            });
+            sw.Stop();
+            loadingText += string.Format("obelisk: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Terrain
+
+            sw.Restart();
+
+            var navSettings = NavigationMeshGenerationSettings.Default;
+            var tankbbox = this.tank.GetBoundingBox();
+            navSettings.AgentHeight = tankbbox.GetY();
+            navSettings.AgentRadius = tankbbox.GetX() * 0.5f;
+
+            var terrainDescription = new TerrainDescription()
+            {
+                ContentPath = resources,
+                Model = new TerrainDescription.ModelDescription()
+                {
+                    ModelFileName = "two_levels.dae",
+                },
+                Quadtree = new TerrainDescription.QuadtreeDescription()
+                {
+                    MaxTrianglesPerNode = 2048,
+                },
+                PathFinder = new TerrainDescription.PathFinderDescription()
+                {
+                    Settings = navSettings,
+                },
+                Vegetation = new TerrainDescription.VegetationDescription()
+                {
+                    VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
+                    Saturation = 0.5f,
+                    Opaque = true,
+                    StartRadius = 0f,
+                    EndRadius = 300f,
+                    MinSize = Vector2.One * 2.50f,
+                    MaxSize = Vector2.One * 3.50f,
+                },
+                Opaque = true,
+                DelayGeneration = true,
+            };
+            this.terrain = this.AddTerrain(terrainDescription);
+            sw.Stop();
+
+            loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            this.load.Text = loadingText;
+
+            #region Positioning
+
+            for (int i = 0; i < 4; i++)
+            {
+                int ox = i == 0 || i == 2 ? 1 : -1;
+                int oy = i == 0 || i == 1 ? 1 : -1;
+
+                Vector3 obeliskPosition;
+                if (this.terrain.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition))
+                {
+                    this.obelisk.Instances[i].Manipulator.SetPosition(obeliskPosition, true);
+                }
+            }
+
+            this.terrain.AttachObject(this.obelisk);
+
+            this.SceneVolume = this.terrain.GetBoundingSphere();
+
             Vector3 gPos;
-            if (this.terrain.FindTopGroundPosition(20, 20, out gPos))
+            Triangle gTri;
+            if (this.terrain.FindTopGroundPosition(20, 20, out gPos, out gTri))
             {
                 this.helicopter.Manipulator.SetPosition(gPos, true);
+                this.helicopter.Manipulator.SetNormal(gTri.Normal);
             }
 
             this.curve = new BezierPath();
@@ -199,58 +260,15 @@ namespace TerrainTest
 
             this.curve.SetControlPoints(cPoints, 1, 10, 0.33f);
 
-            #endregion
-
-            #region Tank
-
-            sw.Restart();
-            this.tank = this.AddModel(new ModelDescription()
-            {
-                ContentPath = resources,
-                ModelFileName = "Leopard.dae",
-                Opaque = true,
-            });
-            sw.Stop();
-            loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
-
-            this.tank.Manipulator.SetScale(3);
-
             Vector3 tankPosition;
-            if (this.terrain.FindTopGroundPosition(0, 0, out tankPosition))
+            Triangle tankTriangle;
+            if (this.terrain.FindTopGroundPosition(0, 0, out tankPosition, out tankTriangle))
             {
                 this.tank.Manipulator.SetPosition(tankPosition, true);
+                this.tank.Manipulator.SetNormal(tankTriangle.Normal);
             }
 
             #endregion
-
-            #region Obelisk
-
-            sw.Restart();
-            this.obelisk = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = resources,
-                ModelFileName = "obelisk.dae",
-                Opaque = true,
-                Instances = 4,
-            });
-            sw.Stop();
-            loadingText += string.Format("obelisk: {0} ", sw.Elapsed.TotalSeconds);
-
-            for (int i = 0; i < 4; i++)
-            {
-                int ox = i == 0 || i == 2 ? 1 : -1;
-                int oy = i == 0 || i == 1 ? 1 : -1;
-
-                Vector3 obeliskPosition;
-                if (this.terrain.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition))
-                {
-                    this.obelisk.Instances[i].Manipulator.SetPosition(obeliskPosition, true);
-                }
-            }
-
-            #endregion
-
-            this.load.Text = loadingText;
 
             #endregion
 
