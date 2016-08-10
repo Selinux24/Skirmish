@@ -25,7 +25,7 @@ namespace DeferredTest
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
         private Skydom skydom = null;
-        private Terrain terrain = null;
+        private Scenery terrain = null;
         private ParticleSystem fire = null;
 
         private SpriteTexture bufferDrawer = null;
@@ -75,18 +75,18 @@ namespace DeferredTest
             #region Terrain
 
             sw.Restart();
-            this.terrain = this.AddTerrain(new TerrainDescription()
+            this.terrain = this.AddTerrain(new GroundDescription()
             {
                 ContentPath = resources,
-                Model = new TerrainDescription.ModelDescription()
+                Model = new GroundDescription.ModelDescription()
                 {
                     ModelFileName = "terrain.dae",
                 },
-                Quadtree = new TerrainDescription.QuadtreeDescription()
+                Quadtree = new GroundDescription.QuadtreeDescription()
                 {
                     MaxTrianglesPerNode = 2048,
                 },
-                PathFinder = new TerrainDescription.PathFinderDescription()
+                PathFinder = new GroundDescription.PathFinderDescription()
                 {
                     Settings = new GridGenerationSettings()
                     {
@@ -94,7 +94,7 @@ namespace DeferredTest
                         NodeInclination = MathUtil.DegreesToRadians(35),
                     },
                 },
-                Vegetation = new TerrainDescription.VegetationDescription()
+                Vegetation = new GroundDescription.VegetationDescription()
                 {
                     VegetarionTextures = new[] { "grass.png" },
                     Saturation = 20f,

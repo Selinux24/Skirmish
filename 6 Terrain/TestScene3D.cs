@@ -33,7 +33,7 @@ namespace TerrainTest
         private Model tank = null;
 
         private Skydom skydom = null;
-        private Terrain terrain = null;
+        private Scenery terrain = null;
         private List<Line3> oks = new List<Line3>();
         private List<Line3> errs = new List<Line3>();
         private LineListDrawer terrainLineDrawer = null;
@@ -182,22 +182,22 @@ namespace TerrainTest
             navSettings.AgentRadius = tankbbox.GetZ() * 0.5f;
             navSettings.MaxClimb = tankbbox.GetY() * 0.45f;
 
-            var terrainDescription = new TerrainDescription()
+            var terrainDescription = new GroundDescription()
             {
                 ContentPath = resources,
-                Model = new TerrainDescription.ModelDescription()
+                Model = new GroundDescription.ModelDescription()
                 {
                     ModelFileName = "two_levels.dae",
                 },
-                Quadtree = new TerrainDescription.QuadtreeDescription()
+                Quadtree = new GroundDescription.QuadtreeDescription()
                 {
                     MaxTrianglesPerNode = 2048,
                 },
-                PathFinder = new TerrainDescription.PathFinderDescription()
+                PathFinder = new GroundDescription.PathFinderDescription()
                 {
                     Settings = navSettings,
                 },
-                Vegetation = new TerrainDescription.VegetationDescription()
+                Vegetation = new GroundDescription.VegetationDescription()
                 {
                     VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
                     Saturation = 0.5f,

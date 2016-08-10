@@ -266,7 +266,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="points">Result point list</param>
         /// <param name="tris">Result triangle list</param>
         /// <returns>Returns true if point is valid.</returns>
-        private static bool TestPoint(float x, float z, Terrain terrain, float angle, out Vector3[] points, out Triangle[] tris)
+        private static bool TestPoint(float x, float z, Scenery terrain, float angle, out Vector3[] points, out Triangle[] tris)
         {
             points = null;
             tris = null;

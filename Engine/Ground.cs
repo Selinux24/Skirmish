@@ -1,17 +1,44 @@
-﻿using SharpDX;
+﻿using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.PathFinding;
 
+    /// <summary>
+    /// Ground class
+    /// </summary>
+    /// <remarks>Used for picking tests and navigation over surfaces</remarks>
     public abstract class Ground : Drawable, IGround
     {
+        /// <summary>
+        /// Terrain attached objects
+        /// </summary>
+        protected readonly List<ModelBase> GroundObjects = new List<ModelBase>();
+        /// <summary>
+        /// Quadtree
+        /// </summary>
+        protected QuadTree pickingQuadtree = null;
+        /// <summary>
+        /// Graph used for pathfinding
+        /// </summary>
+        protected IGraph navigationGraph = null;
+
+        /// <summary>
+        /// Instance description used for creation
+        /// </summary>
+        public readonly GroundDescription Description = null;
+
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        public Ground(Game game) : base(game) { }
+        public Ground(Game game, GroundDescription description)
+            : base(game)
+        {
+            this.Description = description;
+        }
 
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -166,7 +193,25 @@ namespace Engine
                 return false;
             }
         }
+        /// <summary>
+        /// Attach objects to terrain
+        /// </summary>
+        /// <param name="model">Model</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachObject(ModelBase model, bool updateInternals = true)
+        {
+            this.GroundObjects.Add(model);
 
+            if (updateInternals)
+            {
+                this.UpdateInternals();
+            }
+        }
+
+        /// <summary>
+        /// Updates internal objects
+        /// </summary>
+        public abstract void UpdateInternals();
         /// <summary>
         /// Pick nearest position
         /// </summary>
@@ -191,7 +236,6 @@ namespace Engine
         /// <param name="triangles">Picked triangles if exists</param>
         /// <returns>Returns true if picked positions found</returns>
         public abstract bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles);
-
         /// <summary>
         /// Find path from point to point
         /// </summary>
@@ -199,7 +243,6 @@ namespace Engine
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
         public abstract PathFindingPath FindPath(Vector3 from, Vector3 to);
-
         /// <summary>
         /// Gets bounding sphere
         /// </summary>

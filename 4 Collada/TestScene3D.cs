@@ -21,7 +21,7 @@ namespace Collada
         private TextDrawer title = null;
         private TextDrawer fps = null;
         private TextDrawer picks = null;
-        private Terrain ground = null;
+        private Scenery ground = null;
         private ModelInstanced lampsModel = null;
         private ModelInstanced helicoptersModel = null;
         private ParticleSystem rain = null;
@@ -63,14 +63,14 @@ namespace Collada
             this.picks.Text = null;
             this.picks.Position = new Vector2(0, 48);
 
-            TerrainDescription terrainDescription = new TerrainDescription()
+            GroundDescription terrainDescription = new GroundDescription()
             {
                 ContentPath = "Resources",
-                Model = new TerrainDescription.ModelDescription()
+                Model = new GroundDescription.ModelDescription()
                 {
                     ModelFileName = "Ground.dae",
                 },
-                Vegetation = new TerrainDescription.VegetationDescription()
+                Vegetation = new GroundDescription.VegetationDescription()
                 {
                     VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
                     Saturation = 0.05f,
@@ -81,7 +81,7 @@ namespace Collada
                     Seed = 1024,
                     Opaque = true,
                 },
-                PathFinder = new TerrainDescription.PathFinderDescription()
+                PathFinder = new GroundDescription.PathFinderDescription()
                 {
                     Settings = new GridGenerationSettings()
                     {

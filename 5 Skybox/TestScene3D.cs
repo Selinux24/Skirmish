@@ -28,7 +28,7 @@ namespace Skybox
         private TextDrawer fps = null;
 
         private Skydom skydom = null;
-        private Terrain ruins = null;
+        private Scenery ruins = null;
         private TriangleListDrawer pickedTri = null;
         private LineListDrawer bboxGlobalDrawer = null;
         private LineListDrawer bsphLightsDrawer = null;
@@ -100,10 +100,10 @@ namespace Skybox
 
             #region Terrain
 
-            TerrainDescription desc = new TerrainDescription()
+            GroundDescription desc = new GroundDescription()
             {
                 ContentPath = "Resources",
-                Model = new TerrainDescription.ModelDescription()
+                Model = new GroundDescription.ModelDescription()
                 {
                     ModelFileName = "ruins.dae",
                 },

@@ -1,8 +1,8 @@
-﻿using Engine;
+﻿using System;
+using System.Diagnostics;
+using Engine;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
-using System;
-using System.Diagnostics;
 
 namespace HeightmapTest
 {
@@ -32,7 +32,7 @@ namespace HeightmapTest
         private Cursor cursor;
         private LensFlare lensFlare = null;
         private Skydom skydom = null;
-        private Terrain2 terrain = null;
+        private Terrain terrain = null;
         private LineListDrawer bboxesDrawer = null;
 
         public TestScene3D(Game game)
@@ -138,11 +138,16 @@ namespace HeightmapTest
             #region Terrain
 
             sw.Restart();
-            this.terrain = this.AddTerrain2(new TerrainDescription()
+
+            var pfSettings = NavigationMeshGenerationSettings.Default;
+            pfSettings.CellHeight = 10f;
+            pfSettings.CellSize = 10f;
+
+            this.terrain = this.AddTerrain2(new GroundDescription()
             {
                 ContentPath = "Resources/Scenery",
 
-                Heightmap = new TerrainDescription.HeightmapDescription()
+                Heightmap = new GroundDescription.HeightmapDescription()
                 {
                     ContentPath = "Heightmap",
                     HeightmapFileName = "desert0hm.bmp",
@@ -150,15 +155,15 @@ namespace HeightmapTest
                     CellSize = 5,
                     MaximumHeight = 50,
                 },
-                Quadtree = new TerrainDescription.QuadtreeDescription()
+                Quadtree = new GroundDescription.QuadtreeDescription()
                 {
 
                 },
-                PathFinder = new TerrainDescription.PathFinderDescription()
+                PathFinder = new GroundDescription.PathFinderDescription()
                 {
-                    Settings = NavigationMeshGenerationSettings.Default,
+                    Settings = pfSettings,
                 },
-                Textures = new TerrainDescription.TexturesDescription()
+                Textures = new GroundDescription.TexturesDescription()
                 {
                     ContentPath = "Textures",
                     TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
@@ -166,7 +171,7 @@ namespace HeightmapTest
                     NormalMaps = new[] { "dirt0nm.dds" },
                     SlopeRanges = new Vector2(0.1f, 0.3f),
                 },
-                Vegetation = new TerrainDescription.VegetationDescription()
+                Vegetation = new GroundDescription.VegetationDescription()
                 {
                     ContentPath = "Foliage/Billboard",
                     VegetarionTextures = new[] { "grass.png" },

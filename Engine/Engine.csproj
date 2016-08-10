@@ -441,8 +441,8 @@
     <Compile Include="PathFinding\AStar\AStarQueryData.cs" />
     <Compile Include="ShadowMap.cs" />
     <Compile Include="SpriteButton.cs" />
-    <Compile Include="Terrain2.cs" />
-    <Compile Include="TerrainDescription.cs" />
+    <Compile Include="Terrain.cs" />
+    <Compile Include="GroundDescription.cs" />
     <Compile Include="TriangleListDrawer.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
     <Compile Include="Effects\EffectParticles.cs" />
@@ -513,7 +513,7 @@
     <Compile Include="Common\VertexSkinnedPositionNormalTexture.cs" />
     <Compile Include="Common\VertexPositionTexture.cs" />
     <Compile Include="Common\VertexTypes.cs" />
-    <Compile Include="Terrain.cs" />
+    <Compile Include="Scenery.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

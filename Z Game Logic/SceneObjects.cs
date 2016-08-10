@@ -47,7 +47,7 @@ namespace GameLogic
         private int bsphSlices = 50;
         private int bsphStacks = 25;
 
-        private Terrain terrain = null;
+        private Scenery terrain = null;
         private Minimap minimap = null;
 
         private int actionIndex = 0;
@@ -127,14 +127,14 @@ namespace GameLogic
                 ContentPath = "Resources3D",
                 ModelFileName = "cursor.dae",
             });
-            this.terrain = this.AddTerrain(new TerrainDescription()
+            this.terrain = this.AddTerrain(new GroundDescription()
             {
-                Model = new TerrainDescription.ModelDescription()
+                Model = new GroundDescription.ModelDescription()
                 {
                     ModelFileName = "terrain.dae",
                 },
                 ContentPath = "Resources3D",
-                PathFinder = new TerrainDescription.PathFinderDescription()
+                PathFinder = new GroundDescription.PathFinderDescription()
                 {
                     Settings = new GridGenerationSettings()
                     {

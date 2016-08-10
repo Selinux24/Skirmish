@@ -30,7 +30,7 @@ namespace Engine.Common
             QuadTree quadTree, QuadTreeNode parent,
             BoundingBox bbox, Triangle[] triangles,
             int treeDepth,
-            TerrainDescription description)
+            GroundDescription description)
         {
             Triangle[] nodeTriangles = Array.FindAll(triangles, t =>
             {
@@ -112,7 +112,7 @@ namespace Engine.Common
             QuadTree quadTree, QuadTreeNode parent,
             BoundingBox bbox, VertexData[] vertices,
             int treeDepth,
-            TerrainDescription description)
+            GroundDescription description)
         {
             VertexData[] nodeVertices = Array.FindAll(vertices, p =>
             {

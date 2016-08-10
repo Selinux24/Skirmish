@@ -167,14 +167,14 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 		shadowPosition,
 		gShadowMap);
 
+	float distToEye = length(toEyeWorld);
+
 	if(gFogRange > 0)
 	{
-		float distToEye = length(toEyeWorld);
-
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return float4(litColor, textureColor.a);
+	return float4(litColor, textureColor.a * (1.0f - (distToEye / gEndRadius * 0.5f)));
 }
 GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 {

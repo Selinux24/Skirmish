@@ -398,7 +398,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Terrain AddTerrain(TerrainDescription description, bool optimize = true, int order = 0)
+        public Scenery AddTerrain(GroundDescription description, bool optimize = true, int order = 0)
         {
             return AddTerrain(description, Matrix.Identity, optimize, order);
         }
@@ -410,7 +410,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Terrain AddTerrain(TerrainDescription description, Matrix transform, bool optimize = true, int order = 0)
+        public Scenery AddTerrain(GroundDescription description, Matrix transform, bool optimize = true, int order = 0)
         {
             ModelContent geo = null;
 
@@ -447,9 +447,9 @@ namespace Engine
         /// <param name="description">Terrain description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Terrain AddTerrain(ModelContent content, TerrainDescription description, int order = 0)
+        public Scenery AddTerrain(ModelContent content, GroundDescription description, int order = 0)
         {
-            Terrain newModel = new Terrain(this.Game, content, description.ContentPath, description);
+            Scenery newModel = new Scenery(this.Game, content, description.ContentPath, description);
 
             this.AddComponent(newModel, order);
 
@@ -463,9 +463,9 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Terrain2 AddTerrain2(TerrainDescription description, bool optimize = true, int order = 0)
+        public Terrain AddTerrain2(GroundDescription description, bool optimize = true, int order = 0)
         {
-            Terrain2 newModel = new Terrain2(this.Game, description);
+            Terrain newModel = new Terrain(this.Game, description);
 
             this.AddComponent(newModel, order);
 

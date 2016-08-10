@@ -21,7 +21,7 @@ namespace Engine.Common
         public static QuadTree Build(
             Game game,
             Triangle[] triangles,
-            TerrainDescription description)
+            GroundDescription description)
         {
             BoundingBox bbox = Helper.CreateBoundingBox(triangles);
             BoundingSphere bsph = Helper.CreateBoundingSphere(triangles);
@@ -55,7 +55,7 @@ namespace Engine.Common
         public static QuadTree Build(
             Game game,
             VertexData[] vertices,
-            TerrainDescription description)
+            GroundDescription description)
         {
             //Process Quadtree. Each tail quadnode must contains the same number of vertices
 

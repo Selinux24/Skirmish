@@ -15,7 +15,7 @@ namespace Collada
         private Vector3 leftMachineGunView = Vector3.Normalize(new Vector3(-20, -2, -10));
         private Vector3 rightMachineGunView = Vector3.Normalize(new Vector3(20, -2, -10));
 
-        private Terrain terrain = null;
+        private Scenery terrain = null;
         private float pathTime = 0;
         private float pathVelocity = 1f;
         private float pathHeight = 0f;
@@ -57,7 +57,7 @@ namespace Collada
             this.View = this.rightMachineGunView;
         }
 
-        public void SetPath(Terrain terrain, Vector3[] points, float velocity, float pathHeight)
+        public void SetPath(Scenery terrain, Vector3[] points, float velocity, float pathHeight)
         {
             this.terrain = terrain;
             this.pathTime = 0f;
