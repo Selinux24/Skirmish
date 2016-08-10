@@ -165,14 +165,7 @@ namespace Engine
         {
             if (topology == PrimitiveTopology.TriangleList || topology == PrimitiveTopology.TriangleListWithAdjacency)
             {
-                Triangle[] triList = new Triangle[poly.Count - 2];
-
-                for (int i = 0; i < triList.Length; i++)
-                {
-                    triList[i] = new Triangle(poly[0], poly[i + 1], poly[i + 2]);
-                }
-
-                return triList;
+                return poly.Triangulate();
             }
             else
             {

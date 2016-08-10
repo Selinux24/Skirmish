@@ -1,9 +1,9 @@
-﻿using Engine;
-using Engine.Common;
-using Engine.PathFinding.AStar;
-using SharpDX;
-using System;
+﻿using System;
 using System.Diagnostics;
+using Engine;
+using Engine.Common;
+using Engine.PathFinding.NavMesh;
+using SharpDX;
 
 namespace DeferredTest
 {
@@ -88,11 +88,7 @@ namespace DeferredTest
                 },
                 PathFinder = new GroundDescription.PathFinderDescription()
                 {
-                    Settings = new GridGenerationSettings()
-                    {
-                        NodeSize = 2f,
-                        NodeInclination = MathUtil.DegreesToRadians(35),
-                    },
+                    Settings = NavigationMeshGenerationSettings.Default,
                 },
                 Vegetation = new GroundDescription.VegetationDescription()
                 {
@@ -153,7 +149,7 @@ namespace DeferredTest
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.tank.Manipulator.SetScale(3);
+            this.tank.Manipulator.SetScale(2);
 
             #endregion
 
@@ -217,7 +213,7 @@ namespace DeferredTest
 
             Vector3 tankPosition;
             Triangle tankTriangle;
-            if (this.terrain.FindTopGroundPosition(0, 0, out tankPosition, out tankTriangle))
+            if (this.terrain.FindTopGroundPosition(20, 20, out tankPosition, out tankTriangle))
             {
                 //Inclination
                 this.tank.Manipulator.SetPosition(tankPosition, true);

@@ -553,6 +553,29 @@ namespace Engine
 
             if (toRemove.Count > 0) this.Remove(toRemove.ToArray());
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>
+        /// </returns>
+        public Triangle[] Triangulate()
+        {
+            if (GetOrientation(this.points) != GeometricOrientation.None)
+            {
+                Triangle[] triList = new Triangle[this.Count - 2];
+
+                for (int i = 0; i < triList.Length; i++)
+                {
+                    triList[i] = new Triangle(this[0], this[i + 1], this[i + 2]);
+                }
+
+                return triList;
+            }
+            else
+            {
+                throw new InvalidOperationException("Bad point list orientation");
+            }
+        }
 
         /// <summary>
         /// Gets the text representation of the instance

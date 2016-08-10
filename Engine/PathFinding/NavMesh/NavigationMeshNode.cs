@@ -10,24 +10,6 @@ namespace Engine.PathFinding.NavMesh
     public class NavigationMeshNode : IGraphNode
     {
         /// <summary>
-        /// Generates a navigation node array from a polygon array
-        /// </summary>
-        /// <param name="parent">Parent navigation mesh</param>
-        /// <param name="list">Polygon array</param>
-        /// <returns>Returns the generated node array</returns>
-        public static NavigationMeshNode[] FromPolygonArray(NavigationMesh parent, Polygon[] list)
-        {
-            var nodes = new NavigationMeshNode[list.Length];
-
-            for (int i = 0; i < nodes.Length; i++)
-            {
-                nodes[i] = new NavigationMeshNode(parent, list[i]);
-            }
-
-            return nodes;
-        }
-
-        /// <summary>
         /// Parent navigation mesh
         /// </summary>
         private NavigationMesh NavigationMesh;
@@ -35,6 +17,8 @@ namespace Engine.PathFinding.NavMesh
         /// Internal polygon
         /// </summary>
         public Polygon Poly;
+
+        public int Region;
         /// <summary>
         /// Node passing cost
         /// </summary>
@@ -49,10 +33,11 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="parent">Parent</param>
         /// <param name="poly">Polygon</param>
-        public NavigationMeshNode(NavigationMesh parent, Polygon poly)
+        public NavigationMeshNode(NavigationMesh parent, Polygon poly, int region)
         {
             this.NavigationMesh = parent;
             this.Poly = poly;
+            this.Region = region;
             this.Center = poly.Center;
         }
 

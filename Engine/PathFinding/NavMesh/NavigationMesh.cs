@@ -95,8 +95,9 @@ namespace Engine.PathFinding.NavMesh
             for (int i = 0; i < pmd.MeshCount; i++)
             {
                 var mesh = pmd.Meshes[i];
+                var poly = pm.Polys[i];
 
-                nm.Nodes[i] = new NavigationMeshNode(nm, new Polygon(mesh.VertexCount));
+                nm.Nodes[i] = new NavigationMeshNode(nm, new Polygon(mesh.VertexCount), poly.RegionId.Id);
                 for (int v = 0; v < mesh.VertexCount; v++)
                 {
                     nm.Nodes[i].Poly.Points[v] = pmd.Verts[mesh.VertexIndex + v];
