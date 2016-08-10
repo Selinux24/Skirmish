@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using SharpDX;
 
 namespace Engine.PathFinding.NavMesh
@@ -113,9 +112,7 @@ namespace Engine.PathFinding.NavMesh
         /// <returns></returns>
         public IGraphNode[] GetNodes()
         {
-            var nodes = Array.ConvertAll(this.Nodes, (n) => { return (IGraphNode)n; });
-
-            return nodes;
+            return Array.ConvertAll(this.Nodes, (n) => { return (IGraphNode)n; });
         }
         /// <summary>
         /// Finds a path over the navigation mesh
@@ -125,59 +122,13 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Returns path between the specified points if exists</returns>
         public PathFindingPath FindPath(Vector3 from, Vector3 to)
         {
-            PathFindingPath res = null;
-
-            PathPoint startPt = this.Query.FindNearestPoly(from, Vector3.Zero);
-            PathPoint endPt = this.Query.FindNearestPoly(to, Vector3.Zero);
-            List<int> path = new List<int>();
-            if (this.Query.FindPath(ref startPt, ref endPt, path))
+            Vector3[] path;
+            if (this.Query.FindPath(from, to, out path))
             {
-                var points = new List<Vector3>();
-
-                points.Add(from);
-
-                Vector3 startPos = new Vector3();
-                if (this.Query.ClosestPointOnPoly(startPt.Polygon, startPt.Position, ref startPos))
-                {
-                    points.Add(startPos);
-                }
-                else
-                {
-                    return null;
-                }
-
-                var last = startPos;
-                for (int i = 1; i < path.Count - 1; i++)
-                {
-                    Vector3 pointPos = new Vector3();
-                    if (this.Query.ClosestPointOnPoly(path[i], last, ref pointPos))
-                    {
-                        points.Add(pointPos);
-                    }
-                    else
-                    {
-                        return null;
-                    }
-
-                    last = pointPos;
-                }
-
-                Vector3 targetPos = new Vector3();
-                if (this.Query.ClosestPointOnPoly(path[path.Count - 1], last, ref targetPos))
-                {
-                    points.Add(targetPos);
-                }
-                else
-                {
-                    return null;
-                }
-
-                points.Add(to);
-
-                res = new PathFindingPath(from, to, points.ToArray());
+                return new PathFindingPath(path);
             }
 
-            return res;
+            return null;
         }
         /// <summary>
         /// Gets text representation of instance

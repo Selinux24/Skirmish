@@ -14,11 +14,99 @@ namespace Engine
         private Curve cY = new Curve();
         private Curve cZ = new Curve();
 
+        /// <summary>
+        /// Returns <c>true</c> if this curve is constant (has zero or one points); <c>false</c> otherwise.
+        /// </summary>
+        public bool IsConstant
+        {
+            get { return this.KeyCount <= 1; }
+        }
+        /// <summary>
+        /// Defines how to handle weighting values that are greater than the last control point in the curve.
+        /// </summary>
+        public CurveLoopType PostLoop
+        {
+            get
+            {
+                return this.cX.PostLoop;
+            }
+            set
+            {
+                this.cX.PostLoop = value;
+                this.cY.PostLoop = value;
+                this.cZ.PostLoop = value;
+            }
+        }
+        /// <summary>
+        /// Defines how to handle weighting values that are less than the first control point in the curve.
+        /// </summary>
+        public CurveLoopType PreLoop
+        {
+            get
+            {
+                return this.cX.PreLoop;
+            }
+            set
+            {
+                this.cX.PreLoop = value;
+                this.cY.PreLoop = value;
+                this.cZ.PreLoop = value;
+            }
+        }
         public int KeyCount
         {
             get
             {
                 return this.cX.Keys.Count;
+            }
+        }
+        public Curve3DKey Start
+        {
+            get
+            {
+                return this.GetKey(0);
+            }
+        }
+        public Curve3DKey[] Keys
+        {
+            get
+            {
+                Curve3DKey[] keys = new Curve3DKey[this.KeyCount];
+
+                for (int i = 0; i < this.KeyCount; i++)
+                {
+                    keys[i] = this.GetKey(i);
+                }
+
+                return keys;
+            }
+        }
+        public Curve3DKey End
+        {
+            get
+            {
+                return this.GetKey(this.KeyCount - 1);
+            }
+        }
+        public float Length
+        {
+            get
+            {
+                return this.End.Position;
+            }
+        }
+        public Vector3[] Points
+        {
+            get
+            {
+                Vector3[] points = new Vector3[this.KeyCount];
+
+                for (int i = 0; i < this.KeyCount; i++)
+                {
+                    points[i] = this.GetKey(i).Value;
+                }
+
+                return points;
             }
         }
 
@@ -40,27 +128,18 @@ namespace Engine
             this.cZ.Keys.Add(new CurveKey(position, vector.Z));
         }
 
-        public Vector3 GetKey(int index)
+        public Curve3DKey GetKey(int index)
         {
-            return new Vector3(
-                this.cX.Keys[index].Value,
-                this.cY.Keys[index].Value,
-                this.cZ.Keys[index].Value);
-        }
+            var keyX = this.cX.Keys[index];
+            var keyY = this.cY.Keys[index];
+            var keyZ = this.cZ.Keys[index];
 
-        public float Length
-        {
-            get
-            {
-                float length = 0;
-
-                for (int i = 1; i < this.KeyCount; i++)
-                {
-                    length += Vector3.DistanceSquared(this.GetKey(i - 1), this.GetKey(i));
-                }
-
-                return (float)Math.Sqrt(length);
-            }
+            return new Curve3DKey(
+                keyX.Position,
+                new Vector3(keyX.Value, keyY.Value, keyZ.Value),
+                new Vector3(keyX.TangentIn, keyY.TangentIn, keyZ.TangentIn),
+                new Vector3(keyX.TangentOut, keyY.TangentOut, keyZ.TangentOut),
+                keyX.Continuity);
         }
 
         public Vector3 GetPosition(float time)

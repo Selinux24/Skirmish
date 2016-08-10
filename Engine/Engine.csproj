@@ -307,6 +307,7 @@
     <Compile Include="Collections\PriorityDictionary.cs" />
     <Compile Include="Common\IGround.cs" />
     <Compile Include="Common\IValueWithCost.cs" />
+    <Compile Include="Curve3DKey.cs" />
     <Compile Include="Curve3D.cs" />
     <Compile Include="CurveContinuity.cs" />
     <Compile Include="CurveKey.cs" />

@@ -1,6 +1,6 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine.PathFinding.AStar
 {
@@ -41,7 +41,7 @@ namespace Engine.PathFinding.AStar
                 if (cachedPath != null)
                 {
                     //Return path
-                    return new PathFindingPath(startPosition, endPosition, cachedPath.Path.ReturnPath.ToArray());
+                    return new PathFindingPath(cachedPath.Path.ReturnPath.ToArray());
                 }
                 else
                 {
@@ -50,7 +50,7 @@ namespace Engine.PathFinding.AStar
                     if (solvedList != null && solvedList.Length > 0)
                     {
                         //Generate path
-                        var path = new PathFindingPath(startPosition, endPosition, solvedList);
+                        var path = new PathFindingPath(solvedList);
 
                         //Update queue
                         if (Cache.Count >= 10) Cache.RemoveAt(0);

@@ -44,7 +44,7 @@ namespace TerrainTest
 
         private Model helicopter = null;
         private float v = 0f;
-        private BezierPath curve = null;
+        private Curve3D curve = null;
         private float curveTime = 0;
         private LineListDrawer helicopterLineDrawer = null;
         private Vector3 heightOffset = (Vector3.Up * 10f);
@@ -179,7 +179,8 @@ namespace TerrainTest
             var navSettings = NavigationMeshGenerationSettings.Default;
             var tankbbox = this.tank.GetBoundingBox();
             navSettings.AgentHeight = tankbbox.GetY();
-            navSettings.AgentRadius = tankbbox.GetX() * 0.5f;
+            navSettings.AgentRadius = tankbbox.GetZ() * 0.5f;
+            navSettings.MaxClimb = tankbbox.GetY() * 0.45f;
 
             var terrainDescription = new TerrainDescription()
             {
@@ -244,7 +245,9 @@ namespace TerrainTest
                 this.helicopter.Manipulator.SetNormal(gTri.Normal);
             }
 
-            this.curve = new BezierPath();
+            this.curve = new Curve3D();
+            this.curve.PreLoop = CurveLoopType.Oscillate;
+            this.curve.PostLoop = CurveLoopType.Oscillate;
 
             Vector3[] cPoints = new[]
             {
@@ -258,7 +261,15 @@ namespace TerrainTest
                 this.DEBUGGetRandomPoint(this.heightOffset),
             };
 
-            this.curve.SetControlPoints(cPoints, 1, 10, 0.33f);
+            float t = 0;
+            for (int i = 0; i < cPoints.Length; i++)
+            {
+                if (i > 0) t += Vector3.Distance(cPoints[i - 1], cPoints[i]);
+
+                this.curve.AddPosition(t, cPoints[i]);
+            }
+
+            this.curve.SetTangents();
 
             Vector3 tankPosition;
             Triangle tankTriangle;
@@ -564,7 +575,11 @@ namespace TerrainTest
 
             if (this.Game.Input.KeyJustReleased(Keys.C))
             {
-                this.curve.AddPoint(this.DEBUGGetRandomPoint(this.heightOffset));
+                var pt = this.DEBUGGetRandomPoint(this.heightOffset);
+                var lastpt = this.curve.End.Value;
+
+                this.curve.AddPosition(Vector3.Distance(lastpt, pt) + this.curve.Length, pt);
+                this.curve.SetTangents();
 
                 this.DEBUGComputePath();
             }
@@ -580,67 +595,59 @@ namespace TerrainTest
                     time *= 0.01f;
                 }
 
-                int segment;
-                float segmentDistance;
-                this.curve.FindCurve(this.curveTime, out segment, out segmentDistance);
+                Vector3 p0 = this.curve.GetPosition(this.curveTime);
+                Vector3 p1 = this.curve.GetPosition(this.curveTime + gameTime.ElapsedSeconds);
 
-                if (segment < this.curve.Count - 3)
-                {
-                    int segment2;
-                    float segmentDistance2;
-                    this.curve.FindCurve(this.curveTime + gameTime.ElapsedSeconds, out segment2, out segmentDistance2);
+                float segmentDelta = Vector3.Distance(p0, p1);
 
-                    float segmentDelta = segmentDistance2 - segmentDistance;
+                Vector3 cfw = this.helicopter.Manipulator.Forward;
+                Vector3 nfw = Vector3.Normalize(p1 - p0);
+                cfw.Y = 0f;
+                nfw.Y = 0f;
 
-                    Vector3 p0 = this.curve.GetPosition(this.curveTime);
-                    Vector3 p1 = this.curve.GetPosition(this.curveTime + gameTime.ElapsedSeconds);
+                float pitch = Vector3.DistanceSquared(p0, p1) * 10f;
+                float roll = Helper.Angle(Vector3.Normalize(nfw), Vector3.Normalize(cfw), Vector3.Up) * 50f;
 
-                    Vector3 cfw = this.helicopter.Manipulator.Forward;
-                    Vector3 nfw = Vector3.Normalize(p1 - p0);
-                    cfw.Y = 0f;
-                    nfw.Y = 0f;
+                pitch = MathUtil.Clamp(pitch, -MathUtil.PiOverFour, MathUtil.PiOverFour);
+                roll = MathUtil.Clamp(roll, -MathUtil.PiOverFour, MathUtil.PiOverFour);
 
-                    float pitch = Vector3.DistanceSquared(p0, p1) * 10f;
-                    float roll = Helper.Angle(Vector3.Normalize(nfw), Vector3.Normalize(cfw), Vector3.Up) * 50f;
+                roll *= pitch * 50f;
 
-                    pitch = MathUtil.Clamp(pitch, -MathUtil.PiOverFour, MathUtil.PiOverFour);
-                    roll = MathUtil.Clamp(roll, -MathUtil.PiOverFour, MathUtil.PiOverFour);
+                Quaternion r =
+                    Helper.LookAt(p1, p0) *
+                    Quaternion.RotationYawPitchRoll(0, -pitch, roll);
 
-                    roll *= pitch * 50f;
+                r = Quaternion.Slerp(this.helicopter.Manipulator.Rotation, r, 0.1f);
 
-                    Quaternion r =
-                        Helper.LookAt(p1, p0) *
-                        Quaternion.RotationYawPitchRoll(0, -pitch, roll);
+                this.helicopter.Manipulator.SetPosition(p0);
+                this.helicopter.Manipulator.SetRotation(r);
 
-                    r = Quaternion.Slerp(this.helicopter.Manipulator.Rotation, r, 0.1f);
+                this.Lights.PointLights[0].Position = (p0 + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Left);
+                this.Lights.PointLights[1].Position = (p0 + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Right);
 
-                    this.helicopter.Manipulator.SetPosition(p0);
-                    this.helicopter.Manipulator.SetRotation(r);
+                this.curveTime += time;
 
-                    this.Lights.PointLights[0].Position = (p0 + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Left);
-                    this.Lights.PointLights[1].Position = (p0 + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Right);
+                this.curveLineDrawer.SetLines(this.velocityColor, new[] { new Line3(p0, p1) });
 
-                    this.curveTime += time;
+                this.help.Text = string.Format(
+                    "Pitch {0:+00.00;-00.00}; Roll {1:+00.00;-00.00}; Delta {2:00.0000}; Index {3}; Curve Time: {4}; Curve Length: {5}",
+                    MathUtil.RadiansToDegrees(pitch),
+                    MathUtil.RadiansToDegrees(roll),
+                    pitch / MathUtil.PiOverFour,
+                    this.gridIndex,
+                    this.curveTime,
+                    this.curve.Length);
 
-                    this.curveLineDrawer.SetLines(this.velocityColor, new[] { new Line3(p0, p1) });
+                //if (this.curveTime > this.curve.Length * 0.66f)
+                //{
+                //    var pt = this.DEBUGGetRandomPoint(this.heightOffset);
+                //    var lastpt = this.curve.End;
 
-                    this.help.Text = string.Format(
-                        "Pitch {0:+00.00;-00.00}; Roll {1:+00.00;-00.00}; Delta {2:00.0000}; Segment {3} of {4}/{5:00.0000}/{6:00.0000}; Index {7}",
-                        MathUtil.RadiansToDegrees(pitch),
-                        MathUtil.RadiansToDegrees(roll),
-                        pitch / MathUtil.PiOverFour,
-                        segment + 1,
-                        this.curve.Count,
-                        segmentDistance,
-                        segmentDelta,
-                        this.gridIndex);
-                }
-                else
-                {
-                    this.curve.AddPoint(this.DEBUGGetRandomPoint(this.heightOffset));
+                //    this.curve.AddPosition(Vector3.Distance(lastpt, pt) + this.curve.Length, pt);
+                //    this.curve.SetTangents();
 
-                    this.DEBUGComputePath();
-                }
+                //    this.DEBUGComputePath();
+                //}
             }
 
             Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
