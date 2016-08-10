@@ -1,5 +1,5 @@
-﻿using SharpDX;
-using System;
+﻿using System;
+using SharpDX;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
@@ -59,6 +59,10 @@ namespace Engine
         private Matrix local = Matrix.Identity;
 
         /// <summary>
+        /// Enables z-buffer writting
+        /// </summary>
+        public bool EnableDepthStencil { get; set; }
+        /// <summary>
         /// Enables transparent blending
         /// </summary>
         public bool EnableAlphaBlending { get; set; }
@@ -81,6 +85,8 @@ namespace Engine
         {
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+
+            this.EnableDepthStencil = true;
         }
         /// <summary>
         /// Update
@@ -136,7 +142,14 @@ namespace Engine
 
                     #endregion
 
-                    this.Game.Graphics.SetDepthStencilZEnabled();
+                    if (this.EnableDepthStencil)
+                    {
+                        this.Game.Graphics.SetDepthStencilZEnabled();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetDepthStencilZDisabled();
+                    }
 
                     if (this.EnableAlphaBlending)
                     {

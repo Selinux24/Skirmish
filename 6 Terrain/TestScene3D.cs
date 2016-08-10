@@ -296,7 +296,7 @@ namespace TerrainTest
                 Width = width,
                 Height = height,
                 Channel = SpriteTextureChannelsEnum.Red,
-            });
+            }, 99);
             this.shadowMapDrawer.Visible = false;
             this.shadowMapDrawer.DeferredEnabled = false;
 
@@ -307,6 +307,7 @@ namespace TerrainTest
             #region DEBUG Path finding Graph
 
             this.terrainGraphDrawer = this.AddTriangleListDrawer(MaxGridDrawer);
+            this.terrainGraphDrawer.EnableDepthStencil = false;
             this.terrainGraphDrawer.EnableAlphaBlending = true;
             this.terrainGraphDrawer.Visible = false;
             this.terrainGraphDrawer.DeferredEnabled = false;
@@ -337,6 +338,8 @@ namespace TerrainTest
             this.terrainLineDrawer = this.AddLineListDrawer(oks.Count + errs.Count);
             this.terrainLineDrawer.Visible = false;
             this.terrainLineDrawer.DeferredEnabled = false;
+            this.terrainLineDrawer.EnableAlphaBlending = true;
+            this.terrainLineDrawer.EnableDepthStencil = false;
 
             if (this.oks.Count > 0)
             {
@@ -354,6 +357,8 @@ namespace TerrainTest
             this.terrainPointDrawer = this.AddLineListDrawer(MaxPickingTest);
             this.terrainPointDrawer.Visible = false;
             this.terrainPointDrawer.DeferredEnabled = false;
+            this.terrainPointDrawer.EnableAlphaBlending = true;
+            this.terrainPointDrawer.EnableDepthStencil = false;
 
             #endregion
 
@@ -362,6 +367,8 @@ namespace TerrainTest
             this.helicopterLineDrawer = this.AddLineListDrawer(1000);
             this.helicopterLineDrawer.Visible = false;
             this.helicopterLineDrawer.DeferredEnabled = false;
+            this.helicopterLineDrawer.EnableAlphaBlending = true;
+            this.helicopterLineDrawer.EnableDepthStencil = false;
 
             #endregion
 
@@ -370,6 +377,8 @@ namespace TerrainTest
             this.curveLineDrawer = this.AddLineListDrawer(20000);
             this.curveLineDrawer.Visible = false;
             this.curveLineDrawer.DeferredEnabled = false;
+            this.curveLineDrawer.EnableAlphaBlending = true;
+            this.curveLineDrawer.EnableDepthStencil = false;
             this.curveLineDrawer.SetLines(this.wAxisColor, Line3.CreateAxis(Matrix.Identity, 20f));
 
             this.DEBUGHelicopterPath();
@@ -764,17 +773,6 @@ namespace TerrainTest
                         var poly = node.Poly;
                         var tris = poly.Triangulate();
 
-                        for (int t = 0; t < tris.Length; t++)
-                        {
-                            this.terrain.FindNearestGroundPosition(tris[t].Point1, out tris[t].Point1);
-                            this.terrain.FindNearestGroundPosition(tris[t].Point2, out tris[t].Point2);
-                            this.terrain.FindNearestGroundPosition(tris[t].Point3, out tris[t].Point3);
-
-                            tris[t].Point1.Y += 0.1f;
-                            tris[t].Point2.Y += 0.1f;
-                            tris[t].Point3.Y += 0.1f;
-                        }
-
                         this.terrainGraphDrawer.AddTriangles(color, tris);
                     }
                 }
@@ -793,17 +791,6 @@ namespace TerrainTest
                         var color = regions[node.Region];
                         var poly = node.Poly;
                         var tris = poly.Triangulate();
-
-                        for (int t = 0; t < tris.Length; t++)
-                        {
-                            this.terrain.FindNearestGroundPosition(tris[t].Point1, out tris[t].Point1);
-                            this.terrain.FindNearestGroundPosition(tris[t].Point2, out tris[t].Point2);
-                            this.terrain.FindNearestGroundPosition(tris[t].Point3, out tris[t].Point3);
-
-                            tris[t].Point1.Y += 0.1f;
-                            tris[t].Point2.Y += 0.1f;
-                            tris[t].Point3.Y += 0.1f;
-                        }
 
                         this.terrainGraphDrawer.SetTriangles(color, tris);
                     }

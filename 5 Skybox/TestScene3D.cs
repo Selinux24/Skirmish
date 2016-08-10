@@ -1,7 +1,7 @@
-﻿using Engine;
-using Engine.Common;
+﻿using System;
+using Engine;
+using Engine.PathFinding.NavMesh;
 using SharpDX;
-using System;
 
 namespace Skybox
 {
@@ -107,14 +107,26 @@ namespace Skybox
                 {
                     ModelFileName = "ruins.dae",
                 },
+                PathFinder = new GroundDescription.PathFinderDescription()
+                {
+                    Settings = NavigationMeshGenerationSettings.Default,
+                },
                 Opaque = true,
             };
             this.ruins = this.AddTerrain(desc, false);
 
             this.bboxGlobalDrawer = this.AddLineListDrawer(Line3.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
             this.bboxGlobalDrawer.Visible = false;
+            this.bboxGlobalDrawer.DeferredEnabled = false;
+            this.bboxGlobalDrawer.EnableDepthStencil = false;
+            this.bboxGlobalDrawer.EnableAlphaBlending = true;
+            this.bboxGlobalDrawer.Opaque = false;
 
             this.pickedTri = this.AddTriangleListDrawer(1);
+            this.pickedTri.DeferredEnabled = false;
+            this.pickedTri.EnableDepthStencil = false;
+            this.pickedTri.EnableAlphaBlending = true;
+            this.pickedTri.Opaque = false;
 
             #endregion
 
@@ -290,30 +302,16 @@ namespace Skybox
 
                 Vector3 p;
                 Triangle tri;
-                if (this.ruins.FindTopGroundPosition(v.X, v.Z, out p, out tri))
+                if (this.ruins.FindNearestGroundPosition(v, out p, out tri))
                 {
-                    if (tri.Inclination > walkerClimb)
+                    //Position test
+                    if (this.ruins.FindNearestGroundPosition(currentPosition, out p, out tri))
                     {
-                        this.Camera.Goto(previousPosition);
+                        this.Camera.Goto(p + this.walkerHeight);
                     }
                     else
                     {
-                        //Position test
-                        if (this.ruins.FindTopGroundPosition(currentPosition.X, currentPosition.Z, out p, out tri))
-                        {
-                            if (tri.Inclination > walkerClimb)
-                            {
-                                this.Camera.Goto(previousPosition);
-                            }
-                            else
-                            {
-                                this.Camera.Goto(p + this.walkerHeight);
-                            }
-                        }
-                        else
-                        {
-                            this.Camera.Goto(previousPosition);
-                        }
+                        this.Camera.Goto(previousPosition);
                     }
                 }
                 else
@@ -323,10 +321,6 @@ namespace Skybox
             }
 
             #endregion
-        }
-        public override void Draw(GameTime gameTime)
-        {
-            base.Draw(gameTime);
         }
 
         private void UpdateInput()
