@@ -157,6 +157,162 @@ namespace Engine
             return triangleList.ToArray();
         }
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="topology"></param>
+        /// <param name="bbox"></param>
+        /// <returns></returns>
+        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, BoundingBox bbox)
+        {
+            List<Triangle> triangleList = new List<Triangle>();
+
+            if (topology == PrimitiveTopology.TriangleList || topology == PrimitiveTopology.TriangleListWithAdjacency)
+            {
+                var v = new Vector3[24];
+
+                float xm = bbox.Minimum.X;
+                float ym = bbox.Minimum.Y;
+                float zm = bbox.Minimum.Z;
+
+                float xM = bbox.Maximum.X;
+                float yM = bbox.Maximum.Y;
+                float zM = bbox.Maximum.Z;
+
+                // Fill in the front face vertex data.
+                v[0] = new Vector3(xm, ym, zm);
+                v[1] = new Vector3(xm, yM, zm);
+                v[2] = new Vector3(xM, yM, zm);
+                v[3] = new Vector3(xM, ym, zm);
+
+                // Fill in the back face vertex data.
+                v[4] = new Vector3(xm, ym, zM);
+                v[5] = new Vector3(xM, ym, zM);
+                v[6] = new Vector3(xM, yM, zM);
+                v[7] = new Vector3(xm, yM, zM);
+
+                // Fill in the top face vertex data.
+                v[8] = new Vector3(xm, yM, zm);
+                v[9] = new Vector3(xm, yM, zM);
+                v[10] = new Vector3(xM, yM, zM);
+                v[11] = new Vector3(xM, yM, zm);
+
+                // Fill in the bottom face vertex data.
+                v[12] = new Vector3(xm, ym, zm);
+                v[13] = new Vector3(xM, ym, zm);
+                v[14] = new Vector3(xM, ym, zM);
+                v[15] = new Vector3(xm, ym, zM);
+
+                // Fill in the left face vertex data.
+                v[16] = new Vector3(xm, ym, zM);
+                v[17] = new Vector3(xm, yM, zM);
+                v[18] = new Vector3(xm, yM, zm);
+                v[19] = new Vector3(xm, ym, zm);
+
+                // Fill in the right face vertex data.
+                v[20] = new Vector3(xM, ym, zm);
+                v[21] = new Vector3(xM, yM, zm);
+                v[22] = new Vector3(xM, yM, zM);
+                v[23] = new Vector3(xM, ym, zM);
+
+                // Fill in the front face index data
+                triangleList.Add(new Triangle(v[0], v[1], v[2]));
+                triangleList.Add(new Triangle(v[0], v[2], v[3]));
+
+                // Fill in the back face index data
+                triangleList.Add(new Triangle(v[4], v[5], v[6]));
+                triangleList.Add(new Triangle(v[4], v[6], v[7]));
+
+                // Fill in the top face index data
+                triangleList.Add(new Triangle(v[8], v[9], v[10]));
+                triangleList.Add(new Triangle(v[8], v[10], v[11]));
+
+                // Fill in the bottom face index data
+                triangleList.Add(new Triangle(v[12], v[13], v[14]));
+                triangleList.Add(new Triangle(v[12], v[14], v[15]));
+
+                // Fill in the left face index data
+                triangleList.Add(new Triangle(v[16], v[17], v[18]));
+                triangleList.Add(new Triangle(v[16], v[18], v[19]));
+
+                // Fill in the right face index data
+                triangleList.Add(new Triangle(v[20], v[21], v[22]));
+                triangleList.Add(new Triangle(v[20], v[22], v[23]));
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            return triangleList.ToArray();
+        }
+
+        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, BoundingCylinder cylinder, int segments)
+        {
+            List<Triangle> triangleList = new List<Triangle>();
+
+            if (topology == PrimitiveTopology.TriangleList || topology == PrimitiveTopology.TriangleListWithAdjacency)
+            {
+                List<Vector3> verts = new List<Vector3>();
+
+                //verts
+                for (int i = 0; i < 2; i++)
+                {
+                    for (int j = 0; j <= segments; j++)
+                    {
+                        float theta = ((float)j / (float)segments) * 2 * (float)Math.PI;
+                        float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
+
+                        verts.Add(cylinder.Position + new Vector3(cylinder.Radius * st, cylinder.Height * i, cylinder.Radius * ct));
+                        verts.Add(cylinder.Position + (i == 0 ? -Vector3.UnitY : Vector3.UnitY));
+                    }
+                }
+
+                for (int i = 0; i < 2; i++)
+                {
+                    for (int j = 0; j <= segments; j++)
+                    {
+                        float theta = ((float)j / (float)segments) * 2 * (float)Math.PI;
+                        float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
+
+                        verts.Add(cylinder.Position + new Vector3(cylinder.Radius * st, cylinder.Height * i, cylinder.Radius * ct));
+                        verts.Add(cylinder.Position + new Vector3(st, 0, ct));
+                    }
+                }
+
+                //inds
+                int start = 0;
+
+                //bottom cap
+                for (int i = 1; i < segments - 1; i++)
+                {
+                    triangleList.Add(new Triangle(verts[start], verts[start + i + 1], verts[start + i]));
+                }
+
+                start = segments + 1;
+
+                //top cap
+                for (int i = 1; i < segments - 1; i++)
+                {
+                    triangleList.Add(new Triangle(verts[start], verts[start + i], verts[start + i + 1]));
+                }
+
+                start += segments + 1;
+
+                //edge
+                for (int i = 0; i <= segments; i++)
+                {
+                    triangleList.Add(new Triangle(verts[start + i], verts[start + segments + i + 1], verts[start + segments + i]));
+                    triangleList.Add(new Triangle(verts[start + i], verts[start + i + 1], verts[start + segments + i + 1]));
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            return triangleList.ToArray();
+        }
+        /// <summary>
         /// Generate a triangle list from polygon
         /// </summary>
         /// <param name="poly">Polygon</param>
@@ -338,34 +494,6 @@ namespace Engine
 
                 return false;
             }
-        }
-        /// <summary>
-        /// Gets the area of the triangle projected onto the XZ-plane.
-        /// </summary>
-        /// <param name="a">The first point.</param>
-        /// <param name="b">The second point.</param>
-        /// <param name="c">The third point.</param>
-        /// <param name="area">The calculated area.</param>
-        public static void Area2D(ref Vector3 a, ref Vector3 b, ref Vector3 c, out float area)
-        {
-            float abx = b.X - a.X;
-            float abz = b.Z - a.Z;
-            float acx = c.X - a.X;
-            float acz = c.Z - a.Z;
-            area = acx * abz - abx * acz;
-        }
-        /// <summary>
-        /// Gets the area of the triangle projected onto the XZ-plane.
-        /// </summary>
-        /// <param name="a">The first point.</param>
-        /// <param name="b">The second point.</param>
-        /// <param name="c">The third point.</param>
-        /// <returns>The calculated area.</returns>
-        public static float Area2D(Vector3 a, Vector3 b, Vector3 c)
-        {
-            float result;
-            Area2D(ref a, ref b, ref c, out result);
-            return result;
         }
 
         /// <summary>

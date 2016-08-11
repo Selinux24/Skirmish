@@ -699,6 +699,35 @@ namespace Engine.Common
 
             return r;
         }
+      
+        /// <summary>
+        /// Gets the area of the triangle projected onto the XZ-plane.
+        /// </summary>
+        /// <param name="a">The first point.</param>
+        /// <param name="b">The second point.</param>
+        /// <param name="c">The third point.</param>
+        /// <param name="area">The calculated area.</param>
+        public static void Area2D(ref Vector3 a, ref Vector3 b, ref Vector3 c, out float area)
+        {
+            float abx = b.X - a.X;
+            float abz = b.Z - a.Z;
+            float acx = c.X - a.X;
+            float acz = c.Z - a.Z;
+            area = acx * abz - abx * acz;
+        }
+        /// <summary>
+        /// Gets the area of the triangle projected onto the XZ-plane.
+        /// </summary>
+        /// <param name="a">The first point.</param>
+        /// <param name="b">The second point.</param>
+        /// <param name="c">The third point.</param>
+        /// <returns>The calculated area.</returns>
+        public static float Area2D(Vector3 a, Vector3 b, Vector3 c)
+        {
+            float result;
+            Area2D(ref a, ref b, ref c, out result);
+            return result;
+        }
 
         /// <summary>
         /// Determine whether a ray (origin, dir) is intersecting a segment AB.
@@ -943,57 +972,6 @@ namespace Engine.Common
         internal static bool OverlapRange(float amin, float amax, float bmin, float bmax, float eps)
         {
             return ((amin + eps) > bmax || (amax - eps) < bmin) ? false : true;
-        }
-
-        /// <summary>
-        /// Generate an accurate sample of random points in the convex polygon and pick a point.
-        /// </summary>
-        /// <param name="pts">The polygon's points data</param>
-        /// <param name="npts">The number of points</param>
-        /// <param name="areas">The triangle areas</param>
-        /// <param name="s">A random float</param>
-        /// <param name="t">Another random float</param>
-        /// <param name="pt">The resulting point</param>
-        public static void RandomPointInConvexPoly(Vector3[] pts, int npts, float[] areas, float s, float t, out Vector3 pt)
-        {
-            //Calculate triangle areas
-            float areaSum = 0.0f;
-            float area;
-            for (int i = 2; i < npts; i++)
-            {
-                Triangle.Area2D(ref pts[0], ref pts[i - 1], ref pts[i], out area);
-                areaSum += Math.Max(0.001f, area);
-                areas[i] = area;
-            }
-
-            //Find sub triangle weighted by area
-            float threshold = s * areaSum;
-            float accumulatedArea = 0.0f;
-            float u = 0.0f;
-            int triangleVertex = 0;
-            for (int i = 2; i < npts; i++)
-            {
-                float currentArea = areas[i];
-                if (threshold >= accumulatedArea && threshold < (accumulatedArea + currentArea))
-                {
-                    u = (threshold - accumulatedArea) / currentArea;
-                    triangleVertex = i;
-                    break;
-                }
-
-                accumulatedArea += currentArea;
-            }
-
-            float v = (float)Math.Sqrt(t);
-
-            float a = 1 - v;
-            float b = (1 - u) * v;
-            float c = u * v;
-            Vector3 pointA = pts[0];
-            Vector3 pointB = pts[triangleVertex - 1];
-            Vector3 pointC = pts[triangleVertex];
-
-            pt = a * pointA + b * pointB + c * pointC;
         }
 
         /// <summary>

@@ -69,7 +69,7 @@ namespace Engine
         /// <summary>
         /// Model manipulator
         /// </summary>
-        public Manipulator3D Manipulator { get; set; }
+        public Manipulator3D Manipulator { get; private set; }
         /// <summary>
         /// Texture index
         /// </summary>
@@ -248,6 +248,15 @@ namespace Engine
             }
         }
 
+
+        public void SetManipulator(Manipulator3D manipulator)
+        {
+            this.Manipulator.Updated -= ManipulatorUpdated;
+            this.Manipulator = null;
+
+            this.Manipulator = manipulator;
+            this.Manipulator.Updated += ManipulatorUpdated;
+        }
         /// <summary>
         /// Occurs when manipulator transform updated
         /// </summary>
@@ -476,32 +485,5 @@ namespace Engine
 
             return false;
         }
-    }
-
-    /// <summary>
-    /// Terrain description
-    /// </summary>
-    public class ModelDescription
-    {
-        /// <summary>
-        /// Content path
-        /// </summary>
-        public string ContentPath = "Resources";
-        /// <summary>
-        /// Model file name
-        /// </summary>
-        public string ModelFileName = null;
-        /// <summary>
-        /// Texture index
-        /// </summary>
-        public int TextureIndex = 0;
-        /// <summary>
-        /// Is opaque
-        /// </summary>
-        public bool Opaque = true;
-        /// <summary>
-        /// Can be renderer by the deferred renderer
-        /// </summary>
-        public bool DeferredEnabled = true;
     }
 }

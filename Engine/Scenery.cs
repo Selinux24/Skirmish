@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SharpDX;
+using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
@@ -113,21 +114,23 @@ namespace Engine
                 this.ground.Draw(context);
             }
         }
-   
+
         /// <summary>
         /// Updates internal objects
         /// </summary>
         public override void UpdateInternals()
         {
-            var triangles = this.GetTriangles();
-
             if (this.Description != null && this.Description.Quadtree != null)
             {
+                var triangles = this.GetTriangles(UsageEnum.Picking);
+
                 this.pickingQuadtree = QuadTree.Build(this.Game, triangles, this.Description);
             }
 
             if (this.Description != null && this.Description.PathFinder != null)
             {
+                var triangles = this.GetTriangles(UsageEnum.PathFinding);
+
                 this.navigationGraph = PathFinder.Build(this.Description.PathFinder.Settings, triangles);
             }
         }
@@ -226,16 +229,16 @@ namespace Engine
                 {
                     var curr = this.GroundObjects[i];
 
-                    if (curr is Model)
+                    if (curr.Model is Model)
                     {
-                        BoundingSphere.Merge(sph, ((Model)curr).GetBoundingSphere());
+                        BoundingSphere.Merge(sph, ((Model)curr.Model).GetBoundingSphere());
                     }
 
-                    if (curr is ModelInstanced)
+                    if (curr.Model is ModelInstanced)
                     {
-                        for (int m = 0; m < ((ModelInstanced)curr).Instances.Length; m++)
+                        for (int m = 0; m < ((ModelInstanced)curr.Model).Instances.Length; m++)
                         {
-                            BoundingSphere.Merge(sph, ((ModelInstanced)curr).Instances[m].GetBoundingSphere());
+                            BoundingSphere.Merge(sph, ((ModelInstanced)curr.Model).Instances[m].GetBoundingSphere());
                         }
                     }
                 }
@@ -261,16 +264,16 @@ namespace Engine
                 {
                     var curr = this.GroundObjects[i];
 
-                    if (curr is Model)
+                    if (curr.Model is Model)
                     {
-                        BoundingBox.Merge(bbox, ((Model)curr).GetBoundingBox());
+                        BoundingBox.Merge(bbox, ((Model)curr.Model).GetBoundingBox());
                     }
 
-                    if (curr is ModelInstanced)
+                    if (curr.Model is ModelInstanced)
                     {
-                        for (int m = 0; m < ((ModelInstanced)curr).Instances.Length; m++)
+                        for (int m = 0; m < ((ModelInstanced)curr.Model).Instances.Length; m++)
                         {
-                            BoundingBox.Merge(bbox, ((ModelInstanced)curr).Instances[m].GetBoundingBox());
+                            BoundingBox.Merge(bbox, ((ModelInstanced)curr.Model).Instances[m].GetBoundingBox());
                         }
                     }
                 }
@@ -300,16 +303,16 @@ namespace Engine
                 {
                     var curr = this.GroundObjects[i];
 
-                    if (curr is Model)
+                    if (curr.Model is Model)
                     {
-                        res.Add(((Model)curr).GetBoundingBox());
+                        res.Add(((Model)curr.Model).GetBoundingBox());
                     }
 
-                    if (curr is ModelInstanced)
+                    if (curr.Model is ModelInstanced)
                     {
-                        for (int m = 0; m < ((ModelInstanced)curr).Instances.Length; m++)
+                        for (int m = 0; m < ((ModelInstanced)curr.Model).Instances.Length; m++)
                         {
-                            res.Add(((ModelInstanced)curr).Instances[m].GetBoundingBox());
+                            res.Add(((ModelInstanced)curr.Model).Instances[m].GetBoundingBox());
                         }
                     }
                 }
@@ -321,7 +324,7 @@ namespace Engine
         /// Gets triangle list
         /// </summary>
         /// <returns>Returns triangle list. Empty if the vertex type hasn't position channel</returns>
-        public Triangle[] GetTriangles()
+        public Triangle[] GetTriangles(UsageEnum usage = UsageEnum.None)
         {
             List<Triangle> tris = new List<Triangle>();
 
@@ -331,16 +334,38 @@ namespace Engine
             {
                 var curr = this.GroundObjects[i];
 
-                if (curr is Model)
+                if (usage == UsageEnum.Picking && !curr.EvaluateForPicking) continue;
+                if (usage == UsageEnum.PathFinding && !curr.EvaluateForPathFinding) continue;
+
+                if (curr.Model is Model)
                 {
-                    tris.AddRange(((Model)curr).GetTriangles());
+                    if (usage == UsageEnum.Picking && curr.UseVolumeForPicking || usage == UsageEnum.PathFinding && curr.UseVolumeForPathFinding)
+                    {
+                        var cylinder = BoundingCylinder.FromPoints(((Model)curr.Model).GetPoints());
+                        tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
+                    }
+                    else
+                    {
+                        tris.AddRange(((Model)curr.Model).GetTriangles());
+                    }
                 }
 
-                if (curr is ModelInstanced)
+                if (curr.Model is ModelInstanced)
                 {
-                    for (int m = 0; m < ((ModelInstanced)curr).Instances.Length; m++)
+                    if (usage == UsageEnum.Picking && curr.UseVolumeForPicking || usage == UsageEnum.PathFinding && curr.UseVolumeForPathFinding)
                     {
-                        tris.AddRange(((ModelInstanced)curr).Instances[m].GetTriangles());
+                        for (int m = 0; m < ((ModelInstanced)curr.Model).Instances.Length; m++)
+                        {
+                            var cylinder = BoundingCylinder.FromPoints(((ModelInstanced)curr.Model).Instances[m].GetPoints());
+                            tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
+                        }
+                    }
+                    else
+                    {
+                        for (int m = 0; m < ((ModelInstanced)curr.Model).Instances.Length; m++)
+                        {
+                            tris.AddRange(((ModelInstanced)curr.Model).Instances[m].GetTriangles());
+                        }
                     }
                 }
             }
@@ -361,6 +386,25 @@ namespace Engine
             }
 
             return nodes;
+        }
+
+        /// <summary>
+        /// Usage enumeration for internal's update
+        /// </summary>
+        public enum UsageEnum
+        {
+            /// <summary>
+            /// None
+            /// </summary>
+            None,
+            /// <summary>
+            /// For picking test
+            /// </summary>
+            Picking,
+            /// <summary>
+            /// For path finding test
+            /// </summary>
+            PathFinding,
         }
     }
 }

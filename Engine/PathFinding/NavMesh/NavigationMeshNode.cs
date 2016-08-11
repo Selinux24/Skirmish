@@ -12,13 +12,19 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Parent navigation mesh
         /// </summary>
-        private NavigationMesh NavigationMesh;
+        private NavigationMesh NavigationMesh = null;
         /// <summary>
         /// Internal polygon
         /// </summary>
-        public Polygon Poly;
-
-        public int Region;
+        public Polygon Poly { get; set; }
+        /// <summary>
+        /// Polygon Id
+        /// </summary>
+        public int PolyId { get; set; }
+        /// <summary>
+        /// Region Id
+        /// </summary>
+        public int RegionId { get; set; }
         /// <summary>
         /// Node passing cost
         /// </summary>
@@ -33,11 +39,12 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="parent">Parent</param>
         /// <param name="poly">Polygon</param>
-        public NavigationMeshNode(NavigationMesh parent, Polygon poly, int region)
+        public NavigationMeshNode(NavigationMesh parent, Polygon poly, int polyId, int regionId)
         {
             this.NavigationMesh = parent;
             this.Poly = poly;
-            this.Region = region;
+            this.PolyId = polyId;
+            this.RegionId = regionId;
             this.Center = poly.Center;
         }
 

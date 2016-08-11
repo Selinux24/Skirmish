@@ -42,6 +42,37 @@ namespace Engine
         protected Vector3 position = Vector3.Zero;
 
         /// <summary>
+        /// Ground
+        /// </summary>
+        protected IGround Ground = null;
+
+        /// <summary>
+        /// Following path
+        /// </summary>
+        protected ICurve Curve = null;
+        /// <summary>
+        /// Path time
+        /// </summary>
+        protected float CurveTime = 0f;
+        /// <summary>
+        /// Following time delta
+        /// </summary>
+        protected float CurveTimeDelta = 1f;
+
+        /// <summary>
+        /// Target
+        /// </summary>
+        protected Vector3[] Path = null;
+        /// <summary>
+        /// Target position
+        /// </summary>
+        protected int PathTarget = -1;
+        /// <summary>
+        /// Path velocity
+        /// </summary>
+        protected float PathVelocity = 0f;
+
+        /// <summary>
         /// Gets Position component
         /// </summary>
         public Vector3 Position
@@ -120,38 +151,9 @@ namespace Engine
         {
             get
             {
-                return this.curve != null;
+                return this.Curve != null || this.Path != null;
             }
         }
-
-        /// <summary>
-        /// Ground
-        /// </summary>
-        private IGround ground = null;
-        /// <summary>
-        /// Following path
-        /// </summary>
-        private ICurve curve = null;
-        /// <summary>
-        /// Path time
-        /// </summary>
-        private float curveTime = 0f;
-        /// <summary>
-        /// Following time delta
-        /// </summary>
-        private float curveTimeDelta = 1f;
-        /// <summary>
-        /// Target
-        /// </summary>
-        private Vector3[] path = null;
-        /// <summary>
-        /// Target position
-        /// </summary>
-        private int pathTarget = -1;
-        /// <summary>
-        /// Path velocity
-        /// </summary>
-        private float pathVelocity = 0f;
 
         /// <summary>
         /// Contructor
@@ -168,79 +170,95 @@ namespace Engine
         /// Update internal state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        public virtual void Update(GameTime gameTime)
         {
-            if (this.curve != null)
+            if (this.Curve != null)
             {
                 #region Following a curve
 
-                if (this.curveTime <= this.curve.Length)
-                {
-                    Vector3 newPosition = this.curve.GetPosition(this.curveTime);
-
-                    if (this.curveTime != 0f)
-                    {
-                        Vector3 view = Vector3.Normalize(this.position - newPosition);
-
-                        this.position = newPosition;
-                        this.LookAt(newPosition + view);
-                    }
-
-                    this.curveTime += gameTime.ElapsedMilliseconds * 0.01f * this.curveTimeDelta;
-                }
-                else
-                {
-                    this.curve = null;
-                    this.curveTime = 0f;
-                }
+                this.UpdateFollowCurve(gameTime);
 
                 #endregion
             }
-            else if (this.path != null)
+            else if (this.Path != null)
             {
                 #region Following a path
 
-                if (this.pathTarget < this.path.Length)
-                {
-                    Vector3 p = this.path[this.pathTarget];
-
-                    if (GeometryUtil.WithinEpsilon(this.position, p, this.pathVelocity))
-                    {
-                        this.pathTarget++;
-                    }
-                    else
-                    {
-                        Vector3 newPosition = this.position + (Vector3.Normalize(p - this.position) * this.pathVelocity);
-                        Vector3 newNormal = this.Up;
-
-                        if (this.ground != null)
-                        {
-                            Vector3 pos;
-                            Triangle tri;
-                            if (this.ground.FindNearestGroundPosition(newPosition, out pos, out tri))
-                            {
-                                newPosition = pos;
-                                newNormal = tri.Normal;
-                            }
-                        }
-
-                        Vector3 view = Vector3.Normalize(this.position - newPosition);
-
-                        this.position = newPosition;
-                        this.LookAt(newPosition + view, newNormal, false, 0.1f);
-                    }
-                }
-                else
-                {
-                    this.path = null;
-                    this.pathVelocity = 0f;
-                    this.pathTarget = -1;
-                }
+                this.UpdateFollowPath(gameTime);
 
                 #endregion
             }
 
             this.UpdateLocalTransform();
+        }
+        /// <summary>
+        /// Computes current position and orientation in the curve
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        public virtual void UpdateFollowCurve(GameTime gameTime)
+        {
+            if (this.CurveTime <= this.Curve.Length)
+            {
+                Vector3 newPosition = this.Curve.GetPosition(this.CurveTime);
+
+                if (this.CurveTime != 0f)
+                {
+                    Vector3 view = Vector3.Normalize(this.position - newPosition);
+
+                    this.position = newPosition;
+                    this.LookAt(newPosition + view);
+                }
+
+                this.CurveTime += gameTime.ElapsedMilliseconds * 0.01f * this.CurveTimeDelta;
+            }
+            else
+            {
+                this.Curve = null;
+                this.CurveTime = 0f;
+            }
+        }
+        /// <summary>
+        /// Computes current position and orientation in the path
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        public virtual void UpdateFollowPath(GameTime gameTime)
+        {
+            if (this.PathTarget < this.Path.Length)
+            {
+                Vector3 p = this.Path[this.PathTarget];
+
+                if (GeometryUtil.WithinEpsilon(this.position, p, this.PathVelocity))
+                {
+                    this.PathTarget++;
+                }
+                else
+                {
+                    Vector3 newPosition = this.position + (Vector3.Normalize(p - this.position) * this.PathVelocity);
+                    Vector3 newNormal = this.Up;
+
+                    if (this.Ground != null)
+                    {
+                        Vector3 pos;
+                        Triangle tri;
+                        if (this.Ground.FindNearestGroundPosition(newPosition, out pos, out tri))
+                        {
+                            newPosition = pos;
+                            newNormal = tri.Normal;
+                        }
+                    }
+
+                    Vector3 view = Vector3.Normalize(this.position - newPosition);
+
+                    this.position = newPosition;
+                    this.LookAt(newPosition + view, newNormal, false, 0.1f);
+                }
+            }
+            else
+            {
+                this.Path = null;
+                this.PathVelocity = 0f;
+                this.PathTarget = -1;
+            }
         }
         /// <summary>
         /// Update internal state
@@ -587,9 +605,9 @@ namespace Engine
         /// <param name="delta">Delta to apply to time increment</param>
         public void Follow(ICurve curve, float delta = 1f)
         {
-            this.curve = curve;
-            this.curveTime = 0f;
-            this.curveTimeDelta = delta;
+            this.Curve = curve;
+            this.CurveTime = 0f;
+            this.CurveTimeDelta = delta;
         }
         /// <summary>
         /// Follow specified path
@@ -599,10 +617,10 @@ namespace Engine
         /// <param name="ground">Terrain</param>
         public void Follow(Vector3[] path, float velocity, IGround ground)
         {
-            this.path = path;
-            this.pathTarget = 0;
-            this.pathVelocity = velocity;
-            this.ground = ground;
+            this.Path = path;
+            this.PathTarget = 0;
+            this.PathVelocity = velocity;
+            this.Ground = ground;
         }
 
         /// <summary>

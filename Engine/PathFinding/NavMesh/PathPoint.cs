@@ -35,5 +35,13 @@ namespace Engine.PathFinding.NavMesh
             this.Polygon = poly;
             this.Position = pos;
         }
+
+        /// <summary>
+        /// Gets the string representation of the instance
+        /// </summary>
+        public override string ToString()
+        {
+            return string.Format("Polygon: {0}; Position: {1}", this.Polygon, this.Position);
+        }
     }
 }

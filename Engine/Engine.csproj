@@ -148,6 +148,7 @@
   <ItemGroup>
     <Compile Include="BezierPath.cs" />
     <Compile Include="Billboard.cs" />
+    <Compile Include="BoundingCylinder.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="CameraModes.cs" />
     <Compile Include="Collada\Accessor.cs" />
@@ -315,6 +316,9 @@
     <Compile Include="CurveLoopType.cs" />
     <Compile Include="CurveTangent.cs" />
     <Compile Include="Ground.cs" />
+    <Compile Include="ModelDescription.cs" />
+    <Compile Include="ModelInstance.cs" />
+    <Compile Include="ModelInstancedDescription.cs" />
     <Compile Include="PathFinding\AStar\GridGenerationSettings.cs" />
     <Compile Include="PathFinding\NavMesh\BoundarySide.cs" />
     <Compile Include="PathFinding\NavMesh\BoundingVolumeTreeNode.cs" />
@@ -522,9 +526,6 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="Diagrams\3DClasses.cd" />
-    <None Include="Diagrams\ColladaClasses.cd" />
-    <None Include="Diagrams\Drawables.cd" />
     <None Include="packages.config" />
     <None Include="Resources\ShaderDeferred.fxo" />
     <None Include="Resources\ShaderGBuffer.fx" />

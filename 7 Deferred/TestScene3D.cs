@@ -16,6 +16,7 @@ namespace DeferredTest
         private const float fogStart = 0.01f;
         private const float fogRange = 0.10f;
 
+        private Cursor cursor = null;
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer help = null;
@@ -49,6 +50,14 @@ namespace DeferredTest
 
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
+
+            SpriteDescription cursorDesc = new SpriteDescription()
+            {
+                Textures = new[] { "target.png" },
+                Width = 16,
+                Height = 16,
+            };
+            this.cursor = this.AddCursor(cursorDesc);
 
             #region Models
 
@@ -514,20 +523,8 @@ namespace DeferredTest
                     var p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
                     if (p != null)
                     {
-                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.2f, this.terrain);
+                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.1f, this.terrain);
                     }
-                }
-            }
-
-            if (this.tank.Manipulator.IsFollowingPath)
-            {
-                Vector3 pos = this.tank.Manipulator.Position;
-
-                Vector3 tankPosition;
-                Triangle tankTriangle;
-                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out tankPosition, out tankTriangle))
-                {
-                    this.tank.Manipulator.SetNormal(tankTriangle.Normal);
                 }
             }
 

@@ -97,7 +97,7 @@ namespace Engine.PathFinding.NavMesh
                 var mesh = pmd.Meshes[i];
                 var poly = pm.Polys[i];
 
-                nm.Nodes[i] = new NavigationMeshNode(nm, new Polygon(mesh.VertexCount), poly.RegionId.Id);
+                nm.Nodes[i] = new NavigationMeshNode(nm, new Polygon(mesh.VertexCount), i, poly.RegionId.Id);
                 for (int v = 0; v < mesh.VertexCount; v++)
                 {
                     nm.Nodes[i].Poly.Points[v] = pmd.Verts[mesh.VertexIndex + v];
@@ -124,7 +124,7 @@ namespace Engine.PathFinding.NavMesh
         public PathFindingPath FindPath(Vector3 from, Vector3 to)
         {
             Vector3[] path;
-            if (this.Query.FindPath(from, to, out path))
+            if (this.Query.FindStraightPath(from, to, out path))
             {
                 return new PathFindingPath(path);
             }

@@ -15,8 +15,6 @@ namespace TerrainTest
         private const int MaxPickingTest = 1000;
         private const int MaxGridDrawer = 10000;
 
-        private Random rnd = new Random();
-
         private bool follow = false;
 
         private bool useDebugTex = false;
@@ -40,11 +38,10 @@ namespace TerrainTest
         private TriangleListDrawer terrainGraphDrawer = null;
 
         private ModelInstanced obelisk = null;
+        private ModelInstanced rocks = null;
+        private ModelInstanced trees = null;
 
         private Model helicopter = null;
-        private float v = 0f;
-        private Curve3D curve = null;
-        private float curveTime = 0;
         private LineListDrawer helicopterLineDrawer = null;
         private Vector3 heightOffset = (Vector3.Up * 10f);
 
@@ -103,6 +100,7 @@ namespace TerrainTest
                 ModelFileName = "cursor.dae",
                 DeferredEnabled = false,
             });
+            this.cursor3D.EnableDepthStencil = false;
             sw.Stop();
             loadingText += string.Format("cursor3D: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -133,6 +131,7 @@ namespace TerrainTest
                 TextureIndex = 2,
             };
             this.helicopter = this.AddModel(heliDesc, Matrix.RotationY(0));
+            this.helicopter.SetManipulator(new HeliManipulator());
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -168,6 +167,36 @@ namespace TerrainTest
             });
             sw.Stop();
             loadingText += string.Format("obelisk: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Roks
+
+            sw.Restart();
+            this.rocks = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = resources,
+                ModelFileName = "rocks.dae",
+                Opaque = true,
+                Instances = 15,
+            });
+            sw.Stop();
+            loadingText += string.Format("rocks: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Roks
+
+            sw.Restart();
+            this.trees = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = resources + "\\tree",
+                ModelFileName = "tree1.dae",
+                Opaque = true,
+                Instances = 30,
+            });
+            sw.Stop();
+            loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
@@ -232,7 +261,38 @@ namespace TerrainTest
                 }
             }
 
-            this.terrain.AttachObject(this.obelisk);
+            Random posRnd = new Random(1);
+
+            for (int i = 0; i < this.rocks.Instances.Length; i++)
+            {
+                var pos = this.DEBUGGetRandomPoint(posRnd, Vector3.Zero);
+
+                Vector3 rockPosition;
+                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out rockPosition))
+                {
+                    this.rocks.Instances[i].Manipulator.SetPosition(rockPosition, true);
+                    this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
+                    this.rocks.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.5f, 2f), true);
+                }
+            }
+
+            for (int i = 0; i < this.trees.Instances.Length; i++)
+            {
+                var pos = this.DEBUGGetRandomPoint(posRnd, Vector3.Zero);
+
+                Vector3 treePosition;
+                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition))
+                {
+                    this.trees.Instances[i].Manipulator.SetPosition(treePosition, true);
+                    this.trees.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
+                    this.trees.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.5f, 1.5f), true);
+                }
+            }
+
+            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.obelisk, EvaluateForPicking = false }, false);
+            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.rocks, EvaluateForPicking = false }, false);
+            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.trees, EvaluateForPicking = false, UseVolumeForPicking = true, EvaluateForPathFinding = true, UseVolumeForPathFinding = true }, false);
+            this.terrain.UpdateInternals();
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
 
@@ -243,32 +303,6 @@ namespace TerrainTest
                 this.helicopter.Manipulator.SetPosition(gPos, true);
                 this.helicopter.Manipulator.SetNormal(gTri.Normal);
             }
-
-            this.curve = new Curve3D();
-            this.curve.PreLoop = CurveLoopType.Constant;
-            this.curve.PostLoop = CurveLoopType.Constant;
-
-            Vector3[] cPoints = new[]
-            {
-                this.helicopter.Manipulator.Position,
-                this.helicopter.Manipulator.Position + (Vector3.Up * 5f) + (this.helicopter.Manipulator.Forward * 10f),
-                this.DEBUGGetRandomPoint(this.heightOffset),
-                this.DEBUGGetRandomPoint(this.heightOffset),
-                this.DEBUGGetRandomPoint(this.heightOffset),
-                this.DEBUGGetRandomPoint(this.heightOffset),
-                this.DEBUGGetRandomPoint(this.heightOffset),
-                this.DEBUGGetRandomPoint(this.heightOffset),
-            };
-
-            float t = 0;
-            for (int i = 0; i < cPoints.Length; i++)
-            {
-                if (i > 0) t += Vector3.Distance(cPoints[i - 1], cPoints[i]);
-
-                this.curve.AddPosition(t, cPoints[i]);
-            }
-
-            this.curve.SetTangents();
 
             Vector3 tankPosition;
             Triangle tankTriangle;
@@ -288,15 +322,15 @@ namespace TerrainTest
             int height = 300;
             int smLeft = this.Game.Form.RenderWidth - width;
             int smTop = this.Game.Form.RenderHeight - height;
-
-            this.shadowMapDrawer = this.AddSpriteTexture(new SpriteTextureDescription()
+            var stDescription = new SpriteTextureDescription()
             {
                 Left = smLeft,
                 Top = smTop,
                 Width = width,
                 Height = height,
                 Channel = SpriteTextureChannelsEnum.Red,
-            }, 99);
+            };
+            this.shadowMapDrawer = this.AddSpriteTexture(stDescription, 99);
             this.shadowMapDrawer.Visible = false;
             this.shadowMapDrawer.DeferredEnabled = false;
 
@@ -381,8 +415,6 @@ namespace TerrainTest
             this.curveLineDrawer.EnableDepthStencil = false;
             this.curveLineDrawer.SetLines(this.wAxisColor, Line3.CreateAxis(Matrix.Identity, 20f));
 
-            this.DEBUGHelicopterPath();
-
             #endregion
 
             this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
@@ -395,7 +427,7 @@ namespace TerrainTest
             {
                 Name = "One point",
                 Enabled = true,
-                LightColor = Color.White,
+                LightColor = Color.Blue,
                 AmbientIntensity = 1,
                 DiffuseIntensity = 1,
                 Position = Vector3.Zero,
@@ -405,14 +437,13 @@ namespace TerrainTest
             {
                 Name = "Another point",
                 Enabled = true,
-                LightColor = Color.White,
+                LightColor = Color.Red,
                 AmbientIntensity = 1,
                 DiffuseIntensity = 1,
                 Position = Vector3.Zero,
                 Radius = 1f,
             });
         }
-
         public override void Dispose()
         {
             if (this.debugTex != null)
@@ -423,7 +454,6 @@ namespace TerrainTest
 
             base.Dispose();
         }
-
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -537,7 +567,7 @@ namespace TerrainTest
                     {
                         this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.1f, this.terrain);
 
-                        this.DEBUGTankPath(p);
+                        this.DEBUGDrawTankPath(this.tank.Manipulator.Position, p);
                     }
                 }
             }
@@ -548,93 +578,19 @@ namespace TerrainTest
 
             if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
-                this.curveTime = 0f;
-                this.v = 0.01f;
+                Curve3D curve = this.DEBUGGenerateHelicopterPath();
+                ((HeliManipulator)this.helicopter.Manipulator).Follow(curve, 10f, 0.001f);
+                this.DEBUGDrawHelicopterPath(curve);
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.C))
-            {
-                var pt = this.DEBUGGetRandomPoint(this.heightOffset);
-                var lastpt = this.curve.End.Value;
-
-                this.curve.AddPosition(Vector3.Distance(lastpt, pt) + this.curve.Length, pt);
-                this.curve.SetTangents();
-
-                this.DEBUGHelicopterPath();
-            }
-
-            if (this.curve != null && this.v != 0f)
-            {
-                if (this.v < 10f) this.v += 0.01f;
-
-                float time = gameTime.ElapsedSeconds * this.v;
-
-                if (this.Game.Input.KeyPressed(Keys.LShiftKey))
-                {
-                    time *= 0.01f;
-                }
-
-                Vector3 p0 = this.curve.GetPosition(this.curveTime);
-                Vector3 p1 = this.curve.GetPosition(this.curveTime + gameTime.ElapsedSeconds);
-
-                float segmentDelta = Vector3.Distance(p0, p1);
-
-                Vector3 cfw = this.helicopter.Manipulator.Forward;
-                Vector3 nfw = Vector3.Normalize(p1 - p0);
-                cfw.Y = 0f;
-                nfw.Y = 0f;
-
-                float pitch = Vector3.DistanceSquared(p0, p1) * 10f;
-                float roll = Helper.Angle(Vector3.Normalize(nfw), Vector3.Normalize(cfw), Vector3.Up) * 50f;
-
-                pitch = MathUtil.Clamp(pitch, -MathUtil.PiOverFour, MathUtil.PiOverFour);
-                roll = MathUtil.Clamp(roll, -MathUtil.PiOverFour, MathUtil.PiOverFour);
-
-                roll *= pitch * 50f;
-
-                Quaternion r =
-                    Helper.LookAt(p1, p0) *
-                    Quaternion.RotationYawPitchRoll(0, -pitch, roll);
-
-                r = Quaternion.Slerp(this.helicopter.Manipulator.Rotation, r, 0.1f);
-
-                this.helicopter.Manipulator.SetPosition(p0);
-                this.helicopter.Manipulator.SetRotation(r);
-
-                this.Lights.PointLights[0].Position = (p0 + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Left);
-                this.Lights.PointLights[1].Position = (p0 + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Right);
-
-                this.curveTime += time;
-
-                this.curveLineDrawer.SetLines(this.velocityColor, new[] { new Line3(p0, p1) });
-
-                this.help.Text = string.Format(
-                    "Pitch {0:+00.00;-00.00}; Roll {1:+00.00;-00.00}; Delta {2:00.0000}; Index {3}; Curve Time: {4}; Curve Length: {5}",
-                    MathUtil.RadiansToDegrees(pitch),
-                    MathUtil.RadiansToDegrees(roll),
-                    pitch / MathUtil.PiOverFour,
-                    this.graphIndex,
-                    this.curveTime,
-                    this.curve.Length);
-
-                //if (this.curveTime > this.curve.Length * 0.66f)
-                //{
-                //    var pt = this.DEBUGGetRandomPoint(this.heightOffset);
-                //    var lastpt = this.curve.End;
-
-                //    this.curve.AddPosition(Vector3.Distance(lastpt, pt) + this.curve.Length, pt);
-                //    this.curve.SetTangents();
-
-                //    this.DEBUGComputePath();
-                //}
-            }
+            this.Lights.PointLights[0].Position = (this.helicopter.Manipulator.Position + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Left);
+            this.Lights.PointLights[1].Position = (this.helicopter.Manipulator.Position + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Right);
 
             Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
-            BoundingSphere sph = this.helicopter.GetBoundingSphere();
-
             this.curveLineDrawer.SetLines(this.hAxisColor, Line3.CreateAxis(rot, 5f));
 
-            this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.20f), Line3.CreateWiredSphere(sph, 50, 20));
+            BoundingSphere sph = this.helicopter.GetBoundingSphere();
+            this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.55f), Line3.CreateWiredSphere(sph, 50, 20));
 
             #endregion
 
@@ -683,7 +639,6 @@ namespace TerrainTest
 
             #endregion
         }
-
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
@@ -705,41 +660,78 @@ namespace TerrainTest
                 }
             }
         }
+        private Curve3D DEBUGGenerateHelicopterPath()
+        {
+            Curve3D curve = new Curve3D();
+            curve.PreLoop = CurveLoopType.Constant;
+            curve.PostLoop = CurveLoopType.Constant;
 
-        private void DEBUGHelicopterPath()
+            Vector3[] cPoints = new Vector3[10];
+
+            Random rnd = new Random();
+
+            if (this.helicopter.Manipulator.IsFollowingPath)
+            {
+                for (int i = 0; i < cPoints.Length; i++)
+                {
+                    cPoints[i] = this.DEBUGGetRandomPoint(rnd, this.heightOffset);
+                }
+            }
+            else
+            {
+                cPoints[0] = this.helicopter.Manipulator.Position;
+                cPoints[1] = this.helicopter.Manipulator.Position + (Vector3.Up * 5f) + (this.helicopter.Manipulator.Forward * 10f);
+
+                for (int i = 2; i < cPoints.Length; i++)
+                {
+                    cPoints[i] = this.DEBUGGetRandomPoint(rnd, this.heightOffset);
+                }
+            }
+
+            float t = 0;
+            for (int i = 0; i < cPoints.Length; i++)
+            {
+                if (i > 0) t += Vector3.Distance(cPoints[i - 1], cPoints[i]);
+
+                curve.AddPosition(t, cPoints[i]);
+            }
+
+            curve.SetTangents();
+            return curve;
+        }
+        private void DEBUGDrawHelicopterPath(Curve3D curve)
         {
             List<Vector3> path = new List<Vector3>();
 
-            float pass = this.curve.Length / 500f;
+            float pass = curve.Length / 500f;
 
-            for (float i = 0; i <= this.curve.Length; i += pass)
+            for (float i = 0; i <= curve.Length; i += pass)
             {
-                Vector3 pos = this.curve.GetPosition(i);
+                Vector3 pos = curve.GetPosition(i);
 
                 path.Add(pos);
             }
 
             this.curveLineDrawer.SetLines(this.curvesColor, Line3.CreatePath(path.ToArray()));
-            this.curveLineDrawer.SetLines(this.pointsColor, Line3.CreateCrossList(this.curve.Points, 0.5f));
-            this.curveLineDrawer.SetLines(this.segmentsColor, Line3.CreatePath(this.curve.Points));
+            this.curveLineDrawer.SetLines(this.pointsColor, Line3.CreateCrossList(curve.Points, 0.5f));
+            this.curveLineDrawer.SetLines(this.segmentsColor, Line3.CreatePath(curve.Points));
         }
-
-        private void DEBUGTankPath(PathFindingPath p)
+        private void DEBUGDrawTankPath(Vector3 from, PathFindingPath path)
         {
-            int count = Math.Min(p.ReturnPath.Count, MaxPickingTest);
+            int count = Math.Min(path.ReturnPath.Count, MaxPickingTest);
 
-            Line3[] lines = new Line3[count];
+            Line3[] lines = new Line3[count + 1];
 
             for (int i = 0; i < count; i++)
             {
                 Line3 line;
                 if (i == 0)
                 {
-                    line = new Line3(p.StartPosition, p.ReturnPath[i]);
+                    line = new Line3(from, path.ReturnPath[i]);
                 }
                 else
                 {
-                    line = new Line3(p.ReturnPath[i - 1], p.ReturnPath[i]);
+                    line = new Line3(path.ReturnPath[i - 1], path.ReturnPath[i]);
                 }
 
                 lines[i] = line;
@@ -747,7 +739,6 @@ namespace TerrainTest
 
             this.terrainPointDrawer.SetLines(Color.Red, lines);
         }
-
         private void DEBUGUpdateGraphDrawer()
         {
             var nodes = this.terrain.GetNodes();
@@ -769,7 +760,7 @@ namespace TerrainTest
                     for (int i = 0; i < nodes.Length; i++)
                     {
                         var node = (NavigationMeshNode)nodes[i];
-                        var color = regions[node.Region];
+                        var color = regions[node.RegionId];
                         var poly = node.Poly;
                         var tris = poly.Triangulate();
 
@@ -788,7 +779,7 @@ namespace TerrainTest
                         this.terrainGraphDrawer.Clear();
 
                         var node = (NavigationMeshNode)nodes[this.graphIndex];
-                        var color = regions[node.Region];
+                        var color = regions[node.RegionId];
                         var poly = node.Poly;
                         var tris = poly.Triangulate();
 
@@ -801,8 +792,7 @@ namespace TerrainTest
                 this.graphIndex = -1;
             }
         }
-
-        private Vector3 DEBUGGetRandomPoint(Vector3 offset)
+        private Vector3 DEBUGGetRandomPoint(Random rnd, Vector3 offset)
         {
             BoundingBox bbox = this.terrain.GetBoundingBox();
 

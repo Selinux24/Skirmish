@@ -15,7 +15,7 @@ namespace Engine
         /// <summary>
         /// Terrain attached objects
         /// </summary>
-        protected readonly List<ModelBase> GroundObjects = new List<ModelBase>();
+        protected readonly List<GroundAttachedObject> GroundObjects = new List<GroundAttachedObject>();
         /// <summary>
         /// Quadtree
         /// </summary>
@@ -198,7 +198,7 @@ namespace Engine
         /// </summary>
         /// <param name="model">Model</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachObject(ModelBase model, bool updateInternals = true)
+        public void AttachObject(GroundAttachedObject model, bool updateInternals = true)
         {
             this.GroundObjects.Add(model);
 
@@ -253,5 +253,14 @@ namespace Engine
         /// </summary>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public abstract BoundingBox GetBoundingBox();
+    }
+
+    public class GroundAttachedObject
+    {
+        public ModelBase Model = null;
+        public bool EvaluateForPicking = true;
+        public bool EvaluateForPathFinding = true;
+        public bool UseVolumeForPicking = false;
+        public bool UseVolumeForPathFinding = false;
     }
 }
