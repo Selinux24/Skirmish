@@ -54,7 +54,6 @@ namespace Engine
 
             camera.Position = position;
             camera.Interest = interest;
-            camera.Up = up;
 
             camera.SetLens(width, height);
 
@@ -98,70 +97,158 @@ namespace Engine
         /// </summary>
         private CameraModes mode;
 
-        #region Free
+        /// <summary>
+        /// Forward vector
+        /// </summary>
+        public Vector3 Forward
+        {
+            get
+            {
+                if (this.mode == CameraModes.FreeIsometric)
+                {
+                    return this.isoMetricForward;
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return Vector3.Normalize(this.Interest - this.Position);
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    var v = this.Interest - this.Position;
 
-        /// <summary>
-        /// Forward free vector
-        /// </summary>
-        private Vector3 freeForward
-        {
-            get
-            {
-                return Vector3.Normalize(this.Interest - this.Position);
+                    return Vector3.Normalize(new Vector3(v.X, 0, v.Z));
+                }
+                else
+                {
+                    return Vector3.Normalize(this.Interest - this.Position);
+                }
             }
         }
         /// <summary>
-        /// Backward free vector
+        /// Backward vector
         /// </summary>
-        private Vector3 freeBackward
+        public Vector3 Backward
         {
             get
             {
-                return -this.freeForward;
+                if (this.mode == CameraModes.FreeIsometric)
+                {
+                    return this.isoMetricBackward;
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return -this.Forward;
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    return -this.Forward;
+                }
+                else
+                {
+                    return -this.Forward;
+                }
             }
         }
         /// <summary>
-        /// Left free vector
+        /// Left vector
         /// </summary>
-        private Vector3 freeLeft
+        public Vector3 Left
         {
             get
             {
-                return Vector3.Cross(this.freeForward, Vector3.Up);
+                if (this.mode == CameraModes.FreeIsometric)
+                {
+                    return this.isoMetricLeft;
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return Vector3.Cross(this.Forward, Vector3.Up);
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    return Vector3.Cross(this.Forward, Vector3.Up);
+                }
+                else
+                {
+                    return Vector3.Cross(this.Forward, Vector3.Up);
+                }
             }
         }
         /// <summary>
-        /// Right free vector
+        /// Right vector
         /// </summary>
-        private Vector3 freeRight
+        public Vector3 Right
         {
             get
             {
-                return -this.freeLeft;
+                if (this.mode == CameraModes.FreeIsometric)
+                {
+                    return this.isoMetricRight;
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return -Left;
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    return -Left;
+                }
+                else
+                {
+                    return -Left;
+                }
             }
         }
         /// <summary>
-        /// Up free vector
+        /// Up vector
         /// </summary>
-        private Vector3 freeUp
+        public Vector3 Up
         {
             get
             {
-                return Vector3.Cross(this.freeLeft, this.freeForward);
+                if (this.mode == CameraModes.FreeIsometric)
+                {
+                    return new Vector3(0f, 1f, 0f);
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return Vector3.Cross(this.Left, this.Forward);
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    return Vector3.Up;
+                }
+                else
+                {
+                    return Vector3.Cross(this.Left, this.Forward);
+                }
             }
         }
         /// <summary>
-        /// Down free vector
+        /// Down vector
         /// </summary>
-        private Vector3 freeDown
+        public Vector3 Down
         {
             get
             {
-                return -this.freeUp;
+                if (this.mode == CameraModes.FreeIsometric)
+                {
+                    return new Vector3(0f, -1f, 0f);
+                }
+                else if (mode == CameraModes.Free)
+                {
+                    return -Up;
+                }
+                else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
+                {
+                    return -Up;
+                }
+                else
+                {
+                    return -Up;
+                }
             }
         }
-
-        #endregion
 
         #region Isometric
 
@@ -170,29 +257,21 @@ namespace Engine
         /// </summary>
         private IsometricAxis isometricAxis = IsometricAxis.NW;
         /// <summary>
-        /// Forward isometric vector
+        /// Isometric current forward
         /// </summary>
         private Vector3 isoMetricForward = new Vector3(-1f, 0f, -1f);
         /// <summary>
-        /// Backward isometric vector
+        /// Isometric current backward
         /// </summary>
         private Vector3 isoMetricBackward = new Vector3(1f, 0f, 1f);
         /// <summary>
-        /// Left isometric vector
+        /// Isometric current left
         /// </summary>
         private Vector3 isoMetricLeft = new Vector3(1f, 0f, -1f);
         /// <summary>
-        /// Right isometric vector
+        /// Isometric current right
         /// </summary>
         private Vector3 isoMetricRight = new Vector3(-1f, 0f, 1f);
-        /// <summary>
-        /// Up isometric vector
-        /// </summary>
-        private Vector3 isoMetricUp = new Vector3(0f, 1f, 0f);
-        /// <summary>
-        /// Down isometric vector
-        /// </summary>
-        private Vector3 isoMetricDown = new Vector3(0f, -1f, 0f);
 
         #endregion
 
@@ -280,10 +359,6 @@ namespace Engine
                 if (this.Following != null) this.Following = null;
             }
         }
-        /// <summary>
-        /// Up vector
-        /// </summary>
-        public Vector3 Up { get; set; }
         /// <summary>
         /// Camera direction
         /// </summary>
@@ -414,7 +489,6 @@ namespace Engine
         {
             this.position = Vector3.One;
             this.interest = Vector3.Zero;
-            this.Up = Vector3.Up;
 
             this.View = Matrix.LookAtLH(
                 this.position,
@@ -451,10 +525,20 @@ namespace Engine
         {
             this.UpdateTranslations(gameTime);
 
-            this.View = Matrix.LookAtLH(
-                this.Position,
-                this.Interest,
-                this.Up);
+            if (this.mode == CameraModes.Ortho)
+            {
+                this.View = Matrix.LookAtLH(
+                    this.Position,
+                    this.Interest,
+                    Vector3.UnitZ);
+            }
+            else
+            {
+                this.View = Matrix.LookAtLH(
+                    this.Position,
+                    this.Interest,
+                    Vector3.UnitY);
+            }
 
             this.Frustum = new BoundingFrustum(this.View * this.Projection);
         }
@@ -509,14 +593,7 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         public void MoveForward(GameTime gameTime, bool slow)
         {
-            if (this.mode == CameraModes.FreeIsometric)
-            {
-                this.Move(gameTime, this.isoMetricForward, slow);
-            }
-            else if (this.mode == CameraModes.Free)
-            {
-                this.Move(gameTime, this.freeForward, slow);
-            }
+            this.Move(gameTime, this.Forward, slow);
         }
         /// <summary>
         /// Move backward
@@ -525,14 +602,7 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         public void MoveBackward(GameTime gameTime, bool slow)
         {
-            if (this.mode == CameraModes.FreeIsometric)
-            {
-                this.Move(gameTime, this.isoMetricBackward, slow);
-            }
-            else if (this.mode == CameraModes.Free)
-            {
-                this.Move(gameTime, this.freeBackward, slow);
-            }
+            this.Move(gameTime, this.Backward, slow);
         }
         /// <summary>
         /// Move left
@@ -541,14 +611,7 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         public void MoveLeft(GameTime gameTime, bool slow)
         {
-            if (this.mode == CameraModes.FreeIsometric)
-            {
-                this.Move(gameTime, this.isoMetricLeft, slow);
-            }
-            else if (this.mode == CameraModes.Free)
-            {
-                this.Move(gameTime, this.freeLeft, slow);
-            }
+            this.Move(gameTime, this.Left, slow);
         }
         /// <summary>
         /// Move right
@@ -557,14 +620,7 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         public void MoveRight(GameTime gameTime, bool slow)
         {
-            if (this.mode == CameraModes.FreeIsometric)
-            {
-                this.Move(gameTime, this.isoMetricRight, slow);
-            }
-            else if (this.mode == CameraModes.Free)
-            {
-                this.Move(gameTime, this.freeRight, slow);
-            }
+            this.Move(gameTime, this.Right, slow);
         }
         /// <summary>
         /// Rotate up
@@ -573,10 +629,7 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         public void RotateUp(GameTime gameTime, bool slow)
         {
-            if (this.mode == CameraModes.Free)
-            {
-                this.Rotate(gameTime, this.freeLeft, slow);
-            }
+            this.Rotate(gameTime, this.Left, slow);
         }
         /// <summary>
         /// Rotate down
@@ -585,10 +638,7 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         public void RotateDown(GameTime gameTime, bool slow)
         {
-            if (this.mode == CameraModes.Free)
-            {
-                this.Rotate(gameTime, this.freeRight, slow);
-            }
+            this.Rotate(gameTime, this.Right, slow);
         }
         /// <summary>
         /// Rotate left
@@ -597,10 +647,7 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         public void RotateLeft(GameTime gameTime, bool slow)
         {
-            if (this.mode == CameraModes.Free)
-            {
-                this.Rotate(gameTime, this.freeDown, slow);
-            }
+            this.Rotate(gameTime, this.Down, slow);
         }
         /// <summary>
         /// Rotate right
@@ -609,10 +656,7 @@ namespace Engine
         /// <param name="slow">Slow movement</param>
         public void RotateRight(GameTime gameTime, bool slow)
         {
-            if (this.mode == CameraModes.Free)
-            {
-                this.Rotate(gameTime, this.freeUp, slow);
-            }
+            this.Rotate(gameTime, this.Up, slow);
         }
         /// <summary>
         /// Rotate camera by mouse
@@ -623,9 +667,13 @@ namespace Engine
         public void RotateMouse(GameTime gameTime, float deltaX, float deltaY)
         {
             if (deltaX != 0f)
-                this.Rotate(this.freeUp, gameTime.ElapsedSeconds * deltaX * 10f);
+            {
+                this.Rotate(this.Up, gameTime.ElapsedSeconds * deltaX * 10f);
+            }
             if (deltaY != 0f)
-                this.Rotate(this.freeLeft, gameTime.ElapsedSeconds * -deltaY * 10f);
+            {
+                this.Rotate(this.Left, gameTime.ElapsedSeconds * -deltaY * 10f);
+            }
         }
         /// <summary>
         /// Zoom in
@@ -723,7 +771,6 @@ namespace Engine
 
             this.Position = Vector3.Up;
             this.Interest = Vector3.Zero;
-            this.Up = Vector3.UnitZ;
 
             this.mode = CameraModes.Ortho;
         }
@@ -866,7 +913,7 @@ namespace Engine
             Quaternion targetRotation = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
             Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
 
-            Vector3 fw = Vector3.Transform(this.freeForward, r);
+            Vector3 fw = Vector3.Transform(Vector3.Normalize(this.Interest - this.Position), r);
 
             this.Interest = this.position + fw;
         }

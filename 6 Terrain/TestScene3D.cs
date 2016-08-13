@@ -15,6 +15,9 @@ namespace TerrainTest
         private const int MaxPickingTest = 1000;
         private const int MaxGridDrawer = 10000;
 
+        private bool walkMode = false;
+        private float walkerHeight = 1f;
+        private float walkerVelocity = 8f;
         private bool follow = false;
 
         private bool useDebugTex = false;
@@ -38,6 +41,7 @@ namespace TerrainTest
         private TriangleListDrawer terrainGraphDrawer = null;
 
         private Model helipod = null;
+        private Model garage = null;
         private ModelInstanced obelisk = null;
         private ModelInstanced rocks = null;
         private ModelInstanced trees = null;
@@ -170,6 +174,20 @@ namespace TerrainTest
 
             #endregion
 
+            #region Garage
+
+            sw.Restart();
+            this.garage = this.AddModel(new ModelDescription()
+            {
+                ContentPath = resources,
+                ModelFileName = "garage.dae",
+                Opaque = true,
+            });
+            sw.Stop();
+            loadingText += string.Format("garage: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
             #region Obelisk
 
             sw.Restart();
@@ -267,11 +285,18 @@ namespace TerrainTest
             Random posRnd = new Random(1);
 
             //Helipod
-            Vector3 gPos;
-            Triangle gTri;
-            if (this.terrain.FindTopGroundPosition(25, 25, out gPos, out gTri))
+            Vector3 hPos;
+            if (this.terrain.FindTopGroundPosition(25, 25, out hPos))
             {
-                this.helipod.Manipulator.SetPosition(gPos, true);
+                this.helipod.Manipulator.SetPosition(hPos, true);
+            }
+
+            //Garage
+            Vector3 gPos;
+            if (this.terrain.FindTopGroundPosition(0, -50, out gPos))
+            {
+                this.garage.Manipulator.SetPosition(gPos, true);
+                this.garage.Manipulator.SetRotation(MathUtil.PiOverTwo + MathUtil.Pi, 0, 0, true);
             }
 
             //Obelisk
@@ -316,6 +341,7 @@ namespace TerrainTest
             }
 
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.helipod, EvaluateForPicking = true, UseVolumeForPicking = false, EvaluateForPathFinding = true, UseVolumeForPathFinding = false }, false);
+            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.garage, EvaluateForPicking = true, UseVolumeForPicking = false, EvaluateForPathFinding = true, UseVolumeForPathFinding = false }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.obelisk, EvaluateForPicking = false }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.rocks, EvaluateForPicking = false }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.trees, EvaluateForPicking = false, UseVolumeForPicking = true, EvaluateForPathFinding = true, UseVolumeForPathFinding = true }, false);
@@ -490,16 +516,41 @@ namespace TerrainTest
                 this.Game.Exit();
             }
 
-            Ray cursorRay = this.GetPickingRay();
+            if (this.Game.Input.KeyJustReleased(Keys.Z))
+            {
+                this.walkMode = !this.walkMode;
+
+                if (this.walkMode)
+                {
+                    this.Camera.Mode = CameraModes.FirstPerson;
+                    this.Camera.MovementDelta = this.walkerVelocity;
+                    this.Camera.SlowMovementDelta = this.walkerVelocity * 0.05f;
+                    this.cursor3D.Visible = false;
+                }
+                else
+                {
+                    this.Camera.Mode = CameraModes.Free;
+                    this.Camera.MovementDelta = 20.5f;
+                    this.Camera.SlowMovementDelta = 1f;
+                    this.cursor3D.Visible = true;
+                }
+            }
 
             #region Cursor picking and positioning
 
-            Vector3 position;
-            Triangle triangle;
-            bool picked = this.terrain.PickNearest(ref cursorRay, out position, out triangle);
-            if (picked)
+            bool picked = false;
+            Vector3 pickedPosition = Vector3.Zero;
+            Triangle pickedTriangle = new Triangle();
+
+            if (!this.walkMode)
             {
-                this.cursor3D.Manipulator.SetPosition(position);
+                Ray cursorRay = this.GetPickingRay();
+
+                picked = this.terrain.PickNearest(ref cursorRay, out pickedPosition, out pickedTriangle);
+                if (picked)
+                {
+                    this.cursor3D.Manipulator.SetPosition(pickedPosition);
+                }
             }
 
             #endregion
@@ -576,7 +627,7 @@ namespace TerrainTest
 
                     if (picked)
                     {
-                        this.DEBUGPickingPosition(position);
+                        this.DEBUGPickingPosition(pickedPosition);
                     }
                 }
             }
@@ -589,7 +640,7 @@ namespace TerrainTest
             {
                 if (picked)
                 {
-                    var p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
+                    var p = this.terrain.FindPath(this.tank.Manipulator.Position, pickedPosition);
                     if (p != null)
                     {
                         this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.1f, this.terrain);
@@ -623,45 +674,83 @@ namespace TerrainTest
 
             #region Camera
 
-#if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
-#endif
+            if (this.walkMode)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
-            }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
-            {
-                this.follow = !this.follow;
-            }
+                if (this.Game.Input.KeyPressed(Keys.A))
+                {
+                    this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+                }
 
-            if (this.Game.Input.KeyPressed(Keys.A))
-            {
-                this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
-            }
+                if (this.Game.Input.KeyPressed(Keys.D))
+                {
+                    this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+                }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
-            {
-                this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
-            }
+                if (this.Game.Input.KeyPressed(Keys.W))
+                {
+                    this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+                }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
-            {
-                this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
-            }
+                if (this.Game.Input.KeyPressed(Keys.S))
+                {
+                    this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+                }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
-            {
-                this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
-            }
+                Vector3 walkerPos;
+                if (this.terrain.FindNearestGroundPosition(this.Camera.Position, out walkerPos))
+                {
+                    walkerPos.Y += this.walkerHeight;
 
-            if (this.follow)
+                    this.Camera.Goto(walkerPos);
+                }
+            }
+            else
             {
-                this.Camera.LookTo(sph.Center);
-                this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
+#if DEBUG
+                if (this.Game.Input.RightMouseButtonPressed)
+#endif
+                {
+                    this.Camera.RotateMouse(
+                        this.Game.GameTime,
+                        this.Game.Input.MouseXDelta,
+                        this.Game.Input.MouseYDelta);
+                }
+
+                if (this.Game.Input.KeyJustReleased(Keys.Space))
+                {
+                    this.follow = !this.follow;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.A))
+                {
+                    this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.D))
+                {
+                    this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.W))
+                {
+                    this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.S))
+                {
+                    this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.follow)
+                {
+                    this.Camera.LookTo(sph.Center);
+                    this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
+                }
             }
 
             #endregion
