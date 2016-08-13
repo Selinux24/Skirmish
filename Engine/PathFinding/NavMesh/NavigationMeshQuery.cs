@@ -64,7 +64,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="to">Ending position</param>
         /// <param name="resultPath">The straight path</param>
         /// <returns>True, if path found. False, if otherwise.</returns>
-        public bool FindStraightPath(Vector3 from, Vector3 to, out Vector3[] resultPath)
+        public bool FindPath(Vector3 from, Vector3 to, out Vector3[] resultPath)
         {
             resultPath = null;
 
@@ -87,6 +87,195 @@ namespace Engine.PathFinding.NavMesh
             }
 
             return false;
+        }
+        /// <summary>
+        /// Find a path from the start polygon to the end polygon.
+        /// -If the end polygon can't be reached, the last polygon will be nearest the end polygon
+        /// -If the path array is too small, it will be filled as far as possible 
+        /// -start and end positions are used to calculate traversal costs
+        /// </summary>
+        /// <param name="startPt">The start point.</param>
+        /// <param name="endPt">The end point.</param>
+        /// <param name="resultPath">The path of polygon references</param>
+        /// <returns>True, if path found. False, if otherwise.</returns>
+        private bool FindPath(ref PathPoint startPt, ref PathPoint endPt, out int[] resultPath)
+        {
+            resultPath = null;
+
+            //validate input
+            int startRef = startPt.Polygon;
+            int endRef = endPt.Polygon;
+            if (startRef == 0 || endRef == 0)
+            {
+                return false;
+            }
+            if (!this.navigationMesh.IsValidPolyRef(startRef) || !this.navigationMesh.IsValidPolyRef(endRef))
+            {
+                return false;
+            }
+
+            //special case: both start and end are in the same polygon
+            if (startRef == endRef)
+            {
+                resultPath = new int[] { startRef };
+                return true;
+            }
+
+            Vector3 startPos = startPt.Position;
+            Vector3 endPos = endPt.Position;
+
+            this.nodePool.Clear();
+            this.openList.Clear();
+
+            //initial node is located at the starting position
+            Node startNode = this.nodePool.GetNode(startRef);
+            startNode.Position = startPos;
+            startNode.ParentIdx = 0;
+            startNode.cost = 0;
+            startNode.total = (startPos - endPos).Length() * HeuristicScale;
+            startNode.Id = startRef;
+            startNode.Flags = NodeFlags.Open;
+
+            this.openList.Push(startNode);
+
+            Node lastBestNode = startNode;
+            float lastBestTotalCost = startNode.total;
+
+            while (this.openList.Count > 0)
+            {
+                //remove node from open list and put it in closed list
+                Node bestNode = this.openList.Pop();
+                bestNode.SetNodeFlagClosed();
+
+                //reached the goal. stop searching
+                if (bestNode.Id == endRef)
+                {
+                    lastBestNode = bestNode;
+                    break;
+                }
+
+                //get current poly and tile
+                int bestRef = bestNode.Id;
+                MeshTile bestTile;
+                Poly bestPoly;
+                this.navigationMesh.TryGetTileAndPolyByRefUnsafe(bestRef, out bestTile, out bestPoly);
+
+                //get parent poly and tile
+                int parentRef = 0;
+                if (bestNode.ParentIdx != 0)
+                {
+                    parentRef = this.nodePool.GetNodeAtIdx(bestNode.ParentIdx).Id;
+                }
+
+                //examine neighbors
+                foreach (Link link in bestPoly.Links)
+                {
+                    int neighborRef = link.Reference;
+
+                    //skip invalid ids and do not expand back to where we came from
+                    if (neighborRef == 0 || neighborRef == parentRef)
+                    {
+                        continue;
+                    }
+
+                    //get neighbor poly and tile
+                    MeshTile neighborTile;
+                    Poly neighborPoly;
+                    this.navigationMesh.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
+
+                    Node neighborNode = this.nodePool.GetNode(neighborRef);
+                    if (neighborNode == null)
+                    {
+                        continue;
+                    }
+
+                    //if node is visited the first time, calculate node position
+                    if (neighborNode.Flags == NodeFlags.None)
+                    {
+                        this.GetEdgeMidPoint(bestRef, bestPoly, bestTile, neighborRef, neighborPoly, neighborTile, ref neighborNode.Position);
+                    }
+
+                    //calculate cost and heuristic
+                    float cost = 0;
+                    float heuristic = 0;
+
+                    //special case for last node
+                    if (neighborRef == endRef)
+                    {
+                        //cost
+                        float curCost = this.GetCost(bestNode.Position, neighborNode.Position, bestPoly);
+                        float endCost = this.GetCost(neighborNode.Position, endPos, neighborPoly);
+
+                        cost = bestNode.cost + curCost + endCost;
+                        heuristic = 0;
+                    }
+                    else
+                    {
+                        //cost
+                        float curCost = this.GetCost(bestNode.Position, neighborNode.Position, bestPoly);
+
+                        cost = bestNode.cost + curCost;
+                        heuristic = (neighborNode.Position - endPos).Length() * HeuristicScale;
+                    }
+
+                    float total = cost + heuristic;
+
+                    //the node is already in open list and new result is worse, skip
+                    if (neighborNode.IsInOpenList && total >= neighborNode.total)
+                    {
+                        continue;
+                    }
+
+                    //the node is already visited and processesd, and the new result is worse, skip
+                    if (neighborNode.IsInClosedList && total >= neighborNode.total)
+                    {
+                        continue;
+                    }
+
+                    //add or update the node
+                    neighborNode.ParentIdx = this.nodePool.GetNodeIdx(bestNode);
+                    neighborNode.Id = neighborRef;
+                    neighborNode.Flags = neighborNode.RemoveNodeFlagClosed();
+                    neighborNode.cost = cost;
+                    neighborNode.total = total;
+
+                    if (neighborNode.IsInOpenList)
+                    {
+                        //already in open, update node location
+                        this.openList.Modify(neighborNode);
+                    }
+                    else
+                    {
+                        //put the node in the open list
+                        neighborNode.SetNodeFlagOpen();
+                        this.openList.Push(neighborNode);
+                    }
+
+                    //update nearest node to target so far
+                    if (heuristic < lastBestTotalCost)
+                    {
+                        lastBestTotalCost = heuristic;
+                        lastBestNode = neighborNode;
+                    }
+                }
+            }
+
+            //save path
+            List<int> path = new List<int>();
+            Node node = lastBestNode;
+            do
+            {
+                path.Add(node.Id);
+
+                node = this.nodePool.GetNodeAtIdx(node.ParentIdx);
+            }
+            while (node != null);
+
+            //reverse the path since it's backwards
+            path.Reverse();
+
+            resultPath = path.ToArray();
+            return true;
         }
         /// <summary>
         /// Add vertices and portals to a regular path computed from the method FindPath
@@ -333,195 +522,6 @@ namespace Engine.PathFinding.NavMesh
         private float GetCost(Vector3 pa, Vector3 pb, Poly curPoly)
         {
             return (pa - pb).Length() * this.areaCost[(int)curPoly.Area.Id];
-        }
-        /// <summary>
-        /// Find a path from the start polygon to the end polygon.
-        /// -If the end polygon can't be reached, the last polygon will be nearest the end polygon
-        /// -If the path array is too small, it will be filled as far as possible 
-        /// -start and end positions are used to calculate traversal costs
-        /// </summary>
-        /// <param name="startPt">The start point.</param>
-        /// <param name="endPt">The end point.</param>
-        /// <param name="resultPath">The path of polygon references</param>
-        /// <returns>True, if path found. False, if otherwise.</returns>
-        private bool FindPath(ref PathPoint startPt, ref PathPoint endPt, out int[] resultPath)
-        {
-            resultPath = null;
-
-            //validate input
-            int startRef = startPt.Polygon;
-            int endRef = endPt.Polygon;
-            if (startRef == 0 || endRef == 0)
-            {
-                return false;
-            }
-            if (!this.navigationMesh.IsValidPolyRef(startRef) || !this.navigationMesh.IsValidPolyRef(endRef))
-            {
-                return false;
-            }
-
-            //special case: both start and end are in the same polygon
-            if (startRef == endRef)
-            {
-                resultPath = new int[] { startRef };
-                return true;
-            }
-
-            Vector3 startPos = startPt.Position;
-            Vector3 endPos = endPt.Position;
-
-            this.nodePool.Clear();
-            this.openList.Clear();
-
-            //initial node is located at the starting position
-            Node startNode = this.nodePool.GetNode(startRef);
-            startNode.Position = startPos;
-            startNode.ParentIdx = 0;
-            startNode.cost = 0;
-            startNode.total = (startPos - endPos).Length() * HeuristicScale;
-            startNode.Id = startRef;
-            startNode.Flags = NodeFlags.Open;
-
-            this.openList.Push(startNode);
-
-            Node lastBestNode = startNode;
-            float lastBestTotalCost = startNode.total;
-
-            while (this.openList.Count > 0)
-            {
-                //remove node from open list and put it in closed list
-                Node bestNode = this.openList.Pop();
-                bestNode.SetNodeFlagClosed();
-
-                //reached the goal. stop searching
-                if (bestNode.Id == endRef)
-                {
-                    lastBestNode = bestNode;
-                    break;
-                }
-
-                //get current poly and tile
-                int bestRef = bestNode.Id;
-                MeshTile bestTile;
-                Poly bestPoly;
-                this.navigationMesh.TryGetTileAndPolyByRefUnsafe(bestRef, out bestTile, out bestPoly);
-
-                //get parent poly and tile
-                int parentRef = 0;
-                if (bestNode.ParentIdx != 0)
-                {
-                    parentRef = this.nodePool.GetNodeAtIdx(bestNode.ParentIdx).Id;
-                }
-
-                //examine neighbors
-                foreach (Link link in bestPoly.Links)
-                {
-                    int neighborRef = link.Reference;
-
-                    //skip invalid ids and do not expand back to where we came from
-                    if (neighborRef == 0 || neighborRef == parentRef)
-                    {
-                        continue;
-                    }
-
-                    //get neighbor poly and tile
-                    MeshTile neighborTile;
-                    Poly neighborPoly;
-                    this.navigationMesh.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
-
-                    Node neighborNode = this.nodePool.GetNode(neighborRef);
-                    if (neighborNode == null)
-                    {
-                        continue;
-                    }
-
-                    //if node is visited the first time, calculate node position
-                    if (neighborNode.Flags == NodeFlags.None)
-                    {
-                        this.GetEdgeMidPoint(bestRef, bestPoly, bestTile, neighborRef, neighborPoly, neighborTile, ref neighborNode.Position);
-                    }
-
-                    //calculate cost and heuristic
-                    float cost = 0;
-                    float heuristic = 0;
-
-                    //special case for last node
-                    if (neighborRef == endRef)
-                    {
-                        //cost
-                        float curCost = this.GetCost(bestNode.Position, neighborNode.Position, bestPoly);
-                        float endCost = this.GetCost(neighborNode.Position, endPos, neighborPoly);
-
-                        cost = bestNode.cost + curCost + endCost;
-                        heuristic = 0;
-                    }
-                    else
-                    {
-                        //cost
-                        float curCost = this.GetCost(bestNode.Position, neighborNode.Position, bestPoly);
-
-                        cost = bestNode.cost + curCost;
-                        heuristic = (neighborNode.Position - endPos).Length() * HeuristicScale;
-                    }
-
-                    float total = cost + heuristic;
-
-                    //the node is already in open list and new result is worse, skip
-                    if (neighborNode.IsInOpenList && total >= neighborNode.total)
-                    {
-                        continue;
-                    }
-
-                    //the node is already visited and processesd, and the new result is worse, skip
-                    if (neighborNode.IsInClosedList && total >= neighborNode.total)
-                    {
-                        continue;
-                    }
-
-                    //add or update the node
-                    neighborNode.ParentIdx = this.nodePool.GetNodeIdx(bestNode);
-                    neighborNode.Id = neighborRef;
-                    neighborNode.Flags = neighborNode.RemoveNodeFlagClosed();
-                    neighborNode.cost = cost;
-                    neighborNode.total = total;
-
-                    if (neighborNode.IsInOpenList)
-                    {
-                        //already in open, update node location
-                        this.openList.Modify(neighborNode);
-                    }
-                    else
-                    {
-                        //put the node in the open list
-                        neighborNode.SetNodeFlagOpen();
-                        this.openList.Push(neighborNode);
-                    }
-
-                    //update nearest node to target so far
-                    if (heuristic < lastBestTotalCost)
-                    {
-                        lastBestTotalCost = heuristic;
-                        lastBestNode = neighborNode;
-                    }
-                }
-            }
-
-            //save path
-            List<int> path = new List<int>();
-            Node node = lastBestNode;
-            do
-            {
-                path.Add(node.Id);
-
-                node = this.nodePool.GetNodeAtIdx(node.ParentIdx);
-            }
-            while (node != null);
-
-            //reverse the path since it's backwards
-            path.Reverse();
-
-            resultPath = path.ToArray();
-            return true;
         }
         /// <summary>
         /// Update the vertices on the straight path
@@ -895,7 +895,7 @@ namespace Engine.PathFinding.NavMesh
             nearestPt = PathPoint.Null;
 
             // Get nearby polygons from proximity grid.
-            List<int> polys = new List<int>(128);
+            List<int> polys = new List<int>();
             if (this.QueryPolygons(ref center, ref extents, polys))
             {
                 float nearestDistanceSqr = float.MaxValue;
@@ -953,7 +953,9 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = minx; x <= maxx; x++)
                 {
-                    foreach (MeshTile neighborTile in this.navigationMesh.GetTilesAt(x, y))
+                    var tiles = this.navigationMesh.GetTilesAt(x, y);
+
+                    foreach (var neighborTile in tiles)
                     {
                         n += neighborTile.QueryPolygons(bounds, polys);
                     }

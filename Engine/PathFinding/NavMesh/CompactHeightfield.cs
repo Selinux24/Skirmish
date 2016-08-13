@@ -115,6 +115,41 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
+        /// Builds a new compact height field from a height field
+        /// </summary>
+        /// <param name="heightField">Height field</param>
+        /// <param name="settings">Generation settings</param>
+        /// <returns>Returns the new generated compact height field</returns>
+        public static CompactHeightField Build(HeightField heightField, NavigationMeshGenerationSettings settings)
+        {
+            var ch = new CompactHeightField(heightField, settings.VoxelAgentHeight, settings.VoxelMaxClimb);
+            ch.Erode(settings.VoxelAgentRadius);
+            ch.BuildDistanceField();
+            ch.BuildRegions(0, settings.MinRegionSize, settings.MergedRegionSize);
+
+            return ch;
+        }
+        /// <summary>
+        /// Merge two stacks to get a single stack.
+        /// </summary>
+        /// <param name="source">The original stack</param>
+        /// <param name="destination">The new stack</param>
+        /// <param name="regions">Region ids</param>
+        private static void AppendStacks(List<CompactHeightFieldSpanReference> source, List<CompactHeightFieldSpanReference> destination, RegionId[] regions)
+        {
+            for (int j = 0; j < source.Count; j++)
+            {
+                var spanRef = source[j];
+                if (spanRef.Index < 0 || regions[spanRef.Index] != 0)
+                {
+                    continue;
+                }
+
+                destination.Add(spanRef);
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="CompactHeightField"/> class.
         /// </summary>
         /// <param name="field">A <see cref="HeightField"/> to build from.</param>
@@ -364,21 +399,161 @@ namespace Engine.PathFinding.NavMesh
             }
         }
         /// <summary>
-        /// Merge two stacks to get a single stack.
+        /// Builds a set of <see cref="Contour"/>s around the generated regions. Must be called after regions are generated.
         /// </summary>
-        /// <param name="source">The original stack</param>
-        /// <param name="destination">The new stack</param>
-        /// <param name="regions">Region ids</param>
-        private static void AppendStacks(List<CompactHeightFieldSpanReference> source, List<CompactHeightFieldSpanReference> destination, RegionId[] regions)
+        /// <param name="maxError">The maximum allowed deviation in a simplified contour from a raw one.</param>
+        /// <param name="maxEdgeLength">The maximum edge length.</param>
+        /// <param name="buildFlags">Flags that change settings for the build process.</param>
+        /// <returns>A <see cref="ContourSet"/> containing one contour per region.</returns>
+        public ContourSet BuildContourSet(float maxError, int maxEdgeLength, ContourBuildFlags buildFlags)
         {
-            for (int j = 0; j < source.Count; j++)
+            BoundingBox contourSetBounds = this.Bounds;
+            if (this.BorderSize > 0)
             {
-                var spanRef = source[j];
-                if (spanRef.Index < 0 || regions[spanRef.Index] != 0)
-                    continue;
-
-                destination.Add(spanRef);
+                //remove offset
+                float pad = this.BorderSize * this.CellSize;
+                contourSetBounds.Minimum.X += pad;
+                contourSetBounds.Minimum.Z += pad;
+                contourSetBounds.Maximum.X -= pad;
+                contourSetBounds.Maximum.Z -= pad;
             }
+
+            int contourSetWidth = this.Width - this.BorderSize * 2;
+            int contourSetLength = this.Length - this.BorderSize * 2;
+
+            int maxContours = Math.Max(this.MaxRegions, 8);
+            var contours = new List<Contour>(maxContours);
+
+            EdgeFlags[] flags = new EdgeFlags[this.Spans.Length];
+
+            //Modify flags array by using the CompactHeightfield data
+            //mark boundaries
+            for (int z = 0; z < this.Length; z++)
+            {
+                for (int x = 0; x < this.Width; x++)
+                {
+                    //loop through all the spans in the cell
+                    CompactHeightFieldCell c = this.Cells[x + z * this.Width];
+                    for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
+                    {
+                        CompactHeightFieldSpan s = this.Spans[i];
+
+                        //set the flag to 0 if the region is a border region or null.
+                        if (s.Region.IsNull || RegionId.HasFlags(s.Region, RegionFlags.Border))
+                        {
+                            flags[i] = 0;
+                            continue;
+                        }
+
+                        //go through all the neighboring cells
+                        for (var dir = Direction.West; dir <= Direction.South; dir++)
+                        {
+                            //obtain region id
+                            RegionId r = RegionId.Null;
+                            if (s.IsConnected(dir))
+                            {
+                                int dx = x + dir.GetHorizontalOffset();
+                                int dz = z + dir.GetVerticalOffset();
+                                int di = this.Cells[dx + dz * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
+                                r = this.Spans[di].Region;
+                            }
+
+                            //region ids are equal
+                            if (r == s.Region)
+                            {
+                                //res marks all the internal edges
+                                EdgeFlagsHelper.AddEdge(ref flags[i], dir);
+                            }
+                        }
+
+                        //flags represents all the nonconnected edges, edges that are only internal
+                        //the edges need to be between different regions
+                        EdgeFlagsHelper.FlipEdges(ref flags[i]);
+                    }
+                }
+            }
+
+            var verts = new List<ContourVertexi>();
+            var simplified = new List<ContourVertexi>();
+
+            for (int z = 0; z < this.Length; z++)
+            {
+                for (int x = 0; x < this.Width; x++)
+                {
+                    CompactHeightFieldCell c = this.Cells[x + z * this.Width];
+                    for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
+                    {
+                        //flags is either 0000 or 1111
+                        //in other words, not connected at all 
+                        //or has all connections, which means span is in the middle and thus not an edge.
+                        if (flags[i] == EdgeFlags.None || flags[i] == EdgeFlags.All)
+                        {
+                            flags[i] = EdgeFlags.None;
+                            continue;
+                        }
+
+                        var spanRef = new CompactHeightFieldSpanReference(x, z, i);
+                        RegionId reg = this[spanRef].Region;
+                        if (reg.IsNull || RegionId.HasFlags(reg, RegionFlags.Border))
+                        {
+                            continue;
+                        }
+
+                        //reset each iteration
+                        verts.Clear();
+                        simplified.Clear();
+
+                        //Walk along a contour, then build it
+                        WalkContour(spanRef, flags, verts);
+                        Contour.Simplify(verts, simplified, maxError, maxEdgeLength, buildFlags);
+                        Contour.RemoveDegenerateSegments(simplified);
+                        Contour contour = new Contour(simplified, reg, this.Areas[i], this.BorderSize);
+
+                        if (!contour.IsNull)
+                        {
+                            contours.Add(contour);
+                        }
+                    }
+                }
+            }
+
+            //Check and merge bad contours
+            for (int i = 0; i < contours.Count; i++)
+            {
+                Contour cont = contours[i];
+
+                //Check if contour is backwards
+                if (cont.Area2D < 0)
+                {
+                    //Find another contour to merge with
+                    int mergeIndex = -1;
+                    for (int j = 0; j < contours.Count; j++)
+                    {
+                        if (i == j)
+                        {
+                            continue;
+                        }
+
+                        //Must have at least one vertex, the same region ID, and be going forwards.
+                        Contour contj = contours[j];
+                        if (contj.Vertices.Length != 0 && contj.RegionId == cont.RegionId && contj.Area2D > 0)
+                        {
+                            mergeIndex = j;
+                            break;
+                        }
+                    }
+
+                    //Merge if found.
+                    if (mergeIndex != -1)
+                    {
+                        contours[mergeIndex].MergeWith(cont);
+                        contours.RemoveAt(i);
+                        i--;
+                    }
+                }
+            }
+
+            return new ContourSet(contours, contourSetBounds, contourSetWidth, contourSetLength);
         }
         /// <summary>
         /// Discards regions that are too small. 
@@ -1362,163 +1537,6 @@ namespace Engine.PathFinding.NavMesh
                     }
                 }
             }
-        }
-        /// <summary>
-        /// Builds a set of <see cref="Contour"/>s around the generated regions. Must be called after regions are generated.
-        /// </summary>
-        /// <param name="maxError">The maximum allowed deviation in a simplified contour from a raw one.</param>
-        /// <param name="maxEdgeLength">The maximum edge length.</param>
-        /// <param name="buildFlags">Flags that change settings for the build process.</param>
-        /// <returns>A <see cref="ContourSet"/> containing one contour per region.</returns>
-        public ContourSet BuildContourSet(float maxError, int maxEdgeLength, ContourBuildFlags buildFlags)
-        {
-            BoundingBox contourSetBounds = this.Bounds;
-            if (this.BorderSize > 0)
-            {
-                //remove offset
-                float pad = this.BorderSize * this.CellSize;
-                contourSetBounds.Minimum.X += pad;
-                contourSetBounds.Minimum.Z += pad;
-                contourSetBounds.Maximum.X -= pad;
-                contourSetBounds.Maximum.Z -= pad;
-            }
-
-            int contourSetWidth = this.Width - this.BorderSize * 2;
-            int contourSetLength = this.Length - this.BorderSize * 2;
-
-            int maxContours = Math.Max(this.MaxRegions, 8);
-            var contours = new List<Contour>(maxContours);
-
-            EdgeFlags[] flags = new EdgeFlags[this.Spans.Length];
-
-            //Modify flags array by using the CompactHeightfield data
-            //mark boundaries
-            for (int z = 0; z < this.Length; z++)
-            {
-                for (int x = 0; x < this.Width; x++)
-                {
-                    //loop through all the spans in the cell
-                    CompactHeightFieldCell c = this.Cells[x + z * this.Width];
-                    for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
-                    {
-                        CompactHeightFieldSpan s = this.Spans[i];
-
-                        //set the flag to 0 if the region is a border region or null.
-                        if (s.Region.IsNull || RegionId.HasFlags(s.Region, RegionFlags.Border))
-                        {
-                            flags[i] = 0;
-                            continue;
-                        }
-
-                        //go through all the neighboring cells
-                        for (var dir = Direction.West; dir <= Direction.South; dir++)
-                        {
-                            //obtain region id
-                            RegionId r = RegionId.Null;
-                            if (s.IsConnected(dir))
-                            {
-                                int dx = x + dir.GetHorizontalOffset();
-                                int dz = z + dir.GetVerticalOffset();
-                                int di = this.Cells[dx + dz * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
-                                r = this.Spans[di].Region;
-                            }
-
-                            //region ids are equal
-                            if (r == s.Region)
-                            {
-                                //res marks all the internal edges
-                                EdgeFlagsHelper.AddEdge(ref flags[i], dir);
-                            }
-                        }
-
-                        //flags represents all the nonconnected edges, edges that are only internal
-                        //the edges need to be between different regions
-                        EdgeFlagsHelper.FlipEdges(ref flags[i]);
-                    }
-                }
-            }
-
-            var verts = new List<ContourVertexi>();
-            var simplified = new List<ContourVertexi>();
-
-            for (int z = 0; z < this.Length; z++)
-            {
-                for (int x = 0; x < this.Width; x++)
-                {
-                    CompactHeightFieldCell c = this.Cells[x + z * this.Width];
-                    for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
-                    {
-                        //flags is either 0000 or 1111
-                        //in other words, not connected at all 
-                        //or has all connections, which means span is in the middle and thus not an edge.
-                        if (flags[i] == EdgeFlags.None || flags[i] == EdgeFlags.All)
-                        {
-                            flags[i] = EdgeFlags.None;
-                            continue;
-                        }
-
-                        var spanRef = new CompactHeightFieldSpanReference(x, z, i);
-                        RegionId reg = this[spanRef].Region;
-                        if (reg.IsNull || RegionId.HasFlags(reg, RegionFlags.Border))
-                        {
-                            continue;
-                        }
-
-                        //reset each iteration
-                        verts.Clear();
-                        simplified.Clear();
-
-                        //Walk along a contour, then build it
-                        WalkContour(spanRef, flags, verts);
-                        Contour.Simplify(verts, simplified, maxError, maxEdgeLength, buildFlags);
-                        Contour.RemoveDegenerateSegments(simplified);
-                        Contour contour = new Contour(simplified, reg, this.Areas[i], this.BorderSize);
-
-                        if (!contour.IsNull)
-                        {
-                            contours.Add(contour);
-                        }
-                    }
-                }
-            }
-
-            //Check and merge bad contours
-            for (int i = 0; i < contours.Count; i++)
-            {
-                Contour cont = contours[i];
-
-                //Check if contour is backwards
-                if (cont.Area2D < 0)
-                {
-                    //Find another contour to merge with
-                    int mergeIndex = -1;
-                    for (int j = 0; j < contours.Count; j++)
-                    {
-                        if (i == j)
-                        {
-                            continue;
-                        }
-
-                        //Must have at least one vertex, the same region ID, and be going forwards.
-                        Contour contj = contours[j];
-                        if (contj.Vertices.Length != 0 && contj.RegionId == cont.RegionId && contj.Area2D > 0)
-                        {
-                            mergeIndex = j;
-                            break;
-                        }
-                    }
-
-                    //Merge if found.
-                    if (mergeIndex != -1)
-                    {
-                        contours[mergeIndex].MergeWith(cont);
-                        contours.RemoveAt(i);
-                        i--;
-                    }
-                }
-            }
-
-            return new ContourSet(contours, contourSetBounds, contourSetWidth, contourSetLength);
         }
         /// <summary>
         /// Initial generation of the contours

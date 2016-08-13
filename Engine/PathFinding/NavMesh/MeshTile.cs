@@ -360,30 +360,31 @@ namespace Engine.PathFinding.NavMesh
                     //Create new links
                     Vector3 va = this.Verts[this.Polys[i].Vertices[j]];
                     Vector3 vb = this.Verts[this.Polys[i].Vertices[(j + 1) % numPolyVerts]];
-                    List<int> nei = new List<int>(4);
-                    List<float> neia = new List<float>(4 * 2);
-                    target.FindConnectingPolys(va, vb, dir.GetOpposite(), nei, neia);
+                    BoundarySide opSide = dir.GetOpposite();
+                    int[] neighbors;
+                    float[] neighborAreas;
+                    target.FindConnectingPolys(va, vb, opSide, out neighbors, out neighborAreas);
 
-                    //Iterate through neighbors
-                    for (int k = 0; k < nei.Count; k++)
+                    for (int k = 0; k < neighbors.Length; k++)
                     {
-                        Link link = new Link();
-                        link.Reference = nei[k];
-                        link.Edge = j;
-                        link.Side = dir;
+                        Link link = new Link()
+                        {
+                            Reference = neighbors[k],
+                            Edge = j,
+                            Side = dir,
+                        };
+
                         this.Polys[i].Links.Add(link);
 
                         //Compress portal limits to a value
                         if (dir == BoundarySide.PlusX || dir == BoundarySide.MinusX)
                         {
-                            float tmin = (neia[k * 2 + 0] - va.Z) / (vb.Z - va.Z);
-                            float tmax = (neia[k * 2 + 1] - va.Z) / (vb.Z - va.Z);
+                            float tmin = (neighborAreas[k * 2 + 0] - va.Z) / (vb.Z - va.Z);
+                            float tmax = (neighborAreas[k * 2 + 1] - va.Z) / (vb.Z - va.Z);
 
                             if (tmin > tmax)
                             {
-                                float temp = tmin;
-                                tmin = tmax;
-                                tmax = temp;
+                                Helper.SwapValues(ref tmin, ref tmax);
                             }
 
                             link.BMin = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f);
@@ -391,14 +392,12 @@ namespace Engine.PathFinding.NavMesh
                         }
                         else if (dir == BoundarySide.PlusZ || dir == BoundarySide.MinusZ)
                         {
-                            float tmin = (neia[k * 2 + 0] - va.X) / (vb.X - va.X);
-                            float tmax = (neia[k * 2 + 1] - va.X) / (vb.X - va.X);
+                            float tmin = (neighborAreas[k * 2 + 0] - va.X) / (vb.X - va.X);
+                            float tmax = (neighborAreas[k * 2 + 1] - va.X) / (vb.X - va.X);
 
                             if (tmin > tmax)
                             {
-                                float temp = tmin;
-                                tmin = tmax;
-                                tmax = temp;
+                                Helper.SwapValues(ref tmin, ref tmax);
                             }
 
                             link.BMin = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f);
@@ -484,10 +483,16 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="va">Vertex A</param>
         /// <param name="vb">Vertex B</param>
         /// <param name="side">Polygon edge</param>
-        /// <param name="con">Resulting Connection polygon</param>
-        /// <param name="conarea">Resulting Connection area</param>
-        public void FindConnectingPolys(Vector3 va, Vector3 vb, BoundarySide side, List<int> con, List<float> conarea)
+        /// <param name="connections">Resulting Connection polygon</param>
+        /// <param name="connectionAreas">Resulting Connection area</param>
+        public void FindConnectingPolys(Vector3 va, Vector3 vb, BoundarySide side, out int[] connections, out float[] connectionAreas)
         {
+            connections = null;
+            connectionAreas = null;
+
+            List<int> con = new List<int>();
+            List<float> conarea = new List<float>();
+
             Vector2 amin = Vector2.Zero;
             Vector2 amax = Vector2.Zero;
             CalcSlabEndPoints(va, vb, amin, amax, side);
@@ -532,19 +537,19 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     //Add return value
-                    if (con.Count < con.Capacity)
-                    {
-                        conarea.Add(Math.Max(amin.X, bmin.X));
-                        conarea.Add(Math.Min(amax.X, bmax.X));
+                    conarea.Add(Math.Max(amin.X, bmin.X));
+                    conarea.Add(Math.Min(amax.X, bmax.X));
 
-                        int id;
-                        this.idManager.SetPolyIndex(ref baseRef, i, out id);
-                        con.Add(id);
-                    }
+                    int id;
+                    this.idManager.SetPolyIndex(ref baseRef, i, out id);
+                    con.Add(id);
 
                     break;
                 }
             }
+
+            connections = con.ToArray();
+            connectionAreas = conarea.ToArray();
         }
         /// <summary>
         /// Find the closest polygon possible in the tile under certain constraints.

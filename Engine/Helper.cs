@@ -320,6 +320,18 @@ namespace Engine
         {
             return num = num * 0.5f != (int)(num * 0.5f) ? num : num + 1;
         }
+        /// <summary>
+        /// Swaps values
+        /// </summary>
+        /// <typeparam name="T">Type of values</typeparam>
+        /// <param name="left">Left value</param>
+        /// <param name="right">Right value</param>
+        public static void SwapValues<T>(ref T left, ref T right)
+        {
+            T temp = left;
+            left = right;
+            right = temp;
+        }
 
         /// <summary>
         /// Gets angle between two vectors

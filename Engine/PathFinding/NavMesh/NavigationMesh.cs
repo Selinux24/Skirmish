@@ -13,15 +13,11 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// 
         /// </summary>
-        protected TiledNavigationMesh TiledNavigationMesh = null;
+        protected readonly NavigationMeshQuery Query = null;
         /// <summary>
         /// 
         /// </summary>
-        protected NavigationMeshQuery Query = null;
-        /// <summary>
-        /// 
-        /// </summary>
-        protected NavigationMeshNode[] Nodes = null;
+        protected readonly NavigationMeshNode[] Nodes = null;
 
         /// <summary>
         /// Navigation Mesh Build
@@ -58,23 +54,24 @@ namespace Engine.PathFinding.NavMesh
             BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetCorners());
             Array.ForEach(triangles, tri => bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(tri.GetCorners())));
 
-            var fh = new HeightField(bbox, settings.CellSize, settings.CellHeight);
-            fh.RasterizeTriangles(triangles, Area.Default);
-            fh.FilterLedgeSpans(settings.VoxelAgentHeight, settings.VoxelMaxClimb);
-            fh.FilterLowHangingWalkableObstacles(settings.VoxelMaxClimb);
-            fh.FilterWalkableLowHeightSpans(settings.VoxelAgentHeight);
-
-            var ch = new CompactHeightField(fh, settings.VoxelAgentHeight, settings.VoxelMaxClimb);
-            ch.Erode(settings.VoxelAgentRadius);
-            ch.BuildDistanceField();
-            ch.BuildRegions(0, settings.MinRegionSize, settings.MergedRegionSize);
-
-            var cs = ch.BuildContourSet(settings.MaxEdgeError, settings.MaxEdgeLength, settings.ContourFlags);
-
+            var hf = HeightField.Build(bbox, triangles, settings);
+            var chf = CompactHeightField.Build(hf, settings);
+            var cs = chf.BuildContourSet(settings.MaxEdgeError, settings.MaxEdgeLength, settings.ContourFlags);
             var pm = new PolyMesh(cs, settings.CellSize, settings.CellHeight, 0, settings.VertsPerPoly);
+            var pmd = new PolyMeshDetail(pm, chf, settings.SampleDistance, settings.MaxSampleError);
+            var nm = new NavigationMesh(pm, pmd, settings);
 
-            var pmd = new PolyMeshDetail(pm, ch, settings.SampleDistance, settings.MaxSampleError);
+            return nm;
+        }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="pm">Poly mesh</param>
+        /// <param name="pmd">Poly mesh detail</param>
+        /// <param name="settings">Generation settings</param>
+        protected NavigationMesh(PolyMesh pm, PolyMeshDetail pmd, NavigationMeshGenerationSettings settings)
+        {
             var builder = new NavigationMeshBuilder(
                 pm,
                 pmd,
@@ -87,24 +84,22 @@ namespace Engine.PathFinding.NavMesh
                 settings.AgentHeight,
                 settings.AgentRadius);
 
-            var nm = new NavigationMesh();
-            nm.TiledNavigationMesh = new TiledNavigationMesh(builder);
-            nm.Query = new NavigationMeshQuery(nm.TiledNavigationMesh, 2048);
-            nm.Nodes = new NavigationMeshNode[pmd.MeshCount];
+            var tnm = new TiledNavigationMesh(builder);
+            this.Query = new NavigationMeshQuery(tnm, 2048);
+            this.Nodes = new NavigationMeshNode[pmd.MeshCount];
 
             for (int i = 0; i < pmd.MeshCount; i++)
             {
                 var mesh = pmd.Meshes[i];
                 var poly = pm.Polys[i];
 
-                nm.Nodes[i] = new NavigationMeshNode(nm, new Polygon(mesh.VertexCount), i, poly.RegionId.Id);
+                this.Nodes[i] = new NavigationMeshNode(this, new Polygon(mesh.VertexCount), i, poly.RegionId.Id);
+
                 for (int v = 0; v < mesh.VertexCount; v++)
                 {
-                    nm.Nodes[i].Poly.Points[v] = pmd.Verts[mesh.VertexIndex + v];
+                    this.Nodes[i].Poly.Points[v] = pmd.Verts[mesh.VertexIndex + v];
                 }
             }
-
-            return nm;
         }
 
         /// <summary>
@@ -124,7 +119,7 @@ namespace Engine.PathFinding.NavMesh
         public PathFindingPath FindPath(Vector3 from, Vector3 to)
         {
             Vector3[] path;
-            if (this.Query.FindStraightPath(from, to, out path))
+            if (this.Query.FindPath(from, to, out path))
             {
                 return new PathFindingPath(path);
             }
@@ -137,7 +132,7 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Returns text representation</returns>
         public override string ToString()
         {
-            return "NavMesh";
+            return string.Format("Nodes: {0}", this.Nodes != null ? this.Nodes.Length : 0);
         }
     }
 }

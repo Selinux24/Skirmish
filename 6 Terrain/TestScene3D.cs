@@ -37,6 +37,7 @@ namespace TerrainTest
         private LineListDrawer terrainPointDrawer = null;
         private TriangleListDrawer terrainGraphDrawer = null;
 
+        private Model helipod = null;
         private ModelInstanced obelisk = null;
         private ModelInstanced rocks = null;
         private ModelInstanced trees = null;
@@ -155,6 +156,20 @@ namespace TerrainTest
 
             #endregion
 
+            #region Helipod
+
+            sw.Restart();
+            this.helipod = this.AddModel(new ModelDescription()
+            {
+                ContentPath = resources,
+                ModelFileName = "helipod.dae",
+                Opaque = true,
+            });
+            sw.Stop();
+            loadingText += string.Format("helipod: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
             #region Obelisk
 
             sw.Restart();
@@ -249,6 +264,17 @@ namespace TerrainTest
 
             #region Positioning
 
+            Random posRnd = new Random(1);
+
+            //Helipod
+            Vector3 gPos;
+            Triangle gTri;
+            if (this.terrain.FindTopGroundPosition(25, 25, out gPos, out gTri))
+            {
+                this.helipod.Manipulator.SetPosition(gPos, true);
+            }
+
+            //Obelisk
             for (int i = 0; i < 4; i++)
             {
                 int ox = i == 0 || i == 2 ? 1 : -1;
@@ -261,8 +287,7 @@ namespace TerrainTest
                 }
             }
 
-            Random posRnd = new Random(1);
-
+            //Rocks
             for (int i = 0; i < this.rocks.Instances.Length; i++)
             {
                 var pos = this.DEBUGGetRandomPoint(posRnd, Vector3.Zero);
@@ -276,6 +301,7 @@ namespace TerrainTest
                 }
             }
 
+            //Trees
             for (int i = 0; i < this.trees.Instances.Length; i++)
             {
                 var pos = this.DEBUGGetRandomPoint(posRnd, Vector3.Zero);
@@ -289,6 +315,7 @@ namespace TerrainTest
                 }
             }
 
+            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.helipod, EvaluateForPicking = true, UseVolumeForPicking = false, EvaluateForPathFinding = true, UseVolumeForPathFinding = false }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.obelisk, EvaluateForPicking = false }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.rocks, EvaluateForPicking = false }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.trees, EvaluateForPicking = false, UseVolumeForPicking = true, EvaluateForPathFinding = true, UseVolumeForPathFinding = true }, false);
@@ -296,12 +323,12 @@ namespace TerrainTest
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
 
-            Vector3 gPos;
-            Triangle gTri;
-            if (this.terrain.FindTopGroundPosition(20, 20, out gPos, out gTri))
+            Vector3 heliPos;
+            Triangle heliTri;
+            if (this.terrain.FindTopGroundPosition(25, 25, out heliPos, out heliTri))
             {
-                this.helicopter.Manipulator.SetPosition(gPos, true);
-                this.helicopter.Manipulator.SetNormal(gTri.Normal);
+                this.helicopter.Manipulator.SetPosition(heliPos, true);
+                this.helicopter.Manipulator.SetNormal(heliTri.Normal);
             }
 
             Vector3 tankPosition;

@@ -9,6 +9,9 @@ namespace Engine.PathFinding.NavMesh
     /// </summary>
     public class HeightField
     {
+        /// <summary>
+        /// Cells array
+        /// </summary>
         private HeightFieldCell[] cells;
 
         /// <summary>
@@ -131,21 +134,39 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
+        /// Builds a new height field
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="settings">Generation settings</param>
+        /// <returns>Returns the new generated height field</returns>
+        public static HeightField Build(BoundingBox bbox, Triangle[] triangles, NavigationMeshGenerationSettings settings)
+        {
+            var fh = new HeightField(bbox, settings.CellSize, settings.CellHeight);
+            fh.RasterizeTriangles(triangles, Area.Default);
+            fh.FilterLedgeSpans(settings.VoxelAgentHeight, settings.VoxelMaxClimb);
+            fh.FilterLowHangingWalkableObstacles(settings.VoxelMaxClimb);
+            fh.FilterWalkableLowHeightSpans(settings.VoxelAgentHeight);
+
+            return fh;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="HeightField"/> class.
         /// </summary>
-        /// <param name="b">The world-space bounds.</param>
+        /// <param name="bbox">The world-space bounds.</param>
         /// <param name="cellSize">The world-space size of each cell in the XZ plane.</param>
         /// <param name="cellHeight">The world-space height of each cell.</param>
-        public HeightField(BoundingBox b, float cellSize, float cellHeight)
+        public HeightField(BoundingBox bbox, float cellSize, float cellHeight)
         {
             this.CellSizeXZ = cellSize;
             this.CellHeight = cellHeight;
-            this.Bounds = b;
+            this.Bounds = bbox;
 
             //Make sure the bbox contains all the possible voxels.
-            this.Width = (int)Math.Ceiling((b.Maximum.X - b.Minimum.X) / cellSize);
-            this.Height = (int)Math.Ceiling((b.Maximum.Y - b.Minimum.Y) / cellHeight);
-            this.Length = (int)Math.Ceiling((b.Maximum.Z - b.Minimum.Z) / cellSize);
+            this.Width = (int)Math.Ceiling((bbox.Maximum.X - bbox.Minimum.X) / cellSize);
+            this.Height = (int)Math.Ceiling((bbox.Maximum.Y - bbox.Minimum.Y) / cellHeight);
+            this.Length = (int)Math.Ceiling((bbox.Maximum.Z - bbox.Minimum.Z) / cellSize);
 
             Vector3 min = this.Bounds.Minimum;
             Vector3 max = new Vector3();
@@ -154,10 +175,10 @@ namespace Engine.PathFinding.NavMesh
             max.Z = min.Z + this.Length * cellSize;
             this.Bounds = new BoundingBox(min, max);
 
-            cells = new HeightFieldCell[this.Width * this.Length];
-            for (int i = 0; i < cells.Length; i++)
+            this.cells = new HeightFieldCell[this.Width * this.Length];
+            for (int i = 0; i < this.cells.Length; i++)
             {
-                cells[i] = new HeightFieldCell(this.Height);
+                this.cells[i] = new HeightFieldCell(this.Height);
             }
         }
 
@@ -174,7 +195,7 @@ namespace Engine.PathFinding.NavMesh
             //Loop through every cell in the Heightfield
             for (int i = 0; i < this.cells.Length; i++)
             {
-                HeightFieldCell c = this.cells[i];
+                var c = this.cells[i];
 
                 //Store the first span's data as the "previous" data
                 var spans = c.MutableSpans;
@@ -216,7 +237,7 @@ namespace Engine.PathFinding.NavMesh
         {
             for (int i = 0; i < this.cells.Length; i++)
             {
-                HeightFieldCell c = cells[i];
+                var c = this.cells[i];
 
                 var spans = c.MutableSpans;
 
@@ -247,7 +268,7 @@ namespace Engine.PathFinding.NavMesh
             {
                 for (int x = 0; x < this.Width; x++)
                 {
-                    HeightFieldCell c = cells[x + y * this.Width];
+                    var c = this.cells[x + y * this.Width];
 
                     var spans = c.MutableSpans;
 
@@ -343,7 +364,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="area">The area flags for all of the triangles.</param>
         public void RasterizeTriangles(Triangle[] tris, Area area)
         {
-            RasterizeTriangles(tris, 0, tris.Length, area);
+            this.RasterizeTriangles(tris, 0, tris.Length, area);
         }
         /// <summary>
         /// Rasterizes several triangles at once.
@@ -368,7 +389,7 @@ namespace Engine.PathFinding.NavMesh
                 for (int j = start; j < end; j++)
                 {
                     Triangle t = tris[j];
-                    RasterizeTriangle(ref t.Point1, ref t.Point2, ref t.Point3, area);
+                    this.RasterizeTriangle(ref t.Point1, ref t.Point2, ref t.Point3, area);
                 }
             });
         }
@@ -411,11 +432,12 @@ namespace Engine.PathFinding.NavMesh
                 Polygon pIn = new Polygon(a, b, c);
 
                 //clip the triangle to the row
-                int nvrow = 3;
                 float cz = this.Bounds.Minimum.Z + z * this.CellSizeXZ;
+
                 Polygon pOut;
-                nvrow = Polygon.ClipPolygonToPlane(pIn, 0, 1, -cz, out pOut);
+                int nvrow = Polygon.ClipPolygonToPlane(pIn, 0, 1, -cz, out pOut);
                 if (nvrow < 3) continue;
+
                 Polygon pInRow;
                 nvrow = Polygon.ClipPolygonToPlane(pOut, 0, -1, cz + this.CellSizeXZ, out pInRow);
                 if (nvrow < 3) continue;
@@ -471,7 +493,7 @@ namespace Engine.PathFinding.NavMesh
                     int spanMax = (int)Math.Ceiling(polyMax * invCellHeight);
 
                     //add the span
-                    cells[z * this.Width + x].AddSpan(new HeightFieldSpan(spanMin, spanMax, area));
+                    this.cells[z * this.Width + x].AddSpan(new HeightFieldSpan(spanMin, spanMax, area));
                 }
             }
         }
