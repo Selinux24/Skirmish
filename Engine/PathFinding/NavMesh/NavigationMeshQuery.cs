@@ -89,6 +89,18 @@ namespace Engine.PathFinding.NavMesh
             return false;
         }
         /// <summary>
+        /// Gets wether the specified position is walkable
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        public bool IsWalkable(Vector3 position)
+        {
+            var pt = this.FindNearestPoly(position, Vector3.Zero);
+
+            return pt.Polygon != 0;
+        }
+
+        /// <summary>
         /// Find a path from the start polygon to the end polygon.
         /// -If the end polygon can't be reached, the last polygon will be nearest the end polygon
         /// -If the path array is too small, it will be filled as far as possible 

@@ -681,6 +681,8 @@ namespace TerrainTest
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
 
+                var prevPos = this.Camera.Position;
+
                 if (this.Game.Input.KeyPressed(Keys.A))
                 {
                     this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
@@ -704,9 +706,16 @@ namespace TerrainTest
                 Vector3 walkerPos;
                 if (this.terrain.FindNearestGroundPosition(this.Camera.Position, out walkerPos))
                 {
-                    walkerPos.Y += this.walkerHeight;
+                    if (this.terrain.IsWalkable(walkerPos))
+                    {
+                        walkerPos.Y += this.walkerHeight;
 
-                    this.Camera.Goto(walkerPos);
+                        this.Camera.Goto(walkerPos);
+                    }
+                    else
+                    {
+                        this.Camera.Goto(prevPos);
+                    }
                 }
             }
             else
@@ -782,13 +791,13 @@ namespace TerrainTest
             curve.PreLoop = CurveLoopType.Constant;
             curve.PostLoop = CurveLoopType.Constant;
 
-            Vector3[] cPoints = new Vector3[10];
+            Vector3[] cPoints = new Vector3[15];
 
             Random rnd = new Random();
 
             if (this.helicopter.Manipulator.IsFollowingPath)
             {
-                for (int i = 0; i < cPoints.Length; i++)
+                for (int i = 0; i < cPoints.Length - 2; i++)
                 {
                     cPoints[i] = this.DEBUGGetRandomPoint(rnd, this.heightOffset);
                 }
@@ -798,10 +807,17 @@ namespace TerrainTest
                 cPoints[0] = this.helicopter.Manipulator.Position;
                 cPoints[1] = this.helicopter.Manipulator.Position + (Vector3.Up * 5f) + (this.helicopter.Manipulator.Forward * 10f);
 
-                for (int i = 2; i < cPoints.Length; i++)
+                for (int i = 2; i < cPoints.Length - 2; i++)
                 {
                     cPoints[i] = this.DEBUGGetRandomPoint(rnd, this.heightOffset);
                 }
+            }
+
+            var p = this.helipod.Manipulator.Position;
+            if (this.terrain.FindTopGroundPosition(p.X, p.Z, out p))
+            {
+                cPoints[cPoints.Length - 2] = p + this.heightOffset;
+                cPoints[cPoints.Length - 1] = p;
             }
 
             float t = 0;

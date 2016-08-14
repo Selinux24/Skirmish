@@ -244,6 +244,12 @@ namespace Engine
         /// <returns>Return path if exists</returns>
         public abstract PathFindingPath FindPath(Vector3 from, Vector3 to);
         /// <summary>
+        /// Gets wether the specified position is walkable
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        public abstract bool IsWalkable(Vector3 position);
+        /// <summary>
         /// Gets bounding sphere
         /// </summary>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>

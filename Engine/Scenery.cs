@@ -212,6 +212,15 @@ namespace Engine
             return path;
         }
         /// <summary>
+        /// Gets wether the specified position is walkable
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        public override bool IsWalkable(Vector3 position)
+        {
+            return this.navigationGraph.IsWalkable(position);
+        }
+        /// <summary>
         /// Gets bounding sphere
         /// </summary>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>

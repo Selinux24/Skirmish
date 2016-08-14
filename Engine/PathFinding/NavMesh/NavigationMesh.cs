@@ -127,6 +127,15 @@ namespace Engine.PathFinding.NavMesh
             return null;
         }
         /// <summary>
+        /// Gets wether the specified position is walkable
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        public bool IsWalkable(Vector3 position)
+        {
+            return this.Query.IsWalkable(position);
+        }
+        /// <summary>
         /// Gets text representation of instance
         /// </summary>
         /// <returns>Returns text representation</returns>

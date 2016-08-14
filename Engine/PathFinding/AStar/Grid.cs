@@ -301,16 +301,44 @@ namespace Engine.PathFinding.AStar
                 return false;
             }
         }
-
+     
+        /// <summary>
+        /// Gets the node collection of the grid
+        /// </summary>
+        /// <returns></returns>
         public IGraphNode[] GetNodes()
         {
             return Array.ConvertAll(this.Nodes, (n) => { return (IGraphNode)n; });
         }
-
+        /// <summary>
+        /// Find path from point to point
+        /// </summary>
+        /// <param name="from">Start point</param>
+        /// <param name="to">End point</param>
+        /// <returns>Return path if exists</returns>
         public PathFindingPath FindPath(Vector3 from, Vector3 to)
         {
             return AStarQuery.FindPath(this, from, to);
         }
+        /// <summary>
+        /// Gets wether the specified position is walkable
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        public bool IsWalkable(Vector3 position)
+        {
+            for (int i = 0; i < this.Nodes.Length; i++)
+            {
+                float distance;
+                if (this.Nodes[i].Contains(position, out distance))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Gets text representation of instance
         /// </summary>
