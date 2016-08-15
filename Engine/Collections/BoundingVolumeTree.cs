@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace Engine.PathFinding.NavMesh
+namespace Engine.Collections
 {
     /// <summary>
     /// A tree of bounding volumes.
@@ -46,7 +45,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="minIndex">The first bounding box in the list to get the extends of.</param>
         /// <param name="maxIndex">The last bounding box in the list to get the extends of.</param>
         /// <param name="bounds">The extends of all the bounding boxes.</param>
-        private static void CalcExtends(List<BoundingVolumeTreeNode> items, int minIndex, int maxIndex, out BoundingBoxi bounds)
+        private static void CalcExtends(BoundingVolumeTreeNode[] items, int minIndex, int maxIndex, out BoundingBoxi bounds)
         {
             bounds = items[minIndex].Bounds;
 
@@ -84,47 +83,12 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BoundingVolumeTree"/> class.
+        /// Constructor
         /// </summary>
-        /// <param name="verts">A set of vertices.</param>
-        /// <param name="polys">A set of polygons composed of the vertices in <c>verts</c>.</param>
-        /// <param name="nvp">The maximum number of vertices per polygon.</param>
-        /// <param name="cellSize">The size of a cell.</param>
-        /// <param name="cellHeight">The height of a cell.</param>
-        public BoundingVolumeTree(Vertexi[] verts, PolyMesh.Polygon[] polys, int nvp, float cellSize, float cellHeight)
+        /// <param name="nodes">Nodes list</param>
+        public BoundingVolumeTree(BoundingVolumeTreeNode[] nodes)
         {
-            this.nodes = new BoundingVolumeTreeNode[polys.Length * 2];
-
-            var items = new List<BoundingVolumeTreeNode>();
-
-            for (int i = 0; i < polys.Length; i++)
-            {
-                PolyMesh.Polygon p = polys[i];
-
-                BoundingVolumeTreeNode temp;
-                temp.Index = i;
-                temp.Bounds.Min = temp.Bounds.Max = verts[p.Vertices[0]];
-
-                for (int j = 1; j < nvp; j++)
-                {
-                    int vi = p.Vertices[j];
-                    if (vi == PolyMesh.NullId)
-                    {
-                        break;
-                    }
-
-                    var v = verts[vi];
-                    Vertexi.ComponentMin(ref temp.Bounds.Min, ref v, out temp.Bounds.Min);
-                    Vertexi.ComponentMax(ref temp.Bounds.Max, ref v, out temp.Bounds.Max);
-                }
-
-                temp.Bounds.Min.Y = (int)Math.Floor((float)temp.Bounds.Min.Y * cellHeight / cellSize);
-                temp.Bounds.Max.Y = (int)Math.Ceiling((float)temp.Bounds.Max.Y * cellHeight / cellSize);
-
-                items.Add(temp);
-            }
-
-            this.Subdivide(items, 0, items.Count, 0);
+            this.nodes = nodes;
         }
 
         /// <summary>
@@ -135,7 +99,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="maxIndex">The last index to consier (recursively).</param>
         /// <param name="curNode">The current node to look at.</param>
         /// <returns>The current node at the end of each method.</returns>
-        private int Subdivide(List<BoundingVolumeTreeNode> items, int minIndex, int maxIndex, int curNode)
+        public int Subdivide(BoundingVolumeTreeNode[] items, int minIndex, int maxIndex, int curNode)
         {
             int numIndex = maxIndex - minIndex;
             int curIndex = curNode;
@@ -159,13 +123,13 @@ namespace Engine.PathFinding.NavMesh
                 switch (axis)
                 {
                     case 0:
-                        items.Sort(minIndex, numIndex, XComparer);
+                        Array.Sort(items, minIndex, numIndex, XComparer);
                         break;
                     case 1:
-                        items.Sort(minIndex, numIndex, YComparer);
+                        Array.Sort(items, minIndex, numIndex, YComparer);
                         break;
                     case 2:
-                        items.Sort(minIndex, numIndex, ZComparer);
+                        Array.Sort(items, minIndex, numIndex, ZComparer);
                         break;
                     default:
                         break;

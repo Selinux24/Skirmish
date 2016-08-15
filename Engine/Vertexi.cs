@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace Engine.PathFinding.NavMesh
+namespace Engine
 {
     /// <summary>
-    /// A vertex inside a <see cref="PolyMesh"/>.
+    /// A integer vertex
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct Vertexi : IEquatable<Vertexi>

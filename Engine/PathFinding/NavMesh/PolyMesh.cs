@@ -1,9 +1,11 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine.PathFinding.NavMesh
 {
+    using Engine.Collections;
+
     /// <summary>
     /// The class of Poly mesh.
     /// </summary>
@@ -14,6 +16,51 @@ namespace Engine.PathFinding.NavMesh
         private const int DiagonalFlag = unchecked((int)0x80000000);
         private const int NeighborEdgeFlag = unchecked((int)0x80000000);
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BoundingVolumeTree"/> class.
+        /// </summary>
+        /// <param name="verts">A set of vertices.</param>
+        /// <param name="polys">A set of polygons composed of the vertices in <c>verts</c>.</param>
+        /// <param name="nvp">The maximum number of vertices per polygon.</param>
+        /// <param name="cellSize">The size of a cell.</param>
+        /// <param name="cellHeight">The height of a cell.</param>
+        public static BoundingVolumeTree BuildBVT(Vertexi[] verts, PolyMesh.Polygon[] polys, int nvp, float cellSize, float cellHeight)
+        {
+            var items = new List<BoundingVolumeTreeNode>();
+
+            for (int i = 0; i < polys.Length; i++)
+            {
+                PolyMesh.Polygon p = polys[i];
+
+                BoundingVolumeTreeNode temp;
+                temp.Index = i;
+                temp.Bounds.Min = temp.Bounds.Max = verts[p.Vertices[0]];
+
+                for (int j = 1; j < nvp; j++)
+                {
+                    int vi = p.Vertices[j];
+                    if (vi == PolyMesh.NullId)
+                    {
+                        break;
+                    }
+
+                    var v = verts[vi];
+                    Vertexi.ComponentMin(ref temp.Bounds.Min, ref v, out temp.Bounds.Min);
+                    Vertexi.ComponentMax(ref temp.Bounds.Max, ref v, out temp.Bounds.Max);
+                }
+
+                temp.Bounds.Min.Y = (int)Math.Floor((float)temp.Bounds.Min.Y * cellHeight / cellSize);
+                temp.Bounds.Max.Y = (int)Math.Ceiling((float)temp.Bounds.Max.Y * cellHeight / cellSize);
+
+                items.Add(temp);
+            }
+
+            BoundingVolumeTree bvt = new BoundingVolumeTree(items.ToArray());
+
+            bvt.Subdivide(items.ToArray(), 0, items.Count, 0);
+
+            return bvt;
+        }
         /// <summary>
         /// Determines if it is a boundary edge with the specified flag.
         /// </summary>

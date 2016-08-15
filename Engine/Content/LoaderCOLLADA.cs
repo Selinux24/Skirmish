@@ -6,6 +6,7 @@ using SharpDX.Direct3D;
 
 namespace Engine.Content
 {
+    using Engine.Animation;
     using Engine.Collada;
     using Engine.Collada.FX;
     using Engine.Collada.Types;

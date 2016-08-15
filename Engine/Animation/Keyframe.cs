@@ -1,7 +1,7 @@
 ﻿using System;
 using SharpDX;
 
-namespace Engine.Common
+namespace Engine.Animation
 {
     /// <summary>
     /// Animation keyframe

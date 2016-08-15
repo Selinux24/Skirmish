@@ -1,9 +1,10 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine.PathFinding.NavMesh
 {
+    using Engine.Collections;
     using Engine.Common;
 
     /// <summary>

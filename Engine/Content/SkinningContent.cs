@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.Content
 {
-    using Engine.Common;
+    using Engine.Animation;
 
     /// <summary>
     /// Skinning content

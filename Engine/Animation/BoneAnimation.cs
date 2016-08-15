@@ -1,6 +1,6 @@
 ﻿using SharpDX;
 
-namespace Engine.Common
+namespace Engine.Animation
 {
     /// <summary>
     /// Bone animation

@@ -1,9 +1,11 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using SharpDX;
 
 namespace Engine.PathFinding.NavMesh
 {
+    using Engine.Collections;
+
     /// <summary>
     /// The NavMeshBuilder class converst PolyMesh and PolyMeshDetail into a different data structure suited for pathfinding.
     /// This class will create tiled data.
@@ -440,7 +442,7 @@ namespace Engine.PathFinding.NavMesh
             if (buildBoundingVolumeTree)
             {
                 //build tree
-                this.NavBvTree = new BoundingVolumeTree(polyMesh.Vertices, polyMesh.Polys, vertsPerPoly, cellSize, cellHeight);
+                this.NavBvTree = PolyMesh.BuildBVT(polyMesh.Vertices, polyMesh.Polys, vertsPerPoly, cellSize, cellHeight);
             }
 
             //store off-mesh connections

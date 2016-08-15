@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Engine.PathFinding.NavMesh
+namespace Engine
 {
     /// <summary>
     /// A bounding box for vertices in a <see cref="PolyMesh"/>.

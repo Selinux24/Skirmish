@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Engine.PathFinding.NavMesh
+namespace Engine.Collections
 {
     /// <summary>
     /// The data stored in a bounding volume node.

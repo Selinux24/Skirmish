@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SharpDX;
 
-namespace Engine.Common
+namespace Engine.Animation
 {
     /// <summary>
     /// Skinning data

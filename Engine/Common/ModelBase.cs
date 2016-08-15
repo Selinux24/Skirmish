@@ -1,11 +1,12 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using SharpDX;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Common
 {
+    using Engine.Animation;
     using Engine.Content;
 
     /// <summary>

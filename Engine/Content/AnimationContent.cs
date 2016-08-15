@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.Content
 {
-    using Engine.Common;
+    using Engine.Animation;
 
     /// <summary>
     /// Animation content
