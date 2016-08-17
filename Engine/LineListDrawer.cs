@@ -36,7 +36,7 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="count">Maximum line count</param>
         public LineListDrawer(Game game, int count)
-            : base(game, ModelContent.GenerateLineList(new Line3[count], Color.Transparent))
+            : base(game, ModelContent.GenerateLineList(new Line3[count], Color.Transparent), true)
         {
             this.EnableAlphaBlending = true;
 
@@ -49,7 +49,7 @@ namespace Engine
         /// <param name="lines">Line list</param>
         /// <param name="color">Color</param>
         public LineListDrawer(Game game, Line3[] lines, Color4 color)
-            : base(game, ModelContent.GenerateLineList(lines, color))
+            : base(game, ModelContent.GenerateLineList(lines, color), true)
         {
             this.EnableAlphaBlending = true;
 
@@ -63,7 +63,7 @@ namespace Engine
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
         public LineListDrawer(Game game, Triangle[] triangles, Color4 color)
-            : base(game, ModelContent.GenerateLineList(Line3.CreateWiredTriangle(triangles), color))
+            : base(game, ModelContent.GenerateLineList(Line3.CreateWiredTriangle(triangles), color), true)
         {
             this.EnableAlphaBlending = true;
 
@@ -73,17 +73,17 @@ namespace Engine
             this.dictionaryChanged = true;
         }
         /// <summary>
-        /// Update content
+        /// Draw content
         /// </summary>
-        /// <param name="context">Context</param>
-        public override void Update(UpdateContext context)
+        /// <param name="context">Drawing context</param>
+        public override void Draw(DrawContext context)
         {
             if (this.dictionary.Count > 0)
             {
                 this.WriteDataInBuffer();
             }
 
-            base.Update(context);
+            base.Draw(context);
         }
         /// <summary>
         /// No frustum culling

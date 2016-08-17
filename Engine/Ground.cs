@@ -3,6 +3,7 @@ using SharpDX;
 
 namespace Engine
 {
+    using Engine.Collections;
     using Engine.Common;
     using Engine.PathFinding;
 

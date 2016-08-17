@@ -768,7 +768,7 @@ namespace Engine
             VertexData[] cv;
             uint[] ci;
             VertexData.CreateCone(
-                1, 12, 12,
+                1, 12, 1,
                 out cv,
                 out ci);
 
@@ -800,7 +800,7 @@ namespace Engine
         {
             //Set shadow mapper viewport
             this.Game.Graphics.SetViewport(this.shadowMapper.Viewport);
-            
+
             //Set shadow map depth map without render target
             this.Game.Graphics.SetRenderTarget(
                 null,
@@ -891,9 +891,13 @@ namespace Engine
                 var geometry = this.lightGeometry[0];
 
                 deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
+                Counters.IAInputLayoutSets++;
                 deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
+                Counters.IAVertexBuffersSets++;
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+                Counters.IAIndexBufferSets++;
 
                 for (int i = 0; i < directionalLights.Length; i++)
                 {
@@ -926,15 +930,19 @@ namespace Engine
                 var geometry = this.lightGeometry[2];
 
                 deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
+                Counters.IAInputLayoutSets++;
                 deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
+                Counters.IAVertexBuffersSets++;
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+                Counters.IAIndexBufferSets++;
 
                 for (int i = 0; i < spotLights.Length; i++)
                 {
                     var light = spotLights[i];
 
-                    if (context.Frustum.Contains(light.BoundingSphere) != ContainmentType.Disjoint)
+                    if (Helper.Contains(context.Frustum, light.BoundingFrustum) != ContainmentType.Disjoint)
                     {
                         this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
                         this.Game.Graphics.SetRasterizerCullNone();
@@ -992,9 +1000,13 @@ namespace Engine
                 var geometry = this.lightGeometry[1];
 
                 deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
+                Counters.IAInputLayoutSets++;
                 deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
+                Counters.IAVertexBuffersSets++;
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+                Counters.IAIndexBufferSets++;
 
                 for (int i = 0; i < pointLights.Length; i++)
                 {
@@ -1147,9 +1159,13 @@ namespace Engine
                 var geometry = this.lightGeometry[0];
 
                 deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
+                Counters.IAInputLayoutSets++;
                 deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
+                Counters.IAVertexBuffersSets++;
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+                Counters.IAIndexBufferSets++;
 
                 this.Game.Graphics.SetDepthStencilZDisabled();
                 this.Game.Graphics.SetRasterizerDefault();

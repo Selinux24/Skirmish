@@ -229,9 +229,12 @@ namespace Engine
             this.Game.Graphics.DeviceContext.OutputMerger.BlendFactor = Color.Zero;
             this.Game.Graphics.DeviceContext.OutputMerger.BlendSampleMask = -1;
 
-            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
             this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
+            Counters.IAInputLayoutSets++;
+            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
+            Counters.IAPrimitiveTopologySets++;
             this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, Format.R32_UInt, 0);
+            Counters.IAIndexBufferSets++;
 
             #region Per frame update
 
@@ -258,6 +261,7 @@ namespace Engine
                 StreamOutputBufferBinding soBinding = new StreamOutputBufferBinding(this.streamOutBuffer, 0);
 
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
+                Counters.IAVertexBuffersSets++;
                 this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(new[] { soBinding });
 
                 this.Game.Graphics.SetDepthStencilRDZDisabled();
@@ -296,6 +300,7 @@ namespace Engine
                 var technique = DrawerPool.EffectParticles.GetTechniqueForDrawing(VertexTypes.Particle, this.particleClass, context.DrawerMode);
 
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
+                Counters.IAVertexBuffersSets++;
 
                 this.Game.Graphics.SetDepthStencilRDZEnabled();
 

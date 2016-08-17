@@ -205,9 +205,13 @@ namespace Engine
                     #endregion
 
                     this.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                    Counters.IAInputLayoutSets++;
                     this.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
+                    Counters.IAPrimitiveTopologySets++;
                     this.DeviceContext.InputAssembler.SetVertexBuffers(0, this.VertexBufferBinding);
+                    Counters.IAVertexBuffersSets++;
                     this.DeviceContext.InputAssembler.SetIndexBuffer(null, Format.R32_UInt, 0);
+                    Counters.IAIndexBufferSets++;
 
                     for (int p = 0; p < technique.Description.PassCount; p++)
                     {

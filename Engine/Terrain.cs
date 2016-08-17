@@ -1,8 +1,8 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using SharpDX;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
@@ -10,6 +10,7 @@ using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
+    using Engine.Collections;
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
@@ -594,7 +595,9 @@ namespace Engine
                     var technique = effect.GetTechnique(VertexTypes.Terrain, DrawingStages.Drawing, context.BaseContext.DrawerMode);
 
                     this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                    Counters.IAInputLayoutSets++;
                     this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
+                    Counters.IAPrimitiveTopologySets++;
 
                     foreach (var lod in this.patches.Keys)
                     {
@@ -691,7 +694,9 @@ namespace Engine
                     var technique = effect.GetTechnique(VertexTypes.Billboard, DrawingStages.Drawing, context.BaseContext.DrawerMode);
 
                     this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                    Counters.IAInputLayoutSets++;
                     this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.PointList;
+                    Counters.IAPrimitiveTopologySets++;
 
                     foreach (var lod in this.patches.Keys)
                     {
@@ -912,7 +917,9 @@ namespace Engine
                 {
                     //Sets vertex and index buffer
                     this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+                    Counters.IAVertexBuffersSets++;
                     this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, SharpDX.DXGI.Format.R32_UInt, 0);
+                    Counters.IAIndexBufferSets++;
 
                     for (int p = 0; p < technique.Description.PassCount; p++)
                     {
@@ -938,7 +945,9 @@ namespace Engine
 
                     //Sets vertex and index buffer
                     this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.foliageBufferBinding);
+                    Counters.IAVertexBuffersSets++;
                     this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
+                    Counters.IAIndexBufferSets++;
 
                     for (int p = 0; p < technique.Description.PassCount; p++)
                     {

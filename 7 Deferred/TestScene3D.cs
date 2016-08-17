@@ -84,7 +84,7 @@ namespace DeferredTest
             #region Terrain
 
             sw.Restart();
-            this.terrain = this.AddTerrain(new GroundDescription()
+            this.terrain = this.AddScenery(new GroundDescription()
             {
                 ContentPath = resources,
                 Model = new GroundDescription.ModelDescription()
@@ -279,11 +279,9 @@ namespace DeferredTest
             this.Lights.FogStart = far * fogStart;
             this.Lights.FogRange = far * fogRange;
 
-            #region Light Sphere Marker
+            #region Spot Light Marker
 
-            Line3[] axis = Line3.CreateAxis(Matrix.Identity, 5f);
-
-            this.lineDrawer = this.AddLineListDrawer(axis, Color.Red);
+            this.lineDrawer = this.AddLineListDrawer(1000);
             this.lineDrawer.Opaque = false;
             this.lineDrawer.Active = false;
             this.lineDrawer.Visible = false;
@@ -562,6 +560,12 @@ namespace DeferredTest
                 this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
             }
 
+            if (this.Game.Input.KeyPressed(Keys.Space))
+            {
+                this.lineDrawer.SetLines(Color.Yellow, Line3.CreateWiredFrustum(this.Camera.Frustum));
+                this.lineDrawer.Visible = true;
+            }
+
             #endregion
 
             #region Lights
@@ -650,8 +654,8 @@ namespace DeferredTest
                     this.spotLight.DiffuseIntensity = Math.Max(0f, this.spotLight.DiffuseIntensity);
                 }
 
-                this.lineDrawer.Manipulator.SetPosition(this.spotLight.Position);
-                this.lineDrawer.Manipulator.LookAt(this.spotLight.Position + this.spotLight.Direction, false);
+                this.lineDrawer.SetLines(Color.White, Line3.CreateWiredFrustum(this.spotLight.BoundingFrustum));
+                this.lineDrawer.SetLines(Color.Red, Line3.CreateAxis(this.spotLight.Transform, 1f));
             }
             else
             {
@@ -739,16 +743,12 @@ namespace DeferredTest
 
                 Vector3 direction = -Vector3.Normalize(lightPosition);
 
-                this.spotLight = new SceneLightSpot()
+                this.spotLight = new SceneLightSpot(lightPosition, direction, 25, 25)
                 {
                     Name = "Spot the dog",
                     LightColor = Color.Yellow,
                     AmbientIntensity = 0.2f,
                     DiffuseIntensity = 25f,
-                    Position = lightPosition,
-                    Direction = direction,
-                    Angle = 25,
-                    Radius = 25,
                     Enabled = true,
                     CastShadow = false,
                 };

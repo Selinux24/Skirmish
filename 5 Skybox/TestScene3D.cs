@@ -113,7 +113,7 @@ namespace Skybox
                 },
                 Opaque = true,
             };
-            this.ruins = this.AddTerrain(desc, false);
+            this.ruins = this.AddScenery(desc, false);
 
             this.bboxGlobalDrawer = this.AddLineListDrawer(Line3.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
             this.bboxGlobalDrawer.Visible = false;

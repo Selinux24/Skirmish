@@ -127,7 +127,7 @@ namespace GameLogic
                 ContentPath = "Resources3D",
                 ModelFileName = "cursor.dae",
             });
-            this.terrain = this.AddTerrain(new GroundDescription()
+            this.terrain = this.AddScenery(new GroundDescription()
             {
                 Model = new GroundDescription.ModelDescription()
                 {

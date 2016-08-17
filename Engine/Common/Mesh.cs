@@ -200,9 +200,13 @@ namespace Engine.Common
         public virtual void SetInputAssembler(DeviceContext deviceContext, InputLayout inputLayout)
         {
             deviceContext.InputAssembler.InputLayout = inputLayout;
+            Counters.IAInputLayoutSets++;
             deviceContext.InputAssembler.PrimitiveTopology = this.Topology;
+            Counters.IAPrimitiveTopologySets++;
             deviceContext.InputAssembler.SetVertexBuffers(0, this.VertexBufferBinding);
+            Counters.IAVertexBuffersSets++;
             deviceContext.InputAssembler.SetIndexBuffer(this.IndexBuffer, Format.R32_UInt, 0);
+            Counters.IAIndexBufferSets++;
         }
         /// <summary>
         /// Writes vertex data

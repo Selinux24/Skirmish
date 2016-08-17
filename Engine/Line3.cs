@@ -236,6 +236,42 @@ namespace Engine
 
             return CreateFromVertices(vertList.ToArray(), indexList.ToArray());
         }
+        public static Line3[] CreateWiredCone(Vector3 center, float radius, int sliceCount, float height)
+        {
+            List<Vector3> vertList = new List<Vector3>();
+            List<int> indexList = new List<int>();
+
+            vertList.Add(new Vector3(0.0f, height, 0.0f) + center);
+            vertList.Add(new Vector3(0.0f, 0.0f, 0.0f) + center);
+
+            float thetaStep = MathUtil.TwoPi / (float)sliceCount;
+
+            for (int sl = 0; sl < sliceCount; sl++)
+            {
+                float theta = sl * thetaStep;
+
+                Vector3 position = new Vector3(
+                    radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta),
+                    0.0f,
+                    radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta));
+
+                vertList.Add(position + center);
+            }
+
+            for (int index = 0; index < sliceCount; index++)
+            {
+                indexList.Add(0);
+                indexList.Add(index + 2);
+
+                indexList.Add(1);
+                indexList.Add(index + 2);
+
+                indexList.Add(index + 2);
+                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
+            }
+
+            return CreateFromVertices(vertList.ToArray(), indexList.ToArray());
+        }
         public static Line3[] CreateWiredFrustum(BoundingFrustum frustum)
         {
             return CreateWiredBox(frustum.GetCorners());

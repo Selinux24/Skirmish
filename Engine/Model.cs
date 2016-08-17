@@ -80,8 +80,9 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game class</param>
         /// <param name="content">Content</param>
-        public Model(Game game, ModelContent content)
-            : base(game, content, false, 0, true, true)
+        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
+        public Model(Game game, ModelContent content, bool dynamic = false)
+            : base(game, content, false, 0, true, true, dynamic)
         {
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
@@ -248,7 +249,10 @@ namespace Engine
             }
         }
 
-
+        /// <summary>
+        /// Sets a new manipulator to this instance
+        /// </summary>
+        /// <param name="manipulator">Manipulator</param>
         public void SetManipulator(Manipulator3D manipulator)
         {
             this.Manipulator.Updated -= ManipulatorUpdated;

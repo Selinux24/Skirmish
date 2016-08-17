@@ -152,7 +152,7 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="description">Description</param>
         public Sprite(Game game, SpriteDescription description)
-            : base(game, ModelContent.GenerateSprite(description.ContentPath, description.Textures), false, 0, false, false)
+            : base(game, ModelContent.GenerateSprite(description.ContentPath, description.Textures), false, 0, false, false, false)
         {
             this.renderWidth = game.Form.RenderWidth.NextPair();
             this.renderHeight = game.Form.RenderHeight.NextPair();

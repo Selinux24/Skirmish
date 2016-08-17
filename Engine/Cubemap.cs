@@ -28,7 +28,7 @@ namespace Engine
         /// <param name="game">Game class</param>
         /// <param name="content">Content</param>
         public Cubemap(Game game, ModelContent content)
-            : base(game, content, false, 0, false, false)
+            : base(game, content, false, 0, false, false, false)
         {
             this.Manipulator = new Manipulator3D();
             this.Opaque = true;

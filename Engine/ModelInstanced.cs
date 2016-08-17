@@ -68,8 +68,9 @@ namespace Engine
         /// <param name="game">Game class</param>
         /// <param name="content">Content</param>
         /// <param name="instances">Number of instances</param>
-        public ModelInstanced(Game game, ModelContent content, int instances)
-            : base(game, content, true, instances, true, true)
+        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
+        public ModelInstanced(Game game, ModelContent content, int instances, bool dynamic = false)
+            : base(game, content, true, instances, true, true, dynamic)
         {
             this.instancingData = new VertexInstancingData[instances];
             this.instances = Helper.CreateArray(instances, () => new ModelInstance(this));

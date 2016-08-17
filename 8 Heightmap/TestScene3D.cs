@@ -143,7 +143,7 @@ namespace HeightmapTest
             pfSettings.CellHeight = 10f;
             pfSettings.CellSize = 10f;
 
-            this.terrain = this.AddTerrain2(new GroundDescription()
+            this.terrain = this.AddTerrain(new GroundDescription()
             {
                 ContentPath = "Resources/Scenery",
 

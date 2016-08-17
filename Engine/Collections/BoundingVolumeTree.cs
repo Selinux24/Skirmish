@@ -85,10 +85,13 @@ namespace Engine.Collections
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="nodes">Nodes list</param>
-        public BoundingVolumeTree(BoundingVolumeTreeNode[] nodes)
+        /// <param name="capacity">Node capacity</param>
+        /// <param name="items">Item list</param>
+        public BoundingVolumeTree(int capacity, BoundingVolumeTreeNode[] items)
         {
-            this.nodes = nodes;
+            this.nodes = new BoundingVolumeTreeNode[capacity];
+
+            this.Subdivide(items, 0, items.Length, 0);
         }
 
         /// <summary>
@@ -99,7 +102,7 @@ namespace Engine.Collections
         /// <param name="maxIndex">The last index to consier (recursively).</param>
         /// <param name="curNode">The current node to look at.</param>
         /// <returns>The current node at the end of each method.</returns>
-        public int Subdivide(BoundingVolumeTreeNode[] items, int minIndex, int maxIndex, int curNode)
+        private int Subdivide(BoundingVolumeTreeNode[] items, int minIndex, int maxIndex, int curNode)
         {
             int numIndex = maxIndex - minIndex;
             int curIndex = curNode;

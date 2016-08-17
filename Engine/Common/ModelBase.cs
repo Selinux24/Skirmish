@@ -240,10 +240,11 @@ namespace Engine.Common
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
-        public ModelBase(Game game, ModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true)
+        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
+        public ModelBase(Game game, ModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
             : base(game)
         {
-            this.Initialize(content, instanced, instances, loadAnimation, loadNormalMaps);
+            this.Initialize(content, instanced, instances, loadAnimation, loadNormalMaps, dynamic);
         }
 
         /// <summary>
@@ -254,7 +255,8 @@ namespace Engine.Common
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
-        private void Initialize(ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps)
+        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
+        private void Initialize(ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps, bool dynamic)
         {
             //Images
             this.InitializeTextures(modelContent);
@@ -263,7 +265,7 @@ namespace Engine.Common
             this.InitializeMaterials(modelContent);
 
             //Skins & Meshes
-            this.InitializeGeometry(modelContent, instanced, instances, loadAnimation, loadNormalMaps);
+            this.InitializeGeometry(modelContent, instanced, instances, loadAnimation, loadNormalMaps, dynamic);
 
             //Animation
             if (loadAnimation) this.InitializeSkinnedData(modelContent);
@@ -330,7 +332,7 @@ namespace Engine.Common
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
-        private void InitializeGeometry(ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps)
+        private void InitializeGeometry(ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps, bool dynamic)
         {
             foreach (string meshName in modelContent.Geometry.Keys)
             {
@@ -405,7 +407,7 @@ namespace Engine.Common
                             vertexList,
                             indices,
                             instances,
-                            true);
+                            dynamic);
                     }
                     else
                     {
@@ -414,7 +416,7 @@ namespace Engine.Common
                             geometry.Topology,
                             vertexList,
                             indices,
-                            true);
+                            dynamic);
                     }
 
                     this.Meshes.Add(meshName, geometry.Material, nMesh);

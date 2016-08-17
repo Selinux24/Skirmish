@@ -273,10 +273,14 @@ namespace Engine
             {
                 this.Game.Graphics.SetDepthStencilZDisabled();
 
-                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                 this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
+                Counters.IAInputLayoutSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+                Counters.IAVertexBuffersSets++;
                 this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
+                Counters.IAIndexBufferSets++;
 
                 if (this.ShadowColor != Color.Transparent)
                 {
@@ -328,6 +332,9 @@ namespace Engine
                 if (this.indexBuffer != null)
                 {
                     this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+
+                    Counters.DrawCallsPerFrame++;
+                    Counters.InstancesPerFrame++;
                 }
                 else
                 {

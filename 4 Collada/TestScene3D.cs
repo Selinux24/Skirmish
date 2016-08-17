@@ -91,7 +91,7 @@ namespace Collada
                 Opaque = true,
             };
 
-            this.ground = this.AddTerrain(terrainDescription, Matrix.Scaling(20, 10, 20));
+            this.ground = this.AddScenery(terrainDescription, Matrix.Scaling(20, 10, 20));
             this.helicoptersModel = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = "Resources",
@@ -167,16 +167,12 @@ namespace Collada
                 CastShadow = false,
             });
 
-            this.Lights.Add(new SceneLightSpot()
+            this.Lights.Add(new SceneLightSpot(Vector3.Down, Vector3.Zero, MathUtil.DegreesToRadians(10f), 15f)
             {
                 Name = "Helilight",
                 LightColor = Color.White,
                 AmbientIntensity = 1.0f,
                 DiffuseIntensity = 1.0f,
-                Direction = Vector3.Down,
-                Position = Vector3.Zero,
-                Radius = 10f,
-                Angle = 15f,
                 Enabled = true,
                 CastShadow = false,
             });

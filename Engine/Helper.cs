@@ -561,6 +561,38 @@ namespace Engine
             return bbox.Maximum.Z - bbox.Minimum.Z;
         }
         /// <summary>
+        /// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.
+        /// </summary>
+        /// <param name="instance">Instance</param>
+        /// <param name="frustum">A <see cref="BoundingFrustum"/> for testing.</param>
+        /// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.</returns>
+        public static ContainmentType Contains(this BoundingFrustum instance, BoundingFrustum frustum)
+        {
+            if (instance == frustum)
+            {
+                return ContainmentType.Contains;
+            }
+
+            var intersects = false;
+            for (var i = 0; i < 6; ++i)
+            {
+                var plane = instance.GetPlane(i);
+                PlaneIntersectionType planeIntersectionType;
+                frustum.Intersects(ref plane, out planeIntersectionType);
+                if (planeIntersectionType == PlaneIntersectionType.Back)
+                {
+                    return ContainmentType.Disjoint;
+                }
+                else if (planeIntersectionType == PlaneIntersectionType.Intersecting)
+                {
+                    intersects = true;
+                    break;
+                }
+            }
+
+            return intersects ? ContainmentType.Intersects : ContainmentType.Contains;
+        }
+        /// <summary>
         /// Generates a bounding sphere from a triangle list
         /// </summary>
         /// <param name="triangles">Triangle list</param>

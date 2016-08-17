@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D;
@@ -115,6 +115,17 @@ namespace Engine.Helpers
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
 
+            Counters.Buffers++;
+            Counters.AllocatedMemoryInBuffers += (sizeInBytes / 1024);
+            var key = string.Format("{0}.{1}", usage, typeof(T));
+            var c = Counters.GetStatistics(key) as ResourceStatus;
+            if (c == null)
+            {
+                c = new ResourceStatus();
+                Counters.SetStatistics(key, c, true);
+            }
+            c.Add(sizeInBytes, length);
+
             BufferDescription description = new BufferDescription()
             {
                 Usage = usage,
@@ -142,23 +153,33 @@ namespace Engine.Helpers
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Length;
 
+            Counters.Buffers++;
+            Counters.AllocatedMemoryInBuffers += (sizeInBytes / 1024);
+            var key = string.Format("{0}.{1}", usage, typeof(T));
+            var c = Counters.GetStatistics(key) as ResourceStatus;
+            if (c == null)
+            {
+                c = new ResourceStatus();
+                Counters.SetStatistics(key, c, true);
+            }
+            c.Add(sizeInBytes, data.Length);
+
             using (DataStream dstr = new DataStream(sizeInBytes, true, true))
             {
                 dstr.WriteRange(data);
                 dstr.Position = 0;
 
-                return new Buffer(
-                    device,
-                    dstr,
-                    new BufferDescription()
-                    {
-                        Usage = usage,
-                        SizeInBytes = sizeInBytes,
-                        BindFlags = binding,
-                        CpuAccessFlags = access,
-                        OptionFlags = ResourceOptionFlags.None,
-                        StructureByteStride = 0,
-                    });
+                var description = new BufferDescription()
+                {
+                    Usage = usage,
+                    SizeInBytes = sizeInBytes,
+                    BindFlags = binding,
+                    CpuAccessFlags = access,
+                    OptionFlags = ResourceOptionFlags.None,
+                    StructureByteStride = 0,
+                };
+
+                return new Buffer(device, dstr, description);
             }
         }
 
@@ -172,6 +193,8 @@ namespace Engine.Helpers
         public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, T[] data)
             where T : struct
         {
+            Counters.BufferWrites++;
+
             if (data != null && data.Length > 0)
             {
                 DataStream stream;
@@ -184,51 +207,7 @@ namespace Engine.Helpers
                 deviceContext.UnmapSubresource(buffer, 0);
             }
         }
-        /// <summary>
-        /// Write data into buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="deviceContext">Graphic context</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="data">Data</param>
-        /// <param name="offset">Offset to write in buffer</param>
-        public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, T data, long offset)
-            where T : struct
-        {
-            DataStream stream;
-            deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out stream);
-            using (stream)
-            {
-                stream.Position = offset;
-                stream.Write(data);
-            }
-            deviceContext.UnmapSubresource(buffer, 0);
-        }
 
-        /// <summary>
-        /// Reads an unique value from buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="deviceContext">Graphics context</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="offset">Offset to read</param>
-        /// <returns>Returns readed data</returns>
-        public static T ReadBuffer<T>(this DeviceContext deviceContext, Buffer buffer, long offset)
-            where T : struct
-        {
-            T data;
-
-            DataStream stream;
-            deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out stream);
-            using (stream)
-            {
-                stream.Position = offset;
-                data = stream.Read<T>();
-            }
-            deviceContext.UnmapSubresource(buffer, 0);
-
-            return data;
-        }
         /// <summary>
         /// Reads an array of values from buffer
         /// </summary>
@@ -241,6 +220,8 @@ namespace Engine.Helpers
         public static T[] ReadBuffer<T>(this DeviceContext deviceContext, Buffer buffer, long offset, int length)
             where T : struct
         {
+            Counters.BufferReads++;
+
             T[] data = new T[length];
 
             DataStream stream;

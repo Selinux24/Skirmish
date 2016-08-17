@@ -37,7 +37,7 @@ namespace Engine
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
         public TriangleListDrawer(Game game, Triangle[] triangles, Color4 color)
-            : base(game, ModelContent.GenerateTriangleList(triangles, color))
+            : base(game, ModelContent.GenerateTriangleList(triangles, color), true)
         {
             this.EnableAlphaBlending = true;
 
@@ -50,24 +50,24 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="count">Maximum triangle count</param>
         public TriangleListDrawer(Game game, int count)
-            : base(game, ModelContent.GenerateTriangleList(new Triangle[count], Color.Transparent))
+            : base(game, ModelContent.GenerateTriangleList(new Triangle[count], Color.Transparent), true)
         {
             this.EnableAlphaBlending = true;
 
             this.dictionaryChanged = false;
         }
         /// <summary>
-        /// Update content
+        /// Draw content
         /// </summary>
-        /// <param name="context">Context</param>
-        public override void Update(UpdateContext context)
+        /// <param name="context">Drawing context</param>
+        public override void Draw(DrawContext context)
         {
             if (this.dictionary.Count > 0)
             {
                 this.WriteDataInBuffer();
             }
 
-            base.Update(context);
+            base.Draw(context);
         }
         /// <summary>
         /// No frustum culling

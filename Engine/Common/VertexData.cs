@@ -777,7 +777,7 @@ namespace Engine.Common
             i[33] = 20; i[34] = 22; i[35] = 23;
         }
         /// <summary>
-        /// Creates a box of VertexPositionNormalTextureTangent VertexData
+        /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
         /// </summary>
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slice count</param>
@@ -910,128 +910,81 @@ namespace Engine.Common
             v = vertList.ToArray();
             i = indexList.ToArray();
         }
-
-        public static void CreateCone(float radius, uint sliceCount, uint stackCount, out VertexData[] v, out uint[] i)
+        /// <summary>
+        /// Creates a cone of VertexPositionNormalTextureTangent VertexData
+        /// </summary>
+        /// <param name="radius">The base radius</param>
+        /// <param name="sliceCount">The base slice count</param>
+        /// <param name="height">Cone height</param>
+        /// <param name="v">Result vertices</param>
+        /// <param name="i">Result indices</param>
+        public static void CreateCone(float radius, uint sliceCount, float height, out VertexData[] v, out uint[] i)
         {
             List<VertexData> vertList = new List<VertexData>();
-
-            //
-            // Compute the vertices stating at the top pole and moving down the stacks.
-            //
-
-            // Poles: note that there will be texture coordinate distortion as there is
-            // not a unique point on the texture map to assign to the pole when mapping
-            // a rectangular texture onto a sphere.
+            List<uint> indexList = new List<uint>();
 
             vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
-                new Vector3(0.0f, +radius, 0.0f),
+                new Vector3(0.0f, 0.0f, 0.0f),
                 new Vector3(0.0f, +1.0f, 0.0f),
                 new Vector3(1.0f, 0.0f, 0.0f),
                 new Vector3(1.0f, 0.0f, 0.0f),
                 new Vector2(0.0f, 0.0f)));
 
-            float phiStep = MathUtil.Pi / stackCount;
-            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
-
-            // Compute vertices for each stack ring (do not count the poles as rings).
-            for (int st = 1; st <= stackCount - 1; ++st)
-            {
-                float phi = st * phiStep;
-
-                // Vertices of ring.
-                for (int sl = 0; sl <= sliceCount; ++sl)
-                {
-                    float theta = sl * thetaStep;
-
-                    Vector3 position;
-                    Vector3 normal;
-                    Vector3 tangent;
-                    Vector3 binormal;
-                    Vector2 texture;
-
-                    // spherical to cartesian
-                    position.X = radius * (float)Math.Sin(phi) * (float)Math.Cos(theta);
-                    position.Y = radius * (float)Math.Cos(phi);
-                    position.Z = radius * (float)Math.Sin(phi) * (float)Math.Sin(theta);
-
-                    normal = position;
-                    normal.Normalize();
-
-                    // Partial derivative of P with respect to theta
-                    tangent.X = -radius * (float)Math.Sin(phi) * (float)Math.Sin(theta);
-                    tangent.Y = 0.0f;
-                    tangent.Z = +radius * (float)Math.Sin(phi) * (float)Math.Cos(theta);
-                    //tangent.W = 0.0f;
-                    tangent.Normalize();
-
-                    binormal = tangent;
-
-                    texture.X = theta / MathUtil.Pi * 2f;
-                    texture.Y = phi / MathUtil.Pi;
-
-                    vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
-                        position,
-                        normal,
-                        tangent,
-                        binormal,
-                        texture));
-                }
-            }
-
             vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
-                new Vector3(0.0f, -radius, 0.0f),
+                new Vector3(0.0f, -height, 0.0f),
                 new Vector3(0.0f, -1.0f, 0.0f),
                 new Vector3(1.0f, 0.0f, 0.0f),
                 new Vector3(1.0f, 0.0f, 0.0f),
-                new Vector2(0.0f, 1.0f)));
+                new Vector2(0.0f, 0.0f)));
 
-            List<uint> indexList = new List<uint>();
+            float thetaStep = MathUtil.TwoPi / (float)sliceCount;
 
-            for (uint index = 1; index <= sliceCount; ++index)
+            for (int sl = 0; sl < sliceCount; sl++)
+            {
+                float theta = sl * thetaStep;
+
+                Vector3 position;
+                Vector3 normal;
+                Vector3 tangent;
+                Vector3 binormal;
+                Vector2 texture;
+
+                // spherical to cartesian
+                position.X = radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta);
+                position.Y = -height;
+                position.Z = radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta);
+
+                normal = position;
+                normal.Normalize();
+
+                // Partial derivative of P with respect to theta
+                tangent.X = -radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta);
+                tangent.Y = 0.0f;
+                tangent.Z = +radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta);
+                tangent.Normalize();
+
+                binormal = tangent;
+
+                texture.X = theta / MathUtil.TwoPi;
+                texture.Y = 1f;
+
+                vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
+                    position,
+                    normal,
+                    tangent,
+                    binormal,
+                    texture));
+            }
+
+            for (uint index = 0; index < sliceCount; index++)
             {
                 indexList.Add(0);
-                indexList.Add(index + 1);
-                indexList.Add(index);
-            }
+                indexList.Add(index + 2);
+                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
 
-            //
-            // Compute indices for inner stacks (not connected to poles).
-            //
-
-            // Offset the indices to the index of the first vertex in the first ring.
-            // This is just skipping the top pole vertex.
-            uint baseIndex = 1;
-            uint ringVertexCount = sliceCount + 1;
-            for (uint st = 0; st < stackCount - 2; ++st)
-            {
-                for (uint sl = 0; sl < sliceCount; ++sl)
-                {
-                    indexList.Add(baseIndex + st * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
-
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl + 1);
-                }
-            }
-
-            //
-            // Compute indices for bottom stack.  The bottom stack was written last to the vertex buffer
-            // and connects the bottom pole to the bottom ring.
-            //
-
-            // South pole vertex was added last.
-            uint southPoleIndex = (uint)vertList.Count - 1;
-
-            // Offset the indices to the index of the first vertex in the last ring.
-            baseIndex = southPoleIndex - ringVertexCount;
-
-            for (uint index = 0; index < sliceCount; ++index)
-            {
-                indexList.Add(southPoleIndex);
-                indexList.Add(baseIndex + index);
-                indexList.Add(baseIndex + index + 1);
+                indexList.Add(1);
+                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
+                indexList.Add(index + 2);
             }
 
             v = vertList.ToArray();

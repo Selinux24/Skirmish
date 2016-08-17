@@ -1238,7 +1238,7 @@ namespace Engine
                 this.currentDepthStencilState = state;
                 this.currentDepthStencilStateRef = stencilRef;
 
-                Common.Counters.DepthStencilStateChanges++;
+                Counters.DepthStencilStateChanges++;
             }
         }
         /// <summary>
@@ -1255,7 +1255,7 @@ namespace Engine
 
                 this.currentBlendState = state;
 
-                Common.Counters.BlendStateChanges++;
+                Counters.BlendStateChanges++;
             }
         }
         /// <summary>
@@ -1270,7 +1270,7 @@ namespace Engine
 
                 this.currentRasterizerState = state;
 
-                Common.Counters.RasterizerStateChanges++;
+                Counters.RasterizerStateChanges++;
             }
         }
 

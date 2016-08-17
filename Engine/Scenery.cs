@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using SharpDX;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
+    using Engine.Collections;
     using Engine.Common;
     using Engine.Content;
     using Engine.PathFinding;

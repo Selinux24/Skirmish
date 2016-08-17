@@ -260,6 +260,8 @@ namespace Engine
         {
             Helper.Dispose(this.Renderer);
 
+            Counters.ClearAll();
+
             if (this.sceneMode == SceneModesEnum.ForwardLigthning)
             {
                 this.Renderer = new SceneRendererForward(this.Game);
@@ -398,9 +400,9 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Scenery AddTerrain(GroundDescription description, bool optimize = true, int order = 0)
+        public Scenery AddScenery(GroundDescription description, bool optimize = true, int order = 0)
         {
-            return AddTerrain(description, Matrix.Identity, optimize, order);
+            return AddScenery(description, Matrix.Identity, optimize, order);
         }
         /// <summary>
         /// Adds new terrain model
@@ -410,7 +412,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Scenery AddTerrain(GroundDescription description, Matrix transform, bool optimize = true, int order = 0)
+        public Scenery AddScenery(GroundDescription description, Matrix transform, bool optimize = true, int order = 0)
         {
             ModelContent geo = null;
 
@@ -433,7 +435,7 @@ namespace Engine
             {
                 if (optimize) geo.Optimize();
 
-                return AddTerrain(geo, description, order);
+                return AddScenery(geo, description, order);
             }
             else
             {
@@ -447,7 +449,7 @@ namespace Engine
         /// <param name="description">Terrain description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Scenery AddTerrain(ModelContent content, GroundDescription description, int order = 0)
+        public Scenery AddScenery(ModelContent content, GroundDescription description, int order = 0)
         {
             Scenery newModel = new Scenery(this.Game, content, description.ContentPath, description);
 
@@ -455,7 +457,6 @@ namespace Engine
 
             return newModel;
         }
-
         /// <summary>
         /// Adds new terrain model
         /// </summary>
@@ -463,7 +464,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Terrain AddTerrain2(GroundDescription description, bool optimize = true, int order = 0)
+        public Terrain AddTerrain(GroundDescription description, bool optimize = true, int order = 0)
         {
             Terrain newModel = new Terrain(this.Game, description);
 
@@ -471,7 +472,6 @@ namespace Engine
 
             return newModel;
         }
-
         /// <summary>
         /// Adds new mini-map
         /// </summary>

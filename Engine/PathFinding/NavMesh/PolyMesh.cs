@@ -30,7 +30,7 @@ namespace Engine.PathFinding.NavMesh
 
             for (int i = 0; i < polys.Length; i++)
             {
-                PolyMesh.Polygon p = polys[i];
+                var p = polys[i];
 
                 BoundingVolumeTreeNode temp;
                 temp.Index = i;
@@ -55,11 +55,7 @@ namespace Engine.PathFinding.NavMesh
                 items.Add(temp);
             }
 
-            BoundingVolumeTree bvt = new BoundingVolumeTree(items.ToArray());
-
-            bvt.Subdivide(items.ToArray(), 0, items.Count, 0);
-
-            return bvt;
+            return new BoundingVolumeTree(polys.Length * 2, items.ToArray());
         }
         /// <summary>
         /// Determines if it is a boundary edge with the specified flag.

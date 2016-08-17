@@ -153,9 +153,13 @@ namespace Engine
             this.Game.Graphics.SetDepthStencilZDisabled();
 
             this.DeviceContext.InputAssembler.InputLayout = this.effect.GetInputLayout(effectTechnique);
+            Counters.IAInputLayoutSets++;
             this.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+            Counters.IAPrimitiveTopologySets++;
             this.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+            Counters.IAVertexBuffersSets++;
             this.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
+            Counters.IAIndexBufferSets++;
 
             this.effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
             this.effect.UpdatePerObject(Material.Default, this.Texture, null, 0);
@@ -166,6 +170,9 @@ namespace Engine
                 this.effectTechnique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
                 this.DeviceContext.DrawIndexed(6, 0, 0);
+
+                Counters.DrawCallsPerFrame++;
+                Counters.InstancesPerFrame++;
             }
         }
         /// <summary>

@@ -55,16 +55,12 @@ namespace ModelDrawing
                 this.radius = Vector3.Distance(this.Camera.Position, p);
             }
 
-            this.spotLight = new SceneLightSpot()
+            this.spotLight = new SceneLightSpot(this.Camera.Position, this.Camera.Direction, MathUtil.DegreesToRadians(this.angle), this.radius * 10f)
             {
                 Name = "Red Spot",
                 LightColor = Color.White,
                 AmbientIntensity = 0.2f,
                 DiffuseIntensity = 25f,
-                Angle = this.angle,
-                Radius = this.radius * 10f,
-                Position = this.Camera.Position,
-                Direction = this.Camera.Direction,
                 Enabled = true,
                 CastShadow = false,
             };

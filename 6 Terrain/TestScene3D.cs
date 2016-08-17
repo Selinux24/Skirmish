@@ -27,9 +27,11 @@ namespace TerrainTest
 
         private TextDrawer title = null;
         private TextDrawer load = null;
-        private TextDrawer help = null;
+        private TextDrawer counters1 = null;
+        private TextDrawer counters2 = null;
 
         private Model cursor3D = null;
+        private Cursor cursor2D = null;
         private Model tank = null;
 
         private Skydom skydom = null;
@@ -76,15 +78,18 @@ namespace TerrainTest
 
             this.title = this.AddText("Tahoma", 18, Color.White);
             this.load = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.help = this.AddText("Lucida Casual", 12, Color.Yellow);
+            this.counters1 = this.AddText("Lucida Casual", 10, Color.GreenYellow);
+            this.counters2 = this.AddText("Lucida Casual", 10, Color.GreenYellow);
 
             this.title.Text = "Terrain collision and trajectories test";
             this.load.Text = "";
-            this.help.Text = "";
+            this.counters1.Text = "";
+            this.counters2.Text = "";
 
             this.title.Position = Vector2.Zero;
             this.load.Position = new Vector2(0, 24);
-            this.help.Position = new Vector2(0, 48);
+            this.counters1.Position = new Vector2(0, 46);
+            this.counters2.Position = new Vector2(0, 68);
 
             #endregion
 
@@ -96,7 +101,7 @@ namespace TerrainTest
 
             string loadingText = null;
 
-            #region Cursor
+            #region Cursor 3D
 
             sw.Restart();
             this.cursor3D = this.AddModel(new ModelDescription()
@@ -108,6 +113,22 @@ namespace TerrainTest
             this.cursor3D.EnableDepthStencil = false;
             sw.Stop();
             loadingText += string.Format("cursor3D: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Cursor 2D
+
+            sw.Restart();
+            this.cursor2D = this.AddCursor(new SpriteDescription()
+            {
+                Textures = new[] { "target.png" },
+                Width = 16,
+                Height = 16,
+            });
+            sw.Stop();
+            loadingText += string.Format("cursor2D: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.cursor2D.Visible = false;
 
             #endregion
 
@@ -271,7 +292,7 @@ namespace TerrainTest
                 Opaque = true,
                 DelayGeneration = true,
             };
-            this.terrain = this.AddTerrain(terrainDescription);
+            this.terrain = this.AddScenery(terrainDescription);
             sw.Stop();
 
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
@@ -516,6 +537,13 @@ namespace TerrainTest
                 this.Game.Exit();
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning;
+            }
+
             if (this.Game.Input.KeyJustReleased(Keys.Z))
             {
                 this.walkMode = !this.walkMode;
@@ -526,6 +554,7 @@ namespace TerrainTest
                     this.Camera.MovementDelta = this.walkerVelocity;
                     this.Camera.SlowMovementDelta = this.walkerVelocity * 0.05f;
                     this.cursor3D.Visible = false;
+                    this.cursor2D.Visible = true;
                 }
                 else
                 {
@@ -533,6 +562,7 @@ namespace TerrainTest
                     this.Camera.MovementDelta = 20.5f;
                     this.Camera.SlowMovementDelta = 1f;
                     this.cursor3D.Visible = true;
+                    this.cursor2D.Visible = false;
                 }
             }
 
@@ -769,6 +799,15 @@ namespace TerrainTest
             base.Draw(gameTime);
 
             this.shadowMapDrawer.Texture = this.useDebugTex ? this.debugTex : this.Renderer.GetResource(SceneRendererResultEnum.ShadowMap);
+
+            #region Texts
+
+            string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}", Counters.Buffers, Counters.AllocatedMemoryInBuffers, Counters.BufferReads, Counters.BufferWrites);
+            string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets);
+            this.counters1.Text = txt1;
+            this.counters2.Text = txt2;
+
+            #endregion
         }
 
         private void DEBUGPickingPosition(Vector3 position)

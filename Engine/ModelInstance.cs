@@ -58,7 +58,7 @@ namespace Engine
         /// <summary>
         /// Manipulator
         /// </summary>
-        public Manipulator3D Manipulator = null;
+        public Manipulator3D Manipulator { get; private set; }
         /// <summary>
         /// Texture index
         /// </summary>
@@ -85,6 +85,19 @@ namespace Engine
             this.model = model;
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new System.EventHandler(ManipulatorUpdated);
+        }
+
+        /// <summary>
+        /// Sets a new manipulator to this instance
+        /// </summary>
+        /// <param name="manipulator">Manipulator</param>
+        public void SetManipulator(Manipulator3D manipulator)
+        {
+            this.Manipulator.Updated -= ManipulatorUpdated;
+            this.Manipulator = null;
+
+            this.Manipulator = manipulator;
+            this.Manipulator.Updated += ManipulatorUpdated;
         }
         /// <summary>
         /// Occurs when manipulator transform updated
