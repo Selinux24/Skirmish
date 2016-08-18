@@ -146,6 +146,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="BezierPath.cs" />
     <Compile Include="Billboard.cs" />
     <Compile Include="BoundingCylinder.cs" />
@@ -393,7 +394,6 @@
     <Compile Include="PathFinding\PathFinderSettings.cs" />
     <Compile Include="Polygon.cs" />
     <Compile Include="SceneRendererResultEnum.cs" />
-    <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Content\LoaderConversion.cs" />
     <Compile Include="Content\CoordinateSystems.cs" />
     <Compile Include="Content\GeometryOrientations.cs" />
