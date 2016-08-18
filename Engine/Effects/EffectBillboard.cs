@@ -516,7 +516,7 @@ namespace Engine.Effects
             Matrix viewProjection,
             Vector3 eyePositionWorld)
         {
-            this.UpdatePerFrame(world, viewProjection, eyePositionWorld, null, null, Matrix.Identity);
+            this.UpdatePerFrame(world, viewProjection, eyePositionWorld, new BoundingFrustum(), null, null, Matrix.Identity);
         }
         /// <summary>
         /// Update per frame data
@@ -524,6 +524,7 @@ namespace Engine.Effects
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="viewFrustum">Camera frustum</param>
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMap">Shadow map texture</param>
         /// <param name="fromLightViewProjection">From camera View * Projection transform</param>
@@ -531,6 +532,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
+            BoundingFrustum viewFrustum,
             SceneLights lights,
             ShaderResourceView shadowMap,
             Matrix fromLightViewProjection)
@@ -539,6 +541,7 @@ namespace Engine.Effects
                 world,
                 viewProjection,
                 eyePositionWorld,
+                viewFrustum,
                 lights,
                 shadowMap,
                 fromLightViewProjection,
@@ -553,6 +556,7 @@ namespace Engine.Effects
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="viewFrustum">Camera frustum</param>
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMap">Shadow map texture</param>
         /// <param name="fromLightViewProjection">From camera View * Projection transform</param>
@@ -564,6 +568,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
+            BoundingFrustum viewFrustum,
             SceneLights lights,
             ShaderResourceView shadowMap,
             Matrix fromLightViewProjection,
@@ -578,9 +583,9 @@ namespace Engine.Effects
 
             if (lights != null)
             {
-                var dirLights = lights.EnabledDirectionalLights;
-                var pointLights = lights.EnabledPointLights;
-                var spotLights = lights.EnabledSpotLights;
+                var dirLights = lights.GetVisibleDirectionalLights(viewFrustum);
+                var pointLights = lights.GetVisiblePointLights(viewFrustum);
+                var spotLights = lights.GetVisibleSpotLights(viewFrustum);
 
                 this.DirLights = new[]
                 {

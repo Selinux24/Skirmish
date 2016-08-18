@@ -233,7 +233,7 @@ namespace Skybox
             this.Lights.DirectionalLights[1].Enabled = true;
             this.Lights.DirectionalLights[2].Enabled = false;
 
-            this.directionalLightCount = this.Lights.EnabledDirectionalLights.Length;
+            this.directionalLightCount = this.Lights.DirectionalLights.Length;
 
             this.SceneVolume = this.ruins.GetBoundingSphere();
 

@@ -1,5 +1,5 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
@@ -134,6 +134,7 @@ namespace Engine
                             context.World,
                             context.ViewProjection,
                             context.EyePosition,
+                            context.Frustum,
                             context.Lights,
                             context.ShadowMap,
                             context.FromLightViewProjection);

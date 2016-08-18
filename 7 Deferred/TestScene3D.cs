@@ -595,7 +595,7 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.L))
             {
-                if (this.Lights.EnabledPointLights.Length > 0)
+                if (this.Lights.PointLights.Length > 0)
                 {
                     this.ClearPointLigths();
                 }
@@ -664,11 +664,11 @@ namespace DeferredTest
 
             if (animateLights)
             {
-                if (this.Lights.EnabledPointLights.Length > 0)
+                if (this.Lights.PointLights.Length > 0)
                 {
-                    for (int i = 1; i < this.Lights.EnabledPointLights.Length; i++)
+                    for (int i = 1; i < this.Lights.PointLights.Length; i++)
                     {
-                        var l = this.Lights.EnabledPointLights[i];
+                        var l = this.Lights.PointLights[i];
 
                         if ((int)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds * 50f);
                         if ((int)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds * 50f);
@@ -704,9 +704,9 @@ namespace DeferredTest
             this.title.Text = string.Format(
                 this.titleMask,
                 this.RenderMode,
-                this.Lights.EnabledDirectionalLights.Length,
-                this.Lights.EnabledPointLights.Length,
-                this.Lights.EnabledSpotLights.Length,
+                this.Lights.DirectionalLights.Length,
+                this.Lights.PointLights.Length,
+                this.Lights.SpotLights.Length,
                 this.Lights.ShadowCastingLights.Length);
 
             if (Counters.Statistics.Length == 0)
@@ -773,9 +773,10 @@ namespace DeferredTest
         {
             this.Lights.ClearPointLights();
 
-            int sep = 2;
+            int sep = 10;
             int f = 12;
             int l = (f - 1) * sep;
+            l -= (l / 2);
 
             for (int i = 0; i < f; i++)
             {

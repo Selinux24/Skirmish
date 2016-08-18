@@ -884,7 +884,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swDirectional = Stopwatch.StartNew();
 #endif
-            SceneLightDirectional[] directionalLights = context.Lights.EnabledDirectionalLights;
+            SceneLightDirectional[] directionalLights = context.Lights.GetVisibleDirectionalLights(context.Frustum);
             if (directionalLights != null && directionalLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredDirectionalLight;
@@ -923,7 +923,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swSpot = Stopwatch.StartNew();
 #endif
-            SceneLightSpot[] spotLights = context.Lights.EnabledSpotLights;
+            SceneLightSpot[] spotLights = context.Lights.GetVisibleSpotLights(context.Frustum);
             if (spotLights != null && spotLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredSpotLight;
@@ -938,49 +938,27 @@ namespace Engine
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
                 Counters.IAIndexBufferSets++;
 
+                this.Game.Graphics.SetRasterizerCullFrontFace();
+                this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
+
                 for (int i = 0; i < spotLights.Length; i++)
                 {
                     var light = spotLights[i];
 
-                    if (Helper.Contains(context.Frustum, light.BoundingFrustum) != ContainmentType.Disjoint)
+                    //Draw Pass
+                    effect.UpdatePerLight(
+                        light,
+                        context.World * light.Transform,
+                        context.ViewProjection);
+
+                    for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                     {
-                        this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
-                        this.Game.Graphics.SetRasterizerCullNone();
-                        this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
+                        effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
 
-                        //Stencil Pass
-                        DrawerPool.EffectNull.UpdatePerFrame(
-                            context.World * light.Transform,
-                            context.ViewProjection);
+                        deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
 
-                        for (int p = 0; p < DrawerPool.EffectNull.Null.Description.PassCount; p++)
-                        {
-                            DrawerPool.EffectNull.Null.GetPassByIndex(p).Apply(deviceContext, 0);
-
-                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
-
-                            Counters.DrawCallsPerFrame++;
-                            Counters.InstancesPerFrame++;
-                        }
-
-                        this.Game.Graphics.SetRasterizerCullFrontFace();
-                        this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
-
-                        //Draw Pass
-                        effect.UpdatePerLight(
-                            light,
-                            context.World * light.Transform,
-                            context.ViewProjection);
-
-                        for (int p = 0; p < effectTechnique.Description.PassCount; p++)
-                        {
-                            effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
-
-                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
-
-                            Counters.DrawCallsPerFrame++;
-                            Counters.InstancesPerFrame++;
-                        }
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame++;
                     }
                 }
             }
@@ -993,7 +971,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swPoint = Stopwatch.StartNew();
 #endif
-            SceneLightPoint[] pointLights = context.Lights.EnabledPointLights;
+            SceneLightPoint[] pointLights = context.Lights.GetVisiblePointLights(context.Frustum);
             if (pointLights != null && pointLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredPointLight;
@@ -1008,49 +986,27 @@ namespace Engine
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
                 Counters.IAIndexBufferSets++;
 
+                this.Game.Graphics.SetRasterizerCullFrontFace();
+                this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
+
                 for (int i = 0; i < pointLights.Length; i++)
                 {
                     var light = pointLights[i];
 
-                    if (context.Frustum.Contains(light.BoundingSphere) != ContainmentType.Disjoint)
+                    //Draw Pass
+                    effect.UpdatePerLight(
+                        light,
+                        context.World * light.Transform,
+                        context.ViewProjection);
+
+                    for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                     {
-                        this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
-                        this.Game.Graphics.SetRasterizerCullNone();
-                        this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
+                        effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
 
-                        //Stencil Pass
-                        DrawerPool.EffectNull.UpdatePerFrame(
-                            context.World * light.Transform,
-                            context.ViewProjection);
+                        deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
 
-                        for (int p = 0; p < DrawerPool.EffectNull.Null.Description.PassCount; p++)
-                        {
-                            DrawerPool.EffectNull.Null.GetPassByIndex(p).Apply(deviceContext, 0);
-
-                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
-
-                            Counters.DrawCallsPerFrame++;
-                            Counters.InstancesPerFrame++;
-                        }
-
-                        this.Game.Graphics.SetRasterizerCullFrontFace();
-                        this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
-
-                        //Draw Pass
-                        effect.UpdatePerLight(
-                            light,
-                            context.World * light.Transform,
-                            context.ViewProjection);
-
-                        for (int p = 0; p < effectTechnique.Description.PassCount; p++)
-                        {
-                            effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
-
-                            deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
-
-                            Counters.DrawCallsPerFrame++;
-                            Counters.InstancesPerFrame++;
-                        }
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame++;
                     }
                 }
             }

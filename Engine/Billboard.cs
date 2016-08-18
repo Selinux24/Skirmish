@@ -3,9 +3,7 @@ using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
 using Buffer = SharpDX.Direct3D11.Buffer;
-using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using InputLayout = SharpDX.Direct3D11.InputLayout;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
@@ -69,6 +67,7 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game class</param>
         /// <param name="content">Content</param>
+        /// <param name="maxCount">Maximum number of billboards</param>
         public Billboard(Game game, ModelContent content, int maxCount)
             : base(game)
         {
@@ -148,6 +147,7 @@ namespace Engine
                             this.local,
                             context.ViewProjection,
                             context.EyePosition,
+                            context.Frustum,
                             context.Lights,
                             context.ShadowMap,
                             context.FromLightViewProjection);
@@ -158,6 +158,7 @@ namespace Engine
                             this.local,
                             context.ViewProjection,
                             context.EyePosition,
+                            context.Frustum,
                             context.Lights,
                             context.ShadowMap,
                             context.FromLightViewProjection);

@@ -110,36 +110,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Gets enabled directional lights
-        /// </summary>
-        public SceneLightDirectional[] EnabledDirectionalLights
-        {
-            get
-            {
-                return this.directionalLights.FindAll(l => l.Enabled == true).ToArray();
-            }
-        }
-        /// <summary>
-        /// Gets enabled point lights
-        /// </summary>
-        public SceneLightPoint[] EnabledPointLights
-        {
-            get
-            {
-                return this.pointLights.FindAll(l => l.Enabled == true).ToArray();
-            }
-        }
-        /// <summary>
-        /// Gets enabled spot lights
-        /// </summary>
-        public SceneLightSpot[] EnabledSpotLights
-        {
-            get
-            {
-                return this.spotLights.FindAll(l => l.Enabled == true).ToArray();
-            }
-        }
-        /// <summary>
         /// Fog start value
         /// </summary>
         public float FogStart = 0f;
@@ -285,6 +255,38 @@ namespace Engine
         public void ClearSpotLights()
         {
             this.spotLights.Clear();
+        }
+        /// <summary>
+        /// Gets the visible directional lights
+        /// </summary>
+        /// <param name="frustum">Camera frustum</param>
+        /// <returns>Returns the visible directional lights array</returns>
+        public SceneLightDirectional[] GetVisibleDirectionalLights(BoundingFrustum frustum)
+        {
+            return this.directionalLights.FindAll(l =>
+                l.Enabled == true).ToArray();
+        }
+        /// <summary>
+        /// Gets the visible point lights
+        /// </summary>
+        /// <param name="frustum">Camera frustum</param>
+        /// <returns>Returns the visible point lights array</returns>
+        public SceneLightPoint[] GetVisiblePointLights(BoundingFrustum frustum)
+        {
+            return this.pointLights.FindAll(l =>
+                l.Enabled == true &&
+                frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint).ToArray();
+        }
+        /// <summary>
+        /// Gets the visible spot lights
+        /// </summary>
+        /// <param name="frustum">Camera frustum</param>
+        /// <returns>Returns the visible spot lights array</returns>
+        public SceneLightSpot[] GetVisibleSpotLights(BoundingFrustum frustum)
+        {
+            return this.spotLights.FindAll(l => 
+                l.Enabled == true &&
+                Helper.Contains(frustum, l.BoundingFrustum) != ContainmentType.Disjoint).ToArray();
         }
     }
 }

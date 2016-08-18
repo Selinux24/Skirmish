@@ -1,5 +1,5 @@
-﻿using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using SharpDX;
+﻿using SharpDX;
+using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
 {
@@ -67,6 +67,7 @@ namespace Engine
                         this.local,
                         context.ViewProjection,
                         context.EyePosition,
+                        context.Frustum,
                         context.Lights);
 
                     #endregion
@@ -99,24 +100,5 @@ namespace Engine
                 }
             }
         }
-    }
-
-    /// <summary>
-    /// Cube-map description
-    /// </summary>
-    public class CubemapDescription
-    {
-        /// <summary>
-        /// Content path
-        /// </summary>
-        public string ContentPath;
-        /// <summary>
-        /// Texture
-        /// </summary>
-        public string Texture;
-        /// <summary>
-        /// Radius
-        /// </summary>
-        public float Radius;
     }
 }
