@@ -6,8 +6,18 @@ namespace Engine.PathFinding
     using Engine.PathFinding.AStar;
     using Engine.PathFinding.NavMesh;
 
+    /// <summary>
+    /// Path finder generation class
+    /// </summary>
     public static class PathFinder
     {
+        /// <summary>
+        /// Builds a path finder from vertex and index data
+        /// </summary>
+        /// <param name="settings">Generation settings</param>
+        /// <param name="vertices">Vertex list</param>
+        /// <param name="indices">Index list</param>
+        /// <returns>Returns the generated graph for path finding over a triangle mesh</returns>
         public static IGraph Build(PathFinderSettings settings, VertexData[] vertices, uint[] indices)
         {
             if (settings is GridGenerationSettings)
@@ -23,7 +33,12 @@ namespace Engine.PathFinding
                 throw new Exception("Bad Graph type");
             }
         }
-
+        /// <summary>
+        /// Builds a path finder from triangle data
+        /// </summary>
+        /// <param name="settings">Generation settings</param>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Returns the generated graph for path finding over a triangle mesh</returns>
         public static IGraph Build(PathFinderSettings settings, Triangle[] triangles)
         {
             if (settings is GridGenerationSettings)

@@ -23,6 +23,7 @@ namespace DeferredTest
         private TextDrawer statistics = null;
 
         private Model tank = null;
+        private NavigationMeshAgent tankAgent = new NavigationMeshAgent();
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
         private Skydom skydom = null;
@@ -81,41 +82,6 @@ namespace DeferredTest
 
             #endregion
 
-            #region Terrain
-
-            sw.Restart();
-            this.terrain = this.AddScenery(new GroundDescription()
-            {
-                ContentPath = resources,
-                Model = new GroundDescription.ModelDescription()
-                {
-                    ModelFileName = "terrain.dae",
-                },
-                Quadtree = new GroundDescription.QuadtreeDescription()
-                {
-                    MaxTrianglesPerNode = 2048,
-                },
-                PathFinder = new GroundDescription.PathFinderDescription()
-                {
-                    Settings = NavigationMeshGenerationSettings.Default,
-                },
-                Vegetation = new GroundDescription.VegetationDescription()
-                {
-                    VegetarionTextures = new[] { "grass.png" },
-                    Saturation = 20f,
-                    StartRadius = 0f,
-                    EndRadius = 50f,
-                    MinSize = Vector2.One * 0.20f,
-                    MaxSize = Vector2.One * 0.25f,
-                },
-            });
-            sw.Stop();
-            loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
-
-            this.SceneVolume = this.terrain.GetBoundingSphere();
-
-            #endregion
-
             #region Helicopter
 
             sw.Restart();
@@ -171,6 +137,53 @@ namespace DeferredTest
                 Position = new Vector3(0, 10, 0),
             };
             this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(fireEmitter, "flare2.png"));
+
+            #endregion
+
+            #region Terrain
+
+            sw.Restart();
+
+            var tankbbox = this.tank.GetBoundingBox();
+            tankAgent.AgentHeight = tankbbox.GetY();
+            tankAgent.AgentRadius = tankbbox.GetZ() * 0.5f;
+            tankAgent.MaxClimb = tankbbox.GetY() * 0.45f;
+
+            var navSettings = NavigationMeshGenerationSettings.Default;
+            navSettings.Agents = new[]
+            {
+                tankAgent,
+            };
+
+            this.terrain = this.AddScenery(new GroundDescription()
+            {
+                ContentPath = resources,
+                Model = new GroundDescription.ModelDescription()
+                {
+                    ModelFileName = "terrain.dae",
+                },
+                Quadtree = new GroundDescription.QuadtreeDescription()
+                {
+                    MaxTrianglesPerNode = 2048,
+                },
+                PathFinder = new GroundDescription.PathFinderDescription()
+                {
+                    Settings = navSettings,
+                },
+                Vegetation = new GroundDescription.VegetationDescription()
+                {
+                    VegetarionTextures = new[] { "grass.png" },
+                    Saturation = 20f,
+                    StartRadius = 0f,
+                    EndRadius = 50f,
+                    MinSize = Vector2.One * 0.20f,
+                    MaxSize = Vector2.One * 0.25f,
+                },
+            });
+            sw.Stop();
+            loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.SceneVolume = this.terrain.GetBoundingSphere();
 
             #endregion
 
@@ -518,7 +531,7 @@ namespace DeferredTest
             {
                 if (picked)
                 {
-                    var p = this.terrain.FindPath(this.tank.Manipulator.Position, position);
+                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, position);
                     if (p != null)
                     {
                         this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.1f, this.terrain);

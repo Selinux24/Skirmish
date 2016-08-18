@@ -305,27 +305,30 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Gets the node collection of the grid
         /// </summary>
-        /// <returns></returns>
-        public IGraphNode[] GetNodes()
+        /// <param name="agent">Agent</param>
+        /// <returns>Returns the node collection of the grid</returns>
+        public IGraphNode[] GetNodes(Agent agent)
         {
             return Array.ConvertAll(this.Nodes, (n) => { return (IGraphNode)n; });
         }
         /// <summary>
         /// Find path from point to point
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public PathFindingPath FindPath(Vector3 from, Vector3 to)
+        public PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to)
         {
             return AStarQuery.FindPath(this, from, to);
         }
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <param name="position">Position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(Vector3 position)
+        public bool IsWalkable(Agent agent, Vector3 position)
         {
             for (int i = 0; i < this.Nodes.Length; i++)
             {

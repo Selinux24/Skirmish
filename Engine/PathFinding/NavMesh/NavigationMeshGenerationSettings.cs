@@ -26,18 +26,6 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public float CellHeight { get; set; }
         /// <summary>
-        /// Gets or sets the maximum climb height.
-        /// </summary>
-        public float MaxClimb { get; set; }
-        /// <summary>
-        /// Gets or sets the height of the agents traversing the <see cref="NavMesh"/>.
-        /// </summary>
-        public float AgentHeight { get; set; }
-        /// <summary>
-        /// Gets or sets the radius of the agents traversing the <see cref="NavMesh"/>.
-        /// </summary>
-        public float AgentRadius { get; set; }
-        /// <summary>
         /// Gets or sets the minimum number of spans that can form a region. Any less than this, and they will be
         /// merged with another region.
         /// </summary>
@@ -75,35 +63,9 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public bool BuildBoundingVolumeTree { get; set; }
         /// <summary>
-        /// Gets the height of the agents traversing the <see cref="NavMesh"/> in voxel (cell) units.
+        /// Agents list
         /// </summary>
-        public int VoxelAgentHeight
-        {
-            get
-            {
-                return (int)(AgentHeight / CellHeight);
-            }
-        }
-        /// <summary>
-        /// Gets the maximum clim height in voxel (cell) units.
-        /// </summary>
-        public int VoxelMaxClimb
-        {
-            get
-            {
-                return (int)(MaxClimb / CellHeight);
-            }
-        }
-        /// <summary>
-        /// Gets the radius of the agents traversing the <see cref="NavMesh"/> in voxel (cell) units.
-        /// </summary>
-        public int VoxelAgentRadius
-        {
-            get
-            {
-                return (int)(AgentRadius / CellHeight);
-            }
-        }
+        public NavigationMeshAgent[] Agents = null;
 
         /// <summary>
         /// Prevents a default instance of the <see cref="NavigationMeshGenerationSettings"/> class from being created.
@@ -113,9 +75,6 @@ namespace Engine.PathFinding.NavMesh
         {
             this.CellSize = 0.3f;
             this.CellHeight = 0.2f;
-            this.MaxClimb = 1f;
-            this.AgentHeight = 2.0f;
-            this.AgentRadius = 0.6f;
             this.MinRegionSize = 8;
             this.MergedRegionSize = 20;
             this.MaxEdgeLength = 12;
@@ -125,6 +84,44 @@ namespace Engine.PathFinding.NavMesh
             this.SampleDistance = 6;
             this.MaxSampleError = 1;
             this.BuildBoundingVolumeTree = true;
+
+            this.Agents = new[]
+            {
+                new NavigationMeshAgent()
+                {
+                    MaxClimb = 1f,
+                    AgentHeight = 2.0f,
+                    AgentRadius = 0.6f,
+                }
+            };
+        }
+
+        /// <summary>
+        /// Gets the height of the agents traversing the <see cref="NavMesh"/> in voxel (cell) units.
+        /// </summary>
+        public int GetVoxelAgentHeight(NavigationMeshAgent agent)
+        {
+            var vah = (int)(agent.AgentHeight / CellHeight);
+
+            return vah == 0 ? 1 : vah;
+        }
+        /// <summary>
+        /// Gets the radius of the agents traversing the <see cref="NavMesh"/> in voxel (cell) units.
+        /// </summary>
+        public int GetVoxelAgentRadius(NavigationMeshAgent agent)
+        {
+            var var = (int)(agent.AgentRadius / CellHeight);
+
+            return var == 0 ? 1 : var;
+        }
+        /// <summary>
+        /// Gets the maximum clim height in voxel (cell) units.
+        /// </summary>
+        public int GetVoxelMaxClimb(NavigationMeshAgent agent)
+        {
+            var vmc = (int)(agent.MaxClimb / CellHeight);
+
+            return vmc == 0 ? 1 : vmc;
         }
     }
 }

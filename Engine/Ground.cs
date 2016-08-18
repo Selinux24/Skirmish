@@ -240,16 +240,18 @@ namespace Engine
         /// <summary>
         /// Find path from point to point
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public abstract PathFindingPath FindPath(Vector3 from, Vector3 to);
+        public abstract PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to);
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <param name="position">Position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public abstract bool IsWalkable(Vector3 position);
+        public abstract bool IsWalkable(Agent agent, Vector3 position);
         /// <summary>
         /// Gets bounding sphere
         /// </summary>

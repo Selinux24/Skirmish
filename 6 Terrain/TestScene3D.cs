@@ -19,6 +19,12 @@ namespace TerrainTest
         private float walkerHeight = 1f;
         private float walkerVelocity = 8f;
         private bool follow = false;
+        private NavigationMeshAgent walkerAgent = new NavigationMeshAgent()
+        {
+            AgentHeight = 1f,
+            AgentRadius = 0.5f,
+            MaxClimb = 0.9f,
+        };
 
         private bool useDebugTex = false;
         private SpriteTexture shadowMapDrawer = null;
@@ -32,7 +38,9 @@ namespace TerrainTest
 
         private Model cursor3D = null;
         private Cursor cursor2D = null;
+
         private Model tank = null;
+        private NavigationMeshAgent tankAgent = new NavigationMeshAgent();
 
         private Skydom skydom = null;
         private Scenery terrain = null;
@@ -258,11 +266,17 @@ namespace TerrainTest
 
             sw.Restart();
 
-            var navSettings = NavigationMeshGenerationSettings.Default;
             var tankbbox = this.tank.GetBoundingBox();
-            navSettings.AgentHeight = tankbbox.GetY();
-            navSettings.AgentRadius = tankbbox.GetZ() * 0.5f;
-            navSettings.MaxClimb = tankbbox.GetY() * 0.45f;
+            tankAgent.AgentHeight = tankbbox.GetY();
+            tankAgent.AgentRadius = tankbbox.GetZ() * 0.5f;
+            tankAgent.MaxClimb = tankbbox.GetY() * 0.45f;
+
+            var navSettings = NavigationMeshGenerationSettings.Default;
+            navSettings.Agents = new[]
+            {
+                walkerAgent,
+                tankAgent,
+            };
 
             var terrainDescription = new GroundDescription()
             {
@@ -564,6 +578,15 @@ namespace TerrainTest
                     this.cursor3D.Visible = true;
                     this.cursor2D.Visible = false;
                 }
+
+                this.DEBUGUpdateGraphDrawer();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.D1))
+            {
+                this.walkMode = !this.walkMode;
+                this.DEBUGUpdateGraphDrawer();
+                this.walkMode = !this.walkMode;
             }
 
             #region Cursor picking and positioning
@@ -670,7 +693,7 @@ namespace TerrainTest
             {
                 if (picked)
                 {
-                    var p = this.terrain.FindPath(this.tank.Manipulator.Position, pickedPosition);
+                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, pickedPosition);
                     if (p != null)
                     {
                         this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.1f, this.terrain);
@@ -736,7 +759,7 @@ namespace TerrainTest
                 Vector3 walkerPos;
                 if (this.terrain.FindNearestGroundPosition(this.Camera.Position, out walkerPos))
                 {
-                    if (this.terrain.IsWalkable(walkerPos))
+                    if (this.terrain.IsWalkable(this.walkerAgent, walkerPos))
                     {
                         walkerPos.Y += this.walkerHeight;
 
@@ -912,7 +935,9 @@ namespace TerrainTest
         }
         private void DEBUGUpdateGraphDrawer()
         {
-            var nodes = this.terrain.GetNodes();
+            var agent = this.walkMode ? this.walkerAgent : this.tankAgent;
+
+            var nodes = this.terrain.GetNodes(agent);
             if (nodes != null && nodes.Length > 0)
             {
                 Random clrRnd = new Random(1);

@@ -118,14 +118,21 @@ namespace Engine.PathFinding.NavMesh
         /// Builds a new compact height field from a height field
         /// </summary>
         /// <param name="heightField">Height field</param>
-        /// <param name="settings">Generation settings</param>
+        /// <param name="minRegionSize">Minimum region size</param>
+        /// <param name="mergedRegionSize">Merged region size</param>
+        /// <param name="voxelAgentHeight">Voxel agent height</param>
+        /// <param name="voxelAgentRadius">Voxel agent radius</param>
+        /// <param name="voxelMaxClimb">Voxel maximum climb</param>
         /// <returns>Returns the new generated compact height field</returns>
-        public static CompactHeightField Build(HeightField heightField, NavigationMeshGenerationSettings settings)
+        public static CompactHeightField Build(
+            HeightField heightField, 
+            int minRegionSize, int mergedRegionSize, 
+            int voxelAgentHeight, int voxelAgentRadius, int voxelMaxClimb)
         {
-            var ch = new CompactHeightField(heightField, settings.VoxelAgentHeight, settings.VoxelMaxClimb);
-            ch.Erode(settings.VoxelAgentRadius);
+            var ch = new CompactHeightField(heightField, voxelAgentHeight, voxelMaxClimb);
+            ch.Erode(voxelAgentRadius);
             ch.BuildDistanceField();
-            ch.BuildRegions(0, settings.MinRegionSize, settings.MergedRegionSize);
+            ch.BuildRegions(0, minRegionSize, mergedRegionSize);
 
             return ch;
         }

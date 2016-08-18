@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.PathFinding.NavMesh
 {
@@ -45,21 +45,6 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public OffMeshConnection[] OffMeshCons { get; private set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NavigationMeshBuilder" /> class.
-        /// Add all the PolyMesh and PolyMeshDetail attributes to the Navigation Mesh.
-        /// Then, add Off-Mesh connection support.
-        /// </summary>
-        /// <param name="polyMesh">The PolyMesh</param>
-        /// <param name="polyMeshDetail">The PolyMeshDetail</param>
-        /// <param name="offMeshCons">Offmesh connection data</param>
-        /// <param name="settings">The settings used to build.</param>
-        public NavigationMeshBuilder(
-            PolyMesh polyMesh,
-            PolyMeshDetail polyMeshDetail,
-            OffMeshConnection[] offMeshCons,
-            NavigationMeshGenerationSettings settings)
-            : this(polyMesh, polyMeshDetail, offMeshCons, settings.CellSize, settings.CellHeight, settings.VertsPerPoly, settings.MaxClimb, settings.BuildBoundingVolumeTree, settings.AgentHeight, settings.AgentRadius) { }
         /// <summary>
         /// Initializes a new instance of the <see cref="NavigationMeshBuilder" /> class.
         /// Add all the PolyMesh and PolyMeshDetail attributes to the Navigation Mesh.

@@ -138,15 +138,22 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <param name="triangles">Triangle list</param>
-        /// <param name="settings">Generation settings</param>
+        /// <param name="cellSize">Cell size</param>
+        /// <param name="cellHeight">Cell height</param>
+        /// <param name="voxelAgentHeight">Voxel agent height</param>
+        /// <param name="voxelMaxClimb">Voxel maximum climb</param>
         /// <returns>Returns the new generated height field</returns>
-        public static HeightField Build(BoundingBox bbox, Triangle[] triangles, NavigationMeshGenerationSettings settings)
+        public static HeightField Build(
+            BoundingBox bbox, 
+            Triangle[] triangles,
+            float cellSize, float cellHeight,
+            int voxelAgentHeight, int voxelMaxClimb)
         {
-            var fh = new HeightField(bbox, settings.CellSize, settings.CellHeight);
+            var fh = new HeightField(bbox, cellSize, cellHeight);
             fh.RasterizeTriangles(triangles, Area.Default);
-            fh.FilterLedgeSpans(settings.VoxelAgentHeight, settings.VoxelMaxClimb);
-            fh.FilterLowHangingWalkableObstacles(settings.VoxelMaxClimb);
-            fh.FilterWalkableLowHeightSpans(settings.VoxelAgentHeight);
+            fh.FilterLedgeSpans(voxelAgentHeight, voxelMaxClimb);
+            fh.FilterLowHangingWalkableObstacles(voxelMaxClimb);
+            fh.FilterWalkableLowHeightSpans(voxelAgentHeight);
 
             return fh;
         }

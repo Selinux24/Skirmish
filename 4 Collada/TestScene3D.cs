@@ -123,7 +123,7 @@ namespace Collada
 
             List<Line3> squares = new List<Line3>();
 
-            var nodes = this.ground.GetNodes();
+            var nodes = this.ground.GetNodes(null);
 
             for (int i = 0; i < nodes.Length; i++)
             {

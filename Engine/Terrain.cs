@@ -1415,12 +1415,13 @@ namespace Engine
         /// <summary>
         /// Find path from point to point
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public override PathFindingPath FindPath(Vector3 from, Vector3 to)
+        public override PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to)
         {
-            var path = this.navigationGraph.FindPath(from, to);
+            var path = this.navigationGraph.FindPath(agent, from, to);
             if (path != null)
             {
                 for (int i = 0; i < path.ReturnPath.Count; i++)
@@ -1438,11 +1439,12 @@ namespace Engine
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <param name="position">Position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public override bool IsWalkable(Vector3 position)
+        public override bool IsWalkable(Agent agent, Vector3 position)
         {
-            return this.navigationGraph.IsWalkable(position);
+            return this.navigationGraph.IsWalkable(agent, position);
         }
         /// <summary>
         /// Gets bounding sphere

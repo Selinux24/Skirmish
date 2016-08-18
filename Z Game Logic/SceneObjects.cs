@@ -31,7 +31,8 @@ namespace GameLogic
 
         private SceneLightPoint pointLight = null;
 
-        private ModelInstanced model = null;
+        private ModelInstanced soldier = null;
+        private GridAgent soldierAgent = null;
         private Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
         private ModelInstance current
         {
@@ -143,7 +144,7 @@ namespace GameLogic
                 },
                 Opaque = true,
             });
-            this.model = this.AddInstancingModel(new ModelInstancedDescription()
+            this.soldier = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = "Resources3D",
                 ModelFileName = "soldier.dae",
@@ -174,7 +175,7 @@ namespace GameLogic
                 Drawables = new Drawable[]
                 {
                     this.terrain,
-                    this.model,
+                    this.soldier,
                 },
                 MinimapArea = this.terrain.GetBoundingBox(),
             };
@@ -568,7 +569,7 @@ namespace GameLogic
                 int soldierIndex = 0;
                 foreach (Soldier soldier in team.Soldiers)
                 {
-                    ModelInstance instance = this.model.Instances[instanceIndex++];
+                    ModelInstance instance = this.soldier.Instances[instanceIndex++];
 
                     instance.TextureIndex = teamIndex;
 
@@ -756,7 +757,7 @@ namespace GameLogic
             if (ActionsManager.Move(this.skirmishGame, active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set move animation clip
@@ -773,7 +774,7 @@ namespace GameLogic
             if (ActionsManager.Crawl(this.skirmishGame, active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set crawl animation clip
@@ -790,7 +791,7 @@ namespace GameLogic
             if (ActionsManager.Run(this.skirmishGame, active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
@@ -813,7 +814,7 @@ namespace GameLogic
                 Vector3 dir = Vector3.Normalize(activeMan.Position - passiveMan.Position);
                 Vector3 destination = passiveMan.Position + (dir * 3f);
 
-                var path = this.terrain.FindPath(activeMan.Position, destination);
+                var path = this.terrain.FindPath(this.soldierAgent, activeMan.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set assault animation clip
@@ -898,7 +899,7 @@ namespace GameLogic
             if (ActionsManager.FindCover(this.skirmishGame, active))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
@@ -915,7 +916,7 @@ namespace GameLogic
             if (ActionsManager.RunAway(this.skirmishGame, active))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
@@ -1001,7 +1002,7 @@ namespace GameLogic
             if (ActionsManager.Leave(this.skirmishGame, active))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip

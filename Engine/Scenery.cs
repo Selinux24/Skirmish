@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SharpDX;
+﻿using SharpDX;
+using System.Collections.Generic;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
@@ -191,12 +191,13 @@ namespace Engine
         /// <summary>
         /// Find path from point to point
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public override PathFindingPath FindPath(Vector3 from, Vector3 to)
+        public override PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to)
         {
-            var path = this.navigationGraph.FindPath(from, to);
+            var path = this.navigationGraph.FindPath(agent, from, to);
             if (path != null)
             {
                 for (int i = 0; i < path.ReturnPath.Count; i++)
@@ -214,11 +215,12 @@ namespace Engine
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <param name="position">Position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public override bool IsWalkable(Vector3 position)
+        public override bool IsWalkable(Agent agent, Vector3 position)
         {
-            return this.navigationGraph.IsWalkable(position);
+            return this.navigationGraph.IsWalkable(agent, position);
         }
         /// <summary>
         /// Gets bounding sphere
@@ -384,14 +386,15 @@ namespace Engine
         /// <summary>
         /// Gets the path finder grid nodes
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <returns>Returns the path finder grid nodes</returns>
-        public IGraphNode[] GetNodes()
+        public IGraphNode[] GetNodes(Agent agent)
         {
             IGraphNode[] nodes = null;
 
             if (this.navigationGraph != null)
             {
-                nodes = this.navigationGraph.GetNodes();
+                nodes = this.navigationGraph.GetNodes(agent);
             }
 
             return nodes;
