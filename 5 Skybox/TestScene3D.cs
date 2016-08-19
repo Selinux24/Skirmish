@@ -1,7 +1,7 @@
-﻿using System;
-using Engine;
+﻿using Engine;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
+using System;
 
 namespace Skybox
 {
@@ -14,12 +14,18 @@ namespace Skybox
             new Vector2(+5, -5),
             new Vector2(-5, -5),
         };
-        private Vector3 walkerHeight = Vector3.UnitY;
-        private float walkerClimb = MathUtil.DegreesToRadians(45);
         private Color globalColor = Color.Green;
         private Color bboxColor = Color.GreenYellow;
         private int bsphSlices = 20;
         private int bsphStacks = 10;
+
+        private NavigationMeshAgent walker = new NavigationMeshAgent()
+        {
+            Name = "agent",
+            Height = 1f,
+            Radius = 0.3f,
+            MaxClimb = 0.9f,
+        };
 
         private Cursor cursor;
 
@@ -98,7 +104,35 @@ namespace Skybox
 
             #endregion
 
+            #region Torchs
+
+            this.torchs = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = "Resources",
+                ModelFileName = "torch.dae",
+                Instances = this.firePositions.Length,
+                Opaque = true,
+            });
+
+            #endregion
+
+            #region Rain
+
+            var rainEmitter = new ParticleEmitter()
+            {
+                Color = Color.LightBlue,
+                Size = 0.5f,
+                Position = Vector3.Zero,
+            };
+
+            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(rainEmitter, "raindrop.dds"));
+
+            #endregion
+
             #region Terrain
+
+            var nvSettings = NavigationMeshGenerationSettings.Default;
+            nvSettings.Agents[0] = this.walker;
 
             GroundDescription desc = new GroundDescription()
             {
@@ -109,11 +143,13 @@ namespace Skybox
                 },
                 PathFinder = new GroundDescription.PathFinderDescription()
                 {
-                    Settings = NavigationMeshGenerationSettings.Default,
+                    Settings = nvSettings,
                 },
                 Opaque = true,
+                DelayGeneration = true,
             };
             this.ruins = this.AddScenery(desc, false);
+            this.ruins.AttachObject(new GroundAttachedObject() { Model = this.torchs, EvaluateForPathFinding = true, EvaluateForPicking = false, UseVolumeForPathFinding = true });
 
             this.bboxGlobalDrawer = this.AddLineListDrawer(Line3.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
             this.bboxGlobalDrawer.Visible = false;
@@ -130,15 +166,34 @@ namespace Skybox
 
             #endregion
 
-            #region Torchs
+            #region Moving fire
 
-            this.torchs = this.AddInstancingModel(new ModelInstancedDescription()
+            var movingFireEmitter = new ParticleEmitter()
             {
-                ContentPath = "Resources",
-                ModelFileName = "torch.dae",
-                Instances = this.firePositions.Length,
-                Opaque = true,
-            });
+                Color = Color.Orange,
+                Size = 0.5f,
+                Position = Vector3.Zero,
+            };
+
+            this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(movingFireEmitter, "flare2.png"));
+
+            this.movingFireLight = new SceneLightPoint()
+            {
+                Name = "Moving fire light",
+                LightColor = Color.Orange,
+                AmbientIntensity = 0.1f,
+                DiffuseIntensity = 1f,
+                Position = Vector3.Zero,
+                Radius = 5f,
+                Enabled = true,
+                CastShadow = false,
+            };
+
+            this.Lights.Add(this.movingFireLight);
+
+            #endregion
+
+            #region Positioning and lights
 
             ParticleEmitter[] firePositions3D = new ParticleEmitter[this.firePositions.Length];
             this.torchLights = new SceneLightPoint[this.firePositions.Length];
@@ -185,46 +240,6 @@ namespace Skybox
 
             #endregion
 
-            #region Moving fire
-
-            var movingFireEmitter = new ParticleEmitter()
-            {
-                Color = Color.Orange,
-                Size = 0.5f,
-                Position = Vector3.Zero,
-            };
-
-            this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(movingFireEmitter, "flare2.png"));
-
-            this.movingFireLight = new SceneLightPoint()
-            {
-                Name = "Moving fire light",
-                LightColor = Color.Orange,
-                AmbientIntensity = 0.1f,
-                DiffuseIntensity = 1f,
-                Position = Vector3.Zero,
-                Radius = 5f,
-                Enabled = true,
-                CastShadow = false,
-            };
-
-            this.Lights.Add(this.movingFireLight);
-
-            #endregion
-
-            #region Rain
-
-            var rainEmitter = new ParticleEmitter()
-            {
-                Color = Color.LightBlue,
-                Size = 0.5f,
-                Position = Vector3.Zero,
-            };
-
-            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(rainEmitter, "raindrop.dds"));
-
-            #endregion
-
             Line3[] sphereLines = Line3.CreateWiredSphere(new BoundingSphere(), this.bsphSlices, this.bsphStacks);
             this.bsphLightsDrawer = this.AddLineListDrawer(sphereLines.Length * 5);
             this.bsphLightsDrawer.Visible = false;
@@ -241,12 +256,12 @@ namespace Skybox
         }
         private void InitializeCamera()
         {
-            this.Camera.NearPlaneDistance = 0.5f;
+            this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = 50.0f;
-            this.Camera.Goto(this.walkerHeight + new Vector3(-6, 0, 5));
+            this.Camera.Goto(new Vector3(-6, this.walker.Height, 5));
             this.Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
-            this.Camera.MovementDelta = 8f;
-            this.Camera.SlowMovementDelta = 4f;
+            this.Camera.MovementDelta = 4f;
+            this.Camera.SlowMovementDelta = 2f;
         }
 
         public override void Update(GameTime gameTime)
@@ -300,19 +315,10 @@ namespace Skybox
                     v = Vector3.Normalize(v1 - v2) * this.Camera.NearPlaneDistance;
                 }
 
-                Vector3 p;
-                Triangle tri;
-                if (this.ruins.FindNearestGroundPosition(v, out p, out tri))
+                Vector3 walkerPosition;
+                if (this.ruins.Walk(this.walker, previousPosition, this.Camera.Position, out walkerPosition))
                 {
-                    //Position test
-                    if (this.ruins.FindNearestGroundPosition(currentPosition, out p, out tri))
-                    {
-                        this.Camera.Goto(p + this.walkerHeight);
-                    }
-                    else
-                    {
-                        this.Camera.Goto(previousPosition);
-                    }
+                    this.Camera.Goto(walkerPosition);
                 }
                 else
                 {
