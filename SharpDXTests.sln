@@ -51,6 +51,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blender", "Blender", "{4F0C
 		Blender\helipod.blend = Blender\helipod.blend
 		Blender\human.blend = Blender\human.blend
 		Blender\jagdpanther.blend = Blender\jagdpanther.blend
+		Blender\leafs1.jpg = Blender\leafs1.jpg
+		Blender\leafs1a.jpg = Blender\leafs1a.jpg
+		Blender\Leopard.blend = Blender\Leopard.blend
+		Blender\Leopard.bmp = Blender\Leopard.bmp
 		Blender\obelisk.blend = Blender\obelisk.blend
 		Blender\poly.blend = Blender\poly.blend
 		Blender\poly.png = Blender\poly.png
@@ -63,13 +67,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blender", "Blender", "{4F0C
 		Blender\terrain.png = Blender\terrain.png
 		Blender\terrain_nmap.png = Blender\terrain_nmap.png
 		Blender\torch.blend = Blender\torch.blend
+		Blender\tree1.blend = Blender\tree1.blend
 		Blender\two_levels.blend = Blender\two_levels.blend
+		Blender\wood.jpg = Blender\wood.jpg
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Collada", "Collada", "{DCCFC608-FBD4-45F4-83BA-3ED0192AA744}"
 	ProjectSection(SolutionItems) = preProject
 		Blender\Collada\aniCube.dae = Blender\Collada\aniCube.dae
 		Blender\Collada\aniCube.png = Blender\Collada\aniCube.png
+		Blender\Collada\baneblade.dae = Blender\Collada\baneblade.dae
 		Blender\Collada\garage.dae = Blender\Collada\garage.dae
 		Blender\Collada\ground.dae = Blender\Collada\ground.dae
 		Blender\Collada\ground.png = Blender\Collada\ground.png
@@ -80,6 +87,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Collada", "Collada", "{DCCF
 		Blender\Collada\helicopter - tires.png = Blender\Collada\helicopter - tires.png
 		Blender\Collada\helicopter.dae = Blender\Collada\helicopter.dae
 		Blender\Collada\helipod.dae = Blender\Collada\helipod.dae
+		Blender\Collada\jagdpanther.dae = Blender\Collada\jagdpanther.dae
+		Blender\Collada\leafs1a.jpg = Blender\Collada\leafs1a.jpg
+		Blender\Collada\Leopard.dae = Blender\Collada\Leopard.dae
 		Blender\Collada\obelisk.dae = Blender\Collada\obelisk.dae
 		Blender\Collada\poly.dae = Blender\Collada\poly.dae
 		Blender\Collada\Poly.png = Blender\Collada\Poly.png
@@ -92,7 +102,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Collada", "Collada", "{DCCF
 		Blender\Collada\terrain.png = Blender\Collada\terrain.png
 		Blender\Collada\terrain_nmap.png = Blender\Collada\terrain_nmap.png
 		Blender\Collada\torch.dae = Blender\Collada\torch.dae
+		Blender\Collada\tree1.dae = Blender\Collada\tree1.dae
 		Blender\Collada\two_levels.dae = Blender\Collada\two_levels.dae
+		Blender\Collada\wood.jpg = Blender\Collada\wood.jpg
 	EndProjectSection
 EndProject
 Global
