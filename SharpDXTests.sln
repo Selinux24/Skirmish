@@ -34,6 +34,86 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "7 Deferred", "7 Deferred\7 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "8 Heightmap", "8 Heightmap\8 Heightmap.csproj", "{5F35C198-01BF-48A9-887C-2A99390226E0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blender", "Blender", "{4F0CF2E9-B1BE-4D46-B890-FBFA1253331A}"
+	ProjectSection(SolutionItems) = preProject
+		Blender\aniCube.blend = Blender\aniCube.blend
+		Blender\aniCube.blend1 = Blender\aniCube.blend1
+		Blender\aniCube.png = Blender\aniCube.png
+		Blender\Backup.bat = Blender\Backup.bat
+		Blender\baneblade.blend = Blender\baneblade.blend
+		Blender\baneblade.blend1 = Blender\baneblade.blend1
+		Blender\capital ship.blend = Blender\capital ship.blend
+		Blender\capital ship.blend1 = Blender\capital ship.blend1
+		Blender\Exclude.txt = Blender\Exclude.txt
+		Blender\garage.blend = Blender\garage.blend
+		Blender\garage.blend1 = Blender\garage.blend1
+		Blender\ground.blend = Blender\ground.blend
+		Blender\ground.blend1 = Blender\ground.blend1
+		Blender\ground.png = Blender\ground.png
+		Blender\helicopter - black.png = Blender\helicopter - black.png
+		Blender\helicopter - gray.png = Blender\helicopter - gray.png
+		Blender\helicopter - green.png = Blender\helicopter - green.png
+		Blender\helicopter - tires.png = Blender\helicopter - tires.png
+		Blender\helicopter.blend = Blender\helicopter.blend
+		Blender\helicopter.blend1 = Blender\helicopter.blend1
+		Blender\helipod.blend = Blender\helipod.blend
+		Blender\helipod.blend1 = Blender\helipod.blend1
+		Blender\human.blend = Blender\human.blend
+		Blender\jagdpanther.blend = Blender\jagdpanther.blend
+		Blender\jagdpanther.blend1 = Blender\jagdpanther.blend1
+		Blender\obelisk.blend = Blender\obelisk.blend
+		Blender\obelisk.blend1 = Blender\obelisk.blend1
+		Blender\poly.blend = Blender\poly.blend
+		Blender\poly.blend1 = Blender\poly.blend1
+		Blender\poly.png = Blender\poly.png
+		Blender\rocks.blend = Blender\rocks.blend
+		Blender\rocks.blend1 = Blender\rocks.blend1
+		Blender\ruins.blend = Blender\ruins.blend
+		Blender\ruins.blend1 = Blender\ruins.blend1
+		Blender\soldier.blend = Blender\soldier.blend
+		Blender\soldier.blend1 = Blender\soldier.blend1
+		Blender\soldier.jpg = Blender\soldier.jpg
+		Blender\tank.blend = Blender\tank.blend
+		Blender\tank.blend1 = Blender\tank.blend1
+		Blender\terrain.blend = Blender\terrain.blend
+		Blender\terrain.blend1 = Blender\terrain.blend1
+		Blender\terrain.png = Blender\terrain.png
+		Blender\terrain_nmap.png = Blender\terrain_nmap.png
+		Blender\torch.blend = Blender\torch.blend
+		Blender\two_levels.blend = Blender\two_levels.blend
+		Blender\two_levels.blend1 = Blender\two_levels.blend1
+		Blender\USB.bat = Blender\USB.bat
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Collada", "Collada", "{DCCFC608-FBD4-45F4-83BA-3ED0192AA744}"
+	ProjectSection(SolutionItems) = preProject
+		Blender\Collada\aniCube.dae = Blender\Collada\aniCube.dae
+		Blender\Collada\aniCube.png = Blender\Collada\aniCube.png
+		Blender\Collada\garage.dae = Blender\Collada\garage.dae
+		Blender\Collada\ground.dae = Blender\Collada\ground.dae
+		Blender\Collada\ground.png = Blender\Collada\ground.png
+		Blender\Collada\ground_nmap.png = Blender\Collada\ground_nmap.png
+		Blender\Collada\Helicopter - black.png = Blender\Collada\Helicopter - black.png
+		Blender\Collada\Helicopter - gray.png = Blender\Collada\Helicopter - gray.png
+		Blender\Collada\Helicopter - green.png = Blender\Collada\Helicopter - green.png
+		Blender\Collada\helicopter - tires.png = Blender\Collada\helicopter - tires.png
+		Blender\Collada\helicopter.dae = Blender\Collada\helicopter.dae
+		Blender\Collada\helipod.dae = Blender\Collada\helipod.dae
+		Blender\Collada\obelisk.dae = Blender\Collada\obelisk.dae
+		Blender\Collada\poly.dae = Blender\Collada\poly.dae
+		Blender\Collada\Poly.png = Blender\Collada\Poly.png
+		Blender\Collada\rocks.dae = Blender\Collada\rocks.dae
+		Blender\Collada\ruins.dae = Blender\Collada\ruins.dae
+		Blender\Collada\soldier.dae = Blender\Collada\soldier.dae
+		Blender\Collada\soldier.jpg = Blender\Collada\soldier.jpg
+		Blender\Collada\tank.dae = Blender\Collada\tank.dae
+		Blender\Collada\terrain.dae = Blender\Collada\terrain.dae
+		Blender\Collada\terrain.png = Blender\Collada\terrain.png
+		Blender\Collada\terrain_nmap.png = Blender\Collada\terrain_nmap.png
+		Blender\Collada\torch.dae = Blender\Collada\torch.dae
+		Blender\Collada\two_levels.dae = Blender\Collada\two_levels.dae
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -209,5 +289,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4F0CF2E9-B1BE-4D46-B890-FBFA1253331A} = {E510EEF8-84D0-4A28-9E35-5B55A34893CC}
+		{DCCFC608-FBD4-45F4-83BA-3ED0192AA744} = {4F0CF2E9-B1BE-4D46-B890-FBFA1253331A}
 	EndGlobalSection
 EndGlobal
