@@ -109,8 +109,18 @@ namespace Engine
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <param name="position">Position</param>
+        /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        bool IsWalkable(Agent agent, Vector3 position);
+        bool IsWalkable(Agent agent, Vector3 position, out Vector3? nearest);
+        /// <summary>
+        /// Gets final position for agents walking over the ground if exists
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="prevPosition">Previous position</param>
+        /// <param name="newPosition">New position</param>
+        /// <param name="finalPosition">Returns the final position if exists</param>
+        /// <returns>Returns true if final position found</returns>
+        bool Walk(Agent agent, Vector3 prevPosition, Vector3 newPosition, out Vector3 finalPosition);
 
         /// <summary>
         /// Gets bounding sphere

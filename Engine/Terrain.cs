@@ -1413,40 +1413,6 @@ namespace Engine
             return this.pickingQuadtree.PickAll(ref ray, out positions, out triangles);
         }
         /// <summary>
-        /// Find path from point to point
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="from">Start point</param>
-        /// <param name="to">End point</param>
-        /// <returns>Return path if exists</returns>
-        public override PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to)
-        {
-            var path = this.navigationGraph.FindPath(agent, from, to);
-            if (path != null)
-            {
-                for (int i = 0; i < path.ReturnPath.Count; i++)
-                {
-                    Vector3 position;
-                    if (FindNearestGroundPosition(path.ReturnPath[i], out position))
-                    {
-                        path.ReturnPath[i] = position;
-                    }
-                }
-            }
-
-            return path;
-        }
-        /// <summary>
-        /// Gets wether the specified position is walkable
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="position">Position</param>
-        /// <returns>Returns true if the specified position is walkable</returns>
-        public override bool IsWalkable(Agent agent, Vector3 position)
-        {
-            return this.navigationGraph.IsWalkable(agent, position);
-        }
-        /// <summary>
         /// Gets bounding sphere
         /// </summary>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>

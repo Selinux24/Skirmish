@@ -16,13 +16,12 @@ namespace TerrainTest
         private const int MaxGridDrawer = 10000;
 
         private bool walkMode = false;
-        private float walkerHeight = 1f;
         private float walkerVelocity = 8f;
         private bool follow = false;
         private NavigationMeshAgent walkerAgent = new NavigationMeshAgent()
         {
-            AgentHeight = 1f,
-            AgentRadius = 0.5f,
+            Height = 1f,
+            Radius = 0.5f,
             MaxClimb = 0.9f,
         };
 
@@ -79,7 +78,7 @@ namespace TerrainTest
         {
             base.Initialize();
 
-            this.Camera.NearPlaneDistance = 0.5f;
+            this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = 5000f;
 
             #region Texts
@@ -267,8 +266,8 @@ namespace TerrainTest
             sw.Restart();
 
             var tankbbox = this.tank.GetBoundingBox();
-            tankAgent.AgentHeight = tankbbox.GetY();
-            tankAgent.AgentRadius = tankbbox.GetZ() * 0.5f;
+            tankAgent.Height = tankbbox.GetY();
+            tankAgent.Radius = tankbbox.GetZ() * 0.5f;
             tankAgent.MaxClimb = tankbbox.GetY() * 0.45f;
 
             var navSettings = NavigationMeshGenerationSettings.Default;
@@ -551,13 +550,6 @@ namespace TerrainTest
                 this.Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
-            {
-                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning;
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.Z))
             {
                 this.walkMode = !this.walkMode;
@@ -582,13 +574,6 @@ namespace TerrainTest
                 this.DEBUGUpdateGraphDrawer();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.D1))
-            {
-                this.walkMode = !this.walkMode;
-                this.DEBUGUpdateGraphDrawer();
-                this.walkMode = !this.walkMode;
-            }
-
             #region Cursor picking and positioning
 
             bool picked = false;
@@ -604,6 +589,147 @@ namespace TerrainTest
                 {
                     this.cursor3D.Manipulator.SetPosition(pickedPosition);
                 }
+            }
+
+            #endregion
+
+            if (this.walkMode)
+            {
+                #region Walker
+
+#if DEBUG
+                if (this.Game.Input.RightMouseButtonPressed)
+#endif
+                {
+                    this.Camera.RotateMouse(
+                        this.Game.GameTime,
+                        this.Game.Input.MouseXDelta,
+                        this.Game.Input.MouseYDelta);
+                }
+
+                var prevPos = this.Camera.Position;
+
+                if (this.Game.Input.KeyPressed(Keys.A))
+                {
+                    this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.D))
+                {
+                    this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.W))
+                {
+                    this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.S))
+                {
+                    this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                Vector3 walkerPos;
+                if (this.terrain.Walk(this.walkerAgent, prevPos, this.Camera.Position, out walkerPos))
+                {
+                    this.Camera.Goto(walkerPos);
+                }
+                else
+                {
+                    this.Camera.Goto(prevPos);
+                }
+
+                #endregion
+            }
+            else
+            {
+                #region Free Camera
+
+#if DEBUG
+                if (this.Game.Input.RightMouseButtonPressed)
+#endif
+                {
+                    this.Camera.RotateMouse(
+                        this.Game.GameTime,
+                        this.Game.Input.MouseXDelta,
+                        this.Game.Input.MouseYDelta);
+                }
+
+                if (this.Game.Input.KeyJustReleased(Keys.Space))
+                {
+                    this.follow = !this.follow;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.A))
+                {
+                    this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.D))
+                {
+                    this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.W))
+                {
+                    this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.S))
+                {
+                    this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.follow)
+                {
+                    var sph = this.helicopter.GetBoundingSphere();
+                    this.Camera.LookTo(sph.Center);
+                    this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
+                }
+
+                #endregion
+            }
+
+            #region Tank
+
+            if (this.Game.Input.LeftMouseButtonPressed)
+            {
+                if (picked)
+                {
+                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, pickedPosition);
+                    if (p != null)
+                    {
+                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.1f, this.terrain);
+
+                        this.DEBUGDrawTankPath(this.tank.Manipulator.Position, p);
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Helicopter
+
+            if (this.Game.Input.KeyJustReleased(Keys.Home))
+            {
+                Curve3D curve = this.DEBUGGenerateHelicopterPath();
+                ((HeliManipulator)this.helicopter.Manipulator).Follow(curve, 10f, 0.001f);
+                this.DEBUGDrawHelicopterPath(curve);
+            }
+
+            this.Lights.PointLights[0].Position = (this.helicopter.Manipulator.Position + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Left);
+            this.Lights.PointLights[1].Position = (this.helicopter.Manipulator.Position + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Right);
+
+            if (this.curveLineDrawer.Visible)
+            {
+                Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
+                this.curveLineDrawer.SetLines(this.hAxisColor, Line3.CreateAxis(rot, 5f));
+            }
+
+            if (this.helicopterLineDrawer.Visible)
+            {
+                BoundingSphere sph = this.helicopter.GetBoundingSphere();
+                this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.55f), Line3.CreateWiredSphere(sph, 50, 20));
             }
 
             #endregion
@@ -672,6 +798,20 @@ namespace TerrainTest
                 if (this.helicopter.TextureIndex < 0) this.helicopter.TextureIndex = 0;
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.D1))
+            {
+                this.walkMode = !this.walkMode;
+                this.DEBUGUpdateGraphDrawer();
+                this.walkMode = !this.walkMode;
+            }
+
             if (this.Game.Input.LeftMouseButtonPressed)
             {
                 if (this.terrainGraphDrawer.Visible)
@@ -682,136 +822,6 @@ namespace TerrainTest
                     {
                         this.DEBUGPickingPosition(pickedPosition);
                     }
-                }
-            }
-
-            #endregion
-
-            #region Tank
-
-            if (this.Game.Input.LeftMouseButtonPressed)
-            {
-                if (picked)
-                {
-                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, pickedPosition);
-                    if (p != null)
-                    {
-                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.1f, this.terrain);
-
-                        this.DEBUGDrawTankPath(this.tank.Manipulator.Position, p);
-                    }
-                }
-            }
-
-            #endregion
-
-            #region Helicopter
-
-            if (this.Game.Input.KeyJustReleased(Keys.Home))
-            {
-                Curve3D curve = this.DEBUGGenerateHelicopterPath();
-                ((HeliManipulator)this.helicopter.Manipulator).Follow(curve, 10f, 0.001f);
-                this.DEBUGDrawHelicopterPath(curve);
-            }
-
-            this.Lights.PointLights[0].Position = (this.helicopter.Manipulator.Position + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Left);
-            this.Lights.PointLights[1].Position = (this.helicopter.Manipulator.Position + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Right);
-
-            Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
-            this.curveLineDrawer.SetLines(this.hAxisColor, Line3.CreateAxis(rot, 5f));
-
-            BoundingSphere sph = this.helicopter.GetBoundingSphere();
-            this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.55f), Line3.CreateWiredSphere(sph, 50, 20));
-
-            #endregion
-
-            #region Camera
-
-            if (this.walkMode)
-            {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
-
-                var prevPos = this.Camera.Position;
-
-                if (this.Game.Input.KeyPressed(Keys.A))
-                {
-                    this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.D))
-                {
-                    this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.W))
-                {
-                    this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.S))
-                {
-                    this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                Vector3 walkerPos;
-                if (this.terrain.FindNearestGroundPosition(this.Camera.Position, out walkerPos))
-                {
-                    if (this.terrain.IsWalkable(this.walkerAgent, walkerPos))
-                    {
-                        walkerPos.Y += this.walkerHeight;
-
-                        this.Camera.Goto(walkerPos);
-                    }
-                    else
-                    {
-                        this.Camera.Goto(prevPos);
-                    }
-                }
-            }
-            else
-            {
-#if DEBUG
-                if (this.Game.Input.RightMouseButtonPressed)
-#endif
-                {
-                    this.Camera.RotateMouse(
-                        this.Game.GameTime,
-                        this.Game.Input.MouseXDelta,
-                        this.Game.Input.MouseYDelta);
-                }
-
-                if (this.Game.Input.KeyJustReleased(Keys.Space))
-                {
-                    this.follow = !this.follow;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.A))
-                {
-                    this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.D))
-                {
-                    this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.W))
-                {
-                    this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.S))
-                {
-                    this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.follow)
-                {
-                    this.Camera.LookTo(sph.Center);
-                    this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
                 }
             }
 

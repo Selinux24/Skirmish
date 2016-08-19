@@ -145,8 +145,8 @@ namespace DeferredTest
             sw.Restart();
 
             var tankbbox = this.tank.GetBoundingBox();
-            tankAgent.AgentHeight = tankbbox.GetY();
-            tankAgent.AgentRadius = tankbbox.GetZ() * 0.5f;
+            tankAgent.Height = tankbbox.GetY();
+            tankAgent.Radius = tankbbox.GetZ() * 0.5f;
             tankAgent.MaxClimb = tankbbox.GetY() * 0.45f;
 
             var navSettings = NavigationMeshGenerationSettings.Default;

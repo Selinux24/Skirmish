@@ -327,14 +327,19 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <param name="position">Position</param>
+        /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(Agent agent, Vector3 position)
+        public bool IsWalkable(Agent agent, Vector3 position, out Vector3? nearest)
         {
+            nearest = null;
+
             for (int i = 0; i < this.Nodes.Length; i++)
             {
                 float distance;
                 if (this.Nodes[i].Contains(position, out distance))
                 {
+                    nearest = this.Nodes[i].Center;
+
                     return true;
                 }
             }

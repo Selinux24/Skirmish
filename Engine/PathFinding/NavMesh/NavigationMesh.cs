@@ -79,8 +79,8 @@ namespace Engine.PathFinding.NavMesh
                     settings.VertsPerPoly,
                     agent.MaxClimb,
                     settings.BuildBoundingVolumeTree,
-                    agent.AgentHeight,
-                    agent.AgentRadius);
+                    agent.Height,
+                    agent.Radius);
 
                 var tnm = new TiledNavigationMesh(builder);
                 var query = new NavigationMeshQuery(tnm, 2048);
@@ -145,10 +145,11 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <param name="position">Position</param>
+        /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(Agent agent, Vector3 position)
+        public bool IsWalkable(Agent agent, Vector3 position, out Vector3? nearest)
         {
-            return this.Query[agent].IsWalkable(position);
+            return this.Query[agent].IsWalkable(position, out nearest);
         }
         /// <summary>
         /// Gets text representation of instance

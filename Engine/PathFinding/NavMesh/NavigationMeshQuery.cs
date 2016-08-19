@@ -92,12 +92,24 @@ namespace Engine.PathFinding.NavMesh
         /// Gets wether the specified position is walkable
         /// </summary>
         /// <param name="position">Position</param>
+        /// <param name="nearest">Gets the nearest position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(Vector3 position)
+        public bool IsWalkable(Vector3 position, out Vector3? nearest)
         {
             var pt = this.FindNearestPoly(position, Vector3.Zero);
 
-            return pt.Polygon != 0;
+            if (pt.Polygon != 0)
+            {
+                nearest = pt.Position;
+
+                return pt.Position.X == position.X && pt.Position.Z == position.Z;
+            }
+            else
+            {
+                nearest = null;
+
+                return false;
+            }
         }
 
         /// <summary>

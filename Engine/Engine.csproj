@@ -308,6 +308,7 @@
     <Compile Include="Collada\VisualScene.cs" />
     <Compile Include="Collections\PriorityDictionary.cs" />
     <Compile Include="CubemapDescription.cs" />
+    <Compile Include="GroundAttachedObject.cs" />
     <Compile Include="IGround.cs" />
     <Compile Include="IValueWithCost.cs" />
     <Compile Include="Curve3DKey.cs" />

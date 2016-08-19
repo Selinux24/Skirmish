@@ -19,8 +19,10 @@ namespace Engine.PathFinding
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>
+        /// <param name="agent">Agent</param>
         /// <param name="position">Position</param>
+        /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        bool IsWalkable(Agent agent, Vector3 position);
+        bool IsWalkable(Agent agent, Vector3 position, out Vector3? nearest);
     }
 }

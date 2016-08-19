@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SharpDX;
+﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -238,21 +238,6 @@ namespace Engine
         /// <returns>Returns true if picked positions found</returns>
         public abstract bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles);
         /// <summary>
-        /// Find path from point to point
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="from">Start point</param>
-        /// <param name="to">End point</param>
-        /// <returns>Return path if exists</returns>
-        public abstract PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to);
-        /// <summary>
-        /// Gets wether the specified position is walkable
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="position">Position</param>
-        /// <returns>Returns true if the specified position is walkable</returns>
-        public abstract bool IsWalkable(Agent agent, Vector3 position);
-        /// <summary>
         /// Gets bounding sphere
         /// </summary>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
@@ -262,14 +247,84 @@ namespace Engine
         /// </summary>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public abstract BoundingBox GetBoundingBox();
-    }
+        
+        /// <summary>
+        /// Find path from point to point
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="from">Start point</param>
+        /// <param name="to">End point</param>
+        /// <returns>Return path if exists</returns>
+        public virtual PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to)
+        {
+            var path = this.navigationGraph.FindPath(agent, from, to);
+            if (path != null)
+            {
+                for (int i = 0; i < path.ReturnPath.Count; i++)
+                {
+                    Vector3 position;
+                    if (FindNearestGroundPosition(path.ReturnPath[i], out position))
+                    {
+                        path.ReturnPath[i] = position;
+                    }
+                }
+            }
 
-    public class GroundAttachedObject
-    {
-        public ModelBase Model = null;
-        public bool EvaluateForPicking = true;
-        public bool EvaluateForPathFinding = true;
-        public bool UseVolumeForPicking = false;
-        public bool UseVolumeForPathFinding = false;
+            return path;
+        }
+        /// <summary>
+        /// Gets wether the specified position is walkable
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="position">Position</param>
+        /// <param name="nearest">Gets the nearest walkable position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        public virtual bool IsWalkable(Agent agent, Vector3 position, out Vector3? nearest)
+        {
+            return this.navigationGraph.IsWalkable(agent, position, out nearest);
+        }
+        /// <summary>
+        /// Gets final position for agents walking over the ground if exists
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="prevPosition">Previous position</param>
+        /// <param name="newPosition">New position</param>
+        /// <param name="finalPosition">Returns the final position if exists</param>
+        /// <returns>Returns true if final position found</returns>
+        public virtual bool Walk(Agent agent, Vector3 prevPosition, Vector3 newPosition, out Vector3 finalPosition)
+        {
+            finalPosition = Vector3.Zero;
+
+            Vector3 walkerPos;
+            if (this.FindNearestGroundPosition(newPosition, out walkerPos))
+            {
+                Vector3? nearest;
+                if (this.IsWalkable(agent, walkerPos, out nearest))
+                {
+                    finalPosition = walkerPos;
+                    finalPosition.Y += agent.Height;
+
+                    return true;
+                }
+                else
+                {
+                    if (nearest.HasValue)
+                    {
+                        var p = nearest.Value;
+                        p.Y = prevPosition.Y;
+
+                        if (this.FindNearestGroundPosition(p, out walkerPos))
+                        {
+                            finalPosition = walkerPos;
+                            finalPosition.Y += agent.Height;
+
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 }

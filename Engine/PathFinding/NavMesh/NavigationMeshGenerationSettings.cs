@@ -90,8 +90,8 @@ namespace Engine.PathFinding.NavMesh
                 new NavigationMeshAgent()
                 {
                     MaxClimb = 1f,
-                    AgentHeight = 2.0f,
-                    AgentRadius = 0.6f,
+                    Height = 2.0f,
+                    Radius = 0.6f,
                 }
             };
         }
@@ -101,7 +101,7 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public int GetVoxelAgentHeight(NavigationMeshAgent agent)
         {
-            var vah = (int)(agent.AgentHeight / CellHeight);
+            var vah = (int)(agent.Height / CellHeight);
 
             return vah == 0 ? 1 : vah;
         }
@@ -110,7 +110,7 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public int GetVoxelAgentRadius(NavigationMeshAgent agent)
         {
-            var var = (int)(agent.AgentRadius / CellHeight);
+            var var = (int)(agent.Radius / CellHeight);
 
             return var == 0 ? 1 : var;
         }

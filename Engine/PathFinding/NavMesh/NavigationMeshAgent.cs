@@ -8,12 +8,8 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public float MaxClimb { get; set; }
         /// <summary>
-        /// Gets or sets the height of the agents traversing the <see cref="NavMesh"/>.
+        /// Gets or sets the radius of the agent
         /// </summary>
-        public float AgentHeight { get; set; }
-        /// <summary>
-        /// Gets or sets the radius of the agents traversing the <see cref="NavMesh"/>.
-        /// </summary>
-        public float AgentRadius { get; set; }
+        public float Radius { get; set; }
     }
 }
