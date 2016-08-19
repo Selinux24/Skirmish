@@ -191,3 +191,6 @@ Thumbs.db
 #NUGET
 .nuget/
 *.cod
+
+#Blender
+*.blend1
