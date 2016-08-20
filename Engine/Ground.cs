@@ -42,6 +42,25 @@ namespace Engine
         }
 
         /// <summary>
+        /// Attach objects to terrain
+        /// </summary>
+        /// <param name="model">Model</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachObject(GroundAttachedObject model, bool updateInternals = true)
+        {
+            this.GroundObjects.Add(model);
+
+            if (updateInternals)
+            {
+                this.UpdateInternals();
+            }
+        }
+        /// <summary>
+        /// Updates internal objects
+        /// </summary>
+        public abstract void UpdateInternals();
+
+        /// <summary>
         /// Gets ground position giving x, z coordinates
         /// </summary>
         /// <param name="x">X coordinate</param>
@@ -134,8 +153,9 @@ namespace Engine
                     float d = Vector3.DistanceSquared(from, positions[i]);
                     if (d <= dist)
                     {
-                        index = i;
                         dist = d;
+
+                        index = i;
                     }
                 }
 
@@ -154,25 +174,6 @@ namespace Engine
                 return false;
             }
         }
-        /// <summary>
-        /// Attach objects to terrain
-        /// </summary>
-        /// <param name="model">Model</param>
-        /// <param name="updateInternals">Update internal objects</param>
-        public void AttachObject(GroundAttachedObject model, bool updateInternals = true)
-        {
-            this.GroundObjects.Add(model);
-
-            if (updateInternals)
-            {
-                this.UpdateInternals();
-            }
-        }
-
-        /// <summary>
-        /// Updates internal objects
-        /// </summary>
-        public abstract void UpdateInternals();
 
         /// <summary>
         /// Pick nearest position
@@ -488,12 +489,21 @@ namespace Engine
                     finalPosition = walkerPos;
                     finalPosition.Y += agent.Height;
 
+                    var moveP = newPosition - prevPosition;
+                    var moveV = finalPosition - prevPosition;
+                    if (moveV.LengthSquared() > moveP.LengthSquared())
+                    {
+                        finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+                    }
+
                     return true;
                 }
                 else
                 {
+                    //Not walkable but nearest position found
                     if (nearest.HasValue)
                     {
+                        //Adjust height
                         var p = nearest.Value;
                         p.Y = prevPosition.Y;
 
@@ -501,6 +511,13 @@ namespace Engine
                         {
                             finalPosition = walkerPos;
                             finalPosition.Y += agent.Height;
+
+                            var moveP = newPosition - prevPosition;
+                            var moveV = finalPosition - prevPosition;
+                            if (moveV.LengthSquared() > moveP.LengthSquared())
+                            {
+                                finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+                            }
 
                             return true;
                         }

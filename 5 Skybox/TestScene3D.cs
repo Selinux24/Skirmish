@@ -274,8 +274,10 @@ namespace Skybox
         public override void Update(GameTime gameTime)
         {
             Vector3 previousPosition = this.Camera.Position;
+            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
 
-            this.UpdateInput();
+            this.UpdateInput(shift, rightBtn);
 
             #region Walk
 
@@ -315,11 +317,8 @@ namespace Skybox
             base.Update(gameTime);
         }
 
-        private void UpdateInput()
+        private void UpdateInput(bool shift, bool rightBtn)
         {
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
-
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();

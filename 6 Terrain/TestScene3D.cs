@@ -322,7 +322,7 @@ namespace TerrainTest
             Vector3 hPos;
             Triangle hTri;
             float hDist;
-            if (this.terrain.FindTopGroundPosition(25, 25, out hPos, out hTri, out hDist))
+            if (this.terrain.FindTopGroundPosition(30, 30, out hPos, out hTri, out hDist))
             {
                 this.helipod.Manipulator.SetPosition(hPos, true);
             }
@@ -363,7 +363,7 @@ namespace TerrainTest
                 if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
                 {
                     this.rocks.Instances[i].Manipulator.SetPosition(rockPosition, true);
-                    this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
+                    this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0, true);
                     this.rocks.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.5f, 2f), true);
                 }
             }
@@ -396,7 +396,7 @@ namespace TerrainTest
             Vector3 heliPos;
             Triangle heliTri;
             float heliDist;
-            if (this.terrain.FindTopGroundPosition(25, 25, out heliPos, out heliTri, out heliDist))
+            if (this.terrain.FindTopGroundPosition(30, 30, out heliPos, out heliTri, out heliDist))
             {
                 this.helicopter.Manipulator.SetPosition(heliPos, true);
                 this.helicopter.Manipulator.SetNormal(heliTri.Normal);
