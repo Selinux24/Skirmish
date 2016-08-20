@@ -202,6 +202,51 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
+        /// </summary>
+        /// <param name="ray">The ray to test.</param>
+        /// <param name="vertex1">The first vertex of the triangle to test.</param>
+        /// <param name="vertex2">The second vertex of the triangle to test.</param>
+        /// <param name="vertex3">The third vertex of the triangle to test.</param>
+        /// <param name="distance">Distance to point</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
+        {
+            float d;
+            if (!Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out d))
+            {
+                distance = float.MaxValue;
+                return false;
+            }
+
+            distance = d;
+            return true;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
+        /// </summary>
+        /// <param name="ray">The ray to test.</param>
+        /// <param name="vertex1">The first vertex of the triangle to test.</param>
+        /// <param name="vertex2">The second vertex of the triangle to test.</param>
+        /// <param name="vertex3">The third vertex of the triangle to test.</param>
+        /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <param name="distance">Distance to point</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out Vector3 point, out float distance)
+        {
+            float d;
+            if (!Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out d))
+            {
+                point = Vector3.Zero;
+                distance = float.MaxValue;
+                return false;
+            }
+
+            point = ray.Position + (ray.Direction * d);
+            distance = d;
+            return true;
+        }
+        /// <summary>
         /// Find the 3D distance between a point (x, y, z) and a segment PQ
         /// </summary>
         /// <param name="pt">The coordinate of the point.</param>

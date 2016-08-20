@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using Engine;
+﻿using Engine;
 using Engine.Helpers;
 using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace TerrainTest
@@ -320,14 +320,18 @@ namespace TerrainTest
 
             //Helipod
             Vector3 hPos;
-            if (this.terrain.FindTopGroundPosition(25, 25, out hPos))
+            Triangle hTri;
+            float hDist;
+            if (this.terrain.FindTopGroundPosition(25, 25, out hPos, out hTri, out hDist))
             {
                 this.helipod.Manipulator.SetPosition(hPos, true);
             }
 
             //Garage
             Vector3 gPos;
-            if (this.terrain.FindTopGroundPosition(0, -50, out gPos))
+            Triangle gTri;
+            float gDist;
+            if (this.terrain.FindTopGroundPosition(0, -50, out gPos, out gTri, out gDist))
             {
                 this.garage.Manipulator.SetPosition(gPos, true);
                 this.garage.Manipulator.SetRotation(MathUtil.PiOverTwo + MathUtil.Pi, 0, 0, true);
@@ -340,7 +344,9 @@ namespace TerrainTest
                 int oy = i == 0 || i == 1 ? 1 : -1;
 
                 Vector3 obeliskPosition;
-                if (this.terrain.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition))
+                Triangle obeliskTri;
+                float obeliskDist;
+                if (this.terrain.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition, out obeliskTri, out obeliskDist))
                 {
                     this.obelisk.Instances[i].Manipulator.SetPosition(obeliskPosition, true);
                 }
@@ -352,7 +358,9 @@ namespace TerrainTest
                 var pos = this.DEBUGGetRandomPoint(posRnd, Vector3.Zero);
 
                 Vector3 rockPosition;
-                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out rockPosition))
+                Triangle rockTri;
+                float rockDist;
+                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
                 {
                     this.rocks.Instances[i].Manipulator.SetPosition(rockPosition, true);
                     this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
@@ -366,7 +374,9 @@ namespace TerrainTest
                 var pos = this.DEBUGGetRandomPoint(posRnd, Vector3.Zero);
 
                 Vector3 treePosition;
-                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition))
+                Triangle treeTri;
+                float treeDist;
+                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
                 {
                     this.trees.Instances[i].Manipulator.SetPosition(treePosition, true);
                     this.trees.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
@@ -385,7 +395,8 @@ namespace TerrainTest
 
             Vector3 heliPos;
             Triangle heliTri;
-            if (this.terrain.FindTopGroundPosition(25, 25, out heliPos, out heliTri))
+            float heliDist;
+            if (this.terrain.FindTopGroundPosition(25, 25, out heliPos, out heliTri, out heliDist))
             {
                 this.helicopter.Manipulator.SetPosition(heliPos, true);
                 this.helicopter.Manipulator.SetNormal(heliTri.Normal);
@@ -393,7 +404,8 @@ namespace TerrainTest
 
             Vector3 tankPosition;
             Triangle tankTriangle;
-            if (this.terrain.FindTopGroundPosition(0, 0, out tankPosition, out tankTriangle))
+            float tankDist;
+            if (this.terrain.FindTopGroundPosition(0, 0, out tankPosition, out tankTriangle, out tankDist))
             {
                 this.tank.Manipulator.SetPosition(tankPosition, true);
                 this.tank.Manipulator.SetNormal(tankTriangle.Normal);
@@ -445,7 +457,9 @@ namespace TerrainTest
                 for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
                 {
                     Vector3 pos;
-                    if (this.terrain.FindTopGroundPosition(x, z, out pos))
+                    Triangle tri;
+                    float dist;
+                    if (this.terrain.FindTopGroundPosition(x, z, out pos, out tri, out dist))
                     {
                         this.oks.Add(new Line3(pos, pos + Vector3.Up));
                     }
@@ -579,12 +593,13 @@ namespace TerrainTest
             bool picked = false;
             Vector3 pickedPosition = Vector3.Zero;
             Triangle pickedTriangle = new Triangle();
+            float pickedDistance = float.MaxValue;
 
             if (!this.walkMode)
             {
                 Ray cursorRay = this.GetPickingRay();
 
-                picked = this.terrain.PickNearest(ref cursorRay, out pickedPosition, out pickedTriangle);
+                picked = this.terrain.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance);
                 if (picked)
                 {
                     this.cursor3D.Manipulator.SetPosition(pickedPosition);
@@ -847,7 +862,8 @@ namespace TerrainTest
         {
             Vector3[] positions;
             Triangle[] triangles;
-            if (this.terrain.FindAllGroundPosition(position.X, position.Z, out positions, out triangles))
+            float[] distances;
+            if (this.terrain.FindAllGroundPosition(position.X, position.Z, out positions, out triangles, out distances))
             {
                 this.terrainPointDrawer.SetLines(Color.Magenta, Line3.CreateCrossList(positions, 1f));
                 this.terrainPointDrawer.SetLines(Color.DarkCyan, Line3.CreateWiredTriangle(triangles));
@@ -886,18 +902,20 @@ namespace TerrainTest
             }
 
             var p = this.helipod.Manipulator.Position;
-            if (this.terrain.FindTopGroundPosition(p.X, p.Z, out p))
+            Triangle t;
+            float d;
+            if (this.terrain.FindTopGroundPosition(p.X, p.Z, out p, out t, out d))
             {
                 cPoints[cPoints.Length - 2] = p + this.heightOffset;
                 cPoints[cPoints.Length - 1] = p;
             }
 
-            float t = 0;
+            float time = 0;
             for (int i = 0; i < cPoints.Length; i++)
             {
-                if (i > 0) t += Vector3.Distance(cPoints[i - 1], cPoints[i]);
+                if (i > 0) time += Vector3.Distance(cPoints[i - 1], cPoints[i]);
 
-                curve.AddPosition(t, cPoints[i]);
+                curve.AddPosition(time, cPoints[i]);
             }
 
             curve.SetTangents();
@@ -1007,7 +1025,9 @@ namespace TerrainTest
                 Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
 
                 Vector3 p;
-                if (terrain.FindTopGroundPosition(v.X, v.Z, out p))
+                Triangle t;
+                float d;
+                if (terrain.FindTopGroundPosition(v.X, v.Z, out p, out t, out d))
                 {
                     return p + offset;
                 }

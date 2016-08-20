@@ -235,7 +235,8 @@ namespace DeferredTest
 
             Vector3 tankPosition;
             Triangle tankTriangle;
-            if (this.terrain.FindTopGroundPosition(20, 20, out tankPosition, out tankTriangle))
+            float tankDistance;
+            if (this.terrain.FindTopGroundPosition(20, 20, out tankPosition, out tankTriangle, out tankDistance))
             {
                 //Inclination
                 this.tank.Manipulator.SetPosition(tankPosition, true);
@@ -245,7 +246,9 @@ namespace DeferredTest
             }
 
             Vector3 helicopterPosition;
-            if (this.terrain.FindTopGroundPosition(20, -20, out helicopterPosition))
+            Triangle helicopterTriangle;
+            float helicopterDistance;
+            if (this.terrain.FindTopGroundPosition(20, -20, out helicopterPosition, out helicopterTriangle, out helicopterDistance))
             {
                 helicopterPosition.Y += 10f;
                 this.helicopter.Manipulator.SetPosition(helicopterPosition, true);
@@ -256,7 +259,9 @@ namespace DeferredTest
             for (int i = 0; i < this.helicopters.Count; i++)
             {
                 Vector3 heliPos;
-                if (this.terrain.FindTopGroundPosition((i * 10) - 20, 20, out heliPos))
+                Triangle heliTri;
+                float heliDist;
+                if (this.terrain.FindTopGroundPosition((i * 10) - 20, 20, out heliPos, out heliTri, out heliDist))
                 {
                     heliPos.Y += 10f;
                     this.helicopters.Instances[i].Manipulator.SetPosition(heliPos, true);
@@ -325,7 +330,8 @@ namespace DeferredTest
 
             Vector3 position;
             Triangle triangle;
-            bool picked = this.terrain.PickNearest(ref cursorRay, out position, out triangle);
+            float distance;
+            bool picked = this.terrain.PickNearest(ref cursorRay, true, out position, out triangle, out distance);
 
             #endregion
 
@@ -750,7 +756,9 @@ namespace DeferredTest
             this.Lights.ClearSpotLights();
 
             Vector3 lightPosition;
-            if (this.terrain.FindTopGroundPosition(0, 1, out lightPosition))
+            Triangle lightTriangle;
+            float lightDistance;
+            if (this.terrain.FindTopGroundPosition(0, 1, out lightPosition, out lightTriangle, out lightDistance))
             {
                 lightPosition.Y += 10f;
 
@@ -796,7 +804,9 @@ namespace DeferredTest
                 for (int x = 0; x < f; x++)
                 {
                     Vector3 lightPosition;
-                    if (!this.terrain.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out lightPosition))
+                    Triangle lightTriangle;
+                    float lightDistance;
+                    if (!this.terrain.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out lightPosition, out lightTriangle, out lightDistance))
                     {
                         lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
                     }
@@ -818,8 +828,6 @@ namespace DeferredTest
                     };
 
                     this.Lights.Add(pointLight);
-
-                    //if (this.Lights.PointLights.Length >= 4) return;
                 }
             }
         }

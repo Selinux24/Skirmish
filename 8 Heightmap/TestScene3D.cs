@@ -207,7 +207,9 @@ namespace HeightmapTest
             #endregion
 
             Vector3 position;
-            if (this.terrain.FindTopGroundPosition(0, 0, out position))
+            Triangle triangle;
+            float distance;
+            if (this.terrain.FindTopGroundPosition(0, 0, out position, out triangle, out distance))
             {
                 position += this.playerHeight;
 
@@ -342,7 +344,9 @@ namespace HeightmapTest
             if (!this.playerFlying)
             {
                 Vector3 position;
-                if (this.terrain.FindTopGroundPosition(this.Camera.Position.X, this.Camera.Position.Z, out position))
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(this.Camera.Position.X, this.Camera.Position.Z, out position, out triangle, out distance))
                 {
                     position += this.playerHeight;
 

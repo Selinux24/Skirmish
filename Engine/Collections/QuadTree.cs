@@ -9,7 +9,7 @@ namespace Engine.Collections
     /// <summary>
     /// Quad tree
     /// </summary>
-    public class QuadTree
+    public class QuadTree : IPickable
     {
         /// <summary>
         /// Build quadtree
@@ -103,22 +103,24 @@ namespace Engine.Collections
         /// </summary>
         public QuadTree()
         {
-            
+
         }
 
         /// <summary>
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Hit position</param>
         /// <param name="triangle">Hit triangle</param>
+        /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.PickNearest(ref ray, out position, out triangle);
+                return this.Root.PickNearest(ref ray, facingOnly, out position, out triangle, out distance);
             }
             finally
             {
@@ -134,15 +136,17 @@ namespace Engine.Collections
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Hit position</param>
         /// <param name="triangle">Hit triangle</param>
+        /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.PickFirst(ref ray, out position, out triangle);
+                return this.Root.PickFirst(ref ray, facingOnly, out position, out triangle, out distance);
             }
             finally
             {
@@ -158,15 +162,17 @@ namespace Engine.Collections
         /// Pick all positions
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="positions">Hit positions</param>
         /// <param name="triangles">Hit triangles</param>
+        /// <param name="distances">Distances to hits</param>
         /// <returns>Returns true if picked positions found</returns>
-        public bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
+        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.PickAll(ref ray, out positions, out triangles);
+                return this.Root.PickAll(ref ray, facingOnly, out positions, out triangles, out distances);
             }
             finally
             {

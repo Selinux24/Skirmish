@@ -24,6 +24,10 @@ namespace Engine.PathFinding.AStar
             /// Collision triangle
             /// </summary>
             public Triangle Triangle;
+            /// <summary>
+            /// Distance to point
+            /// </summary>
+            public float Distance;
 
             /// <summary>
             /// Gets text representarion of collision
@@ -129,13 +133,14 @@ namespace Engine.PathFinding.AStar
 
                     Vector3[] pickedPoints;
                     Triangle[] pickedTriangles;
-                    if (Triangle.IntersectAll(ref ray, triangles, true, out pickedPoints, out pickedTriangles))
+                    float[] pickedDistances;
+                    if (Triangle.IntersectAll(ref ray, triangles, true, out pickedPoints, out pickedTriangles, out pickedDistances))
                     {
                         info = new GridCollisionInfo[pickedPoints.Length];
 
                         for (int i = 0; i < pickedPoints.Length; i++)
                         {
-                            info[i] = new GridCollisionInfo() { Point = pickedPoints[i], Triangle = pickedTriangles[i], };
+                            info[i] = new GridCollisionInfo() { Point = pickedPoints[i], Triangle = pickedTriangles[i], Distance = pickedDistances[i] };
                         }
                     }
                     else
@@ -276,7 +281,8 @@ namespace Engine.PathFinding.AStar
 
             Vector3[] pickedPositions;
             Triangle[] pickedTriangles;
-            if (terrain.FindAllGroundPosition(x, z, out pickedPositions, out pickedTriangles))
+            float[] pickedDistances;
+            if (terrain.FindAllGroundPosition(x, z, out pickedPositions, out pickedTriangles, out pickedDistances))
             {
                 for (int i = 0; i < pickedPositions.Length; i++)
                 {

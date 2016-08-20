@@ -1062,7 +1062,8 @@ namespace Engine
                                 Ray ray = new Ray(pos, Vector3.Down);
 
                                 Vector3 intersectionPoint;
-                                if (tri.Intersects(ref ray, out intersectionPoint))
+                                float d;
+                                if (tri.Intersects(ref ray, out intersectionPoint, out d))
                                 {
                                     vertexData.Add(new VertexData()
                                     {
@@ -1383,34 +1384,40 @@ namespace Engine
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        public override bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public override bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
-            return this.pickingQuadtree.PickNearest(ref ray, out position, out triangle);
+            return this.pickingQuadtree.PickNearest(ref ray, facingOnly, out position, out triangle, out distance);
         }
         /// <summary>
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        public override bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public override bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
-            return this.pickingQuadtree.PickFirst(ref ray, out position, out triangle);
+            return this.pickingQuadtree.PickFirst(ref ray, facingOnly, out position, out triangle, out distance);
         }
         /// <summary>
         /// Pick all positions
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="positions">Picked positions if exists</param>
         /// <param name="triangles">Picked triangles if exists</param>
+        /// <param name="distances">Distances to positions</param>
         /// <returns>Returns true if picked positions found</returns>
-        public override bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
+        public override bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
         {
-            return this.pickingQuadtree.PickAll(ref ray, out positions, out triangles);
+            return this.pickingQuadtree.PickAll(ref ray, facingOnly, out positions, out triangles, out distances);
         }
         /// <summary>
         /// Gets bounding sphere

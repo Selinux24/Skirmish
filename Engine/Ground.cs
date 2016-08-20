@@ -11,7 +11,7 @@ namespace Engine
     /// Ground class
     /// </summary>
     /// <remarks>Used for picking tests and navigation over surfaces</remarks>
-    public abstract class Ground : Drawable, IGround
+    public abstract class Ground : Drawable, IGround, IPickable
     {
         /// <summary>
         /// Terrain attached objects
@@ -47,21 +47,10 @@ namespace Engine
         /// <param name="x">X coordinate</param>
         /// <param name="z">Z coordinate</param>
         /// <param name="position">Ground position if exists</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindTopGroundPosition(float x, float z, out Vector3 position)
-        {
-            Triangle tri;
-            return FindTopGroundPosition(x, z, out position, out tri);
-        }
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="position">Ground position if exists</param>
         /// <param name="triangle">Triangle found</param>
+        /// <param name="position">Ground position if exists</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindTopGroundPosition(float x, float z, out Vector3 position, out Triangle triangle)
+        public bool FindTopGroundPosition(float x, float z, out Vector3 position, out Triangle triangle, out float distance)
         {
             BoundingBox bbox = this.GetBoundingBox();
 
@@ -71,19 +60,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            return this.PickNearest(ref ray, out position, out triangle);
-        }
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindFirstGroundPosition(float x, float z, out Vector3 position)
-        {
-            Triangle tri;
-            return FindFirstGroundPosition(x, z, out position, out tri);
+            return this.PickNearest(ref ray, true, out position, out triangle, out distance);
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -92,8 +69,9 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         /// <param name="position">Ground position if exists</param>
         /// <param name="triangle">Triangle found</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindFirstGroundPosition(float x, float z, out Vector3 position, out Triangle triangle)
+        public bool FindFirstGroundPosition(float x, float z, out Vector3 position, out Triangle triangle, out float distance)
         {
             BoundingBox bbox = this.GetBoundingBox();
 
@@ -103,19 +81,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            return this.PickFirst(ref ray, out position, out triangle);
-        }
-        /// <summary>
-        /// Gets ground positions giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="positions">Ground positions if exists</param>
-        /// <returns>Returns true if ground positions found</returns>
-        public bool FindAllGroundPosition(float x, float z, out Vector3[] positions)
-        {
-            Triangle[] triangles;
-            return FindAllGroundPosition(x, z, out positions, out triangles);
+            return this.PickFirst(ref ray, true, out position, out triangle, out distance);
         }
         /// <summary>
         /// Gets all ground positions giving x, z coordinates
@@ -124,8 +90,9 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         /// <param name="positions">Ground positions if exists</param>
         /// <param name="triangles">Triangles found</param>
+        /// <param name="distances">Distances to positions</param>
         /// <returns>Returns true if ground positions found</returns>
-        public bool FindAllGroundPosition(float x, float z, out Vector3[] positions, out Triangle[] triangles)
+        public bool FindAllGroundPosition(float x, float z, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
         {
             BoundingBox bbox = this.GetBoundingBox();
 
@@ -135,18 +102,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            return this.PickAll(ref ray, out positions, out triangles);
-        }
-        /// <summary>
-        /// Gets nearest ground position to "from" position
-        /// </summary>
-        /// <param name="from">Position from</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindNearestGroundPosition(Vector3 from, out Vector3 position)
-        {
-            Triangle tri;
-            return FindNearestGroundPosition(from, out position, out tri);
+            return this.PickAll(ref ray, true, out positions, out triangles, out distances);
         }
         /// <summary>
         /// Gets nearest ground position to "from" position
@@ -154,8 +110,9 @@ namespace Engine
         /// <param name="from">Position from</param>
         /// <param name="position">Ground position if exists</param>
         /// <param name="triangle">Triangle found</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindNearestGroundPosition(Vector3 from, out Vector3 position, out Triangle triangle)
+        public bool FindNearestGroundPosition(Vector3 from, out Vector3 position, out Triangle triangle, out float distance)
         {
             BoundingBox bbox = this.GetBoundingBox();
 
@@ -167,22 +124,24 @@ namespace Engine
 
             Vector3[] positions;
             Triangle[] tris;
-            if (this.PickAll(ref ray, out positions, out tris))
+            float[] dists;
+            if (this.PickAll(ref ray, true, out positions, out tris, out dists))
             {
                 int index = -1;
-                float distance = float.MaxValue;
+                float dist = float.MaxValue;
                 for (int i = 0; i < positions.Length; i++)
                 {
                     float d = Vector3.DistanceSquared(from, positions[i]);
-                    if (d <= distance)
+                    if (d <= dist)
                     {
                         index = i;
-                        distance = d;
+                        dist = d;
                     }
                 }
 
                 position = positions[index];
                 triangle = tris[index];
+                distance = dists[index];
 
                 return true;
             }
@@ -190,6 +149,7 @@ namespace Engine
             {
                 position = Vector3.Zero;
                 triangle = new Triangle();
+                distance = float.MaxValue;
 
                 return false;
             }
@@ -213,30 +173,250 @@ namespace Engine
         /// Updates internal objects
         /// </summary>
         public abstract void UpdateInternals();
+
         /// <summary>
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        public abstract bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle);
+        public abstract bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance);
         /// <summary>
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        public abstract bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle);
+        public abstract bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance);
         /// <summary>
         /// Pick all positions
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="positions">Picked positions if exists</param>
         /// <param name="triangles">Picked triangles if exists</param>
+        /// <param name="distances">Distances to positions if exists</param>
         /// <returns>Returns true if picked positions found</returns>
-        public abstract bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles);
+        public abstract bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances);
+        /// <summary>
+        /// Pick internal ground objects nearest position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
+        /// <param name="position">Picked position if exists</param>
+        /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if picked position found</returns>
+        protected virtual bool PickNearestGroundObjects(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        {
+            position = Vector3.Zero;
+            triangle = new Triangle();
+            distance = float.MaxValue;
+
+            var forPickingObks = this.GroundObjects.FindAll(o => o.EvaluateForPicking == true);
+            if (forPickingObks.Count > 0)
+            {
+                bool picked = false;
+                Vector3 bestP = Vector3.Zero;
+                Triangle bestT = new Triangle();
+                float bestD = float.MaxValue;
+
+                foreach (var gObj in forPickingObks)
+                {
+                    var model = gObj.Model as Model;
+                    if (model != null)
+                    {
+                        Vector3 p;
+                        Triangle t;
+                        float d;
+                        if (model.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                        {
+                            picked = true;
+
+                            if (d < bestD)
+                            {
+                                bestP = p;
+                                bestT = t;
+                                bestD = d;
+                            }
+                        }
+                    }
+
+                    var modelI = gObj.Model as ModelInstanced;
+                    if (modelI != null)
+                    {
+                        for (int i = 0; i < modelI.Count; i++)
+                        {
+                            Vector3 p;
+                            Triangle t;
+                            float d;
+                            if (modelI.Instances[i].PickNearest(ref ray, facingOnly, out p, out t, out d))
+                            {
+                                picked = true;
+
+                                if (d < bestD)
+                                {
+                                    bestP = p;
+                                    bestT = t;
+                                    bestD = d;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (picked)
+                {
+                    position = bestP;
+                    triangle = bestT;
+                    distance = bestD;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Pick internal ground objects first position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
+        /// <param name="position">Picked position if exists</param>
+        /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if picked position found</returns>
+        protected virtual bool PickFirstGroundObjects(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        {
+            position = Vector3.Zero;
+            triangle = new Triangle();
+            distance = float.MaxValue;
+
+            var forPickingObks = this.GroundObjects.FindAll(o => o.EvaluateForPicking == true);
+            if (forPickingObks.Count > 0)
+            {
+                foreach (var gObj in forPickingObks)
+                {
+                    var model = gObj.Model as Model;
+                    if (model != null)
+                    {
+                        Vector3 p;
+                        Triangle t;
+                        float d;
+                        if (model.PickFirst(ref ray, facingOnly, out p, out t, out d))
+                        {
+                            position = p;
+                            triangle = t;
+                            distance = d;
+
+                            return true;
+                        }
+                    }
+
+                    var modelI = gObj.Model as ModelInstanced;
+                    if (modelI != null)
+                    {
+                        for (int i = 0; i < modelI.Count; i++)
+                        {
+                            Vector3 p;
+                            Triangle t;
+                            float d;
+                            if (modelI.Instances[i].PickFirst(ref ray, facingOnly, out p, out t, out d))
+                            {
+                                position = p;
+                                triangle = t;
+                                distance = d;
+
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Pick internal ground objects positions
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
+        /// <param name="positions">Picked positions if exists</param>
+        /// <param name="triangles">Picked triangles if exists</param>
+        /// <param name="distances">Distances to positions</param>
+        /// <returns>Returns true if picked position found</returns>
+        protected virtual bool PickAllGroundObjects(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        {
+            positions = null;
+            triangles = null;
+            distances = null;
+
+            var forPickingObks = this.GroundObjects.FindAll(o => o.EvaluateForPicking == true);
+            if (forPickingObks.Count > 0)
+            {
+                bool picked = false;
+
+                List<Vector3> pList = new List<Vector3>();
+                List<Triangle> tList = new List<Triangle>();
+                List<float> dList = new List<float>();
+
+                foreach (var gObj in forPickingObks)
+                {
+                    var model = gObj.Model as Model;
+                    if (model != null)
+                    {
+                        Vector3[] p;
+                        Triangle[] t;
+                        float[] d;
+                        if (model.PickAll(ref ray, facingOnly, out p, out t, out d))
+                        {
+                            picked = true;
+
+                            pList.AddRange(p);
+                            tList.AddRange(t);
+                            dList.AddRange(d);
+                        }
+                    }
+
+                    var modelI = gObj.Model as ModelInstanced;
+                    if (modelI != null)
+                    {
+                        for (int i = 0; i < modelI.Count; i++)
+                        {
+                            Vector3[] p;
+                            Triangle[] t;
+                            float[] d;
+                            if (modelI.Instances[i].PickAll(ref ray, facingOnly, out p, out t, out d))
+                            {
+                                picked = true;
+
+                                pList.AddRange(p);
+                                tList.AddRange(t);
+                                dList.AddRange(d);
+                            }
+                        }
+                    }
+                }
+
+                if (picked)
+                {
+                    positions = pList.ToArray();
+                    triangles = tList.ToArray();
+                    distances = dList.ToArray();
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Gets bounding sphere
         /// </summary>
@@ -247,7 +427,7 @@ namespace Engine
         /// </summary>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public abstract BoundingBox GetBoundingBox();
-        
+
         /// <summary>
         /// Find path from point to point
         /// </summary>
@@ -263,7 +443,9 @@ namespace Engine
                 for (int i = 0; i < path.ReturnPath.Count; i++)
                 {
                     Vector3 position;
-                    if (FindNearestGroundPosition(path.ReturnPath[i], out position))
+                    Triangle triangle;
+                    float distance;
+                    if (FindNearestGroundPosition(path.ReturnPath[i], out position, out triangle, out distance))
                     {
                         path.ReturnPath[i] = position;
                     }
@@ -296,7 +478,9 @@ namespace Engine
             finalPosition = Vector3.Zero;
 
             Vector3 walkerPos;
-            if (this.FindNearestGroundPosition(newPosition, out walkerPos))
+            Triangle t;
+            float d;
+            if (this.FindNearestGroundPosition(newPosition, out walkerPos, out t, out d))
             {
                 Vector3? nearest;
                 if (this.IsWalkable(agent, walkerPos, out nearest))
@@ -313,7 +497,7 @@ namespace Engine
                         var p = nearest.Value;
                         p.Y = prevPosition.Y;
 
-                        if (this.FindNearestGroundPosition(p, out walkerPos))
+                        if (this.FindNearestGroundPosition(p, out walkerPos, out t, out d))
                         {
                             finalPosition = walkerPos;
                             finalPosition.Y += agent.Height;

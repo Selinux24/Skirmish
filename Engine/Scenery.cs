@@ -138,54 +138,146 @@ namespace Engine
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        public override bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public override bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
             if (this.pickingQuadtree != null)
             {
-                return this.pickingQuadtree.PickNearest(ref ray, out position, out triangle);
+                return this.pickingQuadtree.PickNearest(ref ray, facingOnly, out position, out triangle, out distance);
             }
             else
             {
-                return this.ground.PickNearest(ref ray, out position, out triangle);
+                position = Vector3.Zero;
+                triangle = new Triangle();
+                distance = float.MaxValue;
+
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (this.ground.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                {
+                    Vector3 bestP = p;
+                    Triangle bestT = t;
+                    float bestD = d;
+
+                    if (base.PickNearestGroundObjects(ref ray, facingOnly, out p, out t, out d))
+                    {
+                        if (d < bestD)
+                        {
+                            bestP = p;
+                            bestT = t;
+                            bestD = d;
+                        }
+                    }
+
+                    position = bestP;
+                    triangle = bestT;
+                    distance = bestD;
+
+                    return true;
+                }
+
+                return false;
             }
         }
         /// <summary>
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        public override bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public override bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
             if (this.pickingQuadtree != null)
             {
-                return this.pickingQuadtree.PickFirst(ref ray, out position, out triangle);
+                return this.pickingQuadtree.PickFirst(ref ray, facingOnly, out position, out triangle, out distance);
             }
             else
             {
-                return this.ground.PickFirst(ref ray, out position, out triangle);
+                position = Vector3.Zero;
+                triangle = new Triangle();
+                distance = float.MaxValue;
+
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (this.ground.PickFirst(ref ray, facingOnly, out p, out t, out d))
+                {
+                    position = p;
+                    triangle = t;
+                    distance = d;
+
+                    return true;
+                }
+
+                if (base.PickFirstGroundObjects(ref ray, facingOnly, out p, out t, out d))
+                {
+                    position = p;
+                    triangle = t;
+                    distance = d;
+
+                    return true;
+                }
+
+                return false;
             }
         }
         /// <summary>
         /// Pick all positions
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="positions">Picked positions if exists</param>
         /// <param name="triangles">Picked triangles if exists</param>
+        /// <param name="distances">Distances to positions</param>
         /// <returns>Returns true if picked positions found</returns>
-        public override bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
+        public override bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
         {
             if (this.pickingQuadtree != null)
             {
-                return this.pickingQuadtree.PickAll(ref ray, out positions, out triangles);
+                return this.pickingQuadtree.PickAll(ref ray, facingOnly, out positions, out triangles, out distances);
             }
             else
             {
-                return this.ground.PickAll(ref ray, out positions, out triangles);
+                positions = null;
+                triangles = null;
+                distances = null;
+
+                List<Vector3> pList = new List<Vector3>();
+                List<Triangle> tList = new List<Triangle>();
+                List<float> dList = new List<float>();
+
+                Vector3[] p;
+                Triangle[] t;
+                float[] d;
+                if (this.ground.PickAll(ref ray, facingOnly, out p, out t, out d))
+                {
+                    pList.AddRange(p);
+                    tList.AddRange(t);
+                    dList.AddRange(d);
+
+                    if (base.PickAllGroundObjects(ref ray, facingOnly, out p, out t, out d))
+                    {
+                        pList.AddRange(p);
+                        tList.AddRange(t);
+                        dList.AddRange(d);
+                    }
+
+                    positions = pList.ToArray();
+                    triangles = tList.ToArray();
+                    distances = dList.ToArray();
+
+                    return true;
+                }
+
+                return false;
             }
         }
         /// <summary>

@@ -2,6 +2,7 @@
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Skybox
 {
@@ -14,8 +15,8 @@ namespace Skybox
             new Vector2(+5, -5),
             new Vector2(-5, -5),
         };
-        private Color globalColor = Color.Green;
-        private Color bboxColor = Color.GreenYellow;
+        private Color ruinsVolumeColor = Color.Green;
+        private Color torchVolumeColor = Color.GreenYellow;
         private int bsphSlices = 20;
         private int bsphStacks = 10;
 
@@ -35,9 +36,8 @@ namespace Skybox
 
         private Skydom skydom = null;
         private Scenery ruins = null;
-        private TriangleListDrawer pickedTri = null;
-        private LineListDrawer bboxGlobalDrawer = null;
-        private LineListDrawer bsphLightsDrawer = null;
+        private LineListDrawer volumesDrawer = null;
+        private TriangleListDrawer graphDrawer = null;
 
         private ParticleSystem rain = null;
 
@@ -149,20 +149,6 @@ namespace Skybox
                 DelayGeneration = true,
             };
             this.ruins = this.AddScenery(desc, false);
-            this.ruins.AttachObject(new GroundAttachedObject() { Model = this.torchs, EvaluateForPathFinding = true, EvaluateForPicking = false, UseVolumeForPathFinding = true });
-
-            this.bboxGlobalDrawer = this.AddLineListDrawer(Line3.CreateWiredBox(this.ruins.GetBoundingBox()), this.globalColor);
-            this.bboxGlobalDrawer.Visible = false;
-            this.bboxGlobalDrawer.DeferredEnabled = false;
-            this.bboxGlobalDrawer.EnableDepthStencil = false;
-            this.bboxGlobalDrawer.EnableAlphaBlending = true;
-            this.bboxGlobalDrawer.Opaque = false;
-
-            this.pickedTri = this.AddTriangleListDrawer(1);
-            this.pickedTri.DeferredEnabled = false;
-            this.pickedTri.EnableDepthStencil = false;
-            this.pickedTri.EnableAlphaBlending = true;
-            this.pickedTri.Opaque = false;
 
             #endregion
 
@@ -177,6 +163,32 @@ namespace Skybox
 
             this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(movingFireEmitter, "flare2.png"));
 
+            #endregion
+
+            #region DEBUG drawers
+
+            this.volumesDrawer = this.AddLineListDrawer(10000);
+            this.volumesDrawer.Visible = false;
+            this.volumesDrawer.DeferredEnabled = false;
+            this.volumesDrawer.EnableDepthStencil = false;
+            this.volumesDrawer.EnableAlphaBlending = true;
+            this.volumesDrawer.Opaque = false;
+
+            this.graphDrawer = this.AddTriangleListDrawer(10000);
+            this.graphDrawer.EnableDepthStencil = false;
+            this.graphDrawer.EnableAlphaBlending = true;
+            this.graphDrawer.Visible = false;
+            this.graphDrawer.DeferredEnabled = false;
+
+            #endregion
+
+            #region Positioning and lights
+
+            this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[1].Enabled = true;
+            this.Lights.DirectionalLights[2].Enabled = false;
+            this.directionalLightCount = this.Lights.DirectionalLights.Length;
+
             this.movingFireLight = new SceneLightPoint()
             {
                 Name = "Moving fire light",
@@ -188,16 +200,10 @@ namespace Skybox
                 Enabled = true,
                 CastShadow = false,
             };
-
             this.Lights.Add(this.movingFireLight);
-
-            #endregion
-
-            #region Positioning and lights
 
             ParticleEmitter[] firePositions3D = new ParticleEmitter[this.firePositions.Length];
             this.torchLights = new SceneLightPoint[this.firePositions.Length];
-
             for (int i = 0; i < this.firePositions.Length; i++)
             {
                 Color color = Color.Yellow;
@@ -212,14 +218,16 @@ namespace Skybox
                     Position = Vector3.Zero,
                 };
 
-                this.ruins.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i].Position);
+                Triangle t;
+                float d;
+                this.ruins.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i].Position, out t, out d);
 
                 this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
                 this.torchs.Instances[i].Manipulator.SetPosition(firePositions3D[i].Position, true);
 
                 BoundingBox bbox = this.torchs.Instances[i].GetBoundingBox();
 
-                firePositions3D[i].Position.Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.9f;
+                firePositions3D[i].Position.Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
 
                 this.torchLights[i] = new SceneLightPoint()
                 {
@@ -235,20 +243,19 @@ namespace Skybox
 
                 this.Lights.Add(this.torchLights[i]);
             }
-
             this.torchFire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions3D, "flare1.png"));
 
+            var toAttachTorchs = new GroundAttachedObject()
+            {
+                Model = this.torchs,
+                EvaluateForPathFinding = true,
+                UseVolumeForPathFinding = true,
+                EvaluateForPicking = true,
+                UseVolumeForPicking = true,
+            };
+            this.ruins.AttachObject(toAttachTorchs);
+
             #endregion
-
-            Line3[] sphereLines = Line3.CreateWiredSphere(new BoundingSphere(), this.bsphSlices, this.bsphStacks);
-            this.bsphLightsDrawer = this.AddLineListDrawer(sphereLines.Length * 5);
-            this.bsphLightsDrawer.Visible = false;
-
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = true;
-            this.Lights.DirectionalLights[2].Enabled = false;
-
-            this.directionalLightCount = this.Lights.DirectionalLights.Length;
 
             this.SceneVolume = this.ruins.GetBoundingSphere();
 
@@ -270,9 +277,21 @@ namespace Skybox
 
             this.UpdateInput();
 
-            base.Update(gameTime);
+            #region Walk
 
-            Vector3 currentPosition = this.Camera.Position;
+            {
+                Vector3 walkerPosition;
+                if (this.ruins.Walk(this.walker, previousPosition, this.Camera.Position, out walkerPosition))
+                {
+                    this.Camera.Goto(walkerPosition);
+                }
+                else
+                {
+                    this.Camera.Goto(previousPosition);
+                }
+            }
+
+            #endregion
 
             #region Light
 
@@ -289,51 +308,26 @@ namespace Skybox
                 this.movingFireLight.Position = this.movingfire.Manipulator.Position;
             }
 
-            foreach (var light in this.Lights.PointLights)
-            {
-                this.bsphLightsDrawer.SetLines(
-                    light.LightColor,
-                    Line3.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
-            }
+            this.DEBUGUpdateMovingVolumesDrawer();
 
             #endregion
 
-            #region Walk
-
-            //Direction test
-            {
-                Vector3 v = Vector3.Zero;
-                if (previousPosition == currentPosition)
-                {
-                    v = this.Camera.Direction * 2f;
-                }
-                else
-                {
-                    Vector3 v1 = new Vector3(previousPosition.X, 0f, previousPosition.Z);
-                    Vector3 v2 = new Vector3(currentPosition.X, 0f, currentPosition.Z);
-
-                    v = Vector3.Normalize(v1 - v2) * this.Camera.NearPlaneDistance;
-                }
-
-                Vector3 walkerPosition;
-                if (this.ruins.Walk(this.walker, previousPosition, this.Camera.Position, out walkerPosition))
-                {
-                    this.Camera.Goto(walkerPosition);
-                }
-                else
-                {
-                    this.Camera.Goto(previousPosition);
-                }
-            }
-
-            #endregion
+            base.Update(gameTime);
         }
 
         private void UpdateInput()
         {
+            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
+
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Home))
+            {
+                this.InitializeCamera();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
@@ -343,37 +337,44 @@ namespace Skybox
                     SceneModesEnum.ForwardLigthning;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Home))
-            {
-                this.InitializeCamera();
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
-                this.bboxGlobalDrawer.Visible = !this.bboxGlobalDrawer.Visible;
-                this.bsphLightsDrawer.Visible = !this.bsphLightsDrawer.Visible;
+                this.volumesDrawer.Visible = !this.volumesDrawer.Visible;
+
+                if (this.volumesDrawer.Visible)
+                {
+                    this.DEBUGUpdateVolumesDrawer();
+                }
             }
 
-            bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.graphDrawer.Visible = !this.graphDrawer.Visible;
+
+                if (this.graphDrawer.Visible)
+                {
+                    this.DEBUGUpdateGraphDrawer();
+                }
+            }
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.MoveLeft(this.Game.GameTime, slow);
+                this.Camera.MoveLeft(this.Game.GameTime, shift);
             }
 
             if (this.Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveRight(this.Game.GameTime, slow);
+                this.Camera.MoveRight(this.Game.GameTime, shift);
             }
 
             if (this.Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveForward(this.Game.GameTime, slow);
+                this.Camera.MoveForward(this.Game.GameTime, shift);
             }
 
             if (this.Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveBackward(this.Game.GameTime, slow);
+                this.Camera.MoveBackward(this.Game.GameTime, shift);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Add))
@@ -384,7 +385,7 @@ namespace Skybox
                     this.directionalLightCount = 0;
                 }
 
-                this.UpdateLights();
+                this.UpdateInputEnabledLights();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Subtract))
@@ -395,23 +396,18 @@ namespace Skybox
                     this.directionalLightCount = 3;
                 }
 
-                this.UpdateLights();
+                this.UpdateInputEnabledLights();
             }
 
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (rightBtn)
+#endif
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
-#else
-            this.Camera.RotateMouse(
-                this.Game.GameTime,
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta);
-#endif
 
             if (this.Game.Input.LeftMouseButtonPressed)
             {
@@ -419,12 +415,12 @@ namespace Skybox
 
                 Vector3 p;
                 Triangle t;
-                if (this.ruins.PickNearest(ref pRay, out p, out t))
+                float d;
+                if (this.ruins.PickNearest(ref pRay, true, out p, out t, out d))
                 {
-                    this.pickedTri.SetTriangles(Color.Red, new[] { t });
+                    this.volumesDrawer.SetTriangles(Color.White, new[] { t });
                 }
             }
-
 
 #if DEBUG
             this.fps.Text = string.Format(
@@ -439,11 +435,65 @@ namespace Skybox
             this.fps.Text = this.Game.RuntimeText;
 #endif
         }
-        private void UpdateLights()
+        private void UpdateInputEnabledLights()
         {
             this.Lights.DirectionalLights[0].Enabled = this.directionalLightCount > 0;
             this.Lights.DirectionalLights[1].Enabled = this.directionalLightCount > 1;
             this.Lights.DirectionalLights[2].Enabled = this.directionalLightCount > 2;
+        }
+
+        private void DEBUGUpdateVolumesDrawer()
+        {
+            this.volumesDrawer.SetLines(this.ruinsVolumeColor, Line3.CreateWiredBox(this.ruins.GetBoundingBox()));
+
+            List<Line3> volumesTorchs = new List<Line3>();
+            for (int i = 0; i < this.torchs.Count; i++)
+            {
+                volumesTorchs.AddRange(Line3.CreateWiredBox(this.torchs.Instances[i].GetBoundingBox()));
+            }
+            this.volumesDrawer.SetLines(this.torchVolumeColor, volumesTorchs.ToArray());
+
+            for (int i = 1; i < this.Lights.PointLights.Length; i++)
+            {
+                var light = this.Lights.PointLights[i];
+
+                this.volumesDrawer.SetLines(
+                    light.LightColor,
+                    Line3.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
+            }
+        }
+        private void DEBUGUpdateMovingVolumesDrawer()
+        {
+            var light = this.Lights.PointLights[0];
+
+            this.volumesDrawer.SetLines(
+                light.LightColor,
+                Line3.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
+        }
+        private void DEBUGUpdateGraphDrawer()
+        {
+            var nodes = this.ruins.GetNodes(this.walker);
+            if (nodes != null && nodes.Length > 0)
+            {
+                Random clrRnd = new Random(1);
+                Color[] regions = new Color[nodes.Length];
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.55f);
+                }
+
+                this.graphDrawer.Clear();
+
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    var node = (NavigationMeshNode)nodes[i];
+                    var color = regions[node.RegionId];
+                    var poly = node.Poly;
+                    var tris = poly.Triangulate();
+
+                    this.graphDrawer.AddTriangles(color, tris);
+                }
+            }
         }
     }
 }

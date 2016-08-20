@@ -1,5 +1,5 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Model instance
     /// </summary>
-    public class ModelInstance
+    public class ModelInstance : IPickable
     {
         /// <summary>
         /// Model
@@ -199,42 +199,117 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets picking position of giving ray
+        /// Gets nearest picking position of giving ray
         /// </summary>
         /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Ground position if exists</param>
         /// <param name="triangle">Triangle found</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if ground position found</returns>
-        public virtual bool Pick(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public virtual bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
             position = new Vector3();
             triangle = new Triangle();
+            distance = float.MaxValue;
 
             BoundingSphere bsph = this.GetBoundingSphere();
-
             if (bsph.Intersects(ref ray))
             {
                 Triangle[] triangles = this.GetTriangles();
                 if (triangles != null && triangles.Length > 0)
                 {
-                    for (int i = 0; i < triangles.Length; i++)
+                    Vector3 p;
+                    Triangle t;
+                    float d;
+                    if (Triangle.IntersectNearest(ref ray, triangles, facingOnly, out p, out t, out d))
                     {
-                        Triangle tri = triangles[i];
+                        position = p;
+                        triangle = t;
+                        distance = d;
 
-                        Vector3 pos;
-                        if (tri.Intersects(ref ray, out pos))
-                        {
-                            position = pos;
-                            triangle = tri;
-
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
 
             return false;
         }
+        /// <summary>
+        /// Gets first picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if ground position found</returns>
+        public virtual bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        {
+            position = new Vector3();
+            triangle = new Triangle();
+            distance = float.MaxValue;
+
+            BoundingSphere bsph = this.GetBoundingSphere();
+            if (bsph.Intersects(ref ray))
+            {
+                Triangle[] triangles = this.GetTriangles();
+                if (triangles != null && triangles.Length > 0)
+                {
+                    Vector3 p;
+                    Triangle t;
+                    float d;
+                    if (Triangle.IntersectFirst(ref ray, triangles, facingOnly, out p, out t, out d))
+                    {
+                        position = p;
+                        triangle = t;
+                        distance = d;
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Get all picking positions of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="positions">Ground positions if exists</param>
+        /// <param name="triangles">Triangles found</param>
+        /// <param name="distances">Distances to positions</param>
+        /// <returns>Returns true if ground position found</returns>
+        public virtual bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        {
+            positions = null;
+            triangles = null;
+            distances = null;
+
+            BoundingSphere bsph = this.GetBoundingSphere();
+            if (bsph.Intersects(ref ray))
+            {
+                Triangle[] ts = this.GetTriangles();
+                if (ts != null && ts.Length > 0)
+                {
+                    Vector3[] p;
+                    Triangle[] t;
+                    float[] d;
+                    if (Triangle.IntersectAll(ref ray, ts, facingOnly, out p, out t, out d))
+                    {
+                        positions = p;
+                        triangles = t;
+                        distances = d;
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Performs frustum culling test
         /// </summary>

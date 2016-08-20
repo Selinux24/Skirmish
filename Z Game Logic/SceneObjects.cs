@@ -303,7 +303,8 @@ namespace GameLogic
                 Ray cursorRay = this.GetPickingRay();
                 Vector3 position;
                 Triangle triangle;
-                bool picked = this.terrain.PickNearest(ref cursorRay, out position, out triangle);
+                float distance;
+                bool picked = this.terrain.PickNearest(ref cursorRay, true, out position, out triangle, out distance);
 
                 #region DEBUG
 
@@ -577,7 +578,9 @@ namespace GameLogic
                     float z = (teamIndex * teamSeparation) - (gameWidth * 0.5f);
 
                     Vector3 position;
-                    if (this.terrain.FindTopGroundPosition(x, z, out position))
+                    Triangle triangle;
+                    float distance;
+                    if (this.terrain.FindTopGroundPosition(x, z, out position, out triangle, out distance))
                     {
                         instance.Manipulator.SetPosition(position, true);
                     }
@@ -1066,15 +1069,14 @@ namespace GameLogic
                 {
                     Vector3 soldierPosition;
                     Triangle trianglePosition;
-                    if (this.soldierModels[soldier].Pick(ref cursorRay, out soldierPosition, out trianglePosition))
+                    float distanceToPosition;
+                    if (this.soldierModels[soldier].PickNearest(ref cursorRay, true, out soldierPosition, out trianglePosition, out distanceToPosition))
                     {
-                        float nd = Vector3.DistanceSquared(position, this.soldierModels[soldier].Manipulator.Position);
-
-                        if (nd < d)
+                        if (distanceToPosition < d)
                         {
                             //Select nearest picked soldier
                             res = soldier;
-                            d = nd;
+                            d = distanceToPosition;
                         }
                     }
                 }

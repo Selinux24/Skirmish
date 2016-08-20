@@ -567,7 +567,8 @@ namespace Engine.Content
                         Vector3 v = rnd.NextVector3(tri.Min, tri.Max);
                         Ray ray = new Ray(new Vector3(v.X, bbox.Maximum.Y + 0.1f, v.Z), Vector3.Down);
                         Vector3 iPoint;
-                        if (tri.Intersects(ref ray, out iPoint))
+                        float d;
+                        if (tri.Intersects(ref ray, out iPoint, out d))
                         {
                             Vector2 bbsize = rnd.NextVector2(minSize, maxSize);
 

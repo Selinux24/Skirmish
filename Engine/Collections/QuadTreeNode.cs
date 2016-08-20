@@ -503,8 +503,23 @@ namespace Engine.Collections
         /// <returns>Returns true if picked position found</returns>
         public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle)
         {
+            float distance;
+            return this.PickNearest(ref ray, facingOnly, out position, out triangle, out distance);
+        }
+        /// <summary>
+        /// Pick nearest position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="position">Hit position</param>
+        /// <param name="triangle">Hit triangle</param>
+        /// <param name="distance">Distance to hit</param>
+        /// <returns>Returns true if picked position found</returns>
+        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        {
             position = Vector3.Zero;
             triangle = new Triangle();
+            distance = float.MaxValue;
 
             if (this.Children == null)
             {
@@ -519,10 +534,11 @@ namespace Engine.Collections
 
                         Vector3 pos;
                         Triangle tri;
-                        if (Triangle.IntersectNearest(ref ray, this.Triangles, facingOnly, out pos, out tri))
+                        if (Triangle.IntersectNearest(ref ray, this.Triangles, facingOnly, out pos, out tri, out d))
                         {
                             position = pos;
                             triangle = tri;
+                            distance = d;
 
                             return true;
                         }
@@ -570,10 +586,10 @@ namespace Engine.Collections
                     {
                         Vector3 thisHit;
                         Triangle thisTri;
-                        if (node.PickNearest(ref ray, out thisHit, out thisTri))
+                        float thisD;
+                        if (node.PickNearest(ref ray, facingOnly, out thisHit, out thisTri, out thisD))
                         {
                             // check that the intersection is closer than the nearest intersection found thus far
-                            float thisD = (ray.Position - thisHit).LengthSquared();
                             if (thisD < bestD)
                             {
                                 // if we have found a closer intersection store the new closest intersection
@@ -589,6 +605,7 @@ namespace Engine.Collections
                     {
                         position = bestHit;
                         triangle = bestTri;
+                        distance = bestD;
                     }
 
                     #endregion
@@ -621,8 +638,23 @@ namespace Engine.Collections
         /// <returns>Returns true if picked position found</returns>
         public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle)
         {
+            float distance;
+            return this.PickFirst(ref ray, facingOnly, out position, out triangle, out distance);
+        }
+        /// <summary>
+        /// Pick first position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="position">Hit position</param>
+        /// <param name="triangle">Hit triangle</param>
+        /// <param name="distance">Distance to hit</param>
+        /// <returns>Returns true if picked position found</returns>
+        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        {
             position = Vector3.Zero;
             triangle = new Triangle();
+            distance = float.MaxValue;
 
             if (this.Children == null)
             {
@@ -637,10 +669,11 @@ namespace Engine.Collections
 
                         Vector3 pos;
                         Triangle tri;
-                        if (Triangle.IntersectFirst(ref ray, this.Triangles, facingOnly, out pos, out tri))
+                        if (Triangle.IntersectFirst(ref ray, this.Triangles, facingOnly, out pos, out tri, out d))
                         {
                             position = pos;
                             triangle = tri;
+                            distance = d;
 
                             return true;
                         }
@@ -662,10 +695,12 @@ namespace Engine.Collections
                     {
                         Vector3 thisHit;
                         Triangle thisTri;
-                        if (node.PickFirst(ref ray, out thisHit, out thisTri))
+                        float thisD;
+                        if (node.PickFirst(ref ray, facingOnly, out thisHit, out thisTri, out thisD))
                         {
                             position = thisHit;
                             triangle = thisTri;
+                            distance = thisD;
 
                             return true;
                         }
@@ -699,8 +734,23 @@ namespace Engine.Collections
         /// <returns>Returns true if picked position found</returns>
         public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles)
         {
+            float[] distances;
+            return this.PickAll(ref ray, facingOnly, out positions, out triangles, out distances);
+        }
+        /// <summary>
+        /// Pick all position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="positions">Hit positions</param>
+        /// <param name="triangles">Hit triangles</param>
+        /// <param name="distances">Distances to hits</param>
+        /// <returns>Returns true if picked position found</returns>
+        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        {
             positions = null;
             triangles = null;
+            distances = null;
 
             if (this.Children == null)
             {
@@ -715,10 +765,12 @@ namespace Engine.Collections
 
                         Vector3[] pos;
                         Triangle[] tri;
-                        if (Triangle.IntersectAll(ref ray, this.Triangles, facingOnly, out pos, out tri))
+                        float[] ds;
+                        if (Triangle.IntersectAll(ref ray, this.Triangles, facingOnly, out pos, out tri, out ds))
                         {
                             positions = pos;
                             triangles = tri;
+                            distances = ds;
 
                             return true;
                         }
@@ -737,6 +789,7 @@ namespace Engine.Collections
 
                 List<Vector3> hits = new List<Vector3>();
                 List<Triangle> tris = new List<Triangle>();
+                List<float> dists = new List<float>();
 
                 foreach (var node in this.Children)
                 {
@@ -745,7 +798,8 @@ namespace Engine.Collections
                     {
                         Vector3[] thisHits;
                         Triangle[] thisTris;
-                        if (node.PickAll(ref ray, out thisHits, out thisTris))
+                        float[] thisDs;
+                        if (node.PickAll(ref ray, facingOnly, out thisHits, out thisTris, out thisDs))
                         {
                             for (int i = 0; i < thisHits.Length; i++)
                             {
@@ -753,6 +807,7 @@ namespace Engine.Collections
                                 {
                                     hits.Add(thisHits[i]);
                                     tris.Add(thisTris[i]);
+                                    dists.Add(thisDs[i]);
                                 }
                             }
 
@@ -765,6 +820,7 @@ namespace Engine.Collections
                 {
                     positions = hits.ToArray();
                     triangles = tris.ToArray();
+                    distances = dists.ToArray();
                 }
 
                 return intersect;

@@ -12,8 +12,10 @@ namespace Engine
         /// <param name="x">X coordinate</param>
         /// <param name="z">Z coordinate</param>
         /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if ground position found</returns>
-        bool FindTopGroundPosition(float x, float z, out Vector3 position);
+        bool FindTopGroundPosition(float x, float z, out Vector3 position, out Triangle triangle, out float distance);
         /// <summary>
         /// Gets ground position giving x, z coordinates
         /// </summary>
@@ -21,33 +23,9 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         /// <param name="position">Ground position if exists</param>
         /// <param name="triangle">Triangle found</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if ground position found</returns>
-        bool FindTopGroundPosition(float x, float z, out Vector3 position, out Triangle triangle);
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <returns>Returns true if ground position found</returns>
-        bool FindFirstGroundPosition(float x, float z, out Vector3 position);
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <returns>Returns true if ground position found</returns>
-        bool FindFirstGroundPosition(float x, float z, out Vector3 position, out Triangle triangle);
-        /// <summary>
-        /// Gets ground positions giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="positions">Ground positions if exists</param>
-        /// <returns>Returns true if ground positions found</returns>
-        bool FindAllGroundPosition(float x, float z, out Vector3[] positions);
+        bool FindFirstGroundPosition(float x, float z, out Vector3 position, out Triangle triangle, out float distance);
         /// <summary>
         /// Gets all ground positions giving x, z coordinates
         /// </summary>
@@ -55,47 +33,48 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         /// <param name="positions">Ground positions if exists</param>
         /// <param name="triangles">Triangles found</param>
+        /// <param name="distances">Distances to positions</param>
         /// <returns>Returns true if ground positions found</returns>
-        bool FindAllGroundPosition(float x, float z, out Vector3[] positions, out Triangle[] triangles);
-        /// <summary>
-        /// Gets nearest ground position to "from" position
-        /// </summary>
-        /// <param name="from">Position from</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <returns>Returns true if ground position found</returns>
-        bool FindNearestGroundPosition(Vector3 from, out Vector3 position);
+        bool FindAllGroundPosition(float x, float z, out Vector3[] positions, out Triangle[] triangles, out float[] distances);
         /// <summary>
         /// Gets nearest ground position to "from" position
         /// </summary>
         /// <param name="from">Position from</param>
         /// <param name="position">Ground position if exists</param>
         /// <param name="triangle">Triangle found</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if ground position found</returns>
-        bool FindNearestGroundPosition(Vector3 from, out Vector3 position, out Triangle triangle);
+        bool FindNearestGroundPosition(Vector3 from, out Vector3 position, out Triangle triangle, out float distance);
         /// <summary>
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle);
+        bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance);
         /// <summary>
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle);
+        bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance);
         /// <summary>
         /// Pick all positions
         /// </summary>
         /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="positions">Picked positions if exists</param>
         /// <param name="triangles">Picked triangles if exists</param>
+        /// <param name="distances">Distances to positions if exists</param>
         /// <returns>Returns true if picked positions found</returns>
-        bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles);
+        bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances);
         /// <summary>
         /// Find path from point to point
         /// </summary>

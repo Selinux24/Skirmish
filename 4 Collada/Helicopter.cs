@@ -78,8 +78,10 @@ namespace Collada
                     Vector3 p0 = this.path.GetPosition(this.pathTime);
                     Vector3 p1 = this.path.GetPosition(this.pathTime + time);
 
-                    this.terrain.FindTopGroundPosition(p0.X, p0.Z, out p0);
-                    this.terrain.FindTopGroundPosition(p1.X, p1.Z, out p1);
+                    Triangle t;
+                    float d;
+                    this.terrain.FindTopGroundPosition(p0.X, p0.Z, out p0, out t, out d);
+                    this.terrain.FindTopGroundPosition(p1.X, p1.Z, out p1, out t, out d);
 
                     p0.Y += this.pathHeight;
                     p1.Y += this.pathHeight;

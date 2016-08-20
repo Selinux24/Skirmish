@@ -240,7 +240,8 @@ namespace Engine
                     {
                         Vector3 pos;
                         Triangle tri;
-                        if (this.Ground.FindNearestGroundPosition(newPosition, out pos, out tri))
+                        float d;
+                        if (this.Ground.FindNearestGroundPosition(newPosition, out pos, out tri, out d))
                         {
                             newPosition = pos;
                             newNormal = tri.Normal;

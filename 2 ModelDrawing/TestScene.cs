@@ -50,7 +50,8 @@ namespace ModelDrawing
 
             Vector3 p;
             Triangle t;
-            if (this.floor.PickNearest(ref r, out p, out t))
+            float d;
+            if (this.floor.PickNearest(ref r, true, out p, out t, out d))
             {
                 this.radius = Vector3.Distance(this.Camera.Position, p);
             }
