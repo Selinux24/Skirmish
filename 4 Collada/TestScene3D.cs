@@ -524,7 +524,7 @@ namespace Collada
             Vector3 view = this.helicopters[this.selectedHelicopter].View;
             Manipulator3D manipulator = this.helicopters[this.selectedHelicopter].Manipulator;
 
-            this.Camera.Following = new FollowingManipulator(manipulator, offset, view);
+            this.Camera.Following = new CameraFollower(manipulator, offset, view);
         }
         private void StandUp(GameTime gameTime)
         {

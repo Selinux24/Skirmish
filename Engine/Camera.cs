@@ -480,7 +480,11 @@ namespace Engine
         /// <summary>
         /// Following object
         /// </summary>
-        public FollowingObject Following { get; set; }
+        public IFollower Following { get; set; }
+        /// <summary>
+        /// Gets or sets whether the camera must invert the Y-delta mouse coordinate
+        /// </summary>
+        public bool InvertY { get; set; }
 
         /// <summary>
         /// Constructor
@@ -496,6 +500,8 @@ namespace Engine
                 Vector3.UnitY);
 
             this.Projection = Matrix.Identity;
+
+            this.InvertY = false;
         }
         /// <summary>
         /// Sets dimensions of viewport
@@ -672,7 +678,9 @@ namespace Engine
             }
             if (deltaY != 0f)
             {
-                this.Rotate(this.Left, gameTime.ElapsedSeconds * -deltaY * 10f);
+                if (this.InvertY) deltaY = -deltaY;
+
+                this.Rotate(this.Left, gameTime.ElapsedSeconds * -deltaY * 10f, true, -85, 85);
             }
         }
         /// <summary>
@@ -806,7 +814,7 @@ namespace Engine
         /// <param name="translation">Translation mode</param>
         public void Goto(float x, float y, float z, CameraTranslations translation = CameraTranslations.None)
         {
-            Goto(new Vector3(x, y, z), translation);
+            this.Goto(new Vector3(x, y, z), translation);
         }
         /// <summary>
         /// Move camera to position
@@ -838,7 +846,7 @@ namespace Engine
         /// <param name="translation">Translation mode</param>
         public void LookTo(float x, float y, float z, CameraTranslations translation = CameraTranslations.None)
         {
-            LookTo(new Vector3(x, y, z), translation);
+            this.LookTo(new Vector3(x, y, z), translation);
         }
         /// <summary>
         /// Center camera in new interest
@@ -904,7 +912,10 @@ namespace Engine
         /// </summary>
         /// <param name="axis">Rotation axis</param>
         /// <param name="degrees">Degrees</param>
-        private void Rotate(Vector3 axis, float degrees)
+        /// <param name="clampY">Sets if the current roation must be clamped around the Y vector</param>
+        /// <param name="clampFrom">Clamp from angle in degrees</param>
+        /// <param name="clampTo">Clamp to angle in degrees</param>
+        private void Rotate(Vector3 axis, float degrees, bool clampY = false, float clampFrom = 0, float clampTo = 0)
         {
             this.StopTranslations();
 
@@ -913,9 +924,21 @@ namespace Engine
             Quaternion targetRotation = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
             Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
 
-            Vector3 fw = Vector3.Transform(Vector3.Normalize(this.Interest - this.Position), r);
+            Vector3 curDir = Vector3.Normalize(this.Interest - this.Position);
+            Vector3 newDir = Vector3.Transform(curDir, r);
 
-            this.Interest = this.position + fw;
+            if (clampY)
+            {
+                float newAngle = Helper.Angle(Vector3.Up, newDir) - MathUtil.PiOverTwo;
+                if (newAngle >= MathUtil.DegreesToRadians(clampFrom) && newAngle <= MathUtil.DegreesToRadians(clampTo))
+                {
+                    this.Interest = this.position + newDir;
+                }
+            }
+            else
+            {
+                this.Interest = this.position + newDir;
+            }
         }
         /// <summary>
         /// Zoom
@@ -1024,72 +1047,6 @@ namespace Engine
                     this.StopTranslations();
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// Automatic camera translation modes
-    /// </summary>
-    public enum CameraTranslations
-    {
-        /// <summary>
-        /// No translation
-        /// </summary>
-        None,
-        /// <summary>
-        /// Use current camera movement delta
-        /// </summary>
-        UseDelta,
-        /// <summary>
-        /// Use current camera slow movement delta
-        /// </summary>
-        UseSlowDelta,
-        /// <summary>
-        /// Quick
-        /// </summary>
-        Quick,
-    }
-
-    public interface FollowingObject
-    {
-        Vector3 Position { get; }
-
-        Vector3 Interest { get; }
-    }
-
-    public class FollowingManipulator : FollowingObject
-    {
-        private Manipulator3D manipulator;
-
-        private Vector3 positionOffset = Vector3.Zero;
-        private Vector3 viewOffset = Vector3.ForwardLH;
-
-        public Vector3 Position
-        {
-            get
-            {
-                return Vector3.TransformCoordinate(this.positionOffset, this.manipulator.LocalTransform);
-            }
-        }
-
-        public Vector3 Interest
-        {
-            get
-            {
-                return this.Position + Vector3.TransformNormal(this.viewOffset, this.manipulator.LocalTransform);
-            }
-        }
-
-        public FollowingManipulator(Manipulator3D manipulator)
-        {
-            this.manipulator = manipulator;
-        }
-
-        public FollowingManipulator(Manipulator3D manipulator, Vector3 position, Vector3 view)
-        {
-            this.manipulator = manipulator;
-            this.positionOffset = position;
-            this.viewOffset = view;
         }
     }
 }

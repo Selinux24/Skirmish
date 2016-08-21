@@ -152,6 +152,7 @@
     <Compile Include="BoundingCylinder.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="CameraModes.cs" />
+    <Compile Include="CameraTranslations.cs" />
     <Compile Include="Collada\Accessor.cs" />
     <Compile Include="Collada\AmbientDirectional.cs" />
     <Compile Include="Collada\Animation.cs" />
@@ -308,7 +309,9 @@
     <Compile Include="Collada\VisualScene.cs" />
     <Compile Include="Collections\PriorityDictionary.cs" />
     <Compile Include="CubemapDescription.cs" />
+    <Compile Include="CameraFollower.cs" />
     <Compile Include="GroundAttachedObject.cs" />
+    <Compile Include="IFollower.cs" />
     <Compile Include="IGround.cs" />
     <Compile Include="IPickable.cs" />
     <Compile Include="IValueWithCost.cs" />
