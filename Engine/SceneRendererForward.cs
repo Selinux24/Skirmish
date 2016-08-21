@@ -16,7 +16,7 @@ namespace Engine
     /// </summary>
     public class SceneRendererForward : ISceneRenderer
     {
-        private const int ShadowMapSize = 1024;
+        private const int ShadowMapSize = 4096;
 
         /// <summary>
         /// Shadow mapper
@@ -276,7 +276,7 @@ namespace Engine
                         if (scene.PerformFrustumCulling)
                         {
                             //Frustum culling
-                            draw = scene.CullTest(this.DrawShadowsContext.Frustum, dynamicObjs);
+                            draw = scene.CullTest(this.DrawContext.Frustum, dynamicObjs);
                         }
                         else
                         {
@@ -477,6 +477,7 @@ namespace Engine
                 {
                     this.Game.Graphics.SetRasterizerShadows();
                     this.Game.Graphics.SetBlendDefault();
+                    this.Game.Graphics.SetRasterizerCullFrontFace();
 
                     components[i].Draw(context);
                 }

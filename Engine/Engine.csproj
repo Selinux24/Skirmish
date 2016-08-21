@@ -367,6 +367,7 @@
     <Compile Include="PathFinding\NavMesh\PolyIdManager.cs" />
     <Compile Include="PathFinding\NavMesh\PolyMesh.cs" />
     <Compile Include="PathFinding\NavMesh\PolyMeshDetail.cs" />
+    <Compile Include="SkydomDescription.cs" />
     <Compile Include="Vertexi.cs" />
     <Compile Include="PathFinding\NavMesh\Region.cs" />
     <Compile Include="PathFinding\NavMesh\RegionFlags.cs" />

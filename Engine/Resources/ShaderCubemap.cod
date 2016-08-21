@@ -16,7 +16,7 @@ cbuffer cbPerFrame : register(b0)
 }
 
 //
-// 5 local object(s)
+// 6 local object(s)
 //
 SamplerState SamplerPoint
 {
@@ -33,6 +33,13 @@ SamplerState SamplerAnisotropic
     MaxAnisotropy = uint(4);
     AddressU = uint(WRAP /* 1 */);
     AddressV = uint(WRAP /* 1 */);
+};
+SamplerComparisonState SamplerComparisonLessEqual
+{
+    Filter   = uint(COMPARISON_MIN_MAG_MIP_LINEAR /* 149 */);
+    AddressU = uint(MIRROR /* 2 */);
+    AddressV = uint(MIRROR /* 2 */);
+    ComparisonFunc = uint(LESS_EQUAL /* 4 */);
 };
 TextureCube gCubemap;
 Texture2D gShadowMap;
@@ -229,10 +236,8 @@ fxgroup
                 //
                 // Name                                 Type  Format         Dim Slot Elements
                 // ------------------------------ ---------- ------- ----------- ---- --------
-                // SamplerPoint                      sampler      NA          NA    0        1
-                // SamplerLinear                     sampler      NA          NA    1        1
+                // SamplerLinear                     sampler      NA          NA    0        1
                 // gCubemap                          texture  float4        cube    0        1
-                // gShadowMap                        texture  float4          2d    1        1
                 // cbPerFrame                        cbuffer      NA          NA    0        1
                 //
                 //
@@ -255,9 +260,7 @@ fxgroup
                 dcl_globalFlags refactoringAllowed
                 dcl_constantbuffer cb0[44], immediateIndexed
                 dcl_sampler s0, mode_default
-                dcl_sampler s1, mode_default
                 dcl_resource_texturecube (float,float,float,float) t0
-                dcl_resource_texture2d (float,float,float,float) t1
                 dcl_input_ps linear v1.xyz
                 dcl_output o0.xyzw
                 dcl_temps 5
@@ -268,111 +271,61 @@ fxgroup
                 //   o0.x <- <PSForwardCubic return value>.x; o0.y <- <PSForwardCubic return value>.y; o0.z <- <PSForwardCubic return value>.z; o0.w <- <PSForwardCubic return value>.w
                 //
                 #line 31 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
-                sample_indexable(texturecube)(float,float,float,float) r0.xyzw, v1.xyzx, t0.xyzw, s1  // r0.x <- textureColor.x; r0.y <- textureColor.y; r0.z <- textureColor.z; r0.w <- textureColor.w
+                sample_indexable(texturecube)(float,float,float,float) r0.xyzw, v1.xyzx, t0.xyzw, s0  // r0.x <- textureColor.x; r0.y <- textureColor.y; r0.z <- textureColor.z; r0.w <- textureColor.w
                 add r1.xyz, -v1.xyzx, cb0[4].xyzx  // r1.x <- toEyeWorld.x; r1.y <- toEyeWorld.y; r1.z <- toEyeWorld.z
                 
-                #line 304 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 322 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.w, cb0[7].y, l(1.000000)
                 if_nz r1.w
                 
-                #line 173
-                  eq r1.w, cb0[7].x, l(1.000000)
-                  mul r2.xyz, r0.xyzx, cb0[5].wwww  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
+                #line 186
+                  mul r2.xyz, r0.xyzx, cb0[5].xyzx
+                  mul r2.xyz, r2.xyzx, cb0[5].wwww  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 103
-                  sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // r2.w <- depthS
-                
-                #line 107
-                  lt r2.w, l(-0.001000), r2.w
-                
-                #line 155
-                  mul r3.xyz, r0.xyzx, cb0[5].xyzx
-                  mul r3.xyz, r3.xyzx, cb0[5].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
-                
-                #line 191
-                  movc r2.xyz, r2.wwww, r3.xyzx, r2.xyzx
-                
-                #line 208
-                  movc r2.xyz, r1.wwww, r2.xyzx, r3.xyzx  // r2.x <- <ComputeDirectionalLight return value>.x; r2.y <- <ComputeDirectionalLight return value>.y; r2.z <- <ComputeDirectionalLight return value>.z
-                
-                #line 317
+                #line 335
                 else 
                   mov r2.xyz, l(0,0,0,0)
                 endif 
                 
-                #line 304
+                #line 322
                 eq r1.w, cb0[10].y, l(1.000000)
                 if_nz r1.w
                 
-                #line 173
-                  eq r1.w, cb0[10].x, l(1.000000)
-                  mul r3.xyz, r0.xyzx, cb0[8].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                #line 186
+                  mul r3.xyz, r0.xyzx, cb0[8].xyzx
                 
-                #line 103
-                  sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // r2.w <- depthS
+                #line 324
+                  mad r2.xyz, r3.xyzx, cb0[8].wwww, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 107
-                  lt r2.w, l(-0.001000), r2.w
-                
-                #line 155
-                  mul r4.xyz, r0.xyzx, cb0[8].xyzx
-                  mul r4.xyz, r4.xyzx, cb0[8].wwww  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
-                
-                #line 191
-                  movc r3.xyz, r2.wwww, r4.xyzx, r3.xyzx
-                
-                #line 208
-                  movc r3.xyz, r1.wwww, r3.xyzx, r4.xyzx  // r3.x <- <ComputeDirectionalLight return value>.x; r3.y <- <ComputeDirectionalLight return value>.y; r3.z <- <ComputeDirectionalLight return value>.z
-                
-                #line 306
-                  add r2.xyz, r2.xyzx, r3.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
-                
-                #line 317
+                #line 335
                 endif 
                 
-                #line 304
+                #line 322
                 eq r1.w, cb0[13].y, l(1.000000)
                 if_nz r1.w
                 
-                #line 173
-                  eq r1.w, cb0[13].x, l(1.000000)
-                  mul r3.xyz, r0.xyzx, cb0[11].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                #line 186
+                  mul r3.xyz, r0.xyzx, cb0[11].xyzx
                 
-                #line 103
-                  sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // r2.w <- depthS
+                #line 324
+                  mad r2.xyz, r3.xyzx, cb0[11].wwww, r2.xyzx
                 
-                #line 107
-                  lt r2.w, l(-0.001000), r2.w
-                
-                #line 155
-                  mul r4.xyz, r0.xyzx, cb0[11].xyzx
-                  mul r4.xyz, r4.xyzx, cb0[11].wwww  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
-                
-                #line 191
-                  movc r3.xyz, r2.wwww, r4.xyzx, r3.xyzx
-                
-                #line 208
-                  movc r3.xyz, r1.wwww, r3.xyzx, r4.xyzx  // r3.x <- <ComputeDirectionalLight return value>.x; r3.y <- <ComputeDirectionalLight return value>.y; r3.z <- <ComputeDirectionalLight return value>.z
-                
-                #line 306
-                  add r2.xyz, r2.xyzx, r3.xyzx
-                
-                #line 317
+                #line 335
                 endif 
                 
-                #line 323
+                #line 341
                 eq r1.w, cb0[16].z, l(1.000000)
                 
-                #line 220
+                #line 236
                 add r3.xyz, v1.xyzx, -cb0[15].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                 dp3 r2.w, r3.xyzx, r3.xyzx
                 sqrt r2.w, r2.w  // r2.w <- distance
                 
-                #line 155
+                #line 186
                 mul r3.xyz, r0.xyzx, cb0[14].xyzx
                 mul r3.xyz, r3.xyzx, cb0[14].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 80
+                #line 109
                 div r3.w, r2.w, cb0[16].x  // r3.w <- f
                 mad r3.w, -r3.w, r3.w, l(1.000000)  // r3.w <- denom
                 lt r4.x, l(0.000000), r3.w
@@ -381,28 +334,28 @@ fxgroup
                 mul r2.w, r2.w, r2.w
                 div r2.w, cb0[15].x, r2.w  // r2.w <- <CalcSphericAttenuation return value>
                 
-                #line 92
+                #line 121
                 and r2.w, r2.w, r4.x
                 
-                #line 325
+                #line 343
                 mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 333
+                #line 351
                 movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 323
+                #line 341
                 eq r1.w, cb0[19].z, l(1.000000)
                 
-                #line 220
+                #line 236
                 add r3.xyz, v1.xyzx, -cb0[18].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                 dp3 r2.w, r3.xyzx, r3.xyzx
                 sqrt r2.w, r2.w  // r2.w <- distance
                 
-                #line 155
+                #line 186
                 mul r3.xyz, r0.xyzx, cb0[17].xyzx
                 mul r3.xyz, r3.xyzx, cb0[17].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 80
+                #line 109
                 div r3.w, r2.w, cb0[19].x  // r3.w <- f
                 mad r3.w, -r3.w, r3.w, l(1.000000)  // r3.w <- denom
                 lt r4.x, l(0.000000), r3.w
@@ -411,28 +364,28 @@ fxgroup
                 mul r2.w, r2.w, r2.w
                 div r2.w, cb0[18].x, r2.w  // r2.w <- <CalcSphericAttenuation return value>
                 
-                #line 92
+                #line 121
                 and r2.w, r2.w, r4.x
                 
-                #line 325
+                #line 343
                 mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 333
+                #line 351
                 movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 323
+                #line 341
                 eq r1.w, cb0[22].z, l(1.000000)
                 
-                #line 220
+                #line 236
                 add r3.xyz, v1.xyzx, -cb0[21].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                 dp3 r2.w, r3.xyzx, r3.xyzx
                 sqrt r2.w, r2.w  // r2.w <- distance
                 
-                #line 155
+                #line 186
                 mul r3.xyz, r0.xyzx, cb0[20].xyzx
                 mul r3.xyz, r3.xyzx, cb0[20].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 80
+                #line 109
                 div r3.w, r2.w, cb0[22].x  // r3.w <- f
                 mad r3.w, -r3.w, r3.w, l(1.000000)  // r3.w <- denom
                 lt r4.x, l(0.000000), r3.w
@@ -441,28 +394,28 @@ fxgroup
                 mul r2.w, r2.w, r2.w
                 div r2.w, cb0[21].x, r2.w  // r2.w <- <CalcSphericAttenuation return value>
                 
-                #line 92
+                #line 121
                 and r2.w, r2.w, r4.x
                 
-                #line 325
+                #line 343
                 mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 333
+                #line 351
                 movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 323
+                #line 341
                 eq r1.w, cb0[25].z, l(1.000000)
                 
-                #line 220
+                #line 236
                 add r3.xyz, v1.xyzx, -cb0[24].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                 dp3 r2.w, r3.xyzx, r3.xyzx
                 sqrt r2.w, r2.w  // r2.w <- distance
                 
-                #line 155
+                #line 186
                 mul r3.xyz, r0.xyzx, cb0[23].xyzx
                 mul r3.xyz, r3.xyzx, cb0[23].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 80
+                #line 109
                 div r3.w, r2.w, cb0[25].x  // r3.w <- f
                 mad r3.w, -r3.w, r3.w, l(1.000000)  // r3.w <- denom
                 lt r4.x, l(0.000000), r3.w
@@ -471,20 +424,20 @@ fxgroup
                 mul r2.w, r2.w, r2.w
                 div r2.w, cb0[24].x, r2.w  // r2.w <- <CalcSphericAttenuation return value>
                 
-                #line 92
+                #line 121
                 and r2.w, r2.w, r4.x
                 
-                #line 325
+                #line 343
                 mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 333
+                #line 351
                 movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 339
+                #line 357
                 eq r1.w, cb0[29].z, l(1.000000)
                 if_nz r1.w
                 
-                #line 252
+                #line 269
                   add r3.xyz, v1.xyzx, -cb0[27].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r1.w, r3.xyzx, r3.xyzx
                   sqrt r1.w, r1.w  // r1.w <- distance
@@ -503,11 +456,11 @@ fxgroup
                   mul r3.x, r2.w, l(57.295780)  // r3.x <- lightToSurfaceAngle
                   ge r3.x, cb0[28].w, r3.x
                 
-                #line 155
+                #line 186
                   mul r3.yzw, r0.xxyz, cb0[26].xxyz
                   mul r3.yzw, r3.yyzw, cb0[26].wwww  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                 
-                #line 80
+                #line 109
                   div r4.x, r1.w, cb0[29].x  // r4.x <- f
                   mad r4.x, -r4.x, r4.x, l(1.000000)  // r4.x <- denom
                   lt r4.y, l(0.000000), r4.x
@@ -516,10 +469,10 @@ fxgroup
                   mul r1.w, r1.w, r1.w
                   div r1.w, cb0[27].x, r1.w  // r1.w <- <CalcSphericAttenuation return value>
                 
-                #line 92
+                #line 121
                   and r1.w, r1.w, r4.y
                 
-                #line 275
+                #line 293
                   mad r2.w, -r2.w, l(57.295780), l(1.000000)
                   add r4.x, -cb0[28].w, l(1.000000)
                   div r2.w, r2.w, r4.x
@@ -528,17 +481,17 @@ fxgroup
                   mul r3.yzw, r1.wwww, r3.yyzw  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                   and r3.xyz, r3.yzwy, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 341
+                #line 359
                   add r2.xyz, r2.xyzx, r3.xyzx
                 
-                #line 349
+                #line 367
                 endif 
                 
-                #line 339
+                #line 357
                 eq r1.w, cb0[33].z, l(1.000000)
                 if_nz r1.w
                 
-                #line 252
+                #line 269
                   add r3.xyz, v1.xyzx, -cb0[31].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r1.w, r3.xyzx, r3.xyzx
                   sqrt r1.w, r1.w  // r1.w <- distance
@@ -557,11 +510,11 @@ fxgroup
                   mul r3.x, r2.w, l(57.295780)  // r3.x <- lightToSurfaceAngle
                   ge r3.x, cb0[32].w, r3.x
                 
-                #line 155
+                #line 186
                   mul r3.yzw, r0.xxyz, cb0[30].xxyz
                   mul r3.yzw, r3.yyzw, cb0[30].wwww  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                 
-                #line 80
+                #line 109
                   div r4.x, r1.w, cb0[33].x  // r4.x <- f
                   mad r4.x, -r4.x, r4.x, l(1.000000)  // r4.x <- denom
                   lt r4.y, l(0.000000), r4.x
@@ -570,10 +523,10 @@ fxgroup
                   mul r1.w, r1.w, r1.w
                   div r1.w, cb0[31].x, r1.w  // r1.w <- <CalcSphericAttenuation return value>
                 
-                #line 92
+                #line 121
                   and r1.w, r1.w, r4.y
                 
-                #line 275
+                #line 293
                   mad r2.w, -r2.w, l(57.295780), l(1.000000)
                   add r4.x, -cb0[32].w, l(1.000000)
                   div r2.w, r2.w, r4.x
@@ -582,17 +535,17 @@ fxgroup
                   mul r3.yzw, r1.wwww, r3.yyzw  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                   and r3.xyz, r3.yzwy, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 341
+                #line 359
                   add r2.xyz, r2.xyzx, r3.xyzx
                 
-                #line 349
+                #line 367
                 endif 
                 
-                #line 339
+                #line 357
                 eq r1.w, cb0[37].z, l(1.000000)
                 if_nz r1.w
                 
-                #line 252
+                #line 269
                   add r3.xyz, v1.xyzx, -cb0[35].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r1.w, r3.xyzx, r3.xyzx
                   sqrt r1.w, r1.w  // r1.w <- distance
@@ -611,11 +564,11 @@ fxgroup
                   mul r3.x, r2.w, l(57.295780)  // r3.x <- lightToSurfaceAngle
                   ge r3.x, cb0[36].w, r3.x
                 
-                #line 155
+                #line 186
                   mul r3.yzw, r0.xxyz, cb0[34].xxyz
                   mul r3.yzw, r3.yyzw, cb0[34].wwww  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                 
-                #line 80
+                #line 109
                   div r4.x, r1.w, cb0[37].x  // r4.x <- f
                   mad r4.x, -r4.x, r4.x, l(1.000000)  // r4.x <- denom
                   lt r4.y, l(0.000000), r4.x
@@ -624,10 +577,10 @@ fxgroup
                   mul r1.w, r1.w, r1.w
                   div r1.w, cb0[35].x, r1.w  // r1.w <- <CalcSphericAttenuation return value>
                 
-                #line 92
+                #line 121
                   and r1.w, r1.w, r4.y
                 
-                #line 275
+                #line 293
                   mad r2.w, -r2.w, l(57.295780), l(1.000000)
                   add r4.x, -cb0[36].w, l(1.000000)
                   div r2.w, r2.w, r4.x
@@ -636,17 +589,17 @@ fxgroup
                   mul r3.yzw, r1.wwww, r3.yyzw  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                   and r3.xyz, r3.yzwy, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 341
+                #line 359
                   add r2.xyz, r2.xyzx, r3.xyzx
                 
-                #line 349
+                #line 367
                 endif 
                 
-                #line 339
+                #line 357
                 eq r1.w, cb0[41].z, l(1.000000)
                 if_nz r1.w
                 
-                #line 252
+                #line 269
                   add r3.xyz, v1.xyzx, -cb0[39].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r1.w, r3.xyzx, r3.xyzx
                   sqrt r1.w, r1.w  // r1.w <- distance
@@ -665,11 +618,11 @@ fxgroup
                   mul r3.x, r2.w, l(57.295780)  // r3.x <- lightToSurfaceAngle
                   ge r3.x, cb0[40].w, r3.x
                 
-                #line 155
+                #line 186
                   mul r0.xyz, r0.xyzx, cb0[38].xyzx
                   mul r0.xyz, r0.xyzx, cb0[38].wwww  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 
-                #line 80
+                #line 109
                   div r3.y, r1.w, cb0[41].x  // r3.y <- f
                   mad r3.y, -r3.y, r3.y, l(1.000000)  // r3.y <- denom
                   lt r3.z, l(0.000000), r3.y
@@ -678,10 +631,10 @@ fxgroup
                   mul r1.w, r1.w, r1.w
                   div r1.w, cb0[39].x, r1.w  // r1.w <- <CalcSphericAttenuation return value>
                 
-                #line 92
+                #line 121
                   and r1.w, r1.w, r3.z
                 
-                #line 275
+                #line 293
                   mad r2.w, -r2.w, l(57.295780), l(1.000000)
                   add r3.y, -cb0[40].w, l(1.000000)
                   div r2.w, r2.w, r3.y
@@ -690,10 +643,10 @@ fxgroup
                   mul r0.xyz, r0.xyzx, r1.wwww  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                   and r0.xyz, r0.xyzx, r3.xxxx
                 
-                #line 341
+                #line 359
                   add r2.xyz, r0.xyzx, r2.xyzx
                 
-                #line 349
+                #line 367
                 endif 
                 
                 #line 50 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
@@ -701,7 +654,7 @@ fxgroup
                 dp3 r0.y, r1.xyzx, r1.xyzx
                 sqrt r0.y, r0.y  // r0.y <- distToEye
                 
-                #line 117 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 147 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.y, r0.y, -cb0[42].x
                 div_sat r0.y, r0.y, cb0[42].y  // r0.y <- fogLerp
                 add r1.xyz, -r2.xyzx, cb0[43].xyzx
@@ -711,7 +664,7 @@ fxgroup
                 movc o0.xyz, r0.xxxx, r1.xyzx, r2.xyzx
                 mov o0.w, r0.w
                 ret 
-                // Approximately 265 instruction slots used
+                // Approximately 245 instruction slots used
                             
             };
         }

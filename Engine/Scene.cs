@@ -320,6 +320,7 @@ namespace Engine
 
             Model newModel = new Model(this.Game, geo);
 
+            newModel.Name = description.ModelFileName;
             newModel.Opaque = description.Opaque;
             newModel.Static = description.Static;
             newModel.DeferredEnabled = description.DeferredEnabled;
@@ -372,6 +373,7 @@ namespace Engine
 
             ModelInstanced newModel = new ModelInstanced(this.Game, geo, description.Instances);
 
+            newModel.Name = description.ModelFileName;
             newModel.Opaque = description.Opaque;
             newModel.Static = description.Static;
             newModel.DeferredEnabled = description.DeferredEnabled;

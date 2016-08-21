@@ -14,7 +14,7 @@ cbuffer cbSkinned : register(b1)
 }
 
 //
-// 3 local object(s)
+// 4 local object(s)
 //
 SamplerState SamplerPoint
 {
@@ -31,6 +31,13 @@ SamplerState SamplerAnisotropic
     MaxAnisotropy = uint(4);
     AddressU = uint(WRAP /* 1 */);
     AddressV = uint(WRAP /* 1 */);
+};
+SamplerComparisonState SamplerComparisonLessEqual
+{
+    Filter   = uint(COMPARISON_MIN_MAG_MIP_LINEAR /* 149 */);
+    AddressU = uint(MIRROR /* 2 */);
+    AddressV = uint(MIRROR /* 2 */);
+    ComparisonFunc = uint(LESS_EQUAL /* 4 */);
 };
 
 //

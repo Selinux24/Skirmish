@@ -165,7 +165,7 @@ namespace Engine
         public void Update(SceneLightDirectional light, BoundingSphere sceneVolume)
         {
             // Calc light position outside the scene volume
-            this.LightPosition = light.GetPosition(2.0f * sceneVolume.Radius);
+            this.LightPosition = light.GetPosition(sceneVolume.Radius);
             this.LightDirection = light.Direction;
 
             // View from light to scene center position

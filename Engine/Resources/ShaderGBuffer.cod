@@ -26,7 +26,7 @@ cbuffer cbPerInstance : register(b3)
 }
 
 //
-// 5 local object(s)
+// 6 local object(s)
 //
 SamplerState SamplerPoint
 {
@@ -43,6 +43,13 @@ SamplerState SamplerAnisotropic
     MaxAnisotropy = uint(4);
     AddressU = uint(WRAP /* 1 */);
     AddressV = uint(WRAP /* 1 */);
+};
+SamplerComparisonState SamplerComparisonLessEqual
+{
+    Filter   = uint(COMPARISON_MIN_MAG_MIP_LINEAR /* 149 */);
+    AddressU = uint(MIRROR /* 2 */);
+    AddressV = uint(MIRROR /* 2 */);
+    ComparisonFunc = uint(LESS_EQUAL /* 4 */);
 };
 Texture2DArray gTextureArray;
 Texture2D gNormalMap;
@@ -3552,7 +3559,7 @@ fxgroup
                 #line 459 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1
                 
-                #line 71 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 100 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -3564,10 +3571,10 @@ fxgroup
                 #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // r2.x <- normalMapSample.x; r2.y <- normalMapSample.y; r2.z <- normalMapSample.z
                 
-                #line 67 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 96 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // r2.x <- normalT.x; r2.y <- normalT.y; r2.z <- normalT.z
                 
-                #line 76
+                #line 105
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx
@@ -3794,7 +3801,7 @@ fxgroup
                 #line 459 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1
                 
-                #line 71 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 100 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -3806,10 +3813,10 @@ fxgroup
                 #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // r2.x <- normalMapSample.x; r2.y <- normalMapSample.y; r2.z <- normalMapSample.z
                 
-                #line 67 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 96 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // r2.x <- normalT.x; r2.y <- normalT.y; r2.z <- normalT.z
                 
-                #line 76
+                #line 105
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx
@@ -4093,7 +4100,7 @@ fxgroup
                 #line 459 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1
                 
-                #line 71 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 100 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -4105,10 +4112,10 @@ fxgroup
                 #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // r2.x <- normalMapSample.x; r2.y <- normalMapSample.y; r2.z <- normalMapSample.z
                 
-                #line 67 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 96 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // r2.x <- normalT.x; r2.y <- normalT.y; r2.z <- normalT.z
                 
-                #line 76
+                #line 105
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx
@@ -4403,7 +4410,7 @@ fxgroup
                 #line 459 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2darray)(float,float,float,float) o0.xyzw, v4.xyzx, t0.xyzw, s1
                 
-                #line 71 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 100 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 dp3 r0.x, v3.xyzx, v2.xyzx
                 mad r0.xyz, -r0.xxxx, v2.xyzx, v3.xyzx
                 dp3 r0.w, r0.xyzx, r0.xyzx
@@ -4415,10 +4422,10 @@ fxgroup
                 #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderGBuffer.fx"
                 sample_indexable(texture2d)(float,float,float,float) r2.xyz, v4.xyxx, t1.xyzw, s0  // r2.x <- normalMapSample.x; r2.y <- normalMapSample.y; r2.z <- normalMapSample.z
                 
-                #line 67 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 96 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mad r2.xyz, r2.xyzx, l(2.000000, 2.000000, 2.000000, 0.000000), l(-1.000000, -1.000000, -1.000000, 0.000000)  // r2.x <- normalT.x; r2.y <- normalT.y; r2.z <- normalT.z
                 
-                #line 76
+                #line 105
                 mul r1.xyz, r1.xyzx, r2.yyyy
                 mad r0.xyz, r2.xxxx, r0.xyzx, r1.xyzx
                 mad r0.xyz, r2.zzzz, v2.xyzx, r0.xyzx

@@ -20,7 +20,9 @@ namespace Engine
         public Skydom(Game game, ModelContent content)
             : base(game, content)
         {
-
+            this.Cull = false;
+            this.Opaque = false;
+            this.Static = true;
         }
 
         /// <summary>
@@ -33,13 +35,5 @@ namespace Engine
 
             base.Update(context);
         }
-    }
-
-    /// <summary>
-    /// Skydom descriptor
-    /// </summary>
-    public class SkydomDescription : CubemapDescription
-    {
-
     }
 }

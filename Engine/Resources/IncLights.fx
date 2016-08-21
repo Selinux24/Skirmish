@@ -14,6 +14,14 @@ SamplerState SamplerAnisotropic
 	AddressU = WRAP;
 	AddressV = WRAP;
 };
+SamplerComparisonState SamplerComparisonLessEqual
+{
+	Filter = COMPARISON_MIN_MAG_MIP_LINEAR;
+	AddressU = MIRROR;
+	AddressV = MIRROR;
+
+	ComparisonFunc = LESS_EQUAL;
+};
 
 static const int MAX_LIGHTS_DIRECTIONAL = 3;
 static const int MAX_LIGHTS_POINT = 4;
@@ -61,6 +69,27 @@ struct SpotLight
 	float Pad1;
 };
 
+static const uint sampleCount = 16;
+static float2 poissonDisk[sampleCount] =
+{
+	float2(0.2770745f, 0.6951455f),
+	float2(0.1874257f, -0.02561589f),
+	float2(-0.3381929f, 0.8713168f),
+	float2(0.5867746f, 0.1087471f),
+	float2(-0.3078699f, 0.188545f),
+	float2(0.7993396f, 0.4595091f),
+	float2(-0.09242552f, 0.5260149f),
+	float2(0.3657553f, -0.5329605f),
+	float2(-0.3829718f, -0.2476171f),
+	float2(-0.01085108f, -0.6966301f),
+	float2(0.8404155f, -0.3543923f),
+	float2(-0.5186161f, -0.7624033f),
+	float2(-0.8135794f, 0.2328489f),
+	float2(-0.784665f, -0.2434929f),
+	float2(0.9920505f, 0.0855163f),
+	float2(-0.687256f, 0.6711345f)
+};
+
 float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, float3 tangentW)
 {
 	//Uncompress each component from [0,1] to [-1,1].
@@ -93,24 +122,25 @@ float CalcSphericAttenuation(float radius, float intensity, float maxDistance, f
 }
 float CalcShadowFactor(float4 lightPosition, Texture2D shadowMapStatic, Texture2D shadowMapDynamic)
 {
+	float shadow = 0.0f;
+
     float2 tex = 0.0f;
     tex.x = (+lightPosition.x / lightPosition.w * 0.5f) + 0.5f;
     tex.y = (-lightPosition.y / lightPosition.w * 0.5f) + 0.5f;
+	float z = (lightPosition.z / lightPosition.w) -  0.001f;
 
-	[flatten]
-	if((saturate(tex.x) == tex.x) && (saturate(tex.y) == tex.y))
+	for (uint i = 0; i < sampleCount; i++)
 	{
-		float depthS = shadowMapStatic.Sample(SamplerPoint, tex).r;
-		float depthD = shadowMapDynamic.Sample(SamplerPoint, tex).r;
-		float z = (lightPosition.z / lightPosition.w) -  0.001f;
+		float2 stc = tex + poissonDisk[i] / 700.0f;
 
-		if(z < depthS && z < depthD)
+		if (!shadowMapStatic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z) ||
+			!shadowMapDynamic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
 		{
-			return 1.0f;
+			shadow += 0.8f;
 		}
 	}
 
-    return 0.0f;
+    return 1.0f - (shadow / sampleCount);
 }
 float3 ComputeFog(float3 litColor, float distToEye, float fogStart, float fogRange, float3 fogColor)
 {
@@ -129,7 +159,8 @@ float3 ComputeBaseLight(
 	float3 modelPosition,
 	float3 modelNormal,
 	float specularIntensity,
-	float specularPower)
+	float specularPower,
+	float shadowFactor)
 {                                                                                           
     float ambient = lightAmbient;
 	float diffuse  = 0.0f;
@@ -139,7 +170,7 @@ float3 ComputeBaseLight(
 	[flatten]
     if (diffuseFactor > 0) 
 	{
-		diffuse = lightDiffuse * diffuseFactor;
+		diffuse = lightDiffuse * diffuseFactor * shadowFactor;
 
         float3 lightReflection = normalize(reflect(lightDirection, modelNormal));
         
@@ -169,43 +200,28 @@ float3 ComputeDirectionalLight(
 	Texture2D shadowMapStatic,
 	Texture2D shadowMapDynamic)
 {
+	float shadowFactor = 1.0f;
+
 	[flatten]
 	if(L.CastShadow == 1)
 	{
-		float3 litColor = L.Ambient * color;
-
-		float shadowFactor = CalcShadowFactor(lightPosition, shadowMapStatic, shadowMapDynamic);
-		if(shadowFactor == 1.0f)
-		{
-			litColor = ComputeBaseLight(
-				L.Color,
-				L.Ambient,
-				L.Diffuse,
-				L.Direction,
-				toEye,
-				color,
-				position,
-				normal,
-				specularIntensity,
-				specularPower);
-		}
-
-		return litColor;
+		shadowFactor = CalcShadowFactor(lightPosition, shadowMapStatic, shadowMapDynamic);
 	}
-	else
-	{
-		return ComputeBaseLight(
-			L.Color,
-			L.Ambient,
-			L.Diffuse,
-			L.Direction,
-			toEye,
-			color,
-			position,
-			normal,
-			specularIntensity,
-			specularPower);
-	}
+
+	float3 litColor = ComputeBaseLight(
+		L.Color,
+		L.Ambient,
+		L.Diffuse,
+		L.Direction,
+		toEye,
+		color,
+		position,
+		normal,
+		specularIntensity,
+		specularPower,
+		shadowFactor);
+
+	return litColor;
 }
 
 float3 ComputePointLight(
@@ -231,7 +247,8 @@ float3 ComputePointLight(
 		position,
 		normal,
 		specularIntensity,
-		specularPower);
+		specularPower,
+		1.0f);
 
     float attenuation = CalcSphericAttenuation(1, L.Diffuse, L.Radius, distance);
 
@@ -268,7 +285,8 @@ float3 ComputeSpotLight(
 			position,
 			normal,
 			specularIntensity,
-			specularPower);
+			specularPower,
+			1.0f);
 
 		float attenuationD = CalcSphericAttenuation(1, L.Diffuse, L.Radius, distance);
 

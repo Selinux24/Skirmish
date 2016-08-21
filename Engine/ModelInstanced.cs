@@ -254,13 +254,18 @@ namespace Engine
         public override void FrustumCulling(BoundingFrustum frustum)
         {
             //Cull was made per instance
-            this.Cull = false;
+            this.Cull = true;
 
             for (int i = 0; i < this.Instances.Length; i++)
             {
                 if (this.Instances[i].Visible)
                 {
                     this.Instances[i].FrustumCulling(frustum);
+
+                    if (!this.Instances[i].Cull)
+                    {
+                        this.Cull = false;
+                    }
                 }
             }
         }
