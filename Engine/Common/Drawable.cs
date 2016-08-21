@@ -41,12 +41,16 @@ namespace Engine.Common
         /// Culling test flag
         /// </summary>
         /// <remarks>True if passes culling test</remarks>
-        public bool Cull { get; set; }
+        public bool Cull { get; protected set; }
 
         /// <summary>
         /// Gets or sets whether the object is opaque
         /// </summary>
         public bool Opaque { get; set; }
+        /// <summary>
+        /// Gets or sets whether the object is static
+        /// </summary>
+        public bool Static { get; set; }
         /// <summary>
         /// Gets or sets whether the object is enabled to draw with the deferred renderer
         /// </summary>
@@ -89,6 +93,14 @@ namespace Engine.Common
         public virtual void FrustumCulling(BoundingFrustum frustum)
         {
             this.Cull = false;
+        }
+        /// <summary>
+        /// Sets cull value
+        /// </summary>
+        /// <param name="value">New value</param>
+        public virtual void SetCulling(bool value)
+        {
+            this.Cull = value;
         }
 
         /// <summary>
@@ -198,9 +210,13 @@ namespace Engine.Common
         /// </summary>
         public Matrix FromLightViewProjection;
         /// <summary>
-        /// Shadow map
+        /// Static shadow map
         /// </summary>
-        public ShaderResourceView ShadowMap;
+        public ShaderResourceView ShadowMapStatic;
+        /// <summary>
+        /// Dynamic shadow map
+        /// </summary>
+        public ShaderResourceView ShadowMapDynamic;
     }
 
     /// <summary>

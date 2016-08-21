@@ -74,7 +74,7 @@ namespace Engine
         /// <summary>
         /// Culling test flag
         /// </summary>
-        public bool Cull = false;
+        public bool Cull { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -85,6 +85,7 @@ namespace Engine
             this.model = model;
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new System.EventHandler(ManipulatorUpdated);
+            this.Cull = false;
         }
 
         /// <summary>
@@ -324,6 +325,14 @@ namespace Engine
             {
                 this.Cull = false;
             }
+        }
+        /// <summary>
+        /// Sets cull value
+        /// </summary>
+        /// <param name="value">New value</param>
+        public virtual void SetCulling(bool value)
+        {
+            this.Cull = value;
         }
     }
 }

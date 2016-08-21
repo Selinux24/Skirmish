@@ -11,9 +11,13 @@ namespace Engine
         /// </summary>
         None,
         /// <summary>
-        /// Shadow map
+        /// Static shadow map
         /// </summary>
-        ShadowMap,
+        ShadowMapStatic,
+        /// <summary>
+        /// Dynamic shadow map
+        /// </summary>
+        ShadowMapDynamic,
         /// <summary>
         /// Light map
         /// </summary>

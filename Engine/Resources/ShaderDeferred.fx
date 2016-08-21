@@ -18,8 +18,9 @@ cbuffer cbPerFrame : register (b0)
 Texture2D gTG1Map : register(t0);
 Texture2D gTG2Map : register(t1);
 Texture2D gTG3Map : register(t2);
-Texture2D gShadowMap : register(t3);
-Texture2D gLightMap : register(t4);
+Texture2D gShadowMapStatic : register(t3);
+Texture2D gShadowMapDynamic : register(t4);
+Texture2D gLightMap : register(t5);
 
 struct PSDirectionalLightInput
 {
@@ -102,7 +103,8 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 		depth.w,
 		normal.w,
 		lPosition,
-		gShadowMap);
+		gShadowMapStatic,
+		gShadowMapDynamic);
 
 	return float4(litColor, diffuseColor.a);
 }

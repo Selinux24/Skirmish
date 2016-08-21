@@ -88,9 +88,13 @@ namespace Engine.Effects
         /// </summary>
         private EffectShaderResourceVariable tg3Map = null;
         /// <summary>
-        /// Shadow map effect variable
+        /// Static shadow map effect variable
         /// </summary>
-        private EffectShaderResourceVariable shadowMap = null;
+        private EffectShaderResourceVariable shadowMapStatic = null;
+        /// <summary>
+        /// Dynamic shadow map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable shadowMapDynamic = null;
         /// <summary>
         /// Light Map effect variable
         /// </summary>
@@ -313,17 +317,31 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Shadow map
+        /// Static shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMap
+        protected ShaderResourceView ShadowMapStatic
         {
             get
             {
-                return this.shadowMap.GetResource();
+                return this.shadowMapStatic.GetResource();
             }
             set
             {
-                this.shadowMap.SetResource(value);
+                this.shadowMapStatic.SetResource(value);
+            }
+        }
+        /// <summary>
+        /// Dynamic shadow map
+        /// </summary>
+        protected ShaderResourceView ShadowMapDynamic
+        {
+            get
+            {
+                return this.shadowMapDynamic.GetResource();
+            }
+            set
+            {
+                this.shadowMapDynamic.SetResource(value);
             }
         }
         /// <summary>
@@ -373,7 +391,8 @@ namespace Engine.Effects
             this.tg1Map = this.Effect.GetVariableByName("gTG1Map").AsShaderResource();
             this.tg2Map = this.Effect.GetVariableByName("gTG2Map").AsShaderResource();
             this.tg3Map = this.Effect.GetVariableByName("gTG3Map").AsShaderResource();
-            this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
+            this.shadowMapStatic = this.Effect.GetVariableByName("gShadowMapStatic").AsShaderResource();
+            this.shadowMapDynamic = this.Effect.GetVariableByName("gShadowMapDynamic").AsShaderResource();
             this.lightMap = this.Effect.GetVariableByName("gLightMap").AsShaderResource();
         }
         /// <summary>
@@ -418,7 +437,8 @@ namespace Engine.Effects
         /// <param name="colorMap">Color map texture</param>
         /// <param name="normalMap">Normal map texture</param>
         /// <param name="depthMap">Depth map texture</param>
-        /// <param name="shadowMap">Shadow map</param>
+        /// <param name="shadowMapStatic">Static shadow map texture</param>
+        /// <param name="shadowMapDynamic">Dynamic shadow map texture</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
@@ -429,7 +449,8 @@ namespace Engine.Effects
             ShaderResourceView colorMap,
             ShaderResourceView normalMap,
             ShaderResourceView depthMap,
-            ShaderResourceView shadowMap)
+            ShaderResourceView shadowMapStatic,
+            ShaderResourceView shadowMapDynamic)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
@@ -443,7 +464,8 @@ namespace Engine.Effects
             this.TG2Map = normalMap;
             this.TG3Map = depthMap;
 
-            this.ShadowMap = shadowMap;
+            this.ShadowMapStatic = shadowMapStatic;
+            this.ShadowMapDynamic = shadowMapDynamic;
         }
         /// <summary>
         /// Updates per directional light variables

@@ -91,24 +91,26 @@ float CalcSphericAttenuation(float radius, float intensity, float maxDistance, f
         return 0.0f;
     }
 }
-float CalcShadowFactor(float4 lightPosition, Texture2D shadowMap)
+float CalcShadowFactor(float4 lightPosition, Texture2D shadowMapStatic, Texture2D shadowMapDynamic)
 {
     float2 tex = 0.0f;
     tex.x = (+lightPosition.x / lightPosition.w * 0.5f) + 0.5f;
     tex.y = (-lightPosition.y / lightPosition.w * 0.5f) + 0.5f;
 
+	[flatten]
 	if((saturate(tex.x) == tex.x) && (saturate(tex.y) == tex.y))
 	{
-		float depth = shadowMap.Sample(SamplerPoint, tex).r;
+		float depthS = shadowMapStatic.Sample(SamplerPoint, tex).r;
+		float depthD = shadowMapDynamic.Sample(SamplerPoint, tex).r;
 		float z = (lightPosition.z / lightPosition.w) -  0.001f;
 
-		if(z < depth)
+		if(z < depthS && z < depthD)
 		{
 			return 1.0f;
 		}
 	}
 
-    return 0.5f;
+    return 0.0f;
 }
 float3 ComputeFog(float3 litColor, float distToEye, float fogStart, float fogRange, float3 fogColor)
 {
@@ -164,29 +166,46 @@ float3 ComputeDirectionalLight(
 	float specularIntensity,
 	float specularPower,
 	float4 lightPosition,
-	Texture2D shadowMap)
+	Texture2D shadowMapStatic,
+	Texture2D shadowMapDynamic)
 {
-	float3 litColor = ComputeBaseLight(
-		L.Color,
-		L.Ambient,
-		L.Diffuse,
-		L.Direction,
-		toEye,
-		color,
-		position,
-		normal,
-		specularIntensity,
-		specularPower);
-
 	[flatten]
 	if(L.CastShadow == 1)
 	{
-		float shadowFactor = CalcShadowFactor(lightPosition, shadowMap);
+		float3 litColor = L.Ambient * color;
 
-		litColor *= shadowFactor;
+		float shadowFactor = CalcShadowFactor(lightPosition, shadowMapStatic, shadowMapDynamic);
+		if(shadowFactor == 1.0f)
+		{
+			litColor = ComputeBaseLight(
+				L.Color,
+				L.Ambient,
+				L.Diffuse,
+				L.Direction,
+				toEye,
+				color,
+				position,
+				normal,
+				specularIntensity,
+				specularPower);
+		}
+
+		return litColor;
 	}
-
-	return litColor;
+	else
+	{
+		return ComputeBaseLight(
+			L.Color,
+			L.Ambient,
+			L.Diffuse,
+			L.Direction,
+			toEye,
+			color,
+			position,
+			normal,
+			specularIntensity,
+			specularPower);
+	}
 }
 
 float3 ComputePointLight(
@@ -272,7 +291,8 @@ float3 ComputeAllLights(
 	float specularIntensity,
 	float specularPower,
 	float4 lightPosition,
-	Texture2D shadowMap)
+	Texture2D shadowMapStatic,
+	Texture2D shadowMapDynamic)
 {
 	float3 litColor = 0;
 
@@ -292,7 +312,8 @@ float3 ComputeAllLights(
 				specularIntensity,
 				specularPower,
 				lightPosition,
-				shadowMap);
+				shadowMapStatic,
+				shadowMapDynamic);
 		}
 	}
 

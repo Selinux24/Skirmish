@@ -136,7 +136,8 @@ namespace Engine
                             context.EyePosition,
                             context.Frustum,
                             context.Lights,
-                            context.ShadowMap,
+                            context.ShadowMapStatic,
+                            context.ShadowMapDynamic,
                             context.FromLightViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
@@ -260,6 +261,22 @@ namespace Engine
                 if (this.Instances[i].Visible)
                 {
                     this.Instances[i].FrustumCulling(frustum);
+                }
+            }
+        }
+        /// <summary>
+        /// Sets cull value
+        /// </summary>
+        /// <param name="value">New value</param>
+        public override void SetCulling(bool value)
+        {
+            base.SetCulling(value);
+
+            if (this.instances != null && this.instances.Length > 0)
+            {
+                for (int i = 0; i < this.instances.Length; i++)
+                {
+                    this.instances[i].SetCulling(value);
                 }
             }
         }

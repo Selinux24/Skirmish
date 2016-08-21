@@ -39,13 +39,21 @@ namespace Engine
         /// </summary>
         public readonly Viewport Viewport;
         /// <summary>
-        /// Depth map
+        /// Static depth map
         /// </summary>
-        public DepthStencilView DepthMap { get; protected set; }
+        public DepthStencilView DepthMapStatic { get; protected set; }
         /// <summary>
-        /// Deph map texture
+        /// Dynamic depth map
         /// </summary>
-        public ShaderResourceView Texture { get; protected set; }
+        public DepthStencilView DepthMapDynamic { get; protected set; }
+        /// <summary>
+        /// Static deph map texture
+        /// </summary>
+        public ShaderResourceView TextureStatic { get; protected set; }
+        /// <summary>
+        /// Dynamic deph map texture
+        /// </summary>
+        public ShaderResourceView TextureDynamic { get; protected set; }
         /// <summary>
         /// View matrix
         /// </summary>
@@ -68,20 +76,15 @@ namespace Engine
         public Matrix Transform { get; protected set; }
 
         /// <summary>
-        /// Constructor
+        /// Generate internal resources
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="width">With</param>
-        /// <param name="height">Height</param>
-        public ShadowMap(Game game, int width, int height)
+        /// <param name="game">Game instance</param>
+        /// <param name="width">Buffer width</param>
+        /// <param name="height">Buffer height</param>
+        /// <param name="dsv">Depth stencil view to be created</param>
+        /// <param name="srv">Texture to be created</param>
+        private static void GenerateResources(Game game, int width, int height, out DepthStencilView dsv, out ShaderResourceView srv)
         {
-            this.Game = game;
-
-            this.Width = width;
-            this.Height = height;
-
-            this.Viewport = new Viewport(0, 0, width, height, 0, 1.0f);
-
             Texture2D depthMap = new Texture2D(
                 game.Graphics.Device,
                 new Texture2DDescription
@@ -100,34 +103,59 @@ namespace Engine
 
             using (depthMap)
             {
-                this.DepthMap = new DepthStencilView(
-                    game.Graphics.Device,
-                    depthMap,
-                    new DepthStencilViewDescription
+                var dsDescription = new DepthStencilViewDescription
+                {
+                    Flags = DepthStencilViewFlags.None,
+                    Format = Format.D24_UNorm_S8_UInt,
+                    Dimension = DepthStencilViewDimension.Texture2D,
+                    Texture2D = new DepthStencilViewDescription.Texture2DResource()
                     {
-                        Flags = DepthStencilViewFlags.None,
-                        Format = Format.D24_UNorm_S8_UInt,
-                        Dimension = DepthStencilViewDimension.Texture2D,
-                        Texture2D = new DepthStencilViewDescription.Texture2DResource()
-                        {
-                            MipSlice = 0,
-                        },
-                    });
+                        MipSlice = 0,
+                    },
+                };
 
-                this.Texture = new ShaderResourceView(
-                    game.Graphics.Device,
-                    depthMap,
-                    new ShaderResourceViewDescription
+                var rvDescription = new ShaderResourceViewDescription
+                {
+                    Format = Format.R24_UNorm_X8_Typeless,
+                    Dimension = ShaderResourceViewDimension.Texture2D,
+                    Texture2D = new ShaderResourceViewDescription.Texture2DResource()
                     {
-                        Format = Format.R24_UNorm_X8_Typeless,
-                        Dimension = ShaderResourceViewDimension.Texture2D,
-                        Texture2D = new ShaderResourceViewDescription.Texture2DResource()
-                        {
-                            MipLevels = 1,
-                            MostDetailedMip = 0
-                        },
-                    });
+                        MipLevels = 1,
+                        MostDetailedMip = 0
+                    },
+                };
+
+                dsv = new DepthStencilView(game.Graphics.Device, depthMap, dsDescription);
+                srv = new ShaderResourceView(game.Graphics.Device, depthMap, rvDescription);
             }
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="width">With</param>
+        /// <param name="height">Height</param>
+        public ShadowMap(Game game, int width, int height)
+        {
+            this.Game = game;
+
+            this.Width = width;
+            this.Height = height;
+
+            this.Viewport = new Viewport(0, 0, width, height, 0, 1.0f);
+
+            DepthStencilView dsvStatic;
+            ShaderResourceView srvStatic;
+            GenerateResources(game, width, height, out dsvStatic, out srvStatic);
+            this.DepthMapStatic = dsvStatic;
+            this.TextureStatic = srvStatic;
+
+            DepthStencilView dsvDynamic;
+            ShaderResourceView srvDynamic;
+            GenerateResources(game, width, height, out dsvDynamic, out srvDynamic);
+            this.DepthMapDynamic = dsvDynamic;
+            this.TextureDynamic = srvDynamic;
         }
         /// <summary>
         /// Updates shadow map generation parameters
@@ -160,22 +188,31 @@ namespace Engine
             // Normal device coordinates transformation
             this.Transform = Helper.NormalDeviceCoordinatesTransform(this.View, this.Projection);
         }
-
         /// <summary>
         /// Release of resources
         /// </summary>
         public void Dispose()
         {
-            if (this.DepthMap != null)
+            if (this.DepthMapStatic != null)
             {
-                this.DepthMap.Dispose();
-                this.DepthMap = null;
+                this.DepthMapStatic.Dispose();
+                this.DepthMapStatic = null;
+            }
+            if (this.DepthMapDynamic != null)
+            {
+                this.DepthMapDynamic.Dispose();
+                this.DepthMapDynamic = null;
             }
 
-            if (this.Texture != null)
+            if (this.TextureStatic != null)
             {
-                this.Texture.Dispose();
-                this.Texture = null;
+                this.TextureStatic.Dispose();
+                this.TextureStatic = null;
+            }
+            if (this.TextureDynamic != null)
+            {
+                this.TextureDynamic.Dispose();
+                this.TextureDynamic = null;
             }
         }
     }

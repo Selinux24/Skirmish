@@ -448,7 +448,7 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                var shadowMap = this.Renderer.GetResource(SceneRendererResultEnum.ShadowMap);
+                var shadowMap = this.Renderer.GetResource(SceneRendererResultEnum.ShadowMapStatic);
 
                 if (shadowMap != null)
                 {

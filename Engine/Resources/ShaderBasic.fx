@@ -33,7 +33,8 @@ cbuffer cbPerInstance : register (b3)
 
 Texture2DArray gTextureArray;
 Texture2D gNormalMap;
-Texture2D gShadowMap;
+Texture2D gShadowMapStatic;
+Texture2D gShadowMapDynamic;
 
 /**********************************************************************************************************
 POSITION COLOR
@@ -214,7 +215,8 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
-		gShadowMap);
+		gShadowMapStatic,
+		gShadowMapDynamic);
 
 	if(gFogRange > 0)
 	{
@@ -448,7 +450,8 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
-		gShadowMap);
+		gShadowMapStatic,
+		gShadowMapDynamic);
 
 	if(gFogRange > 0)
 	{
@@ -573,7 +576,8 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
-		gShadowMap);
+		gShadowMapStatic,
+		gShadowMapDynamic);
 
 	if(gFogRange > 0)
 	{

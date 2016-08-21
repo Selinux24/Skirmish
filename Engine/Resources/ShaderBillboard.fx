@@ -36,7 +36,8 @@ cbuffer cbFixed : register (b2)
 };
 
 Texture2DArray gTextureArray;
-Texture2D gShadowMap;
+Texture2D gShadowMapStatic;
+Texture2D gShadowMapDynamic;
 Texture1D gTextureRandom;
 
 float3 CalcWindTranslation(uint primID, float3 pos)
@@ -165,7 +166,8 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
-		gShadowMap);
+		gShadowMapStatic,
+		gShadowMapDynamic);
 
 	float distToEye = length(toEyeWorld);
 

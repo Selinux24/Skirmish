@@ -321,6 +321,7 @@ namespace Engine
             Model newModel = new Model(this.Game, geo);
 
             newModel.Opaque = description.Opaque;
+            newModel.Static = description.Static;
             newModel.DeferredEnabled = description.DeferredEnabled;
             newModel.TextureIndex = description.TextureIndex;
 
@@ -372,6 +373,7 @@ namespace Engine
             ModelInstanced newModel = new ModelInstanced(this.Game, geo, description.Instances);
 
             newModel.Opaque = description.Opaque;
+            newModel.Static = description.Static;
             newModel.DeferredEnabled = description.DeferredEnabled;
 
             this.AddComponent(newModel, order);

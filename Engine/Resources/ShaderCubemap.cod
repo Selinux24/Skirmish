@@ -271,98 +271,104 @@ fxgroup
                 sample_indexable(texturecube)(float,float,float,float) r0.xyzw, v1.xyzx, t0.xyzw, s1  // r0.x <- textureColor.x; r0.y <- textureColor.y; r0.z <- textureColor.z; r0.w <- textureColor.w
                 add r1.xyz, -v1.xyzx, cb0[4].xyzx  // r1.x <- toEyeWorld.x; r1.y <- toEyeWorld.y; r1.z <- toEyeWorld.z
                 
-                #line 284 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 304 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 eq r1.w, cb0[7].y, l(1.000000)
                 if_nz r1.w
                 
-                #line 153
-                  mul r2.xyz, r0.xyzx, cb0[5].xyzx
-                  mul r2.xyz, r2.xyzx, cb0[5].wwww  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
-                
-                #line 182
+                #line 173
                   eq r1.w, cb0[7].x, l(1.000000)
+                  mul r2.xyz, r0.xyzx, cb0[5].wwww  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 102
-                  sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // r2.w <- depth
+                #line 103
+                  sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // r2.w <- depthS
                 
-                #line 111
-                  ge r2.w, l(-0.001000), r2.w
-                  movc r2.w, r2.w, l(0.500000), l(1.000000)  // r2.w <- <CalcShadowFactor return value>
+                #line 107
+                  lt r2.w, l(-0.001000), r2.w
                 
-                #line 186
-                  mul r3.xyz, r2.wwww, r2.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
-                  movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
+                #line 155
+                  mul r3.xyz, r0.xyzx, cb0[5].xyzx
+                  mul r3.xyz, r3.xyzx, cb0[5].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 296
+                #line 191
+                  movc r2.xyz, r2.wwww, r3.xyzx, r2.xyzx
+                
+                #line 208
+                  movc r2.xyz, r1.wwww, r2.xyzx, r3.xyzx  // r2.x <- <ComputeDirectionalLight return value>.x; r2.y <- <ComputeDirectionalLight return value>.y; r2.z <- <ComputeDirectionalLight return value>.z
+                
+                #line 317
                 else 
                   mov r2.xyz, l(0,0,0,0)
                 endif 
                 
-                #line 284
+                #line 304
                 eq r1.w, cb0[10].y, l(1.000000)
                 if_nz r1.w
                 
-                #line 153
-                  mul r3.xyz, r0.xyzx, cb0[8].xyzx
-                  mul r3.xyz, r3.xyzx, cb0[8].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
-                
-                #line 182
+                #line 173
                   eq r1.w, cb0[10].x, l(1.000000)
+                  mul r3.xyz, r0.xyzx, cb0[8].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 102
-                  sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // r2.w <- depth
+                #line 103
+                  sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // r2.w <- depthS
                 
-                #line 111
-                  ge r2.w, l(-0.001000), r2.w
-                  movc r2.w, r2.w, l(0.500000), l(1.000000)  // r2.w <- <CalcShadowFactor return value>
+                #line 107
+                  lt r2.w, l(-0.001000), r2.w
                 
-                #line 186
-                  mul r4.xyz, r2.wwww, r3.xyzx  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
-                  movc r3.xyz, r1.wwww, r4.xyzx, r3.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                #line 155
+                  mul r4.xyz, r0.xyzx, cb0[8].xyzx
+                  mul r4.xyz, r4.xyzx, cb0[8].wwww  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
                 
-                #line 286
+                #line 191
+                  movc r3.xyz, r2.wwww, r4.xyzx, r3.xyzx
+                
+                #line 208
+                  movc r3.xyz, r1.wwww, r3.xyzx, r4.xyzx  // r3.x <- <ComputeDirectionalLight return value>.x; r3.y <- <ComputeDirectionalLight return value>.y; r3.z <- <ComputeDirectionalLight return value>.z
+                
+                #line 306
                   add r2.xyz, r2.xyzx, r3.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 296
+                #line 317
                 endif 
                 
-                #line 284
+                #line 304
                 eq r1.w, cb0[13].y, l(1.000000)
                 if_nz r1.w
                 
-                #line 153
-                  mul r3.xyz, r0.xyzx, cb0[11].xyzx
-                  mul r3.xyz, r3.xyzx, cb0[11].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
-                
-                #line 182
+                #line 173
                   eq r1.w, cb0[13].x, l(1.000000)
+                  mul r3.xyz, r0.xyzx, cb0[11].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 102
-                  sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // r2.w <- depth
+                #line 103
+                  sample_indexable(texture2d)(float,float,float,float) r2.w, l(0.500000, 0.500000, 0.000000, 0.000000), t1.yzwx, s0  // r2.w <- depthS
                 
-                #line 111
-                  ge r2.w, l(-0.001000), r2.w
-                  movc r2.w, r2.w, l(0.500000), l(1.000000)  // r2.w <- <CalcShadowFactor return value>
+                #line 107
+                  lt r2.w, l(-0.001000), r2.w
                 
-                #line 186
-                  mul r4.xyz, r2.wwww, r3.xyzx  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
-                  movc r3.xyz, r1.wwww, r4.xyzx, r3.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
+                #line 155
+                  mul r4.xyz, r0.xyzx, cb0[11].xyzx
+                  mul r4.xyz, r4.xyzx, cb0[11].wwww  // r4.x <- litColor.x; r4.y <- litColor.y; r4.z <- litColor.z
                 
-                #line 286
+                #line 191
+                  movc r3.xyz, r2.wwww, r4.xyzx, r3.xyzx
+                
+                #line 208
+                  movc r3.xyz, r1.wwww, r3.xyzx, r4.xyzx  // r3.x <- <ComputeDirectionalLight return value>.x; r3.y <- <ComputeDirectionalLight return value>.y; r3.z <- <ComputeDirectionalLight return value>.z
+                
+                #line 306
                   add r2.xyz, r2.xyzx, r3.xyzx
                 
-                #line 296
+                #line 317
                 endif 
                 
-                #line 302
+                #line 323
                 eq r1.w, cb0[16].z, l(1.000000)
                 
-                #line 201
+                #line 220
                 add r3.xyz, v1.xyzx, -cb0[15].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                 dp3 r2.w, r3.xyzx, r3.xyzx
                 sqrt r2.w, r2.w  // r2.w <- distance
                 
-                #line 153
+                #line 155
                 mul r3.xyz, r0.xyzx, cb0[14].xyzx
                 mul r3.xyz, r3.xyzx, cb0[14].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
@@ -378,21 +384,21 @@ fxgroup
                 #line 92
                 and r2.w, r2.w, r4.x
                 
-                #line 304
+                #line 325
                 mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 312
+                #line 333
                 movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 302
+                #line 323
                 eq r1.w, cb0[19].z, l(1.000000)
                 
-                #line 201
+                #line 220
                 add r3.xyz, v1.xyzx, -cb0[18].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                 dp3 r2.w, r3.xyzx, r3.xyzx
                 sqrt r2.w, r2.w  // r2.w <- distance
                 
-                #line 153
+                #line 155
                 mul r3.xyz, r0.xyzx, cb0[17].xyzx
                 mul r3.xyz, r3.xyzx, cb0[17].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
@@ -408,21 +414,21 @@ fxgroup
                 #line 92
                 and r2.w, r2.w, r4.x
                 
-                #line 304
+                #line 325
                 mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 312
+                #line 333
                 movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 302
+                #line 323
                 eq r1.w, cb0[22].z, l(1.000000)
                 
-                #line 201
+                #line 220
                 add r3.xyz, v1.xyzx, -cb0[21].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                 dp3 r2.w, r3.xyzx, r3.xyzx
                 sqrt r2.w, r2.w  // r2.w <- distance
                 
-                #line 153
+                #line 155
                 mul r3.xyz, r0.xyzx, cb0[20].xyzx
                 mul r3.xyz, r3.xyzx, cb0[20].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
@@ -438,21 +444,21 @@ fxgroup
                 #line 92
                 and r2.w, r2.w, r4.x
                 
-                #line 304
+                #line 325
                 mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 312
+                #line 333
                 movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 302
+                #line 323
                 eq r1.w, cb0[25].z, l(1.000000)
                 
-                #line 201
+                #line 220
                 add r3.xyz, v1.xyzx, -cb0[24].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                 dp3 r2.w, r3.xyzx, r3.xyzx
                 sqrt r2.w, r2.w  // r2.w <- distance
                 
-                #line 153
+                #line 155
                 mul r3.xyz, r0.xyzx, cb0[23].xyzx
                 mul r3.xyz, r3.xyzx, cb0[23].wwww  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
@@ -468,17 +474,17 @@ fxgroup
                 #line 92
                 and r2.w, r2.w, r4.x
                 
-                #line 304
+                #line 325
                 mad r3.xyz, r3.xyzx, r2.wwww, r2.xyzx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 312
+                #line 333
                 movc r2.xyz, r1.wwww, r3.xyzx, r2.xyzx  // r2.x <- litColor.x; r2.y <- litColor.y; r2.z <- litColor.z
                 
-                #line 318
+                #line 339
                 eq r1.w, cb0[29].z, l(1.000000)
                 if_nz r1.w
                 
-                #line 233
+                #line 252
                   add r3.xyz, v1.xyzx, -cb0[27].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r1.w, r3.xyzx, r3.xyzx
                   sqrt r1.w, r1.w  // r1.w <- distance
@@ -497,7 +503,7 @@ fxgroup
                   mul r3.x, r2.w, l(57.295780)  // r3.x <- lightToSurfaceAngle
                   ge r3.x, cb0[28].w, r3.x
                 
-                #line 153
+                #line 155
                   mul r3.yzw, r0.xxyz, cb0[26].xxyz
                   mul r3.yzw, r3.yyzw, cb0[26].wwww  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                 
@@ -513,7 +519,7 @@ fxgroup
                 #line 92
                   and r1.w, r1.w, r4.y
                 
-                #line 256
+                #line 275
                   mad r2.w, -r2.w, l(57.295780), l(1.000000)
                   add r4.x, -cb0[28].w, l(1.000000)
                   div r2.w, r2.w, r4.x
@@ -522,17 +528,17 @@ fxgroup
                   mul r3.yzw, r1.wwww, r3.yyzw  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                   and r3.xyz, r3.yzwy, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 320
+                #line 341
                   add r2.xyz, r2.xyzx, r3.xyzx
                 
-                #line 328
+                #line 349
                 endif 
                 
-                #line 318
+                #line 339
                 eq r1.w, cb0[33].z, l(1.000000)
                 if_nz r1.w
                 
-                #line 233
+                #line 252
                   add r3.xyz, v1.xyzx, -cb0[31].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r1.w, r3.xyzx, r3.xyzx
                   sqrt r1.w, r1.w  // r1.w <- distance
@@ -551,7 +557,7 @@ fxgroup
                   mul r3.x, r2.w, l(57.295780)  // r3.x <- lightToSurfaceAngle
                   ge r3.x, cb0[32].w, r3.x
                 
-                #line 153
+                #line 155
                   mul r3.yzw, r0.xxyz, cb0[30].xxyz
                   mul r3.yzw, r3.yyzw, cb0[30].wwww  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                 
@@ -567,7 +573,7 @@ fxgroup
                 #line 92
                   and r1.w, r1.w, r4.y
                 
-                #line 256
+                #line 275
                   mad r2.w, -r2.w, l(57.295780), l(1.000000)
                   add r4.x, -cb0[32].w, l(1.000000)
                   div r2.w, r2.w, r4.x
@@ -576,17 +582,17 @@ fxgroup
                   mul r3.yzw, r1.wwww, r3.yyzw  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                   and r3.xyz, r3.yzwy, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 320
+                #line 341
                   add r2.xyz, r2.xyzx, r3.xyzx
                 
-                #line 328
+                #line 349
                 endif 
                 
-                #line 318
+                #line 339
                 eq r1.w, cb0[37].z, l(1.000000)
                 if_nz r1.w
                 
-                #line 233
+                #line 252
                   add r3.xyz, v1.xyzx, -cb0[35].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r1.w, r3.xyzx, r3.xyzx
                   sqrt r1.w, r1.w  // r1.w <- distance
@@ -605,7 +611,7 @@ fxgroup
                   mul r3.x, r2.w, l(57.295780)  // r3.x <- lightToSurfaceAngle
                   ge r3.x, cb0[36].w, r3.x
                 
-                #line 153
+                #line 155
                   mul r3.yzw, r0.xxyz, cb0[34].xxyz
                   mul r3.yzw, r3.yyzw, cb0[34].wwww  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                 
@@ -621,7 +627,7 @@ fxgroup
                 #line 92
                   and r1.w, r1.w, r4.y
                 
-                #line 256
+                #line 275
                   mad r2.w, -r2.w, l(57.295780), l(1.000000)
                   add r4.x, -cb0[36].w, l(1.000000)
                   div r2.w, r2.w, r4.x
@@ -630,17 +636,17 @@ fxgroup
                   mul r3.yzw, r1.wwww, r3.yyzw  // r3.y <- litColor.x; r3.z <- litColor.y; r3.w <- litColor.z
                   and r3.xyz, r3.yzwy, r3.xxxx  // r3.x <- litColor.x; r3.y <- litColor.y; r3.z <- litColor.z
                 
-                #line 320
+                #line 341
                   add r2.xyz, r2.xyzx, r3.xyzx
                 
-                #line 328
+                #line 349
                 endif 
                 
-                #line 318
+                #line 339
                 eq r1.w, cb0[41].z, l(1.000000)
                 if_nz r1.w
                 
-                #line 233
+                #line 252
                   add r3.xyz, v1.xyzx, -cb0[39].yzwy  // r3.x <- lightDirection.x; r3.y <- lightDirection.y; r3.z <- lightDirection.z
                   dp3 r1.w, r3.xyzx, r3.xyzx
                   sqrt r1.w, r1.w  // r1.w <- distance
@@ -659,7 +665,7 @@ fxgroup
                   mul r3.x, r2.w, l(57.295780)  // r3.x <- lightToSurfaceAngle
                   ge r3.x, cb0[40].w, r3.x
                 
-                #line 153
+                #line 155
                   mul r0.xyz, r0.xyzx, cb0[38].xyzx
                   mul r0.xyz, r0.xyzx, cb0[38].wwww  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                 
@@ -675,7 +681,7 @@ fxgroup
                 #line 92
                   and r1.w, r1.w, r3.z
                 
-                #line 256
+                #line 275
                   mad r2.w, -r2.w, l(57.295780), l(1.000000)
                   add r3.y, -cb0[40].w, l(1.000000)
                   div r2.w, r2.w, r3.y
@@ -684,24 +690,24 @@ fxgroup
                   mul r0.xyz, r0.xyzx, r1.wwww  // r0.x <- litColor.x; r0.y <- litColor.y; r0.z <- litColor.z
                   and r0.xyz, r0.xyzx, r3.xxxx
                 
-                #line 320
+                #line 341
                   add r2.xyz, r0.xyzx, r2.xyzx
                 
-                #line 328
+                #line 349
                 endif 
                 
-                #line 49 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
+                #line 50 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 lt r0.x, l(0.000000), cb0[42].y
                 dp3 r0.y, r1.xyzx, r1.xyzx
                 sqrt r0.y, r0.y  // r0.y <- distToEye
                 
-                #line 115 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
+                #line 117 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.y, r0.y, -cb0[42].x
                 div_sat r0.y, r0.y, cb0[42].y  // r0.y <- fogLerp
                 add r1.xyz, -r2.xyzx, cb0[43].xyzx
                 mad r1.xyz, r0.yyyy, r1.xyzx, r2.xyzx  // r1.x <- <ComputeFog return value>.x; r1.y <- <ComputeFog return value>.y; r1.z <- <ComputeFog return value>.z
                 
-                #line 54 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
+                #line 55 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 movc o0.xyz, r0.xxxx, r1.xyzx, r2.xyzx
                 mov o0.w, r0.w
                 ret 
@@ -875,10 +881,10 @@ fxgroup
                 //   o1.x <- <PSDeferredCubic return value>.normal.x; o1.y <- <PSDeferredCubic return value>.normal.y; o1.z <- <PSDeferredCubic return value>.normal.z; o1.w <- <PSDeferredCubic return value>.normal.w; 
                 //   o0.x <- <PSDeferredCubic return value>.color.x; o0.y <- <PSDeferredCubic return value>.color.y; o0.z <- <PSDeferredCubic return value>.color.z; o0.w <- <PSDeferredCubic return value>.color.w
                 //
-                #line 62 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
+                #line 63 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderCubemap.fx"
                 sample_indexable(texturecube)(float,float,float,float) o0.xyzw, v1.xyzx, t0.xyzw, s0
                 
-                #line 68
+                #line 69
                 mov o1.xyzw, l(0,0,0,0)
                 mov o2.xyz, v1.xyzx
                 mov o2.w, l(0)

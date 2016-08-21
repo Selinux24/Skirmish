@@ -552,7 +552,8 @@ namespace Engine
                             context.BaseContext.EyePosition,
                             context.BaseContext.Frustum,
                             context.BaseContext.Lights,
-                            context.BaseContext.ShadowMap,
+                            context.BaseContext.ShadowMapStatic,
+                            context.BaseContext.ShadowMapDynamic,
                             context.BaseContext.FromLightViewProjection);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
@@ -638,7 +639,8 @@ namespace Engine
                             context.BaseContext.EyePosition,
                             context.BaseContext.Frustum,
                             context.BaseContext.Lights,
-                            context.BaseContext.ShadowMap,
+                            context.BaseContext.ShadowMapStatic,
+                            context.BaseContext.ShadowMapDynamic,
                             context.BaseContext.FromLightViewProjection,
                             context.WindDirection,
                             context.WindStrength,
@@ -653,7 +655,8 @@ namespace Engine
                             context.BaseContext.EyePosition,
                             context.BaseContext.Frustum,
                             context.BaseContext.Lights,
-                            context.BaseContext.ShadowMap,
+                            context.BaseContext.ShadowMapStatic,
+                            context.BaseContext.ShadowMapDynamic,
                             context.BaseContext.FromLightViewProjection,
                             context.WindDirection,
                             context.WindStrength,
@@ -667,6 +670,7 @@ namespace Engine
                             context.BaseContext.ViewProjection,
                             context.BaseContext.EyePosition,
                             new BoundingFrustum(),
+                            null,
                             null,
                             null,
                             Matrix.Identity,

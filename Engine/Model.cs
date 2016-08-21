@@ -126,7 +126,8 @@ namespace Engine
                             context.EyePosition,
                             context.Frustum,
                             context.Lights,
-                            context.ShadowMap,
+                            context.ShadowMapStatic,
+                            context.ShadowMapDynamic,
                             context.FromLightViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)

@@ -37,6 +37,7 @@ namespace Engine
 
             this.ground = new Model(game, content);
             this.ground.Opaque = this.Opaque = this.Description.Opaque;
+            this.ground.Static = this.Static = this.Description.Static;
             this.ground.DeferredEnabled = this.Description.DeferredEnabled;
 
             if (!this.Description.DelayGeneration)

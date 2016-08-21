@@ -149,9 +149,13 @@ namespace Engine.Effects
         /// </summary>
         private EffectShaderResourceVariable normalMap = null;
         /// <summary>
-        /// Shadow map effect variable
+        /// Static shadow map effect variable
         /// </summary>
-        private EffectShaderResourceVariable shadowMap = null;
+        private EffectShaderResourceVariable shadowMapStatic = null;
+        /// <summary>
+        /// Dynamic shadow map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable shadowMapDynamic = null;
 
         /// <summary>
         /// Directional lights
@@ -431,17 +435,31 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Shadow map
+        /// Static shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMap
+        protected ShaderResourceView ShadowMapStatic
         {
             get
             {
-                return this.shadowMap.GetResource();
+                return this.shadowMapStatic.GetResource();
             }
             set
             {
-                this.shadowMap.SetResource(value);
+                this.shadowMapStatic.SetResource(value);
+            }
+        }
+        /// <summary>
+        /// Dynamic shadow map
+        /// </summary>
+        protected ShaderResourceView ShadowMapDynamic
+        {
+            get
+            {
+                return this.shadowMapDynamic.GetResource();
+            }
+            set
+            {
+                this.shadowMapDynamic.SetResource(value);
             }
         }
 
@@ -502,7 +520,8 @@ namespace Engine.Effects
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
-            this.shadowMap = this.Effect.GetVariableByName("gShadowMap").AsShaderResource();
+            this.shadowMapStatic = this.Effect.GetVariableByName("gShadowMapStatic").AsShaderResource();
+            this.shadowMapDynamic = this.Effect.GetVariableByName("gShadowMapDynamic").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -575,7 +594,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection)
         {
-            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, new BoundingFrustum(), null, null, Matrix.Identity);
+            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, new BoundingFrustum(), null, null, null, Matrix.Identity);
         }
         /// <summary>
         /// Update per frame data
@@ -585,7 +604,8 @@ namespace Engine.Effects
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="viewFrustum">Camera frustum</param>
         /// <param name="lights">Scene ligths</param>
-        /// <param name="shadowMap">Shadow map texture</param>
+        /// <param name="shadowMapStatic">Static shadow map texture</param>
+        /// <param name="shadowMapDynamic">Dynamic shadow map texture</param>
         /// <param name="fromLightViewProjection">From light View * Projection transform</param>
         public void UpdatePerFrame(
             Matrix world,
@@ -593,7 +613,8 @@ namespace Engine.Effects
             Vector3 eyePositionWorld,
             BoundingFrustum viewFrustum,
             SceneLights lights,
-            ShaderResourceView shadowMap,
+            ShaderResourceView shadowMapStatic,
+            ShaderResourceView shadowMapDynamic,
             Matrix fromLightViewProjection)
         {
             this.World = world;
@@ -634,7 +655,8 @@ namespace Engine.Effects
                 this.FogColor = lights.FogColor;
 
                 this.FromLightViewProjection = fromLightViewProjection;
-                this.ShadowMap = shadowMap;
+                this.ShadowMapStatic = shadowMapStatic;
+                this.ShadowMapDynamic = shadowMapDynamic;
             }
             else
             {
@@ -649,7 +671,8 @@ namespace Engine.Effects
                 this.FogColor = Color.Transparent;
 
                 this.FromLightViewProjection = Matrix.Identity;
-                this.ShadowMap = null;
+                this.ShadowMapStatic = null;
+                this.ShadowMapDynamic = null;
             }
         }
         /// <summary>

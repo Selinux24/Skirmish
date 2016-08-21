@@ -26,6 +26,7 @@ namespace TerrainTest
         };
 
         private bool useDebugTex = false;
+        private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapStatic;
         private SpriteTexture shadowMapDrawer = null;
         private ShaderResourceView debugTex = null;
         private int graphIndex = -1;
@@ -116,6 +117,7 @@ namespace TerrainTest
                 ContentPath = resources,
                 ModelFileName = "cursor.dae",
                 DeferredEnabled = false,
+                Opaque = false,
             });
             this.cursor3D.EnableDepthStencil = false;
             sw.Stop();
@@ -161,6 +163,7 @@ namespace TerrainTest
                 ContentPath = resources,
                 ModelFileName = "helicopter.dae",
                 Opaque = true,
+                Static = false,
                 TextureIndex = 2,
             };
             this.helicopter = this.AddModel(heliDesc, Matrix.RotationY(0));
@@ -180,6 +183,7 @@ namespace TerrainTest
                 ContentPath = resources,
                 ModelFileName = "Leopard.dae",
                 Opaque = true,
+                Static = false,
             });
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
@@ -196,6 +200,7 @@ namespace TerrainTest
                 ContentPath = resources,
                 ModelFileName = "helipod.dae",
                 Opaque = true,
+                Static = true,
             });
             sw.Stop();
             loadingText += string.Format("helipod: {0} ", sw.Elapsed.TotalSeconds);
@@ -210,6 +215,7 @@ namespace TerrainTest
                 ContentPath = resources,
                 ModelFileName = "garage.dae",
                 Opaque = true,
+                Static = true,
             });
             sw.Stop();
             loadingText += string.Format("garage: {0} ", sw.Elapsed.TotalSeconds);
@@ -224,6 +230,7 @@ namespace TerrainTest
                 ContentPath = resources,
                 ModelFileName = "obelisk.dae",
                 Opaque = true,
+                Static = true,
                 Instances = 4,
             });
             sw.Stop();
@@ -239,6 +246,7 @@ namespace TerrainTest
                 ContentPath = resources,
                 ModelFileName = "rocks.dae",
                 Opaque = true,
+                Static = true,
                 Instances = 15,
             });
             sw.Stop();
@@ -246,7 +254,7 @@ namespace TerrainTest
 
             #endregion
 
-            #region Roks
+            #region Trees
 
             sw.Restart();
             this.trees = this.AddInstancingModel(new ModelInstancedDescription()
@@ -254,6 +262,7 @@ namespace TerrainTest
                 ContentPath = resources + "\\tree",
                 ModelFileName = "tree1.dae",
                 Opaque = true,
+                Static = true,
                 Instances = 30,
             });
             sw.Stop();
@@ -303,6 +312,7 @@ namespace TerrainTest
                     MaxSize = Vector2.One * 3.50f,
                 },
                 Opaque = true,
+                Static = true,
                 DelayGeneration = true,
             };
             this.terrain = this.AddScenery(terrainDescription);
@@ -784,6 +794,7 @@ namespace TerrainTest
             if (this.Game.Input.KeyJustReleased(Keys.F7))
             {
                 this.shadowMapDrawer.Visible = !this.shadowMapDrawer.Visible;
+                this.shadowResult = SceneRendererResultEnum.ShadowMapStatic;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F8))
@@ -811,6 +822,15 @@ namespace TerrainTest
             {
                 this.helicopter.TextureIndex--;
                 if (this.helicopter.TextureIndex < 0) this.helicopter.TextureIndex = 0;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Up))
+            {
+                this.shadowResult = SceneRendererResultEnum.ShadowMapStatic;
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.Down))
+            {
+                this.shadowResult = SceneRendererResultEnum.ShadowMapDynamic;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
@@ -846,11 +866,11 @@ namespace TerrainTest
         {
             base.Draw(gameTime);
 
-            this.shadowMapDrawer.Texture = this.useDebugTex ? this.debugTex : this.Renderer.GetResource(SceneRendererResultEnum.ShadowMap);
+            this.shadowMapDrawer.Texture = this.useDebugTex ? this.debugTex : this.Renderer.GetResource(this.shadowResult);
 
             #region Texts
 
-            string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}", Counters.Buffers, Counters.AllocatedMemoryInBuffers, Counters.BufferReads, Counters.BufferWrites);
+            string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}", Counters.Buffers, Counters.AllocatedMemoryInBuffers, Counters.BufferReads, Counters.BufferWrites, this.RenderMode, this.shadowResult);
             string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets);
             this.counters1.Text = txt1;
             this.counters2.Text = txt2;

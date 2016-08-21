@@ -27,7 +27,8 @@ cbuffer cbPerObject : register (b1)
 Texture2DArray gTextureLRArray;
 Texture2DArray gTextureHRArray;
 Texture2DArray gNormalMapArray;
-Texture2D gShadowMap;
+Texture2D gShadowMapStatic;
+Texture2D gShadowMapDynamic;
 
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE TANGENT
@@ -106,7 +107,8 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
-		gShadowMap);
+		gShadowMapStatic,
+		gShadowMapDynamic);
 
 	if(gFogRange > 0)
 	{

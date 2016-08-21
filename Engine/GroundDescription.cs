@@ -208,6 +208,10 @@ namespace Engine
         /// </summary>
         public bool Opaque = true;
         /// <summary>
+        /// Is Static
+        /// </summary>
+        public bool Static = true;
+        /// <summary>
         /// Can be renderer by the deferred renderer
         /// </summary>
         public bool DeferredEnabled = true;
