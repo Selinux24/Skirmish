@@ -117,13 +117,16 @@ namespace Engine.Content
         /// <summary>
         /// Creates a unique texture image
         /// </summary>
+        /// <param name="contentFolder">Content folder</param>
         /// <param name="texture">Path to texture</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Texture(string texture)
+        public static ImageContent Texture(string contentFolder, string texture)
         {
+            var p = ContentManager.FindPaths(contentFolder, texture);
+            
             return new ImageContent()
             {
-                Path = texture,
+                Paths = p,
             };
         }
         /// <summary>
@@ -141,13 +144,16 @@ namespace Engine.Content
         /// <summary>
         /// Creates a texture array image
         /// </summary>
+        /// <param name="contentFolder">Content folder</param>
         /// <param name="textures">Paths to textures</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Array(string[] textures)
+        public static ImageContent Array(string contentFolder, string[] textures)
         {
+            var p = ContentManager.FindPaths(contentFolder, textures);
+
             return new ImageContent()
             {
-                Paths = textures,
+                Paths = p,
             };
         }
         /// <summary>
@@ -165,14 +171,17 @@ namespace Engine.Content
         /// <summary>
         /// Creates a cubic texture image
         /// </summary>
+        /// <param name="contentFolder">Content folder</param>
         /// <param name="texture">Path to texture</param>
         /// <param name="faceSize">Face size</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Cubic(string texture, int faceSize)
+        public static ImageContent Cubic(string contentFolder, string texture, int faceSize)
         {
+            var p = ContentManager.FindPaths(contentFolder, texture);
+
             return new ImageContent()
             {
-                Path = texture,
+                Paths = p,
                 IsCubic = true,
                 CubicFaceSize = faceSize,
             };

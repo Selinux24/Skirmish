@@ -42,6 +42,7 @@ namespace TerrainTest
         private Model tank = null;
         private NavigationMeshAgent tankAgent = new NavigationMeshAgent();
 
+        private LensFlare lensFlare = null;
         private Skydom skydom = null;
         private Scenery terrain = null;
         private List<Line3> oks = new List<Line3>();
@@ -54,7 +55,8 @@ namespace TerrainTest
         private Model garage = null;
         private ModelInstanced obelisk = null;
         private ModelInstanced rocks = null;
-        private ModelInstanced trees = null;
+        private ModelInstanced tree1 = null;
+        private ModelInstanced tree2 = null;
 
         private Model helicopter = null;
         private LineListDrawer helicopterLineDrawer = null;
@@ -138,6 +140,36 @@ namespace TerrainTest
             loadingText += string.Format("cursor2D: {0} ", sw.Elapsed.TotalSeconds);
 
             this.cursor2D.Visible = false;
+
+            #endregion
+
+            #region Lens flare
+
+            sw.Restart();
+            this.lensFlare = this.AddLensFlare(new LensFlareDescription()
+            {
+                ContentPath = @"Resources/Flare",
+                GlowTexture = "lfGlow.png",
+                Flares = new FlareDescription[]
+                {
+                    new FlareDescription(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
+                    new FlareDescription( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
+                    new FlareDescription( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
+                    new FlareDescription( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
+
+                    new FlareDescription(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
+                    new FlareDescription( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
+                    new FlareDescription( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
+
+                    new FlareDescription(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
+                    new FlareDescription( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
+                    new FlareDescription( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
+                }
+            });
+            sw.Stop();
+            loadingText += string.Format("lensFlare: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.lensFlare.Light = this.Lights.DirectionalLights[0];
 
             #endregion
 
@@ -247,7 +279,7 @@ namespace TerrainTest
                 ModelFileName = "rocks.dae",
                 Opaque = true,
                 Static = true,
-                Instances = 15,
+                Instances = 150,
             });
             sw.Stop();
             loadingText += string.Format("rocks: {0} ", sw.Elapsed.TotalSeconds);
@@ -257,13 +289,21 @@ namespace TerrainTest
             #region Trees
 
             sw.Restart();
-            this.trees = this.AddInstancingModel(new ModelInstancedDescription()
+            this.tree1 = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = resources + "\\tree",
                 ModelFileName = "tree1.dae",
                 Opaque = true,
                 Static = true,
-                Instances = 30,
+                Instances = 100,
+            });
+            this.tree2 = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = resources + "\\tree",
+                ModelFileName = "tree2.dae",
+                Opaque = true,
+                Static = true,
+                Instances = 100,
             });
             sw.Stop();
             loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
@@ -332,7 +372,7 @@ namespace TerrainTest
             Vector3 hPos;
             Triangle hTri;
             float hDist;
-            if (this.terrain.FindTopGroundPosition(30, 30, out hPos, out hTri, out hDist))
+            if (this.terrain.FindTopGroundPosition(70, 70, out hPos, out hTri, out hDist))
             {
                 this.helipod.Manipulator.SetPosition(hPos, true);
             }
@@ -372,14 +412,24 @@ namespace TerrainTest
                 float rockDist;
                 if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
                 {
+                    var scale = 1f;
+                    if (i < 15)
+                    {
+                        scale = posRnd.NextFloat(0.5f, 2f);
+                    }
+                    else
+                    {
+                        scale = posRnd.NextFloat(0.1f, 0.2f);
+                    }
+
                     this.rocks.Instances[i].Manipulator.SetPosition(rockPosition, true);
                     this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0, true);
-                    this.rocks.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.5f, 2f), true);
+                    this.rocks.Instances[i].Manipulator.SetScale(scale, true);
                 }
             }
 
             //Trees
-            for (int i = 0; i < this.trees.Instances.Length; i++)
+            for (int i = 0; i < this.tree1.Instances.Length; i++)
             {
                 var pos = this.DEBUGGetRandomPoint(posRnd, Vector3.Zero);
 
@@ -388,9 +438,24 @@ namespace TerrainTest
                 float treeDist;
                 if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
                 {
-                    this.trees.Instances[i].Manipulator.SetPosition(treePosition, true);
-                    this.trees.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
-                    this.trees.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.5f, 1.5f), true);
+                    this.tree1.Instances[i].Manipulator.SetPosition(treePosition, true);
+                    this.tree1.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
+                    this.tree1.Instances[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                }
+            }
+
+            for (int i = 0; i < this.tree2.Instances.Length; i++)
+            {
+                var pos = this.DEBUGGetRandomPoint(posRnd, Vector3.Zero);
+
+                Vector3 treePosition;
+                Triangle treeTri;
+                float treeDist;
+                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                {
+                    this.tree2.Instances[i].Manipulator.SetPosition(treePosition, true);
+                    this.tree2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
+                    this.tree2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.5f, 1.5f), true);
                 }
             }
 
@@ -398,7 +463,8 @@ namespace TerrainTest
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.garage, EvaluateForPicking = true, UseVolumeForPicking = false, EvaluateForPathFinding = true, UseVolumeForPathFinding = false }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.obelisk, EvaluateForPicking = false }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.rocks, EvaluateForPicking = false }, false);
-            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.trees, EvaluateForPicking = false, UseVolumeForPicking = true, EvaluateForPathFinding = true, UseVolumeForPathFinding = true }, false);
+            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.tree1, EvaluateForPicking = false, UseVolumeForPicking = true, EvaluateForPathFinding = true, UseVolumeForPathFinding = true }, false);
+            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.tree2, EvaluateForPicking = false, UseVolumeForPicking = true, EvaluateForPathFinding = true, UseVolumeForPathFinding = true }, false);
             this.terrain.UpdateInternals();
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
@@ -406,7 +472,7 @@ namespace TerrainTest
             Vector3 heliPos;
             Triangle heliTri;
             float heliDist;
-            if (this.terrain.FindTopGroundPosition(30, 30, out heliPos, out heliTri, out heliDist))
+            if (this.terrain.FindTopGroundPosition(70, 70, out heliPos, out heliTri, out heliDist))
             {
                 this.helicopter.Manipulator.SetPosition(heliPos, true);
                 this.helicopter.Manipulator.SetNormal(heliTri.Normal);
@@ -415,7 +481,7 @@ namespace TerrainTest
             Vector3 tankPosition;
             Triangle tankTriangle;
             float tankDist;
-            if (this.terrain.FindTopGroundPosition(0, 0, out tankPosition, out tankTriangle, out tankDist))
+            if (this.terrain.FindTopGroundPosition(-60, -60, out tankPosition, out tankTriangle, out tankDist))
             {
                 this.tank.Manipulator.SetPosition(tankPosition, true);
                 this.tank.Manipulator.SetNormal(tankTriangle.Normal);

@@ -258,7 +258,7 @@ namespace Engine.Helpers
         /// <returns>Returns the resource view</returns>
         public static ShaderResourceView LoadTexture(this Device device, string filename)
         {
-            return ShaderResourceView.FromFile(device, filename);
+            return ShaderResourceView.FromFile(device, filename, ImageLoadInformation.Default);
         }
         /// <summary>
         /// Loads a texture from file in the graphics device
@@ -268,7 +268,7 @@ namespace Engine.Helpers
         /// <returns>Returns the resource view</returns>
         public static ShaderResourceView LoadTexture(this Device device, MemoryStream file)
         {
-            return ShaderResourceView.FromStream(device, file, (int)file.Length);
+            return ShaderResourceView.FromStream(device, file, (int)file.Length, ImageLoadInformation.Default);
         }
         /// <summary>
         /// Loads a texture array from a file collection in the graphics device

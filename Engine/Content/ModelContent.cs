@@ -108,7 +108,7 @@ namespace Engine.Content
                 {
                     string imageName = this.NextImageName;
 
-                    this.Add(imageName, ImageContent.Texture(material.AmbientTexture));
+                    this.Add(imageName, ImageContent.Texture("", material.AmbientTexture));
 
                     material.AmbientTexture = imageName;
                 }
@@ -117,7 +117,7 @@ namespace Engine.Content
                 {
                     string imageName = this.NextImageName;
 
-                    this.Add(imageName, ImageContent.Texture(material.DiffuseTexture));
+                    this.Add(imageName, ImageContent.Texture("", material.DiffuseTexture));
 
                     material.DiffuseTexture = imageName;
                 }
@@ -126,7 +126,7 @@ namespace Engine.Content
                 {
                     string imageName = this.NextImageName;
 
-                    this.Add(imageName, ImageContent.Texture(material.EmissionTexture));
+                    this.Add(imageName, ImageContent.Texture("", material.EmissionTexture));
 
                     material.EmissionTexture = imageName;
                 }
@@ -135,7 +135,7 @@ namespace Engine.Content
                 {
                     string imageName = this.NextImageName;
 
-                    this.Add(imageName, ImageContent.Texture(material.NormalMapTexture));
+                    this.Add(imageName, ImageContent.Texture("", material.NormalMapTexture));
 
                     material.NormalMapTexture = imageName;
                 }
@@ -144,7 +144,7 @@ namespace Engine.Content
                 {
                     string imageName = this.NextImageName;
 
-                    this.Add(imageName, ImageContent.Texture(material.SpecularTexture));
+                    this.Add(imageName, ImageContent.Texture("", material.SpecularTexture));
 
                     material.SpecularTexture = imageName;
                 }
@@ -495,7 +495,7 @@ namespace Engine.Content
             string materialName = "spriteMaterial";
             string geoName = "spriteGeometry";
 
-            ImageContent image = ImageContent.Array(ContentManager.FindContent(contentFolder, textures));
+            ImageContent image = ImageContent.Array(contentFolder, textures);
 
             MaterialContent material = MaterialContent.Default;
             material.DiffuseTexture = imageName;

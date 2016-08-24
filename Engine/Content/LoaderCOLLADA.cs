@@ -260,15 +260,15 @@ namespace Engine.Content
             {
                 foreach (Image image in dae.LibraryImages)
                 {
-                    ImageContent info = new ImageContent();
+                    ImageContent info = null;
 
                     if (image.Data != null)
                     {
-                        info.Stream = new MemoryStream((byte[])image.Data);
+                        info = ImageContent.Texture(new MemoryStream((byte[])image.Data));
                     }
                     else if (!string.IsNullOrEmpty(image.InitFrom))
                     {
-                        info.Streams = ContentManager.FindContent(contentFolder, Uri.UnescapeDataString(image.InitFrom));
+                        info = ImageContent.Texture(contentFolder, Uri.UnescapeDataString(image.InitFrom));
                     }
 
                     modelContent.Images[image.Id] = info;

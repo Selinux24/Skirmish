@@ -232,7 +232,96 @@ namespace Engine.Content
             {
                 for (int i = 0; i < resourcePaths.Length; i++)
                 {
-                    var resourceRes = FindContent(contentSource, resourcePaths[i]);
+                    var resourceRes = FindContent(contentSource, resourcePaths[i], throwException);
+                    if (resourceRes != null && resourceRes.Length > 0)
+                    {
+                        res.AddRange(resourceRes);
+                    }
+                    else if (throwException)
+                    {
+                        throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePaths[i]);
+                    }
+                }
+            }
+
+            return res.ToArray();
+        }
+        /// <summary>
+        /// Finds paths
+        /// </summary>
+        /// <param name="contentSource">Content source</param>
+        /// <param name="resourcePath">Resource path</param>
+        /// <returns>Returns resource paths found</returns>
+        /// <remarks>
+        /// Content source can be a folder or a zip file
+        /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
+        /// </remarks>
+        public static string[] FindPaths(string contentSource, string resourcePath, bool throwException = true)
+        {
+            if (string.IsNullOrEmpty(resourcePath))
+            {
+                return null;
+            }
+            else if (File.Exists(resourcePath))
+            {
+                return new[] { resourcePath };
+            }
+            else
+            {
+                if (Directory.Exists(contentSource))
+                {
+                    //Directory
+                    resourcePath = Path.Combine(contentSource, resourcePath);
+                    if (File.Exists(resourcePath))
+                    {
+                        return new[] { resourcePath };
+                    }
+                    else
+                    {
+                        string[] files = Directory.GetFiles(
+                            contentSource,
+                            Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
+                        if (files != null && files.Length > 0)
+                        {
+                            return files;
+                        }
+                        else if (throwException)
+                        {
+                            throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePath);
+                        }
+                    }
+                }
+                else if (File.Exists(contentSource))
+                {
+                    //Compressed file
+                    throw new NotImplementedException("Compressed files not implemented yet");
+                }
+                else if (throwException)
+                {
+                    throw new DirectoryNotFoundException(string.Format("El origen de contenido [{0}] no existe", resourcePath));
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Finds paths
+        /// </summary>
+        /// <param name="contentSource">Content source</param>
+        /// <param name="resourcePaths">Resource path list</param>
+        /// <returns>Returns resource path list</returns>
+        /// <remarks>
+        /// Content source can be a folder or a zip file
+        /// </remarks>
+        public static string[] FindPaths(string contentSource, string[] resourcePaths, bool throwException = true)
+        {
+            List<string> res = new List<string>();
+
+            if (resourcePaths != null && resourcePaths.Length > 0)
+            {
+                for (int i = 0; i < resourcePaths.Length; i++)
+                {
+                    var resourceRes = FindPaths(contentSource, resourcePaths[i], throwException);
                     if (resourceRes != null && resourceRes.Length > 0)
                     {
                         res.AddRange(resourceRes);

@@ -371,7 +371,7 @@ namespace Engine
         public Polygon(Vector3[] points, int index, int length)
         {
             Vector3[] tmp = new Vector3[length];
-            Array.Copy(points, index, tmp, 0, length); 
+            Array.Copy(points, index, tmp, 0, length);
             this.Points = tmp;
             this.Hole = false;
         }
@@ -560,21 +560,14 @@ namespace Engine
         /// </returns>
         public Triangle[] Triangulate()
         {
-            if (GetOrientation(this.points) != GeometricOrientation.None)
-            {
-                Triangle[] triList = new Triangle[this.Count - 2];
+            Triangle[] triList = new Triangle[this.Count - 2];
 
-                for (int i = 0; i < triList.Length; i++)
-                {
-                    triList[i] = new Triangle(this[0], this[i + 1], this[i + 2]);
-                }
-
-                return triList;
-            }
-            else
+            for (int i = 0; i < triList.Length; i++)
             {
-                throw new InvalidOperationException("Bad point list orientation");
+                triList[i] = new Triangle(this[0], this[i + 1], this[i + 2]);
             }
+
+            return triList;
         }
 
         /// <summary>
