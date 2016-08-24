@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
+using System;
+using System.Collections.Generic;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Device = SharpDX.Direct3D11.Device;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
@@ -88,6 +88,10 @@ namespace Engine.Common
         /// Index count
         /// </summary>
         public int IndexCount { get; protected set; }
+        /// <summary>
+        /// Is instanced
+        /// </summary>
+        public bool Instanced { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -96,8 +100,9 @@ namespace Engine.Common
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
+        /// <param name="instanced">Instanced</param>
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        public Mesh(string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool dynamic = false)
+        public Mesh(string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced, bool dynamic = false)
         {
             this.dynamicBuffers = dynamic;
 
@@ -109,6 +114,7 @@ namespace Engine.Common
             this.VertextType = vertices[0].VertexType;
             this.Textured = VertexData.IsTextured(vertices[0].VertexType);
             this.Skinned = VertexData.IsSkinned(vertices[0].VertexType);
+            this.Instanced = instanced;
         }
         /// <summary>
         /// Initializes the mesh graphics content
@@ -189,6 +195,44 @@ namespace Engine.Common
 
                     Counters.DrawCallsPerFrame++;
                     Counters.InstancesPerFrame++;
+                }
+            }
+        }
+        /// <summary>
+        /// Draw mesh geometry
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="deviceContext">Immediate context</param>
+        /// <param name="count">Instances to draw</param>
+        public virtual void Draw(DeviceContext deviceContext, int count)
+        {
+            if (count > 0)
+            {
+                if (this.Indexed)
+                {
+                    if (this.IndexCount > 0)
+                    {
+                        deviceContext.DrawIndexedInstanced(
+                            this.IndexCount,
+                            count,
+                            0, 0, 0);
+
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame += count;
+                    }
+                }
+                else
+                {
+                    if (this.VertexCount > 0)
+                    {
+                        deviceContext.DrawInstanced(
+                            this.VertexCount,
+                            count,
+                            0, 0);
+
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame += count;
+                    }
                 }
             }
         }

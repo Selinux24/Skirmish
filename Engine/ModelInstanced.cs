@@ -1,12 +1,16 @@
 ﻿using SharpDX;
 using System;
+using Buffer = SharpDX.Direct3D11.Buffer;
+using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
+    using Engine.Helpers;
 
     /// <summary>
     /// Instaced model
@@ -21,6 +25,11 @@ namespace Engine
         /// Manipulator list per instance
         /// </summary>
         private ModelInstance[] instances = null;
+
+        /// <summary>
+        /// Instancing data buffer
+        /// </summary>
+        protected Buffer InstancingBuffer = null;
 
         /// <summary>
         /// Enables z-buffer writting
@@ -61,6 +70,14 @@ namespace Engine
                 return Array.FindAll(this.instances, i => i.Visible == true && i.Cull == false).Length;
             }
         }
+        /// <summary>
+        /// Stride of instancing data
+        /// </summary>
+        public int InstancingBufferStride { get; protected set; }
+        /// <summary>
+        /// Instances
+        /// </summary>
+        public int InstanceCount { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -76,6 +93,39 @@ namespace Engine
             this.instances = Helper.CreateArray(instances, () => new ModelInstance(this));
 
             this.EnableDepthStencil = true;
+
+            if (instances > 0)
+            {
+                VertexInstancingData[] instancingData = new VertexInstancingData[instances];
+
+                this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(instancingData);
+                this.InstanceCount = instances;
+                this.InstancingBufferStride = instancingData[0].Stride;
+
+                foreach (var meshList in this.Meshes.Values)
+                {
+                    foreach (var mesh in meshList)
+                    {
+                        if (mesh.Value.Instanced)
+                        {
+                            mesh.Value.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Dispose model buffers
+        /// </summary>
+        public override void Dispose()
+        {
+            base.Dispose();
+
+            if (this.InstancingBuffer != null)
+            {
+                this.InstancingBuffer.Dispose();
+                this.InstancingBuffer = null;
+            }
         }
         /// <summary>
         /// Update
@@ -124,6 +174,8 @@ namespace Engine
                                 instanceIndex++;
                             }
                         }
+
+                        this.WriteInstancingData(this.DeviceContext, this.instancingData);
                     }
 
                     #region Per frame update
@@ -210,7 +262,7 @@ namespace Engine
 
                         foreach (string material in dictionary.Keys)
                         {
-                            MeshInstanced mesh = (MeshInstanced)dictionary[material];
+                            Mesh mesh = dictionary[material];
                             MeshMaterial mat = this.Materials[material];
 
                             #region Per object update
@@ -233,8 +285,6 @@ namespace Engine
                             EffectTechnique technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing, context.DrawerMode);
 
                             mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
-
-                            mesh.WriteInstancingData(this.DeviceContext, this.instancingData);
 
                             for (int p = 0; p < technique.Description.PassCount; p++)
                             {
@@ -310,6 +360,28 @@ namespace Engine
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Writes instancing data
+        /// </summary>
+        /// <param name="deviceContext">Immediate context</param>
+        /// <param name="data">Instancig data</param>
+        protected virtual void WriteInstancingData(DeviceContext deviceContext, VertexInstancingData[] data)
+        {
+            if (data != null && data.Length > 0)
+            {
+                this.InstanceCount = data.Length;
+
+                if (this.InstancingBuffer != null)
+                {
+                    deviceContext.WriteBuffer(this.InstancingBuffer, data);
+                }
+            }
+            else
+            {
+                this.InstanceCount = 0;
             }
         }
     }

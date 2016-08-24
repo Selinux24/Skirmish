@@ -443,7 +443,6 @@
     <Compile Include="Content\MeshContent.cs" />
     <Compile Include="Content\ModelContent.cs" />
     <Compile Include="Content\SkinningContent.cs" />
-    <Compile Include="Common\MeshInstanced.cs" />
     <Compile Include="Collada\Transforms.cs" />
     <Compile Include="Common\VertexData.cs" />
     <Compile Include="Common\Weight.cs" />

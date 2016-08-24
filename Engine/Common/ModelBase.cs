@@ -1,7 +1,7 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using SharpDX;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Common
@@ -397,27 +397,13 @@ namespace Engine.Common
                         jointNames,
                         bindShapeMatrix);
 
-                    Mesh nMesh = null;
-
-                    if (instanced)
-                    {
-                        nMesh = new MeshInstanced(
-                            geometry.Material,
-                            geometry.Topology,
-                            vertexList,
-                            indices,
-                            instances,
-                            dynamic);
-                    }
-                    else
-                    {
-                        nMesh = new Mesh(
-                            geometry.Material,
-                            geometry.Topology,
-                            vertexList,
-                            indices,
-                            dynamic);
-                    }
+                    Mesh nMesh = new Mesh(
+                        geometry.Material,
+                        geometry.Topology,
+                        vertexList,
+                        indices,
+                        instanced,
+                        dynamic);
 
                     this.Meshes.Add(meshName, geometry.Material, nMesh);
                 }
