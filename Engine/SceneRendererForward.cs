@@ -463,6 +463,24 @@ namespace Engine
             if (result == SceneRendererResultEnum.ShadowMapDynamic) return this.ShadowMapDynamic;
             return null;
         }
+
+        /// <summary>
+        /// Binds graphics for shadow mapping pass
+        /// </summary>
+        private void BindShadowMap(DepthStencilView dsv)
+        {
+            //Set shadow mapper viewport
+            this.Game.Graphics.SetViewport(this.shadowMapper.Viewport);
+
+            //Set shadow map depth map without render target
+            this.Game.Graphics.SetRenderTarget(
+                null,
+                false,
+                Color.Transparent,
+                dsv,
+                true,
+                DepthStencilClearFlags.Depth);
+        }
         /// <summary>
         /// Draw components for shadow mapping
         /// </summary>
@@ -475,9 +493,8 @@ namespace Engine
             {
                 if (!components[i].Cull)
                 {
-                    this.Game.Graphics.SetRasterizerShadows();
-                    this.Game.Graphics.SetBlendDefault();
                     this.Game.Graphics.SetRasterizerCullFrontFace();
+                    this.Game.Graphics.SetBlendDefault();
 
                     components[i].Draw(context);
                 }
@@ -508,23 +525,6 @@ namespace Engine
                     components[i].Draw(context);
                 }
             }
-        }
-        /// <summary>
-        /// Binds graphics for shadow mapping pass
-        /// </summary>
-        private void BindShadowMap(DepthStencilView dsv)
-        {
-            //Set shadow mapper viewport
-            this.Game.Graphics.SetViewport(this.shadowMapper.Viewport);
-
-            //Set shadow map depth map without render target
-            this.Game.Graphics.SetRenderTarget(
-                null,
-                false,
-                Color.Transparent,
-                dsv,
-                true,
-                DepthStencilClearFlags.Depth);
         }
     }
 }

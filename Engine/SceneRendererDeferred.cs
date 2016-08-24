@@ -1234,9 +1234,8 @@ namespace Engine
             {
                 if (!components[i].Cull)
                 {
-                    this.Game.Graphics.SetRasterizerShadows();
-                    this.Game.Graphics.SetBlendDefault();
                     this.Game.Graphics.SetRasterizerCullFrontFace();
+                    this.Game.Graphics.SetBlendDefault();
 
                     components[i].Draw(context);
                 }

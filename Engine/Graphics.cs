@@ -168,10 +168,6 @@ namespace Engine
         /// Sets cull counter-clockwise face rasterizer
         /// </summary>
         private RasterizerState rasterizerCullFrontFace = null;
-        /// <summary>
-        /// Sets shadow mapping rasterizer
-        /// </summary>
-        private RasterizerState rasterizerShadows = null;
 
         /// <summary>
         /// Back buffer format
@@ -645,23 +641,6 @@ namespace Engine
                     DepthBias = 0,
                     DepthBiasClamp = 0.0f,
                     SlopeScaledDepthBias = 0.0f,
-                });
-
-            //Shadows rasterizer state
-            this.rasterizerShadows = new RasterizerState(
-                this.Device,
-                new RasterizerStateDescription()
-                {
-                    CullMode = CullMode.Back,
-                    FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = false,
-                    IsAntialiasedLineEnabled = false,
-                    IsMultisampleEnabled = false,
-                    IsScissorEnabled = false,
-                    IsDepthClipEnabled = true,
-                    DepthBias = 100000,
-                    DepthBiasClamp = 0.0f,
-                    SlopeScaledDepthBias = 1.0f,
                 });
 
             #endregion
@@ -1202,13 +1181,6 @@ namespace Engine
             this.SetRasterizerState(this.rasterizerCullFrontFace);
         }
         /// <summary>
-        /// Sets shadow mapping rasterizer
-        /// </summary>
-        public void SetRasterizerShadows()
-        {
-            this.SetRasterizerState(this.rasterizerShadows);
-        }
-        /// <summary>
         /// Dispose created resources
         /// </summary>
         public void Dispose()
@@ -1374,7 +1346,6 @@ namespace Engine
             Helper.Dispose(this.rasterizerWireframe);
             Helper.Dispose(this.rasterizerNoCull);
             Helper.Dispose(this.rasterizerCullFrontFace);
-            Helper.Dispose(this.rasterizerShadows);
 
             Helper.Dispose(this.blendDefault);
             Helper.Dispose(this.blendAlphaEnabled);
