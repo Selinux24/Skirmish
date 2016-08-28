@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SharpDX;
+using SharpDX.Direct3D;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using SharpDX;
-using SharpDX.Direct3D;
 
 namespace Engine.Content
 {
@@ -24,8 +24,8 @@ namespace Engine.Content
         /// <param name="fileName">Collada model</param>
         /// <param name="coordinate">Coordinate system</param>
         /// <param name="orientation">Up axis orientation</param>
-        /// <returns>Returns de content loaded</returns>
-        public static ModelContent Load(string contentFolder, string fileName, CoordinateSystems coordinate = CoordinateSystems.LeftHanded, GeometryOrientations orientation = GeometryOrientations.YUp)
+        /// <returns>Returns the loaded contents</returns>
+        public static ModelContent[] Load(string contentFolder, string fileName, CoordinateSystems coordinate = CoordinateSystems.LeftHanded, GeometryOrientations orientation = GeometryOrientations.YUp)
         {
             return Load(contentFolder, fileName, Matrix.Identity, coordinate, orientation);
         }
@@ -37,153 +37,160 @@ namespace Engine.Content
         /// <param name="transform">Global geometry transform</param>
         /// <param name="coordinate">Coordinate system</param>
         /// <param name="orientation">Up axis orientation</param>
-        /// <returns>Returns de content loaded</returns>
-        public static ModelContent Load(string contentFolder, string fileName, Matrix transform, CoordinateSystems coordinate = CoordinateSystems.LeftHanded, GeometryOrientations orientation = GeometryOrientations.YUp)
+        /// <returns>Returns the loaded contents</returns>
+        public static ModelContent[] Load(string contentFolder, string fileName, Matrix transform, CoordinateSystems coordinate = CoordinateSystems.LeftHanded, GeometryOrientations orientation = GeometryOrientations.YUp)
         {
             MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (modelList != null && modelList.Length == 1)
+            if (modelList != null && modelList.Length > 0)
             {
-                COLLADA dae = COLLADA.Load(modelList[0]);
+                ModelContent[] res = new ModelContent[modelList.Length];
 
-                GeometryOrientations daeUp = GeometryOrientations.YUp;
-                if (dae.Asset.UpAxis == EnumAxis.XUp) daeUp = GeometryOrientations.XUp;
-                else if (dae.Asset.UpAxis == EnumAxis.YUp) daeUp = GeometryOrientations.YUp;
-                else if (dae.Asset.UpAxis == EnumAxis.ZUp) daeUp = GeometryOrientations.ZUp;
-
-                LoaderConversion conversion = LoaderConversion.Compute(
-                    transform,
-                    CoordinateSystems.RightHanded,
-                    coordinate,
-                    daeUp,
-                    orientation);
-
-                ModelContent modelContent = new ModelContent();
-
-                #region Scene Objects
-
-                ProcessLibraryLights(dae, modelContent);
-
-                ProcessLibraryImages(dae, modelContent, contentFolder);
-                ProcessLibraryMaterial(dae, modelContent);
-
-                ProcessLibraryGeometries(dae, modelContent, conversion);
-                ProcessLibraryControllers(dae, modelContent, conversion);
-                ProcessLibraryAnimations(dae, modelContent, conversion);
-
-                #endregion
-
-                #region Scene Relations
-
-                if (dae.Scene.InstanceVisualScene != null)
+                for (int i = 0; i < modelList.Length; i++)
                 {
-                    Skeleton skeleton = null;
-                    List<string> controllers = new List<string>();
+                    COLLADA dae = COLLADA.Load(modelList[i]);
 
-                    string sceneUrl = dae.Scene.InstanceVisualScene.Url;
+                    GeometryOrientations daeUp = GeometryOrientations.YUp;
+                    if (dae.Asset.UpAxis == EnumAxis.XUp) daeUp = GeometryOrientations.XUp;
+                    else if (dae.Asset.UpAxis == EnumAxis.YUp) daeUp = GeometryOrientations.YUp;
+                    else if (dae.Asset.UpAxis == EnumAxis.ZUp) daeUp = GeometryOrientations.ZUp;
 
-                    VisualScene vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl));
-                    if (vScene != null)
+                    LoaderConversion conversion = LoaderConversion.Compute(
+                        transform,
+                        CoordinateSystems.RightHanded,
+                        coordinate,
+                        daeUp,
+                        orientation);
+
+                    ModelContent modelContent = new ModelContent();
+
+                    #region Scene Objects
+
+                    ProcessLibraryLights(dae, modelContent);
+
+                    ProcessLibraryImages(dae, modelContent, contentFolder);
+                    ProcessLibraryMaterial(dae, modelContent);
+
+                    ProcessLibraryGeometries(dae, modelContent, conversion);
+                    ProcessLibraryControllers(dae, modelContent, conversion);
+                    ProcessLibraryAnimations(dae, modelContent, conversion);
+
+                    #endregion
+
+                    #region Scene Relations
+
+                    if (dae.Scene.InstanceVisualScene != null)
                     {
-                        if (vScene.Nodes != null && vScene.Nodes.Length > 0)
+                        Skeleton skeleton = null;
+                        List<string> controllers = new List<string>();
+
+                        string sceneUrl = dae.Scene.InstanceVisualScene.Url;
+
+                        VisualScene vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl));
+                        if (vScene != null)
                         {
-                            foreach (Node node in vScene.Nodes)
+                            if (vScene.Nodes != null && vScene.Nodes.Length > 0)
                             {
-                                #region Lights
-
-                                if (node.IsLight)
+                                foreach (Node node in vScene.Nodes)
                                 {
-                                    Matrix trn = node.ReadMatrix();
+                                    #region Lights
 
-
-                                }
-
-                                #endregion
-
-                                #region Armatures (Skeletons)
-
-                                if (node.IsArmature)
-                                {
-                                    if (skeleton != null)
+                                    if (node.IsLight)
                                     {
-                                        throw new Exception("Only one armature definition per file!");
+                                        Matrix trn = node.ReadMatrix();
+
+
                                     }
 
-                                    //TODO: Where to apply this transform?
-                                    //Transforms trn = node.ReadTransforms();
+                                    #endregion
 
-                                    if (node.Nodes != null && node.Nodes.Length > 0)
+                                    #region Armatures (Skeletons)
+
+                                    if (node.IsArmature)
                                     {
-                                        Joint root = ProcessJoints(null, node.Nodes[0], conversion);
+                                        if (skeleton != null)
+                                        {
+                                            throw new Exception("Only one armature definition per file!");
+                                        }
 
-                                        skeleton = new Skeleton(root);
+                                        //TODO: Where to apply this transform?
+                                        //Transforms trn = node.ReadTransforms();
+
+                                        if (node.Nodes != null && node.Nodes.Length > 0)
+                                        {
+                                            Joint root = ProcessJoints(null, node.Nodes[0], conversion);
+
+                                            skeleton = new Skeleton(root);
+                                        }
                                     }
-                                }
 
-                                #endregion
+                                    #endregion
 
-                                #region Geometry nodes
+                                    #region Geometry nodes
 
-                                if (node.HasGeometry)
-                                {
-                                    //Transforms trn = node.ReadTransforms();
+                                    if (node.HasGeometry)
+                                    {
+                                        //Transforms trn = node.ReadTransforms();
 
-                                    MeshContent info = new MeshContent()
+                                        MeshContent info = new MeshContent()
+                                        {
+                                            //TODO: Where to apply this transform?
+                                            //Transform = trn.Matrix.ChangeAxis(conversion),
+                                        };
+
+                                        if (node.InstanceGeometry != null && node.InstanceGeometry.Length > 0)
+                                        {
+                                            List<string> meshList = new List<string>();
+
+                                            foreach (InstanceGeometry ig in node.InstanceGeometry)
+                                            {
+                                                meshList.Add(ig.Url.Replace("#", ""));
+                                            }
+
+                                            info.SubMeshes = meshList.ToArray();
+                                        }
+                                    }
+
+                                    #endregion
+
+                                    #region Controllers
+
+                                    if (node.HasController)
                                     {
                                         //TODO: Where to apply this transform?
-                                        //Transform = trn.Matrix.ChangeAxis(conversion),
-                                    };
+                                        //Transforms trn = node.ReadTransforms();
 
-                                    if (node.InstanceGeometry != null && node.InstanceGeometry.Length > 0)
-                                    {
-                                        List<string> meshList = new List<string>();
-
-                                        foreach (InstanceGeometry ig in node.InstanceGeometry)
+                                        if (node.InstanceController != null && node.InstanceController.Length > 0)
                                         {
-                                            meshList.Add(ig.Url.Replace("#", ""));
-                                        }
+                                            foreach (InstanceController ic in node.InstanceController)
+                                            {
+                                                string controllerName = ic.Url.Replace("#", "");
 
-                                        info.SubMeshes = meshList.ToArray();
-                                    }
-                                }
-
-                                #endregion
-
-                                #region Controllers
-
-                                if (node.HasController)
-                                {
-                                    //TODO: Where to apply this transform?
-                                    //Transforms trn = node.ReadTransforms();
-
-                                    if (node.InstanceController != null && node.InstanceController.Length > 0)
-                                    {
-                                        foreach (InstanceController ic in node.InstanceController)
-                                        {
-                                            string controllerName = ic.Url.Replace("#", "");
-
-                                            controllers.Add(controllerName);
+                                                controllers.Add(controllerName);
+                                            }
                                         }
                                     }
-                                }
 
-                                #endregion
+                                    #endregion
+                                }
                             }
+                        }
+
+                        if (skeleton != null && controllers.Count > 0)
+                        {
+                            modelContent.SkinningInfo = new SkinningContent()
+                            {
+                                Controller = controllers.ToArray(),
+                                Skeleton = skeleton,
+                            };
                         }
                     }
 
-                    if (skeleton != null && controllers.Count > 0)
-                    {
-                        modelContent.SkinningInfo = new SkinningContent()
-                        {
-                            Controller = controllers.ToArray(),
-                            Skeleton = skeleton,
-                        };
-                    }
+                    #endregion
+
+                    res[i] = modelContent;
                 }
 
-                #endregion
-
-                return modelContent;
+                return res;
             }
             else
             {

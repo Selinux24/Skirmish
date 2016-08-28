@@ -406,10 +406,10 @@ namespace Engine.PathFinding.NavMesh
 
                     //Test right vertex
                     float triArea2D;
-                    GeometryUtil.Area2D(ref portalApex, ref portalRight, ref right, out triArea2D);
+                    Helper.Area2D(ref portalApex, ref portalRight, ref right, out triArea2D);
                     if (triArea2D <= 0.0)
                     {
-                        GeometryUtil.Area2D(ref portalApex, ref portalLeft, ref right, out triArea2D);
+                        Helper.Area2D(ref portalApex, ref portalLeft, ref right, out triArea2D);
                         if (portalApex == portalRight || triArea2D > 0.0)
                         {
                             portalRight = right;
@@ -464,10 +464,10 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     //left vertex
-                    GeometryUtil.Area2D(ref portalApex, ref portalLeft, ref left, out triArea2D);
+                    Helper.Area2D(ref portalApex, ref portalLeft, ref left, out triArea2D);
                     if (triArea2D >= 0.0)
                     {
-                        GeometryUtil.Area2D(ref portalApex, ref portalRight, ref left, out triArea2D);
+                        Helper.Area2D(ref portalApex, ref portalRight, ref left, out triArea2D);
                         if (portalApex == portalLeft || triArea2D < 0.0f)
                         {
                             portalLeft = left;
@@ -1279,7 +1279,7 @@ namespace Engine.PathFinding.NavMesh
                     //can only be done if at least one vertex in path
                     Vector3 lastStraightPath = this.verts[Count - 1].Point.Position;
                     Vector3 pos = vert.Point.Position;
-                    equalToLast = GeometryUtil.NearEqual(lastStraightPath, pos);
+                    equalToLast = Helper.NearEqual(lastStraightPath, pos);
                 }
 
                 if (equalToLast)

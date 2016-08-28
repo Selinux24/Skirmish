@@ -90,6 +90,20 @@ namespace Engine
             this.EnableDepthStencil = true;
         }
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game class</param>
+        /// <param name="content">Content</param>
+        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
+        public Model(Game game, LODModelContent content, bool dynamic = false)
+            : base(game, content, false, 0, true, true, dynamic)
+        {
+            this.Manipulator = new Manipulator3D();
+            this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+
+            this.EnableDepthStencil = true;
+        }
+        /// <summary>
         /// Update
         /// </summary>
         /// <param name="context">Context</param>
@@ -248,6 +262,16 @@ namespace Engine
             else
             {
                 this.Cull = false;
+            }
+
+            if (!this.Cull)
+            {
+                var pars = frustum.GetCameraParams();
+                var dist = Vector3.DistanceSquared(this.Manipulator.Position, pars.Position);
+                if (dist < 100) { this.LevelOfDetail = LevelOfDetailEnum.High; }
+                else if (dist < 400) { this.LevelOfDetail = LevelOfDetailEnum.Medium; }
+                else if (dist < 1600) { this.LevelOfDetail = LevelOfDetailEnum.Low; }
+                else { this.LevelOfDetail = LevelOfDetailEnum.Minimum; }
             }
         }
 

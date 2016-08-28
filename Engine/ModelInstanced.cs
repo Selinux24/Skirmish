@@ -115,6 +115,41 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game class</param>
+        /// <param name="content">Content</param>
+        /// <param name="instances">Number of instances</param>
+        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
+        public ModelInstanced(Game game, LODModelContent content, int instances, bool dynamic = false)
+            : base(game, content, true, instances, true, true, dynamic)
+        {
+            this.instancingData = new VertexInstancingData[instances];
+            this.instances = Helper.CreateArray(instances, () => new ModelInstance(this));
+
+            this.EnableDepthStencil = true;
+
+            if (instances > 0)
+            {
+                VertexInstancingData[] instancingData = new VertexInstancingData[instances];
+
+                this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(instancingData);
+                this.InstanceCount = instances;
+                this.InstancingBufferStride = instancingData[0].Stride;
+
+                foreach (var meshList in this.Meshes.Values)
+                {
+                    foreach (var mesh in meshList)
+                    {
+                        if (mesh.Value.Instanced)
+                        {
+                            mesh.Value.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
         /// Dispose model buffers
         /// </summary>
         public override void Dispose()

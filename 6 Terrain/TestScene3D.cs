@@ -38,6 +38,7 @@ namespace TerrainTest
 
         private Model cursor3D = null;
         private Cursor cursor2D = null;
+        private Model cube = null;
 
         private Model tank = null;
         private NavigationMeshAgent tankAgent = new NavigationMeshAgent();
@@ -138,6 +139,25 @@ namespace TerrainTest
             });
             sw.Stop();
             loadingText += string.Format("cursor2D: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.cursor2D.Color = Color.Red;
+            this.cursor2D.Visible = false;
+
+            #endregion
+
+            #region Cube
+
+            sw.Restart();
+            this.cube = this.AddModel(new ModelDescription()
+            {
+                ContentPath = "Resources/Cube",
+                ModelFileName = "cube.dae",
+                DeferredEnabled = true,
+                Opaque = true,
+                Static = true,
+            });
+            sw.Stop();
+            loadingText += string.Format("cube: {0} ", sw.Elapsed.TotalSeconds);
 
             this.cursor2D.Visible = false;
 
@@ -937,7 +957,7 @@ namespace TerrainTest
             #region Texts
 
             string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}", Counters.Buffers, Counters.AllocatedMemoryInBuffers, Counters.BufferReads, Counters.BufferWrites, this.RenderMode, this.shadowResult);
-            string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets);
+            string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3} - Cube LOD: {4}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets, this.cube.LevelOfDetail);
             this.counters1.Text = txt1;
             this.counters2.Text = txt2;
 

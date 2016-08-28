@@ -227,7 +227,7 @@ namespace Engine
             {
                 Vector3 p = this.Path[this.PathTarget];
 
-                if (GeometryUtil.WithinEpsilon(this.position, p, this.PathVelocity))
+                if (Helper.WithinEpsilon(this.position, p, this.PathVelocity))
                 {
                     this.PathTarget++;
                 }

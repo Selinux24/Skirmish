@@ -1,11 +1,11 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using SharpDX;
 
 namespace Engine
 {
@@ -303,6 +303,35 @@ namespace Engine
             return res;
         }
         /// <summary>
+        /// Checks if a and b are almost equals, taking into account the magnitude of floating point numbers (unlike SharpDX.MathUtil.WithinEpsilon(System.Single,System.Single,System.Single) method). See Remarks.
+        /// See remarks
+        /// </summary>
+        /// <param name="a">The left value to compare</param>
+        /// <param name="b">The right value to compare</param>
+        /// <returns>true if a almost equal to b, false otherwise</returns>
+        /// <remarks>The code is using the technique described by Bruce Dawson in Comparing Floating point numbers 2012 edition</remarks>
+        public static bool NearEqual(Vector3 a, Vector3 b)
+        {
+            return
+                MathUtil.NearEqual(a.X, b.X) &&
+                MathUtil.NearEqual(a.Y, b.Y) &&
+                MathUtil.NearEqual(a.Z, b.Z);
+        }
+        /// <summary>
+        /// Checks if a - b are almost equals within a float epsilon.
+        /// </summary>
+        /// <param name="a">The left value to compare</param>
+        /// <param name="b">The right value to compare</param>
+        /// <param name="epsilon">Epsilon value</param>
+        /// <returns>true if a almost equal to b within a float epsilon, false otherwise</returns>
+        public static bool WithinEpsilon(Vector3 a, Vector3 b, float epsilon)
+        {
+            return
+                MathUtil.WithinEpsilon(a.X, b.X, epsilon) &&
+                MathUtil.WithinEpsilon(a.Y, b.Y, epsilon) &&
+                MathUtil.WithinEpsilon(a.Z, b.Z, epsilon);
+        }
+        /// <summary>
         /// Gets next pair of even number, if even
         /// </summary>
         /// <param name="num">Number</param>
@@ -321,6 +350,48 @@ namespace Engine
             return num = num * 0.5f != (int)(num * 0.5f) ? num : num + 1;
         }
         /// <summary>
+        /// Calculates the next highest power of two.
+        /// </summary>
+        /// <remarks>
+        /// This is a minimal method meant to be fast. There is a known edge case where an input of 0 will output 0
+        /// instead of the mathematically correct value of 1. It will not be fixed.
+        /// </remarks>
+        /// <param name="v">A value.</param>
+        /// <returns>The next power of two after the value.</returns>
+        public static int NextPowerOfTwo(int v)
+        {
+            v--;
+            v |= v >> 1;
+            v |= v >> 2;
+            v |= v >> 4;
+            v |= v >> 8;
+            v |= v >> 16;
+            v++;
+
+            return v;
+        }
+        /// <summary>
+        /// Calculates the next highest power of two.
+        /// </summary>
+        /// <remarks>
+        /// This is a minimal method meant to be fast. There is a known edge case where an input of 0 will output 0
+        /// instead of the mathematically correct value of 1. It will not be fixed.
+        /// </remarks>
+        /// <param name="v">A value.</param>
+        /// <returns>The next power of two after the value.</returns>
+        public static uint NextPowerOfTwo(uint v)
+        {
+            v--;
+            v |= v >> 1;
+            v |= v >> 2;
+            v |= v >> 4;
+            v |= v >> 8;
+            v |= v >> 16;
+            v++;
+
+            return v;
+        }
+        /// <summary>
         /// Swaps values
         /// </summary>
         /// <typeparam name="T">Type of values</typeparam>
@@ -331,6 +402,70 @@ namespace Engine
             T temp = left;
             left = right;
             right = temp;
+        }
+        /// <summary>
+        /// Calculates the binary logarithm of the input.
+        /// </summary>
+        /// <remarks>
+        /// Inputs 0 and below have undefined output.
+        /// </remarks>
+        /// <param name="v">A value.</param>
+        /// <returns>The binary logarithm of v.</returns>
+        public static int Log2(int v)
+        {
+            int r;
+            int shift;
+
+            r = (v > 0xffff) ? 1 << 4 : 0 << 4;
+            v >>= r;
+
+            shift = (v > 0xff) ? 1 << 3 : 0 << 3;
+            v >>= shift;
+            r |= shift;
+
+            shift = (v > 0xf) ? 1 << 2 : 0 << 2;
+            v >>= shift;
+            r |= shift;
+
+            shift = (v > 0x3) ? 1 << 1 : 0 << 1;
+            v >>= shift;
+            r |= shift;
+
+            r |= v >> 1;
+
+            return r;
+        }
+        /// <summary>
+        /// Calculates the binary logarithm of the input.
+        /// </summary>
+        /// <remarks>
+        /// An input of 0 has an undefined output.
+        /// </remarks>
+        /// <param name="v">A value.</param>
+        /// <returns>The binary logarithm of v.</returns>
+        public static uint Log2(uint v)
+        {
+            uint r;
+            int shift;
+
+            r = (uint)((v > 0xffff) ? 1 << 4 : 0 << 4);
+            v >>= (int)r;
+
+            shift = (v > 0xff) ? 1 << 3 : 0 << 3;
+            v >>= shift;
+            r |= (uint)shift;
+
+            shift = (v > 0xf) ? 1 << 2 : 0 << 2;
+            v >>= shift;
+            r |= (uint)shift;
+
+            shift = (v > 0x3) ? 1 << 1 : 0 << 1;
+            v >>= shift;
+            r |= (uint)shift;
+
+            r |= v >> 1;
+
+            return r;
         }
 
         /// <summary>
@@ -393,6 +528,21 @@ namespace Engine
             return angle;
         }
         /// <summary>
+        /// Gets the area of the triangle projected onto the XZ-plane.
+        /// </summary>
+        /// <param name="a">The first point.</param>
+        /// <param name="b">The second point.</param>
+        /// <param name="c">The third point.</param>
+        /// <param name="area">The calculated area.</param>
+        public static void Area2D(ref Vector3 a, ref Vector3 b, ref Vector3 c, out float area)
+        {
+            float abx = b.X - a.X;
+            float abz = b.Z - a.Z;
+            float acx = c.X - a.X;
+            float acz = c.Z - a.Z;
+            area = acx * abz - abx * acz;
+        }
+        /// <summary>
         /// Gets total distance between point list
         /// </summary>
         /// <param name="points">Point list</param>
@@ -413,6 +563,79 @@ namespace Engine
             }
 
             return length;
+        }
+        /// <summary>
+        /// Calculates the distance between two points on the XZ plane.
+        /// </summary>
+        /// <param name="a">A point.</param>
+        /// <param name="b">Another point.</param>
+        /// <returns>The distance between the two points.</returns>
+        public static float Distance2D(Vector3 a, Vector3 b)
+        {
+            float result;
+            Distance2D(ref a, ref b, out result);
+            return result;
+        }
+        /// <summary>
+        /// Calculates the distance between two points on the XZ plane.
+        /// </summary>
+        /// <param name="a">A point.</param>
+        /// <param name="b">Another point.</param>
+        /// <param name="dist">The distance between the two points.</param>
+        public static void Distance2D(ref Vector3 a, ref Vector3 b, out float dist)
+        {
+            float dx = b.X - a.X;
+            float dz = b.Z - a.Z;
+            dist = (float)Math.Sqrt(dx * dx + dz * dz);
+        }
+        /// <summary>
+        /// Calculates the dot product of two vectors projected onto the XZ plane.
+        /// </summary>
+        /// <param name="left">A vector.</param>
+        /// <param name="right">Another vector</param>
+        /// <param name="result">The dot product of the two vectors.</param>
+        public static void Dot2D(ref Vector3 left, ref Vector3 right, out float result)
+        {
+            result = left.X * right.X + left.Z * right.Z;
+        }
+        /// <summary>
+        /// Calculates the dot product of two vectors projected onto the XZ plane.
+        /// </summary>
+        /// <param name="left">A vector.</param>
+        /// <param name="right">Another vector</param>
+        /// <returns>The dot product</returns>
+        public static float Dot2D(ref Vector3 left, ref Vector3 right)
+        {
+            return left.X * right.X + left.Z * right.Z;
+        }
+        /// <summary>
+        /// Calculates the cross product of two vectors (formed from three points)
+        /// </summary>
+        /// <param name="p1">The first point</param>
+        /// <param name="p2">The second point</param>
+        /// <param name="p3">The third point</param>
+        /// <returns>The 2d cross product</returns>
+        public static float Cross2D(Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            float result;
+            Cross2D(ref p1, ref p2, ref p3, out result);
+            return result;
+        }
+        /// <summary>
+        /// Calculates the cross product of two vectors (formed from three points)
+        /// </summary>
+        /// <param name="p1">The first point</param>
+        /// <param name="p2">The second point</param>
+        /// <param name="p3">The third point</param>
+        /// <param name="result">The 2d cross product</param>
+        public static void Cross2D(ref Vector3 p1, ref Vector3 p2, ref Vector3 p3, out float result)
+        {
+            float u1 = p2.X - p1.X;
+            float v1 = p2.Z - p1.Z;
+            float u2 = p3.X - p1.X;
+            float v2 = p3.Z - p1.Z;
+
+            result = u1 * v2 - v1 * u2;
         }
         /// <summary>
         /// Look at target

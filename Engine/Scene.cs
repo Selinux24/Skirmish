@@ -314,11 +314,31 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Model AddModel(ModelDescription description, Matrix transform, bool optimize = true, int order = 0)
         {
-            ModelContent geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
+            Model newModel = null;
 
-            if (optimize) geo.Optimize();
+            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
+            if (geo.Length == 1)
+            {
+                if (optimize) geo[0].Optimize();
 
-            Model newModel = new Model(this.Game, geo);
+                newModel = new Model(this.Game, geo[0]);
+            }
+            else
+            {
+                LODModelContent lod = new LODModelContent();
+
+                int lastLod = 1;
+                for (int i = 0; i < geo.Length; i++)
+                {
+                    if (optimize) geo[i].Optimize();
+                    
+                    lod.Add((LevelOfDetailEnum)lastLod, geo[i]);
+
+                    lastLod = Helper.NextPowerOfTwo(lastLod+1);
+                }
+
+                newModel = new Model(this.Game, lod);
+            }
 
             newModel.Name = description.ModelFileName;
             newModel.Opaque = description.Opaque;
@@ -367,11 +387,28 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public ModelInstanced AddInstancingModel(ModelInstancedDescription description, Matrix transform, bool optimize = true, int order = 0)
         {
-            ModelContent geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
+            ModelInstanced newModel = null;
 
-            if (optimize) geo.Optimize();
+            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
+            if (geo.Length == 1)
+            {
+                if (optimize) geo[0].Optimize();
 
-            ModelInstanced newModel = new ModelInstanced(this.Game, geo, description.Instances);
+                newModel = new ModelInstanced(this.Game, geo[0], description.Instances);
+            }
+            else
+            {
+                LODModelContent lod = new LODModelContent();
+
+                for (int i = 0; i < geo.Length; i++)
+                {
+                    if (optimize) geo[i].Optimize();
+
+                    lod.Add((LevelOfDetailEnum)i + 1, geo[i]);
+                }
+
+                newModel = new ModelInstanced(this.Game, lod, description.Instances);
+            }
 
             newModel.Name = description.ModelFileName;
             newModel.Opaque = description.Opaque;
@@ -422,7 +459,9 @@ namespace Engine
 
             if (description.Model != null)
             {
-                geo = LoaderCOLLADA.Load(description.ContentPath, description.Model.ModelFileName, transform);
+                var t = LoaderCOLLADA.Load(description.ContentPath, description.Model.ModelFileName, transform);
+
+                geo = t[0];
             }
             else if (description.Heightmap != null)
             {

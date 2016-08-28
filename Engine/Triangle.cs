@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Engine.Common;
 using SharpDX;
 using SharpDX.Direct3D;
-using Engine.Common;
+using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -158,11 +158,11 @@ namespace Engine
             return triangleList.ToArray();
         }
         /// <summary>
-        /// 
+        /// Generate a triangle list from AABB
         /// </summary>
-        /// <param name="topology"></param>
-        /// <param name="bbox"></param>
-        /// <returns></returns>
+        /// <param name="topology">Topology</param>
+        /// <param name="bbox">AABB</param>
+        /// <returns>Returns the triangle list</returns>
         public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, BoundingBox bbox)
         {
             List<Triangle> triangleList = new List<Triangle>();
@@ -246,7 +246,13 @@ namespace Engine
 
             return triangleList.ToArray();
         }
-
+        /// <summary>
+        /// Generate a triangle list from cylinder
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="cylinder">Cylinder</param>
+        /// <param name="segments">Number of segments</param>
+        /// <returns>Returns the triangle list</returns>
         public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, BoundingCylinder cylinder, int segments)
         {
             List<Triangle> triangleList = new List<Triangle>();
@@ -316,6 +322,7 @@ namespace Engine
         /// <summary>
         /// Generate a triangle list from polygon
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="poly">Polygon</param>
         /// <returns>Returns the triangle list</returns>
         public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Polygon poly)

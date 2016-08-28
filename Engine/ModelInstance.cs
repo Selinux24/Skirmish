@@ -75,6 +75,10 @@ namespace Engine
         /// Culling test flag
         /// </summary>
         public bool Cull { get; private set; }
+        /// <summary>
+        /// Instance level of detail
+        /// </summary>
+        public LevelOfDetailEnum LevelOfDetail { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -324,6 +328,16 @@ namespace Engine
             else
             {
                 this.Cull = false;
+            }
+
+            if (!this.Cull)
+            {
+                var pars = frustum.GetCameraParams();
+                var dist = Vector3.DistanceSquared(this.Manipulator.Position, pars.Position);
+                if (dist < 100) { this.LevelOfDetail = LevelOfDetailEnum.High; }
+                else if (dist < 400) { this.LevelOfDetail = LevelOfDetailEnum.Medium; }
+                else if (dist < 1600) { this.LevelOfDetail = LevelOfDetailEnum.Low; }
+                else { this.LevelOfDetail = LevelOfDetailEnum.Minimum; }
             }
         }
         /// <summary>

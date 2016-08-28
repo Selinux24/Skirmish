@@ -672,8 +672,8 @@ namespace Engine.PathFinding.NavMesh
                     for (int j = 1; j < poly.VertexCount; j++)
                     {
                         Vector3 v = this.Verts[poly.Vertices[j]];
-                        GeometryUtil.ComponentMin(ref b.Minimum, ref v, out b.Minimum);
-                        GeometryUtil.ComponentMax(ref b.Maximum, ref v, out b.Maximum);
+                        Vector3.Min(ref b.Minimum, ref v, out b.Minimum);
+                        Vector3.Max(ref b.Maximum, ref v, out b.Maximum);
                     }
 
                     if (qbounds.Contains(ref b) != ContainmentType.Disjoint)

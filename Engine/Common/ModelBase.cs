@@ -524,9 +524,49 @@ namespace Engine.Common
         /// </summary>
         private LODDictionary meshesByLOD = new LODDictionary();
         /// <summary>
+        /// Default level of detail
+        /// </summary>
+        private readonly LevelOfDetailEnum defaultLevelOfDetail = LevelOfDetailEnum.None;
+        /// <summary>
         /// Level of detail
         /// </summary>
-        public LevelOfDetailEnum LevelOfDetail { get; set; }
+        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        public LevelOfDetailEnum LevelOfDetail
+        {
+            get
+            {
+                return this.levelOfDetail;
+            }
+            set
+            {
+                var prevSkData = this.SkinningData;
+
+                if (this.meshesByLOD.ContainsKey(value))
+                {
+                    this.levelOfDetail = value;
+                }
+                else
+                {
+                    this.levelOfDetail = this.defaultLevelOfDetail;
+                }
+
+                this.Materials = this.meshesByLOD[this.levelOfDetail].Materials;
+                this.Textures = this.meshesByLOD[this.levelOfDetail].Textures;
+                this.Meshes = this.meshesByLOD[this.levelOfDetail].Meshes;
+
+                this.SkinningData = this.meshesByLOD[this.levelOfDetail].SkinningData;
+                if (this.SkinningData != null && prevSkData != null)
+                {
+                    this.SkinningData.SetClip(prevSkData.ClipName);
+                    this.SkinningData.AnimationVelocity = prevSkData.AnimationVelocity;
+                    this.SkinningData.Loop = prevSkData.Loop;
+                    this.SkinningData.Time = prevSkData.Time;
+                }
+            }
+        }
         /// <summary>
         /// Gets the texture count for texture index
         /// </summary>
@@ -535,43 +575,19 @@ namespace Engine.Common
         /// <summary>
         /// Datos de animación
         /// </summary>
-        protected SkinningData SkinningData
-        {
-            get
-            {
-                return this.meshesByLOD[this.LevelOfDetail].SkinningData;
-            }
-        }
+        protected SkinningData SkinningData { get; private set; }
         /// <summary>
         /// Materials dictionary
         /// </summary>
-        protected MaterialDictionary Materials
-        {
-            get
-            {
-                return this.meshesByLOD[this.LevelOfDetail].Materials;
-            }
-        }
+        protected MaterialDictionary Materials { get; private set; }
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        protected TextureDictionary Textures
-        {
-            get
-            {
-                return this.meshesByLOD[this.LevelOfDetail].Textures;
-            }
-        }
+        protected TextureDictionary Textures { get; private set; }
         /// <summary>
         /// Meshes
         /// </summary>
-        protected MeshDictionary Meshes
-        {
-            get
-            {
-                return this.meshesByLOD[this.LevelOfDetail].Meshes;
-            }
-        }
+        protected MeshDictionary Meshes { get; private set; }
 
         /// <summary>
         /// Base model
@@ -595,6 +611,7 @@ namespace Engine.Common
 
             this.meshesByLOD.Add(LevelOfDetailEnum.None, drawable);
 
+            this.defaultLevelOfDetail = LevelOfDetailEnum.None;
             this.LevelOfDetail = LevelOfDetailEnum.None;
         }
         /// <summary>
@@ -612,14 +629,19 @@ namespace Engine.Common
         {
             foreach (var lod in content.Keys)
             {
+                if (this.defaultLevelOfDetail == LevelOfDetailEnum.None)
+                {
+                    this.defaultLevelOfDetail = lod;
+                }
+
                 var drawable = MeshData.Build(
                     game,
-                    LevelOfDetailEnum.None,
+                    lod,
                     content[lod], instanced, instances, loadAnimation,
                     this.TextureCount, loadNormalMaps,
                     dynamic);
 
-                this.meshesByLOD.Add(LevelOfDetailEnum.None, drawable);
+                this.meshesByLOD.Add(lod, drawable);
             }
 
             this.LevelOfDetail = LevelOfDetailEnum.None;
@@ -652,11 +674,12 @@ namespace Engine.Common
                 this.meshesByLOD = null;
             }
         }
+
         /// <summary>
         /// Sets clip to play
         /// </summary>
         /// <param name="clipName">Clip name</param>
-        public void SetClip(string clipName)
+        public void SetAnimationClipName(string clipName)
         {
             if (this.SkinningData != null)
             {

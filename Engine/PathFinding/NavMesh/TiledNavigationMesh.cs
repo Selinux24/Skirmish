@@ -108,8 +108,8 @@ namespace Engine.PathFinding.NavMesh
             this.tileList = new List<MeshTile>();
 
             //init ID generator values
-            int tileBits = GeometryUtil.Log2(GeometryUtil.NextPowerOfTwo(this.MaxTiles));
-            int polyBits = GeometryUtil.Log2(GeometryUtil.NextPowerOfTwo(this.MaxPolys));
+            int tileBits = Helper.Log2(Helper.NextPowerOfTwo(this.MaxTiles));
+            int polyBits = Helper.Log2(Helper.NextPowerOfTwo(this.MaxPolys));
 
             //only allow 31 salt bits, since salt mask is calculated using 32-bit int and it will overflow
             int saltBits = Math.Min(31, 32 - tileBits - polyBits);

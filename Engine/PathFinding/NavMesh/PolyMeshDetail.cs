@@ -788,8 +788,8 @@ namespace Engine.PathFinding.NavMesh
 
                 for (int i = 1; i < numMeshVerts; i++)
                 {
-                    GeometryUtil.ComponentMin(ref bounds.Minimum, ref polyMeshVerts[i], out bounds.Minimum);
-                    GeometryUtil.ComponentMax(ref bounds.Maximum, ref polyMeshVerts[i], out bounds.Maximum);
+                    Vector3.Min(ref bounds.Minimum, ref polyMeshVerts[i], out bounds.Minimum);
+                    Vector3.Max(ref bounds.Maximum, ref polyMeshVerts[i], out bounds.Maximum);
                 }
 
                 int x0 = (int)Math.Floor(bounds.Minimum.X / sampleDist);
@@ -954,11 +954,11 @@ namespace Engine.PathFinding.NavMesh
                 Vector3 nv = pts[hull[ni]];
                 float d = 0;
                 float dtmp;
-                GeometryUtil.Distance2D(ref pv, ref cv, out dtmp);
+                Helper.Distance2D(ref pv, ref cv, out dtmp);
                 d += dtmp;
-                GeometryUtil.Distance2D(ref cv, ref nv, out dtmp);
+                Helper.Distance2D(ref cv, ref nv, out dtmp);
                 d += dtmp;
-                GeometryUtil.Distance2D(ref nv, ref pv, out dtmp);
+                Helper.Distance2D(ref nv, ref pv, out dtmp);
                 d += dtmp;
 
                 if (d < dmin)
@@ -984,13 +984,13 @@ namespace Engine.PathFinding.NavMesh
                 float dleft = 0;
                 float dright = 0;
                 float dtmp;
-                GeometryUtil.Distance2D(ref cvleft, ref nvleft, out dtmp);
+                Helper.Distance2D(ref cvleft, ref nvleft, out dtmp);
                 dleft += dtmp;
-                GeometryUtil.Distance2D(ref nvleft, ref cvright, out dtmp);
+                Helper.Distance2D(ref nvleft, ref cvright, out dtmp);
                 dleft += dtmp;
-                GeometryUtil.Distance2D(ref cvright, ref nvright, out dtmp);
+                Helper.Distance2D(ref cvright, ref nvright, out dtmp);
                 dright += dtmp;
-                GeometryUtil.Distance2D(ref cvleft, ref nvright, out dtmp);
+                Helper.Distance2D(ref cvleft, ref nvright, out dtmp);
                 dright += dtmp;
 
                 if (dleft < dright)
@@ -1158,7 +1158,7 @@ namespace Engine.PathFinding.NavMesh
                     continue;
                 }
 
-                cross = GeometryUtil.Cross2D(pts[s], pts[t], pts[u]);
+                cross = Helper.Cross2D(pts[s], pts[t], pts[u]);
                 if (cross > EPS)
                 {
                     if (r < 0)
@@ -1169,7 +1169,7 @@ namespace Engine.PathFinding.NavMesh
                         continue;
                     }
 
-                    float d = GeometryUtil.Distance2D(c, pts[u]);
+                    float d = Helper.Distance2D(c, pts[u]);
                     float tol = 0.001f;
 
                     if (d > r * (1 + tol))
@@ -1321,16 +1321,16 @@ namespace Engine.PathFinding.NavMesh
         {
             const float EPS = 1e-6f;
             float cp;
-            GeometryUtil.Cross2D(ref p1, ref p2, ref p3, out cp);
+            Helper.Cross2D(ref p1, ref p2, ref p3, out cp);
 
             if (Math.Abs(cp) > EPS)
             {
                 //find magnitude of each point
                 float p1sq, p2sq, p3sq;
 
-                GeometryUtil.Dot2D(ref p1, ref p1, out p1sq);
-                GeometryUtil.Dot2D(ref p2, ref p2, out p2sq);
-                GeometryUtil.Dot2D(ref p3, ref p3, out p3sq);
+                Helper.Dot2D(ref p1, ref p1, out p1sq);
+                Helper.Dot2D(ref p2, ref p2, out p2sq);
+                Helper.Dot2D(ref p3, ref p3, out p3sq);
 
                 c.X = (p1sq * (p2.Z - p3.Z) + p2sq * (p3.Z - p1.Z) + p3sq * (p1.Z - p2.Z)) / (2 * cp);
                 c.Z = (p1sq * (p3.X - p2.X) + p2sq * (p1.X - p3.X) + p3sq * (p2.X - p1.X)) / (2 * cp);
