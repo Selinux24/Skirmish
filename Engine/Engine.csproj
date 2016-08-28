@@ -308,6 +308,7 @@
     <Compile Include="Collada\Vertices.cs" />
     <Compile Include="Collada\VisualScene.cs" />
     <Compile Include="Collections\PriorityDictionary.cs" />
+    <Compile Include="Content\LODModelContent.cs" />
     <Compile Include="CubemapDescription.cs" />
     <Compile Include="CameraFollower.cs" />
     <Compile Include="GroundAttachedObject.cs" />
