@@ -18,7 +18,7 @@ namespace Engine
         {
             get
             {
-                return this.Meshes[ModelContent.StaticMesh][ModelContent.NoMaterial];
+                return this.DrawingData.Meshes[ModelContent.StaticMesh][ModelContent.NoMaterial];
             }
         }
         /// <summary>

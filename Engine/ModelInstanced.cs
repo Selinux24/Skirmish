@@ -102,16 +102,7 @@ namespace Engine
                 this.InstanceCount = instances;
                 this.InstancingBufferStride = instancingData[0].Stride;
 
-                foreach (var meshList in this.Meshes.Values)
-                {
-                    foreach (var mesh in meshList)
-                    {
-                        if (mesh.Value.Instanced)
-                        {
-                            mesh.Value.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
-                        }
-                    }
-                }
+                this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
             }
         }
         /// <summary>
@@ -137,16 +128,7 @@ namespace Engine
                 this.InstanceCount = instances;
                 this.InstancingBufferStride = instancingData[0].Stride;
 
-                foreach (var meshList in this.Meshes.Values)
-                {
-                    foreach (var mesh in meshList)
-                    {
-                        if (mesh.Value.Instanced)
-                        {
-                            mesh.Value.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
-                        }
-                    }
-                }
+                this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
             }
         }
         /// <summary>
@@ -168,8 +150,6 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            base.Update(context);
-
             if (this.instances != null && this.instances.Length > 0)
             {
                 for (int i = 0; i < this.instances.Length; i++)
@@ -177,6 +157,16 @@ namespace Engine
                     if (this.instances[i].Active)
                     {
                         this.instances[i].Manipulator.Update(context.GameTime);
+                    }
+                }
+
+                //Update by level of detail
+                for (int l = 1; l < (int)LevelOfDetailEnum.Minimum; l *= 2)
+                {
+                    var drawingData = this.GetDrawingData((LevelOfDetailEnum)l);
+                    if (drawingData != null && drawingData.SkinningData != null)
+                    {
+                        drawingData.SkinningData.Update(context.GameTime);
                     }
                 }
             }
@@ -187,7 +177,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.Meshes != null && this.VisibleCount > 0)
+            if (this.VisibleCount > 0)
             {
                 Drawer effect = null;
                 if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectInstancing;
@@ -196,6 +186,11 @@ namespace Engine
 
                 if (effect != null)
                 {
+                    //TODO: Process only visible instances
+                    //Sort by LOD
+                    Array.Sort(this.instances, (i1, i2) => i1.LevelOfDetail.CompareTo(i2.LevelOfDetail));
+
+                    //Writes instancing data
                     if (this.instances != null && this.instances.Length > 0)
                     {
                         int instanceIndex = 0;
@@ -256,76 +251,92 @@ namespace Engine
                         this.Game.Graphics.SetBlendAlphaEnabled();
                     }
 
-                    foreach (string meshName in this.Meshes.Keys)
+                    //Render by level of detail
+                    for (int l = 1; l < (int)LevelOfDetailEnum.Minimum; l *= 2)
                     {
-                        #region Per skinning update
-
-                        if (this.SkinningData != null)
+                        //Get instances in this LOD
+                        var ins = Array.FindAll(this.instances, i => (int)i.LevelOfDetail == l);
+                        if (ins != null && ins.Length > 0)
                         {
-                            if (context.DrawerMode == DrawerModesEnum.Forward)
+                            var index = Array.IndexOf(this.instances, ins[0]);
+                            var length = this.instances.Length;
+
+                            var drawingData = this.GetDrawingData((LevelOfDetailEnum)l);
+                            if (drawingData != null)
                             {
-                                ((EffectInstancing)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
-                            }
-                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                            {
-                                ((EffectInstancingGBuffer)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
-                            }
-                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                            {
-                                ((EffectInstancingShadow)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
-                            }
-                        }
-                        else
-                        {
-                            if (context.DrawerMode == DrawerModesEnum.Forward)
-                            {
-                                ((EffectInstancing)effect).UpdatePerSkinning(null);
-                            }
-                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                            {
-                                ((EffectInstancingGBuffer)effect).UpdatePerSkinning(null);
-                            }
-                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                            {
-                                ((EffectInstancingShadow)effect).UpdatePerSkinning(null);
-                            }
-                        }
+                                foreach (string meshName in drawingData.Meshes.Keys)
+                                {
+                                    #region Per skinning update
 
-                        #endregion
+                                    if (drawingData.SkinningData != null)
+                                    {
+                                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                                        {
+                                            ((EffectInstancing)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
+                                        }
+                                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                                        {
+                                            ((EffectInstancingGBuffer)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
+                                        }
+                                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                                        {
+                                            ((EffectInstancingShadow)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                                        {
+                                            ((EffectInstancing)effect).UpdatePerSkinning(null);
+                                        }
+                                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                                        {
+                                            ((EffectInstancingGBuffer)effect).UpdatePerSkinning(null);
+                                        }
+                                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                                        {
+                                            ((EffectInstancingShadow)effect).UpdatePerSkinning(null);
+                                        }
+                                    }
 
-                        MeshMaterialsDictionary dictionary = this.Meshes[meshName];
+                                    #endregion
 
-                        foreach (string material in dictionary.Keys)
-                        {
-                            Mesh mesh = dictionary[material];
-                            MeshMaterial mat = this.Materials[material];
+                                    MeshMaterialsDictionary dictionary = drawingData.Meshes[meshName];
 
-                            #region Per object update
+                                    foreach (string material in dictionary.Keys)
+                                    {
+                                        Mesh mesh = dictionary[material];
+                                        MeshMaterial mat = drawingData.Materials[material];
 
-                            var matdata = mat != null ? mat.Material : Material.Default;
-                            var texture = mat != null ? mat.DiffuseTexture : null;
-                            var normalMap = mat != null ? mat.NormalMap : null;
+                                        #region Per object update
 
-                            if (context.DrawerMode == DrawerModesEnum.Forward)
-                            {
-                                ((EffectInstancing)effect).UpdatePerObject(matdata, texture, normalMap);
-                            }
-                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                            {
-                                ((EffectInstancingGBuffer)effect).UpdatePerObject(matdata, texture, normalMap);
-                            }
+                                        var matdata = mat != null ? mat.Material : Material.Default;
+                                        var texture = mat != null ? mat.DiffuseTexture : null;
+                                        var normalMap = mat != null ? mat.NormalMap : null;
 
-                            #endregion
+                                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                                        {
+                                            ((EffectInstancing)effect).UpdatePerObject(matdata, texture, normalMap);
+                                        }
+                                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                                        {
+                                            ((EffectInstancingGBuffer)effect).UpdatePerObject(matdata, texture, normalMap);
+                                        }
 
-                            EffectTechnique technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing, context.DrawerMode);
+                                        #endregion
 
-                            mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
+                                        EffectTechnique technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing, context.DrawerMode);
 
-                            for (int p = 0; p < technique.Description.PassCount; p++)
-                            {
-                                technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+                                        mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 
-                                mesh.Draw(this.DeviceContext, this.VisibleCount);
+                                        for (int p = 0; p < technique.Description.PassCount; p++)
+                                        {
+                                            technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+
+                                            mesh.Draw(this.DeviceContext, index, length);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

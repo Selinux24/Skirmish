@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
@@ -57,7 +58,14 @@ namespace Engine
         /// Local transform
         /// </summary>
         private Matrix local = Matrix.Identity;
-
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
+        /// <summary>
+        /// Datos renderización
+        /// </summary>
+        protected DrawingData DrawingData { get; private set; }
         /// <summary>
         /// Enables z-buffer writting
         /// </summary>
@@ -74,6 +82,21 @@ namespace Engine
         /// Texture index
         /// </summary>
         public int TextureIndex { get; set; }
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        public override LevelOfDetailEnum LevelOfDetail
+        {
+            get
+            {
+                return this.levelOfDetail;
+            }
+            set
+            {
+                this.levelOfDetail = this.GetLODDrawingData(value);
+                this.DrawingData = this.ChangeDrawingData(this.DrawingData, this.levelOfDetail);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -109,7 +132,10 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            base.Update(context);
+            if (this.DrawingData != null && this.DrawingData.SkinningData != null)
+            {
+                this.DrawingData.SkinningData.Update(context.GameTime);
+            }
 
             this.Manipulator.Update(context.GameTime);
 
@@ -121,7 +147,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.Meshes != null)
+            if (this.DrawingData != null)
             {
                 Drawer effect = null;
                 if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectBasic;
@@ -173,23 +199,23 @@ namespace Engine
                         this.Game.Graphics.SetBlendAlphaEnabled();
                     }
 
-                    foreach (string meshName in this.Meshes.Keys)
+                    foreach (string meshName in this.DrawingData.Meshes.Keys)
                     {
                         #region Per skinning update
 
-                        if (this.SkinningData != null)
+                        if (this.DrawingData.SkinningData != null)
                         {
                             if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
-                                ((EffectBasic)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
+                                ((EffectBasic)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
                             }
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
-                                ((EffectBasicGBuffer)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
+                                ((EffectBasicGBuffer)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
                             }
                             else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                             {
-                                ((EffectBasicShadow)effect).UpdatePerSkinning(this.SkinningData.GetFinalTransforms(meshName));
+                                ((EffectBasicShadow)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
                             }
                         }
                         else
@@ -210,12 +236,12 @@ namespace Engine
 
                         #endregion
 
-                        MeshMaterialsDictionary dictionary = this.Meshes[meshName];
+                        MeshMaterialsDictionary dictionary = this.DrawingData.Meshes[meshName];
 
                         foreach (string material in dictionary.Keys)
                         {
                             Mesh mesh = dictionary[material];
-                            MeshMaterial mat = this.Materials[material];
+                            MeshMaterial mat = this.DrawingData.Materials[material];
 
                             #region Per object update
 
@@ -309,9 +335,27 @@ namespace Engine
         /// <returns>Returns null or position list</returns>
         public Vector3[] GetPoints()
         {
-            if (this.updatePoints)
+            if (this.updatePoints && this.DrawingData != null)
             {
-                this.positionCache = base.GetPoints(this.Manipulator.LocalTransform);
+                List<Vector3> points = new List<Vector3>();
+
+                foreach (MeshMaterialsDictionary dictionary in this.DrawingData.Meshes.Values)
+                {
+                    foreach (Mesh mesh in dictionary.Values)
+                    {
+                        Vector3[] meshPoints = mesh.GetPoints();
+                        if (meshPoints != null && meshPoints.Length > 0)
+                        {
+                            points.AddRange(meshPoints);
+                        }
+                    }
+                }
+
+                Matrix transform = this.Manipulator.LocalTransform;
+                Vector3[] trnPoints = new Vector3[points.Count];
+                Vector3.TransformCoordinate(points.ToArray(), ref transform, trnPoints);
+
+                this.positionCache = trnPoints;
 
                 this.updatePoints = false;
             }
@@ -324,9 +368,23 @@ namespace Engine
         /// <returns>Returns null or triangle list</returns>
         public Triangle[] GetTriangles()
         {
-            if (this.updateTriangles)
+            if (this.updateTriangles && this.DrawingData != null)
             {
-                this.triangleCache = base.GetTriangles(this.Manipulator.LocalTransform);
+                List<Triangle> triangles = new List<Triangle>();
+
+                foreach (MeshMaterialsDictionary dictionary in this.DrawingData.Meshes.Values)
+                {
+                    foreach (Mesh mesh in dictionary.Values)
+                    {
+                        Triangle[] meshTriangles = mesh.GetTriangles();
+                        if (meshTriangles != null && meshTriangles.Length > 0)
+                        {
+                            triangles.AddRange(meshTriangles);
+                        }
+                    }
+                }
+
+                this.triangleCache = Triangle.Transform(triangles.ToArray(), this.Manipulator.LocalTransform);
 
                 this.updateTriangles = false;
             }

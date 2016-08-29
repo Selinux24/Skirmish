@@ -68,6 +68,15 @@ namespace Engine
         /// View * projection matrix
         /// </summary>
         private Matrix viewProjection;
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
+
+        /// <summary>
+        /// Datos renderización
+        /// </summary>
+        protected DrawingData DrawingData { get; private set; }
 
         /// <summary>
         /// Gets or sets text left position in 2D screen
@@ -145,6 +154,21 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator2D Manipulator { get; private set; }
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        public override LevelOfDetailEnum LevelOfDetail
+        {
+            get
+            {
+                return this.levelOfDetail;
+            }
+            set
+            {
+                this.levelOfDetail = this.GetLODDrawingData(value);
+                this.DrawingData = this.ChangeDrawingData(this.DrawingData, this.levelOfDetail);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -174,8 +198,6 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            base.Update(context);
-
             this.Manipulator.Update(context.GameTime, this.Game.Form.RelativeCenter, this.Width, this.Height);
         }
         /// <summary>
@@ -184,7 +206,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.Meshes != null)
+            if (this.DrawingData != null)
             {
                 var effect = DrawerPool.EffectSprite;
 
@@ -196,14 +218,14 @@ namespace Engine
 
                 this.Game.Graphics.SetDepthStencilZDisabled();
 
-                foreach (string meshName in this.Meshes.Keys)
+                foreach (string meshName in this.DrawingData.Meshes.Keys)
                 {
-                    MeshMaterialsDictionary dictionary = this.Meshes[meshName];
+                    MeshMaterialsDictionary dictionary = this.DrawingData.Meshes[meshName];
 
                     foreach (string material in dictionary.Keys)
                     {
                         Mesh mesh = dictionary[material];
-                        MeshMaterial mat = this.Materials[material];
+                        MeshMaterial mat = this.DrawingData.Materials[material];
                         EffectTechnique technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing, context.DrawerMode);
 
                         #region Per object update

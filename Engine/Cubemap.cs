@@ -16,11 +16,35 @@ namespace Engine
         /// Local transform
         /// </summary>
         private Matrix local = Matrix.Identity;
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
 
+        /// <summary>
+        /// Datos renderización
+        /// </summary>
+        protected DrawingData DrawingData { get; private set; }
+        
         /// <summary>
         /// Manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; set; }
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        public override LevelOfDetailEnum LevelOfDetail
+        {
+            get
+            {
+                return this.levelOfDetail;
+            }
+            set
+            {
+                this.levelOfDetail = this.GetLODDrawingData(value);
+                this.DrawingData = this.ChangeDrawingData(this.DrawingData, this.levelOfDetail);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -40,8 +64,6 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            base.Update(context);
-
             this.Manipulator.Update(context.GameTime);
 
             this.local = context.World * this.Manipulator.LocalTransform;
@@ -52,7 +74,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.Meshes != null)
+            if (this.DrawingData != null)
             {
                 EffectCubemap effect = DrawerPool.EffectCubemap;
                 EffectTechnique technique = null;
@@ -74,12 +96,12 @@ namespace Engine
 
                     this.Game.Graphics.SetDepthStencilZDisabled();
 
-                    foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+                    foreach (MeshMaterialsDictionary dictionary in this.DrawingData.Meshes.Values)
                     {
                         foreach (string material in dictionary.Keys)
                         {
                             Mesh mesh = dictionary[material];
-                            MeshMaterial mat = this.Materials[material];
+                            MeshMaterial mat = this.DrawingData.Materials[material];
 
                             #region Per object update
 

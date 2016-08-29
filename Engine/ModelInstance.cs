@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -54,6 +55,10 @@ namespace Engine
                 return positions != null && positions.Length > 0;
             }
         }
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
 
         /// <summary>
         /// Manipulator
@@ -78,7 +83,17 @@ namespace Engine
         /// <summary>
         /// Instance level of detail
         /// </summary>
-        public LevelOfDetailEnum LevelOfDetail { get; private set; }
+        public LevelOfDetailEnum LevelOfDetail
+        {
+            get
+            {
+                return this.levelOfDetail;
+            }
+            set
+            {
+                this.levelOfDetail = this.model.GetLODDrawingData(value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -90,6 +105,7 @@ namespace Engine
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new System.EventHandler(ManipulatorUpdated);
             this.Cull = false;
+            this.LevelOfDetail = LevelOfDetailEnum.High;
         }
 
         /// <summary>
@@ -128,9 +144,31 @@ namespace Engine
         {
             if (this.updatePoints)
             {
-                this.positionCache = this.model.GetPoints(this.Manipulator.LocalTransform);
+                var drawingData = this.model.GetDrawingData(this.LevelOfDetail);
+                if (drawingData != null)
+                {
+                    List<Vector3> points = new List<Vector3>();
 
-                this.updatePoints = false;
+                    foreach (MeshMaterialsDictionary dictionary in drawingData.Meshes.Values)
+                    {
+                        foreach (Mesh mesh in dictionary.Values)
+                        {
+                            Vector3[] meshPoints = mesh.GetPoints();
+                            if (meshPoints != null && meshPoints.Length > 0)
+                            {
+                                points.AddRange(meshPoints);
+                            }
+                        }
+                    }
+
+                    Matrix transform = this.Manipulator.LocalTransform;
+                    Vector3[] trnPoints = new Vector3[points.Count];
+                    Vector3.TransformCoordinate(points.ToArray(), ref transform, trnPoints);
+
+                    this.positionCache = trnPoints;
+
+                    this.updatePoints = false;
+                }
             }
 
             return this.positionCache;
@@ -143,9 +181,27 @@ namespace Engine
         {
             if (this.updateTriangles)
             {
-                this.triangleCache = this.model.GetTriangles(this.Manipulator.LocalTransform);
+                var drawingData = this.model.GetDrawingData(this.LevelOfDetail);
+                if (drawingData != null)
+                {
+                    List<Triangle> triangles = new List<Triangle>();
 
-                this.updateTriangles = false;
+                    foreach (MeshMaterialsDictionary dictionary in drawingData.Meshes.Values)
+                    {
+                        foreach (Mesh mesh in dictionary.Values)
+                        {
+                            Triangle[] meshTriangles = mesh.GetTriangles();
+                            if (meshTriangles != null && meshTriangles.Length > 0)
+                            {
+                                triangles.AddRange(meshTriangles);
+                            }
+                        }
+                    }
+
+                    this.triangleCache = Triangle.Transform(triangles.ToArray(), this.Manipulator.LocalTransform);
+
+                    this.updateTriangles = false;
+                }
             }
 
             return this.triangleCache;

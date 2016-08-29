@@ -212,8 +212,10 @@ namespace TerrainTest
             sw.Restart();
             var heliDesc = new ModelDescription()
             {
-                ContentPath = resources,
-                ModelFileName = "helicopter.dae",
+                //ContentPath = resources,
+                //ModelFileName = "helicopter.dae",
+                ContentPath = "Resources/Cube",
+                ModelFileName = "cube.dae",
                 Opaque = true,
                 Static = false,
                 TextureIndex = 2,
@@ -232,8 +234,10 @@ namespace TerrainTest
             sw.Restart();
             this.tank = this.AddModel(new ModelDescription()
             {
-                ContentPath = resources,
-                ModelFileName = "Leopard.dae",
+                //ContentPath = resources,
+                //ModelFileName = "Leopard.dae",
+                ContentPath = "Resources/Cube",
+                ModelFileName = "cube.dae",
                 Opaque = true,
                 Static = false,
             });
@@ -295,8 +299,10 @@ namespace TerrainTest
             sw.Restart();
             this.rocks = this.AddInstancingModel(new ModelInstancedDescription()
             {
-                ContentPath = resources,
-                ModelFileName = "rocks.dae",
+                //ContentPath = resources,
+                //ModelFileName = "rocks.dae",
+                ContentPath = "Resources/Cube",
+                ModelFileName = "cube.dae",
                 Opaque = true,
                 Static = true,
                 Instances = 150,
@@ -311,16 +317,20 @@ namespace TerrainTest
             sw.Restart();
             this.tree1 = this.AddInstancingModel(new ModelInstancedDescription()
             {
-                ContentPath = resources + "\\tree",
-                ModelFileName = "tree1.dae",
+                //ContentPath = resources + "\\tree",
+                //ModelFileName = "tree1.dae",
+                ContentPath = "Resources/Cube",
+                ModelFileName = "cube.dae",
                 Opaque = true,
                 Static = true,
                 Instances = 100,
             });
             this.tree2 = this.AddInstancingModel(new ModelInstancedDescription()
             {
-                ContentPath = resources + "\\tree",
-                ModelFileName = "tree2.dae",
+                //ContentPath = resources + "\\tree",
+                //ModelFileName = "tree2.dae",
+                ContentPath = "Resources/Cube",
+                ModelFileName = "cube.dae",
                 Opaque = true,
                 Static = true,
                 Instances = 100,

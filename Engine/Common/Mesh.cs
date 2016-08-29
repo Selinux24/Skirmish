@@ -203,8 +203,9 @@ namespace Engine.Common
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="deviceContext">Immediate context</param>
+        /// <param name="startInstanceLocation">Start instance location</param>
         /// <param name="count">Instances to draw</param>
-        public virtual void Draw(DeviceContext deviceContext, int count)
+        public virtual void Draw(DeviceContext deviceContext, int startInstanceLocation, int count)
         {
             if (count > 0)
             {
@@ -215,7 +216,7 @@ namespace Engine.Common
                         deviceContext.DrawIndexedInstanced(
                             this.IndexCount,
                             count,
-                            0, 0, 0);
+                            0, 0, startInstanceLocation);
 
                         Counters.DrawCallsPerFrame++;
                         Counters.InstancesPerFrame += count;
@@ -228,7 +229,7 @@ namespace Engine.Common
                         deviceContext.DrawInstanced(
                             this.VertexCount,
                             count,
-                            0, 0);
+                            0, startInstanceLocation);
 
                         Counters.DrawCallsPerFrame++;
                         Counters.InstancesPerFrame += count;
