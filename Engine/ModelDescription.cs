@@ -7,6 +7,10 @@ namespace Engine
     public class ModelDescription
     {
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name = null;
+        /// <summary>
         /// Content path
         /// </summary>
         public string ContentPath = "Resources";

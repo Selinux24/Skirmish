@@ -335,14 +335,16 @@ namespace Engine
 
                     Counters.DrawCallsPerFrame++;
                     Counters.InstancesPerFrame++;
+                    Counters.TrianglesPerFrame += this.indexCount / 3;
                 }
                 else
                 {
                     this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
-                }
 
-                Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
+                    Counters.DrawCallsPerFrame++;
+                    Counters.InstancesPerFrame++;
+                    Counters.TrianglesPerFrame += this.vertexCount / 3;
+                }
             }
         }
         /// <summary>

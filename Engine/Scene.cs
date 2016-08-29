@@ -325,22 +325,12 @@ namespace Engine
             }
             else
             {
-                LODModelContent lod = new LODModelContent();
-
-                int lastLod = 1;
-                for (int i = 0; i < geo.Length; i++)
-                {
-                    if (optimize) geo[i].Optimize();
-                    
-                    lod.Add((LevelOfDetailEnum)lastLod, geo[i]);
-
-                    lastLod = Helper.NextPowerOfTwo(lastLod+1);
-                }
+                var lod = new LODModelContent(geo, optimize);
 
                 newModel = new Model(this.Game, lod);
             }
 
-            newModel.Name = description.ModelFileName;
+            newModel.Name = !string.IsNullOrEmpty(description.Name) ? description.Name : description.ModelFileName;
             newModel.Opaque = description.Opaque;
             newModel.Static = description.Static;
             newModel.DeferredEnabled = description.DeferredEnabled;
@@ -398,19 +388,12 @@ namespace Engine
             }
             else
             {
-                LODModelContent lod = new LODModelContent();
-
-                for (int i = 0; i < geo.Length; i++)
-                {
-                    if (optimize) geo[i].Optimize();
-
-                    lod.Add((LevelOfDetailEnum)i + 1, geo[i]);
-                }
+                var lod = new LODModelContent(geo, optimize);
 
                 newModel = new ModelInstanced(this.Game, lod, description.Instances);
             }
 
-            newModel.Name = description.ModelFileName;
+            newModel.Name = !string.IsNullOrEmpty(description.Name) ? description.Name : description.ModelFileName;
             newModel.Opaque = description.Opaque;
             newModel.Static = description.Static;
             newModel.DeferredEnabled = description.DeferredEnabled;

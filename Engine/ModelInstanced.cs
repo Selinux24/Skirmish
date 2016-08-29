@@ -22,9 +22,13 @@ namespace Engine
         /// </summary>
         private VertexInstancingData[] instancingData = null;
         /// <summary>
-        /// Manipulator list per instance
+        /// Model instance list
         /// </summary>
         private ModelInstance[] instances = null;
+        /// <summary>
+        /// Temporal instance listo for rendering
+        /// </summary>
+        private ModelInstance[] instancesTmp = null;
 
         /// <summary>
         /// Instancing data buffer
@@ -89,21 +93,20 @@ namespace Engine
         public ModelInstanced(Game game, ModelContent content, int instances, bool dynamic = false)
             : base(game, content, true, instances, true, true, dynamic)
         {
-            this.instancingData = new VertexInstancingData[instances];
+            if (instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
+
+            this.InstanceCount = instances;
+
             this.instances = Helper.CreateArray(instances, () => new ModelInstance(this));
+            this.instancesTmp = new ModelInstance[instances];
+            this.instancingData = new VertexInstancingData[instances];
+
+            this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.instancingData);
+            this.InstancingBufferStride = instancingData[0].Stride;
+
+            this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
 
             this.EnableDepthStencil = true;
-
-            if (instances > 0)
-            {
-                VertexInstancingData[] instancingData = new VertexInstancingData[instances];
-
-                this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(instancingData);
-                this.InstanceCount = instances;
-                this.InstancingBufferStride = instancingData[0].Stride;
-
-                this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
-            }
         }
         /// <summary>
         /// Constructor
@@ -115,21 +118,20 @@ namespace Engine
         public ModelInstanced(Game game, LODModelContent content, int instances, bool dynamic = false)
             : base(game, content, true, instances, true, true, dynamic)
         {
-            this.instancingData = new VertexInstancingData[instances];
+            if (instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
+
+            this.InstanceCount = instances;
+
             this.instances = Helper.CreateArray(instances, () => new ModelInstance(this));
+            this.instancesTmp = new ModelInstance[instances];
+            this.instancingData = new VertexInstancingData[instances];
+
+            this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.instancingData);
+            this.InstancingBufferStride = instancingData[0].Stride;
+
+            this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
 
             this.EnableDepthStencil = true;
-
-            if (instances > 0)
-            {
-                VertexInstancingData[] instancingData = new VertexInstancingData[instances];
-
-                this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(instancingData);
-                this.InstanceCount = instances;
-                this.InstancingBufferStride = instancingData[0].Stride;
-
-                this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
-            }
         }
         /// <summary>
         /// Dispose model buffers
@@ -186,27 +188,48 @@ namespace Engine
 
                 if (effect != null)
                 {
-                    //TODO: Process only visible instances
+                    //Process only visible instances
+                    Array.Copy(this.instances, this.instancesTmp, this.instances.Length);
+
+                    for (int i = 0; i < this.instancesTmp.Length; i++)
+                    {
+                        if (!this.instancesTmp[i].Visible || this.instancesTmp[i].Cull)
+                        {
+                            this.instancesTmp[i] = null;
+                        }
+                    }
+
                     //Sort by LOD
-                    Array.Sort(this.instances, (i1, i2) => i1.LevelOfDetail.CompareTo(i2.LevelOfDetail));
+                    Array.Sort(this.instancesTmp, (i1, i2) =>
+                    {
+                        if (i1 == null)
+                        {
+                            return 1;
+                        }
+                        else if (i2 == null)
+                        {
+                            return -1;
+                        }
+                        else
+                        {
+                            return i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+                        }
+                    });
+
+                    int instanceIndex = 0;
+                    for (int i = 0; i < this.instancesTmp.Length; i++)
+                    {
+                        if (this.instancesTmp[i] != null)
+                        {
+                            this.instancingData[instanceIndex].Local = this.instancesTmp[i].Manipulator.LocalTransform;
+                            this.instancingData[instanceIndex].TextureIndex = this.instancesTmp[i].TextureIndex;
+
+                            instanceIndex++;
+                        }
+                    }
 
                     //Writes instancing data
-                    if (this.instances != null && this.instances.Length > 0)
-                    {
-                        int instanceIndex = 0;
-                        for (int i = 0; i < this.instances.Length; i++)
-                        {
-                            if (this.instances[i].Visible && !this.instances[i].Cull)
-                            {
-                                this.instancingData[instanceIndex].Local = this.instances[i].Manipulator.LocalTransform;
-                                this.instancingData[instanceIndex].TextureIndex = this.instances[i].TextureIndex;
-
-                                instanceIndex++;
-                            }
-                        }
-
-                        this.WriteInstancingData(this.DeviceContext, this.instancingData);
-                    }
+                    this.WriteInstancingData(this.DeviceContext, this.instancingData);
 
                     #region Per frame update
 
@@ -252,18 +275,20 @@ namespace Engine
                     }
 
                     //Render by level of detail
-                    for (int l = 1; l < (int)LevelOfDetailEnum.Minimum; l *= 2)
+                    for (int l = 1; l < (int)LevelOfDetailEnum.Minimum + 1; l *= 2)
                     {
+                        LevelOfDetailEnum lod = (LevelOfDetailEnum)l;
+
                         //Get instances in this LOD
-                        var ins = Array.FindAll(this.instances, i => (int)i.LevelOfDetail == l);
+                        var ins = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
                         if (ins != null && ins.Length > 0)
                         {
-                            var index = Array.IndexOf(this.instances, ins[0]);
-                            var length = this.instances.Length;
-
-                            var drawingData = this.GetDrawingData((LevelOfDetailEnum)l);
+                            var drawingData = this.GetDrawingData(lod);
                             if (drawingData != null)
                             {
+                                var index = Array.IndexOf(this.instancesTmp, ins[0]);
+                                var length = ins.Length;
+
                                 foreach (string meshName in drawingData.Meshes.Keys)
                                 {
                                     #region Per skinning update
@@ -301,12 +326,12 @@ namespace Engine
 
                                     #endregion
 
-                                    MeshMaterialsDictionary dictionary = drawingData.Meshes[meshName];
+                                    var dictionary = drawingData.Meshes[meshName];
 
                                     foreach (string material in dictionary.Keys)
                                     {
-                                        Mesh mesh = dictionary[material];
-                                        MeshMaterial mat = drawingData.Materials[material];
+                                        var mesh = dictionary[material];
+                                        var mat = drawingData.Materials[material];
 
                                         #region Per object update
 
@@ -325,7 +350,7 @@ namespace Engine
 
                                         #endregion
 
-                                        EffectTechnique technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing, context.DrawerMode);
+                                        var technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing, context.DrawerMode);
 
                                         mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 

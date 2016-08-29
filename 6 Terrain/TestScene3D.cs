@@ -38,7 +38,6 @@ namespace TerrainTest
 
         private Model cursor3D = null;
         private Cursor cursor2D = null;
-        private Model cube = null;
 
         private Model tank = null;
         private NavigationMeshAgent tankAgent = new NavigationMeshAgent();
@@ -117,7 +116,7 @@ namespace TerrainTest
             sw.Restart();
             this.cursor3D = this.AddModel(new ModelDescription()
             {
-                ContentPath = resources,
+                ContentPath = resources + "/Cursor",
                 ModelFileName = "cursor.dae",
                 DeferredEnabled = false,
                 Opaque = false,
@@ -133,6 +132,7 @@ namespace TerrainTest
             sw.Restart();
             this.cursor2D = this.AddCursor(new SpriteDescription()
             {
+                ContentPath = resources + "/Cursor",
                 Textures = new[] { "target.png" },
                 Width = 16,
                 Height = 16,
@@ -145,30 +145,12 @@ namespace TerrainTest
 
             #endregion
 
-            #region Cube
-
-            sw.Restart();
-            this.cube = this.AddModel(new ModelDescription()
-            {
-                ContentPath = "Resources/Cube",
-                ModelFileName = "cube.dae",
-                DeferredEnabled = true,
-                Opaque = true,
-                Static = true,
-            });
-            sw.Stop();
-            loadingText += string.Format("cube: {0} ", sw.Elapsed.TotalSeconds);
-
-            this.cursor2D.Visible = false;
-
-            #endregion
-
             #region Lens flare
 
             sw.Restart();
             this.lensFlare = this.AddLensFlare(new LensFlareDescription()
             {
-                ContentPath = @"Resources/Flare",
+                ContentPath = resources + "/Flare",
                 GlowTexture = "lfGlow.png",
                 Flares = new FlareDescription[]
                 {
@@ -198,9 +180,9 @@ namespace TerrainTest
             sw.Restart();
             this.skydom = this.AddSkydom(new SkydomDescription()
             {
-                ContentPath = resources,
-                Radius = this.Camera.FarPlaneDistance,
+                ContentPath = resources + "/Skydom",
                 Texture = "sunset.dds",
+                Radius = this.Camera.FarPlaneDistance,
             });
             sw.Stop();
             loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
@@ -212,10 +194,8 @@ namespace TerrainTest
             sw.Restart();
             var heliDesc = new ModelDescription()
             {
-                //ContentPath = resources,
-                //ModelFileName = "helicopter.dae",
-                ContentPath = "Resources/Cube",
-                ModelFileName = "cube.dae",
+                ContentPath = resources + "/Helicopter",
+                ModelFileName = "helicopter.dae",
                 Opaque = true,
                 Static = false,
                 TextureIndex = 2,
@@ -234,10 +214,8 @@ namespace TerrainTest
             sw.Restart();
             this.tank = this.AddModel(new ModelDescription()
             {
-                //ContentPath = resources,
-                //ModelFileName = "Leopard.dae",
-                ContentPath = "Resources/Cube",
-                ModelFileName = "cube.dae",
+                ContentPath = resources + "/Leopard",
+                ModelFileName = "Leopard.dae",
                 Opaque = true,
                 Static = false,
             });
@@ -253,7 +231,7 @@ namespace TerrainTest
             sw.Restart();
             this.helipod = this.AddModel(new ModelDescription()
             {
-                ContentPath = resources,
+                ContentPath = resources + "/Helipod",
                 ModelFileName = "helipod.dae",
                 Opaque = true,
                 Static = true,
@@ -268,7 +246,7 @@ namespace TerrainTest
             sw.Restart();
             this.garage = this.AddModel(new ModelDescription()
             {
-                ContentPath = resources,
+                ContentPath = resources + "/Garage",
                 ModelFileName = "garage.dae",
                 Opaque = true,
                 Static = true,
@@ -283,7 +261,7 @@ namespace TerrainTest
             sw.Restart();
             this.obelisk = this.AddInstancingModel(new ModelInstancedDescription()
             {
-                ContentPath = resources,
+                ContentPath = resources + "/Obelisk",
                 ModelFileName = "obelisk.dae",
                 Opaque = true,
                 Static = true,
@@ -299,10 +277,9 @@ namespace TerrainTest
             sw.Restart();
             this.rocks = this.AddInstancingModel(new ModelInstancedDescription()
             {
-                //ContentPath = resources,
-                //ModelFileName = "rocks.dae",
-                ContentPath = "Resources/Cube",
-                ModelFileName = "cube.dae",
+                Name = "DEBUG_CUBE_INSTANCED",
+                ContentPath = resources + "/Rocks",
+                ModelFileName = "rocks.dae",
                 Opaque = true,
                 Static = true,
                 Instances = 150,
@@ -317,23 +294,19 @@ namespace TerrainTest
             sw.Restart();
             this.tree1 = this.AddInstancingModel(new ModelInstancedDescription()
             {
-                //ContentPath = resources + "\\tree",
-                //ModelFileName = "tree1.dae",
-                ContentPath = "Resources/Cube",
-                ModelFileName = "cube.dae",
+                ContentPath = resources + "/Trees",
+                ModelFileName = "tree1.dae",
                 Opaque = true,
                 Static = true,
-                Instances = 100,
+                Instances = 50,
             });
             this.tree2 = this.AddInstancingModel(new ModelInstancedDescription()
             {
-                //ContentPath = resources + "\\tree",
-                //ModelFileName = "tree2.dae",
-                ContentPath = "Resources/Cube",
-                ModelFileName = "cube.dae",
+                ContentPath = resources + "/Trees",
+                ModelFileName = "tree2.dae",
                 Opaque = true,
                 Static = true,
-                Instances = 100,
+                Instances = 50,
             });
             sw.Stop();
             loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
@@ -358,7 +331,7 @@ namespace TerrainTest
 
             var terrainDescription = new GroundDescription()
             {
-                ContentPath = resources,
+                ContentPath = resources + "/Terrain",
                 Model = new GroundDescription.ModelDescription()
                 {
                     ModelFileName = "two_levels.dae",
@@ -370,16 +343,6 @@ namespace TerrainTest
                 PathFinder = new GroundDescription.PathFinderDescription()
                 {
                     Settings = navSettings,
-                },
-                Vegetation = new GroundDescription.VegetationDescription()
-                {
-                    VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
-                    Saturation = 0.5f,
-                    Opaque = true,
-                    StartRadius = 0f,
-                    EndRadius = 300f,
-                    MinSize = Vector2.One * 2.50f,
-                    MaxSize = Vector2.One * 3.50f,
                 },
                 Opaque = true,
                 Static = true,
@@ -492,7 +455,7 @@ namespace TerrainTest
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.helipod, EvaluateForPicking = true, UseVolumeForPicking = false, EvaluateForPathFinding = true, UseVolumeForPathFinding = false }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.garage, EvaluateForPicking = true, UseVolumeForPicking = false, EvaluateForPathFinding = true, UseVolumeForPathFinding = false }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.obelisk, EvaluateForPicking = false }, false);
-            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.rocks, EvaluateForPicking = false }, false);
+            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.rocks, EvaluateForPicking = false, UseVolumeForPathFinding = true }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.tree1, EvaluateForPicking = false, UseVolumeForPicking = true, EvaluateForPathFinding = true, UseVolumeForPathFinding = true }, false);
             this.terrain.AttachObject(new GroundAttachedObject() { Model = this.tree2, EvaluateForPicking = false, UseVolumeForPicking = true, EvaluateForPathFinding = true, UseVolumeForPathFinding = true }, false);
             this.terrain.UpdateInternals();
@@ -966,8 +929,8 @@ namespace TerrainTest
 
             #region Texts
 
-            string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}", Counters.Buffers, Counters.AllocatedMemoryInBuffers, Counters.BufferReads, Counters.BufferWrites, this.RenderMode, this.shadowResult);
-            string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3} - Cube LOD: {4}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets, this.cube.LevelOfDetail);
+            string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Triangles: {6}", Counters.Buffers, Counters.AllocatedMemoryInBuffers, Counters.BufferReads, Counters.BufferWrites, this.RenderMode, this.shadowResult, Counters.TrianglesPerFrame);
+            string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets);
             this.counters1.Text = txt1;
             this.counters2.Text = txt2;
 

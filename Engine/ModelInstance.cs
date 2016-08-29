@@ -390,9 +390,9 @@ namespace Engine
             {
                 var pars = frustum.GetCameraParams();
                 var dist = Vector3.DistanceSquared(this.Manipulator.Position, pars.Position);
-                if (dist < 100) { this.LevelOfDetail = LevelOfDetailEnum.High; }
-                else if (dist < 400) { this.LevelOfDetail = LevelOfDetailEnum.Medium; }
-                else if (dist < 1600) { this.LevelOfDetail = LevelOfDetailEnum.Low; }
+                if (dist < 100f) { this.LevelOfDetail = LevelOfDetailEnum.High; }
+                else if (dist < 400f) { this.LevelOfDetail = LevelOfDetailEnum.Medium; }
+                else if (dist < 1600f) { this.LevelOfDetail = LevelOfDetailEnum.Low; }
                 else { this.LevelOfDetail = LevelOfDetailEnum.Minimum; }
             }
         }

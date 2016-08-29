@@ -937,6 +937,7 @@ namespace Engine
 
                         Counters.DrawCallsPerFrame++;
                         Counters.InstancesPerFrame++;
+                        Counters.TrianglesPerFrame += this.indexCount/3;
                     }
                 }
             }
@@ -965,6 +966,7 @@ namespace Engine
 
                         Counters.DrawCallsPerFrame++;
                         Counters.InstancesPerFrame++;
+                        Counters.TrianglesPerFrame += this.foliageCount / 3;
                     }
                 }
             }

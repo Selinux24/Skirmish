@@ -34,100 +34,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "7 Deferred", "7 Deferred\7 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "8 Heightmap", "8 Heightmap\8 Heightmap.csproj", "{5F35C198-01BF-48A9-887C-2A99390226E0}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blender", "Blender", "{4F0CF2E9-B1BE-4D46-B890-FBFA1253331A}"
-	ProjectSection(SolutionItems) = preProject
-		Blender\aniCube.blend = Blender\aniCube.blend
-		Blender\aniCube.png = Blender\aniCube.png
-		Blender\baneblade.blend = Blender\baneblade.blend
-		Blender\capital ship.blend = Blender\capital ship.blend
-		Blender\cube_1.blend = Blender\cube_1.blend
-		Blender\cube_2.blend = Blender\cube_2.blend
-		Blender\cube_3.blend = Blender\cube_3.blend
-		Blender\cube_4.blend = Blender\cube_4.blend
-		Blender\garage.blend = Blender\garage.blend
-		Blender\ground.blend = Blender\ground.blend
-		Blender\ground.png = Blender\ground.png
-		Blender\helicopter - black.png = Blender\helicopter - black.png
-		Blender\helicopter - gray.png = Blender\helicopter - gray.png
-		Blender\helicopter - green.png = Blender\helicopter - green.png
-		Blender\helicopter - tires.png = Blender\helicopter - tires.png
-		Blender\helicopter.blend = Blender\helicopter.blend
-		Blender\helipod.blend = Blender\helipod.blend
-		Blender\human.blend = Blender\human.blend
-		Blender\jagdpanther.blend = Blender\jagdpanther.blend
-		Blender\leafs1.jpg = Blender\leafs1.jpg
-		Blender\leafs1a.jpg = Blender\leafs1a.jpg
-		Blender\Leopard.blend = Blender\Leopard.blend
-		Blender\Leopard.bmp = Blender\Leopard.bmp
-		Blender\obelisk.blend = Blender\obelisk.blend
-		Blender\poly.blend = Blender\poly.blend
-		Blender\poly.png = Blender\poly.png
-		Blender\rocks.blend = Blender\rocks.blend
-		Blender\ruins.blend = Blender\ruins.blend
-		Blender\soldier.blend = Blender\soldier.blend
-		Blender\soldier.jpg = Blender\soldier.jpg
-		Blender\tank.blend = Blender\tank.blend
-		Blender\terrain.blend = Blender\terrain.blend
-		Blender\terrain.png = Blender\terrain.png
-		Blender\terrain_nmap.png = Blender\terrain_nmap.png
-		Blender\torch.blend = Blender\torch.blend
-		Blender\tree1.blend = Blender\tree1.blend
-		Blender\tree2.blend = Blender\tree2.blend
-		Blender\tree2_bark_albedo.png = Blender\tree2_bark_albedo.png
-		Blender\tree2_bark_normal.png = Blender\tree2_bark_normal.png
-		Blender\tree2_bark_specular.png = Blender\tree2_bark_specular.png
-		Blender\tree2_bushes_albedo.png = Blender\tree2_bushes_albedo.png
-		Blender\tree2_bushes_normal.png = Blender\tree2_bushes_normal.png
-		Blender\tree2_bushes_specular.png = Blender\tree2_bushes_specular.png
-		Blender\two_levels.blend = Blender\two_levels.blend
-		Blender\wood.jpg = Blender\wood.jpg
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Collada", "Collada", "{DCCFC608-FBD4-45F4-83BA-3ED0192AA744}"
-	ProjectSection(SolutionItems) = preProject
-		Blender\Collada\aniCube.dae = Blender\Collada\aniCube.dae
-		Blender\Collada\aniCube.png = Blender\Collada\aniCube.png
-		Blender\Collada\baneblade.dae = Blender\Collada\baneblade.dae
-		Blender\Collada\bark_albedo.png = Blender\Collada\bark_albedo.png
-		Blender\Collada\bark_normal.png = Blender\Collada\bark_normal.png
-		Blender\Collada\bark_specular.png = Blender\Collada\bark_specular.png
-		Blender\Collada\bushes_albedo.png = Blender\Collada\bushes_albedo.png
-		Blender\Collada\bushes_normal.png = Blender\Collada\bushes_normal.png
-		Blender\Collada\bushes_specular.png = Blender\Collada\bushes_specular.png
-		Blender\Collada\cube_1.dae = Blender\Collada\cube_1.dae
-		Blender\Collada\cube_2.dae = Blender\Collada\cube_2.dae
-		Blender\Collada\cube_3.dae = Blender\Collada\cube_3.dae
-		Blender\Collada\cube_4.dae = Blender\Collada\cube_4.dae
-		Blender\Collada\garage.dae = Blender\Collada\garage.dae
-		Blender\Collada\ground.dae = Blender\Collada\ground.dae
-		Blender\Collada\ground.png = Blender\Collada\ground.png
-		Blender\Collada\ground_nmap.png = Blender\Collada\ground_nmap.png
-		Blender\Collada\Helicopter - black.png = Blender\Collada\Helicopter - black.png
-		Blender\Collada\Helicopter - gray.png = Blender\Collada\Helicopter - gray.png
-		Blender\Collada\Helicopter - green.png = Blender\Collada\Helicopter - green.png
-		Blender\Collada\helicopter - tires.png = Blender\Collada\helicopter - tires.png
-		Blender\Collada\helicopter.dae = Blender\Collada\helicopter.dae
-		Blender\Collada\helipod.dae = Blender\Collada\helipod.dae
-		Blender\Collada\jagdpanther.dae = Blender\Collada\jagdpanther.dae
-		Blender\Collada\leafs1a.jpg = Blender\Collada\leafs1a.jpg
-		Blender\Collada\Leopard.dae = Blender\Collada\Leopard.dae
-		Blender\Collada\obelisk.dae = Blender\Collada\obelisk.dae
-		Blender\Collada\poly.dae = Blender\Collada\poly.dae
-		Blender\Collada\Poly.png = Blender\Collada\Poly.png
-		Blender\Collada\rocks.dae = Blender\Collada\rocks.dae
-		Blender\Collada\ruins.dae = Blender\Collada\ruins.dae
-		Blender\Collada\soldier.dae = Blender\Collada\soldier.dae
-		Blender\Collada\soldier.jpg = Blender\Collada\soldier.jpg
-		Blender\Collada\tank.dae = Blender\Collada\tank.dae
-		Blender\Collada\terrain.dae = Blender\Collada\terrain.dae
-		Blender\Collada\terrain.png = Blender\Collada\terrain.png
-		Blender\Collada\terrain_nmap.png = Blender\Collada\terrain_nmap.png
-		Blender\Collada\torch.dae = Blender\Collada\torch.dae
-		Blender\Collada\tree1.dae = Blender\Collada\tree1.dae
-		Blender\Collada\tree2.dae = Blender\Collada\tree2.dae
-		Blender\Collada\two_levels.dae = Blender\Collada\two_levels.dae
-		Blender\Collada\wood.jpg = Blender\Collada\wood.jpg
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Resources.csproj", "{28391C85-9275-4E62-A159-3C67DFADC428}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -301,12 +208,16 @@ Global
 		{5F35C198-01BF-48A9-887C-2A99390226E0}.Release|x64.Build.0 = Release|x64
 		{5F35C198-01BF-48A9-887C-2A99390226E0}.Release|x86.ActiveCfg = Release|x86
 		{5F35C198-01BF-48A9-887C-2A99390226E0}.Release|x86.Build.0 = Release|x86
+		{28391C85-9275-4E62-A159-3C67DFADC428}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28391C85-9275-4E62-A159-3C67DFADC428}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{28391C85-9275-4E62-A159-3C67DFADC428}.Debug|x64.ActiveCfg = Debug|x64
+		{28391C85-9275-4E62-A159-3C67DFADC428}.Debug|x86.ActiveCfg = Debug|x86
+		{28391C85-9275-4E62-A159-3C67DFADC428}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28391C85-9275-4E62-A159-3C67DFADC428}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{28391C85-9275-4E62-A159-3C67DFADC428}.Release|x64.ActiveCfg = Release|x64
+		{28391C85-9275-4E62-A159-3C67DFADC428}.Release|x86.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{4F0CF2E9-B1BE-4D46-B890-FBFA1253331A} = {E510EEF8-84D0-4A28-9E35-5B55A34893CC}
-		{DCCFC608-FBD4-45F4-83BA-3ED0192AA744} = {4F0CF2E9-B1BE-4D46-B890-FBFA1253331A}
 	EndGlobalSection
 EndGlobal
