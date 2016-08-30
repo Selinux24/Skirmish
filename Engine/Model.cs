@@ -93,7 +93,7 @@ namespace Engine
             }
             set
             {
-                this.levelOfDetail = this.GetLODDrawingData(value);
+                this.levelOfDetail = this.GetLODNearest(value);
                 this.DrawingData = this.ChangeDrawingData(this.DrawingData, this.levelOfDetail);
             }
         }
@@ -196,7 +196,7 @@ namespace Engine
 
                     if (this.EnableAlphaBlending)
                     {
-                        this.Game.Graphics.SetBlendAlphaEnabled();
+                        this.Game.Graphics.SetBlendTransparent();
                     }
 
                     foreach (string meshName in this.DrawingData.Meshes.Keys)
@@ -335,27 +335,11 @@ namespace Engine
         /// <returns>Returns null or position list</returns>
         public Vector3[] GetPoints()
         {
-            if (this.updatePoints && this.DrawingData != null)
+            if (this.updatePoints)
             {
-                List<Vector3> points = new List<Vector3>();
+                var drawingData = this.GetDrawingData(this.GetLODMinimum());
 
-                foreach (MeshMaterialsDictionary dictionary in this.DrawingData.Meshes.Values)
-                {
-                    foreach (Mesh mesh in dictionary.Values)
-                    {
-                        Vector3[] meshPoints = mesh.GetPoints();
-                        if (meshPoints != null && meshPoints.Length > 0)
-                        {
-                            points.AddRange(meshPoints);
-                        }
-                    }
-                }
-
-                Matrix transform = this.Manipulator.LocalTransform;
-                Vector3[] trnPoints = new Vector3[points.Count];
-                Vector3.TransformCoordinate(points.ToArray(), ref transform, trnPoints);
-
-                this.positionCache = trnPoints;
+                this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform);
 
                 this.updatePoints = false;
             }
@@ -368,23 +352,11 @@ namespace Engine
         /// <returns>Returns null or triangle list</returns>
         public Triangle[] GetTriangles()
         {
-            if (this.updateTriangles && this.DrawingData != null)
+            if (this.updateTriangles)
             {
-                List<Triangle> triangles = new List<Triangle>();
+                var drawingData = this.GetDrawingData(this.GetLODMinimum());
 
-                foreach (MeshMaterialsDictionary dictionary in this.DrawingData.Meshes.Values)
-                {
-                    foreach (Mesh mesh in dictionary.Values)
-                    {
-                        Triangle[] meshTriangles = mesh.GetTriangles();
-                        if (meshTriangles != null && meshTriangles.Length > 0)
-                        {
-                            triangles.AddRange(meshTriangles);
-                        }
-                    }
-                }
-
-                this.triangleCache = Triangle.Transform(triangles.ToArray(), this.Manipulator.LocalTransform);
+                this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform);
 
                 this.updateTriangles = false;
             }

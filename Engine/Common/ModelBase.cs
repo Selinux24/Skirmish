@@ -124,20 +124,70 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Gets the default level of detail for the specified level of detail
+        /// Gets the nearest level of detail for the specified level of detail
         /// </summary>
         /// <param name="lod">Level of detail</param>
-        /// <returns>Returns the default level of detail for the specified level of detail</returns>
-        internal LevelOfDetailEnum GetLODDrawingData(LevelOfDetailEnum lod)
+        /// <returns>Returns the nearest level of detail for the specified level of detail</returns>
+        internal LevelOfDetailEnum GetLODNearest(LevelOfDetailEnum lod)
         {
             if (this.meshesByLOD.ContainsKey(lod))
             {
                 return lod;
             }
+            else if (this.meshesByLOD.Keys.Count > 1)
+            {
+                int i = Helper.NextPowerOfTwo((int)lod + 1);
+
+                for (int l = i; l < (int)LevelOfDetailEnum.Minimum + 1; l *= 2)
+                {
+                    if (this.meshesByLOD.ContainsKey((LevelOfDetailEnum)l))
+                    {
+                        return (LevelOfDetailEnum)l;
+                    }
+                }
+
+                return this.defaultLevelOfDetail;
+            }
             else
             {
                 return this.defaultLevelOfDetail;
             }
+        }
+        /// <summary>
+        /// Gets the minimum level of detail
+        /// </summary>
+        /// <returns>Returns the minimum level of detail</returns>
+        internal LevelOfDetailEnum GetLODMinimum()
+        {
+            int l = int.MaxValue;
+
+            foreach (var lod in this.meshesByLOD.Keys)
+            {
+                if ((int)lod < l)
+                {
+                    l = (int)lod;
+                }
+            }
+
+            return (LevelOfDetailEnum)l;
+        }
+        /// <summary>
+        /// Gets the maximum level of detail
+        /// </summary>
+        /// <returns>Returns the maximum level of detail</returns>
+        internal LevelOfDetailEnum GetLODMaximum()
+        {
+            int l = int.MinValue;
+
+            foreach (var lod in this.meshesByLOD.Keys)
+            {
+                if ((int)lod > l)
+                {
+                    l = (int)lod;
+                }
+            }
+
+            return (LevelOfDetailEnum)l;
         }
         /// <summary>
         /// Gets the drawing data by level of detail

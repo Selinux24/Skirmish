@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine
 {
@@ -271,6 +271,44 @@ namespace Engine
             }
 
             return CreateFromVertices(vertList.ToArray(), indexList.ToArray());
+        }
+        public static Line3[] CreateWiredCylinder(BoundingCylinder cylinder, int segments)
+        {
+            List<Line3> resultList = new List<Line3>();
+
+            List<Vector3> verts = new List<Vector3>();
+
+            //verts
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < segments; j++)
+                {
+                    float theta = ((float)j / (float)segments) * 2 * (float)Math.PI;
+                    float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
+
+                    verts.Add(cylinder.Position + new Vector3(cylinder.Radius * st, cylinder.Height * i, cylinder.Radius * ct));
+                }
+            }
+
+            for (int i = 0; i < segments; i++)
+            {
+                if (i == segments - 1)
+                {
+                    resultList.Add(new Line3(verts[i], verts[0]));
+                    resultList.Add(new Line3(verts[i + segments], verts[0 + segments]));
+
+                    resultList.Add(new Line3(verts[i], verts[i + segments]));
+                }
+                else
+                {
+                    resultList.Add(new Line3(verts[i], verts[i + 1]));
+                    resultList.Add(new Line3(verts[i + segments], verts[i + 1 + segments]));
+
+                    resultList.Add(new Line3(verts[i], verts[i + segments]));
+                }
+            }
+
+            return resultList.ToArray();
         }
         public static Line3[] CreateWiredFrustum(BoundingFrustum frustum)
         {

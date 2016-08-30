@@ -91,7 +91,7 @@ namespace Engine
             }
             set
             {
-                this.levelOfDetail = this.model.GetLODDrawingData(value);
+                this.levelOfDetail = this.model.GetLODNearest(value);
             }
         }
 
@@ -144,31 +144,11 @@ namespace Engine
         {
             if (this.updatePoints)
             {
-                var drawingData = this.model.GetDrawingData(this.LevelOfDetail);
-                if (drawingData != null)
-                {
-                    List<Vector3> points = new List<Vector3>();
+                var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
 
-                    foreach (MeshMaterialsDictionary dictionary in drawingData.Meshes.Values)
-                    {
-                        foreach (Mesh mesh in dictionary.Values)
-                        {
-                            Vector3[] meshPoints = mesh.GetPoints();
-                            if (meshPoints != null && meshPoints.Length > 0)
-                            {
-                                points.AddRange(meshPoints);
-                            }
-                        }
-                    }
+                this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform);
 
-                    Matrix transform = this.Manipulator.LocalTransform;
-                    Vector3[] trnPoints = new Vector3[points.Count];
-                    Vector3.TransformCoordinate(points.ToArray(), ref transform, trnPoints);
-
-                    this.positionCache = trnPoints;
-
-                    this.updatePoints = false;
-                }
+                this.updatePoints = false;
             }
 
             return this.positionCache;
@@ -181,27 +161,11 @@ namespace Engine
         {
             if (this.updateTriangles)
             {
-                var drawingData = this.model.GetDrawingData(this.LevelOfDetail);
-                if (drawingData != null)
-                {
-                    List<Triangle> triangles = new List<Triangle>();
+                var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
 
-                    foreach (MeshMaterialsDictionary dictionary in drawingData.Meshes.Values)
-                    {
-                        foreach (Mesh mesh in dictionary.Values)
-                        {
-                            Triangle[] meshTriangles = mesh.GetTriangles();
-                            if (meshTriangles != null && meshTriangles.Length > 0)
-                            {
-                                triangles.AddRange(meshTriangles);
-                            }
-                        }
-                    }
+                this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform);
 
-                    this.triangleCache = Triangle.Transform(triangles.ToArray(), this.Manipulator.LocalTransform);
-
-                    this.updateTriangles = false;
-                }
+                this.updateTriangles = false;
             }
 
             return this.triangleCache;

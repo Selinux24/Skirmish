@@ -261,55 +261,35 @@ namespace Engine
             {
                 List<Vector3> verts = new List<Vector3>();
 
-                //verts
                 for (int i = 0; i < 2; i++)
                 {
-                    for (int j = 0; j <= segments; j++)
+                    for (int j = 0; j < segments; j++)
                     {
                         float theta = ((float)j / (float)segments) * 2 * (float)Math.PI;
                         float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
 
                         verts.Add(cylinder.Position + new Vector3(cylinder.Radius * st, cylinder.Height * i, cylinder.Radius * ct));
-                        verts.Add(cylinder.Position + (i == 0 ? -Vector3.UnitY : Vector3.UnitY));
                     }
                 }
 
-                for (int i = 0; i < 2; i++)
+                for (int i = 0; i < segments - 2; i++)
                 {
-                    for (int j = 0; j <= segments; j++)
+                    triangleList.Add(new Triangle(verts[0], verts[i + 2], verts[i + 1]));
+                    triangleList.Add(new Triangle(verts[0 + segments], verts[i + 1 + segments], verts[i + 2 + segments]));
+                }
+
+                for (int i = 0; i < segments; i++)
+                {
+                    if (i == segments - 1)
                     {
-                        float theta = ((float)j / (float)segments) * 2 * (float)Math.PI;
-                        float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
-
-                        verts.Add(cylinder.Position + new Vector3(cylinder.Radius * st, cylinder.Height * i, cylinder.Radius * ct));
-                        verts.Add(cylinder.Position + new Vector3(st, 0, ct));
+                        triangleList.Add(new Triangle(verts[i], verts[0], verts[i + segments]));
+                        triangleList.Add(new Triangle(verts[0], verts[0 + segments], verts[i + segments]));
                     }
-                }
-
-                //inds
-                int start = 0;
-
-                //bottom cap
-                for (int i = 1; i < segments - 1; i++)
-                {
-                    triangleList.Add(new Triangle(verts[start], verts[start + i + 1], verts[start + i]));
-                }
-
-                start = segments + 1;
-
-                //top cap
-                for (int i = 1; i < segments - 1; i++)
-                {
-                    triangleList.Add(new Triangle(verts[start], verts[start + i], verts[start + i + 1]));
-                }
-
-                start += segments + 1;
-
-                //edge
-                for (int i = 0; i <= segments; i++)
-                {
-                    triangleList.Add(new Triangle(verts[start + i], verts[start + segments + i + 1], verts[start + segments + i]));
-                    triangleList.Add(new Triangle(verts[start + i], verts[start + i + 1], verts[start + segments + i + 1]));
+                    else
+                    {
+                        triangleList.Add(new Triangle(verts[i], verts[i + 1], verts[i + segments]));
+                        triangleList.Add(new Triangle(verts[i + 1], verts[i + 1 + segments], verts[i + segments]));
+                    }
                 }
             }
             else

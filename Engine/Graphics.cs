@@ -125,10 +125,6 @@ namespace Engine
         /// </summary>
         private BlendState blendDefault = null;
         /// <summary>
-        /// Blend state for alpha blending
-        /// </summary>
-        private BlendState blendAlphaEnabled = null;
-        /// <summary>
         /// Blend state for transparent blending
         /// </summary>
         private BlendState blendTransparent = null;
@@ -668,27 +664,6 @@ namespace Engine
             }
             #endregion
 
-            #region Alpha blend state
-            {
-                BlendStateDescription desc = new BlendStateDescription();
-                desc.AlphaToCoverageEnable = true;
-                desc.IndependentBlendEnable = false;
-
-                desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-
-                this.blendAlphaEnabled = new BlendState(this.Device, desc);
-            }
-            #endregion
-
             #region Transparent blend state
             {
                 BlendStateDescription desc = new BlendStateDescription();
@@ -1104,13 +1079,6 @@ namespace Engine
             this.SetBlendState(this.blendDefault, Color.Transparent, -1);
         }
         /// <summary>
-        /// Sets alpha rendering blend state
-        /// </summary>
-        public void SetBlendAlphaEnabled()
-        {
-            this.SetBlendState(this.blendAlphaEnabled, Color.Transparent, -1);
-        }
-        /// <summary>
         /// Sets transparent blend state
         /// </summary>
         public void SetBlendTransparent()
@@ -1348,7 +1316,6 @@ namespace Engine
             Helper.Dispose(this.rasterizerCullFrontFace);
 
             Helper.Dispose(this.blendDefault);
-            Helper.Dispose(this.blendAlphaEnabled);
             Helper.Dispose(this.blendTransparent);
             Helper.Dispose(this.blendAdditive);
             Helper.Dispose(this.blendDeferredLighting);

@@ -271,7 +271,7 @@ namespace Engine
 
                     if (this.EnableAlphaBlending)
                     {
-                        this.Game.Graphics.SetBlendAlphaEnabled();
+                        this.Game.Graphics.SetBlendTransparent();
                     }
 
                     //Render by level of detail

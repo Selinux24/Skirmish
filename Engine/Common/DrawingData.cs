@@ -348,5 +348,89 @@ namespace Engine.Common
                 this.SkinningData = null;
             }
         }
+
+        /// <summary>
+        /// Gets the drawing data's point list
+        /// </summary>
+        /// <returns>Returns the drawing data's point list</returns>
+        public Vector3[] GetPoints()
+        {
+            List<Vector3> points = new List<Vector3>();
+
+            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+            {
+                foreach (Mesh mesh in dictionary.Values)
+                {
+                    Vector3[] meshPoints = mesh.GetPoints();
+                    if (meshPoints != null && meshPoints.Length > 0)
+                    {
+                        points.AddRange(meshPoints);
+                    }
+                }
+            }
+
+            return points.ToArray();
+        }
+        /// <summary>
+        /// Gets the drawing data's point list
+        /// </summary>
+        /// <param name="transform">Transform to apply</param>
+        /// <returns>Returns the drawing data's point list</returns>
+        public Vector3[] GetPoints(Matrix transform)
+        {
+            Vector3[] points = this.GetPoints();
+
+            if (transform != Matrix.Identity)
+            {
+                Vector3[] trnPoints = new Vector3[points.Length];
+                Vector3.TransformCoordinate(points, ref transform, trnPoints);
+
+                return trnPoints;
+            }
+            else
+            {
+                return points;
+            }
+        }
+        /// <summary>
+        /// Gets the drawing data's triangle list
+        /// </summary>
+        /// <returns>Returns the drawing data's triangle list</returns>
+        public Triangle[] GetTriangles()
+        {
+            List<Triangle> triangles = new List<Triangle>();
+
+            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+            {
+                foreach (Mesh mesh in dictionary.Values)
+                {
+                    Triangle[] meshTriangles = mesh.GetTriangles();
+                    if (meshTriangles != null && meshTriangles.Length > 0)
+                    {
+                        triangles.AddRange(meshTriangles);
+                    }
+                }
+            }
+
+            return triangles.ToArray();
+        }
+        /// <summary>
+        /// Gets the drawing data's triangle list
+        /// </summary>
+        /// <param name="transform">Transform to apply</param>
+        /// <returns>Returns the drawing data's triangle list</returns>
+        public Triangle[] GetTriangles(Matrix transform)
+        {
+            Triangle[] triangles = this.GetTriangles();
+
+            if (transform != Matrix.Identity)
+            {
+                return Triangle.Transform(triangles, transform);
+            }
+            else
+            {
+                return triangles;
+            }
+        }
     }
 }

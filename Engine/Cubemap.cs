@@ -41,7 +41,7 @@ namespace Engine
             }
             set
             {
-                this.levelOfDetail = this.GetLODDrawingData(value);
+                this.levelOfDetail = this.GetLODNearest(value);
                 this.DrawingData = this.ChangeDrawingData(this.DrawingData, this.levelOfDetail);
             }
         }

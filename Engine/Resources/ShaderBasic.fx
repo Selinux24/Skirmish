@@ -106,17 +106,16 @@ float4 PSPositionColor(PSVertexPositionColor input) : SV_TARGET
 {
 	float4 matColor = input.color * gMaterial.Diffuse;
 
-	float3 litColor = matColor.rgb;
-
 	if(gFogRange > 0)
 	{
 		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 		float distToEye = length(toEyeWorld);
 
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
+		float3 litColor = ComputeFog(matColor.rgb, distToEye, gFogStart, gFogRange, gFogColor.rgb);
+		matColor = float4(litColor, matColor.a);
 	}
 
-	return float4(litColor, matColor.a);
+	return matColor;
 }
 
 /**********************************************************************************************************

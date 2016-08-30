@@ -88,6 +88,16 @@ namespace Engine
         /// Height
         /// </summary>
         public float Height;
+        /// <summary>
+        /// Center
+        /// </summary>
+        public Vector3 Center
+        {
+            get
+            {
+                return this.Position + new Vector3(0f, this.Height * 0.5f, 0f);
+            }
+        }
 
         /// <summary>
         /// Constructor

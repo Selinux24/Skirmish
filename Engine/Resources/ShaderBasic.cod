@@ -320,7 +320,7 @@ fxgroup
                 //   v2.x <- input.color.x; v2.y <- input.color.y; v2.z <- input.color.z; v2.w <- input.color.w; 
                 //   o0.x <- <PSPositionColor return value>.x; o0.y <- <PSPositionColor return value>.y; o0.z <- <PSPositionColor return value>.z; o0.w <- <PSPositionColor return value>.w
                 //
-                #line 113 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 111 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
@@ -336,10 +336,10 @@ fxgroup
                 #line 149 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z
                 
-                #line 111 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 109 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.w, l(0.000000), cb0[54].y
                 
-                #line 117
+                #line 116
                 movc o0.xyz, r0.wwww, r0.xyzx, r1.xyzx
                 mov o0.w, r1.w
                 ret 
@@ -616,7 +616,7 @@ fxgroup
                 //   v2.x <- input.color.x; v2.y <- input.color.y; v2.z <- input.color.z; v2.w <- input.color.w; 
                 //   o0.x <- <PSPositionColor return value>.x; o0.y <- <PSPositionColor return value>.y; o0.z <- <PSPositionColor return value>.z; o0.w <- <PSPositionColor return value>.w
                 //
-                #line 113 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 111 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
@@ -632,10 +632,10 @@ fxgroup
                 #line 149 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z
                 
-                #line 111 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 109 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.w, l(0.000000), cb0[54].y
                 
-                #line 117
+                #line 116
                 movc o0.xyz, r0.wwww, r0.xyzx, r1.xyzx
                 mov o0.w, r1.w
                 ret 
@@ -947,7 +947,7 @@ fxgroup
                 //   v2.x <- input.color.x; v2.y <- input.color.y; v2.z <- input.color.z; v2.w <- input.color.w; 
                 //   o0.x <- <PSPositionColor return value>.x; o0.y <- <PSPositionColor return value>.y; o0.z <- <PSPositionColor return value>.z; o0.w <- <PSPositionColor return value>.w
                 //
-                #line 113 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 111 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
@@ -963,10 +963,10 @@ fxgroup
                 #line 149 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z
                 
-                #line 111 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 109 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.w, l(0.000000), cb0[54].y
                 
-                #line 117
+                #line 116
                 movc o0.xyz, r0.wwww, r0.xyzx, r1.xyzx
                 mov o0.w, r1.w
                 ret 
@@ -1297,7 +1297,7 @@ fxgroup
                 //   v2.x <- input.color.x; v2.y <- input.color.y; v2.z <- input.color.z; v2.w <- input.color.w; 
                 //   o0.x <- <PSPositionColor return value>.x; o0.y <- <PSPositionColor return value>.y; o0.z <- <PSPositionColor return value>.z; o0.w <- <PSPositionColor return value>.w
                 //
-                #line 113 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 111 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
@@ -1313,10 +1313,10 @@ fxgroup
                 #line 149 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z
                 
-                #line 111 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 109 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.w, l(0.000000), cb0[54].y
                 
-                #line 117
+                #line 116
                 movc o0.xyz, r0.wwww, r0.xyzx, r1.xyzx
                 mov o0.w, r1.w
                 ret 
@@ -1444,7 +1444,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColor return value>.positionWorld.x; o1.y <- <VSPositionNormalColor return value>.positionWorld.y; o1.z <- <VSPositionNormalColor return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColor return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColor return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColor return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColor return value>.positionHomogeneous.w
                 //
-                #line 129 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 128 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -1461,7 +1461,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 134
+                #line 133
                 mov o3.xyzw, v2.xyzw
                 ret 
                 // Approximately 17 instruction slots used
@@ -1615,7 +1615,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 200 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 199 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 rsq r1.x, r0.w
@@ -2381,7 +2381,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 221 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 220 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r0.w  // r0.y <- distToEye
                 
@@ -2391,7 +2391,7 @@ fxgroup
                 add r1.xyz, -r2.yzwy, cb0[55].xyzx
                 mad r0.yzw, r0.yyyy, r1.xxyz, r2.yyzw  // r0.y <- <ComputeFog return value>.x; r0.z <- <ComputeFog return value>.y; r0.w <- <ComputeFog return value>.z
                 
-                #line 226 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 225 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r0.yzwy, r2.yzwy
                 mov o0.w, r1.w
                 ret 
@@ -2535,7 +2535,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalColorI return value>.positionWorld.x; o1.y <- <VSPositionNormalColorI return value>.positionWorld.y; o1.z <- <VSPositionNormalColorI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalColorI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalColorI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalColorI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalColorI return value>.positionHomogeneous.w
                 //
-                #line 140 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 139 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -2554,7 +2554,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 147
+                #line 146
                 mov o3.xyzw, v2.xyzw
                 ret 
                 // Approximately 19 instruction slots used
@@ -2708,7 +2708,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 200 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 199 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 rsq r1.x, r0.w
@@ -3474,7 +3474,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 221 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 220 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r0.w  // r0.y <- distToEye
                 
@@ -3484,7 +3484,7 @@ fxgroup
                 add r1.xyz, -r2.yzwy, cb0[55].xyzx
                 mad r0.yzw, r0.yyyy, r1.xxyz, r2.yyzw  // r0.y <- <ComputeFog return value>.x; r0.z <- <ComputeFog return value>.y; r0.w <- <ComputeFog return value>.z
                 
-                #line 226 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 225 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r0.yzwy, r2.yzwy
                 mov o0.w, r1.w
                 ret 
@@ -3671,7 +3671,7 @@ fxgroup
                   mad r2.xyz, r2.wwww, r4.xyzx, r2.xyzx
                 endloop 
                 
-                #line 165 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 164 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -3687,7 +3687,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 170
+                #line 169
                 mov o3.xyzw, v2.xyzw
                 ret 
                 // Approximately 52 instruction slots used
@@ -3841,7 +3841,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 200 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 199 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 rsq r1.x, r0.w
@@ -4607,7 +4607,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 221 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 220 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r0.w  // r0.y <- distToEye
                 
@@ -4617,7 +4617,7 @@ fxgroup
                 add r1.xyz, -r2.yzwy, cb0[55].xyzx
                 mad r0.yzw, r0.yyyy, r1.xxyz, r2.yyzw  // r0.y <- <ComputeFog return value>.x; r0.z <- <ComputeFog return value>.y; r0.w <- <ComputeFog return value>.z
                 
-                #line 226 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 225 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r0.yzwy, r2.yzwy
                 mov o0.w, r1.w
                 ret 
@@ -4820,7 +4820,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r4.xyzx, r1.xyzx
                 endloop 
                 
-                #line 188 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 187 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -4839,7 +4839,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 195
+                #line 194
                 mov o3.xyzw, v2.xyzw
                 ret 
                 // Approximately 55 instruction slots used
@@ -4993,7 +4993,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 200 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 199 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.w, r0.xyzx, r0.xyzx
                 rsq r1.x, r0.w
@@ -5759,7 +5759,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 221 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 220 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r0.w  // r0.y <- distToEye
                 
@@ -5769,7 +5769,7 @@ fxgroup
                 add r1.xyz, -r2.yzwy, cb0[55].xyzx
                 mad r0.yzw, r0.yyyy, r1.xxyz, r2.yyzw  // r0.y <- <ComputeFog return value>.x; r0.z <- <ComputeFog return value>.y; r0.w <- <ComputeFog return value>.z
                 
-                #line 226 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 225 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r0.yzwy, r2.yzwy
                 mov o0.w, r1.w
                 ret 
@@ -5902,7 +5902,7 @@ fxgroup
                 //   o1.x <- <VSPositionTexture return value>.positionWorld.x; o1.y <- <VSPositionTexture return value>.positionWorld.y; o1.z <- <VSPositionTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionTexture return value>.positionHomogeneous.w
                 //
-                #line 238 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 237 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -5913,7 +5913,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 243
+                #line 242
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -6030,7 +6030,7 @@ fxgroup
                 //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionTexture return value>.x; o0.y <- <PSPositionTexture return value>.y; o0.z <- <PSPositionTexture return value>.z; o0.w <- <PSPositionTexture return value>.w
                 //
-                #line 309 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 308 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
@@ -6039,17 +6039,17 @@ fxgroup
                 add r0.x, r0.x, -cb0[54].x
                 div_sat r0.x, r0.x, cb0[54].y  // r0.x <- fogLerp
                 
-                #line 303 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 302 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 
                 #line 149 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.yzw, -r1.xxyz, cb0[55].xxyz
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z
                 
-                #line 307 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 306 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.w, l(0.000000), cb0[54].y
                 
-                #line 313
+                #line 312
                 movc o0.xyz, r0.wwww, r0.xyzx, r1.xyzx
                 mov o0.w, r1.w
                 ret 
@@ -6182,7 +6182,7 @@ fxgroup
                 //   o1.x <- <VSPositionTexture return value>.positionWorld.x; o1.y <- <VSPositionTexture return value>.positionWorld.y; o1.z <- <VSPositionTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionTexture return value>.positionHomogeneous.w
                 //
-                #line 238 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 237 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -6193,7 +6193,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 243
+                #line 242
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -6246,10 +6246,10 @@ fxgroup
                 //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionTextureRED return value>.x; o0.y <- <PSPositionTextureRED return value>.y; o0.z <- <PSPositionTextureRED return value>.z; o0.w <- <PSPositionTextureRED return value>.w
                 //
-                #line 319 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 318 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.x, v2.xyzx, t0.xyzw, s0  // r0.x <- color.x
                 
-                #line 322
+                #line 321
                 mov o0.xyz, r0.xxxx
                 mov o0.w, l(1.000000)
                 ret 
@@ -6382,7 +6382,7 @@ fxgroup
                 //   o1.x <- <VSPositionTexture return value>.positionWorld.x; o1.y <- <VSPositionTexture return value>.positionWorld.y; o1.z <- <VSPositionTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionTexture return value>.positionHomogeneous.w
                 //
-                #line 238 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 237 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -6393,7 +6393,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 243
+                #line 242
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -6446,10 +6446,10 @@ fxgroup
                 //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionTextureGREEN return value>.x; o0.y <- <PSPositionTextureGREEN return value>.y; o0.z <- <PSPositionTextureGREEN return value>.z; o0.w <- <PSPositionTextureGREEN return value>.w
                 //
-                #line 326 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 325 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.x, v2.xyzx, t0.yxzw, s0  // r0.x <- color.y
                 
-                #line 329
+                #line 328
                 mov o0.xyz, r0.xxxx
                 mov o0.w, l(1.000000)
                 ret 
@@ -6582,7 +6582,7 @@ fxgroup
                 //   o1.x <- <VSPositionTexture return value>.positionWorld.x; o1.y <- <VSPositionTexture return value>.positionWorld.y; o1.z <- <VSPositionTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionTexture return value>.positionHomogeneous.w
                 //
-                #line 238 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 237 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -6593,7 +6593,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 243
+                #line 242
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -6646,10 +6646,10 @@ fxgroup
                 //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionTextureBLUE return value>.x; o0.y <- <PSPositionTextureBLUE return value>.y; o0.z <- <PSPositionTextureBLUE return value>.z; o0.w <- <PSPositionTextureBLUE return value>.w
                 //
-                #line 333 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 332 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.x, v2.xyzx, t0.zxyw, s0  // r0.x <- color.z
                 
-                #line 336
+                #line 335
                 mov o0.xyz, r0.xxxx
                 mov o0.w, l(1.000000)
                 ret 
@@ -6782,7 +6782,7 @@ fxgroup
                 //   o1.x <- <VSPositionTexture return value>.positionWorld.x; o1.y <- <VSPositionTexture return value>.positionWorld.y; o1.z <- <VSPositionTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionTexture return value>.positionHomogeneous.w
                 //
-                #line 238 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 237 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -6793,7 +6793,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 243
+                #line 242
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -6846,10 +6846,10 @@ fxgroup
                 //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionTextureALPHA return value>.x; o0.y <- <PSPositionTextureALPHA return value>.y; o0.z <- <PSPositionTextureALPHA return value>.z; o0.w <- <PSPositionTextureALPHA return value>.w
                 //
-                #line 340 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 339 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.x, v2.xyzx, t0.wxyz, s0  // r0.x <- color.w
                 
-                #line 343
+                #line 342
                 mov o0.xyz, r0.xxxx
                 mov o0.w, l(1.000000)
                 ret 
@@ -6982,7 +6982,7 @@ fxgroup
                 //   o1.x <- <VSPositionTexture return value>.positionWorld.x; o1.y <- <VSPositionTexture return value>.positionWorld.y; o1.z <- <VSPositionTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionTexture return value>.positionHomogeneous.w
                 //
-                #line 238 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 237 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -6993,7 +6993,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 243
+                #line 242
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -7046,10 +7046,10 @@ fxgroup
                 //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionTextureNOALPHA return value>.x; o0.y <- <PSPositionTextureNOALPHA return value>.y; o0.z <- <PSPositionTextureNOALPHA return value>.z; o0.w <- <PSPositionTextureNOALPHA return value>.w
                 //
-                #line 347 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 346 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.xyz, v2.xyzx, t0.xyzw, s0  // r0.x <- color.x; r0.y <- color.y; r0.z <- color.z
                 
-                #line 350
+                #line 349
                 mov o0.xyz, r0.xyzx
                 mov o0.w, l(1.000000)
                 ret 
@@ -7190,7 +7190,7 @@ fxgroup
                 //   o1.x <- <VSPositionTextureI return value>.positionWorld.x; o1.y <- <VSPositionTextureI return value>.positionWorld.y; o1.z <- <VSPositionTextureI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionTextureI return value>.positionHomogeneous.x; o0.y <- <VSPositionTextureI return value>.positionHomogeneous.y; o0.z <- <VSPositionTextureI return value>.positionHomogeneous.z; o0.w <- <VSPositionTextureI return value>.positionHomogeneous.w
                 //
-                #line 249 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 248 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v3.xyzw
                 mad r0.xyzw, v0.xxxx, v2.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v4.xyzw, r0.xyzw
@@ -7203,7 +7203,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 256
+                #line 255
                 mov o2.xy, v1.xyxx
                 mov o2.z, v6.x
                 ret 
@@ -7320,7 +7320,7 @@ fxgroup
                 //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionTexture return value>.x; o0.y <- <PSPositionTexture return value>.y; o0.z <- <PSPositionTexture return value>.z; o0.w <- <PSPositionTexture return value>.w
                 //
-                #line 309 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 308 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
@@ -7329,17 +7329,17 @@ fxgroup
                 add r0.x, r0.x, -cb0[54].x
                 div_sat r0.x, r0.x, cb0[54].y  // r0.x <- fogLerp
                 
-                #line 303 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 302 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 
                 #line 149 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.yzw, -r1.xxyz, cb0[55].xxyz
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z
                 
-                #line 307 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 306 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.w, l(0.000000), cb0[54].y
                 
-                #line 313
+                #line 312
                 movc o0.xyz, r0.wwww, r0.xyzx, r1.xyzx
                 mov o0.w, r1.w
                 ret 
@@ -7526,7 +7526,7 @@ fxgroup
                   mad r1.xyz, r2.zzzz, r3.xyzx, r1.xyzx
                 endloop 
                 
-                #line 271 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 270 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -7536,7 +7536,7 @@ fxgroup
                 dp4 o1.y, r1.xyzw, cb0[1].xyzw
                 dp4 o1.z, r1.xyzw, cb0[2].xyzw
                 
-                #line 276
+                #line 275
                 mov o2.xy, v1.xyxx
                 mov o2.z, cb3[0].x
                 ret 
@@ -7653,7 +7653,7 @@ fxgroup
                 //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionTexture return value>.x; o0.y <- <PSPositionTexture return value>.y; o0.z <- <PSPositionTexture return value>.z; o0.w <- <PSPositionTexture return value>.w
                 //
-                #line 309 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 308 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
@@ -7662,17 +7662,17 @@ fxgroup
                 add r0.x, r0.x, -cb0[54].x
                 div_sat r0.x, r0.x, cb0[54].y  // r0.x <- fogLerp
                 
-                #line 303 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 302 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 
                 #line 149 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.yzw, -r1.xxyz, cb0[55].xxyz
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z
                 
-                #line 307 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 306 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.w, l(0.000000), cb0[54].y
                 
-                #line 313
+                #line 312
                 movc o0.xyz, r0.wwww, r0.xyzx, r1.xyzx
                 mov o0.w, r1.w
                 ret 
@@ -7867,7 +7867,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r3.xyzx, r1.xyzx
                 endloop 
                 
-                #line 291 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 290 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r1.yyyy, v5.xyzw
                 mad r0.xyzw, r1.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, r1.zzzz, v6.xyzw, r0.xyzw
@@ -7880,7 +7880,7 @@ fxgroup
                 dp4 o1.y, r0.xyzw, cb0[1].xyzw
                 dp4 o1.z, r0.xyzw, cb0[2].xyzw
                 
-                #line 298
+                #line 297
                 mov o2.xy, v1.xyxx
                 mov o2.z, v8.x
                 ret 
@@ -7997,7 +7997,7 @@ fxgroup
                 //   v2.x <- input.tex.x; v2.y <- input.tex.y; v2.z <- input.textureIndex; 
                 //   o0.x <- <PSPositionTexture return value>.x; o0.y <- <PSPositionTexture return value>.y; o0.z <- <PSPositionTexture return value>.z; o0.w <- <PSPositionTexture return value>.w
                 //
-                #line 309 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 308 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 add r0.xyz, -v1.xyzx, cb0[16].xyzx  // r0.x <- toEyeWorld.x; r0.y <- toEyeWorld.y; r0.z <- toEyeWorld.z
                 dp3 r0.x, r0.xyzx, r0.xyzx
                 sqrt r0.x, r0.x  // r0.x <- distToEye
@@ -8006,17 +8006,17 @@ fxgroup
                 add r0.x, r0.x, -cb0[54].x
                 div_sat r0.x, r0.x, cb0[54].y  // r0.x <- fogLerp
                 
-                #line 303 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 302 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v2.xyzx, t0.xyzw, s0  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 
                 #line 149 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
                 add r0.yzw, -r1.xxyz, cb0[55].xxyz
                 mad r0.xyz, r0.xxxx, r0.yzwy, r1.xyzx  // r0.x <- <ComputeFog return value>.x; r0.y <- <ComputeFog return value>.y; r0.z <- <ComputeFog return value>.z
                 
-                #line 307 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 306 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.w, l(0.000000), cb0[54].y
                 
-                #line 313
+                #line 312
                 movc o0.xyz, r0.wwww, r0.xyzx, r1.xyzx
                 mov o0.w, r1.w
                 ret 
@@ -8155,7 +8155,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTexture return value>.positionWorld.x; o1.y <- <VSPositionNormalTexture return value>.positionWorld.y; o1.z <- <VSPositionNormalTexture return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTexture return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTexture return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTexture return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTexture return value>.positionHomogeneous.w
                 //
-                #line 360 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 359 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -8172,7 +8172,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 366
+                #line 365
                 mov o3.xy, v2.xyxx
                 mov o3.z, cb3[0].x
                 ret 
@@ -8333,7 +8333,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 435 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 434 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.xyzw, v3.xyzx, t0.xyzw, s0  // r0.x <- textureColor.x; r0.y <- textureColor.y; r0.z <- textureColor.z; r0.w <- textureColor.w
                 add r1.xyz, -v1.xyzx, cb0[16].xyzx  // r1.x <- toEyeWorld.x; r1.y <- toEyeWorld.y; r1.z <- toEyeWorld.z
                 dp3 r1.w, r1.xyzx, r1.xyzx
@@ -9099,7 +9099,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 456 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 455 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r1.w  // r0.y <- distToEye
                 
@@ -9109,7 +9109,7 @@ fxgroup
                 add r1.xyz, -r2.yzwy, cb0[55].xyzx
                 mad r1.xyz, r0.yyyy, r1.xyzx, r2.yzwy  // r1.x <- <ComputeFog return value>.x; r1.y <- <ComputeFog return value>.y; r1.z <- <ComputeFog return value>.z
                 
-                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r1.xyzx, r2.yzwy
                 mov o0.w, r0.w
                 ret 
@@ -9256,7 +9256,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureI return value>.positionHomogeneous.w
                 //
-                #line 372 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 371 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v4.xyzw
                 mad r0.xyzw, v0.xxxx, v3.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v5.xyzw, r0.xyzw
@@ -9275,7 +9275,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 380
+                #line 379
                 mov o3.xy, v2.xyxx
                 mov o3.z, v7.x
                 ret 
@@ -9436,7 +9436,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 435 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 434 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.xyzw, v3.xyzx, t0.xyzw, s0  // r0.x <- textureColor.x; r0.y <- textureColor.y; r0.z <- textureColor.z; r0.w <- textureColor.w
                 add r1.xyz, -v1.xyzx, cb0[16].xyzx  // r1.x <- toEyeWorld.x; r1.y <- toEyeWorld.y; r1.z <- toEyeWorld.z
                 dp3 r1.w, r1.xyzx, r1.xyzx
@@ -10202,7 +10202,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 456 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 455 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r1.w  // r0.y <- distToEye
                 
@@ -10212,7 +10212,7 @@ fxgroup
                 add r1.xyz, -r2.yzwy, cb0[55].xyzx
                 mad r1.xyz, r0.yyyy, r1.xyzx, r2.yzwy  // r1.x <- <ComputeFog return value>.x; r1.y <- <ComputeFog return value>.y; r1.z <- <ComputeFog return value>.z
                 
-                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r1.xyzx, r2.yzwy
                 mov o0.w, r0.w
                 ret 
@@ -10410,7 +10410,7 @@ fxgroup
                   mad r2.xyz, r2.wwww, r4.xyzx, r2.xyzx
                 endloop 
                 
-                #line 398 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 397 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -10426,7 +10426,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 404
+                #line 403
                 mov o3.xy, v2.xyxx
                 mov o3.z, cb3[0].x
                 ret 
@@ -10587,7 +10587,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 435 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 434 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.xyzw, v3.xyzx, t0.xyzw, s0  // r0.x <- textureColor.x; r0.y <- textureColor.y; r0.z <- textureColor.z; r0.w <- textureColor.w
                 add r1.xyz, -v1.xyzx, cb0[16].xyzx  // r1.x <- toEyeWorld.x; r1.y <- toEyeWorld.y; r1.z <- toEyeWorld.z
                 dp3 r1.w, r1.xyzx, r1.xyzx
@@ -11353,7 +11353,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 456 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 455 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r1.w  // r0.y <- distToEye
                 
@@ -11363,7 +11363,7 @@ fxgroup
                 add r1.xyz, -r2.yzwy, cb0[55].xyzx
                 mad r1.xyz, r0.yyyy, r1.xyzx, r2.yzwy  // r1.x <- <ComputeFog return value>.x; r1.y <- <ComputeFog return value>.y; r1.z <- <ComputeFog return value>.z
                 
-                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r1.xyzx, r2.yzwy
                 mov o0.w, r0.w
                 ret 
@@ -11569,7 +11569,7 @@ fxgroup
                   mad r1.xyz, r1.wwww, r4.xyzx, r1.xyzx
                 endloop 
                 
-                #line 422 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 421 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r2.yyyy, v6.xyzw
                 mad r0.xyzw, r2.xxxx, v5.xyzw, r0.xyzw
                 mad r0.xyzw, r2.zzzz, v7.xyzw, r0.xyzw
@@ -11588,7 +11588,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul o2.xyz, r0.wwww, r0.xyzx
                 
-                #line 430
+                #line 429
                 mov o3.xy, v2.xyxx
                 mov o3.z, v9.x
                 ret 
@@ -11749,7 +11749,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 435 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 434 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r0.xyzw, v3.xyzx, t0.xyzw, s0  // r0.x <- textureColor.x; r0.y <- textureColor.y; r0.z <- textureColor.z; r0.w <- textureColor.w
                 add r1.xyz, -v1.xyzx, cb0[16].xyzx  // r1.x <- toEyeWorld.x; r1.y <- toEyeWorld.y; r1.z <- toEyeWorld.z
                 dp3 r1.w, r1.xyzx, r1.xyzx
@@ -12515,7 +12515,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 456 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 455 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r1.w  // r0.y <- distToEye
                 
@@ -12525,7 +12525,7 @@ fxgroup
                 add r1.xyz, -r2.yzwy, cb0[55].xyzx
                 mad r1.xyz, r0.yyyy, r1.xyzx, r2.yzwy  // r1.x <- <ComputeFog return value>.x; r1.y <- <ComputeFog return value>.y; r1.z <- <ComputeFog return value>.z
                 
-                #line 461 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 460 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r1.xyzx, r2.yzwy
                 mov o0.w, r0.w
                 ret 
@@ -12670,7 +12670,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangent return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangent return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangent return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangent return value>.positionHomogeneous.w
                 //
-                #line 473 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 472 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[8].xyzw
@@ -12690,7 +12690,7 @@ fxgroup
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx
                 
-                #line 480
+                #line 479
                 mov o4.xy, v3.xyxx
                 mov o4.z, cb3[0].x
                 ret 
@@ -12858,7 +12858,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 558 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 557 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t1.xyzw, s0  // r0.x <- normalMapSample.x; r0.y <- normalMapSample.y; r0.z <- normalMapSample.z
                 
                 #line 96 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
@@ -12881,7 +12881,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul r0.xyz, r0.wwww, r0.xyzx  // r0.x <- <NormalSampleToWorldSpace return value>.x; r0.y <- <NormalSampleToWorldSpace return value>.y; r0.z <- <NormalSampleToWorldSpace return value>.z
                 
-                #line 561 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 560 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r2.xyz, -v1.xyzx, cb0[16].xyzx  // r2.x <- toEyeWorld.x; r2.y <- toEyeWorld.y; r2.z <- toEyeWorld.z
                 dp3 r0.w, r2.xyzx, r2.xyzx
@@ -13647,7 +13647,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 582 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 581 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r0.w  // r0.y <- distToEye
                 
@@ -13657,7 +13657,7 @@ fxgroup
                 add r1.xyz, -r3.yzwy, cb0[55].xyzx
                 mad r0.yzw, r0.yyyy, r1.xxyz, r3.yyzw  // r0.y <- <ComputeFog return value>.x; r0.z <- <ComputeFog return value>.y; r0.w <- <ComputeFog return value>.z
                 
-                #line 587 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 586 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r0.yzwy, r3.yzwy
                 mov o0.w, r1.w
                 ret 
@@ -13810,7 +13810,7 @@ fxgroup
                 //   o1.x <- <VSPositionNormalTextureTangentI return value>.positionWorld.x; o1.y <- <VSPositionNormalTextureTangentI return value>.positionWorld.y; o1.z <- <VSPositionNormalTextureTangentI return value>.positionWorld.z; 
                 //   o0.x <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.x; o0.y <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.y; o0.z <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.z; o0.w <- <VSPositionNormalTextureTangentI return value>.positionHomogeneous.w
                 //
-                #line 486 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 485 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, v0.yyyy, v5.xyzw
                 mad r0.xyzw, v0.xxxx, v4.xyzw, r0.xyzw
                 mad r0.xyzw, v0.zzzz, v6.xyzw, r0.xyzw
@@ -13832,7 +13832,7 @@ fxgroup
                 dp3 o3.y, v2.xyzx, cb0[1].xyzx
                 dp3 o3.z, v2.xyzx, cb0[2].xyzx
                 
-                #line 495
+                #line 494
                 mov o4.xy, v3.xyxx
                 mov o4.z, v8.x
                 ret 
@@ -14000,7 +14000,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 558 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 557 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t1.xyzw, s0  // r0.x <- normalMapSample.x; r0.y <- normalMapSample.y; r0.z <- normalMapSample.z
                 
                 #line 96 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
@@ -14023,7 +14023,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul r0.xyz, r0.wwww, r0.xyzx  // r0.x <- <NormalSampleToWorldSpace return value>.x; r0.y <- <NormalSampleToWorldSpace return value>.y; r0.z <- <NormalSampleToWorldSpace return value>.z
                 
-                #line 561 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 560 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r2.xyz, -v1.xyzx, cb0[16].xyzx  // r2.x <- toEyeWorld.x; r2.y <- toEyeWorld.y; r2.z <- toEyeWorld.z
                 dp3 r0.w, r2.xyzx, r2.xyzx
@@ -14789,7 +14789,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 582 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 581 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r0.w  // r0.y <- distToEye
                 
@@ -14799,7 +14799,7 @@ fxgroup
                 add r1.xyz, -r3.yzwy, cb0[55].xyzx
                 mad r0.yzw, r0.yyyy, r1.xxyz, r3.yyzw  // r0.y <- <ComputeFog return value>.x; r0.z <- <ComputeFog return value>.y; r0.w <- <ComputeFog return value>.z
                 
-                #line 587 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 586 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r0.yzwy, r3.yzwy
                 mov o0.w, r1.w
                 ret 
@@ -15012,7 +15012,7 @@ fxgroup
                   mad r3.xyz, r2.wwww, r5.xyzx, r3.xyzx
                 endloop 
                 
-                #line 516 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 515 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mov r1.w, l(1.000000)
                 dp4 o0.x, r1.xyzw, cb0[8].xyzw
                 dp4 o0.y, r1.xyzw, cb0[9].xyzw
@@ -15031,7 +15031,7 @@ fxgroup
                 dp3 o3.y, r3.xyzx, cb0[1].xyzx
                 dp3 o3.z, r3.xyzx, cb0[2].xyzx
                 
-                #line 523
+                #line 522
                 mov o4.xy, v3.xyxx
                 mov o4.z, cb3[0].x
                 ret 
@@ -15199,7 +15199,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 558 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 557 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t1.xyzw, s0  // r0.x <- normalMapSample.x; r0.y <- normalMapSample.y; r0.z <- normalMapSample.z
                 
                 #line 96 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
@@ -15222,7 +15222,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul r0.xyz, r0.wwww, r0.xyzx  // r0.x <- <NormalSampleToWorldSpace return value>.x; r0.y <- <NormalSampleToWorldSpace return value>.y; r0.z <- <NormalSampleToWorldSpace return value>.z
                 
-                #line 561 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 560 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r2.xyz, -v1.xyzx, cb0[16].xyzx  // r2.x <- toEyeWorld.x; r2.y <- toEyeWorld.y; r2.z <- toEyeWorld.z
                 dp3 r0.w, r2.xyzx, r2.xyzx
@@ -15988,7 +15988,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 582 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 581 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r0.w  // r0.y <- distToEye
                 
@@ -15998,7 +15998,7 @@ fxgroup
                 add r1.xyz, -r3.yzwy, cb0[55].xyzx
                 mad r0.yzw, r0.yyyy, r1.xxyz, r3.yyzw  // r0.y <- <ComputeFog return value>.x; r0.z <- <ComputeFog return value>.y; r0.w <- <ComputeFog return value>.z
                 
-                #line 587 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 586 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r0.yzwy, r3.yzwy
                 mov o0.w, r1.w
                 ret 
@@ -16219,7 +16219,7 @@ fxgroup
                   mad r2.xyz, r1.wwww, r5.xyzx, r2.xyzx
                 endloop 
                 
-                #line 544 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 543 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 mul r0.xyzw, r3.yyyy, v7.xyzw
                 mad r0.xyzw, r3.xxxx, v6.xyzw, r0.xyzw
                 mad r0.xyzw, r3.zzzz, v8.xyzw, r0.xyzw
@@ -16241,7 +16241,7 @@ fxgroup
                 dp3 o3.y, r2.xyzx, cb0[1].xyzx
                 dp3 o3.z, r2.xyzx, cb0[2].xyzx
                 
-                #line 553
+                #line 552
                 mov o4.xy, v3.xyxx
                 mov o4.z, v10.x
                 ret 
@@ -16409,7 +16409,7 @@ fxgroup
                 mov x0[14].xy, l(0.992051,0.085516,0,0)
                 mov x0[15].xy, l(-0.687256,0.671134,0,0)
                 
-                #line 558 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 557 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2d)(float,float,float,float) r0.xyz, v4.xyxx, t1.xyzw, s0  // r0.x <- normalMapSample.x; r0.y <- normalMapSample.y; r0.z <- normalMapSample.z
                 
                 #line 96 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\IncLights.fx"
@@ -16432,7 +16432,7 @@ fxgroup
                 rsq r0.w, r0.w
                 mul r0.xyz, r0.wwww, r0.xyzx  // r0.x <- <NormalSampleToWorldSpace return value>.x; r0.y <- <NormalSampleToWorldSpace return value>.y; r0.z <- <NormalSampleToWorldSpace return value>.z
                 
-                #line 561 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 560 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 sample_indexable(texture2darray)(float,float,float,float) r1.xyzw, v4.xyzx, t0.xyzw, s1  // r1.x <- textureColor.x; r1.y <- textureColor.y; r1.z <- textureColor.z; r1.w <- textureColor.w
                 add r2.xyz, -v1.xyzx, cb0[16].xyzx  // r2.x <- toEyeWorld.x; r2.y <- toEyeWorld.y; r2.z <- toEyeWorld.z
                 dp3 r0.w, r2.xyzx, r2.xyzx
@@ -17198,7 +17198,7 @@ fxgroup
                 #line 367
                 endif 
                 
-                #line 582 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 581 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 lt r0.x, l(0.000000), cb0[54].y
                 sqrt r0.y, r0.w  // r0.y <- distToEye
                 
@@ -17208,7 +17208,7 @@ fxgroup
                 add r1.xyz, -r3.yzwy, cb0[55].xyzx
                 mad r0.yzw, r0.yyyy, r1.xxyz, r3.yyzw  // r0.y <- <ComputeFog return value>.x; r0.z <- <ComputeFog return value>.y; r0.w <- <ComputeFog return value>.z
                 
-                #line 587 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
+                #line 586 "C:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderBasic.fx"
                 movc o0.xyz, r0.xxxx, r0.yzwy, r3.yzwy
                 mov o0.w, r1.w
                 ret 
