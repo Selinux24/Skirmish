@@ -1,0 +1,226 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{28391C85-9275-4E62-A159-3C67DFADC428}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Resources</RootNamespace>
+    <AssemblyName>Resources</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <PublishUrl>publicar\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="Blender\AniCube\aniCube.blend" />
+    <None Include="Blender\LandRaider\landraider.blend" />
+    <None Include="Blender\CapitalShip\capital ship.blend" />
+    <None Include="Blender\Cube\cube_1.blend" />
+    <None Include="Blender\Cube\cube_2.blend" />
+    <None Include="Blender\Cube\cube_3.blend" />
+    <None Include="Blender\Cube\cube_4.blend" />
+    <None Include="Blender\Garage\garage.blend" />
+    <None Include="Blender\Ground\ground.blend" />
+    <None Include="Blender\Helicopter\helicopter.blend" />
+    <None Include="Blender\Helipod\helipod.blend" />
+    <None Include="Blender\Human\human.blend" />
+    <None Include="Blender\Jagdpanther\jagdpanther.blend" />
+    <None Include="Blender\Leopard\Leopard.blend" />
+    <None Include="Blender\Obelisk\obelisk.blend" />
+    <None Include="Blender\Poly\poly.blend" />
+    <None Include="Blender\Rocks\rocks.blend" />
+    <None Include="Blender\Ruins\ruins.blend" />
+    <None Include="Blender\Soldier\soldier.blend" />
+    <None Include="Blender\Tank\tank.blend" />
+    <None Include="Blender\Terrain\terrain.blend" />
+    <None Include="Blender\Torch\torch.blend" />
+    <None Include="Blender\Tree1\tree1.blend" />
+    <None Include="Blender\Tree2\tree2.blend" />
+    <None Include="Blender\TwoLevels\two_levels.blend" />
+    <None Include="Collada\AniCube\aniCube.dae" />
+    <None Include="Collada\LandRaider\landraider.dae" />
+    <None Include="Collada\Cube\cube_1.dae" />
+    <None Include="Collada\Cube\cube_2.dae" />
+    <None Include="Collada\Cube\cube_3.dae" />
+    <None Include="Collada\Cube\cube_4.dae" />
+    <None Include="Collada\Garage\garage.dae" />
+    <None Include="Collada\Ground\ground.dae" />
+    <None Include="Collada\Helicopter\helicopter.dae" />
+    <None Include="Collada\Helipod\helipod.dae" />
+    <None Include="Collada\Jagdpanther\jagdpanther.dae" />
+    <None Include="Collada\Leopard\Leopard.dae" />
+    <None Include="Collada\Obelisk\obelisk.dae" />
+    <None Include="Collada\Poly\poly.dae" />
+    <None Include="Collada\Rocks\rocks.dae" />
+    <None Include="Collada\Ruins\ruins.dae" />
+    <None Include="Collada\Soldier\soldier.dae" />
+    <None Include="Collada\Tank\tank.dae" />
+    <None Include="Collada\Terrain\terrain.dae" />
+    <None Include="Collada\Torch\torch.dae" />
+    <None Include="Collada\Tree1\tree1.dae" />
+    <None Include="Collada\Tree2\tree2.dae" />
+    <None Include="Collada\TwoLevels\two_levels.dae" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Blender\AniCube\aniCube.png" />
+    <None Include="Blender\Ground\ground.png" />
+    <None Include="Blender\Helicopter\helicopter - black.png" />
+    <None Include="Blender\Helicopter\helicopter - gray.png" />
+    <None Include="Blender\Helicopter\helicopter - green.png" />
+    <None Include="Blender\Helicopter\helicopter - tires.png" />
+    <None Include="Blender\Leopard\Leopard.bmp" />
+    <None Include="Blender\Poly\poly.png" />
+    <None Include="Blender\Soldier\soldier.jpg" />
+    <None Include="Blender\Terrain\terrain.png" />
+    <None Include="Blender\Terrain\terrain_nmap.png" />
+    <None Include="Blender\Tree2\tree2_bark_albedo.png" />
+    <None Include="Blender\Tree2\tree2_bark_normal.png" />
+    <None Include="Blender\Tree2\tree2_bark_specular.png" />
+    <None Include="Blender\Tree2\tree2_bushes_albedo.png" />
+    <None Include="Blender\Tree2\tree2_bushes_normal.png" />
+    <None Include="Blender\Tree2\tree2_bushes_specular.png" />
+    <None Include="Blender\Tree1\wood.jpg" />
+    <None Include="Collada\AniCube\aniCube.png" />
+    <None Include="Collada\Tree2\bark_albedo.png" />
+    <None Include="Collada\Tree2\bark_normal.png" />
+    <None Include="Collada\Tree2\bark_specular.png" />
+    <None Include="Collada\Tree2\bushes_albedo.png" />
+    <None Include="Collada\Tree2\bushes_normal.png" />
+    <None Include="Collada\Tree2\bushes_specular.png" />
+    <None Include="Collada\Ground\ground.png" />
+    <None Include="Collada\Ground\ground_nmap.png" />
+    <None Include="Collada\Helicopter\Helicopter - black.png" />
+    <None Include="Collada\Helicopter\Helicopter - gray.png" />
+    <None Include="Collada\Helicopter\Helicopter - green.png" />
+    <None Include="Collada\Helicopter\helicopter - tires.png" />
+    <None Include="Collada\Poly\Poly.png" />
+    <None Include="Collada\Soldier\soldier.jpg" />
+    <None Include="Collada\Terrain\terrain.png" />
+    <None Include="Collada\Terrain\terrain_nmap.png" />
+    <None Include="Collada\Tree1\wood.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5 %28x86 y x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Collada\Leopard\Leopard.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Blender\Tree1\leafs1.png" />
+    <None Include="Blender\Tree1\leafs1a.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Collada\Tree1\leafs1.png" />
+    <None Include="Collada\Tree1\leafs1a.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Collada\TwoLevels\terrain.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Collada\TwoLevels\terrain_nmap.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Blender\TwoLevels\terrain.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Blender\TwoLevels\terrain_nmap.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
