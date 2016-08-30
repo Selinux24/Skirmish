@@ -110,7 +110,8 @@
     <None Include="Blender\Tank\tank.blend" />
     <None Include="Blender\Terrain\terrain.blend" />
     <None Include="Blender\Torch\torch.blend" />
-    <None Include="Blender\Tree1\tree1.blend" />
+    <None Include="Blender\Tree1\tree1_1.blend" />
+    <None Include="Blender\Tree1\tree1_2.blend" />
     <None Include="Blender\Tree2\tree2.blend" />
     <None Include="Blender\TwoLevels\two_levels.blend" />
     <None Include="Collada\AniCube\aniCube.dae" />
@@ -133,7 +134,8 @@
     <None Include="Collada\Tank\tank.dae" />
     <None Include="Collada\Terrain\terrain.dae" />
     <None Include="Collada\Torch\torch.dae" />
-    <None Include="Collada\Tree1\tree1.dae" />
+    <None Include="Collada\Tree1\tree1_1.dae" />
+    <None Include="Collada\Tree1\tree1_2.dae" />
     <None Include="Collada\Tree2\tree2.dae" />
     <None Include="Collada\TwoLevels\two_levels.dae" />
   </ItemGroup>
