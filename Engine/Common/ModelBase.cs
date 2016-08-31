@@ -39,12 +39,17 @@ namespace Engine.Common
         public ModelBase(Game game, ModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
             : base(game)
         {
-            var drawable = DrawingData.Build(
-                game,
-                LevelOfDetailEnum.High,
-                content, instanced, instances, loadAnimation,
-                this.TextureCount, loadNormalMaps,
-                dynamic);
+            var desc = new DrawingDataDescription()
+            {
+                Instanced = instanced,
+                Instances = instances,
+                LoadAnimation = loadAnimation,
+                LoadNormalMaps = loadNormalMaps,
+                TextureCount = this.TextureCount,
+                DynamicBuffers = dynamic,
+            };
+
+            var drawable = DrawingData.Build(game, content, desc);
 
             this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
 
@@ -64,6 +69,16 @@ namespace Engine.Common
         public ModelBase(Game game, LODModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
             : base(game)
         {
+            var desc = new DrawingDataDescription()
+            {
+                Instanced = instanced,
+                Instances = instances,
+                LoadAnimation = loadAnimation,
+                LoadNormalMaps = loadNormalMaps,
+                TextureCount = this.TextureCount,
+                DynamicBuffers = dynamic,
+            };
+
             foreach (var lod in content.Keys)
             {
                 if (this.defaultLevelOfDetail == LevelOfDetailEnum.None)
@@ -71,12 +86,7 @@ namespace Engine.Common
                     this.defaultLevelOfDetail = lod;
                 }
 
-                var drawable = DrawingData.Build(
-                    game,
-                    lod,
-                    content[lod], instanced, instances, loadAnimation,
-                    this.TextureCount, loadNormalMaps,
-                    dynamic);
+                var drawable = DrawingData.Build(game, content[lod], desc);
 
                 this.meshesByLOD.Add(lod, drawable);
             }

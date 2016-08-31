@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Diagnostics;
-using SharpDX;
 
 namespace Engine.Collections
 {
@@ -14,12 +14,10 @@ namespace Engine.Collections
         /// <summary>
         /// Build quadtree
         /// </summary>
-        /// <param name="game">Game</param>
         /// <param name="triangles">Partitioning triangles</param>
         /// <param name="description">Description</param>
         /// <returns>Returns generated quadtree</returns>
         public static QuadTree Build(
-            Game game,
             Triangle[] triangles,
             GroundDescription description)
         {
@@ -33,7 +31,6 @@ namespace Engine.Collections
             };
 
             quadTree.Root = QuadTreeNode.CreatePartitions(
-                game,
                 quadTree,
                 null,
                 bbox,
@@ -48,12 +45,10 @@ namespace Engine.Collections
         /// <summary>
         /// Build quadtree
         /// </summary>
-        /// <param name="game">Game</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="description">Description</param>
         /// <returns>Returns generated quadtree</returns>
         public static QuadTree Build(
-            Game game,
             VertexData[] vertices,
             GroundDescription description)
         {
@@ -74,7 +69,6 @@ namespace Engine.Collections
             };
 
             quadTree.Root = QuadTreeNode.CreatePartitions(
-                game,
                 quadTree, null,
                 bbox, vertices,
                 0,

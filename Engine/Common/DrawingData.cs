@@ -34,27 +34,29 @@ namespace Engine.Common
         /// <summary>
         /// Model initialization
         /// </summary>
+        /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="instanced">Is instanced</param>
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
+        /// <param name="textureCount">Number of textures</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public static DrawingData Build(Game game, LevelOfDetailEnum lod, ModelContent modelContent, bool instanced, int instances, bool loadAnimation, int textureCount, bool loadNormalMaps, bool dynamic)
+        public static DrawingData Build(Game game, ModelContent modelContent, DrawingDataDescription description)
         {
             DrawingData res = new DrawingData();
 
             //Images
-            InitializeTextures(ref res, game, modelContent, textureCount);
+            InitializeTextures(ref res, game, modelContent, description.TextureCount);
 
             //Materials
             InitializeMaterials(ref res, game, modelContent);
 
             //Skins & Meshes
-            InitializeGeometry(ref res, game, modelContent, instanced, instances, loadAnimation, loadNormalMaps, dynamic);
+            InitializeGeometry(ref res, game, modelContent, description);
 
             //Animation
-            if (loadAnimation) InitializeSkinnedData(ref res, game, modelContent);
+            if (description.LoadAnimation) InitializeSkinnedData(ref res, game, modelContent);
 
             //Update meshes into device
             InitializeMeshes(ref res, game);
@@ -120,7 +122,7 @@ namespace Engine.Common
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
-        private static void InitializeGeometry(ref DrawingData drw, Game game, ModelContent modelContent, bool instanced, int instances, bool loadAnimation, bool loadNormalMaps, bool dynamic)
+        private static void InitializeGeometry(ref DrawingData drw, Game game, ModelContent modelContent, DrawingDataDescription description)
         {
             foreach (string meshName in modelContent.Geometry.Keys)
             {
@@ -133,7 +135,7 @@ namespace Engine.Common
                 uint[] indices = null;
                 Weight[] weights = null;
                 string[] jointNames = null;
-                if (loadAnimation && modelContent.Controllers != null && modelContent.SkinningInfo != null)
+                if (description.LoadAnimation && modelContent.Controllers != null && modelContent.SkinningInfo != null)
                 {
                     cInfo = modelContent.Controllers.GetControllerForMesh(meshName);
                     if (cInfo != null)
@@ -159,7 +161,7 @@ namespace Engine.Common
                         vertexType = VertexData.GetSkinnedEquivalent(vertexType);
                     }
 
-                    if (loadNormalMaps)
+                    if (description.LoadNormalMaps)
                     {
                         if (!VertexData.IsTangent(vertexType))
                         {
@@ -178,6 +180,50 @@ namespace Engine.Common
                     vertices = geometry.Vertices;
                     indices = geometry.Indices;
 
+                    if (description.Constraint.HasValue)
+                    {
+                        List<VertexData> tmpVertices = new List<VertexData>();
+                        List<uint> tmpIndices = new List<uint>();
+
+                        if (indices != null && indices.Length > 0)
+                        {
+                            uint index = 0;
+                            for (int i = 0; i < indices.Length; i += 3)
+                            {
+                                if (description.Constraint.Value.Contains(vertices[indices[i + 0]].Position.Value) != ContainmentType.Disjoint ||
+                                    description.Constraint.Value.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint ||
+                                    description.Constraint.Value.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint)
+                                {
+                                    tmpVertices.Add(vertices[indices[i + 0]]);
+                                    tmpVertices.Add(vertices[indices[i + 1]]);
+                                    tmpVertices.Add(vertices[indices[i + 1]]);
+                                    tmpIndices.Add(index++);
+                                    tmpIndices.Add(index++);
+                                    tmpIndices.Add(index++);
+                                }
+                            }
+
+                            vertices = tmpVertices.ToArray();
+                            indices = tmpIndices.ToArray();
+                        }
+                        else
+                        {
+                            for (int i = 0; i < vertices.Length; i += 3)
+                            {
+                                if (description.Constraint.Value.Contains(vertices[i + 0].Position.Value) != ContainmentType.Disjoint ||
+                                    description.Constraint.Value.Contains(vertices[i + 1].Position.Value) != ContainmentType.Disjoint ||
+                                    description.Constraint.Value.Contains(vertices[i + 2].Position.Value) != ContainmentType.Disjoint)
+                                {
+                                    tmpVertices.Add(vertices[i + 0]);
+                                    tmpVertices.Add(vertices[i + 1]);
+                                    tmpVertices.Add(vertices[i + 2]);
+                                }
+                            }
+
+                            vertices = tmpVertices.ToArray();
+                        }
+                    }
+
                     IVertexData[] vertexList = VertexData.Convert(
                         vertexType,
                         vertices,
@@ -190,8 +236,8 @@ namespace Engine.Common
                         geometry.Topology,
                         vertexList,
                         indices,
-                        instanced,
-                        dynamic);
+                        description.Instanced,
+                        description.DynamicBuffers);
 
                     drw.Meshes.Add(meshName, geometry.Material, nMesh);
                 }
@@ -431,6 +477,22 @@ namespace Engine.Common
             {
                 return triangles;
             }
+        }
+    }
+
+    public class DrawingDataDescription
+    {
+        public bool Instanced = false;
+        public int Instances = 0;
+        public bool LoadAnimation = false;
+        public int TextureCount = 0;
+        public bool LoadNormalMaps = false;
+        public bool DynamicBuffers = false;
+        public BoundingBox? Constraint = null;
+
+        public DrawingDataDescription()
+        {
+
         }
     }
 }

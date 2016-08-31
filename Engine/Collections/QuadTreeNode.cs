@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.Collections
 {
@@ -19,7 +19,6 @@ namespace Engine.Collections
         /// <summary>
         /// Recursive partition creation
         /// </summary>
-        /// <param name="game">Game</param>
         /// <param name="quadTree">Quadtree</param>
         /// <param name="parent">Parent node</param>
         /// <param name="bbox">Parent bounding box</param>
@@ -28,7 +27,6 @@ namespace Engine.Collections
         /// <param name="description">Description</param>
         /// <returns>Returns new node</returns>
         public static QuadTreeNode CreatePartitions(
-            Game game,
             QuadTree quadTree, QuadTreeNode parent,
             BoundingBox bbox, Triangle[] triangles,
             int treeDepth,
@@ -71,10 +69,10 @@ namespace Engine.Collections
                     //+0-1+0   +1+1+1   -->   cmc    MMM
                     BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
 
-                    QuadTreeNode topLeftChild = CreatePartitions(game, quadTree, node, topLeftBox, triangles, treeDepth + 1, description);
-                    QuadTreeNode topRightChild = CreatePartitions(game, quadTree, node, topRightBox, triangles, treeDepth + 1, description);
-                    QuadTreeNode bottomLeftChild = CreatePartitions(game, quadTree, node, bottomLeftBox, triangles, treeDepth + 1, description);
-                    QuadTreeNode bottomRightChild = CreatePartitions(game, quadTree, node, bottomRightBox, triangles, treeDepth + 1, description);
+                    QuadTreeNode topLeftChild = CreatePartitions(quadTree, node, topLeftBox, triangles, treeDepth + 1, description);
+                    QuadTreeNode topRightChild = CreatePartitions(quadTree, node, topRightBox, triangles, treeDepth + 1, description);
+                    QuadTreeNode bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, triangles, treeDepth + 1, description);
+                    QuadTreeNode bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, triangles, treeDepth + 1, description);
 
                     List<QuadTreeNode> childList = new List<QuadTreeNode>();
 
@@ -101,7 +99,6 @@ namespace Engine.Collections
         /// <summary>
         /// Recursive partition creation
         /// </summary>
-        /// <param name="game">Game</param>
         /// <param name="quadTree">Quadtree</param>
         /// <param name="parent">Parent node</param>
         /// <param name="bbox">Parent bounding box</param>
@@ -110,7 +107,6 @@ namespace Engine.Collections
         /// <param name="description">Description</param>
         /// <returns>Returns new node</returns>
         public static QuadTreeNode CreatePartitions(
-            Game game,
             QuadTree quadTree, QuadTreeNode parent,
             BoundingBox bbox, VertexData[] vertices,
             int treeDepth,
@@ -167,10 +163,10 @@ namespace Engine.Collections
                     //+0-1+0   +1+1+1   -->   cmc    MMM
                     BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
 
-                    QuadTreeNode topLeftChild = CreatePartitions(game, quadTree, node, topLeftBox, nodeVertices, treeDepth + 1, description);
-                    QuadTreeNode topRightChild = CreatePartitions(game, quadTree, node, topRightBox, nodeVertices, treeDepth + 1, description);
-                    QuadTreeNode bottomLeftChild = CreatePartitions(game, quadTree, node, bottomLeftBox, nodeVertices, treeDepth + 1, description);
-                    QuadTreeNode bottomRightChild = CreatePartitions(game, quadTree, node, bottomRightBox, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode topLeftChild = CreatePartitions(quadTree, node, topLeftBox, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode topRightChild = CreatePartitions(quadTree, node, topRightBox, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, nodeVertices, treeDepth + 1, description);
+                    QuadTreeNode bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, nodeVertices, treeDepth + 1, description);
 
                     List<QuadTreeNode> childList = new List<QuadTreeNode>();
 

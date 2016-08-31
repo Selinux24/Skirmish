@@ -8,6 +8,7 @@ namespace Engine
     using Engine.Collections;
     using Engine.Common;
     using Engine.Content;
+    using Engine.Effects;
     using Engine.PathFinding;
 
     /// <summary>
@@ -16,13 +17,155 @@ namespace Engine
     public class Scenery : Ground
     {
         /// <summary>
-        /// Geometry
+        /// Terrain patch
         /// </summary>
-        private Model ground = null;
+        /// <remarks>
+        /// Holds the necessary information to render a portion of terrain using an arbitrary level of detail
+        /// </remarks>
+        class SceneryPatch : IDisposable
+        {
+            /// <summary>
+            /// Creates a new patch
+            /// </summary>
+            /// <param name="game">Game</param>
+            /// <param name="vertices">Vertex list</param>
+            /// <param name="indices">Index list</param>
+            /// <returns>Returns the new generated patch</returns>
+            public static SceneryPatch CreatePatch(Game game, ModelContent content, QuadTreeNode node)
+            {
+                var desc = new DrawingDataDescription()
+                {
+                    Instanced = false,
+                    Instances = 0,
+                    LoadAnimation = true,
+                    LoadNormalMaps = true,
+                    TextureCount = 0,
+                    DynamicBuffers = false,
+                    Constraint = node.BoundingBox,
+                };
+
+                var drawingData = DrawingData.Build(game, content, desc);
+
+                return new SceneryPatch(game, drawingData);
+            }
+
+            /// <summary>
+            /// Game
+            /// </summary>
+            protected Game Game = null;
+            /// <summary>
+            /// Drawing data
+            /// </summary>
+            protected DrawingData DrawingData = null;
+
+            /// <summary>
+            /// Cosntructor
+            /// </summary>
+            /// <param name="game">Game</param>
+            public SceneryPatch(Game game, DrawingData drawingData)
+            {
+                this.Game = game;
+                this.DrawingData = drawingData;
+            }
+            /// <summary>
+            /// Releases created resources
+            /// </summary>
+            public void Dispose()
+            {
+                Helper.Dispose(this.DrawingData);
+            }
+
+            /// <summary>
+            /// Draw the patch terrain
+            /// </summary>
+            /// <param name="context">Drawing context</param>
+            /// <param name="technique">Technique</param>
+            public void Draw(DrawContext context, Drawer effect)
+            {
+                foreach (string meshName in this.DrawingData.Meshes.Keys)
+                {
+                    #region Per skinning update
+
+                    if (this.DrawingData.SkinningData != null)
+                    {
+                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                        {
+                            ((EffectBasic)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                        {
+                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                        {
+                            ((EffectBasicShadow)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
+                        }
+                    }
+                    else
+                    {
+                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                        {
+                            ((EffectBasic)effect).UpdatePerSkinning(null);
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                        {
+                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                        {
+                            ((EffectBasicShadow)effect).UpdatePerSkinning(null);
+                        }
+                    }
+
+                    #endregion
+
+                    var dictionary = this.DrawingData.Meshes[meshName];
+
+                    foreach (string material in dictionary.Keys)
+                    {
+                        var mesh = dictionary[material];
+                        var mat = this.DrawingData.Materials[material];
+
+                        #region Per object update
+
+                        var matdata = mat != null ? mat.Material : Material.Default;
+                        var texture = mat != null ? mat.DiffuseTexture : null;
+                        var normalMap = mat != null ? mat.NormalMap : null;
+
+                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                        {
+                            ((EffectBasic)effect).UpdatePerObject(matdata, texture, normalMap, 0);
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                        {
+                            ((EffectBasicGBuffer)effect).UpdatePerObject(mat.Material, texture, normalMap, 0);
+                        }
+
+                        #endregion
+
+                        var technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing, context.DrawerMode);
+
+                        mesh.SetInputAssembler(this.Game.Graphics.DeviceContext, effect.GetInputLayout(technique));
+
+                        for (int p = 0; p < technique.Description.PassCount; p++)
+                        {
+                            technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                            mesh.Draw(this.Game.Graphics.DeviceContext);
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
-        /// Vegetation
+        /// Scenery patch list
         /// </summary>
-        private Billboard[] vegetation = null;
+        private SceneryPatch[] patches = null;
+        /// <summary>
+        /// Cached triangle list
+        /// </summary>
+        private Triangle[] triangleCache;
 
         /// <summary>
         /// Constructor
@@ -36,10 +179,14 @@ namespace Engine
         {
             this.DeferredEnabled = this.Description.DeferredEnabled;
 
-            this.ground = new Model(game, content);
-            this.ground.Opaque = this.Opaque = this.Description.Opaque;
-            this.ground.Static = this.Static = this.Description.Static;
-            this.ground.DeferredEnabled = this.Description.DeferredEnabled;
+            this.triangleCache = content.GetTriangles();
+            this.pickingQuadtree = QuadTree.Build(this.triangleCache, description);
+            var nodes = this.pickingQuadtree.GetTailNodes();
+            this.patches = new SceneryPatch[nodes.Length];
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                this.patches[i] = SceneryPatch.CreatePatch(game, content, nodes[i]);
+            }
 
             if (!this.Description.DelayGeneration)
             {
@@ -51,21 +198,7 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            if (this.ground != null)
-            {
-                this.ground.Dispose();
-                this.ground = null;
-            }
-
-            if (this.vegetation != null && this.vegetation.Length > 0)
-            {
-                for (int i = 0; i < this.vegetation.Length; i++)
-                {
-                    this.vegetation[i].Dispose();
-                }
-
-                this.vegetation = null;
-            }
+            Helper.Dispose(this.patches);
         }
         /// <summary>
         /// Objects updating
@@ -73,22 +206,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            if (this.pickingQuadtree == null)
-            {
-                this.ground.Update(context);
 
-                if (this.vegetation != null && this.vegetation.Length > 0)
-                {
-                    for (int i = 0; i < this.vegetation.Length; i++)
-                    {
-                        this.vegetation[i].Update(context);
-                    }
-                }
-            }
-            else
-            {
-                this.ground.Update(context);
-            }
         }
         /// <summary>
         /// Objects drawing
@@ -96,24 +214,45 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.pickingQuadtree == null)
-            {
-                if (!this.ground.Cull)
-                {
-                    this.ground.Draw(context);
+            Drawer effect = null;
+            if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectBasic;
+            else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectGBuffer;
+            else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
 
-                    if (this.vegetation != null && this.vegetation.Length > 0)
-                    {
-                        for (int i = 0; i < this.vegetation.Length; i++)
-                        {
-                            this.vegetation[i].Draw(context);
-                        }
-                    }
-                }
-            }
-            else
+            #region Per frame update
+
+            if (context.DrawerMode == DrawerModesEnum.Forward)
             {
-                this.ground.Draw(context);
+                ((EffectBasic)effect).UpdatePerFrame(
+                    Matrix.Identity,
+                    context.ViewProjection,
+                    context.EyePosition,
+                    context.Frustum,
+                    context.Lights,
+                    context.ShadowMapStatic,
+                    context.ShadowMapDynamic,
+                    context.FromLightViewProjection);
+            }
+            else if (context.DrawerMode == DrawerModesEnum.Deferred)
+            {
+                ((EffectBasicGBuffer)effect).UpdatePerFrame(
+                    Matrix.Identity,
+                    context.ViewProjection);
+            }
+            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+            {
+                ((EffectBasicShadow)effect).UpdatePerFrame(
+                    Matrix.Identity,
+                    context.ViewProjection);
+            }
+
+            #endregion
+
+            this.Game.Graphics.SetDepthStencilZEnabled();
+
+            for (int i = 0; i < this.patches.Length; i++)
+            {
+                this.patches[i].Draw(context, effect);
             }
         }
 
@@ -126,7 +265,7 @@ namespace Engine
             {
                 var triangles = this.GetTriangles(UsageEnum.Picking);
 
-                this.pickingQuadtree = QuadTree.Build(this.Game, triangles, this.Description);
+                this.pickingQuadtree = QuadTree.Build(triangles, this.Description);
             }
 
             if (this.Description != null && this.Description.PathFinder != null)
@@ -147,44 +286,7 @@ namespace Engine
         /// <returns>Returns true if picked position found</returns>
         public override bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
-            if (this.pickingQuadtree != null)
-            {
-                return this.pickingQuadtree.PickNearest(ref ray, facingOnly, out position, out triangle, out distance);
-            }
-            else
-            {
-                position = Vector3.Zero;
-                triangle = new Triangle();
-                distance = float.MaxValue;
-
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.ground.PickNearest(ref ray, facingOnly, out p, out t, out d))
-                {
-                    Vector3 bestP = p;
-                    Triangle bestT = t;
-                    float bestD = d;
-
-                    if (base.PickNearestGroundObjects(ref ray, facingOnly, out p, out t, out d))
-                    {
-                        if (d < bestD)
-                        {
-                            bestP = p;
-                            bestT = t;
-                            bestD = d;
-                        }
-                    }
-
-                    position = bestP;
-                    triangle = bestT;
-                    distance = bestD;
-
-                    return true;
-                }
-
-                return false;
-            }
+            return this.pickingQuadtree.PickNearest(ref ray, facingOnly, out position, out triangle, out distance);
         }
         /// <summary>
         /// Pick first position
@@ -197,39 +299,7 @@ namespace Engine
         /// <returns>Returns true if picked position found</returns>
         public override bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
-            if (this.pickingQuadtree != null)
-            {
-                return this.pickingQuadtree.PickFirst(ref ray, facingOnly, out position, out triangle, out distance);
-            }
-            else
-            {
-                position = Vector3.Zero;
-                triangle = new Triangle();
-                distance = float.MaxValue;
-
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.ground.PickFirst(ref ray, facingOnly, out p, out t, out d))
-                {
-                    position = p;
-                    triangle = t;
-                    distance = d;
-
-                    return true;
-                }
-
-                if (base.PickFirstGroundObjects(ref ray, facingOnly, out p, out t, out d))
-                {
-                    position = p;
-                    triangle = t;
-                    distance = d;
-
-                    return true;
-                }
-
-                return false;
-            }
+            return this.pickingQuadtree.PickFirst(ref ray, facingOnly, out position, out triangle, out distance);
         }
         /// <summary>
         /// Pick all positions
@@ -242,45 +312,7 @@ namespace Engine
         /// <returns>Returns true if picked positions found</returns>
         public override bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
         {
-            if (this.pickingQuadtree != null)
-            {
-                return this.pickingQuadtree.PickAll(ref ray, facingOnly, out positions, out triangles, out distances);
-            }
-            else
-            {
-                positions = null;
-                triangles = null;
-                distances = null;
-
-                List<Vector3> pList = new List<Vector3>();
-                List<Triangle> tList = new List<Triangle>();
-                List<float> dList = new List<float>();
-
-                Vector3[] p;
-                Triangle[] t;
-                float[] d;
-                if (this.ground.PickAll(ref ray, facingOnly, out p, out t, out d))
-                {
-                    pList.AddRange(p);
-                    tList.AddRange(t);
-                    dList.AddRange(d);
-
-                    if (base.PickAllGroundObjects(ref ray, facingOnly, out p, out t, out d))
-                    {
-                        pList.AddRange(p);
-                        tList.AddRange(t);
-                        dList.AddRange(d);
-                    }
-
-                    positions = pList.ToArray();
-                    triangles = tList.ToArray();
-                    distances = dList.ToArray();
-
-                    return true;
-                }
-
-                return false;
-            }
+            return this.pickingQuadtree.PickAll(ref ray, facingOnly, out positions, out triangles, out distances);
         }
         /// <summary>
         /// Gets bounding sphere
@@ -288,34 +320,7 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public override BoundingSphere GetBoundingSphere()
         {
-            if (this.pickingQuadtree != null)
-            {
-                return this.pickingQuadtree.BoundingSphere;
-            }
-            else
-            {
-                BoundingSphere sph = this.ground.GetBoundingSphere();
-
-                for (int i = 0; i < this.GroundObjects.Count; i++)
-                {
-                    var curr = this.GroundObjects[i];
-
-                    if (curr.Model is Model)
-                    {
-                        BoundingSphere.Merge(sph, ((Model)curr.Model).GetBoundingSphere());
-                    }
-
-                    if (curr.Model is ModelInstanced)
-                    {
-                        for (int m = 0; m < ((ModelInstanced)curr.Model).Instances.Length; m++)
-                        {
-                            BoundingSphere.Merge(sph, ((ModelInstanced)curr.Model).Instances[m].GetBoundingSphere());
-                        }
-                    }
-                }
-
-                return sph;
-            }
+            return this.pickingQuadtree.BoundingSphere;
         }
         /// <summary>
         /// Gets bounding box
@@ -323,34 +328,7 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public override BoundingBox GetBoundingBox()
         {
-            if (this.pickingQuadtree != null)
-            {
-                return this.pickingQuadtree.BoundingBox;
-            }
-            else
-            {
-                BoundingBox bbox = this.ground.GetBoundingBox();
-
-                for (int i = 0; i < this.GroundObjects.Count; i++)
-                {
-                    var curr = this.GroundObjects[i];
-
-                    if (curr.Model is Model)
-                    {
-                        BoundingBox.Merge(bbox, ((Model)curr.Model).GetBoundingBox());
-                    }
-
-                    if (curr.Model is ModelInstanced)
-                    {
-                        for (int m = 0; m < ((ModelInstanced)curr.Model).Instances.Length; m++)
-                        {
-                            BoundingBox.Merge(bbox, ((ModelInstanced)curr.Model).Instances[m].GetBoundingBox());
-                        }
-                    }
-                }
-
-                return bbox;
-            }
+            return this.pickingQuadtree.BoundingBox;
         }
 
         /// <summary>
@@ -360,46 +338,34 @@ namespace Engine
         /// <returns>Returns terrain bounding boxes</returns>
         public BoundingBox[] GetBoundingBoxes(int level = 0)
         {
-            if (this.pickingQuadtree != null)
-            {
-                return this.pickingQuadtree.GetBoundingBoxes(level);
-            }
-            else
-            {
-                List<BoundingBox> res = new List<BoundingBox>();
-
-                res.Add(this.ground.GetBoundingBox());
-
-                for (int i = 0; i < this.GroundObjects.Count; i++)
-                {
-                    var curr = this.GroundObjects[i];
-
-                    if (curr.Model is Model)
-                    {
-                        res.Add(((Model)curr.Model).GetBoundingBox());
-                    }
-
-                    if (curr.Model is ModelInstanced)
-                    {
-                        for (int m = 0; m < ((ModelInstanced)curr.Model).Instances.Length; m++)
-                        {
-                            res.Add(((ModelInstanced)curr.Model).Instances[m].GetBoundingBox());
-                        }
-                    }
-                }
-
-                return res.ToArray();
-            }
+            return this.pickingQuadtree.GetBoundingBoxes(level);
         }
+        /// <summary>
+        /// Gets the path finder grid nodes
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <returns>Returns the path finder grid nodes</returns>
+        public IGraphNode[] GetNodes(Agent agent)
+        {
+            IGraphNode[] nodes = null;
+
+            if (this.navigationGraph != null)
+            {
+                nodes = this.navigationGraph.GetNodes(agent);
+            }
+
+            return nodes;
+        }
+
         /// <summary>
         /// Gets triangle list
         /// </summary>
         /// <returns>Returns triangle list. Empty if the vertex type hasn't position channel</returns>
-        public Triangle[] GetTriangles(UsageEnum usage = UsageEnum.None)
+        private Triangle[] GetTriangles(UsageEnum usage = UsageEnum.None)
         {
             List<Triangle> tris = new List<Triangle>();
 
-            tris.AddRange(this.ground.GetTriangles());
+            tris.AddRange(this.triangleCache);
 
             for (int i = 0; i < this.GroundObjects.Count; i++)
             {
@@ -444,22 +410,6 @@ namespace Engine
             }
 
             return tris.ToArray();
-        }
-        /// <summary>
-        /// Gets the path finder grid nodes
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <returns>Returns the path finder grid nodes</returns>
-        public IGraphNode[] GetNodes(Agent agent)
-        {
-            IGraphNode[] nodes = null;
-
-            if (this.navigationGraph != null)
-            {
-                nodes = this.navigationGraph.GetNodes(agent);
-            }
-
-            return nodes;
         }
 
         /// <summary>

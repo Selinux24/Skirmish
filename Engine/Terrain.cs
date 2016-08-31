@@ -1376,7 +1376,6 @@ namespace Engine
 
             //Initialize Quadtree
             this.pickingQuadtree = QuadTree.Build(
-                this.Game,
                 vertices,
                 this.Description);
 

@@ -749,5 +749,23 @@ namespace Engine.Content
 
             this.Geometry = newDict;
         }
+        /// <summary>
+        /// Gets triangle list
+        /// </summary>
+        /// <returns>Returns triangle list</returns>
+        public Triangle[] GetTriangles()
+        {
+            List<Triangle> triangles = new List<Triangle>();
+
+            foreach (var meshDict in this.Geometry.Values)
+            {
+                foreach (var mesh in meshDict.Values)
+                {
+                     triangles.AddRange(mesh.GetTriangles());
+                }
+            }
+
+            return triangles.ToArray();
+        }
     }
 }

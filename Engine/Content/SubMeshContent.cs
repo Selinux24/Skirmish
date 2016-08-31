@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SharpDX.Direct3D;
+using SharpDX;
 
 namespace Engine.Content
 {
     using Engine.Common;
-    using SharpDX;
 
     /// <summary>
     /// Sub mesh content
@@ -149,7 +150,7 @@ namespace Engine.Content
                         VertexData.ComputeNormals(
                             this.vertices[this.indices[i + 0]],
                             this.vertices[this.indices[i + 1]],
-                            this.vertices[this.indices[i + 2]], 
+                            this.vertices[this.indices[i + 2]],
                             out tangent, out binormal, out normal);
 
                         this.vertices[this.indices[i + 0]].Tangent = tangent;
@@ -167,7 +168,7 @@ namespace Engine.Content
                         VertexData.ComputeNormals(
                             this.vertices[i + 0],
                             this.vertices[i + 1],
-                            this.vertices[i + 2], 
+                            this.vertices[i + 2],
                             out tangent, out binormal, out normal);
 
                         this.vertices[i + 0].Tangent = tangent;
@@ -175,6 +176,44 @@ namespace Engine.Content
                         this.vertices[i + 2].Tangent = tangent;
                     }
                 }
+            }
+        }
+        /// <summary>
+        /// Gets triangle list
+        /// </summary>
+        /// <returns>Returns the triangle list</returns>
+        public Triangle[] GetTriangles()
+        {
+            if (this.Topology == PrimitiveTopology.TriangleList || this.Topology == PrimitiveTopology.TriangleListWithAdjacency)
+            {
+                List<Triangle> triangles = new List<Triangle>();
+
+                if (this.indices != null && this.indices.Length > 0)
+                {
+                    for (int i = 0; i < this.indices.Length; i += 3)
+                    {
+                        triangles.Add(new Triangle(
+                            this.vertices[this.indices[i + 0]].Position.Value,
+                            this.vertices[this.indices[i + 1]].Position.Value,
+                            this.vertices[this.indices[i + 2]].Position.Value));
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < this.vertices.Length; i += 3)
+                    {
+                        triangles.Add(new Triangle(
+                            this.vertices[i + 0].Position.Value,
+                            this.vertices[i + 1].Position.Value,
+                            this.vertices[i + 2].Position.Value));
+                    }
+                }
+
+                return triangles.ToArray();
+            }
+            else
+            {
+                throw new InvalidOperationException(string.Format("Bad source topology for triangle list: {0}", this.Topology));
             }
         }
 
