@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Common;
 using Engine.Helpers;
 using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
@@ -452,12 +453,8 @@ namespace TerrainTest
                 }
             }
 
-            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.helipod, EvaluateForPicking = true, UseVolumeForPicking = false, EvaluateForPathFinding = true, UseVolumeForPathFinding = false }, false);
-            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.garage, EvaluateForPicking = true, UseVolumeForPicking = false, EvaluateForPathFinding = true, UseVolumeForPathFinding = false }, false);
-            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.obelisk, EvaluateForPicking = false }, false);
-            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.rocks, EvaluateForPicking = false, UseVolumeForPathFinding = true }, false);
-            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.tree1, EvaluateForPicking = false, UseVolumeForPicking = true, EvaluateForPathFinding = true, UseVolumeForPathFinding = true }, false);
-            this.terrain.AttachObject(new GroundAttachedObject() { Model = this.tree2, EvaluateForPicking = false, UseVolumeForPicking = true, EvaluateForPathFinding = true, UseVolumeForPathFinding = true }, false);
+            this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helipod, this.garage, this.obelisk }, false);
+            this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.rocks, this.tree1, this.tree2 }, false);
             this.terrain.UpdateInternals();
 
             this.SceneVolume = this.terrain.GetBoundingSphere();

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
@@ -404,38 +405,40 @@ namespace Engine
             {
                 var curr = this.GroundObjects[i];
 
-                if (usage == UsageEnum.Picking && !curr.EvaluateForPicking) continue;
-                if (usage == UsageEnum.PathFinding && !curr.EvaluateForPathFinding) continue;
-
                 if (curr.Model is Model)
                 {
-                    if (usage == UsageEnum.Picking && curr.UseVolumeForPicking || usage == UsageEnum.PathFinding && curr.UseVolumeForPathFinding)
+                    if (usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) ||
+                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePathFinding))
                     {
                         var cylinder = BoundingCylinder.FromPoints(((Model)curr.Model).GetPoints());
                         tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
                     }
-                    else
+                    else if (
+                        usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.FullPicking) ||
+                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.FullPathFinding))
                     {
                         tris.AddRange(((Model)curr.Model).GetTriangles());
                     }
                 }
-
-                if (curr.Model is ModelInstanced)
+                else if (curr.Model is ModelInstanced)
                 {
-                    if (usage == UsageEnum.Picking && curr.UseVolumeForPicking || usage == UsageEnum.PathFinding && curr.UseVolumeForPathFinding)
+                    if (usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) ||
+                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePathFinding))
                     {
-                        for (int m = 0; m < ((ModelInstanced)curr.Model).Instances.Length; m++)
+                        Array.ForEach(((ModelInstanced)curr.Model).Instances, (m) =>
                         {
-                            var cylinder = BoundingCylinder.FromPoints(((ModelInstanced)curr.Model).Instances[m].GetPoints());
+                            var cylinder = BoundingCylinder.FromPoints(m.GetPoints());
                             tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
-                        }
+                        });
                     }
-                    else
+                    else if (
+                        usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.FullPicking) ||
+                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.FullPathFinding))
                     {
-                        for (int m = 0; m < ((ModelInstanced)curr.Model).Instances.Length; m++)
+                        Array.ForEach(((ModelInstanced)curr.Model).Instances, (m) =>
                         {
-                            tris.AddRange(((ModelInstanced)curr.Model).Instances[m].GetTriangles());
-                        }
+                            tris.AddRange(m.GetTriangles());
+                        });
                     }
                 }
             }

@@ -16,7 +16,7 @@ namespace Engine
         /// <summary>
         /// Terrain attached objects
         /// </summary>
-        protected readonly List<GroundAttachedObject> GroundObjects = new List<GroundAttachedObject>();
+        protected readonly List<AttachedModel> GroundObjects = new List<AttachedModel>();
         /// <summary>
         /// Quadtree
         /// </summary>
@@ -45,16 +45,188 @@ namespace Engine
         /// Attach objects to terrain
         /// </summary>
         /// <param name="model">Model</param>
+        /// <param name="use">Use</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachObject(GroundAttachedObject model, bool updateInternals = true)
+        protected void Attach(ModelBase model, AttachedModelUsesEnum use, bool updateInternals = true)
         {
-            this.GroundObjects.Add(model);
+            this.GroundObjects.Add(new AttachedModel()
+            {
+                Model = model,
+                Use = use,
+            });
 
             if (updateInternals)
             {
                 this.UpdateInternals();
             }
         }
+        /// <summary>
+        /// Attach objects to terrain for full picking and full path finding
+        /// </summary>
+        /// <param name="model">Model</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachFullPickingFullPathFinding(ModelBase model, bool updateInternals = true)
+        {
+            Attach(model, AttachedModelUsesEnum.FullPicking | AttachedModelUsesEnum.FullPathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for coarse picking and coarse path finding
+        /// </summary>
+        /// <param name="model">Model</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachCoarsePickingCoarsePathFinding(ModelBase model, bool updateInternals = true)
+        {
+            Attach(model, AttachedModelUsesEnum.CoarsePicking | AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for coarse picking and full path finding
+        /// </summary>
+        /// <param name="model">Model</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachCoarsePickingFullPathFinding(ModelBase model, bool updateInternals = true)
+        {
+            Attach(model, AttachedModelUsesEnum.CoarsePicking | AttachedModelUsesEnum.FullPathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for full picking and coarse path finding
+        /// </summary>
+        /// <param name="model">Model</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachFullPickingCoarsePathFinding(ModelBase model, bool updateInternals = true)
+        {
+            Attach(model, AttachedModelUsesEnum.FullPicking | AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for full picking
+        /// </summary>
+        /// <param name="model">Model</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachFullPicking(ModelBase model, bool updateInternals = true)
+        {
+            Attach(model, AttachedModelUsesEnum.FullPicking, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for coarse picking
+        /// </summary>
+        /// <param name="model">Model</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachCoarsePicking(ModelBase model, bool updateInternals = true)
+        {
+            Attach(model, AttachedModelUsesEnum.CoarsePicking, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for full path finding
+        /// </summary>
+        /// <param name="model">Model</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachFullPathFinding(ModelBase model, bool updateInternals = true)
+        {
+            Attach(model, AttachedModelUsesEnum.FullPathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for coarse path finding
+        /// </summary>
+        /// <param name="model">Model</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachCoarsePathFinding(ModelBase model, bool updateInternals = true)
+        {
+            Attach(model, AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain
+        /// </summary>
+        /// <param name="models">Model list</param>
+        /// <param name="use">Use</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        protected void Attach(IEnumerable<ModelBase> models, AttachedModelUsesEnum use, bool updateInternals = true)
+        {
+            foreach (var model in models)
+            {
+                this.GroundObjects.Add(new AttachedModel()
+                {
+                    Model = model,
+                    Use = use,
+                });
+            }
+
+            if (updateInternals)
+            {
+                this.UpdateInternals();
+            }
+        }
+        /// <summary>
+        /// Attach objects to terrain for full picking and full path finding
+        /// </summary>
+        /// <param name="models">Model list</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachFullPickingFullPathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        {
+            Attach(models, AttachedModelUsesEnum.FullPicking | AttachedModelUsesEnum.FullPathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for coarse picking and coarse path finding
+        /// </summary>
+        /// <param name="models">Model list</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachCoarsePickingCoarsePathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        {
+            Attach(models, AttachedModelUsesEnum.CoarsePicking | AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for coarse picking and full path finding
+        /// </summary>
+        /// <param name="models">Model list</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachCoarsePickingFullPathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        {
+            Attach(models, AttachedModelUsesEnum.CoarsePicking | AttachedModelUsesEnum.FullPathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for full picking and coarse path finding
+        /// </summary>
+        /// <param name="models">Model list</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachFullPickingCoarsePathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        {
+            Attach(models, AttachedModelUsesEnum.FullPicking | AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for full picking
+        /// </summary>
+        /// <param name="models">Model list</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachFullPicking(IEnumerable<ModelBase> models, bool updateInternals = true)
+        {
+            Attach(models, AttachedModelUsesEnum.FullPicking, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for coarse picking
+        /// </summary>
+        /// <param name="models">Model list</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachCoarsePicking(IEnumerable<ModelBase> models, bool updateInternals = true)
+        {
+            Attach(models, AttachedModelUsesEnum.CoarsePicking, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for full path finding
+        /// </summary>
+        /// <param name="models">Model list</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachFullPathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        {
+            Attach(models, AttachedModelUsesEnum.FullPathFinding, updateInternals);
+        }
+        /// <summary>
+        /// Attach objects to terrain for coarse path finding
+        /// </summary>
+        /// <param name="models">Model list</param>
+        /// <param name="updateInternals">Update internal objects</param>
+        public void AttachCoarsePathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        {
+            Attach(models, AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
+        }
+        
         /// <summary>
         /// Updates internal objects
         /// </summary>
@@ -220,7 +392,7 @@ namespace Engine
             triangle = new Triangle();
             distance = float.MaxValue;
 
-            var forPickingObks = this.GroundObjects.FindAll(o => o.EvaluateForPicking == true);
+            var forPickingObks = this.GroundObjects.FindAll(o => o.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) || o.Use.HasFlag(AttachedModelUsesEnum.FullPicking));
             if (forPickingObks.Count > 0)
             {
                 bool picked = false;
@@ -299,7 +471,7 @@ namespace Engine
             triangle = new Triangle();
             distance = float.MaxValue;
 
-            var forPickingObks = this.GroundObjects.FindAll(o => o.EvaluateForPicking == true);
+            var forPickingObks = this.GroundObjects.FindAll(o => o.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) || o.Use.HasFlag(AttachedModelUsesEnum.FullPicking));
             if (forPickingObks.Count > 0)
             {
                 foreach (var gObj in forPickingObks)
@@ -358,7 +530,7 @@ namespace Engine
             triangles = null;
             distances = null;
 
-            var forPickingObks = this.GroundObjects.FindAll(o => o.EvaluateForPicking == true);
+            var forPickingObks = this.GroundObjects.FindAll(o => o.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) || o.Use.HasFlag(AttachedModelUsesEnum.FullPicking));
             if (forPickingObks.Count > 0)
             {
                 bool picked = false;

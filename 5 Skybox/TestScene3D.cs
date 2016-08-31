@@ -245,15 +245,7 @@ namespace Skybox
             }
             this.torchFire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions3D, "flare1.png"));
 
-            var toAttachTorchs = new GroundAttachedObject()
-            {
-                Model = this.torchs,
-                EvaluateForPathFinding = true,
-                UseVolumeForPathFinding = true,
-                EvaluateForPicking = true,
-                UseVolumeForPicking = true,
-            };
-            this.ruins.AttachObject(toAttachTorchs);
+            this.ruins.AttachFullPickingFullPathFinding(this.torchs);
 
             #endregion
 

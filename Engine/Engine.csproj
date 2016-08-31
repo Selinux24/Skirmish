@@ -147,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animation\Skeleton.cs" />
+    <Compile Include="AttachedModelUsesEnum.cs" />
     <Compile Include="BezierPath.cs" />
     <Compile Include="Billboard.cs" />
     <Compile Include="BoundingCylinder.cs" />
@@ -317,7 +318,7 @@
     <Compile Include="Content\LODModelContent.cs" />
     <Compile Include="CubemapDescription.cs" />
     <Compile Include="CameraFollower.cs" />
-    <Compile Include="GroundAttachedObject.cs" />
+    <Compile Include="AttachedModel.cs" />
     <Compile Include="IFollower.cs" />
     <Compile Include="IGround.cs" />
     <Compile Include="IPickable.cs" />
