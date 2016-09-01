@@ -20,7 +20,7 @@ namespace Engine
         /// <summary>
         /// Quadtree
         /// </summary>
-        protected QuadTree pickingQuadtree = null;
+        protected PickingQuadTree pickingQuadtree = null;
         /// <summary>
         /// Graph used for pathfinding
         /// </summary>

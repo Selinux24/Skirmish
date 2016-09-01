@@ -33,7 +33,7 @@ namespace Engine
             /// <summary>
             /// Visible Nodes
             /// </summary>
-            public QuadTreeNode[] VisibleNodes;
+            public PickingQuadTreeNode[] VisibleNodes;
             /// <summary>
             /// Foliage generation description
             /// </summary>
@@ -134,7 +134,7 @@ namespace Engine
             /// <summary>
             /// 
             /// </summary>
-            private Dictionary<LevelOfDetailEnum, List<QuadTreeNode>> tmp = null;
+            private Dictionary<LevelOfDetailEnum, List<PickingQuadTreeNode>> tmp = null;
 
             /// <summary>
             /// Constructor
@@ -150,11 +150,11 @@ namespace Engine
 
                 this.InitializeIndices(trianglesPerNode);
 
-                this.tmp = new Dictionary<LevelOfDetailEnum, List<QuadTreeNode>>();
-                tmp.Add(LevelOfDetailEnum.High, new List<QuadTreeNode>());
-                tmp.Add(LevelOfDetailEnum.Medium, new List<QuadTreeNode>());
-                tmp.Add(LevelOfDetailEnum.Low, new List<QuadTreeNode>());
-                tmp.Add(LevelOfDetailEnum.Minimum, new List<QuadTreeNode>());
+                this.tmp = new Dictionary<LevelOfDetailEnum, List<PickingQuadTreeNode>>();
+                tmp.Add(LevelOfDetailEnum.High, new List<PickingQuadTreeNode>());
+                tmp.Add(LevelOfDetailEnum.Medium, new List<PickingQuadTreeNode>());
+                tmp.Add(LevelOfDetailEnum.Low, new List<PickingQuadTreeNode>());
+                tmp.Add(LevelOfDetailEnum.Minimum, new List<PickingQuadTreeNode>());
             }
             /// <summary>
             /// Resource disposal
@@ -260,7 +260,7 @@ namespace Engine
             /// </summary>
             /// <param name="node">Node to find</param>
             /// <returns>Returns the currently assigned patch of the specified node if exists</returns>
-            private TerrainPatch GetCurrent(QuadTreeNode node)
+            private TerrainPatch GetCurrent(PickingQuadTreeNode node)
             {
                 foreach (var item in this.patches.Values)
                 {
@@ -779,6 +779,38 @@ namespace Engine
                     return new TerrainPatch(game, lod);
                 }
             }
+            /// <summary>
+            /// Gets the vertex data for buffer writing
+            /// </summary>
+            /// <param name="vertexType">Vertex type</param>
+            /// <param name="lod">Level of detail</param>
+            /// <returns>Returns the vertex data for buffer writing</returns>
+            private static IVertexData[] PrepareVertexData(VertexData[] vertices, VertexTypes vertexType, LevelOfDetailEnum lod)
+            {
+                var data = VertexData.Convert(vertexType, vertices, null, null, Matrix.Identity);
+
+                int range = (int)lod;
+                if (range > 1)
+                {
+                    int side = (int)Math.Sqrt(data.Length);
+
+                    List<IVertexData> data2 = new List<IVertexData>();
+
+                    for (int y = 0; y < side; y += range)
+                    {
+                        for (int x = 0; x < side; x += range)
+                        {
+                            int index = (y * side) + x;
+
+                            data2.Add(data[index]);
+                        }
+                    }
+
+                    data = data2.ToArray();
+                }
+
+                return data;
+            }
 
             /// <summary>
             /// Index buffer
@@ -836,7 +868,7 @@ namespace Engine
             /// <summary>
             /// Current quadtree node
             /// </summary>
-            public QuadTreeNode Current { get; private set; }
+            public PickingQuadTreeNode Current { get; private set; }
             /// <summary>
             /// Gets or sets if patch is visible
             /// </summary>
@@ -864,7 +896,7 @@ namespace Engine
             /// Sets vertex data
             /// </summary>
             /// <param name="node">Node to attach to the vertex buffer</param>
-            public void SetVertexData(QuadTreeNode node)
+            public void SetVertexData(PickingQuadTreeNode node)
             {
                 if (this.vertexBuffer != null)
                 {
@@ -874,7 +906,7 @@ namespace Engine
 
                         if (this.Current != null)
                         {
-                            var data = this.Current.GetVertexData(VertexTypes.Terrain, this.LevelOfDetail);
+                            var data = PrepareVertexData(this.Current.Vertices, VertexTypes.Terrain, this.LevelOfDetail);
 
                             //if (this.LevelOfDetail == LevelOfDetailEnum.High)
                             //{
@@ -1036,7 +1068,7 @@ namespace Engine
             /// <param name="node">Node to process</param>
             /// <param name="description">Vegetation task</param>
             /// <returns>Returns generated vertex data</returns>
-            private static VertexData[] PlantTask(QuadTreeNode node, GroundDescription.VegetationDescription description)
+            private static VertexData[] PlantTask(PickingQuadTreeNode node, GroundDescription.VegetationDescription description)
             {
                 List<VertexData> vertexData = new List<VertexData>(MAX);
 
@@ -1375,7 +1407,7 @@ namespace Engine
                 out vertices, out indices);
 
             //Initialize Quadtree
-            this.pickingQuadtree = QuadTree.Build(
+            this.pickingQuadtree = PickingQuadTree.Build(
                 vertices,
                 this.Description);
 

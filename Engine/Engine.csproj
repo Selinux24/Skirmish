@@ -308,7 +308,15 @@
     <Compile Include="Collada\VertexWeights.cs" />
     <Compile Include="Collada\Vertices.cs" />
     <Compile Include="Collada\VisualScene.cs" />
+    <Compile Include="Collections\PickingQuadTree.cs" />
+    <Compile Include="Collections\PickingQuadTreeNode.cs" />
     <Compile Include="Collections\PriorityDictionary.cs" />
+    <Compile Include="Collections\QuadTree.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Collections\QuadTreeNode.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Common\DrawingData.cs" />
     <Compile Include="Common\LODDictionary.cs" />
     <Compile Include="Common\MaterialDictionary.cs" />
@@ -391,8 +399,6 @@
     <Compile Include="IScreenFitted.cs" />
     <Compile Include="Collections\PriorityQueue.cs" />
     <Compile Include="Collections\PriorityDictionaryItem.cs" />
-    <Compile Include="Collections\QuadTree.cs" />
-    <Compile Include="Collections\QuadTreeNode.cs" />
     <Compile Include="Content\LightContent.cs" />
     <Compile Include="Effects\EffectTerrain.cs" />
     <Compile Include="Effects\EffectSprite.cs" />

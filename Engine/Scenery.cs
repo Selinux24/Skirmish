@@ -16,6 +16,8 @@ namespace Engine
     /// </summary>
     public class Scenery : Ground
     {
+        #region Helper Classes
+
         /// <summary>
         /// Terrain patch
         /// </summary>
@@ -31,7 +33,7 @@ namespace Engine
             /// <param name="vertices">Vertex list</param>
             /// <param name="indices">Index list</param>
             /// <returns>Returns the new generated patch</returns>
-            public static SceneryPatch CreatePatch(Game game, ModelContent content, QuadTreeNode node)
+            public static SceneryPatch CreatePatch(Game game, ModelContent content, PickingQuadTreeNode node)
             {
                 var desc = new DrawingDataDescription()
                 {
@@ -157,15 +159,28 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Scenery patches dictionary
+        /// </summary>
+        class SceneryPatchDictionary : Dictionary<int, SceneryPatch>
+        {
 
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Visible nodes
+        /// </summary>
+        private PickingQuadTreeNode[] visibleNodes = null;
         /// <summary>
         /// Scenery patch list
         /// </summary>
-        private SceneryPatch[] patches = null;
+        private SceneryPatchDictionary patchDictionary = new SceneryPatchDictionary();
         /// <summary>
         /// Cached triangle list
         /// </summary>
-        private Triangle[] triangleCache;
+        private Triangle[] triangleCache = null;
 
         /// <summary>
         /// Constructor
@@ -180,12 +195,12 @@ namespace Engine
             this.DeferredEnabled = this.Description.DeferredEnabled;
 
             this.triangleCache = content.GetTriangles();
-            this.pickingQuadtree = QuadTree.Build(this.triangleCache, description);
+            this.pickingQuadtree = PickingQuadTree.Build(this.triangleCache, description);
             var nodes = this.pickingQuadtree.GetTailNodes();
-            this.patches = new SceneryPatch[nodes.Length];
             for (int i = 0; i < nodes.Length; i++)
             {
-                this.patches[i] = SceneryPatch.CreatePatch(game, content, nodes[i]);
+                var patch = SceneryPatch.CreatePatch(game, content, nodes[i]);
+                this.patchDictionary.Add(nodes[i].Id, patch);
             }
 
             if (!this.Description.DelayGeneration)
@@ -198,7 +213,7 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.patches);
+            Helper.Dispose(this.patchDictionary);
         }
         /// <summary>
         /// Objects updating
@@ -206,7 +221,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-
+            this.visibleNodes = this.pickingQuadtree.GetNodesInVolume(ref context.Frustum);
         }
         /// <summary>
         /// Objects drawing
@@ -214,45 +229,48 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            Drawer effect = null;
-            if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectBasic;
-            else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectGBuffer;
-            else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
-
-            #region Per frame update
-
-            if (context.DrawerMode == DrawerModesEnum.Forward)
+            if (visibleNodes != null && visibleNodes.Length > 0)
             {
-                ((EffectBasic)effect).UpdatePerFrame(
-                    Matrix.Identity,
-                    context.ViewProjection,
-                    context.EyePosition,
-                    context.Frustum,
-                    context.Lights,
-                    context.ShadowMapStatic,
-                    context.ShadowMapDynamic,
-                    context.FromLightViewProjection);
-            }
-            else if (context.DrawerMode == DrawerModesEnum.Deferred)
-            {
-                ((EffectBasicGBuffer)effect).UpdatePerFrame(
-                    Matrix.Identity,
-                    context.ViewProjection);
-            }
-            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-            {
-                ((EffectBasicShadow)effect).UpdatePerFrame(
-                    Matrix.Identity,
-                    context.ViewProjection);
-            }
+                Drawer effect = null;
+                if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectBasic;
+                else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectGBuffer;
+                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
 
-            #endregion
+                #region Per frame update
 
-            this.Game.Graphics.SetDepthStencilZEnabled();
+                if (context.DrawerMode == DrawerModesEnum.Forward)
+                {
+                    ((EffectBasic)effect).UpdatePerFrame(
+                        Matrix.Identity,
+                        context.ViewProjection,
+                        context.EyePosition,
+                        context.Frustum,
+                        context.Lights,
+                        context.ShadowMapStatic,
+                        context.ShadowMapDynamic,
+                        context.FromLightViewProjection);
+                }
+                else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                {
+                    ((EffectBasicGBuffer)effect).UpdatePerFrame(
+                        Matrix.Identity,
+                        context.ViewProjection);
+                }
+                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                {
+                    ((EffectBasicShadow)effect).UpdatePerFrame(
+                        Matrix.Identity,
+                        context.ViewProjection);
+                }
 
-            for (int i = 0; i < this.patches.Length; i++)
-            {
-                this.patches[i].Draw(context, effect);
+                #endregion
+
+                this.Game.Graphics.SetDepthStencilZEnabled();
+
+                for (int i = 0; i < visibleNodes.Length; i++)
+                {
+                    this.patchDictionary[visibleNodes[i].Id].Draw(context, effect);
+                }
             }
         }
 
@@ -265,7 +283,7 @@ namespace Engine
             {
                 var triangles = this.GetTriangles(UsageEnum.Picking);
 
-                this.pickingQuadtree = QuadTree.Build(triangles, this.Description);
+                this.pickingQuadtree = PickingQuadTree.Build(triangles, this.Description);
             }
 
             if (this.Description != null && this.Description.PathFinder != null)
