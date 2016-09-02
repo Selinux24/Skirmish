@@ -21,7 +21,7 @@ namespace Engine
             : base(game, content)
         {
             this.Cull = false;
-            this.Opaque = true;
+            this.Opaque = false;
             this.Static = true;
         }
 

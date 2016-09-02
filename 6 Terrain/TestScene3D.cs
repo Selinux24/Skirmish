@@ -173,20 +173,6 @@ namespace TerrainTest
 
             #endregion
 
-            #region Skydom
-
-            sw.Restart();
-            this.skydom = this.AddSkydom(new SkydomDescription()
-            {
-                ContentPath = resources + "/Skydom",
-                Texture = "sunset.dds",
-                Radius = this.Camera.FarPlaneDistance,
-            });
-            sw.Stop();
-            loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
-
-            #endregion
-
             #region Helicopter
 
             sw.Restart();
@@ -308,6 +294,20 @@ namespace TerrainTest
             });
             sw.Stop();
             loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Skydom
+
+            sw.Restart();
+            this.skydom = this.AddSkydom(new SkydomDescription()
+            {
+                ContentPath = resources + "/Skydom",
+                Texture = "sunset.dds",
+                Radius = this.Camera.FarPlaneDistance,
+            });
+            sw.Stop();
+            loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 

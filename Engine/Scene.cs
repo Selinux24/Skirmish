@@ -534,13 +534,13 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Skydom AddSkydom(SkydomDescription description, int order = 0)
+        public Skydom AddSkydom(SkydomDescription description)
         {
             ModelContent skydom = ModelContent.GenerateSkydom(description.ContentPath, description.Texture, description.Radius);
 
             Skydom newModel = new Skydom(this.Game, skydom);
 
-            this.AddComponent(newModel, order);
+            this.AddComponent(newModel, -1);
 
             return newModel;
         }
