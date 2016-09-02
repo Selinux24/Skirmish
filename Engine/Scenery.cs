@@ -145,7 +145,7 @@ namespace Engine
 
                         #endregion
 
-                        var technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing, context.DrawerMode);
+                        var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
 
                         mesh.SetInputAssembler(this.Game.Graphics.DeviceContext, effect.GetInputLayout(technique));
 

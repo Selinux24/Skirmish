@@ -58,6 +58,46 @@ namespace Engine.Effects
         /// Position normal texture tangent skinned drawing technique
         /// </summary>
         public readonly EffectTechnique ShadowMapPositionNormalTextureTangentSkinned = null;
+        /// <summary>
+        /// Position color drawing technique
+        /// </summary>
+        public readonly EffectTechnique InstancingShadowMapPositionColor = null;
+        /// <summary>
+        /// Position color skinned drawing technique
+        /// </summary>
+        public readonly EffectTechnique InstancingShadowMapPositionColorSkinned = null;
+        /// <summary>
+        /// Position normal color drawing technique
+        /// </summary>
+        public readonly EffectTechnique InstancingShadowMapPositionNormalColor = null;
+        /// <summary>
+        /// Position normal color skinned drawing technique
+        /// </summary>
+        public readonly EffectTechnique InstancingShadowMapPositionNormalColorSkinned = null;
+        /// <summary>
+        /// Position texture drawing technique
+        /// </summary>
+        public readonly EffectTechnique InstancingShadowMapPositionTexture = null;
+        /// <summary>
+        /// Position texture skinned drawing technique
+        /// </summary>
+        public readonly EffectTechnique InstancingShadowMapPositionTextureSkinned = null;
+        /// <summary>
+        /// Position normal texture drawing technique
+        /// </summary>
+        public readonly EffectTechnique InstancingShadowMapPositionNormalTexture = null;
+        /// <summary>
+        /// Position normal texture skinned drawing technique
+        /// </summary>
+        public readonly EffectTechnique InstancingShadowMapPositionNormalTextureSkinned = null;
+        /// <summary>
+        /// Position normal texture tangent drawing technique
+        /// </summary>
+        public readonly EffectTechnique InstancingShadowMapPositionNormalTextureTangent = null;
+        /// <summary>
+        /// Position normal texture tangent skinned drawing technique
+        /// </summary>
+        public readonly EffectTechnique InstancingShadowMapPositionNormalTextureTangentSkinned = null;
 
         /// <summary>
         /// Bone transformation matrices effect variable
@@ -125,6 +165,16 @@ namespace Engine.Effects
             this.ShadowMapPositionNormalTextureSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureSkinned");
             this.ShadowMapPositionNormalTextureTangent = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangent");
             this.ShadowMapPositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentSkinned");
+            this.InstancingShadowMapPositionColor = this.Effect.GetTechniqueByName("ShadowMapPositionColorI");
+            this.InstancingShadowMapPositionColorSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionColorSkinnedI");
+            this.InstancingShadowMapPositionNormalColor = this.Effect.GetTechniqueByName("ShadowMapPositionNormalColorI");
+            this.InstancingShadowMapPositionNormalColorSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalColorSkinnedI");
+            this.InstancingShadowMapPositionTexture = this.Effect.GetTechniqueByName("ShadowMapPositionTextureI");
+            this.InstancingShadowMapPositionTextureSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionTextureSkinnedI");
+            this.InstancingShadowMapPositionNormalTexture = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureI");
+            this.InstancingShadowMapPositionNormalTextureSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureSkinnedI");
+            this.InstancingShadowMapPositionNormalTextureTangent = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentI");
+            this.InstancingShadowMapPositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentSkinnedI");
 
             this.AddInputLayout(this.ShadowMapPositionColor, VertexPositionColor.GetInput());
             this.AddInputLayout(this.ShadowMapPositionColorSkinned, VertexSkinnedPositionColor.GetInput());
@@ -136,6 +186,16 @@ namespace Engine.Effects
             this.AddInputLayout(this.ShadowMapPositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput());
             this.AddInputLayout(this.ShadowMapPositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput());
             this.AddInputLayout(this.ShadowMapPositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput());
+            this.AddInputLayout(this.InstancingShadowMapPositionColor, VertexPositionColor.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.InstancingShadowMapPositionColorSkinned, VertexSkinnedPositionColor.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalColor, VertexPositionNormalColor.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalColorSkinned, VertexSkinnedPositionNormalColor.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.InstancingShadowMapPositionTexture, VertexPositionTexture.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.InstancingShadowMapPositionTextureSkinned, VertexSkinnedPositionTexture.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalTexture, VertexPositionNormalTexture.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput().Merge(VertexInstancingData.GetInput()));
 
             this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
@@ -144,56 +204,38 @@ namespace Engine.Effects
         /// Get technique by vertex type
         /// </summary>
         /// <param name="vertexType">VertexType</param>
+        /// <param name="instanced">Use instancing data</param>
         /// <param name="stage">Stage</param>
         /// <param name="mode">Mode</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EffectTechnique GetTechnique(VertexTypes vertexType, DrawingStages stage, DrawerModesEnum mode)
+        public override EffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
             if (stage == DrawingStages.Drawing)
             {
-                if (vertexType == VertexTypes.PositionColor)
+                switch (vertexType)
                 {
-                    return this.ShadowMapPositionColor;
-                }
-                else if (vertexType == VertexTypes.PositionColorSkinned)
-                {
-                    return this.ShadowMapPositionNormalColorSkinned;
-                }
-                else if (vertexType == VertexTypes.PositionNormalColor)
-                {
-                    return this.ShadowMapPositionNormalColor;
-                }
-                else if (vertexType == VertexTypes.PositionNormalColorSkinned)
-                {
-                    return this.ShadowMapPositionNormalColorSkinned;
-                }
-                else if (vertexType == VertexTypes.PositionTexture)
-                {
-                    return this.ShadowMapPositionTexture;
-                }
-                else if (vertexType == VertexTypes.PositionTextureSkinned)
-                {
-                    return this.ShadowMapPositionTextureSkinned;
-                }
-                else if (vertexType == VertexTypes.PositionNormalTexture)
-                {
-                    return this.ShadowMapPositionNormalTexture;
-                }
-                else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
-                {
-                    return this.ShadowMapPositionNormalTextureSkinned;
-                }
-                else if (vertexType == VertexTypes.PositionNormalTextureTangent)
-                {
-                    return this.ShadowMapPositionNormalTextureTangent;
-                }
-                else if (vertexType == VertexTypes.PositionNormalTextureTangentSkinned)
-                {
-                    return this.ShadowMapPositionNormalTextureTangentSkinned;
-                }
-                else
-                {
-                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    case VertexTypes.PositionColor:
+                        return instanced ? this.InstancingShadowMapPositionColor : this.ShadowMapPositionColor;
+                    case VertexTypes.PositionTexture:
+                        return instanced ? this.InstancingShadowMapPositionTexture : this.ShadowMapPositionTexture;
+                    case VertexTypes.PositionNormalColor:
+                        return instanced ? this.InstancingShadowMapPositionNormalColor : this.ShadowMapPositionNormalColor;
+                    case VertexTypes.PositionNormalTexture:
+                        return instanced ? this.InstancingShadowMapPositionNormalTexture : this.ShadowMapPositionNormalTexture;
+                    case VertexTypes.PositionNormalTextureTangent:
+                        return instanced ? this.InstancingShadowMapPositionNormalTextureTangent : this.ShadowMapPositionNormalTextureTangent;
+                    case VertexTypes.PositionColorSkinned:
+                        return instanced ? this.InstancingShadowMapPositionColorSkinned : this.ShadowMapPositionColorSkinned;
+                    case VertexTypes.PositionTextureSkinned:
+                        return instanced ? this.InstancingShadowMapPositionTextureSkinned : this.ShadowMapPositionTextureSkinned;
+                    case VertexTypes.PositionNormalColorSkinned:
+                        return instanced ? this.InstancingShadowMapPositionNormalColorSkinned : this.ShadowMapPositionNormalColorSkinned;
+                    case VertexTypes.PositionNormalTextureSkinned:
+                        return instanced ? this.InstancingShadowMapPositionNormalTextureSkinned : this.ShadowMapPositionNormalTextureSkinned;
+                    case VertexTypes.PositionNormalTextureTangentSkinned:
+                        return instanced ? this.InstancingShadowMapPositionNormalTextureTangentSkinned : this.ShadowMapPositionNormalTextureTangentSkinned;
+                    default:
+                        throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                 }
             }
             else

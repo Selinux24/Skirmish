@@ -34,10 +34,6 @@ namespace Engine.Effects
         /// </summary>
         public static EffectFont EffectFont { get; private set; }
         /// <summary>
-        /// Instancing effect
-        /// </summary>
-        public static EffectInstancing EffectInstancing { get; private set; }
-        /// <summary>
         /// Particles drawing effect
         /// </summary>
         public static EffectParticles EffectParticles { get; private set; }
@@ -50,17 +46,9 @@ namespace Engine.Effects
         /// </summary>
         public static EffectBasicShadow EffectShadow { get; private set; }
         /// <summary>
-        /// Instancing shadows effect
-        /// </summary>
-        public static EffectInstancingShadow EffectInstancingShadow { get; private set; }
-        /// <summary>
         /// Geometry Buffer effect
         /// </summary>
         public static EffectBasicGBuffer EffectGBuffer { get; private set; }
-        /// <summary>
-        /// Geometry Buffer Instancing effect
-        /// </summary>
-        public static EffectInstancingGBuffer EffectInstancingGBuffer { get; private set; }
         /// <summary>
         /// Deferred lightning effect
         /// </summary>
@@ -93,34 +81,28 @@ namespace Engine.Effects
             if (Resources.ShaderBasicFxo != null)
             {
                 EffectBasic = new EffectBasic(device, Resources.ShaderBasicFxo, false);
-                EffectInstancing = new EffectInstancing(device, Resources.ShaderBasicFxo, false);
             }
             else
             {
                 EffectBasic = new EffectBasic(device, Resources.ShaderBasicFx, true);
-                EffectInstancing = new EffectInstancing(device, Resources.ShaderBasicFx, true);
             }
 
             if (Resources.ShaderShadowFxo != null)
             {
                 EffectShadow = new EffectBasicShadow(device, Resources.ShaderShadowFxo, false);
-                EffectInstancingShadow = new EffectInstancingShadow(device, Resources.ShaderShadowFxo, false);
             }
             else
             {
                 EffectShadow = new EffectBasicShadow(device, Resources.ShaderShadowFx, true);
-                EffectInstancingShadow = new EffectInstancingShadow(device, Resources.ShaderShadowFx, true);
             }
 
             if (Resources.ShaderGBufferFxo != null)
             {
                 EffectGBuffer = new EffectBasicGBuffer(device, Resources.ShaderGBufferFxo, false);
-                EffectInstancingGBuffer = new EffectInstancingGBuffer(device, Resources.ShaderGBufferFxo, false);
             }
             else
             {
                 EffectGBuffer = new EffectBasicGBuffer(device, Resources.ShaderGBufferFx, true);
-                EffectInstancingGBuffer = new EffectInstancingGBuffer(device, Resources.ShaderGBufferFx, true);
             }
 
             if (Resources.ShaderFontFxo != null)
@@ -187,13 +169,10 @@ namespace Engine.Effects
             Helper.Dispose(EffectBillboard);
             Helper.Dispose(EffectCubemap);
             Helper.Dispose(EffectFont);
-            Helper.Dispose(EffectInstancing);
             Helper.Dispose(EffectParticles);
             Helper.Dispose(EffectTerrain);
             Helper.Dispose(EffectShadow);
-            Helper.Dispose(EffectInstancingShadow);
             Helper.Dispose(EffectGBuffer);
-            Helper.Dispose(EffectInstancingGBuffer);
             Helper.Dispose(EffectDeferred);
         }
     }

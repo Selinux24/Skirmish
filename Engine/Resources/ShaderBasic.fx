@@ -728,6 +728,51 @@ technique11 PositionTextureI
 		SetPixelShader(CompileShader(ps_5_0, PSPositionTexture()));
 	}
 }
+technique11 PositionTextureREDI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureI()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureRED()));
+	}
+}
+technique11 PositionTextureGREENI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureI()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureGREEN()));
+	}
+}
+technique11 PositionTextureBLUEI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureI()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureBLUE()));
+	}
+}
+technique11 PositionTextureALPHAI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureI()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureALPHA()));
+	}
+}
+technique11 PositionTextureNOALPHAI
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSPositionTextureI()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSPositionTextureNOALPHA()));
+	}
+}
 technique11 PositionTextureSkinned
 {
 	pass P0

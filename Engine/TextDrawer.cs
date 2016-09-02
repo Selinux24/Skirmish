@@ -219,7 +219,7 @@ namespace Engine
         {
             this.Font = string.Format("{0} {1}", font, size);
 
-            this.technique = DrawerPool.EffectFont.GetTechnique(VertexTypes.PositionTexture, DrawingStages.Drawing, DrawerModesEnum.Forward);
+            this.technique = DrawerPool.EffectFont.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, DrawerModesEnum.Forward);
             this.inputLayout = DrawerPool.EffectFont.GetInputLayout(this.technique);
 
             this.viewProjection = Sprite.CreateViewOrthoProjection(

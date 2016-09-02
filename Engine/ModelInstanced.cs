@@ -2,7 +2,6 @@
 using System;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
@@ -182,9 +181,9 @@ namespace Engine
             if (this.VisibleCount > 0)
             {
                 Drawer effect = null;
-                if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectInstancing;
-                else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectInstancingGBuffer;
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectInstancingShadow;
+                if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectBasic;
+                else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectGBuffer;
+                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
 
                 if (effect != null)
                 {
@@ -235,7 +234,7 @@ namespace Engine
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        ((EffectInstancing)effect).UpdatePerFrame(
+                        ((EffectBasic)effect).UpdatePerFrame(
                             context.World,
                             context.ViewProjection,
                             context.EyePosition,
@@ -247,13 +246,13 @@ namespace Engine
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        ((EffectInstancingGBuffer)effect).UpdatePerFrame(
+                        ((EffectBasicGBuffer)effect).UpdatePerFrame(
                             context.World,
                             context.ViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        ((EffectInstancingShadow)effect).UpdatePerFrame(
+                        ((EffectBasicShadow)effect).UpdatePerFrame(
                             context.World,
                             context.ViewProjection);
                     }
@@ -297,30 +296,30 @@ namespace Engine
                                     {
                                         if (context.DrawerMode == DrawerModesEnum.Forward)
                                         {
-                                            ((EffectInstancing)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
+                                            ((EffectBasic)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
                                         {
-                                            ((EffectInstancingGBuffer)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
+                                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                                         {
-                                            ((EffectInstancingShadow)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
+                                            ((EffectBasicShadow)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
                                         }
                                     }
                                     else
                                     {
                                         if (context.DrawerMode == DrawerModesEnum.Forward)
                                         {
-                                            ((EffectInstancing)effect).UpdatePerSkinning(null);
+                                            ((EffectBasic)effect).UpdatePerSkinning(null);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
                                         {
-                                            ((EffectInstancingGBuffer)effect).UpdatePerSkinning(null);
+                                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                                         {
-                                            ((EffectInstancingShadow)effect).UpdatePerSkinning(null);
+                                            ((EffectBasicShadow)effect).UpdatePerSkinning(null);
                                         }
                                     }
 
@@ -341,16 +340,16 @@ namespace Engine
 
                                         if (context.DrawerMode == DrawerModesEnum.Forward)
                                         {
-                                            ((EffectInstancing)effect).UpdatePerObject(matdata, texture, normalMap);
+                                            ((EffectBasic)effect).UpdatePerObject(matdata, texture, normalMap, 0);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
                                         {
-                                            ((EffectInstancingGBuffer)effect).UpdatePerObject(matdata, texture, normalMap);
+                                            ((EffectBasicGBuffer)effect).UpdatePerObject(matdata, texture, normalMap, 0);
                                         }
 
                                         #endregion
 
-                                        var technique = effect.GetTechnique(mesh.VertextType, DrawingStages.Drawing, context.DrawerMode);
+                                        var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
 
                                         mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 

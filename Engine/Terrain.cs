@@ -594,7 +594,7 @@ namespace Engine
 
                     #endregion
 
-                    var technique = effect.GetTechnique(VertexTypes.Terrain, DrawingStages.Drawing, context.BaseContext.DrawerMode);
+                    var technique = effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
 
                     this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
                     Counters.IAInputLayoutSets++;
@@ -699,7 +699,7 @@ namespace Engine
 
                     #endregion
 
-                    var technique = effect.GetTechnique(VertexTypes.Billboard, DrawingStages.Drawing, context.BaseContext.DrawerMode);
+                    var technique = effect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
 
                     this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
                     Counters.IAInputLayoutSets++;

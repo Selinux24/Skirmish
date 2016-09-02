@@ -424,9 +424,7 @@
     <Compile Include="Effects\EffectDeferred.cs" />
     <Compile Include="EngineException.cs" />
     <Compile Include="GBuffer.cs" />
-    <Compile Include="Effects\EffectInstancingGBuffer.cs" />
     <Compile Include="Effects\EffectBasicGBuffer.cs" />
-    <Compile Include="Effects\EffectInstancingShadow.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LightBuffer.cs" />
     <Compile Include="SceneLight.cs" />
@@ -501,7 +499,6 @@
     <Compile Include="Counters.cs" />
     <Compile Include="Effects\EffectFont.cs" />
     <Compile Include="Effects\Drawer.cs" />
-    <Compile Include="Effects\EffectInstancing.cs" />
     <Compile Include="GameTime.cs" />
     <Compile Include="Model.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
