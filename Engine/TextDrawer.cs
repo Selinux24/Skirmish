@@ -638,10 +638,10 @@ namespace Engine
                     float u1 = (chr.X + chr.Width) / (float)FontMap.TEXTURESIZE;
                     float v1 = (chr.Y + chr.Height) / (float)FontMap.TEXTURESIZE;
 
-                    cv[0].Texture = new Vector2(u0, v0);
-                    cv[1].Texture = new Vector2(u1, v1);
-                    cv[2].Texture = new Vector2(u0, v1);
-                    cv[3].Texture = new Vector2(u1, v0);
+                    cv[0].Texture0 = new Vector2(u0, v0);
+                    cv[1].Texture0 = new Vector2(u1, v1);
+                    cv[2].Texture0 = new Vector2(u0, v1);
+                    cv[3].Texture0 = new Vector2(u1, v0);
 
                     Array.ForEach(ci, (i) => { indexList.Add(i + (uint)vertList.Count); });
                     Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPositionTexture(v)); });

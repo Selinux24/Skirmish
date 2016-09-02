@@ -173,7 +173,8 @@ namespace Engine.Common
                     VertexData newVertex = new VertexData()
                     {
                         Position = new Vector3(posX, posY, posZ),
-                        Texture = new Vector2(width * cellSize / 12f, depth * cellSize / 12f),
+                        Texture0 = new Vector2(width * cellSize / 12f, depth * cellSize / 12f),
+                        Texture1 = new Vector2(width * cellSize / totalWidth, depth * cellSize / totalDepth),
                         Color = this.m_ColorData[depth, width],
                     };
 

@@ -61,6 +61,10 @@ namespace Engine
             /// Normal map textures for terrain
             /// </summary>
             public ShaderResourceView TerrainNormalMaps;
+
+            public ShaderResourceView ColorTextures;
+
+            public ShaderResourceView AlphaMap;
             /// <summary>
             /// Slope ranges
             /// </summary>
@@ -580,6 +584,8 @@ namespace Engine
                             context.TerraintexturesLR,
                             context.TerraintexturesHR,
                             context.TerrainNormalMaps,
+                            context.ColorTextures,
+                            context.AlphaMap,
                             context.SlopeRanges);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
@@ -589,6 +595,8 @@ namespace Engine
                             context.TerraintexturesLR,
                             context.TerraintexturesHR,
                             context.TerrainNormalMaps,
+                            context.ColorTextures,
+                            context.AlphaMap,
                             context.SlopeRanges);
                     }
 
@@ -1218,6 +1226,14 @@ namespace Engine
         /// </summary>
         private ShaderResourceView terrainNormalMaps = null;
         /// <summary>
+        /// Color textures for alpha map
+        /// </summary>
+        private ShaderResourceView colorTextures = null;
+        /// <summary>
+        /// Alpha map
+        /// </summary>
+        private ShaderResourceView alphaMap = null;
+        /// <summary>
         /// Random texture
         /// </summary>
         private ShaderResourceView textureRandom = null;
@@ -1284,10 +1300,20 @@ namespace Engine
                 {
                     Streams = ContentManager.FindContent(contentPath, this.Description.Textures.NormalMaps),
                 };
+                ImageContent colors = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(contentPath, this.Description.Textures.ColorTextures),
+                };
+                ImageContent alphaMap = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(contentPath, this.Description.Textures.AlphaMap),
+                };
 
                 this.terrainTexturesLR = game.Graphics.Device.LoadTextureArray(terrainTexturesLR.Streams);
                 this.terrainTexturesHR = game.Graphics.Device.LoadTextureArray(terrainTexturesHR.Streams);
                 this.terrainNormalMaps = game.Graphics.Device.LoadTextureArray(normalMapTextures.Streams);
+                this.colorTextures = game.Graphics.Device.LoadTextureArray(colors.Streams);
+                this.alphaMap = game.Graphics.Device.LoadTexture(alphaMap.Stream);
                 this.slopeRanges = this.Description.Textures.SlopeRanges;
             }
 
@@ -1333,6 +1359,8 @@ namespace Engine
                 TerraintexturesLR = this.terrainTexturesLR,
                 TerraintexturesHR = this.terrainTexturesHR,
                 TerrainNormalMaps = this.terrainNormalMaps,
+                ColorTextures = this.colorTextures,
+                AlphaMap = this.alphaMap,
                 SlopeRanges = this.slopeRanges,
                 FoliageTextureCount = this.foliageTextureCount,
                 FoliageTextures = this.foliageTextures,
@@ -1359,6 +1387,8 @@ namespace Engine
             Helper.Dispose(this.terrainNormalMaps);
             Helper.Dispose(this.foliageTextures);
             Helper.Dispose(this.textureRandom);
+            Helper.Dispose(this.colorTextures);
+            Helper.Dispose(this.alphaMap);
             Helper.Dispose(this.patches);
         }
         /// <summary>

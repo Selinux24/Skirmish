@@ -22,8 +22,9 @@ namespace Engine.Common
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
                 new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, 0, InputClassification.PerVertexData, 0),
                 new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, 0, InputClassification.PerVertexData, 0),
-                new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32_Float, 32, 0, InputClassification.PerVertexData, 0),
-                new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 44, 0, InputClassification.PerVertexData, 0),
+                new InputElement("TEXCOORD", 1, SharpDX.DXGI.Format.R32G32_Float, 32, 0, InputClassification.PerVertexData, 0),
+                new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32_Float, 40, 0, InputClassification.PerVertexData, 0),
+                new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 52, 0, InputClassification.PerVertexData, 0),
             };
         }
 
@@ -36,9 +37,13 @@ namespace Engine.Common
         /// </summary>
         public Vector3 Normal;
         /// <summary>
-        /// Texture UV
+        /// Texture UV 0
         /// </summary>
-        public Vector2 Texture;
+        public Vector2 Texture0;
+        /// <summary>
+        /// Texture UV 1
+        /// </summary>
+        public Vector2 Texture1;
         /// <summary>
         /// Tangent
         /// </summary>
@@ -78,6 +83,7 @@ namespace Engine.Common
             if (channel == VertexDataChannels.Position) return true;
             else if (channel == VertexDataChannels.Normal) return true;
             else if (channel == VertexDataChannels.Texture) return true;
+            else if (channel == VertexDataChannels.Texture1) return true;
             else if (channel == VertexDataChannels.Tangent) return true;
             else if (channel == VertexDataChannels.Color) return true;
             else return false;
@@ -92,7 +98,8 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
             else if (channel == VertexDataChannels.Normal) return this.Normal.Cast<T>();
-            else if (channel == VertexDataChannels.Texture) return this.Texture.Cast<T>();
+            else if (channel == VertexDataChannels.Texture) return this.Texture0.Cast<T>();
+            else if (channel == VertexDataChannels.Texture1) return this.Texture1.Cast<T>();
             else if (channel == VertexDataChannels.Tangent) return this.Tangent.Cast<T>();
             else if (channel == VertexDataChannels.Color) return this.Color.Cast<T>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
@@ -107,7 +114,8 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
             else if (channel == VertexDataChannels.Normal) this.Normal = value.Cast<Vector3>();
-            else if (channel == VertexDataChannels.Texture) this.Texture = value.Cast<Vector2>();
+            else if (channel == VertexDataChannels.Texture) this.Texture0 = value.Cast<Vector2>();
+            else if (channel == VertexDataChannels.Texture1) this.Texture1 = value.Cast<Vector2>();
             else if (channel == VertexDataChannels.Tangent) this.Tangent = value.Cast<Vector3>();
             else if (channel == VertexDataChannels.Color) this.Color = value.Cast<Color4>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
@@ -119,7 +127,12 @@ namespace Engine.Common
         /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
-            return string.Format("Position: {0}; Normal: {1}; Texture: {2}; Tangent: {3}", this.Position, this.Normal, this.Texture, this.Tangent);
+            return string.Format(
+                "Position: {0}; Normal: {1}; Texture0: {2}; Texture1: {3}; Tangent: {4}", 
+                this.Position, 
+                this.Normal,
+                this.Texture0, this.Texture1, 
+                this.Tangent);
         }
     };
 }

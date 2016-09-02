@@ -68,6 +68,14 @@ namespace Engine
             /// </summary>
             public string[] NormalMaps = null;
             /// <summary>
+            /// Color textures for alpha map
+            /// </summary>
+            public string[] ColorTextures = null;
+            /// <summary>
+            /// Alpha map
+            /// </summary>
+            public string AlphaMap = null;
+            /// <summary>
             /// Slope ranges
             /// </summary>
             public Vector2 SlopeRanges = Vector2.Zero;

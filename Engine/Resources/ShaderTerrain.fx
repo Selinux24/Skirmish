@@ -30,6 +30,9 @@ Texture2DArray gNormalMapArray;
 Texture2D gShadowMapStatic;
 Texture2D gShadowMapDynamic;
 
+Texture2DArray gColorTextureArray;
+Texture2D gAlphaTexture;
+
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE TANGENT
 **********************************************************************************************************/
@@ -41,7 +44,8 @@ PSVertexTerrain VSTerrainForward(VSVertexTerrain input)
     output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
 	output.tangentWorld = mul(float4(input.tangentLocal, 0), gWorld).xyz;
-	output.tex = input.tex;
+	output.tex0 = input.tex0;
+	output.tex1 = input.tex1;
 	output.color = input.color;
     
     return output;
@@ -57,39 +61,53 @@ ShadowMapOutput VSTerrainShadowMap(VSVertexTerrain input)
 
 float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 {
-	float3 normalMapSample = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, 0)).rgb;
-	float3 normalWorld = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
+	// BY ALPHA MAP
+	float3 normalMapSample1 = gNormalMapArray.Sample(SamplerLinear, float3(input.tex0, 0)).rgb;
+	float3 bumpNormalWorld1 = NormalSampleToWorldSpace(normalMapSample1, input.normalWorld, input.tangentWorld);
 
-	float4 textureColor = 0;
+	float3 normalMapSample2 = gNormalMapArray.Sample(SamplerLinear, float3(input.tex0, 1)).rgb;
+	float3 bumpNormalWorld2 = NormalSampleToWorldSpace(normalMapSample2, input.normalWorld, input.tangentWorld);
 
-	// Determine which texture to use based on height.
+    float4 textureColor1 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 0));
+    float4 textureColor2 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 1));
+    float4 textureColor3 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 2));
+    float4 textureColor4 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 3));
+
+	float4 alphaMap1 = gAlphaTexture.Sample(SamplerLinear, input.tex1);
+
+	float4 color1 = lerp(textureColor1, textureColor2, alphaMap1.r);
+	color1 = lerp(color1, textureColor3, alphaMap1.g);
+	color1 = lerp(color1, textureColor4, alphaMap1.b);
+
+	// BY SLOPE. Determine which texture to use based on height.
+	float4 color2 = 0;
 	float slope = 1.0f - input.normalWorld.y;
     if(slope < gSlopeRanges.x)
     {
-        textureColor = lerp(
-			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 0)), 
-			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 1)), 
+        color2 = lerp(
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)), 
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
 			slope / gSlopeRanges.x);
     }
     if((slope < gSlopeRanges.y) && (slope >= gSlopeRanges.x))
     {
-        textureColor = lerp(
-			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 1)), 
-			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 2)), 
+        color2 = lerp(
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2)), 
 			(slope - gSlopeRanges.x) * (1.0f / (gSlopeRanges.y - gSlopeRanges.x)));
     }
     if(slope >= gSlopeRanges.y) 
     {
-        textureColor = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 2));
+        color2 = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
     }
 
 	float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
 	if(depthValue >= 0.05f)
 	{
-		textureColor *= gTextureHRArray.Sample(SamplerAnisotropic, float3(input.tex, 0)) * 1.8f;
+		color2 *= gTextureHRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)) * 1.8f;
 	}
 
-	textureColor = saturate(textureColor * input.color * 2.0f);
+	float4 color = saturate(((color1 * 0.70f) + (color2 * 0.30f)) * input.color * 2.0f);
 
 	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 	float3 toEye = normalize(toEyeWorld);
@@ -101,9 +119,9 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		gPointLights, 
 		gSpotLights,
 		toEye,
-		textureColor.rgb,
+		color.rgb,
 		input.positionWorld,
-		normalWorld,
+		bumpNormalWorld1,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
@@ -117,48 +135,61 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return float4(litColor, textureColor.a);
+	return float4(litColor, color.a);
 }
 GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 {
     GBufferPSOutput output = (GBufferPSOutput)0;
 
-	float3 normalMapSample = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, 0)).rgb;
-	float3 normal = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
+	// BY ALPHA MAP
+	float3 normalMapSample1 = gNormalMapArray.Sample(SamplerLinear, float3(input.tex0, 0)).rgb;
+	float3 bumpNormalWorld1 = NormalSampleToWorldSpace(normalMapSample1, input.normalWorld, input.tangentWorld);
 
-	float4 color = 0.0f;
+	float3 normalMapSample2 = gNormalMapArray.Sample(SamplerLinear, float3(input.tex0, 1)).rgb;
+	float3 bumpNormalWorld2 = NormalSampleToWorldSpace(normalMapSample2, input.normalWorld, input.tangentWorld);
 
-	// Determine which texture to use based on height.
+    float4 textureColor1 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 0));
+    float4 textureColor2 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 1));
+    float4 textureColor3 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 2));
+    float4 textureColor4 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 3));
+	float4 alphaMap1 = gAlphaTexture.Sample(SamplerLinear, input.tex1);
+
+	float4 color1 = lerp(textureColor1, textureColor2, alphaMap1.r);
+	color1 = lerp(color1, textureColor3, alphaMap1.g);
+	color1 = lerp(color1, textureColor4, alphaMap1.b);
+
+	// BY SLOPE. Determine which texture to use based on height.
+	float4 color2 = 0;
 	float slope = 1.0f - input.normalWorld.y;
     if(slope < gSlopeRanges.x)
     {
-        color = lerp(
-			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 0)), 
-			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 1)), 
+        color2 = lerp(
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)), 
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
 			slope / gSlopeRanges.x);
     }
     if((slope < gSlopeRanges.y) && (slope >= gSlopeRanges.x))
     {
-        color = lerp(
-			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 1)), 
-			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 2)), 
+        color2 = lerp(
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
+			gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2)), 
 			(slope - gSlopeRanges.x) * (1.0f / (gSlopeRanges.y - gSlopeRanges.x)));
     }
     if(slope >= gSlopeRanges.y) 
     {
-        color = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex, 2));
+        color2 = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
     }
 
 	float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
 	if(depthValue >= 0.05f)
 	{
-		color *= gTextureHRArray.Sample(SamplerAnisotropic, float3(input.tex, 0)) * 1.8f;
+		color2 *= gTextureHRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)) * 1.8f;
 	}
 
-	color = saturate(color * input.color * 2.0f);
+	float4 color = saturate(((color1 * 0.70f) + (color2 * 0.30f)) * input.color * 2.0f);
 
 	output.color = color;
-	output.normal = float4(normal.xyz, gMaterial.SpecularPower);
+	output.normal = float4(bumpNormalWorld1.xyz, gMaterial.SpecularPower);
 	output.depth = float4(input.positionWorld, gMaterial.SpecularIntensity);
 
     return output;

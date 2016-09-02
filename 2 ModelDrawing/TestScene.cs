@@ -79,10 +79,10 @@ namespace ModelDrawing
 
             VertexData[] vertices = new VertexData[]
             {
-                new VertexData{ Position = new Vector3(-l, -h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, -h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+l, -h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, -h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
+                new VertexData{ Position = new Vector3(-l, -h, -l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, 0.0f) },
+                new VertexData{ Position = new Vector3(-l, -h, +l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, 1.0f) },
+                new VertexData{ Position = new Vector3(+l, -h, -l), Normal = Vector3.Up, Texture0 = new Vector2(1.0f, 0.0f) },
+                new VertexData{ Position = new Vector3(+l, -h, +l), Normal = Vector3.Up, Texture0 = new Vector2(1.0f, 1.0f) },
             };
 
             uint[] indices = new uint[]
@@ -98,10 +98,10 @@ namespace ModelDrawing
         {
             VertexData[] vertices = new VertexData[]
             {
-                new VertexData{ Position = new Vector3(-1f, +0f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+0f, +2f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture = new Vector2(0.5f, 0.0f) },
-                new VertexData{ Position = new Vector3(+1f, +0f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture = new Vector2(1.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+0f, -2f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture = new Vector2(0.5f, 0.0f) },
+                new VertexData{ Position = new Vector3(-1f, +0f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture0 = new Vector2(0.0f, 1.0f) },
+                new VertexData{ Position = new Vector3(+0f, +2f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture0 = new Vector2(0.5f, 0.0f) },
+                new VertexData{ Position = new Vector3(+1f, +0f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture0 = new Vector2(1.0f, 1.0f) },
+                new VertexData{ Position = new Vector3(+0f, -2f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture0 = new Vector2(0.5f, 0.0f) },
             };
 
             uint[] indices = new uint[]

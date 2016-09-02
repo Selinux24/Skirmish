@@ -42,7 +42,11 @@ namespace Engine.Common
         /// <summary>
         /// Texture UV
         /// </summary>
-        public Vector2? Texture;
+        public Vector2? Texture0;
+        /// <summary>
+        /// Texture UV
+        /// </summary>
+        public Vector2? Texture1;
         /// <summary>
         /// Color
         /// </summary>
@@ -125,7 +129,7 @@ namespace Engine.Common
             return new VertexData()
             {
                 Position = position,
-                Texture = texture,
+                Texture0 = texture,
             };
         }
         /// <summary>
@@ -157,7 +161,7 @@ namespace Engine.Common
             {
                 Position = position,
                 Normal = normal,
-                Texture = texture,
+                Texture0 = texture,
             };
         }
         /// <summary>
@@ -177,7 +181,7 @@ namespace Engine.Common
                 Normal = normal,
                 Tangent = tangent,
                 BiNormal = binormal,
-                Texture = texture,
+                Texture0 = texture,
             };
         }
         /// <summary>
@@ -227,7 +231,7 @@ namespace Engine.Common
             return new VertexData()
             {
                 Position = position,
-                Texture = texture,
+                Texture0 = texture,
                 Weights = weights,
                 BoneIndices = boneIndices,
             };
@@ -267,7 +271,7 @@ namespace Engine.Common
             {
                 Position = position,
                 Normal = normal,
-                Texture = texture,
+                Texture0 = texture,
                 Weights = weights,
                 BoneIndices = boneIndices,
             };
@@ -291,7 +295,7 @@ namespace Engine.Common
                 Normal = normal,
                 Tangent = tangent,
                 BiNormal = binormal,
-                Texture = texture,
+                Texture0 = texture,
                 Weights = weights,
                 BoneIndices = boneIndices,
             };
@@ -306,7 +310,7 @@ namespace Engine.Common
         /// <param name="texture">Texture</param>
         /// <param name="color">Color</param>
         /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexTerrain(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture, Color4 color)
+        public static VertexData CreateVertexTerrain(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture0, Vector2 texture1, Color4 color)
         {
             return new VertexData()
             {
@@ -314,7 +318,8 @@ namespace Engine.Common
                 Normal = normal,
                 Tangent = tangent,
                 BiNormal = binormal,
-                Texture = texture,
+                Texture0 = texture0,
+                Texture1 = texture1,
                 Color = color,
             };
         }
@@ -397,7 +402,7 @@ namespace Engine.Common
             return new VertexPositionTexture
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero
+                Texture = v.Texture0.HasValue ? v.Texture0.Value : Vector2.Zero
             };
         }
         /// <summary>
@@ -411,7 +416,7 @@ namespace Engine.Common
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero
+                Texture = v.Texture0.HasValue ? v.Texture0.Value : Vector2.Zero
             };
         }
         /// <summary>
@@ -425,7 +430,7 @@ namespace Engine.Common
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Texture = v.Texture0.HasValue ? v.Texture0.Value : Vector2.Zero,
                 Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
             };
         }
@@ -440,7 +445,8 @@ namespace Engine.Common
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Texture0 = v.Texture0.HasValue ? v.Texture0.Value : Vector2.Zero,
+                Texture1 = v.Texture1.HasValue ? v.Texture1.Value : Vector2.Zero,
                 Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
                 Color = v.Color.HasValue ? v.Color.Value : Color4.White,
             };
@@ -519,7 +525,7 @@ namespace Engine.Common
             return new VertexSkinnedPositionTexture
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Texture = v.Texture0.HasValue ? v.Texture0.Value : Vector2.Zero,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
@@ -541,7 +547,7 @@ namespace Engine.Common
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Texture = v.Texture0.HasValue ? v.Texture0.Value : Vector2.Zero,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
@@ -563,7 +569,7 @@ namespace Engine.Common
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Texture = v.Texture0.HasValue ? v.Texture0.Value : Vector2.Zero,
                 Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
@@ -636,16 +642,16 @@ namespace Engine.Common
             float bottom = top - (float)height;
 
             v[0].Position = new Vector3(left, top, 0.0f);
-            v[0].Texture = new Vector2(0.0f, 0.0f);
+            v[0].Texture0 = new Vector2(0.0f, 0.0f);
 
             v[1].Position = new Vector3(right, bottom, 0.0f);
-            v[1].Texture = new Vector2(1.0f, 1.0f);
+            v[1].Texture0 = new Vector2(1.0f, 1.0f);
 
             v[2].Position = new Vector3(left, bottom, 0.0f);
-            v[2].Texture = new Vector2(0.0f, 1.0f);
+            v[2].Texture0 = new Vector2(0.0f, 1.0f);
 
             v[3].Position = new Vector3(right, top, 0.0f);
-            v[3].Texture = new Vector2(1.0f, 0.0f);
+            v[3].Texture0 = new Vector2(1.0f, 0.0f);
 
             i[0] = 0;
             i[1] = 1;
@@ -677,19 +683,19 @@ namespace Engine.Common
 
             v[0].Position = new Vector3(left, top, 0.0f);
             v[0].Normal = new Vector3(0, 0, -1);
-            v[0].Texture = Vector2.Zero;
+            v[0].Texture0 = Vector2.Zero;
 
             v[1].Position = new Vector3(right, bottom, 0.0f);
             v[1].Normal = new Vector3(0, 0, -1);
-            v[1].Texture = Vector2.One;
+            v[1].Texture0 = Vector2.One;
 
             v[2].Position = new Vector3(left, bottom, 0.0f);
             v[2].Normal = new Vector3(0, 0, -1);
-            v[2].Texture = Vector2.UnitY;
+            v[2].Texture0 = Vector2.UnitY;
 
             v[3].Position = new Vector3(right, top, 0.0f);
             v[3].Normal = new Vector3(0, 0, -1);
-            v[3].Texture = Vector2.UnitX;
+            v[3].Texture0 = Vector2.UnitX;
 
             i[0] = 0;
             i[1] = 1;
@@ -1366,11 +1372,11 @@ namespace Engine.Common
 
             // Calculate the tu and tv texture space vectors.
             Vector2 tuVector = new Vector2(
-                vertex2.Texture.Value.X - vertex1.Texture.Value.X,
-                vertex3.Texture.Value.X - vertex1.Texture.Value.X);
+                vertex2.Texture0.Value.X - vertex1.Texture0.Value.X,
+                vertex3.Texture0.Value.X - vertex1.Texture0.Value.X);
             Vector2 tvVector = new Vector2(
-                vertex2.Texture.Value.Y - vertex1.Texture.Value.Y,
-                vertex3.Texture.Value.Y - vertex1.Texture.Value.Y);
+                vertex2.Texture0.Value.Y - vertex1.Texture0.Value.Y,
+                vertex3.Texture0.Value.Y - vertex1.Texture0.Value.Y);
 
             // Calculate the denominator of the tangent / binormal equation.
             var den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
@@ -1454,7 +1460,7 @@ namespace Engine.Common
             if (this.Normal.HasValue) text += string.Format("Normal: {0}; ", this.Normal);
             if (this.Tangent.HasValue) text += string.Format("Tangent: {0}; ", this.Tangent);
             if (this.BiNormal.HasValue) text += string.Format("BiNormal: {0}; ", this.BiNormal);
-            if (this.Texture.HasValue) text += string.Format("Texture: {0}; ", this.Texture);
+            if (this.Texture0.HasValue) text += string.Format("Texture: {0}; ", this.Texture0);
             if (this.Color.HasValue) text += string.Format("Color: {0}; ", this.Color);
             if (this.Size.HasValue) text += string.Format("Size: {0}; ", this.Size);
             if (this.Weights != null && this.Weights.Length > 0) text += string.Format("Weights: {0}; ", this.Weights.Length);
@@ -1489,6 +1495,10 @@ namespace Engine.Common
         /// Texture UV
         /// </summary>
         Texture,
+        /// <summary>
+        /// Texture UV
+        /// </summary>
+        Texture1,
         /// <summary>
         /// Color
         /// </summary>

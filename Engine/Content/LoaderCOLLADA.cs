@@ -603,7 +603,7 @@ namespace Engine.Content
                             int tIndex = polyList.P[index + texCoordInput.Offset];
                             Vector2 tex = texCoords[tIndex];
 
-                            vert.Texture = tex;
+                            vert.Texture0 = tex;
                         }
 
                         verts.Add(vert);

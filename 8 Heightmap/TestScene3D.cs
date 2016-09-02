@@ -133,6 +133,8 @@ namespace HeightmapTest
             sw.Stop();
             loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
 
+            this.skydom.Visible = false;
+
             #endregion
 
             #region Terrain
@@ -159,28 +161,30 @@ namespace HeightmapTest
                 {
                     MaximumDepth = 3,
                 },
-                PathFinder = new GroundDescription.PathFinderDescription()
-                {
-                    Settings = pfSettings,
-                },
+                //PathFinder = new GroundDescription.PathFinderDescription()
+                //{
+                //    Settings = pfSettings,
+                //},
                 Textures = new GroundDescription.TexturesDescription()
                 {
                     ContentPath = "Textures",
                     TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
                     TexturesHR = new[] { "dirt0hr.dds" },
-                    NormalMaps = new[] { "dirt0nm.dds" },
+                    NormalMaps = new[] { "normal001.dds", "normal002.dds" },
+                    ColorTextures = new[] { "dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds" },
+                    AlphaMap = "alpha001.dds",
                     SlopeRanges = new Vector2(0.1f, 0.3f),
                 },
-                Vegetation = new GroundDescription.VegetationDescription()
-                {
-                    ContentPath = "Foliage/Billboard",
-                    VegetarionTextures = new[] { "grass.png" },
-                    Saturation = 0.3f,
-                    StartRadius = 0f,
-                    EndRadius = 200f,
-                    MinSize = new Vector2(2, 2),
-                    MaxSize = new Vector2(2, 4),
-                }
+                //Vegetation = new GroundDescription.VegetationDescription()
+                //{
+                //    ContentPath = "Foliage/Billboard",
+                //    VegetarionTextures = new[] { "grass.png" },
+                //    Saturation = 0.3f,
+                //    StartRadius = 0f,
+                //    EndRadius = 200f,
+                //    MinSize = new Vector2(2, 2),
+                //    MaxSize = new Vector2(2, 4),
+                //}
             });
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);

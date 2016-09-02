@@ -100,6 +100,14 @@ namespace Engine.Effects
         /// </summary>
         private EffectShaderResourceVariable shadowMapDynamic = null;
         /// <summary>
+        /// Color texture array effect variable
+        /// </summary>
+        private EffectShaderResourceVariable colorTextures = null;
+        /// <summary>
+        /// Alpha map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable alphaMap = null;
+        /// <summary>
         /// Slope ranges effect variable
         /// </summary>
         private EffectVectorVariable slopeRanges = null;
@@ -387,6 +395,34 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Color textures for alpha map
+        /// </summary>
+        protected ShaderResourceView ColorTextures
+        {
+            get
+            {
+                return this.colorTextures.GetResource();
+            }
+            set
+            {
+                this.colorTextures.SetResource(value);
+            }
+        }
+        /// <summary>
+        /// Alpha map
+        /// </summary>
+        protected ShaderResourceView AlphaMap
+        {
+            get
+            {
+                return this.alphaMap.GetResource();
+            }
+            set
+            {
+                this.alphaMap.SetResource(value);
+            }
+        }
+        /// <summary>
         /// Slope ranges
         /// </summary>
         protected Vector2 SlopeRanges
@@ -439,6 +475,8 @@ namespace Engine.Effects
             this.normalMaps = this.Effect.GetVariableByName("gNormalMapArray").AsShaderResource();
             this.shadowMapStatic = this.Effect.GetVariableByName("gShadowMapStatic").AsShaderResource();
             this.shadowMapDynamic = this.Effect.GetVariableByName("gShadowMapDynamic").AsShaderResource();
+            this.colorTextures = this.Effect.GetVariableByName("gColorTextureArray").AsShaderResource();
+            this.alphaMap = this.Effect.GetVariableByName("gAlphaTexture").AsShaderResource();
             this.slopeRanges = this.Effect.GetVariableByName("gSlopeRanges").AsVector();
         }
         /// <summary>
@@ -568,18 +606,24 @@ namespace Engine.Effects
         /// <param name="texturesLR">Low resolution textures</param>
         /// <param name="texturesHR">High resolution textures</param>
         /// <param name="normalMap">Normal map</param>
+        /// <param name="colorTextures">Color textures</param>
+        /// <param name="alphaMap">Alpha map</param>
         /// <param name="slopeRanges">Slope ranges</param>
         public void UpdatePerObject(
             Material material,
             ShaderResourceView texturesLR,
             ShaderResourceView texturesHR,
             ShaderResourceView normalMap,
+            ShaderResourceView colorTextures,
+            ShaderResourceView alphaMap,
             Vector2 slopeRanges)
         {
             this.Material = new BufferMaterials(material);
             this.TexturesLR = texturesLR;
             this.TexturesHR = texturesHR;
             this.NormalMaps = normalMap;
+            this.ColorTextures = colorTextures;
+            this.AlphaMap = alphaMap;
             this.SlopeRanges = slopeRanges;
         }
     }
