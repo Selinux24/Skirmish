@@ -12,74 +12,6 @@ namespace Engine.Collections
     public class PickingQuadTree : IPickable
     {
         /// <summary>
-        /// Build quadtree
-        /// </summary>
-        /// <param name="triangles">Partitioning triangles</param>
-        /// <param name="description">Description</param>
-        /// <returns>Returns generated quadtree</returns>
-        public static PickingQuadTree Build(
-            Triangle[] triangles,
-            GroundDescription description)
-        {
-            BoundingBox bbox = Helper.CreateBoundingBox(triangles);
-            BoundingSphere bsph = Helper.CreateBoundingSphere(triangles);
-
-            PickingQuadTree quadTree = new PickingQuadTree()
-            {
-                BoundingBox = bbox,
-                BoundingSphere = bsph,
-            };
-
-            quadTree.Root = PickingQuadTreeNode.CreatePartitions(
-                quadTree,
-                null,
-                bbox,
-                triangles,
-                0,
-                description);
-
-            quadTree.Root.ConnectNodes();
-
-            return quadTree;
-        }
-        /// <summary>
-        /// Build quadtree
-        /// </summary>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="description">Description</param>
-        /// <returns>Returns generated quadtree</returns>
-        public static PickingQuadTree Build(
-            VertexData[] vertices,
-            GroundDescription description)
-        {
-            //Process Quadtree. Each tail quadnode must contains the same number of vertices
-
-            //Compute bounding volumes
-            long index = 0;
-            Vector3[] positions = new Vector3[vertices.Length];
-            Array.ForEach(vertices, v => positions[index++] = v.Position.Value);
-
-            BoundingBox bbox = BoundingBox.FromPoints(positions);
-            BoundingSphere bsph = BoundingSphere.FromPoints(positions);
-
-            PickingQuadTree quadTree = new PickingQuadTree()
-            {
-                BoundingBox = bbox,
-                BoundingSphere = bsph,
-            };
-
-            quadTree.Root = PickingQuadTreeNode.CreatePartitions(
-                quadTree, null,
-                bbox, vertices,
-                0,
-                description);
-
-            quadTree.Root.ConnectNodes();
-
-            return quadTree;
-        }
-
-        /// <summary>
         /// Root node
         /// </summary>
         public PickingQuadTreeNode Root { get; private set; }
@@ -95,9 +27,48 @@ namespace Engine.Collections
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingQuadTree()
+        /// <param name="triangles">Partitioning triangles</param>
+        /// <param name="maxDepth">Maximum depth</param>
+        public PickingQuadTree(Triangle[] triangles, int maxDepth)
         {
+            BoundingBox bbox = Helper.CreateBoundingBox(triangles);
+            BoundingSphere bsph = Helper.CreateBoundingSphere(triangles);
 
+            this.BoundingBox = bbox;
+            this.BoundingSphere = bsph;
+
+            this.Root = PickingQuadTreeNode.CreatePartitions(
+                this, null,
+                bbox, triangles,
+                maxDepth,
+                0);
+
+            this.Root.ConnectNodes();
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="maxDepth">Maximum depth</param>
+        public PickingQuadTree(VertexData[] vertices, int maxDepth)
+        {
+            long index = 0;
+            Vector3[] positions = new Vector3[vertices.Length];
+            Array.ForEach(vertices, v => positions[index++] = v.Position.Value);
+
+            BoundingBox bbox = BoundingBox.FromPoints(positions);
+            BoundingSphere bsph = BoundingSphere.FromPoints(positions);
+
+            this.BoundingBox = bbox;
+            this.BoundingSphere = bsph;
+
+            this.Root = PickingQuadTreeNode.CreatePartitions(
+                this, null,
+                bbox, vertices,
+                maxDepth,
+                0);
+
+            this.Root.ConnectNodes();
         }
 
         /// <summary>

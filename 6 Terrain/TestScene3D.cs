@@ -82,9 +82,6 @@ namespace TerrainTest
         {
             base.Initialize();
 
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 5000f;
-
             #region Texts
 
             this.title = this.AddText("Tahoma", 18, Color.White);
@@ -104,7 +101,7 @@ namespace TerrainTest
 
             #endregion
 
-            #region Models
+            #region Loading models
 
             string resources = @"Resources";
 
@@ -339,7 +336,7 @@ namespace TerrainTest
                 },
                 Quadtree = new GroundDescription.QuadtreeDescription()
                 {
-                    MaxTrianglesPerNode = 2048,
+                    MaximumDepth = 1,
                 },
                 PathFinder = new GroundDescription.PathFinderDescription()
                 {
@@ -358,7 +355,9 @@ namespace TerrainTest
 
             this.load.Text = loadingText;
 
-            #region Positioning
+            #endregion
+
+            #region Model positioning over scenery
 
             Random posRnd = new Random(1);
 
@@ -457,8 +456,6 @@ namespace TerrainTest
             this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.rocks, this.tree1, this.tree2 }, false);
             this.terrain.UpdateInternals();
 
-            this.SceneVolume = this.terrain.GetBoundingSphere();
-
             Vector3 heliPos;
             Triangle heliTri;
             float heliDist;
@@ -477,11 +474,50 @@ namespace TerrainTest
                 this.tank.Manipulator.SetNormal(tankTriangle.Normal);
             }
 
-            #endregion
+            //this.rocks.Active = this.rocks.Visible = false;
+            //this.tree1.Active = this.tree1.Visible = false;
+            //this.tree2.Active = this.tree2.Visible = false;
 
             #endregion
 
-            #region Shadow Map
+            #region Lights
+
+            this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[1].Enabled = false;
+            this.Lights.DirectionalLights[2].Enabled = false;
+            this.Lights.Add(new SceneLightPoint()
+            {
+                Name = "One point",
+                Enabled = true,
+                LightColor = Color.Blue,
+                AmbientIntensity = 1,
+                DiffuseIntensity = 1,
+                Position = Vector3.Zero,
+                Radius = 1f,
+            });
+            this.Lights.Add(new SceneLightPoint()
+            {
+                Name = "Another point",
+                Enabled = true,
+                LightColor = Color.Red,
+                AmbientIntensity = 1,
+                DiffuseIntensity = 1,
+                Position = Vector3.Zero,
+                Radius = 1f,
+            });
+
+            #endregion
+
+            #region Camera
+
+            this.Camera.NearPlaneDistance = 0.1f;
+            this.Camera.FarPlaneDistance = 5000f;
+            this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
+            this.Camera.LookTo(this.helicopter.Manipulator.Position);
+
+            #endregion
+
+            #region DEBUG Shadow Map
 
             int width = 300;
             int height = 300;
@@ -584,32 +620,7 @@ namespace TerrainTest
 
             #endregion
 
-            this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
-            this.Camera.LookTo(this.helicopter.Manipulator.Position);
-
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = false;
-            this.Lights.DirectionalLights[2].Enabled = false;
-            this.Lights.Add(new SceneLightPoint()
-            {
-                Name = "One point",
-                Enabled = true,
-                LightColor = Color.Blue,
-                AmbientIntensity = 1,
-                DiffuseIntensity = 1,
-                Position = Vector3.Zero,
-                Radius = 1f,
-            });
-            this.Lights.Add(new SceneLightPoint()
-            {
-                Name = "Another point",
-                Enabled = true,
-                LightColor = Color.Red,
-                AmbientIntensity = 1,
-                DiffuseIntensity = 1,
-                Position = Vector3.Zero,
-                Radius = 1f,
-            });
+            this.SceneVolume = this.terrain.GetBoundingSphere();
         }
         public override void Dispose()
         {
@@ -927,7 +938,7 @@ namespace TerrainTest
             #region Texts
 
             string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Triangles: {6}", Counters.Buffers, Counters.AllocatedMemoryInBuffers, Counters.BufferReads, Counters.BufferWrites, this.RenderMode, this.shadowResult, Counters.TrianglesPerFrame);
-            string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets);
+            string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets, this.terrain.VisiblePatchesCount);
             this.counters1.Text = txt1;
             this.counters2.Text = txt2;
 

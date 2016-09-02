@@ -181,6 +181,16 @@ namespace Engine
         /// Cached triangle list
         /// </summary>
         private Triangle[] triangleCache = null;
+        /// <summary>
+        /// Gets the visible node count
+        /// </summary>
+        public int VisiblePatchesCount
+        {
+            get
+            {
+                return this.visibleNodes != null ? this.visibleNodes.Length : 0;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -192,10 +202,13 @@ namespace Engine
         public Scenery(Game game, ModelContent content, string contentFolder, GroundDescription description)
             : base(game, description)
         {
+            this.Name = this.Description.Name;
             this.DeferredEnabled = this.Description.DeferredEnabled;
+            this.Opaque = this.Description.Opaque;
+            this.Static = this.Description.Static;
 
             this.triangleCache = content.GetTriangles();
-            this.pickingQuadtree = PickingQuadTree.Build(this.triangleCache, description);
+            this.pickingQuadtree = new PickingQuadTree(this.triangleCache, description.Quadtree.MaximumDepth);
             var nodes = this.pickingQuadtree.GetTailNodes();
             for (int i = 0; i < nodes.Length; i++)
             {
@@ -283,7 +296,7 @@ namespace Engine
             {
                 var triangles = this.GetTriangles(UsageEnum.Picking);
 
-                this.pickingQuadtree = PickingQuadTree.Build(triangles, this.Description);
+                this.pickingQuadtree = new PickingQuadTree(triangles, this.Description.Quadtree.MaximumDepth);
             }
 
             if (this.Description != null && this.Description.PathFinder != null)

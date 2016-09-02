@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -139,7 +140,7 @@ namespace Engine
             this.UpdateContext.EyeTarget = scene.Camera.Direction;
 
             //Update active components
-            List<Drawable> activeComponents = scene.Components.FindAll(c => c.Active);
+            var activeComponents = scene.Components.FindAll(c => c.Active);
             for (int i = 0; i < activeComponents.Count; i++)
             {
                 activeComponents[i].Update(this.UpdateContext);
@@ -173,7 +174,7 @@ namespace Engine
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
             //Draw visible components
-            List<Drawable> visibleComponents = scene.Components.FindAll(c => c.Visible);
+            var visibleComponents = scene.Components.FindAll(c => c.Visible);
             if (visibleComponents.Count > 0)
             {
                 #region Preparation
@@ -238,7 +239,7 @@ namespace Engine
                         #region Static shadow map
 
                         //Draw static components if drop shadow (opaque)
-                        List<Drawable> staticObjs = visibleComponents.FindAll(c => c.Opaque == true && c.Static == true);
+                        var staticObjs = visibleComponents.FindAll(c => c.Opaque == true && c.Static == true);
                         if (staticObjs.Count > 0)
                         {
                             #region Draw
@@ -265,7 +266,7 @@ namespace Engine
                     #region Dynamic shadow map
 
                     //Draw dynamic components if drop shadow (opaque)
-                    List<Drawable> dynamicObjs = visibleComponents.FindAll(c => c.Opaque == true && c.Static == false);
+                    var dynamicObjs = visibleComponents.FindAll(c => c.Opaque == true && c.Static == false);
                     if (dynamicObjs.Count > 0)
                     {
                         #region Cull
@@ -336,7 +337,7 @@ namespace Engine
 #endif
                 #endregion
 
-                List<Drawable> solidComponents = visibleComponents.FindAll(c => c.Opaque);
+                var solidComponents = visibleComponents.FindAll(c => c.Opaque);
                 if (solidComponents.Count > 0)
                 {
                     #region Cull
@@ -379,7 +380,7 @@ namespace Engine
                     #endregion
                 }
 
-                List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.Opaque);
+                var otherComponents = visibleComponents.FindAll(c => !c.Opaque);
                 if (otherComponents.Count > 0)
                 {
                     #region Draw 2D
@@ -487,17 +488,18 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawShadowComponents(GameTime gameTime, DrawContext context, IList<Drawable> components)
+        private void DrawShadowComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
         {
-            for (int i = 0; i < components.Count; i++)
+            var toDraw = components.FindAll(c => !c.Cull);
+            if (toDraw.Count > 0)
             {
-                if (!components[i].Cull)
+                toDraw.ForEach((c) =>
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
                     this.Game.Graphics.SetBlendDefault();
 
-                    components[i].Draw(context);
-                }
+                    c.Draw(context);
+                });
             }
         }
         /// <summary>
@@ -506,14 +508,15 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(GameTime gameTime, DrawContext context, IList<Drawable> components)
+        private void DrawResultComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
         {
-            for (int i = 0; i < components.Count; i++)
+            var toDraw = components.FindAll(c => !c.Cull);
+            if (toDraw.Count > 0)
             {
-                if (!components[i].Cull)
+                toDraw.ForEach((c) =>
                 {
                     this.Game.Graphics.SetRasterizerDefault();
-                    if (components[i].Opaque)
+                    if (c.Opaque)
                     {
                         this.Game.Graphics.SetBlendDefault();
                     }
@@ -522,8 +525,8 @@ namespace Engine
                         this.Game.Graphics.SetBlendTransparent();
                     }
 
-                    components[i].Draw(context);
-                }
+                    c.Draw(context);
+                });
             }
         }
     }

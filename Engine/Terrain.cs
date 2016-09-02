@@ -969,7 +969,7 @@ namespace Engine
 
                         Counters.DrawCallsPerFrame++;
                         Counters.InstancesPerFrame++;
-                        Counters.TrianglesPerFrame += this.indexCount/3;
+                        Counters.TrianglesPerFrame += this.indexCount / 3;
                     }
                 }
             }
@@ -1318,9 +1318,8 @@ namespace Engine
             #endregion
 
             //Initialize patch dictionary
-            this.patches = new TerrainPatchDictionary(
-                game,
-                this.Description.Quadtree.MaxTrianglesPerNode);
+            int trisPerNode = this.heightMap.CalcTrianglesPerNode(this.Description.Quadtree.MaximumDepth);
+            this.patches = new TerrainPatchDictionary(game, trisPerNode);
 
             //Initialize update context
             this.updateContext = new TerrainUpdateContext()
@@ -1407,9 +1406,9 @@ namespace Engine
                 out vertices, out indices);
 
             //Initialize Quadtree
-            this.pickingQuadtree = PickingQuadTree.Build(
+            this.pickingQuadtree = new PickingQuadTree(
                 vertices,
-                this.Description);
+                this.Description.Quadtree.MaximumDepth);
 
             //Intialize Pathfinding Graph
             if (this.Description != null && this.Description.PathFinder != null)

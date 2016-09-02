@@ -8,31 +8,6 @@ namespace Engine.Collections
     public class QuadTree
     {
         /// <summary>
-        /// Build quadtree
-        /// </summary>
-        /// <param name="bbox">Initial bounding box</param>
-        /// <param name="maxDepth">Maximum depth level</param>
-        /// <returns>Returns generated quadtree</returns>
-        public static QuadTree Build(BoundingBox bbox, int maxDepth)
-        {
-            QuadTree quadTree = new QuadTree()
-            {
-                BoundingBox = bbox,
-            };
-
-            quadTree.Root = QuadTreeNode.CreatePartitions(
-                quadTree,
-                null,
-                bbox,
-                maxDepth,
-                0);
-
-            quadTree.Root.ConnectNodes();
-
-            return quadTree;
-        }
-
-        /// <summary>
         /// Root node
         /// </summary>
         public QuadTreeNode Root { get; private set; }
@@ -44,9 +19,20 @@ namespace Engine.Collections
         /// <summary>
         /// Constructor
         /// </summary>
-        public QuadTree()
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="maxDepth">Maximum depth</param>
+        public QuadTree(BoundingBox bbox, int maxDepth)
         {
+            this.BoundingBox = bbox;
 
+            this.Root = QuadTreeNode.CreatePartitions(
+                this,
+                null,
+                bbox,
+                maxDepth,
+                0);
+
+            this.Root.ConnectNodes();
         }
 
         /// <summary>

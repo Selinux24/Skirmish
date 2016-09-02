@@ -157,7 +157,7 @@ namespace HeightmapTest
                 },
                 Quadtree = new GroundDescription.QuadtreeDescription()
                 {
-
+                    MaximumDepth = 3,
                 },
                 PathFinder = new GroundDescription.PathFinderDescription()
                 {

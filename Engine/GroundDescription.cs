@@ -125,42 +125,16 @@ namespace Engine
         public class QuadtreeDescription
         {
             /// <summary>
-            /// Maximum triangle count per node
+            /// Maximum depth
             /// </summary>
-            private int maxTrianglesPerNode = 0;
-
-            /// <summary>
-            /// Maximum triangle count per node
-            /// </summary>
-            public int MaxTrianglesPerNode
-            {
-                get
-                {
-                    return this.maxTrianglesPerNode;
-                }
-                set
-                {
-                    this.maxTrianglesPerNode = value;
-
-                    float v = (float)Math.Pow((Math.Sqrt(value / 2) + 1), 2);
-                    int vi = (int)v;
-
-                    if (v != (float)vi) throw new ArgumentException("Bad triangles per node count.");
-
-                    this.MaxVerticesByNode = vi;
-                }
-            }
-            /// <summary>
-            /// Maximum vertex count per node
-            /// </summary>
-            public int MaxVerticesByNode { get; protected set; }
+            public int MaximumDepth { get; set; }
 
             /// <summary>
             /// Constructor
             /// </summary>
             public QuadtreeDescription()
             {
-                this.MaxTrianglesPerNode = 2048;
+                this.MaximumDepth = 3;
             }
         }
         /// <summary>
@@ -204,6 +178,10 @@ namespace Engine
         public PathFinderDescription PathFinder = null;
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name = null;
+        /// <summary>
         /// Is Opaque
         /// </summary>
         public bool Opaque = true;
@@ -219,5 +197,13 @@ namespace Engine
         /// Delay internal generation
         /// </summary>
         public bool DelayGeneration = false;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public GroundDescription()
+        {
+
+        }
     }
 }

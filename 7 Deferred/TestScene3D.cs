@@ -164,7 +164,7 @@ namespace DeferredTest
                 },
                 Quadtree = new GroundDescription.QuadtreeDescription()
                 {
-                    MaxTrianglesPerNode = 2048,
+                    MaximumDepth = 2,
                 },
                 PathFinder = new GroundDescription.PathFinderDescription()
                 {

@@ -31,7 +31,7 @@ namespace Engine.Collections
         {
             if (parent == null) NodeCount = 0;
 
-            if (treeDepth < maxDepth)
+            if (treeDepth <= maxDepth)
             {
                 QuadTreeNode node = new QuadTreeNode(quadTree, parent)
                 {

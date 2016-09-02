@@ -23,77 +23,79 @@ namespace Engine.Collections
         /// <param name="parent">Parent node</param>
         /// <param name="bbox">Parent bounding box</param>
         /// <param name="triangles">All triangles</param>
+        /// <param name="maxDepth">Maximum depth</param>
         /// <param name="treeDepth">Current depth</param>
-        /// <param name="description">Description</param>
         /// <returns>Returns new node</returns>
         public static PickingQuadTreeNode CreatePartitions(
             PickingQuadTree quadTree, PickingQuadTreeNode parent,
             BoundingBox bbox, Triangle[] triangles,
-            int treeDepth,
-            GroundDescription description)
+            int maxDepth,
+            int treeDepth)
         {
             if (parent == null) NodeCount = 0;
 
-            Triangle[] nodeTriangles = Array.FindAll(triangles, t =>
+            if (treeDepth <= maxDepth)
             {
-                BoundingBox tbox = BoundingBox.FromPoints(t.GetCorners());
-
-                return Collision.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
-            });
-
-            if (nodeTriangles.Length > 0)
-            {
-                PickingQuadTreeNode node = new PickingQuadTreeNode(quadTree, parent)
+                Triangle[] nodeTriangles = Array.FindAll(triangles, t =>
                 {
-                    Id = NodeCount++,
-                    Level = treeDepth,
-                    BoundingBox = bbox,
-                };
+                    BoundingBox tbox = BoundingBox.FromPoints(t.GetCorners());
 
-                bool haltByCount = nodeTriangles.Length < description.Quadtree.MaxTrianglesPerNode;
+                    return Collision.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
+                });
 
-                if (haltByCount)
+                if (nodeTriangles.Length > 0)
                 {
-                    node.Triangles = nodeTriangles;
-                }
-                else
-                {
-                    Vector3 M = bbox.Maximum;
-                    Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
-                    Vector3 m = bbox.Minimum;
-
-                    //-1-1-1   +0+1+0   -->   mmm    cMc
-                    BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-                    //-1-1+0   +0+1+1   -->   mmc    cMM
-                    BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
-                    //+0-1-1   +1+1+0   -->   cmm    MMc
-                    BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
-                    //+0-1+0   +1+1+1   -->   cmc    MMM
-                    BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
-
-                    PickingQuadTreeNode topLeftChild = CreatePartitions(quadTree, node, topLeftBox, triangles, treeDepth + 1, description);
-                    PickingQuadTreeNode topRightChild = CreatePartitions(quadTree, node, topRightBox, triangles, treeDepth + 1, description);
-                    PickingQuadTreeNode bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, triangles, treeDepth + 1, description);
-                    PickingQuadTreeNode bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, triangles, treeDepth + 1, description);
-
-                    List<PickingQuadTreeNode> childList = new List<PickingQuadTreeNode>();
-
-                    if (topLeftChild != null) childList.Add(topLeftChild);
-                    if (topRightChild != null) childList.Add(topRightChild);
-                    if (bottomLeftChild != null) childList.Add(bottomLeftChild);
-                    if (bottomRightChild != null) childList.Add(bottomRightChild);
-
-                    if (childList.Count > 0)
+                    PickingQuadTreeNode node = new PickingQuadTreeNode(quadTree, parent)
                     {
-                        node.Children = childList.ToArray();
-                        node.TopLeftChild = topLeftChild;
-                        node.TopRightChild = topRightChild;
-                        node.BottomLeftChild = bottomLeftChild;
-                        node.BottomRightChild = bottomRightChild;
-                    }
-                }
+                        Id = NodeCount++,
+                        Level = treeDepth,
+                        BoundingBox = bbox,
+                    };
 
-                return node;
+                    bool haltByDepth = treeDepth == maxDepth;
+                    if (haltByDepth)
+                    {
+                        node.Triangles = nodeTriangles;
+                    }
+                    else
+                    {
+                        Vector3 M = bbox.Maximum;
+                        Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
+                        Vector3 m = bbox.Minimum;
+
+                        //-1-1-1   +0+1+0   -->   mmm    cMc
+                        BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+                        //-1-1+0   +0+1+1   -->   mmc    cMM
+                        BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+                        //+0-1-1   +1+1+0   -->   cmm    MMc
+                        BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+                        //+0-1+0   +1+1+1   -->   cmc    MMM
+                        BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+
+                        PickingQuadTreeNode topLeftChild = CreatePartitions(quadTree, node, topLeftBox, triangles, maxDepth, treeDepth + 1);
+                        PickingQuadTreeNode topRightChild = CreatePartitions(quadTree, node, topRightBox, triangles, maxDepth, treeDepth + 1);
+                        PickingQuadTreeNode bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, triangles, maxDepth, treeDepth + 1);
+                        PickingQuadTreeNode bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, triangles, maxDepth, treeDepth + 1);
+
+                        List<PickingQuadTreeNode> childList = new List<PickingQuadTreeNode>();
+
+                        if (topLeftChild != null) childList.Add(topLeftChild);
+                        if (topRightChild != null) childList.Add(topRightChild);
+                        if (bottomLeftChild != null) childList.Add(bottomLeftChild);
+                        if (bottomRightChild != null) childList.Add(bottomRightChild);
+
+                        if (childList.Count > 0)
+                        {
+                            node.Children = childList.ToArray();
+                            node.TopLeftChild = topLeftChild;
+                            node.TopRightChild = topRightChild;
+                            node.BottomLeftChild = bottomLeftChild;
+                            node.BottomRightChild = bottomRightChild;
+                        }
+                    }
+
+                    return node;
+                }
             }
 
             return null;
@@ -105,91 +107,94 @@ namespace Engine.Collections
         /// <param name="parent">Parent node</param>
         /// <param name="bbox">Parent bounding box</param>
         /// <param name="vertices">Vertices contained into parent bounding box</param>
+        /// <param name="maxDepth">Maximum depth</param>
         /// <param name="treeDepth">Current depth</param>
-        /// <param name="description">Description</param>
         /// <returns>Returns new node</returns>
         public static PickingQuadTreeNode CreatePartitions(
             PickingQuadTree quadTree, PickingQuadTreeNode parent,
             BoundingBox bbox, VertexData[] vertices,
-            int treeDepth,
-            GroundDescription description)
+            int maxDepth,
+            int treeDepth)
         {
             if (parent == null) NodeCount = 0;
 
-            VertexData[] nodeVertices = Array.FindAll(vertices, p =>
+            if (treeDepth <= maxDepth)
             {
-                var containment = bbox.Contains(p.Position.Value);
-
-                return containment != ContainmentType.Disjoint;
-            });
-
-            if (nodeVertices.Length > 0)
-            {
-                PickingQuadTreeNode node = new PickingQuadTreeNode(quadTree, parent)
+                VertexData[] nodeVertices = Array.FindAll(vertices, p =>
                 {
-                    Id = NodeCount++,
-                    Level = treeDepth,
-                    BoundingBox = bbox,
-                };
+                    var containment = bbox.Contains(p.Position.Value);
 
-                bool haltByCount = nodeVertices.Length <= description.Quadtree.MaxVerticesByNode;
-                if (haltByCount)
+                    return containment != ContainmentType.Disjoint;
+                });
+
+                if (nodeVertices.Length > 0)
                 {
-                    node.Vertices = nodeVertices;
-
-                    //Get positions
-                    List<Vector3> positions = new List<Vector3>();
-                    Array.ForEach(nodeVertices, v => positions.Add(v.Position.Value));
-
-                    //Triangles per node
-                    int nodeSide = (int)Math.Sqrt(positions.Count) - 1;
-
-                    //Get indices
-                    uint[] indices = GeometryUtil.GenerateIndices(IndexBufferShapeEnum.Full, nodeSide * nodeSide * 2);
-
-                    node.Triangles = Triangle.ComputeTriangleList(
-                        SharpDX.Direct3D.PrimitiveTopology.TriangleList,
-                        positions.ToArray(),
-                        indices);
-                }
-                else
-                {
-                    Vector3 M = bbox.Maximum;
-                    Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
-                    Vector3 m = bbox.Minimum;
-
-                    //-1-1-1   +0+1+0   -->   mmm    cMc
-                    BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-                    //-1-1+0   +0+1+1   -->   mmc    cMM
-                    BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
-                    //+0-1-1   +1+1+0   -->   cmm    MMc
-                    BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
-                    //+0-1+0   +1+1+1   -->   cmc    MMM
-                    BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
-
-                    PickingQuadTreeNode topLeftChild = CreatePartitions(quadTree, node, topLeftBox, nodeVertices, treeDepth + 1, description);
-                    PickingQuadTreeNode topRightChild = CreatePartitions(quadTree, node, topRightBox, nodeVertices, treeDepth + 1, description);
-                    PickingQuadTreeNode bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, nodeVertices, treeDepth + 1, description);
-                    PickingQuadTreeNode bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, nodeVertices, treeDepth + 1, description);
-
-                    List<PickingQuadTreeNode> childList = new List<PickingQuadTreeNode>();
-
-                    if (topLeftChild != null) childList.Add(topLeftChild);
-                    if (topRightChild != null) childList.Add(topRightChild);
-                    if (bottomLeftChild != null) childList.Add(bottomLeftChild);
-                    if (bottomRightChild != null) childList.Add(bottomRightChild);
-
-                    if (childList.Count > 0)
+                    PickingQuadTreeNode node = new PickingQuadTreeNode(quadTree, parent)
                     {
-                        node.Children = childList.ToArray();
-                        node.TopLeftChild = topLeftChild;
-                        node.TopRightChild = topRightChild;
-                        node.BottomLeftChild = bottomLeftChild;
-                        node.BottomRightChild = bottomRightChild;
-                    }
-                }
+                        Id = NodeCount++,
+                        Level = treeDepth,
+                        BoundingBox = bbox,
+                    };
 
-                return node;
+                    bool haltByDepth = treeDepth == maxDepth;
+                    if (haltByDepth)
+                    {
+                        node.Vertices = nodeVertices;
+
+                        //Get positions
+                        List<Vector3> positions = new List<Vector3>();
+                        Array.ForEach(nodeVertices, v => positions.Add(v.Position.Value));
+
+                        //Triangles per node
+                        int nodeSide = (int)Math.Sqrt(positions.Count) - 1;
+
+                        //Get indices
+                        uint[] indices = GeometryUtil.GenerateIndices(IndexBufferShapeEnum.Full, nodeSide * nodeSide * 2);
+
+                        node.Triangles = Triangle.ComputeTriangleList(
+                            SharpDX.Direct3D.PrimitiveTopology.TriangleList,
+                            positions.ToArray(),
+                            indices);
+                    }
+                    else
+                    {
+                        Vector3 M = bbox.Maximum;
+                        Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
+                        Vector3 m = bbox.Minimum;
+
+                        //-1-1-1   +0+1+0   -->   mmm    cMc
+                        BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+                        //-1-1+0   +0+1+1   -->   mmc    cMM
+                        BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+                        //+0-1-1   +1+1+0   -->   cmm    MMc
+                        BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+                        //+0-1+0   +1+1+1   -->   cmc    MMM
+                        BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+
+                        PickingQuadTreeNode topLeftChild = CreatePartitions(quadTree, node, topLeftBox, nodeVertices, maxDepth, treeDepth + 1);
+                        PickingQuadTreeNode topRightChild = CreatePartitions(quadTree, node, topRightBox, nodeVertices, maxDepth, treeDepth + 1);
+                        PickingQuadTreeNode bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, nodeVertices, maxDepth, treeDepth + 1);
+                        PickingQuadTreeNode bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, nodeVertices, maxDepth, treeDepth + 1);
+
+                        List<PickingQuadTreeNode> childList = new List<PickingQuadTreeNode>();
+
+                        if (topLeftChild != null) childList.Add(topLeftChild);
+                        if (topRightChild != null) childList.Add(topRightChild);
+                        if (bottomLeftChild != null) childList.Add(bottomLeftChild);
+                        if (bottomRightChild != null) childList.Add(bottomRightChild);
+
+                        if (childList.Count > 0)
+                        {
+                            node.Children = childList.ToArray();
+                            node.TopLeftChild = topLeftChild;
+                            node.TopRightChild = topRightChild;
+                            node.BottomLeftChild = bottomLeftChild;
+                            node.BottomRightChild = bottomRightChild;
+                        }
+                    }
+
+                    return node;
+                }
             }
 
             return null;

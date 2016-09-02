@@ -287,5 +287,16 @@ namespace Engine.Common
                 }
             }
         }
+        /// <summary>
+        /// Gets the number of triangles of the note for the specified partition level
+        /// </summary>
+        /// <param name="partitionLevel">Partition level</param>
+        /// <returns>Returns the number of triangles of the note for the specified partition level</returns>
+        public int CalcTrianglesPerNode(int partitionLevel)
+        {
+            int side = ((int)Math.Sqrt(this.DataLength) - 1) / ((int)Math.Pow(2, partitionLevel));
+
+            return side * side * 2;
+        }
     }
 }
