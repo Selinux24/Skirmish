@@ -1556,5 +1556,31 @@ namespace Engine
                 this.drawContext.WindStrength = strength;
             }
         }
+
+        /// <summary>
+        /// Gets terrain bounding boxes at specified level
+        /// </summary>
+        /// <param name="level">Level</param>
+        /// <returns>Returns terrain bounding boxes</returns>
+        public BoundingBox[] GetBoundingBoxes(int level = 0)
+        {
+            return this.pickingQuadtree.GetBoundingBoxes(level);
+        }
+        /// <summary>
+        /// Gets the path finder grid nodes
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <returns>Returns the path finder grid nodes</returns>
+        public IGraphNode[] GetNodes(Agent agent)
+        {
+            IGraphNode[] nodes = null;
+
+            if (this.navigationGraph != null)
+            {
+                nodes = this.navigationGraph.GetNodes(agent);
+            }
+
+            return nodes;
+        }
     }
 }

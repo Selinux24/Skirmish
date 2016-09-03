@@ -78,10 +78,10 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 	if (usage == 1.0f || usage == 3.0f)
 	{
 		// BY ALPHA MAP
-		float4 textureColor1 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 0));
-		float4 textureColor2 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 1));
-		float4 textureColor3 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 2));
-		float4 textureColor4 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 3));
+		float4 textureColor1 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 0));
+		float4 textureColor2 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 1));
+		float4 textureColor3 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
+		float4 textureColor4 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 3));
 
 		float4 alphaMap1 = gAlphaTexture.Sample(SamplerLinear, input.tex1);
 
@@ -189,10 +189,10 @@ GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 	[flatten]
 	if (usage == 1.0f || usage == 3.0f)
 	{
-		float4 textureColor1 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 0));
-		float4 textureColor2 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 1));
-		float4 textureColor3 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 2));
-		float4 textureColor4 = gColorTextureArray.Sample(SamplerLinear, float3(input.tex0, 3));
+		float4 textureColor1 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 0));
+		float4 textureColor2 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 1));
+		float4 textureColor3 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
+		float4 textureColor4 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 3));
 		float4 alphaMap1 = gAlphaTexture.Sample(SamplerLinear, input.tex1);
 
 		color1 = lerp(textureColor1, textureColor2, alphaMap1.r);

@@ -35,6 +35,11 @@ namespace HeightmapTest
         private Terrain terrain = null;
         private LineListDrawer bboxesDrawer = null;
 
+        private ModelInstanced torchs = null;
+        private SceneLightPoint[] torchLights = null;
+        private SceneLightSpot spotLight1 = null;
+        private SceneLightSpot spotLight2 = null;
+
         private Model police = null;
 
         public TestScene3D(Game game)
@@ -135,8 +140,6 @@ namespace HeightmapTest
             sw.Stop();
             loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.skydom.Visible = false;
-
             #endregion
 
             #region Terrain
@@ -225,15 +228,96 @@ namespace HeightmapTest
 
             #endregion
 
-            #region Debug
+            #region Torchs
 
-            //BoundingBox[] bboxes = this.terrain.GetBoundingBoxes(5);
-            //Line[] listBoxes = GeometryUtil.CreateWiredBox(bboxes);
+            int torchCount = 50;
+            Random rnd = new Random(1);
 
-            //this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
-            //this.bboxesDrawer.Visible = false;
-            //this.bboxesDrawer.Opaque = false;
-            //this.bboxesDrawer.EnableAlphaBlending = true;
+            var bbox = this.terrain.GetBoundingBox();
+
+            this.torchs = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = "Resources/Scenery/Objects",
+                ModelFileName = "torch.dae",
+                Instances = torchCount,
+                Opaque = true,
+            });
+
+            {
+                Vector3 position;
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(5, 5, out position, out triangle, out distance))
+                {
+                    this.torchs.Instances[0].Manipulator.SetScale(0.2f, 0.60f, 0.2f, true);
+                    this.torchs.Instances[0].Manipulator.SetPosition(position, true);
+                    BoundingBox tbbox = this.torchs.Instances[0].GetBoundingBox();
+
+                    position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
+
+                    this.spotLight1 = new SceneLightSpot(position, Vector3.Normalize(Vector3.One * -1f), 25, 25)
+                    {
+                        Name = "Spot",
+                        LightColor = Color.Red,
+                        AmbientIntensity = 0.2f,
+                        DiffuseIntensity = 10f,
+                        Enabled = true,
+                        CastShadow = false,
+                    };
+
+                    this.spotLight2 = new SceneLightSpot(position, Vector3.Normalize(Vector3.One * -1f), 25, 25)
+                    {
+                        Name = "Spot",
+                        LightColor = Color.Blue,
+                        AmbientIntensity = 0.2f,
+                        DiffuseIntensity = 10f,
+                        Enabled = true,
+                        CastShadow = false,
+                    };
+
+                    this.Lights.Add(this.spotLight1);
+                    this.Lights.Add(this.spotLight2);
+                };
+            }
+
+            this.torchLights = new SceneLightPoint[torchCount - 1];
+            for (int i = 1; i < torchCount; i++)
+            {
+                Color color = new Color(
+                    rnd.NextFloat(0, 1),
+                    rnd.NextFloat(0, 1),
+                    rnd.NextFloat(0, 1),
+                    1);
+
+                Vector3 pos = new Vector3(
+                    rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
+                    0f,
+                    rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
+
+                Triangle t;
+                float d;
+                this.terrain.FindTopGroundPosition(pos.X, pos.Z, out pos, out t, out d);
+
+                this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
+                this.torchs.Instances[i].Manipulator.SetPosition(pos, true);
+                BoundingBox tbbox = this.torchs.Instances[i].GetBoundingBox();
+
+                pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
+
+                this.torchLights[i - 1] = new SceneLightPoint()
+                {
+                    Name = string.Format("Torch {0}", i),
+                    LightColor = color,
+                    AmbientIntensity = 0.1f,
+                    DiffuseIntensity = 5f,
+                    Position = pos,
+                    Radius = 4f,
+                    Enabled = true,
+                    CastShadow = false,
+                };
+
+                this.Lights.Add(this.torchLights[i - 1]);
+            }
 
             #endregion
 
@@ -253,6 +337,18 @@ namespace HeightmapTest
                     this.Camera.LookTo(this.police.Manipulator.Position);
                 };
             }
+
+            #region Debug
+
+            var bboxes = this.terrain.GetBoundingBoxes(5);
+            var listBoxes = Line3.CreateWiredBox(bboxes);
+
+            this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
+            this.bboxesDrawer.Visible = false;
+            this.bboxesDrawer.Opaque = false;
+            this.bboxesDrawer.EnableAlphaBlending = true;
+
+            #endregion
         }
 
         public override void Update(GameTime gameTime)
@@ -364,6 +460,17 @@ namespace HeightmapTest
 
             #endregion
 
+            {
+                float d = 1f;
+                float v = 5f;
+
+                var x = d * (float)Math.Cos(v * this.Game.GameTime.TotalSeconds);
+                var z = d * (float)Math.Sin(v * this.Game.GameTime.TotalSeconds);
+
+                this.spotLight1.Direction = Vector3.Normalize(new Vector3(x, -1, z));
+                this.spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
+            }
+
             #region Debug
 
             if (this.Game.Input.KeyJustReleased(Keys.F1))
@@ -388,7 +495,11 @@ namespace HeightmapTest
                 };
             }
 
-            this.help.Text = string.Format("Wind {0} {1} - Next {2}", this.windDirection, this.windStrength, this.windNextStrength);
+            this.help.Text = string.Format(
+                "{0}. Wind {1} {2} - Next {3}",
+                this.Renderer,
+                this.windDirection, this.windStrength, this.windNextStrength);
+
             this.help2.Text = this.Game.RuntimeText;
         }
     }
