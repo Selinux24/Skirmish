@@ -110,7 +110,7 @@ namespace Engine.Effects
         /// <summary>
         /// Slope ranges effect variable
         /// </summary>
-        private EffectVectorVariable slopeRanges = null;
+        private EffectVectorVariable parameters = null;
 
         /// <summary>
         /// Directional lights
@@ -425,19 +425,15 @@ namespace Engine.Effects
         /// <summary>
         /// Slope ranges
         /// </summary>
-        protected Vector2 SlopeRanges
+        protected Vector4 Parameters
         {
             get
             {
-                Vector4 v = this.slopeRanges.GetFloatVector();
-
-                return new Vector2(v.X, v.Y);
+                return this.parameters.GetFloatVector();
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, 0f, 1f);
-
-                this.slopeRanges.Set(v4);
+                this.parameters.Set(value);
             }
         }
 
@@ -477,7 +473,7 @@ namespace Engine.Effects
             this.shadowMapDynamic = this.Effect.GetVariableByName("gShadowMapDynamic").AsShaderResource();
             this.colorTextures = this.Effect.GetVariableByName("gColorTextureArray").AsShaderResource();
             this.alphaMap = this.Effect.GetVariableByName("gAlphaTexture").AsShaderResource();
-            this.slopeRanges = this.Effect.GetVariableByName("gSlopeRanges").AsVector();
+            this.parameters = this.Effect.GetVariableByName("gParams").AsVector();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -603,28 +599,41 @@ namespace Engine.Effects
         /// Update per model object data
         /// </summary>
         /// <param name="material">Material</param>
+        /// <param name="normalMaps">Normal map</param>
+        /// <param name="useAlphaMap">Use alpha mapping</param>
+        /// <param name="alphaMap">Alpha map</param>
+        /// <param name="colorTextures">Color textures</param>
+        /// <param name="useSlopes">Use slope texturing</param>
         /// <param name="texturesLR">Low resolution textures</param>
         /// <param name="texturesHR">High resolution textures</param>
-        /// <param name="normalMap">Normal map</param>
-        /// <param name="colorTextures">Color textures</param>
-        /// <param name="alphaMap">Alpha map</param>
         /// <param name="slopeRanges">Slope ranges</param>
+        /// <param name="proportion">Lerping proportion</param>
         public void UpdatePerObject(
             Material material,
+            ShaderResourceView normalMaps,
+            bool useAlphaMap,
+            ShaderResourceView alphaMap,
+            ShaderResourceView colorTextures,
+            bool useSlopes,
+            Vector2 slopeRanges,
             ShaderResourceView texturesLR,
             ShaderResourceView texturesHR,
-            ShaderResourceView normalMap,
-            ShaderResourceView colorTextures,
-            ShaderResourceView alphaMap,
-            Vector2 slopeRanges)
+            float proportion)
         {
             this.Material = new BufferMaterials(material);
+            this.NormalMaps = normalMaps;
+
+            this.AlphaMap = alphaMap;
+            this.ColorTextures = colorTextures;
+
             this.TexturesLR = texturesLR;
             this.TexturesHR = texturesHR;
-            this.NormalMaps = normalMap;
-            this.ColorTextures = colorTextures;
-            this.AlphaMap = alphaMap;
-            this.SlopeRanges = slopeRanges;
+
+            float usage = 0f;
+            if (useAlphaMap) usage += 1;
+            if (useSlopes) usage += 2;
+
+            this.Parameters = new Vector4(usage, proportion, slopeRanges.X, slopeRanges.Y);
         }
     }
 }

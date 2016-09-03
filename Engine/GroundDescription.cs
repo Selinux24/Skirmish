@@ -55,6 +55,33 @@ namespace Engine
             /// Content path
             /// </summary>
             public string ContentPath = "Textures";
+
+            /// <summary>
+            /// Normal maps
+            /// </summary>
+            public string[] NormalMaps = null;
+
+            /// <summary>
+            /// Gets or sets if use alpha mapping or not
+            /// </summary>
+            public bool UseAlphaMapping = false;
+            /// <summary>
+            /// Alpha map
+            /// </summary>
+            public string AlphaMap = null;
+            /// <summary>
+            /// Color textures for alpha map
+            /// </summary>
+            public string[] ColorTextures = null;
+
+            /// <summary>
+            /// Gets or sets if use slope texturing or not
+            /// </summary>
+            public bool UseSlopes = false;
+            /// <summary>
+            /// Slope ranges
+            /// </summary>
+            public Vector2 SlopeRanges = Vector2.Zero;
             /// <summary>
             /// High resolution textures
             /// </summary>
@@ -63,22 +90,11 @@ namespace Engine
             /// Low resolution textures
             /// </summary>
             public string[] TexturesLR = null;
+
             /// <summary>
-            /// Normal maps
+            /// Lerping proportion between alpha mapping and slope texturing
             /// </summary>
-            public string[] NormalMaps = null;
-            /// <summary>
-            /// Color textures for alpha map
-            /// </summary>
-            public string[] ColorTextures = null;
-            /// <summary>
-            /// Alpha map
-            /// </summary>
-            public string AlphaMap = null;
-            /// <summary>
-            /// Slope ranges
-            /// </summary>
-            public Vector2 SlopeRanges = Vector2.Zero;
+            public float Proportion = 0f;
         }
         /// <summary>
         /// Vegetation

@@ -49,6 +49,31 @@ namespace Engine
             /// General draw context
             /// </summary>
             public DrawContext BaseContext;
+
+            /// <summary>
+            /// Normal map textures for terrain
+            /// </summary>
+            public ShaderResourceView TerrainNormalMaps;
+            /// <summary>
+            /// Gets or sets whether use alpha mapping or not
+            /// </summary>
+            public bool UseAlphaMap;
+            /// <summary>
+            /// Alpha map texture
+            /// </summary>
+            public ShaderResourceView AlphaMap;
+            /// <summary>
+            /// Color textures for alpha mapping
+            /// </summary>
+            public ShaderResourceView ColorTextures;
+            /// <summary>
+            /// Gets or sets whether use slope texturing or not
+            /// </summary>
+            public bool UseSlopes;
+            /// <summary>
+            /// Slope ranges
+            /// </summary>
+            public Vector2 SlopeRanges;
             /// <summary>
             /// Low resolution textures for terrain
             /// </summary>
@@ -58,17 +83,10 @@ namespace Engine
             /// </summary>
             public ShaderResourceView TerraintexturesHR;
             /// <summary>
-            /// Normal map textures for terrain
+            /// Lerping proportion between alhpa mapping and slope texturing
             /// </summary>
-            public ShaderResourceView TerrainNormalMaps;
+            public float Proportion;
 
-            public ShaderResourceView ColorTextures;
-
-            public ShaderResourceView AlphaMap;
-            /// <summary>
-            /// Slope ranges
-            /// </summary>
-            public Vector2 SlopeRanges;
             /// <summary>
             /// Foliage textures
             /// </summary>
@@ -581,23 +599,29 @@ namespace Engine
                     {
                         effect.UpdatePerObject(
                             Material.Default,
+                            context.TerrainNormalMaps,
+                            context.UseAlphaMap,
+                            context.AlphaMap,
+                            context.ColorTextures,
+                            context.UseSlopes,
+                            context.SlopeRanges,
                             context.TerraintexturesLR,
                             context.TerraintexturesHR,
-                            context.TerrainNormalMaps,
-                            context.ColorTextures,
-                            context.AlphaMap,
-                            context.SlopeRanges);
+                            context.Proportion);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
                         effect.UpdatePerObject(
                             Material.Default,
+                            context.TerrainNormalMaps,
+                            context.UseAlphaMap,
+                            context.AlphaMap,
+                            context.ColorTextures,
+                            context.UseSlopes,
+                            context.SlopeRanges,
                             context.TerraintexturesLR,
                             context.TerraintexturesHR,
-                            context.TerrainNormalMaps,
-                            context.ColorTextures,
-                            context.AlphaMap,
-                            context.SlopeRanges);
+                            context.Proportion);
                     }
 
                     #endregion
@@ -1288,33 +1312,43 @@ namespace Engine
             {
                 string contentPath = Path.Combine(this.Description.ContentPath, this.Description.Textures.ContentPath);
 
-                ImageContent terrainTexturesLR = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(contentPath, this.Description.Textures.TexturesLR),
-                };
-                ImageContent terrainTexturesHR = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(contentPath, this.Description.Textures.TexturesHR),
-                };
                 ImageContent normalMapTextures = new ImageContent()
                 {
                     Streams = ContentManager.FindContent(contentPath, this.Description.Textures.NormalMaps),
                 };
-                ImageContent colors = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(contentPath, this.Description.Textures.ColorTextures),
-                };
-                ImageContent alphaMap = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(contentPath, this.Description.Textures.AlphaMap),
-                };
 
-                this.terrainTexturesLR = game.Graphics.Device.LoadTextureArray(terrainTexturesLR.Streams);
-                this.terrainTexturesHR = game.Graphics.Device.LoadTextureArray(terrainTexturesHR.Streams);
                 this.terrainNormalMaps = game.Graphics.Device.LoadTextureArray(normalMapTextures.Streams);
-                this.colorTextures = game.Graphics.Device.LoadTextureArray(colors.Streams);
-                this.alphaMap = game.Graphics.Device.LoadTexture(alphaMap.Stream);
-                this.slopeRanges = this.Description.Textures.SlopeRanges;
+
+                if (this.Description.Textures.UseSlopes)
+                {
+                    ImageContent terrainTexturesLR = new ImageContent()
+                    {
+                        Streams = ContentManager.FindContent(contentPath, this.Description.Textures.TexturesLR),
+                    };
+                    ImageContent terrainTexturesHR = new ImageContent()
+                    {
+                        Streams = ContentManager.FindContent(contentPath, this.Description.Textures.TexturesHR),
+                    };
+                    
+                    this.terrainTexturesLR = game.Graphics.Device.LoadTextureArray(terrainTexturesLR.Streams);
+                    this.terrainTexturesHR = game.Graphics.Device.LoadTextureArray(terrainTexturesHR.Streams);
+                    this.slopeRanges = this.Description.Textures.SlopeRanges;
+                }
+
+                if (this.Description.Textures.UseAlphaMapping)
+                {
+                    ImageContent colors = new ImageContent()
+                    {
+                        Streams = ContentManager.FindContent(contentPath, this.Description.Textures.ColorTextures),
+                    };
+                    ImageContent alphaMap = new ImageContent()
+                    {
+                        Streams = ContentManager.FindContent(contentPath, this.Description.Textures.AlphaMap),
+                    };
+
+                    this.colorTextures = game.Graphics.Device.LoadTextureArray(colors.Streams);
+                    this.alphaMap = game.Graphics.Device.LoadTexture(alphaMap.Stream);
+                }
             }
 
             #endregion
@@ -1356,12 +1390,19 @@ namespace Engine
             //Initialize draw context
             this.drawContext = new TerrainDrawContext()
             {
+                TerrainNormalMaps = this.terrainNormalMaps,
+
+                UseAlphaMap = this.Description.Textures.UseAlphaMapping,
+                AlphaMap = this.alphaMap,
+                ColorTextures = this.colorTextures,
+
+                UseSlopes = this.Description.Textures.UseSlopes,
+                SlopeRanges = this.slopeRanges,
                 TerraintexturesLR = this.terrainTexturesLR,
                 TerraintexturesHR = this.terrainTexturesHR,
-                TerrainNormalMaps = this.terrainNormalMaps,
-                ColorTextures = this.colorTextures,
-                AlphaMap = this.alphaMap,
-                SlopeRanges = this.slopeRanges,
+
+                Proportion = this.Description.Textures.Proportion,
+
                 FoliageTextureCount = this.foliageTextureCount,
                 FoliageTextures = this.foliageTextures,
                 FoliageEndRadius = this.Description.Vegetation != null ? this.Description.Vegetation.EndRadius : 0,

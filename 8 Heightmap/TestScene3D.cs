@@ -35,6 +35,8 @@ namespace HeightmapTest
         private Terrain terrain = null;
         private LineListDrawer bboxesDrawer = null;
 
+        private Model police = null;
+
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
         {
@@ -142,8 +144,8 @@ namespace HeightmapTest
             sw.Restart();
 
             var pfSettings = NavigationMeshGenerationSettings.Default;
-            pfSettings.CellHeight = 10f;
-            pfSettings.CellSize = 10f;
+            pfSettings.CellHeight = 20f;
+            pfSettings.CellSize = 20f;
 
             this.terrain = this.AddTerrain(new GroundDescription()
             {
@@ -168,12 +170,19 @@ namespace HeightmapTest
                 Textures = new GroundDescription.TexturesDescription()
                 {
                     ContentPath = "Textures",
-                    TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
-                    TexturesHR = new[] { "dirt0hr.dds" },
                     NormalMaps = new[] { "normal001.dds", "normal002.dds" },
-                    ColorTextures = new[] { "dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds" },
+
+                    UseAlphaMapping = false,
                     AlphaMap = "alpha001.dds",
-                    SlopeRanges = new Vector2(0.1f, 0.3f),
+                    ColorTextures = new[] { "dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds" },
+
+                    UseSlopes = true,
+                    SlopeRanges = new Vector2(0.005f, 0.25f),
+                    //TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
+                    TexturesLR = new[] { "am01.jpg", "am02.jpg", "am04.jpg" },
+                    TexturesHR = new[] { "dirt0hr.dds" },
+
+                    Proportion = 0.25f,
                 },
                 //Vegetation = new GroundDescription.VegetationDescription()
                 //{
@@ -194,6 +203,28 @@ namespace HeightmapTest
 
             #endregion
 
+            #region Police
+
+            this.police = this.AddModel(new ModelDescription()
+            {
+                ContentPath = @"Resources/Police",
+                ModelFileName = "police.dae",
+            });
+
+            {
+                Vector3 position;
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(0, 0, out position, out triangle, out distance))
+                {
+                    this.police.Manipulator.SetPosition(position, true);
+                }
+            }
+
+            this.playerHeight.Y = this.police.GetBoundingBox().Maximum.Y - this.police.GetBoundingBox().Minimum.Y;
+
+            #endregion
+
             #region Debug
 
             //BoundingBox[] bboxes = this.terrain.GetBoundingBoxes(5);
@@ -210,19 +241,18 @@ namespace HeightmapTest
 
             #endregion
 
-            Vector3 position;
-            Triangle triangle;
-            float distance;
-            if (this.terrain.FindTopGroundPosition(0, 0, out position, out triangle, out distance))
             {
-                position += this.playerHeight;
+                Vector3 position;
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(10, 10, out position, out triangle, out distance))
+                {
+                    position += this.playerHeight;
 
-                this.Camera.Goto(position);
-                this.Camera.LookTo(position + Vector3.ForwardLH);
-            };
-
-            this.Camera.Goto(new Vector3(444.4133f, 43.37331f, -389.4511f));
-            this.Camera.LookTo(new Vector3(443.4733f, 43.20348f, -389.1551f));
+                    this.Camera.Goto(position);
+                    this.Camera.LookTo(this.police.Manipulator.Position);
+                };
+            }
         }
 
         public override void Update(GameTime gameTime)

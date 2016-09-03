@@ -103,6 +103,7 @@
     <None Include="Blender\Jagdpanther\jagdpanther.blend" />
     <None Include="Blender\Leopard\Leopard.blend" />
     <None Include="Blender\Obelisk\obelisk.blend" />
+    <None Include="Blender\Police\police.blend" />
     <None Include="Blender\Poly\poly.blend" />
     <None Include="Blender\Rocks\rocks.blend" />
     <None Include="Blender\Ruins\ruins.blend" />
@@ -127,6 +128,15 @@
     <None Include="Collada\Jagdpanther\jagdpanther.dae" />
     <None Include="Collada\Leopard\Leopard.dae" />
     <None Include="Collada\Obelisk\obelisk.dae" />
+    <None Include="Blender\Police\LICENSE.txt" />
+    <None Include="Blender\Police\output.png" />
+    <None Include="Blender\Police\overlay.svg" />
+    <None Include="Blender\Police\README.txt" />
+    <None Include="Blender\Police\render.png" />
+    <None Include="Blender\Police\skin.png" />
+    <Content Include="Collada\Police\police.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Collada\Poly\poly.dae" />
     <None Include="Collada\Rocks\rocks.dae" />
     <None Include="Collada\Ruins\ruins.dae" />
@@ -216,6 +226,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Blender\TwoLevels\terrain_nmap.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Collada\Police\skin.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
