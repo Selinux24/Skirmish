@@ -16,7 +16,7 @@ namespace HeightmapTest
         private Random rnd = new Random();
 
         private Vector3 playerHeight = Vector3.UnitY * 5f;
-        private bool playerFlying = false;
+        private bool playerFlying = true;
 
         private Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
@@ -40,7 +40,7 @@ namespace HeightmapTest
         private SceneLightSpot spotLight1 = null;
         private SceneLightSpot spotLight2 = null;
 
-        private Model police = null;
+        private Model soldier = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -206,12 +206,12 @@ namespace HeightmapTest
 
             #endregion
 
-            #region Police
+            #region Soldier
 
-            this.police = this.AddModel(new ModelDescription()
+            this.soldier = this.AddModel(new ModelDescription()
             {
-                ContentPath = @"Resources/Police",
-                ModelFileName = "police.dae",
+                ContentPath = @"Resources/Soldier",
+                ModelFileName = "soldier.dae",
             });
 
             {
@@ -220,11 +220,11 @@ namespace HeightmapTest
                 float distance;
                 if (this.terrain.FindTopGroundPosition(0, 0, out position, out triangle, out distance))
                 {
-                    this.police.Manipulator.SetPosition(position, true);
+                    this.soldier.Manipulator.SetPosition(position, true);
                 }
             }
 
-            this.playerHeight.Y = this.police.GetBoundingBox().Maximum.Y - this.police.GetBoundingBox().Minimum.Y;
+            this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
             #endregion
 
@@ -326,16 +326,8 @@ namespace HeightmapTest
             #endregion
 
             {
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.terrain.FindTopGroundPosition(10, 10, out position, out triangle, out distance))
-                {
-                    position += this.playerHeight;
-
-                    this.Camera.Goto(position);
-                    this.Camera.LookTo(this.police.Manipulator.Position);
-                };
+                this.Camera.Goto(this.soldier.Manipulator.Position + this.playerHeight + new Vector3(4, 0, -8));
+                this.Camera.LookTo(this.soldier.Manipulator.Position + this.playerHeight + new Vector3(0, -3f, 0));
             }
 
             #region Debug

@@ -140,7 +140,9 @@
     <None Include="Collada\Poly\poly.dae" />
     <None Include="Collada\Rocks\rocks.dae" />
     <None Include="Collada\Ruins\ruins.dae" />
-    <None Include="Collada\Soldier\soldier.dae" />
+    <Content Include="Collada\Soldier\soldier.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Collada\Tank\tank.dae" />
     <None Include="Collada\Terrain\terrain.dae" />
     <None Include="Collada\Torch\torch.dae" />
@@ -182,7 +184,9 @@
     <None Include="Collada\Helicopter\Helicopter - green.png" />
     <None Include="Collada\Helicopter\helicopter - tires.png" />
     <None Include="Collada\Poly\Poly.png" />
-    <None Include="Collada\Soldier\soldier.jpg" />
+    <Content Include="Collada\Soldier\soldier.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Collada\Terrain\terrain.png" />
     <None Include="Collada\Terrain\terrain_nmap.png" />
     <None Include="Collada\Tree1\wood.jpg" />

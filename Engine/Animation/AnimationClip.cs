@@ -55,9 +55,13 @@ namespace Engine.Animation
         /// <param name="boneTransforms">Current bone transformations</param>
         public void Interpolate(float time, ref Matrix[] boneTransforms)
         {
+            string desc = "";
+            
             for (int i = 0; i < this.BoneAnimations.Length; i++)
             {
                 boneTransforms[i] = this.BoneAnimations[i].Interpolate(time);
+
+                desc += string.Format("{0,-20} : {1}", this.BoneAnimations[i].Joint, boneTransforms[i].GetDescription()) + Environment.NewLine;
             }
         }
     }

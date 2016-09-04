@@ -195,7 +195,7 @@ namespace Engine
         /// <summary>
         /// Quadtree
         /// </summary>
-        public QuadtreeDescription Quadtree = null;
+        public QuadtreeDescription Quadtree = new QuadtreeDescription();
         /// <summary>
         /// Path finder
         /// </summary>

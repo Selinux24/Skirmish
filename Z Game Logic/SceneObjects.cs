@@ -589,8 +589,6 @@ namespace GameLogic
                         throw new Exception("Bad position");
                     }
 
-                    instance.Manipulator.SetScale(3, true);
-
                     if (teamIndex == 0)
                     {
                         instance.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);

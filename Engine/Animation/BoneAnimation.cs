@@ -8,6 +8,10 @@ namespace Engine.Animation
     public struct BoneAnimation
     {
         /// <summary>
+        /// Joint name
+        /// </summary>
+        public string Joint;
+        /// <summary>
         /// Keyframe list
         /// </summary>
         public Keyframe[] Keyframes;
