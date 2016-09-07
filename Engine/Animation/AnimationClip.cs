@@ -1,5 +1,6 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
+using System.Text;
 
 namespace Engine.Animation
 {
@@ -11,41 +12,35 @@ namespace Engine.Animation
         /// <summary>
         /// Bone animation list
         /// </summary>
-        public BoneAnimation[] BoneAnimations;
-
+        public readonly BoneAnimation[] BoneAnimations;
         /// <summary>
         /// Start time
         /// </summary>
-        public float StartTime
-        {
-            get
-            {
-                float maxValue = float.MaxValue;
-
-                for (int i = 0; i < this.BoneAnimations.Length; i++)
-                {
-                    maxValue = Math.Min(maxValue, this.BoneAnimations[i].StartTime);
-                }
-
-                return maxValue;
-            }
-        }
+        public readonly float StartTime;
         /// <summary>
         /// End time
         /// </summary>
-        public float EndTime
+        public readonly float EndTime;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="boneAnimations">Bone animation list</param>
+        public AnimationClip(BoneAnimation[] boneAnimations)
         {
-            get
+            this.BoneAnimations = boneAnimations;
+
+            float minValue = float.MaxValue;
+            float maxValue = float.MinValue;
+
+            for (int i = 0; i < this.BoneAnimations.Length; i++)
             {
-                float minValue = float.MinValue;
-
-                for (int i = 0; i < this.BoneAnimations.Length; i++)
-                {
-                    minValue = Math.Max(minValue, this.BoneAnimations[i].EndTime);
-                }
-
-                return minValue;
+                minValue = Math.Min(maxValue, this.BoneAnimations[i].StartTime);
+                maxValue = Math.Max(minValue, this.BoneAnimations[i].EndTime);
             }
+
+            this.StartTime = minValue;
+            this.EndTime = maxValue;
         }
 
         /// <summary>
@@ -55,30 +50,23 @@ namespace Engine.Animation
         /// <param name="boneTransforms">Current bone transformations</param>
         public void Interpolate(float time, ref Matrix[] boneTransforms)
         {
-            string desc = "";
-
             for (int i = 0; i < this.BoneAnimations.Length; i++)
             {
                 var curr = this.BoneAnimations[i];
 
-                boneTransforms[i] = Matrix.Transpose(curr.Interpolate(time));
-
-                string d = string.Format("{0,-20} : {1}", curr.Joint, boneTransforms[i].GetDescription()) + Environment.NewLine;
-
-                desc += d;
+                boneTransforms[i] = curr.Interpolate(time);
             }
         }
-
-        public string GetDescription()
+        /// <summary>
+        /// Fills animation clip description into the specified StringBuilder
+        /// </summary>
+        /// <param name="desc">Description to fill</param>
+        public void GetDescription(ref StringBuilder desc)
         {
-            string desc = "";
-
             for (int i = 0; i < this.BoneAnimations.Length; i++)
             {
-                desc += this.BoneAnimations[i].GetDescription() + Environment.NewLine;
+                this.BoneAnimations[i].GetDescription(ref desc);
             }
-
-            return desc;
         }
     }
 }

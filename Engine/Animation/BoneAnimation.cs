@@ -1,5 +1,5 @@
 ﻿using SharpDX;
-using System;
+using System.Text;
 
 namespace Engine.Animation
 {
@@ -74,20 +74,19 @@ namespace Engine.Animation
             return Matrix.Identity;
         }
 
-        public string GetDescription()
+        /// <summary>
+        /// Fills keyframe description into the specified StringBuilder
+        /// </summary>
+        /// <param name="desc">Description to fill</param>
+        public void GetDescription(ref StringBuilder desc)
         {
-            string desc = "==> ";
-
-            desc += this.Joint + Environment.NewLine;
+            desc.AppendLine("==> " + this.Joint);
 
             for (int i = 0; i < this.Keyframes.Length; i++)
             {
-                desc += this.Keyframes[i].GetDescription() + Environment.NewLine;
+                this.Keyframes[i].GetDescription(ref desc);
             }
-
-            return desc;
         }
-
         /// <summary>
         /// Gets text representation
         /// </summary>

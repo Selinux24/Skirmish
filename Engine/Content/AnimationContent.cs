@@ -9,26 +9,9 @@ namespace Engine.Content
     public class AnimationContent
     {
         /// <summary>
-        /// Target
-        /// </summary>
-        public string Target { get; set; }
-        /// <summary>
         /// Joint
         /// </summary>
-        public string Joint
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(this.Target))
-                {
-                    string[] bits = this.Target.Split("/".ToCharArray());
-
-                    return bits != null && bits.Length > 0 ? bits[0] : null;
-                }
-
-                return null;
-            }
-        }
+        public string Joint { get; set; }
         /// <summary>
         /// Keyframe list
         /// </summary>

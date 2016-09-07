@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Engine.Animation
 {
@@ -19,6 +20,10 @@ namespace Engine.Animation
         /// </summary>
         private int[] boneHierarchy = null;
         /// <summary>
+        /// Bone names lists
+        /// </summary>
+        private string[] boneNames = null;
+        /// <summary>
         /// Animation dictionary by bone
         /// </summary>
         private Dictionary<string, AnimationClip> animations = new Dictionary<string, AnimationClip>();
@@ -26,6 +31,10 @@ namespace Engine.Animation
         /// Skinning info by mesh
         /// </summary>
         private Dictionary<string, SkinInfo> meshSkinInfo = new Dictionary<string, SkinInfo>();
+        /// <summary>
+        /// Animation state description, updated every frame
+        /// </summary>
+        private StringBuilder animationStateDescription = new StringBuilder();
 
         /// <summary>
         /// Default clip
@@ -74,12 +83,12 @@ namespace Engine.Animation
         /// <summary>
         /// Generates skinning data from animation info
         /// </summary>
-        /// <param name="skins">Skins</param>
         /// <param name="boneHierarchy">Bone hierarchy</param>
-        /// <param name="boneOffsets">Bone offsets</param>
+        /// <param name="boneNames">Bone name list</param>
         /// <param name="animations">Animation dictionary</param>
+        /// <param name="meshSkinInfo">Skinning data</param>
         /// <returns>Returns skinning data</returns>
-        public static SkinningData Create(int[] boneHierarchy, Dictionary<string, AnimationClip> animations, Dictionary<string, SkinInfo> meshSkinInfo)
+        public static SkinningData Create(int[] boneHierarchy, string[] boneNames, Dictionary<string, AnimationClip> animations, Dictionary<string, SkinInfo> meshSkinInfo)
         {
             List<string> clipNames = new List<string>();
 
@@ -92,6 +101,7 @@ namespace Engine.Animation
             {
                 animations = animations,
                 boneHierarchy = boneHierarchy,
+                boneNames = boneNames,
                 meshSkinInfo = meshSkinInfo,
                 Clips = clipNames.ToArray(),
                 ClipName = animations.Count > 0 ? DefaultClip : null,
@@ -111,7 +121,8 @@ namespace Engine.Animation
                 AnimationClip clip = this[this.ClipName];
                 float endTime = clip.EndTime;
 
-                string desc = clip.GetDescription();
+                this.animationStateDescription.Clear();
+                clip.GetDescription(ref this.animationStateDescription);
 
                 if (this.Time == endTime && this.Loop == false)
                 {
@@ -124,7 +135,8 @@ namespace Engine.Animation
 
                     foreach (SkinInfo sk in this.meshSkinInfo.Values)
                     {
-                        sk.Update(clip, this.Time, this.boneHierarchy);
+                        sk.Update(clip, this.Time, this.boneHierarchy, this.boneNames);
+                        sk.GetDescription(ref this.animationStateDescription);
                     }
 
                     if (this.Time > endTime)
@@ -170,37 +182,33 @@ namespace Engine.Animation
         /// Gest animation state
         /// </summary>
         /// <returns>Returns animation state in current time</returns>
-        public virtual string GetState()
+        public string GetState()
         {
-            string desc = "";
-
-            foreach (string key in this.meshSkinInfo.Keys)
-            {
-                SkinInfo info = this.meshSkinInfo[key];
-
-                desc += key + Environment.NewLine;
-                desc += string.Format("Offset: {0}", info.GetState()) + Environment.NewLine;
-            }
-
-            return desc;
+            return this.animationStateDescription.ToString();
         }
         /// <summary>
         /// Gest animation state
         /// </summary>
         /// <param name="time">Time</param>
         /// <returns>Returns animation state in specified time</returns>
-        public virtual string GetState(float time)
+        public string GetState(float time)
         {
-            foreach (SkinInfo sk in this.meshSkinInfo.Values)
+            StringBuilder desc = new StringBuilder();
+
+            if (this.ClipName != null)
             {
-                sk.Update(this[this.ClipName], time, this.boneHierarchy);
+                AnimationClip clip = this[this.ClipName];
+
+                clip.GetDescription(ref desc);
+
+                foreach (SkinInfo sk in this.meshSkinInfo.Values)
+                {
+                    sk.Update(clip, time, this.boneHierarchy, this.boneNames);
+                    sk.GetDescription(ref desc);
+                }
             }
 
-            string desc = string.Format("Time: {0}", time) + Environment.NewLine + Environment.NewLine;
-
-            desc += this.GetState();
-
-            return desc;
+            return desc.ToString();
         }
         /// <summary>
         /// Gets text representation of skinning data instance

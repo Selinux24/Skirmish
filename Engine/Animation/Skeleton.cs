@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Engine.Animation
 {
@@ -20,7 +21,11 @@ namespace Engine.Animation
         /// Joint names
         /// </summary>
         public string[] JointNames { get; private set; }
-
+        /// <summary>
+        /// Gets joint by name
+        /// </summary>
+        /// <param name="jointName">Joint name</param>
+        /// <returns>Returns the joint with the specified name</returns>
         public Joint this[string jointName]
         {
             get
@@ -77,7 +82,25 @@ namespace Engine.Animation
             this.JointNames = names.ToArray();
         }
 
+        /// <summary>
+        /// Fills skeleton description into the specified StringBuilder
+        /// </summary>
+        /// <param name="desc">Description to fill</param>
+        public void GetDescription(ref StringBuilder desc)
+        {
+            for (int i = 0; i < this.JointNames.Length; i++)
+            {
+                Joint j = this[this.JointNames[i]];
 
+                j.GetDescription(ref desc);
+            }
+        }
+        /// <summary>
+        /// Finds a joint by name recursively
+        /// </summary>
+        /// <param name="joint">Joint</param>
+        /// <param name="jointName">Joint name</param>
+        /// <returns>Returns the joint with the specified name</returns>
         private Joint FindJoint(Joint joint, string jointName)
         {
             if (joint.Name == jointName) return joint;

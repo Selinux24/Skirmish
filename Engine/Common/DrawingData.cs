@@ -254,7 +254,10 @@ namespace Engine.Common
             {
                 List<BoneAnimation> boneAnimations = new List<BoneAnimation>();
 
-                foreach (string jointName in modelContent.SkinningInfo.Skeleton.JointNames)
+                string[] jointNames = modelContent.SkinningInfo.Skeleton.JointNames;
+                int[] jointIndices = modelContent.SkinningInfo.Skeleton.JointIndices;
+
+                foreach (string jointName in jointNames)
                 {
                     //Find keyframes for current bone
                     var c = FindJointKeyframes(jointName, modelContent.Animations);
@@ -273,12 +276,7 @@ namespace Engine.Common
 
                 if (boneAnimations.Count > 0)
                 {
-                    animations.Add(
-                        SkinningData.DefaultClip,
-                        new AnimationClip
-                        {
-                            BoneAnimations = boneAnimations.ToArray()
-                        });
+                    animations.Add(SkinningData.DefaultClip, new AnimationClip(boneAnimations.ToArray()));
                 }
 
                 var skinInfo = new Dictionary<string, SkinInfo>();
@@ -286,9 +284,7 @@ namespace Engine.Common
                 foreach (string controllerName in modelContent.SkinningInfo.Controller)
                 {
                     var controller = modelContent.Controllers[controllerName];
-                    var jointNames = modelContent.SkinningInfo.Skeleton.JointNames;
                     var boneOffsets = new Matrix[jointNames.Length];
-                    var ibmList = new Matrix[jointNames.Length];
 
                     for (int i = 0; i < jointNames.Length; i++)
                     {
@@ -300,15 +296,15 @@ namespace Engine.Common
                         }
 
                         //Bind shape Matrix * Inverse shape Matrix -> Rest Position
-                        boneOffsets[i] = controller.BindShapeMatrix;
-                        ibmList[i] = ibm;
+                        boneOffsets[i] = ibm * controller.BindShapeMatrix;
                     }
 
-                    skinInfo.Add(controller.Skin, new SkinInfo(jointNames, boneOffsets, ibmList));
+                    skinInfo.Add(controller.Skin, new SkinInfo(jointNames, boneOffsets));
                 }
 
                 drw.SkinningData = SkinningData.Create(
-                    modelContent.SkinningInfo.Skeleton.JointIndices,
+                    jointIndices,
+                    jointNames,
                     animations,
                     skinInfo);
             }
@@ -485,22 +481,6 @@ namespace Engine.Common
             {
                 return triangles;
             }
-        }
-    }
-
-    public class DrawingDataDescription
-    {
-        public bool Instanced = false;
-        public int Instances = 0;
-        public bool LoadAnimation = false;
-        public int TextureCount = 0;
-        public bool LoadNormalMaps = false;
-        public bool DynamicBuffers = false;
-        public BoundingBox? Constraint = null;
-
-        public DrawingDataDescription()
-        {
-
         }
     }
 }

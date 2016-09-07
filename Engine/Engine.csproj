@@ -319,6 +319,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Common\DrawingData.cs" />
+    <Compile Include="Common\DrawingDataDescription.cs" />
     <Compile Include="Common\LODDictionary.cs" />
     <Compile Include="Common\MaterialDictionary.cs" />
     <Compile Include="Common\MeshDictionary.cs" />
