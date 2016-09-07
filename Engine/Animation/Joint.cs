@@ -9,13 +9,13 @@ namespace Engine.Animation
     public class Joint
     {
         /// <summary>
-        /// World matrix
+        /// Global transform matrix
         /// </summary>
-        private Matrix world;
+        private Matrix globalTransform;
         /// <summary>
-        /// Local matrix
+        /// Local transform matrix
         /// </summary>
-        private Matrix local;
+        private Matrix localTransform;
 
         /// <summary>
         /// Name
@@ -30,26 +30,26 @@ namespace Engine.Animation
         /// </summary>
         public Joint[] Childs { get; set; }
         /// <summary>
-        /// World matrix
+        /// Global transform matrix
         /// </summary>
-        public Matrix World
+        public Matrix GlobalTransform
         {
             get
             {
-                return this.world;
+                return this.globalTransform;
             }
             set
             {
-                this.world = value;
+                this.globalTransform = value;
 
                 Vector3 scale;
                 Quaternion rotation;
                 Vector3 translation;
-                if (this.world.Decompose(out scale, out rotation, out translation))
+                if (this.globalTransform.Decompose(out scale, out rotation, out translation))
                 {
-                    this.WorldScale = scale;
-                    this.WorldRotation = rotation;
-                    this.WorldTranslation = translation;
+                    this.GlobalTransformScale = scale;
+                    this.GlobalTransformRotation = rotation;
+                    this.GlobalTransformTranslation = translation;
                 }
                 else
                 {
@@ -58,38 +58,38 @@ namespace Engine.Animation
             }
         }
         /// <summary>
-        /// World translation
+        /// Global transform translation
         /// </summary>
-        public Vector3 WorldTranslation { get; private set; }
+        public Vector3 GlobalTransformTranslation { get; private set; }
         /// <summary>
-        /// World rotation
+        /// Global transform rotation
         /// </summary>
-        public Quaternion WorldRotation { get; private set; }
+        public Quaternion GlobalTransformRotation { get; private set; }
         /// <summary>
-        /// World scale
+        /// Global transform scale
         /// </summary>
-        public Vector3 WorldScale { get; private set; }
+        public Vector3 GlobalTransformScale { get; private set; }
         /// <summary>
-        /// Local matrix
+        /// Local transform matrix
         /// </summary>
-        public Matrix Local
+        public Matrix LocalTransform
         {
             get
             {
-                return this.local;
+                return this.localTransform;
             }
             set
             {
-                this.local = value;
+                this.localTransform = value;
 
                 Vector3 scale;
                 Quaternion rotation;
                 Vector3 translation;
-                if (this.local.Decompose(out scale, out rotation, out translation))
+                if (this.localTransform.Decompose(out scale, out rotation, out translation))
                 {
-                    this.LocalScale = scale;
-                    this.LocalRotation = rotation;
-                    this.LocalTranslation = translation;
+                    this.LocalTransformScale = scale;
+                    this.LocalTransformRotation = rotation;
+                    this.LocalTransformTranslation = translation;
                 }
                 else
                 {
@@ -98,25 +98,25 @@ namespace Engine.Animation
             }
         }
         /// <summary>
-        /// Local translation
+        /// Local transform translation
         /// </summary>
-        public Vector3 LocalTranslation { get; private set; }
+        public Vector3 LocalTransformTranslation { get; private set; }
         /// <summary>
-        /// Local rotation
+        /// Local transform rotation
         /// </summary>
-        public Quaternion LocalRotation { get; private set; }
+        public Quaternion LocalTransformRotation { get; private set; }
         /// <summary>
-        /// Local scale
+        /// Local transform scale
         /// </summary>
-        public Vector3 LocalScale { get; private set; }
+        public Vector3 LocalTransformScale { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         public Joint()
         {
-            this.World = Matrix.Identity;
-            this.Local = Matrix.Identity;
+            this.GlobalTransform = Matrix.Identity;
+            this.LocalTransform = Matrix.Identity;
         }
 
         /// <summary>

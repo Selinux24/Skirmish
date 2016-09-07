@@ -28,7 +28,7 @@ namespace Engine.Animation
             }
             set
             {
-                Matrix trn = value;
+                Matrix trn = Matrix.Transpose(value);
 
                 Vector3 location;
                 Quaternion rotation;
@@ -78,13 +78,22 @@ namespace Engine.Animation
                 Matrix.Translation(Vector3.Lerp(from.Translation, to.Translation, amount));
         }
 
+        public string GetDescription()
+        {
+            return string.Format("Time: {0,-12}: S:{1,-30} T:{2,-30} R:{3,-30}",
+                this.Time,
+                this.Scale.GetDescription(Vector3.One, "None"),
+                this.Translation.GetDescription(Vector3.Zero, "Zero"),
+                this.Rotation.GetDescription());
+        }
+
         /// <summary>
         /// Gets text representation
         /// </summary>
         /// <returns>Return text representation</returns>
         public override string ToString()
         {
-            return string.Format("Time: {0}; {1}", this.Time, this.Transform.GetDescription());
+            return string.Format("Time: {0,-12}: {1}", this.Time, this.Transform.GetDescription());
         }
     }
 }

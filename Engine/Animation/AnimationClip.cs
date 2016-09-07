@@ -56,13 +56,29 @@ namespace Engine.Animation
         public void Interpolate(float time, ref Matrix[] boneTransforms)
         {
             string desc = "";
-            
+
             for (int i = 0; i < this.BoneAnimations.Length; i++)
             {
-                boneTransforms[i] = this.BoneAnimations[i].Interpolate(time);
+                var curr = this.BoneAnimations[i];
 
-                desc += string.Format("{0,-20} : {1}", this.BoneAnimations[i].Joint, boneTransforms[i].GetDescription()) + Environment.NewLine;
+                boneTransforms[i] = Matrix.Transpose(curr.Interpolate(time));
+
+                string d = string.Format("{0,-20} : {1}", curr.Joint, boneTransforms[i].GetDescription()) + Environment.NewLine;
+
+                desc += d;
             }
+        }
+
+        public string GetDescription()
+        {
+            string desc = "";
+
+            for (int i = 0; i < this.BoneAnimations.Length; i++)
+            {
+                desc += this.BoneAnimations[i].GetDescription() + Environment.NewLine;
+            }
+
+            return desc;
         }
     }
 }

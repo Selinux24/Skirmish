@@ -72,7 +72,6 @@ namespace Engine.Content
 
                     ProcessLibraryGeometries(dae, modelContent, conversion);
                     ProcessLibraryControllers(dae, modelContent, conversion);
-                    ProcessLibraryAnimations(dae, modelContent, conversion);
 
                     #endregion
 
@@ -117,6 +116,8 @@ namespace Engine.Content
 
                                         if (node.Nodes != null && node.Nodes.Length > 0)
                                         {
+                                            DEBUGSTR = "";
+
                                             Joint root = ProcessJoints(null, node.Nodes[0], conversion);
 
                                             skeleton = new Skeleton(root);
@@ -184,6 +185,12 @@ namespace Engine.Content
                             };
                         }
                     }
+
+                    #endregion
+
+                    #region Animations
+
+                    ProcessLibraryAnimations(dae, modelContent, conversion);
 
                     #endregion
 
@@ -379,10 +386,25 @@ namespace Engine.Content
                 {
                     Animation animation = dae.LibraryAnimations[i];
 
-                    AnimationContent[] info = ProcessAnimation(animation, conversion);
+                    AnimationContent[] info = ProcessAnimation(modelContent, animation, conversion);
                     if (info != null && info.Length > 0)
                     {
                         modelContent.Animations[animation.Id] = info;
+
+                        foreach (var a in info)
+                        {
+                            DEBUGSTR += a.Joint + "==>" + Environment.NewLine;
+                            foreach (var k in a.Keyframes)
+                            {
+                                DEBUGSTR += string.Format(
+                                    "Time:{0,-15}  |  [S] X:{1:0.000} Y:{2:0.000} Z:{3:0.000}   |   [T]  X:{4:0.000} Y:{5:0.000} Z:{6:0.000}  |  [R] X:{7:0.000} Y:{8:0.000} Z:{9:0.000} W:{10:0.00}",
+                                    k.Time,
+                                    k.Scale.X, k.Scale.Y, k.Scale.Z,
+                                    k.Translation.X, k.Translation.Y, k.Translation.Z,
+                                    k.Rotation.X, k.Rotation.Y, k.Rotation.Z, k.Rotation.W) + Environment.NewLine;
+                            }
+                            DEBUGSTR += Environment.NewLine;
+                        }
                     }
                 }
             }
@@ -602,10 +624,10 @@ namespace Engine.Content
                         {
                             int tIndex = polyList.P[index + texCoordInput.Offset];
                             Vector2 tex = texCoords[tIndex];
-                            
+
                             //Invert Vertical coordinate
                             tex.Y = -tex.Y;
-                            
+
                             vert.Texture0 = tex;
                         }
 
@@ -728,7 +750,8 @@ namespace Engine.Content
         {
             ControllerContent res = new ControllerContent();
 
-            res.BindShapeMatrix = conversion.ChangeGeometryOrientation(Matrix.Transpose(skin.BindShapeMatrix.ToMatrix()));
+            //res.BindShapeMatrix = conversion.ChangeGeometryOrientation(Matrix.Transpose(skin.BindShapeMatrix.ToMatrix()));
+            res.BindShapeMatrix = skin.BindShapeMatrix.ToMatrix();
 
             res.Skin = skin.SourceUri.Replace("#", "");
             res.Armature = name;
@@ -840,7 +863,8 @@ namespace Engine.Content
             {
                 for (int i = 0; i < joints.Length; i++)
                 {
-                    ibmList.Add(joints[i], Matrix.Transpose(conversion.ChangeGeometryOrientation(mats[i])));
+                    //ibmList.Add(joints[i], Matrix.Transpose(conversion.ChangeGeometryOrientation(mats[i])));
+                    ibmList.Add(joints[i], mats[i]);
                 }
             }
 
@@ -858,12 +882,16 @@ namespace Engine.Content
         /// <param name="animation">Animation information</param>
         /// <param name="conversion">Conversion</param>
         /// <returns>Retuns animation content list</returns>
-        private static AnimationContent[] ProcessAnimation(Animation animation, LoaderConversion conversion)
+        private static AnimationContent[] ProcessAnimation(ModelContent modelContent, Animation animation, LoaderConversion conversion)
         {
             List<AnimationContent> res = new List<AnimationContent>();
 
             foreach (Channel channel in animation.Channels)
             {
+                //string jointName = channel.Target.Split("/".ToCharArray())[0];
+                //Joint j = modelContent.SkinningInfo.Skeleton[jointName];
+                //if (j == null) continue;
+
                 foreach (Sampler sampler in animation.Samplers)
                 {
                     int inputOffset = -1;
@@ -908,7 +936,8 @@ namespace Engine.Content
                         Keyframe keyframe = new Keyframe()
                         {
                             Time = inputs[i],
-                            Transform = Matrix.Transpose(conversion.ChangeGeometryOrientation(outputs[i])),
+                            //Transform = Matrix.Transpose(conversion.ChangeGeometryOrientation(outputs[i])),
+                            Transform = outputs[i],
                             Interpolation = interpolations[i],
                         };
 
@@ -932,6 +961,8 @@ namespace Engine.Content
 
         #region Armatures
 
+        static string DEBUGSTR = null;
+
         /// <summary>
         /// Process skeleton
         /// </summary>
@@ -941,16 +972,29 @@ namespace Engine.Content
         /// <returns>Return skeleton joint hierarchy</returns>
         private static Joint ProcessJoints(Joint parent, Node node, LoaderConversion conversion)
         {
-            Matrix parentMatrix = (parent != null ? parent.Local : Matrix.Identity);
-            Matrix nodeMatrix = Matrix.Transpose(conversion.ChangeGeometryOrientation(node.ReadMatrix()));
+            //Matrix w = new Matrix(
+            //    1, 0, 0, 0,
+            //    0, 0, 1, 0,
+            //    0, -1, 0, 0,
+            //    0, 0, 0, 1);
+            Matrix w = Matrix.Identity;
+
+            //Matrix nodeMatrix = Matrix.Transpose(conversion.ChangeGeometryOrientation(node.ReadMatrix()));
+            Matrix localTransform = node.ReadMatrix();
 
             Joint jt = new Joint()
             {
                 Name = node.SId,
                 Parent = parent,
-                World = nodeMatrix,
-                Local = nodeMatrix * parentMatrix,
+                LocalTransform = localTransform,
+                GlobalTransform = parent != null ? parent.GlobalTransform * localTransform : w * localTransform,
             };
+
+            DEBUGSTR += node.Name + "==>" + Environment.NewLine;
+            DEBUGSTR += "LOCAL" + Environment.NewLine;
+            DEBUGSTR += jt.LocalTransform.Debug() + Environment.NewLine;
+            DEBUGSTR += "GLOBAL" + Environment.NewLine;
+            DEBUGSTR += jt.GlobalTransform.Debug() + Environment.NewLine;
 
             if (node.Nodes != null && node.Nodes.Length > 0)
             {

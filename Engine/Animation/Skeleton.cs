@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Engine.Animation
 {
@@ -19,6 +20,19 @@ namespace Engine.Animation
         /// Joint names
         /// </summary>
         public string[] JointNames { get; private set; }
+
+        public Joint this[string jointName]
+        {
+            get
+            {
+                if (Array.Exists(this.JointNames, j => j == jointName))
+                {
+                    return this.FindJoint(this.Root, jointName);
+                }
+
+                return null;
+            }
+        }
 
         /// <summary>
         /// Flatten skeleton
@@ -61,6 +75,22 @@ namespace Engine.Animation
             this.Root = root;
             this.JointIndices = indices.ToArray();
             this.JointNames = names.ToArray();
+        }
+
+
+        private Joint FindJoint(Joint joint, string jointName)
+        {
+            if (joint.Name == jointName) return joint;
+
+            if (joint.Childs == null || joint.Childs.Length == 0) return null;
+
+            for (int i = 0; i < joint.Childs.Length; i++)
+            {
+                var j = FindJoint(joint.Childs[i], jointName);
+                if (j != null) return j;
+            }
+
+            return null;
         }
     }
 }

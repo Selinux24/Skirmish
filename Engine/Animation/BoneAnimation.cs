@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.Animation
 {
@@ -71,6 +72,20 @@ namespace Engine.Animation
             }
 
             return Matrix.Identity;
+        }
+
+        public string GetDescription()
+        {
+            string desc = "==> ";
+
+            desc += this.Joint + Environment.NewLine;
+
+            for (int i = 0; i < this.Keyframes.Length; i++)
+            {
+                desc += this.Keyframes[i].GetDescription() + Environment.NewLine;
+            }
+
+            return desc;
         }
 
         /// <summary>

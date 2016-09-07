@@ -111,6 +111,8 @@ namespace Engine.Animation
                 AnimationClip clip = this[this.ClipName];
                 float endTime = clip.EndTime;
 
+                string desc = clip.GetDescription();
+
                 if (this.Time == endTime && this.Loop == false)
                 {
                     //Do Nothing

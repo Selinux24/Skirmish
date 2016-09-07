@@ -292,8 +292,7 @@
     </Content>
     <Content Include="Resources\Soldier\soldier.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>
-      </SubType>
+      <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>
