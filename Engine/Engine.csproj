@@ -146,6 +146,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Animation\Animator.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\SkinInfo.cs" />
     <Compile Include="AttachedModelUsesEnum.cs" />
