@@ -123,6 +123,7 @@ namespace Engine.Animation
 
                 this.animationStateDescription.Clear();
                 clip.GetDescription(ref this.animationStateDescription);
+                this.animationStateDescription.AppendLine();
 
                 if (this.Time == endTime && this.Loop == false)
                 {
@@ -131,13 +132,16 @@ namespace Engine.Animation
                 }
                 else
                 {
-                    this.Time += gameTime.ElapsedSeconds * this.AnimationVelocity;
-
                     foreach (SkinInfo sk in this.meshSkinInfo.Values)
                     {
+                        this.animationStateDescription.AppendFormat("Updated at time {0}", this.Time);
+                        this.animationStateDescription.AppendLine();
                         sk.Update(clip, this.Time, this.boneHierarchy, this.boneNames);
                         sk.GetDescription(ref this.animationStateDescription);
+                        this.animationStateDescription.AppendLine();
                     }
+
+                    //this.Time += gameTime.ElapsedSeconds * this.AnimationVelocity;
 
                     if (this.Time > endTime)
                     {
@@ -154,6 +158,8 @@ namespace Engine.Animation
                     }
                 }
             }
+
+            string state = this.animationStateDescription.ToString();
         }
         /// <summary>
         /// Sets clip to play
@@ -248,6 +254,24 @@ namespace Engine.Animation
             }
 
             return desc;
+        }
+
+        public void Test(float time, string meshName, out Matrix[] trns, out string[] jointNames)
+        {
+            trns = null;
+            jointNames = null;
+
+            if (this.ClipName != null)
+            {
+                AnimationClip clip = this[this.ClipName];
+
+                SkinInfo sk = this.meshSkinInfo[meshName];
+             
+                sk.Update(clip, time, this.boneHierarchy, this.boneNames);
+
+                trns = this.GetFinalTransforms(meshName);
+                jointNames = this.boneNames;
+            }
         }
     }
 }

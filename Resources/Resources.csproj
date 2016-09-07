@@ -148,7 +148,9 @@
     </Content>
     <None Include="Collada\Tank\tank.dae" />
     <None Include="Collada\Terrain\terrain.dae" />
-    <None Include="Collada\Torch\torch.dae" />
+    <Content Include="Collada\Torch\torch.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Collada\Tree1\tree1_1.dae" />
     <None Include="Collada\Tree1\tree1_2.dae" />
     <None Include="Collada\Tree2\tree2.dae" />

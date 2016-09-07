@@ -61,15 +61,12 @@ namespace Engine.Animation
                 Matrix toParent = toParentTransforms[i];
                 Matrix toRoot = toRootTransforms[parentIndex];
 
-                toRootTransforms[i] = toRoot * toParent;
+                toRootTransforms[i] = toParent * toRoot;
             }
 
             for (int i = 0; i < numBones; i++)
             {
-                Matrix currentGlobalTransform = toRootTransforms[i];
-                Matrix offset = offsets[i];
-
-                finalTransforms[i] = currentGlobalTransform * offset;
+                finalTransforms[i] = toRootTransforms[i] * offsets[i];
             }
         }
 

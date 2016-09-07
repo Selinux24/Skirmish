@@ -416,6 +416,58 @@ namespace Engine
             return this.orientedBoundingBox;
         }
 
+
+        public void GetFinalTransforms(float time, string meshName, out Matrix[] trns, out string[] jointNames)
+        {
+            trns = null;
+            jointNames = null;
+
+            if (this.DrawingData != null && this.DrawingData.SkinningData != null)
+            {
+                this.DrawingData.SkinningData.Test(time, meshName, out trns, out jointNames);
+            }
+        }
+
+        public Triangle[] GetPoseAtTime(float time, string meshName, Matrix trn)
+        {
+            var sm = this.ModelContent.Geometry["soldier-mesh"]["soldier-material"];
+            var cr = this.ModelContent.Controllers["Armature_soldier-skin"];
+            var verts = sm.Vertices;
+            var wg = cr.Weights;
+            Matrix[] mt;
+            string[] bones;
+            this.GetFinalTransforms(0, "soldier-mesh", out mt, out bones);
+
+            Triangle[] tris = new Triangle[verts.Length / 3];
+
+            int triIndex = 0;
+            for (int i = 0; i < verts.Length; i += 3)
+            {
+                Vector3 p0 = ApplyWeight(trn, verts, wg, mt, bones, i + 0);
+                Vector3 p1 = ApplyWeight(trn, verts, wg, mt, bones, i + 1);
+                Vector3 p2 = ApplyWeight(trn, verts, wg, mt, bones, i + 2);
+
+                tris[triIndex++] = new Triangle(p0, p1, p2);
+            }
+
+            return tris;
+        }
+
+        private static Vector3 ApplyWeight(Matrix baseTrn, VertexData[] verts, Weight[] wgs, Matrix[] mts, string[] bones, int i)
+        {
+            Vector3 p = verts[i].Position.Value;
+            var wg = Array.FindAll(wgs, w => w.VertexIndex == verts[i].VertexIndex);
+
+            Vector3 t = Vector3.Zero;
+            for (int w = 0; w < wg.Length; w++)
+            {
+                int index = Array.IndexOf(bones, wg[w].Joint);
+                t += (Vector3.TransformCoordinate(p, mts[index]) * wg[w].WeightValue);
+            }
+
+            return Vector3.TransformCoordinate(t, baseTrn);
+        }
+
         /// <summary>
         /// Gets nearest picking position of giving ray
         /// </summary>

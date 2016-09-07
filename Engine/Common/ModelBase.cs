@@ -26,6 +26,8 @@ namespace Engine.Common
         /// </summary>
         public int TextureCount { get; private set; }
 
+        public ModelContent ModelContent = null;
+
         /// <summary>
         /// Base model
         /// </summary>
@@ -55,6 +57,8 @@ namespace Engine.Common
 
             this.defaultLevelOfDetail = LevelOfDetailEnum.High;
             this.LevelOfDetail = LevelOfDetailEnum.High;
+
+            this.ModelContent = content;
         }
         /// <summary>
         /// Base model

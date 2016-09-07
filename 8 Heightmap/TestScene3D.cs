@@ -1,8 +1,8 @@
-﻿using System;
-using System.Diagnostics;
-using Engine;
+﻿using Engine;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
+using System;
+using System.Diagnostics;
 
 namespace HeightmapTest
 {
@@ -41,6 +41,7 @@ namespace HeightmapTest
         private SceneLightSpot spotLight2 = null;
 
         private Model soldier = null;
+        private TriangleListDrawer soldierTris = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -226,6 +227,10 @@ namespace HeightmapTest
 
             this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
+            Matrix baseTrn = Matrix.Translation(this.soldier.Manipulator.Position + (Vector3.Left * 5));
+            Triangle[] tris = this.soldier.GetPoseAtTime(0, "soldier-mesh", baseTrn);
+            this.soldierTris = this.AddTriangleListDrawer(tris, new Color(Color.Red.ToColor3(), 0.6f));
+
             #endregion
 
             #region Torchs
@@ -249,7 +254,7 @@ namespace HeightmapTest
                 float distance;
                 if (this.terrain.FindTopGroundPosition(5, 5, out position, out triangle, out distance))
                 {
-                    this.torchs.Instances[0].Manipulator.SetScale(0.2f, 0.60f, 0.2f, true);
+                    this.torchs.Instances[0].Manipulator.SetScale(1f, 1f, 1f, true);
                     this.torchs.Instances[0].Manipulator.SetPosition(position, true);
                     BoundingBox tbbox = this.torchs.Instances[0].GetBoundingBox();
 

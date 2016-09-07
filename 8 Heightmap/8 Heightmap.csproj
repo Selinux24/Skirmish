@@ -289,6 +289,7 @@
     </Content>
     <Content Include="Resources\Scenery\Objects\torch.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Resources\Soldier\soldier.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

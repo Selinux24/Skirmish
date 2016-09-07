@@ -296,7 +296,7 @@ namespace Engine.Common
                         }
 
                         //Bind shape Matrix * Inverse shape Matrix -> Rest Position
-                        boneOffsets[i] = ibm * controller.BindShapeMatrix;
+                        boneOffsets[i] = controller.BindShapeMatrix * ibm;
                     }
 
                     skinInfo.Add(controller.Skin, new SkinInfo(jointNames, boneOffsets));

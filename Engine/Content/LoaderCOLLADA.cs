@@ -111,12 +111,21 @@ namespace Engine.Content
                                             throw new Exception("Only one armature definition per file!");
                                         }
 
-                                        //TODO: Where to apply this transform?
-                                        //Transforms trn = node.ReadTransforms();
+                                        Matrix trn = Matrix.Identity;
+                                        if (node.Matrix != null)
+                                        {
+                                            trn = node.ReadMatrix();
+                                        }
+                                        else
+                                        {
+                                            trn = node.ReadTransforms().Matrix;
+                                        }
+
+                                        trn = Matrix.Transpose(conversion.ChangeGeometryOrientation(trn));
 
                                         if (node.Nodes != null && node.Nodes.Length > 0)
                                         {
-                                            Joint root = ProcessJoints(null, node.Nodes[0], conversion);
+                                            Joint root = ProcessJoints(trn, null, node.Nodes[0], conversion);
 
                                             skeleton = new Skeleton(root);
                                         }
@@ -128,24 +137,35 @@ namespace Engine.Content
 
                                     if (node.HasGeometry)
                                     {
-                                        //Transforms trn = node.ReadTransforms();
-
-                                        MeshContent info = new MeshContent()
+                                        Matrix trn = Matrix.Identity;
+                                        if (node.Matrix != null)
                                         {
-                                            //TODO: Where to apply this transform?
-                                            //Transform = trn.Matrix.ChangeAxis(conversion),
-                                        };
-
-                                        if (node.InstanceGeometry != null && node.InstanceGeometry.Length > 0)
+                                            trn = node.ReadMatrix();
+                                        }
+                                        else
                                         {
-                                            List<string> meshList = new List<string>();
+                                            trn = node.ReadTransforms().Matrix;
+                                        }
 
-                                            foreach (InstanceGeometry ig in node.InstanceGeometry)
+                                        trn = Matrix.Transpose(conversion.ChangeGeometryOrientation(trn));
+
+                                        if (!trn.IsIdentity)
+                                        {
+                                            if (node.InstanceGeometry != null && node.InstanceGeometry.Length > 0)
                                             {
-                                                meshList.Add(ig.Url.Replace("#", ""));
-                                            }
+                                                foreach (InstanceGeometry ig in node.InstanceGeometry)
+                                                {
+                                                    string meshName = ig.Url.Replace("#", "");
 
-                                            info.SubMeshes = meshList.ToArray();
+                                                    foreach (var submesh in modelContent.Geometry[meshName].Values)
+                                                    {
+                                                        for (int v = 0; v < submesh.Vertices.Length; v++)
+                                                        {
+                                                            submesh.Vertices[v].Transform(trn);
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
 
@@ -156,7 +176,17 @@ namespace Engine.Content
                                     if (node.HasController)
                                     {
                                         //TODO: Where to apply this transform?
-                                        //Transforms trn = node.ReadTransforms();
+                                        Matrix trn = Matrix.Identity;
+                                        if (node.Matrix != null)
+                                        {
+                                            trn = node.ReadMatrix();
+                                        }
+                                        else
+                                        {
+                                            trn = node.ReadTransforms().Matrix;
+                                        }
+
+                                        trn = Matrix.Transpose(conversion.ChangeGeometryOrientation(trn));
 
                                         if (node.InstanceController != null && node.InstanceController.Length > 0)
                                         {
@@ -948,11 +978,12 @@ namespace Engine.Content
         /// <summary>
         /// Process skeleton
         /// </summary>
+        /// <param name="trn">Global controller transform</param>
         /// <param name="parent">Parent joint</param>
         /// <param name="node">Armature node</param>
         /// <param name="conversion">Conversion</param>
         /// <returns>Return skeleton joint hierarchy</returns>
-        private static Joint ProcessJoints(Joint parent, Node node, LoaderConversion conversion)
+        private static Joint ProcessJoints(Matrix trn, Joint parent, Node node, LoaderConversion conversion)
         {
             Matrix localTransform = Matrix.Transpose(conversion.ChangeGeometryOrientation(node.ReadMatrix()));
 
@@ -961,7 +992,7 @@ namespace Engine.Content
                 Name = node.SId,
                 Parent = parent,
                 LocalTransform = localTransform,
-                GlobalTransform = parent != null ? parent.GlobalTransform * localTransform : localTransform,
+                GlobalTransform = parent != null ? parent.GlobalTransform * localTransform : trn * localTransform,
             };
 
             if (node.Nodes != null && node.Nodes.Length > 0)
@@ -970,7 +1001,7 @@ namespace Engine.Content
 
                 foreach (Node child in node.Nodes)
                 {
-                    childs.Add(ProcessJoints(jt, child, conversion));
+                    childs.Add(ProcessJoints(Matrix.Identity, jt, child, conversion));
                 }
 
                 jt.Childs = childs.ToArray();
