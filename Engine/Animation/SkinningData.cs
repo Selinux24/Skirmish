@@ -183,6 +183,29 @@ namespace Engine.Animation
 
             return null;
         }
+        /// <summary>
+        /// Resolves the bone transformations at the specified time for the specified mesh
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="meshName">Mesh name</param>
+        /// <param name="boneNames">Returns the bone names list</param>
+        /// <param name="boneTransforms">Returns the bone transforms list</param>
+        public void Resolve(float time, string meshName, out string[] boneNames, out Matrix[] boneTransforms)
+        {
+            boneNames = null;
+            boneTransforms = null;
+
+            if (this.ClipName != null)
+            {
+                SkinInfo sk = this.meshSkinInfo[meshName];
+                AnimationClip clip = this[this.ClipName];
+
+                sk.Update(clip, time, this.boneHierarchy, this.boneNames);
+               
+                boneNames = this.boneNames;
+                boneTransforms = this.GetFinalTransforms(meshName);
+            }
+        }
 
         /// <summary>
         /// Gest animation state
@@ -254,24 +277,6 @@ namespace Engine.Animation
             }
 
             return desc;
-        }
-
-        public void Test(float time, string meshName, out Matrix[] trns, out string[] jointNames)
-        {
-            trns = null;
-            jointNames = null;
-
-            if (this.ClipName != null)
-            {
-                AnimationClip clip = this[this.ClipName];
-
-                SkinInfo sk = this.meshSkinInfo[meshName];
-             
-                sk.Update(clip, time, this.boneHierarchy, this.boneNames);
-
-                trns = this.GetFinalTransforms(meshName);
-                jointNames = this.boneNames;
-            }
         }
     }
 }

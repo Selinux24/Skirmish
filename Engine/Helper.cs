@@ -688,130 +688,6 @@ namespace Engine
             return view * projection * ndcTransform;
         }
         /// <summary>
-        /// Gets matrix description
-        /// </summary>
-        /// <param name="matrix">Matrix</param>
-        /// <returns>Return matrix description</returns>
-        public static string GetDescription(this Matrix matrix)
-        {
-            if (matrix.IsIdentity)
-            {
-                return "Identity";
-            }
-            else
-            {
-                Vector3 scale;
-                Quaternion rotation;
-                Vector3 translation;
-                if (matrix.Decompose(out scale, out rotation, out translation))
-                {
-                    return string.Format("S:{0,-30} T:{1,-30} R:{2,-30}",
-                        scale.GetDescription(Vector3.One, "None"),
-                        translation.GetDescription(Vector3.Zero, "Zero"),
-                        rotation.GetDescription());
-                }
-                else
-                {
-                    return "Bad transform matrix";
-                }
-            }
-        }
-
-        public static string GetDescription(this Quaternion quaternion)
-        {
-            if (quaternion.IsIdentity)
-            {
-                return "Identity";
-            }
-            else
-            {
-                Vector3 axis = quaternion.Axis;
-                float angle = MathUtil.RadiansToDegrees(quaternion.Angle);
-
-                if (angle == 0)
-                {
-                    return "Near Identity";
-                }
-                else
-                {
-                    return string.Format("Angle: {0:0.00} in axis {1}", angle, axis.GetDescription(Vector3.One, "None"));
-                }
-            }
-        }
-
-        public static string GetDescription(this Vector3 vector, Vector3 none, string wath)
-        {
-            if (vector == none)
-            {
-                return wath;
-            }
-            else
-            {
-                if (Helper.NearEqual(none, vector))
-                {
-                    return "Near " + wath;
-                }
-                else
-                {
-                    vector.X = MathUtil.NearEqual(0, vector.X) ? 0 : (float)Math.Round(vector.X, 3);
-                    vector.Y = MathUtil.NearEqual(0, vector.Y) ? 0 : (float)Math.Round(vector.Y, 3);
-                    vector.Z = MathUtil.NearEqual(0, vector.Z) ? 0 : (float)Math.Round(vector.Z, 3);
-
-                    return string.Format("{0:0.000}", vector);
-                }
-            }
-        }
-
-        public static string GetDescription(this Matrix[] list)
-        {
-            string desc = "";
-
-            for (int i = 0; i < list.Length; i++)
-            {
-                desc += list[i].GetDescription() + Environment.NewLine;
-            }
-
-            return desc;
-        }
-
-        public static string Debug(this Matrix matrix)
-        {
-            return string.Format(
-                "11: {0:0.000} 12: {1:0.000} 13: {2:0.000} 14: {3:0.000}" + Environment.NewLine +
-                "21: {4:0.000} 22: {5:0.000} 23: {6:0.000} 24: {7:0.000}" + Environment.NewLine +
-                "31: {8:0.000} 32: {9:0.000} 33: {10:0.000} 34: {11:0.000}" + Environment.NewLine +
-                "41: {12:0.000} 42: {13:0.000} 43: {14:0.000} 44: {15:0.000}" + Environment.NewLine,
-                (float)Math.Round(matrix.M11, 3),
-                (float)Math.Round(matrix.M12, 3),
-                (float)Math.Round(matrix.M13, 3),
-                (float)Math.Round(matrix.M14, 3),
-                (float)Math.Round(matrix.M21, 3),
-                (float)Math.Round(matrix.M22, 3),
-                (float)Math.Round(matrix.M23, 3),
-                (float)Math.Round(matrix.M24, 3),
-                (float)Math.Round(matrix.M31, 3),
-                (float)Math.Round(matrix.M32, 3),
-                (float)Math.Round(matrix.M33, 3),
-                (float)Math.Round(matrix.M34, 3),
-                (float)Math.Round(matrix.M41, 3),
-                (float)Math.Round(matrix.M42, 3),
-                (float)Math.Round(matrix.M43, 3),
-                (float)Math.Round(matrix.M44, 3));
-        }
-
-        public static string Debug(this Matrix[] list)
-        {
-            string desc = "";
-
-            for (int i = 0; i < list.Length; i++)
-            {
-                desc += list[i].Debug() + Environment.NewLine;
-            }
-
-            return desc;
-        }
-
-        /// <summary>
         /// Generates a bounding box from a triangle list
         /// </summary>
         /// <param name="triangles">Triangle list</param>
@@ -956,6 +832,152 @@ namespace Engine
         public static float GetJitterY(int i)
         {
             return (((i * PRIMEY) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
+        }
+
+        /// <summary>
+        /// Gets matrix description
+        /// </summary>
+        /// <param name="matrix">Matrix</param>
+        /// <returns>Return matrix description</returns>
+        public static string GetDescription(this Matrix matrix)
+        {
+            if (matrix.IsIdentity)
+            {
+                return "Identity";
+            }
+            else
+            {
+                Vector3 scale;
+                Quaternion rotation;
+                Vector3 translation;
+                if (matrix.Decompose(out scale, out rotation, out translation))
+                {
+                    return string.Format("S:{0,-30} T:{1,-30} R:{2,-30}",
+                        scale.GetDescription(Vector3.One, "None"),
+                        translation.GetDescription(Vector3.Zero, "Zero"),
+                        rotation.GetDescription());
+                }
+                else
+                {
+                    return "Bad transform matrix";
+                }
+            }
+        }
+        /// <summary>
+        /// Gets quaternion description
+        /// </summary>
+        /// <param name="quaternion">Quaternion</param>
+        /// <returns>Return quaternion description</returns>
+        public static string GetDescription(this Quaternion quaternion)
+        {
+            if (quaternion.IsIdentity)
+            {
+                return "Identity";
+            }
+            else
+            {
+                Vector3 axis = quaternion.Axis;
+                float angle = MathUtil.RadiansToDegrees(quaternion.Angle);
+
+                if (angle == 0)
+                {
+                    return "Near Identity";
+                }
+                else
+                {
+                    return string.Format("Angle: {0:0.00} in axis {1}", angle, axis.GetDescription(Vector3.One, "None"));
+                }
+            }
+        }
+        /// <summary>
+        /// Gets vector description
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <param name="none">Sets the vector who means wath</param>
+        /// <param name="wath">Sets the string to write in description when the specified vector is near equal to none</param>
+        /// <returns>Return vector description</returns>
+        public static string GetDescription(this Vector3 vector, Vector3 none, string wath)
+        {
+            if (vector == none)
+            {
+                return wath;
+            }
+            else
+            {
+                if (Helper.NearEqual(none, vector))
+                {
+                    return "Near " + wath;
+                }
+                else
+                {
+                    vector.X = MathUtil.NearEqual(0, vector.X) ? 0 : (float)Math.Round(vector.X, 3);
+                    vector.Y = MathUtil.NearEqual(0, vector.Y) ? 0 : (float)Math.Round(vector.Y, 3);
+                    vector.Z = MathUtil.NearEqual(0, vector.Z) ? 0 : (float)Math.Round(vector.Z, 3);
+
+                    return string.Format("{0:0.000}", vector);
+                }
+            }
+        }
+        /// <summary>
+        /// Gets matrix list description
+        /// </summary>
+        /// <param name="list">Matrix list</param>
+        /// <returns>Return matrix list description</returns>
+        public static string GetDescription(this Matrix[] list)
+        {
+            string desc = "";
+
+            for (int i = 0; i < list.Length; i++)
+            {
+                desc += list[i].GetDescription() + Environment.NewLine;
+            }
+
+            return desc;
+        }
+        /// <summary>
+        /// Gets matrix debug text
+        /// </summary>
+        /// <param name="matrix">Matrix</param>
+        /// <returns>Return matrix debug text</returns>
+        public static string Debug(this Matrix matrix)
+        {
+            return string.Format(
+                "11: {0:0.000} 12: {1:0.000} 13: {2:0.000} 14: {3:0.000}" + Environment.NewLine +
+                "21: {4:0.000} 22: {5:0.000} 23: {6:0.000} 24: {7:0.000}" + Environment.NewLine +
+                "31: {8:0.000} 32: {9:0.000} 33: {10:0.000} 34: {11:0.000}" + Environment.NewLine +
+                "41: {12:0.000} 42: {13:0.000} 43: {14:0.000} 44: {15:0.000}" + Environment.NewLine,
+                (float)Math.Round(matrix.M11, 3),
+                (float)Math.Round(matrix.M12, 3),
+                (float)Math.Round(matrix.M13, 3),
+                (float)Math.Round(matrix.M14, 3),
+                (float)Math.Round(matrix.M21, 3),
+                (float)Math.Round(matrix.M22, 3),
+                (float)Math.Round(matrix.M23, 3),
+                (float)Math.Round(matrix.M24, 3),
+                (float)Math.Round(matrix.M31, 3),
+                (float)Math.Round(matrix.M32, 3),
+                (float)Math.Round(matrix.M33, 3),
+                (float)Math.Round(matrix.M34, 3),
+                (float)Math.Round(matrix.M41, 3),
+                (float)Math.Round(matrix.M42, 3),
+                (float)Math.Round(matrix.M43, 3),
+                (float)Math.Round(matrix.M44, 3));
+        }
+        /// <summary>
+        /// Gets matrix list debug text
+        /// </summary>
+        /// <param name="list">Matrix list</param>
+        /// <returns>Return matrix list debug text</returns>
+        public static string Debug(this Matrix[] list)
+        {
+            string desc = "";
+
+            for (int i = 0; i < list.Length; i++)
+            {
+                desc += list[i].Debug() + Environment.NewLine;
+            }
+
+            return desc;
         }
     }
 }

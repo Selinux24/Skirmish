@@ -227,8 +227,8 @@ namespace HeightmapTest
 
             this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
-            Matrix baseTrn = Matrix.Translation(this.soldier.Manipulator.Position + (Vector3.Left * 5));
-            Triangle[] tris = this.soldier.GetPoseAtTime(0, "soldier-mesh", baseTrn);
+            Matrix baseTrn = Matrix.Translation(this.soldier.Manipulator.LocalTransform.Left * 5);
+            Triangle[] tris = this.soldier.GetPoseAtTime(0, baseTrn);
             this.soldierTris = this.AddTriangleListDrawer(tris, new Color(Color.Red.ToColor3(), 0.6f));
 
             #endregion

@@ -1445,6 +1445,101 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Apply weighted transforms to the vertext data
+        /// </summary>
+        /// <param name="v">Vertex data</param>
+        /// <param name="vw">Vertex weights list</param>
+        /// <param name="boneNames">Bone names list</param>
+        /// <param name="boneTransforms">Bone transforms list</param>
+        /// <param name="transform">GLobal transforms</param>
+        /// <returns>Returns the weighted position</returns>
+        public static VertexData ApplyWeight(VertexData v, Weight[] vw, string[] boneNames, Matrix[] boneTransforms, Matrix transform)
+        {
+            var wg = Array.FindAll(vw, w => w.VertexIndex == v.VertexIndex);
+
+            Vector3 position = v.Position.HasValue ? v.Position.Value : Vector3.Zero;
+            Vector3 normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero;
+            Vector3 tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.Zero;
+            Vector3 biNormal = v.BiNormal.HasValue ? v.BiNormal.Value : Vector3.Zero;
+
+            VertexData t = new VertexData()
+            {
+                FaceIndex = v.FaceIndex,
+                VertexIndex = v.VertexIndex,
+                Texture0 = v.Texture0,
+                Texture1 = v.Texture1,
+                Color = v.Color,
+                Size = v.Size,
+                Weights = v.Weights,
+                BoneIndices = v.BoneIndices,
+
+                Position = v.Position.HasValue ? (Vector3?)Vector3.Zero : null,
+                Normal = v.Normal.HasValue ? (Vector3?)Vector3.Zero : null,
+                Tangent = v.Tangent.HasValue ? (Vector3?)Vector3.Zero : null,
+                BiNormal = v.BiNormal.HasValue ? (Vector3?)Vector3.Zero : null,
+            };
+
+            for (int w = 0; w < wg.Length; w++)
+            {
+                float weight = wg[w].WeightValue;
+                int index = Array.IndexOf(boneNames, wg[w].Joint);
+                var boneTransform = boneTransforms[index];
+
+                if (v.Position.HasValue)
+                {
+                    Vector3.TransformCoordinate(ref position, ref boneTransform, out position);
+
+                    t.Position += position * weight;
+                }
+
+                if (v.Normal.HasValue)
+                {
+                    Vector3.TransformNormal(ref normal, ref boneTransform, out normal);
+
+                    t.Normal += normal * weight;
+                }
+
+                if (v.Tangent.HasValue)
+                {
+                    Vector3.TransformNormal(ref tangent, ref boneTransform, out tangent);
+
+                    t.Tangent += tangent * weight;
+                }
+
+                if (v.BiNormal.HasValue)
+                {
+                    Vector3.TransformNormal(ref biNormal, ref boneTransform, out biNormal);
+
+                    t.BiNormal += biNormal * weight;
+                }
+            }
+
+            t.Transform(transform);
+
+            return t;
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="v">Vertex data</param>
+        public VertexData(VertexData v)
+        {
+            this.FaceIndex = v.FaceIndex;
+            this.VertexIndex = v.VertexIndex;
+            this.Position = v.Position;
+            this.Normal = v.Normal;
+            this.Tangent = v.Tangent;
+            this.BiNormal = v.BiNormal;
+            this.Texture0 = v.Texture0;
+            this.Texture1 = v.Texture1;
+            this.Color = v.Color;
+            this.Size = v.Size;
+            this.Weights = v.Weights;
+            this.BoneIndices = v.BoneIndices;
+        }
+
+        /// <summary>
         /// Gets text representation of instance
         /// </summary>
         public override string ToString()
