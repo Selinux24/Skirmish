@@ -46,6 +46,9 @@ namespace Engine.Common
         {
             DrawingData res = new DrawingData();
 
+            //Animation
+            if (description.LoadAnimation) InitializeSkinnedData(ref res, game, modelContent);
+
             //Images
             InitializeTextures(ref res, game, modelContent, description.TextureCount);
 
@@ -54,9 +57,6 @@ namespace Engine.Common
 
             //Skins & Meshes
             InitializeGeometry(ref res, game, modelContent, description);
-
-            //Animation
-            if (description.LoadAnimation) InitializeSkinnedData(ref res, game, modelContent);
 
             //Update meshes into device
             InitializeMeshes(ref res, game);
@@ -252,61 +252,53 @@ namespace Engine.Common
         {
             if (modelContent.SkinningInfo != null)
             {
-                List<BoneAnimation> boneAnimations = new List<BoneAnimation>();
+                InitializeJoints(modelContent, modelContent.SkinningInfo.Skeleton.Root);
 
-                string[] jointNames = modelContent.SkinningInfo.Skeleton.JointNames;
-                int[] jointIndices = modelContent.SkinningInfo.Skeleton.JointIndices;
+                drw.SkinningData = SkinningData.Create(modelContent.SkinningInfo.Skeleton);
+            }
+        }
 
-                foreach (string jointName in jointNames)
+        private static void InitializeJoints(ModelContent modelContent, Joint rootJoint)
+        {
+            List<BoneAnimation> boneAnimations = new List<BoneAnimation>();
+
+            //Find keyframes for current bone
+            var c = FindJointKeyframes(rootJoint.Name, modelContent.Animations);
+            if (c != null && c.Length > 0)
+            {
+                //Set bones
+                Array.ForEach(c, (a) =>
                 {
-                    //Find keyframes for current bone
-                    var c = FindJointKeyframes(jointName, modelContent.Animations);
-                    if (c != null && c.Length > 0)
-                    {
-                        //Set bones
-                        Array.ForEach(c, (a) =>
-                        {
-                            boneAnimations.Add(new BoneAnimation() { Joint = a.Joint, Keyframes = a.Keyframes });
-                        });
-                    }
+                    boneAnimations.Add(new BoneAnimation() { Joint = a.Joint, Keyframes = a.Keyframes });
+                });
+            }
+
+            if (boneAnimations.Count > 0)
+            {
+                //TODO: Only one bone animation at a time
+                rootJoint.Animations.Add(SkinningData.DefaultClip, boneAnimations.ToArray()[0]);
+            }
+
+            foreach (string controllerName in modelContent.SkinningInfo.Controller)
+            {
+                var controller = modelContent.Controllers[controllerName];
+
+                Matrix ibm = Matrix.Identity;
+
+                if (controller.InverseBindMatrix.ContainsKey(rootJoint.Name))
+                {
+                    ibm = controller.InverseBindMatrix[rootJoint.Name];
                 }
 
-                //TODO: Animation dictionary is only for one animation
-                var animations = new Dictionary<string, AnimationClip>();
+                rootJoint.InverseBindMatrix = ibm;
+            }
 
-                if (boneAnimations.Count > 0)
+            if (rootJoint.Childs != null && rootJoint.Childs.Length > 0)
+            {
+                foreach (var child in rootJoint.Childs)
                 {
-                    animations.Add(SkinningData.DefaultClip, new AnimationClip(boneAnimations.ToArray()));
+                    InitializeJoints(modelContent, child);
                 }
-
-                var skinInfo = new Dictionary<string, SkinInfo>();
-
-                foreach (string controllerName in modelContent.SkinningInfo.Controller)
-                {
-                    var controller = modelContent.Controllers[controllerName];
-                    var boneOffsets = new Matrix[jointNames.Length];
-
-                    for (int i = 0; i < jointNames.Length; i++)
-                    {
-                        Matrix ibm = Matrix.Identity;
-
-                        if (controller.InverseBindMatrix.ContainsKey(jointNames[i]))
-                        {
-                            ibm = controller.InverseBindMatrix[jointNames[i]];
-                        }
-
-                        //Bind shape Matrix * Inverse shape Matrix -> Rest Position
-                        boneOffsets[i] = controller.BindShapeMatrix * ibm;
-                    }
-
-                    skinInfo.Add(controller.Skin, new SkinInfo(jointNames, boneOffsets));
-                }
-
-                drw.SkinningData = SkinningData.Create(
-                    jointIndices,
-                    jointNames,
-                    animations,
-                    skinInfo);
             }
         }
         /// <summary>

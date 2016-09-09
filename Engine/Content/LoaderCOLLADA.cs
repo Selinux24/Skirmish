@@ -986,14 +986,9 @@ namespace Engine.Content
         private static Joint ProcessJoints(Matrix trn, Joint parent, Node node, LoaderConversion conversion)
         {
             Matrix localTransform = Matrix.Transpose(conversion.ChangeGeometryOrientation(node.ReadMatrix()));
+            Matrix globalTransform = parent != null ? parent.GlobalTransform * localTransform : trn * localTransform;
 
-            Joint jt = new Joint()
-            {
-                Name = node.SId,
-                Parent = parent,
-                LocalTransform = localTransform,
-                GlobalTransform = parent != null ? parent.GlobalTransform * localTransform : trn * localTransform,
-            };
+            Joint jt = new Joint(node.SId, parent, localTransform, globalTransform);
 
             if (node.Nodes != null && node.Nodes.Length > 0)
             {

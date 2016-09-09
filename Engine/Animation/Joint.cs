@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Engine.Animation
@@ -19,17 +20,42 @@ namespace Engine.Animation
         private Matrix localTransform;
 
         /// <summary>
+        /// Global transform translation
+        /// </summary>
+        protected Vector3 GlobalTransformTranslation { get; private set; }
+        /// <summary>
+        /// Global transform rotation
+        /// </summary>
+        protected Quaternion GlobalTransformRotation { get; private set; }
+        /// <summary>
+        /// Global transform scale
+        /// </summary>
+        protected Vector3 GlobalTransformScale { get; private set; }
+        /// <summary>
+        /// Local transform translation
+        /// </summary>
+        protected Vector3 LocalTransformTranslation { get; private set; }
+        /// <summary>
+        /// Local transform rotation
+        /// </summary>
+        protected Quaternion LocalTransformRotation { get; private set; }
+        /// <summary>
+        /// Local transform scale
+        /// </summary>
+        protected Vector3 LocalTransformScale { get; private set; }
+
+        /// <summary>
         /// Name
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; private set; }
         /// <summary>
         /// Parent joint
         /// </summary>
-        public Joint Parent { get; set; }
+        public Joint Parent { get; private set; }
         /// <summary>
         /// Child joints
         /// </summary>
-        public Joint[] Childs { get; set; }
+        public Joint[] Childs { get; private set; }
         /// <summary>
         /// Global transform matrix
         /// </summary>
@@ -59,18 +85,6 @@ namespace Engine.Animation
             }
         }
         /// <summary>
-        /// Global transform translation
-        /// </summary>
-        public Vector3 GlobalTransformTranslation { get; private set; }
-        /// <summary>
-        /// Global transform rotation
-        /// </summary>
-        public Quaternion GlobalTransformRotation { get; private set; }
-        /// <summary>
-        /// Global transform scale
-        /// </summary>
-        public Vector3 GlobalTransformScale { get; private set; }
-        /// <summary>
         /// Local transform matrix
         /// </summary>
         public Matrix LocalTransform
@@ -99,25 +113,29 @@ namespace Engine.Animation
             }
         }
         /// <summary>
-        /// Local transform translation
+        /// Inverse bind matrix
         /// </summary>
-        public Vector3 LocalTransformTranslation { get; private set; }
+        public Matrix InverseBindMatrix { get; set; }
         /// <summary>
-        /// Local transform rotation
+        /// Joint animation dictionary
         /// </summary>
-        public Quaternion LocalTransformRotation { get; private set; }
+        public Dictionary<string, BoneAnimation> Animations { get; set; }
         /// <summary>
-        /// Local transform scale
+        /// Skinning transform
         /// </summary>
-        public Vector3 LocalTransformScale { get; private set; }
+        public Matrix SkinningTransform { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public Joint()
+        public Joint(string name, Joint parent, Matrix local, Matrix global)
         {
-            this.GlobalTransform = Matrix.Identity;
-            this.LocalTransform = Matrix.Identity;
+            this.Animations = new Dictionary<string, BoneAnimation>();
+
+            this.Name = name;
+            this.Parent = parent;
+            this.GlobalTransform = global;
+            this.LocalTransform = local;
         }
 
         /// <summary>

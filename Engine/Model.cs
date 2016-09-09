@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -413,70 +412,6 @@ namespace Engine
             }
 
             return this.orientedBoundingBox;
-        }
-
-        /// <summary>
-        /// Gets model pose at time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <param name="transform">Transform to apply</param>
-        /// <returns>Returns the positioned triangle array of the model</returns>
-        public Triangle[] GetPoseAtTime(float time, Matrix transform)
-        {
-            List<Triangle> res = new List<Triangle>();
-
-            var globalTransform = this.Manipulator.LocalTransform * transform;
-
-            foreach (var meshName in this.ModelContent.Geometry.Keys)
-            {
-                var cr = this.ModelContent.Controllers.GetControllerForMesh(meshName);
-                var vw = cr.Weights;
-
-                var smat = this.ModelContent.Geometry[meshName];
-                foreach (var sm in smat.Values)
-                {
-                    string[] boneNames;
-                    Matrix[] boneTransforms;
-                    this.GetFinalTransforms(time, meshName, out boneNames, out boneTransforms);
-
-                    var verts = sm.Vertices;
-                    Triangle[] tris = new Triangle[verts.Length / 3];
-                    int index = 0;
-
-                    for (int i = 0; i < verts.Length; i += 3)
-                    {
-                        var p0 = VertexData.ApplyWeight(verts[i + 0], vw, boneNames, boneTransforms, globalTransform);
-                        var p1 = VertexData.ApplyWeight(verts[i + 1], vw, boneNames, boneTransforms, globalTransform);
-                        var p2 = VertexData.ApplyWeight(verts[i + 2], vw, boneNames, boneTransforms, globalTransform);
-
-                        tris[index++] = new Triangle(
-                            p0.Position.Value,
-                            p1.Position.Value,
-                            p2.Position.Value);
-                    }
-
-                    res.AddRange(tris);
-                }
-            }
-
-            return res.ToArray();
-        }
-        /// <summary>
-        /// Gets the final bone transforms for the specified mesh at specified time
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <param name="meshName">Mesh name</param>
-        /// <param name="boneNames">Returns the bone names</param>
-        /// <param name="boneTransforms">Returns the bone transforms</param>
-        private void GetFinalTransforms(float time, string meshName, out string[] boneNames, out Matrix[] boneTransforms)
-        {
-            boneNames = null;
-            boneTransforms = null;
-
-            if (this.DrawingData != null && this.DrawingData.SkinningData != null)
-            {
-                this.DrawingData.SkinningData.Resolve(time, meshName, out boneNames, out boneTransforms);
-            }
         }
 
         /// <summary>

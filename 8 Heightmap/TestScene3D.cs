@@ -42,6 +42,7 @@ namespace HeightmapTest
 
         private Model soldier = null;
         private TriangleListDrawer soldierTris = null;
+        private LineListDrawer soldierLines = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -227,9 +228,15 @@ namespace HeightmapTest
 
             this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
-            Matrix baseTrn = Matrix.Translation(this.soldier.Manipulator.LocalTransform.Left * 5);
-            Triangle[] tris = this.soldier.GetPoseAtTime(0, baseTrn);
-            this.soldierTris = this.AddTriangleListDrawer(tris, new Color(Color.Red.ToColor3(), 0.6f));
+            //Matrix baseTrn = Matrix.Translation(this.soldier.Manipulator.Position + (Vector3.Left * 5));
+
+            //Triangle[] tris = this.soldier.GetPoseAtTime(0, baseTrn);
+            //this.soldierTris = this.AddTriangleListDrawer(tris, new Color(Color.Red.ToColor3(), 0.6f));
+            //this.soldierTris.EnableDepthStencil = false;
+
+            //Line3[] lines = this.soldier.GetSkeletonAtTime(0, baseTrn);
+            //this.soldierLines = this.AddLineListDrawer(lines, Color.White);
+            //this.soldierLines.EnableDepthStencil = false;
 
             #endregion
 
