@@ -65,21 +65,6 @@ namespace Engine.Animation
         public string Interpolation;
 
         /// <summary>
-        /// Interpolate between two keyframes
-        /// </summary>
-        /// <param name="from">From</param>
-        /// <param name="to">To</param>
-        /// <param name="amount">Amount</param>
-        /// <returns>Returns the interpolated transformation</returns>
-        public static Matrix Interpolate(Keyframe from, Keyframe to, float amount)
-        {
-            return
-                Matrix.Scaling(Vector3.Lerp(from.Scale, to.Scale, amount)) *
-                Matrix.RotationQuaternion(Quaternion.Slerp(from.Rotation, to.Rotation, amount)) *
-                Matrix.Translation(Vector3.Lerp(from.Translation, to.Translation, amount));
-        }
-
-        /// <summary>
         /// Fills keyframe description into the specified StringBuilder
         /// </summary>
         /// <param name="desc">Description to fill</param>

@@ -494,7 +494,6 @@
     <Compile Include="SceneLightPoint.cs" />
     <Compile Include="SceneLightSpot.cs" />
     <Compile Include="Sprite.cs" />
-    <Compile Include="Animation\AnimationClip.cs" />
     <Compile Include="Animation\BoneAnimation.cs" />
     <Compile Include="Common\VertexPositionNormalTextureTangent.cs" />
     <Compile Include="Counters.cs" />

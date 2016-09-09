@@ -41,8 +41,8 @@ namespace HeightmapTest
         private SceneLightSpot spotLight2 = null;
 
         private Model soldier = null;
-        private TriangleListDrawer soldierTris = null;
-        private LineListDrawer soldierLines = null;
+        //private TriangleListDrawer soldierTris = null;
+        //private LineListDrawer soldierLines = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)

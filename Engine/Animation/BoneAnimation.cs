@@ -49,11 +49,17 @@ namespace Engine.Animation
 
             if (time <= start.Time)
             {
-                return start.Transform;
+                return
+                    Matrix.Scaling(start.Scale) *
+                    Matrix.RotationQuaternion(start.Rotation) *
+                    Matrix.Translation(start.Translation);
             }
             else if (time >= end.Time)
             {
-                return end.Transform;
+                return
+                    Matrix.Scaling(end.Scale) *
+                    Matrix.RotationQuaternion(end.Rotation) *
+                    Matrix.Translation(end.Translation);
             }
             else
             {
@@ -66,7 +72,10 @@ namespace Engine.Animation
                     {
                         float amount = (time - from.Time) / (to.Time - from.Time);
 
-                        return Keyframe.Interpolate(from, to, amount);
+                        return
+                            Matrix.Scaling(Vector3.Lerp(from.Scale, to.Scale, amount)) *
+                            Matrix.RotationQuaternion(Quaternion.Slerp(from.Rotation, to.Rotation, amount)) *
+                            Matrix.Translation(Vector3.Lerp(from.Translation, to.Translation, amount));
                     }
                 }
             }

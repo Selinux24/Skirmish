@@ -55,7 +55,7 @@ namespace Engine.Animation
             }
         }
 
-        private static void Interpolate(float time, string clipName, Joint j)
+        private static void BuildTransforms(float time, string clipName, Joint j)
         {
             Matrix world = Matrix.Identity;
 
@@ -70,17 +70,17 @@ namespace Engine.Animation
 
             if (j.Parent != null)
             {
-                world = j.Parent.GlobalTransform * world;
+                world = j.Parent.WorldTransform * world;
             }
 
-            j.GlobalTransform = world;
+            j.WorldTransform = world;
             j.SkinningTransform = world * j.InverseBindMatrix;
 
             if (j.Childs != null && j.Childs.Length > 0)
             {
                 for (int i = 0; i < j.Childs.Length; i++)
                 {
-                    Interpolate(time, clipName, j.Childs[i]);
+                    BuildTransforms(time, clipName, j.Childs[i]);
                 }
             }
         }
@@ -137,11 +137,17 @@ namespace Engine.Animation
 
         public void Update(float time, string clipName)
         {
-            Interpolate(time, clipName, this.Root);
+            BuildTransforms(time, clipName, this.Root);
+
+            StringBuilder desc = new StringBuilder();
 
             for (int i = 0; i < this.JointNames.Length; i++)
             {
                 this.FinalTransforms[i] = this[this.JointNames[i]].SkinningTransform;
+
+                desc.AppendLine(this.JointNames[i]);
+                desc.AppendLine(this.FinalTransforms[i].GetDescription());
+                desc.AppendLine();
             }
         }
     }
