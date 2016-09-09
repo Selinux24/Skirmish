@@ -5,6 +5,7 @@ using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
 {
+    using Engine.Animation;
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
@@ -428,44 +429,116 @@ namespace Engine
             }
         }
 
-        public Triangle[] GetPoseAtTime(float time, string meshName, Matrix trn)
+        public Triangle[] GetPoseAtTime(float time, Matrix trn)
         {
-            var sm = this.ModelContent.Geometry["soldier-mesh"]["soldier-material"];
-            var cr = this.ModelContent.Controllers["Armature_soldier-skin"];
-            var verts = sm.Vertices;
-            var wg = cr.Weights;
-            Matrix[] mt;
-            string[] bones;
-            this.GetFinalTransforms(0, "soldier-mesh", out mt, out bones);
+            List<Triangle> res = new List<Triangle>();
 
-            Triangle[] tris = new Triangle[verts.Length / 3];
+            var sk = this.ModelContent.SkinningInfo.Skeleton;
 
-            int triIndex = 0;
-            for (int i = 0; i < verts.Length; i += 3)
+            foreach (var meshName in this.ModelContent.Geometry.Keys)
             {
-                Vector3 p0 = ApplyWeight(trn, verts, wg, mt, bones, i + 0);
-                Vector3 p1 = ApplyWeight(trn, verts, wg, mt, bones, i + 1);
-                Vector3 p2 = ApplyWeight(trn, verts, wg, mt, bones, i + 2);
+                var cr = this.ModelContent.Controllers.GetControllerForMesh(meshName);
+                var wg = cr.Weights;
 
-                tris[triIndex++] = new Triangle(p0, p1, p2);
+                Matrix[] mt;
+                string[] bones;
+                this.GetFinalTransforms(time, meshName, out mt, out bones);
+
+                foreach (var sm in this.ModelContent.Geometry[meshName].Values)
+                {
+                    var verts = sm.Vertices;
+
+                    Triangle[] tris = new Triangle[verts.Length / 3];
+
+                    int triIndex = 0;
+                    for (int i = 0; i < verts.Length; i += 3)
+                    {
+                        Vector3 p0 = ApplyWeight(verts[i + 0], wg, mt, bones);
+                        Vector3 p1 = ApplyWeight(verts[i + 1], wg, mt, bones);
+                        Vector3 p2 = ApplyWeight(verts[i + 2], wg, mt, bones);
+
+                        tris[triIndex++] = new Triangle(p0, p1, p2);
+                    }
+
+                    res.AddRange(tris);
+                }
             }
 
-            return tris;
+            return Triangle.Transform(res.ToArray(), trn);
         }
 
-        private static Vector3 ApplyWeight(Matrix baseTrn, VertexData[] verts, Weight[] wgs, Matrix[] mts, string[] bones, int i)
+        public Line3[] GetSkeletonAtTime(float time, Matrix trn)
         {
-            Vector3 p = verts[i].Position.Value;
-            var wg = Array.FindAll(wgs, w => w.VertexIndex == verts[i].VertexIndex);
+            List<Line3> lines = new List<Line3>();
+
+            var sk = this.DrawingData.SkinningData.Skeleton;
+
+            foreach (var meshName in this.ModelContent.Geometry.Keys)
+            {
+                var cr = this.ModelContent.Controllers.GetControllerForMesh(meshName);
+                var wg = cr.Weights;
+
+                Matrix[] mt;
+                string[] bones;
+                this.GetFinalTransforms(time, meshName, out mt, out bones);
+
+                for (int i = 1; i < sk.JointIndices.Length; i++)
+                {
+                    var p = sk[sk.JointNames[i]];
+                    var o = sk[sk.JointNames[sk.JointIndices[i]]];
+
+                    var mp = mt[Array.IndexOf(bones, sk.JointNames[i])];
+                    var mo = mt[Array.IndexOf(bones, sk.JointNames[sk.JointIndices[i]])];
+
+                    Vector3 p0 = Vector3.TransformCoordinate(Vector3.Zero, mp * p.GlobalTransform);
+                    Vector3 p1 = Vector3.TransformCoordinate(Vector3.Zero, mo * o.GlobalTransform);
+
+                    lines.AddRange(Line3.CreateWiredSphere(p0, 0.1f, 5, 5));
+
+                    lines.Add(new Line3(p0, p1));
+                }
+            }
+
+            return Line3.Transform(lines.ToArray(), trn);
+        }
+
+        public Line3[] GetSkeleton(Matrix trn)
+        {
+            List<Line3> lines = new List<Line3>();
+
+            //var sk = this.ModelContent.SkinningInfo.Skeleton;
+            //for (int i = 1; i < sk.JointIndices.Length; i++)
+            //{
+            //    var p = sk[sk.JointNames[i]];
+            //    var o = sk[sk.JointNames[sk.JointIndices[i]]];
+
+            //    Vector3 p0 = Vector3.TransformCoordinate(Vector3.Zero, p.GlobalTransform);
+            //    Vector3 p1 = Vector3.TransformCoordinate(Vector3.Zero, o.GlobalTransform);
+
+            //    lines.AddRange(Line3.CreateWiredSphere(p0, 0.1f, 5, 5));
+
+            //    lines.Add(new Line3(p0, p1));
+            //}
+
+            return Line3.Transform(lines.ToArray(), trn);
+        }
+
+        private static Vector3 ApplyWeight(VertexData vert, Weight[] wgs, Matrix[] mts, string[] bones)
+        {
+            Vector3 p = vert.Position.Value;
+
+            var wg = Array.FindAll(wgs, w => w.VertexIndex == vert.VertexIndex);
 
             Vector3 t = Vector3.Zero;
             for (int w = 0; w < wg.Length; w++)
             {
-                int index = Array.IndexOf(bones, wg[w].Joint);
-                t += (Vector3.TransformCoordinate(p, mts[index]) * wg[w].WeightValue);
+                int index2 = Array.IndexOf(bones, wg[w].Joint);
+                var m = mts[index2];
+
+                t += (Vector3.TransformCoordinate(p, m) * wg[w].WeightValue);
             }
 
-            return Vector3.TransformCoordinate(t, baseTrn);
+            return t;
         }
 
         /// <summary>

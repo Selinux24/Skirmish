@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -14,14 +15,6 @@ namespace Engine.Animation
         /// </summary>
         public Joint Root { get; private set; }
         /// <summary>
-        /// Joint indices
-        /// </summary>
-        public int[] JointIndices { get; private set; }
-        /// <summary>
-        /// Joint names
-        /// </summary>
-        public string[] JointNames { get; private set; }
-        /// <summary>
         /// Gets joint by name
         /// </summary>
         /// <param name="jointName">Joint name</param>
@@ -30,14 +23,17 @@ namespace Engine.Animation
         {
             get
             {
-                if (Array.Exists(this.JointNames, j => j == jointName))
-                {
-                    return this.FindJoint(this.Root, jointName);
-                }
-
-                return null;
+                return this.FindJoint(this.Root, jointName);
             }
         }
+        /// <summary>
+        /// Joint names
+        /// </summary>
+        public string[] JointNames { get; private set; }
+        /// <summary>
+        /// Final transforms
+        /// </summary>
+        public Matrix[] FinalTransforms { get; private set; }
 
         /// <summary>
         /// Flatten skeleton
@@ -46,23 +42,45 @@ namespace Engine.Animation
         /// <param name="parentIndex">Parent joint index</param>
         /// <param name="indices">Joint indices</param>
         /// <param name="names">Joint names</param>
-        private static void FlattenSkeleton(Joint joint, int parentIndex, List<int> indices, List<string> names)
+        private static void FlattenSkeleton(Joint joint, List<string> names)
         {
-            indices.Add(parentIndex);
-
-            int index = names.Count;
-
             names.Add(joint.Name);
 
             if (joint.Childs != null && joint.Childs.Length > 0)
             {
                 for (int i = 0; i < joint.Childs.Length; i++)
                 {
-                    FlattenSkeleton(
-                        joint.Childs[i],
-                        index,
-                        indices,
-                        names);
+                    FlattenSkeleton(joint.Childs[i], names);
+                }
+            }
+        }
+
+        private static void Interpolate(float time, string clipName, Joint j)
+        {
+            Matrix world = Matrix.Identity;
+
+            if (j.Animations.ContainsKey(clipName))
+            {
+                world = j.Animations[clipName].Interpolate(time);
+            }
+            else
+            {
+                world = j.LocalTransform;
+            }
+
+            if (j.Parent != null)
+            {
+                world = j.Parent.GlobalTransform * world;
+            }
+
+            j.GlobalTransform = world;
+            j.SkinningTransform = world * j.InverseBindMatrix;
+
+            if (j.Childs != null && j.Childs.Length > 0)
+            {
+                for (int i = 0; i < j.Childs.Length; i++)
+                {
+                    Interpolate(time, clipName, j.Childs[i]);
                 }
             }
         }
@@ -73,13 +91,14 @@ namespace Engine.Animation
         /// <param name="root">Root joint</param>
         public Skeleton(Joint root)
         {
-            List<int> indices = new List<int>();
-            List<string> names = new List<string>();
-            FlattenSkeleton(root, -1, indices, names);
-
             this.Root = root;
-            this.JointIndices = indices.ToArray();
+
+            List<string> names = new List<string>();
+            FlattenSkeleton(root, names);
+
             this.JointNames = names.ToArray();
+
+            this.FinalTransforms = new Matrix[names.Count];
         }
 
         /// <summary>
@@ -114,6 +133,16 @@ namespace Engine.Animation
             }
 
             return null;
+        }
+
+        public void Update(float time, string clipName)
+        {
+            Interpolate(time, clipName, this.Root);
+
+            for (int i = 0; i < this.JointNames.Length; i++)
+            {
+                this.FinalTransforms[i] = this[this.JointNames[i]].SkinningTransform;
+            }
         }
     }
 }

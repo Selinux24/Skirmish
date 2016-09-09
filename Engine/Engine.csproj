@@ -146,9 +146,7 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Animation\Animator.cs" />
     <Compile Include="Animation\Skeleton.cs" />
-    <Compile Include="Animation\SkinInfo.cs" />
     <Compile Include="AttachedModelUsesEnum.cs" />
     <Compile Include="BezierPath.cs" />
     <Compile Include="Billboard.cs" />

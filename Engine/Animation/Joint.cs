@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Engine.Animation
@@ -110,14 +111,31 @@ namespace Engine.Animation
         /// Local transform scale
         /// </summary>
         public Vector3 LocalTransformScale { get; private set; }
+     
+        /// <summary>
+        /// Inverse bind matrix
+        /// </summary>
+        public Matrix InverseBindMatrix { get; set; }
+        /// <summary>
+        /// Joint animation dictionary
+        /// </summary>
+        public Dictionary<string, BoneAnimation> Animations { get; set; }
+        /// <summary>
+        /// Skinning transform
+        /// </summary>
+        public Matrix SkinningTransform { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public Joint()
+        public Joint(string name, Joint parent, Matrix local, Matrix global)
         {
-            this.GlobalTransform = Matrix.Identity;
-            this.LocalTransform = Matrix.Identity;
+            this.Animations = new Dictionary<string, BoneAnimation>();
+
+            this.Name = name;
+            this.Parent = parent;
+            this.GlobalTransform = global;
+            this.LocalTransform = local;
         }
 
         /// <summary>
