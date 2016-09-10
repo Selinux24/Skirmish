@@ -11,32 +11,41 @@ namespace Engine.Animation
         /// <summary>
         /// Joint name
         /// </summary>
-        public string Joint;
+        public readonly string Joint;
         /// <summary>
         /// Keyframe list
         /// </summary>
-        public Keyframe[] Keyframes;
+        public readonly Keyframe[] Keyframes;
         /// <summary>
         /// Start time
         /// </summary>
-        public float StartTime
-        {
-            get
-            {
-                return this.Keyframes[0].Time;
-            }
-        }
+        public readonly float StartTime;
         /// <summary>
         /// End time
         /// </summary>
-        public float EndTime
+        public readonly float EndTime;
+        /// <summary>
+        /// Animation duration
+        /// </summary>
+        public float Duration
         {
             get
             {
-                return this.Keyframes[this.Keyframes.Length - 1].Time;
+                return this.EndTime - this.StartTime;
             }
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public JointAnimation(string jointName, Keyframe[] keyframes)
+        {
+            this.Joint = jointName;
+            this.Keyframes = keyframes;
+            this.StartTime = keyframes[0].Time;
+            this.EndTime = keyframes[keyframes.Length - 1].Time;
+        }
+        
         /// <summary>
         /// Interpolate bone transformation
         /// </summary>
@@ -44,45 +53,121 @@ namespace Engine.Animation
         /// <returns>Return interpolated transformation</returns>
         public Matrix Interpolate(float time)
         {
-            Keyframe start = this.Keyframes[0];
-            Keyframe end = this.Keyframes[this.Keyframes.Length - 1];
+            time *= 1;
+            var dTime = 0.0f;
+            if (Duration > 0.0f)
+            {
+                dTime = time % Duration;
+            }
 
-            if (time <= start.Time)
+            // interpolate position keyframes
+            var pPosition = new Vector3();
+
             {
-                return
-                    Matrix.Scaling(start.Scale) *
-                    Matrix.RotationQuaternion(start.Rotation) *
-                    Matrix.Translation(start.Translation);
-            }
-            else if (time >= end.Time)
-            {
-                return
-                    Matrix.Scaling(end.Scale) *
-                    Matrix.RotationQuaternion(end.Rotation) *
-                    Matrix.Translation(end.Translation);
-            }
-            else
-            {
-                for (int i = 0; i < this.Keyframes.Length - 1; i++)
+                var frame = 0;
+                while (frame < this.Keyframes.Length - 1)
                 {
-                    Keyframe from = this.Keyframes[i];
-                    Keyframe to = this.Keyframes[i + 1];
-
-                    if ((time >= from.Time) && (time <= to.Time))
+                    if (dTime < this.Keyframes[frame + 1].Time)
                     {
-                        float amount = (time - from.Time) / (to.Time - from.Time);
-
-                        return
-                            Matrix.Scaling(Vector3.Lerp(from.Scale, to.Scale, amount)) *
-                            Matrix.RotationQuaternion(Quaternion.Slerp(from.Rotation, to.Rotation, amount)) *
-                            Matrix.Translation(Vector3.Lerp(from.Translation, to.Translation, amount));
+                        break;
                     }
+                    frame++;
+                }
+                if (frame >= this.Keyframes.Length)
+                {
+                    frame = 0;
+                }
+
+                var nextFrame = (frame + 1) % this.Keyframes.Length;
+
+                var key = this.Keyframes[frame];
+                var nextKey = this.Keyframes[nextFrame];
+                var diffTime = nextKey.Time - key.Time;
+                if (diffTime < 0.0)
+                {
+                    diffTime += Duration;
+                }
+                if (diffTime > 0.0)
+                {
+                    var factor = (float)((dTime - key.Time) / diffTime);
+                    pPosition = key.Translation + (nextKey.Translation - key.Translation) * factor;
+                }
+                else
+                {
+                    pPosition = key.Translation;
                 }
             }
 
-            return Matrix.Identity;
-        }
+            // interpolate rotation keyframes
+            var pRot = new Quaternion(1, 0, 0, 0);
 
+            {
+                var frame = 0;
+                while (frame < this.Keyframes.Length - 1)
+                {
+                    if (dTime < this.Keyframes[frame + 1].Time)
+                    {
+                        break;
+                    }
+                    frame++;
+                }
+                if (frame >= this.Keyframes.Length)
+                {
+                    frame = 0;
+                }
+                var nextFrame = (frame + 1) % this.Keyframes.Length;
+
+                var key = this.Keyframes[frame];
+                var nextKey = this.Keyframes[nextFrame];
+                key.Rotation.Normalize();
+                nextKey.Rotation.Normalize();
+                var diffTime = nextKey.Time - key.Time;
+                if (diffTime < 0.0)
+                {
+                    diffTime += Duration;
+                }
+                if (diffTime > 0)
+                {
+                    var factor = (float)((dTime - key.Time) / diffTime);
+                    pRot = Quaternion.Slerp(key.Rotation, nextKey.Rotation, factor);
+                }
+                else
+                {
+                    pRot = key.Rotation;
+                }
+            }
+
+            // interpolate scale keyframes
+            var pscale = new Vector3(1);
+
+            {
+                var frame = 0;
+                while (frame < this.Keyframes.Length - 1)
+                {
+                    if (dTime < this.Keyframes[frame + 1].Time)
+                    {
+                        break;
+                    }
+                    frame++;
+                }
+                if (frame >= this.Keyframes.Length)
+                {
+                    frame = 0;
+                }
+            }
+
+            // create the combined transformation matrix
+            var mat = Matrix.RotationQuaternion(pRot);
+            mat.M11 *= pscale.X; mat.M21 *= pscale.X; mat.M31 *= pscale.X;
+            mat.M12 *= pscale.Y; mat.M22 *= pscale.Y; mat.M32 *= pscale.Y;
+            mat.M13 *= pscale.Z; mat.M23 *= pscale.Z; mat.M33 *= pscale.Z;
+
+            mat.M41 = pPosition.X;
+            mat.M42 = pPosition.Y; 
+            mat.M43 = pPosition.Z;
+
+            return mat;
+        }
         /// <summary>
         /// Fills keyframe description into the specified StringBuilder
         /// </summary>

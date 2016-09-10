@@ -22,25 +22,21 @@ namespace Engine.Animation
         /// </summary>
         public Joint[] Childs { get; set; }
         /// <summary>
+        /// Inverse bind matrix
+        /// </summary>
+        public Matrix Offset { get; set; }
+        /// <summary>
         /// Local transform matrix
         /// </summary>
         public Matrix LocalTransform { get; set; }
         /// <summary>
         /// World transform matrix
         /// </summary>
-        public Matrix WorldTransform { get; set; }
-        /// <summary>
-        /// Inverse bind matrix
-        /// </summary>
-        public Matrix InverseBindMatrix { get; set; }
+        public Matrix GlobalTransform { get; set; }
         /// <summary>
         /// Joint animation dictionary
         /// </summary>
         public Dictionary<string, JointAnimation> Animations { get; set; }
-        /// <summary>
-        /// Skinning transform
-        /// </summary>
-        public Matrix SkinningTransform { get; set; }
 
         /// <summary>
         /// Constructor
@@ -55,7 +51,7 @@ namespace Engine.Animation
 
             this.Name = name;
             this.Parent = parent;
-            this.WorldTransform = world;
+            this.GlobalTransform = world;
             this.LocalTransform = local;
         }
 
@@ -72,13 +68,11 @@ namespace Engine.Animation
 
             desc.AppendLine();
             desc.AppendLine("BIND MATRIX");
-            desc.AppendLine(this.InverseBindMatrix.GetDescription());
+            desc.AppendLine(this.Offset.GetDescription());
             desc.AppendLine("LOCAL");
             desc.AppendLine(this.LocalTransform.GetDescription());
             desc.AppendLine("GLOBAL");
-            desc.AppendLine(this.WorldTransform.GetDescription());
-            desc.AppendLine("SKINNING");
-            desc.AppendLine(this.SkinningTransform.GetDescription());
+            desc.AppendLine(this.GlobalTransform.GetDescription());
             desc.AppendLine();
         }
         /// <summary>

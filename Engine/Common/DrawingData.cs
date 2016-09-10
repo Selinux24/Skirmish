@@ -47,7 +47,10 @@ namespace Engine.Common
             DrawingData res = new DrawingData();
 
             //Animation
-            if (description.LoadAnimation) InitializeSkinnedData(ref res, game, modelContent);
+            if (description.LoadAnimation)
+            {
+                InitializeSkinnedData(ref res, game, modelContent);
+            }
 
             //Images
             InitializeTextures(ref res, game, modelContent, description.TextureCount);
@@ -196,7 +199,7 @@ namespace Engine.Common
                                 {
                                     tmpVertices.Add(vertices[indices[i + 0]]);
                                     tmpVertices.Add(vertices[indices[i + 1]]);
-                                    tmpVertices.Add(vertices[indices[i + 1]]);
+                                    tmpVertices.Add(vertices[indices[i + 2]]);
                                     tmpIndices.Add(index++);
                                     tmpIndices.Add(index++);
                                     tmpIndices.Add(index++);
@@ -258,25 +261,25 @@ namespace Engine.Common
             }
         }
 
-        private static void InitializeJoints(ModelContent modelContent, Joint rootJoint)
+        private static void InitializeJoints(ModelContent modelContent, Joint joint)
         {
             List<JointAnimation> boneAnimations = new List<JointAnimation>();
 
             //Find keyframes for current bone
-            var c = FindJointKeyframes(rootJoint.Name, modelContent.Animations);
+            var c = FindJointKeyframes(joint.Name, modelContent.Animations);
             if (c != null && c.Length > 0)
             {
                 //Set bones
                 Array.ForEach(c, (a) =>
                 {
-                    boneAnimations.Add(new JointAnimation() { Joint = a.Joint, Keyframes = a.Keyframes });
+                    boneAnimations.Add(new JointAnimation(a.Joint, a.Keyframes));
                 });
             }
 
             if (boneAnimations.Count > 0)
             {
                 //TODO: Only one bone animation at a time
-                rootJoint.Animations.Add(SkinningData.DefaultClip, boneAnimations.ToArray()[0]);
+                joint.Animations.Add(SkinningData.DefaultClip, boneAnimations.ToArray()[0]);
             }
 
             foreach (string controllerName in modelContent.SkinningInfo.Controller)
@@ -285,17 +288,17 @@ namespace Engine.Common
 
                 Matrix ibm = Matrix.Identity;
 
-                if (controller.InverseBindMatrix.ContainsKey(rootJoint.Name))
+                if (controller.InverseBindMatrix.ContainsKey(joint.Name))
                 {
-                    ibm = controller.InverseBindMatrix[rootJoint.Name];
+                    ibm = controller.InverseBindMatrix[joint.Name];
                 }
 
-                rootJoint.InverseBindMatrix = ibm;
+                joint.Offset = ibm;
             }
 
-            if (rootJoint.Childs != null && rootJoint.Childs.Length > 0)
+            if (joint.Childs != null && joint.Childs.Length > 0)
             {
-                foreach (var child in rootJoint.Childs)
+                foreach (var child in joint.Childs)
                 {
                     InitializeJoints(modelContent, child);
                 }

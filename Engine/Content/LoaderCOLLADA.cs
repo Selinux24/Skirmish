@@ -95,7 +95,7 @@ namespace Engine.Content
 
                                     if (node.IsLight)
                                     {
-                                        Matrix trn = conversion.ChangeGeometryOrientation(node.ReadMatrix());
+                                        Matrix trn = Matrix.Transpose(node.ReadMatrix());
 
                                     }
 
@@ -113,7 +113,7 @@ namespace Engine.Content
                                         Matrix trn = Matrix.Identity;
                                         if (node.Matrix != null)
                                         {
-                                            trn = conversion.ChangeGeometryOrientation(node.ReadMatrix());
+                                            trn = Matrix.Transpose(node.ReadMatrix());
                                         }
                                         else
                                         {
@@ -122,7 +122,13 @@ namespace Engine.Content
 
                                         if (node.Nodes != null && node.Nodes.Length > 0)
                                         {
-                                            Joint root = ProcessJoints(trn, null, node.Nodes[0], conversion);
+                                            Matrix cnv = new Matrix(
+                                                1, 0, 0, 0,
+                                                0, 0, -1, 0,
+                                                0, 1, 0, 0,
+                                                0, 0, 0, 1);
+
+                                            Joint root = ProcessJoints(cnv * trn, null, node.Nodes[0], conversion);
 
                                             skeleton = new Skeleton(root);
                                         }
@@ -137,7 +143,7 @@ namespace Engine.Content
                                         Matrix trn = Matrix.Identity;
                                         if (node.Matrix != null)
                                         {
-                                            trn = conversion.ChangeGeometryOrientation(node.ReadMatrix());
+                                            trn = Matrix.Transpose(node.ReadMatrix());
                                         }
                                         else
                                         {
@@ -174,7 +180,7 @@ namespace Engine.Content
                                         Matrix trn = Matrix.Identity;
                                         if (node.Matrix != null)
                                         {
-                                            trn = conversion.ChangeGeometryOrientation(node.ReadMatrix());
+                                            trn = Matrix.Transpose(node.ReadMatrix());
                                         }
                                         else
                                         {
@@ -606,24 +612,14 @@ namespace Engine.Content
                         if (vertexInput != null)
                         {
                             int vIndex = polyList.P[index + vertexInput.Offset];
-                            Vector3 pos = positions[vIndex];
-                            pos = conversion.ChangeCoordinateSystem(pos);
-                            pos = conversion.ChangeGeometryOrientation(pos);
-                            pos = conversion.ApplyCoordinateTransform(pos);
-
                             vert.VertexIndex = vIndex;
-                            vert.Position = pos;
+                            vert.Position = positions[vIndex];
                         }
 
                         if (normalInput != null)
                         {
                             int nIndex = polyList.P[index + normalInput.Offset];
-                            Vector3 nor = normals[nIndex];
-                            nor = conversion.ChangeCoordinateSystem(nor);
-                            nor = conversion.ChangeGeometryOrientation(nor);
-                            nor = conversion.ApplyNormalTransform(nor);
-
-                            vert.Normal = nor;
+                            vert.Normal = normals[nIndex];
                         }
 
                         if (texCoordInput != null)
@@ -641,14 +637,6 @@ namespace Engine.Content
 
                         index += inputCount;
                     }
-                }
-
-                //From right handed to left handed
-                for (int i = 0; i < verts.Count; i += 3)
-                {
-                    VertexData tmp = verts[i + 1];
-                    verts[i + 1] = verts[i + 2];
-                    verts[i + 2] = tmp;
                 }
 
                 SubMeshContent meshInfo = new SubMeshContent()
@@ -756,7 +744,7 @@ namespace Engine.Content
         {
             ControllerContent res = new ControllerContent();
 
-            res.BindShapeMatrix = conversion.ChangeGeometryOrientation(skin.BindShapeMatrix.ToMatrix());
+            res.BindShapeMatrix = Matrix.Transpose(skin.BindShapeMatrix.ToMatrix());
             res.Skin = skin.SourceUri.Replace("#", "");
             res.Armature = name;
 
@@ -823,7 +811,7 @@ namespace Engine.Content
                     mats = skin[mInput.Source].ReadMatrix();
                     for (int i = 0; i < mats.Length; i++)
                     {
-                        mats[i] = conversion.ChangeGeometryOrientation(mats[i]);
+                        mats[i] = Matrix.Transpose(mats[i]);
                     }
                 }
             }
@@ -932,7 +920,7 @@ namespace Engine.Content
                         outputs = animation[outputsInput.Source].ReadMatrix();
                         for (int i = 0; i < outputs.Length; i++)
                         {
-                            outputs[i] = conversion.ChangeGeometryOrientation(outputs[i]);
+                            outputs[i] = Matrix.Transpose(outputs[i]);
                         }
                     }
 
@@ -986,10 +974,11 @@ namespace Engine.Content
         /// <returns>Return skeleton joint hierarchy</returns>
         private static Joint ProcessJoints(Matrix trn, Joint parent, Node node, LoaderConversion conversion)
         {
-            Matrix localTransform = conversion.ChangeGeometryOrientation(node.ReadMatrix());
-            Matrix globalTransform = parent != null ? parent.WorldTransform * localTransform : trn * localTransform;
+            Matrix localTransform = Matrix.Transpose(node.ReadMatrix());
 
-            Joint jt = new Joint(node.SId, parent, localTransform, globalTransform);
+            Joint jt = new Joint(node.SId, parent, localTransform, Matrix.Identity);
+
+            Skeleton.CalculateBoneToWorldTransform(jt);
 
             if (node.Nodes != null && node.Nodes.Length > 0)
             {

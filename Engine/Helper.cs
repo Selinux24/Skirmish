@@ -841,26 +841,19 @@ namespace Engine
         /// <returns>Return matrix description</returns>
         public static string GetDescription(this Matrix matrix)
         {
-            if (matrix.IsIdentity)
+            Vector3 scale;
+            Quaternion rotation;
+            Vector3 translation;
+            if (matrix.Decompose(out scale, out rotation, out translation))
             {
-                return "Identity";
+                return string.Format("S:{0,-30} T:{1,-30} R:{2,-30}",
+                    scale.GetDescription(Vector3.One, "None"),
+                    translation.GetDescription(Vector3.Zero, "Zero"),
+                    rotation.GetDescription());
             }
             else
             {
-                Vector3 scale;
-                Quaternion rotation;
-                Vector3 translation;
-                if (matrix.Decompose(out scale, out rotation, out translation))
-                {
-                    return string.Format("S:{0,-30} T:{1,-30} R:{2,-30}",
-                        scale.GetDescription(Vector3.One, "None"),
-                        translation.GetDescription(Vector3.Zero, "Zero"),
-                        rotation.GetDescription());
-                }
-                else
-                {
-                    return "Bad transform matrix";
-                }
+                return "Bad transform matrix";
             }
         }
         /// <summary>
@@ -870,24 +863,10 @@ namespace Engine
         /// <returns>Return quaternion description</returns>
         public static string GetDescription(this Quaternion quaternion)
         {
-            if (quaternion.IsIdentity)
-            {
-                return "Identity";
-            }
-            else
-            {
-                Vector3 axis = quaternion.Axis;
-                float angle = MathUtil.RadiansToDegrees(quaternion.Angle);
+            Vector3 axis = quaternion.Axis;
+            float angle = quaternion.Angle;
 
-                if (angle == 0)
-                {
-                    return "Near Identity";
-                }
-                else
-                {
-                    return string.Format("Angle: {0:0.00} in axis {1}", angle, axis.GetDescription(Vector3.One, "None"));
-                }
-            }
+            return string.Format("Angle: {0:0.00} in axis {1}", angle, axis.GetDescription(Vector3.One, "None"));
         }
         /// <summary>
         /// Gets vector description
@@ -898,25 +877,11 @@ namespace Engine
         /// <returns>Return vector description</returns>
         public static string GetDescription(this Vector3 vector, Vector3 none, string wath)
         {
-            if (vector == none)
-            {
-                return wath;
-            }
-            else
-            {
-                if (Helper.NearEqual(none, vector))
-                {
-                    return "Near " + wath;
-                }
-                else
-                {
-                    vector.X = MathUtil.NearEqual(0, vector.X) ? 0 : (float)Math.Round(vector.X, 3);
-                    vector.Y = MathUtil.NearEqual(0, vector.Y) ? 0 : (float)Math.Round(vector.Y, 3);
-                    vector.Z = MathUtil.NearEqual(0, vector.Z) ? 0 : (float)Math.Round(vector.Z, 3);
+            vector.X = (float)Math.Round(vector.X, 3);
+            vector.Y = (float)Math.Round(vector.Y, 3);
+            vector.Z = (float)Math.Round(vector.Z, 3);
 
-                    return string.Format("{0:0.000}", vector);
-                }
-            }
+            return string.Format("X:{0:0.000}; Y:{1:0.000}; Z:{2:0.000}", vector.X, vector.Y, vector.Z);
         }
         /// <summary>
         /// Gets matrix list description

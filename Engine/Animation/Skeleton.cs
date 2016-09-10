@@ -57,24 +57,7 @@ namespace Engine.Animation
 
         private static void BuildTransforms(float time, string clipName, Joint j)
         {
-            Matrix world = Matrix.Identity;
-
-            if (j.Animations.ContainsKey(clipName))
-            {
-                world = j.Animations[clipName].Interpolate(time);
-            }
-            else
-            {
-                world = j.LocalTransform;
-            }
-
-            if (j.Parent != null)
-            {
-                world = j.Parent.WorldTransform * world;
-            }
-
-            j.WorldTransform = world;
-            j.SkinningTransform = world * j.InverseBindMatrix;
+            j.LocalTransform = j.Animations[clipName].Interpolate(time);
 
             if (j.Childs != null && j.Childs.Length > 0)
             {
@@ -82,6 +65,31 @@ namespace Engine.Animation
                 {
                     BuildTransforms(time, clipName, j.Childs[i]);
                 }
+            }
+        }
+
+        private static void UpdateTransforms(Joint node)
+        {
+            CalculateBoneToWorldTransform(node);
+
+            if (node.Childs != null && node.Childs.Length > 0)
+            {
+                for (int i = 0; i < node.Childs.Length; i++)
+                {
+                    UpdateTransforms(node.Childs[i]);
+                }
+            }
+        }
+
+        public static void CalculateBoneToWorldTransform(Joint joint)
+        {
+            joint.GlobalTransform = joint.LocalTransform;
+
+            var parent = joint.Parent;
+            while (parent != null)
+            {
+                joint.GlobalTransform *= parent.LocalTransform;
+                parent = parent.Parent;
             }
         }
 
@@ -101,17 +109,16 @@ namespace Engine.Animation
             this.FinalTransforms = new Matrix[names.Count];
         }
 
-        /// <summary>
-        /// Fills skeleton description into the specified StringBuilder
-        /// </summary>
-        /// <param name="desc">Description to fill</param>
-        public void GetDescription(ref StringBuilder desc)
+
+        public void Update(float time, string clipName)
         {
+            BuildTransforms(time, clipName, this.Root);
+
+            UpdateTransforms(this.Root);
+
             for (int i = 0; i < this.JointNames.Length; i++)
             {
-                Joint j = this[this.JointNames[i]];
-
-                j.GetDescription(ref desc);
+                this.FinalTransforms[i] = this[this.JointNames[i]].Offset * this[this.JointNames[i]].GlobalTransform;
             }
         }
         /// <summary>
@@ -134,20 +141,17 @@ namespace Engine.Animation
 
             return null;
         }
-
-        public void Update(float time, string clipName)
+        /// <summary>
+        /// Fills skeleton description into the specified StringBuilder
+        /// </summary>
+        /// <param name="desc">Description to fill</param>
+        public void GetDescription(ref StringBuilder desc)
         {
-            BuildTransforms(time, clipName, this.Root);
-
-            StringBuilder desc = new StringBuilder();
-
             for (int i = 0; i < this.JointNames.Length; i++)
             {
-                this.FinalTransforms[i] = this[this.JointNames[i]].SkinningTransform;
+                Joint j = this[this.JointNames[i]];
 
-                desc.AppendLine(this.JointNames[i]);
-                desc.AppendLine(this.FinalTransforms[i].GetDescription());
-                desc.AppendLine();
+                j.GetDescription(ref desc);
             }
         }
     }

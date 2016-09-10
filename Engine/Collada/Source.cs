@@ -173,23 +173,23 @@ namespace Engine.Collada
                 Matrix m = new Matrix()
                 {
                     M11 = this.FloatArray[i + 0],
-                    M12 = this.FloatArray[i + 4],
-                    M13 = this.FloatArray[i + 8],
-                    M14 = this.FloatArray[i + 12],
+                    M12 = this.FloatArray[i + 1],
+                    M13 = this.FloatArray[i + 2],
+                    M14 = this.FloatArray[i + 3],
 
-                    M21 = this.FloatArray[i + 1],
+                    M21 = this.FloatArray[i + 4],
                     M22 = this.FloatArray[i + 5],
-                    M23 = this.FloatArray[i + 9],
-                    M24 = this.FloatArray[i + 13],
+                    M23 = this.FloatArray[i + 6],
+                    M24 = this.FloatArray[i + 7],
 
-                    M31 = this.FloatArray[i + 2],
-                    M32 = this.FloatArray[i + 6],
+                    M31 = this.FloatArray[i + 8],
+                    M32 = this.FloatArray[i + 9],
                     M33 = this.FloatArray[i + 10],
-                    M34 = this.FloatArray[i + 14],
+                    M34 = this.FloatArray[i + 11],
 
-                    M41 = this.FloatArray[i + 3],
-                    M42 = this.FloatArray[i + 7],
-                    M43 = this.FloatArray[i + 11],
+                    M41 = this.FloatArray[i + 12],
+                    M42 = this.FloatArray[i + 13],
+                    M43 = this.FloatArray[i + 14],
                     M44 = this.FloatArray[i + 15],
                 };
 

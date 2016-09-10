@@ -119,6 +119,9 @@
     <None Include="Blender\Tree2\tree2.blend" />
     <None Include="Blender\TwoLevels\two_levels.blend" />
     <None Include="Collada\AniCube\aniCube.dae" />
+    <Content Include="Collada\Helicopter\helicopter.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Collada\LandRaider\landraider.dae" />
     <None Include="Collada\Cube\cube_1.dae" />
     <None Include="Collada\Cube\cube_2.dae" />
@@ -126,7 +129,6 @@
     <None Include="Collada\Cube\cube_4.dae" />
     <None Include="Collada\Garage\garage.dae" />
     <None Include="Collada\Ground\ground.dae" />
-    <None Include="Collada\Helicopter\helicopter.dae" />
     <None Include="Collada\Helipod\helipod.dae" />
     <None Include="Collada\Jagdpanther\jagdpanther.dae" />
     <None Include="Collada\Leopard\Leopard.dae" />

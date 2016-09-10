@@ -18,23 +18,23 @@ namespace Engine.Collada.Types
                 Matrix m = new Matrix()
                 {
                     M11 = this.Values[0],
-                    M12 = this.Values[4],
-                    M13 = this.Values[8],
-                    M14 = this.Values[12],
+                    M12 = this.Values[1],
+                    M13 = this.Values[2],
+                    M14 = this.Values[3],
 
-                    M21 = this.Values[1],
+                    M21 = this.Values[4],
                     M22 = this.Values[5],
-                    M23 = this.Values[9],
-                    M24 = this.Values[13],
+                    M23 = this.Values[6],
+                    M24 = this.Values[7],
 
-                    M31 = this.Values[2],
-                    M32 = this.Values[6],
+                    M31 = this.Values[8],
+                    M32 = this.Values[9],
                     M33 = this.Values[10],
-                    M34 = this.Values[14],
+                    M34 = this.Values[11],
 
-                    M41 = this.Values[3],
-                    M42 = this.Values[7],
-                    M43 = this.Values[11],
+                    M41 = this.Values[12],
+                    M42 = this.Values[13],
+                    M43 = this.Values[14],
                     M44 = this.Values[15],
                 };
 

@@ -338,8 +338,8 @@ namespace HeightmapTest
             #endregion
 
             {
-                this.Camera.Goto(this.soldier.Manipulator.Position + this.playerHeight + new Vector3(4, 0, -8));
-                this.Camera.LookTo(this.soldier.Manipulator.Position + this.playerHeight + new Vector3(0, -3f, 0));
+                this.Camera.Goto(this.soldier.Manipulator.Position + this.playerHeight + new Vector3(8, 5, -16));
+                this.Camera.LookTo(this.soldier.Manipulator.Position + this.playerHeight + new Vector3(0, 2f, 0));
             }
 
             #region Debug

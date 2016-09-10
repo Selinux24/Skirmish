@@ -62,6 +62,8 @@ namespace Engine.Animation
             {
                 this.Skeleton.Update(this.Time, this.ClipName);
             }
+
+            this.Time += gameTime.ElapsedSeconds * 0.1f;
         }
         /// <summary>
         /// Sets clip to play
