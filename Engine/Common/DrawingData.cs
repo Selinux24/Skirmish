@@ -260,7 +260,7 @@ namespace Engine.Common
 
         private static void InitializeJoints(ModelContent modelContent, Joint rootJoint)
         {
-            List<BoneAnimation> boneAnimations = new List<BoneAnimation>();
+            List<JointAnimation> boneAnimations = new List<JointAnimation>();
 
             //Find keyframes for current bone
             var c = FindJointKeyframes(rootJoint.Name, modelContent.Animations);
@@ -269,7 +269,7 @@ namespace Engine.Common
                 //Set bones
                 Array.ForEach(c, (a) =>
                 {
-                    boneAnimations.Add(new BoneAnimation() { Joint = a.Joint, Keyframes = a.Keyframes });
+                    boneAnimations.Add(new JointAnimation() { Joint = a.Joint, Keyframes = a.Keyframes });
                 });
             }
 

@@ -6,7 +6,7 @@ namespace Engine.Animation
     /// <summary>
     /// Bone animation
     /// </summary>
-    public struct BoneAnimation
+    public struct JointAnimation
     {
         /// <summary>
         /// Joint name

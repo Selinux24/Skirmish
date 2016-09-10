@@ -95,8 +95,7 @@ namespace Engine.Content
 
                                     if (node.IsLight)
                                     {
-                                        Matrix trn = node.ReadMatrix();
-
+                                        Matrix trn = conversion.ChangeGeometryOrientation(node.ReadMatrix());
 
                                     }
 
@@ -114,14 +113,12 @@ namespace Engine.Content
                                         Matrix trn = Matrix.Identity;
                                         if (node.Matrix != null)
                                         {
-                                            trn = node.ReadMatrix();
+                                            trn = conversion.ChangeGeometryOrientation(node.ReadMatrix());
                                         }
                                         else
                                         {
                                             trn = node.ReadTransforms().Matrix;
                                         }
-
-                                        trn = Matrix.Transpose(conversion.ChangeGeometryOrientation(trn));
 
                                         if (node.Nodes != null && node.Nodes.Length > 0)
                                         {
@@ -140,14 +137,12 @@ namespace Engine.Content
                                         Matrix trn = Matrix.Identity;
                                         if (node.Matrix != null)
                                         {
-                                            trn = node.ReadMatrix();
+                                            trn = conversion.ChangeGeometryOrientation(node.ReadMatrix());
                                         }
                                         else
                                         {
                                             trn = node.ReadTransforms().Matrix;
                                         }
-
-                                        trn = Matrix.Transpose(conversion.ChangeGeometryOrientation(trn));
 
                                         if (!trn.IsIdentity)
                                         {
@@ -179,14 +174,12 @@ namespace Engine.Content
                                         Matrix trn = Matrix.Identity;
                                         if (node.Matrix != null)
                                         {
-                                            trn = node.ReadMatrix();
+                                            trn = conversion.ChangeGeometryOrientation(node.ReadMatrix());
                                         }
                                         else
                                         {
                                             trn = node.ReadTransforms().Matrix;
                                         }
-
-                                        trn = Matrix.Transpose(conversion.ChangeGeometryOrientation(trn));
 
                                         if (node.InstanceController != null && node.InstanceController.Length > 0)
                                         {
@@ -763,7 +756,7 @@ namespace Engine.Content
         {
             ControllerContent res = new ControllerContent();
 
-            res.BindShapeMatrix = Matrix.Transpose(conversion.ChangeGeometryOrientation(skin.BindShapeMatrix.ToMatrix()));
+            res.BindShapeMatrix = conversion.ChangeGeometryOrientation(skin.BindShapeMatrix.ToMatrix());
             res.Skin = skin.SourceUri.Replace("#", "");
             res.Armature = name;
 
@@ -828,6 +821,10 @@ namespace Engine.Content
                 if (mInput != null)
                 {
                     mats = skin[mInput.Source].ReadMatrix();
+                    for (int i = 0; i < mats.Length; i++)
+                    {
+                        mats[i] = conversion.ChangeGeometryOrientation(mats[i]);
+                    }
                 }
             }
 
@@ -874,7 +871,7 @@ namespace Engine.Content
             {
                 for (int i = 0; i < joints.Length; i++)
                 {
-                    ibmList.Add(joints[i], Matrix.Transpose(conversion.ChangeGeometryOrientation(mats[i])));
+                    ibmList.Add(joints[i], mats[i]);
                 }
             }
 
@@ -933,6 +930,10 @@ namespace Engine.Content
                         outputOffset = outputsInput.Offset;
 
                         outputs = animation[outputsInput.Source].ReadMatrix();
+                        for (int i = 0; i < outputs.Length; i++)
+                        {
+                            outputs[i] = conversion.ChangeGeometryOrientation(outputs[i]);
+                        }
                     }
 
                     //Keyframe interpolation types
@@ -951,7 +952,7 @@ namespace Engine.Content
                         Keyframe keyframe = new Keyframe()
                         {
                             Time = inputs[i],
-                            Transform = Matrix.Transpose(conversion.ChangeGeometryOrientation(outputs[i])),
+                            Transform = outputs[i],
                             Interpolation = interpolations[i],
                         };
 
@@ -985,7 +986,7 @@ namespace Engine.Content
         /// <returns>Return skeleton joint hierarchy</returns>
         private static Joint ProcessJoints(Matrix trn, Joint parent, Node node, LoaderConversion conversion)
         {
-            Matrix localTransform = Matrix.Transpose(conversion.ChangeGeometryOrientation(node.ReadMatrix()));
+            Matrix localTransform = conversion.ChangeGeometryOrientation(node.ReadMatrix());
             Matrix globalTransform = parent != null ? parent.WorldTransform * localTransform : trn * localTransform;
 
             Joint jt = new Joint(node.SId, parent, localTransform, globalTransform);

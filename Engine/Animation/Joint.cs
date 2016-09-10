@@ -36,7 +36,7 @@ namespace Engine.Animation
         /// <summary>
         /// Joint animation dictionary
         /// </summary>
-        public Dictionary<string, BoneAnimation> Animations { get; set; }
+        public Dictionary<string, JointAnimation> Animations { get; set; }
         /// <summary>
         /// Skinning transform
         /// </summary>
@@ -51,7 +51,7 @@ namespace Engine.Animation
         /// <param name="world">World transform</param>
         public Joint(string name, Joint parent, Matrix local, Matrix world)
         {
-            this.Animations = new Dictionary<string, BoneAnimation>();
+            this.Animations = new Dictionary<string, JointAnimation>();
 
             this.Name = name;
             this.Parent = parent;
