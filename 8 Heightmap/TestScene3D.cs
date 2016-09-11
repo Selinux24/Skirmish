@@ -42,7 +42,7 @@ namespace HeightmapTest
 
         private Model soldier = null;
         //private TriangleListDrawer soldierTris = null;
-        //private LineListDrawer soldierLines = null;
+        private LineListDrawer soldierLines = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -228,6 +228,9 @@ namespace HeightmapTest
 
             this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
+            var bbox2 = this.soldier.GetBoundingBox();
+            this.soldierLines = this.AddLineListDrawer(Line3.CreateWiredBox(bbox2), Color.White);
+
             //Matrix baseTrn = Matrix.Translation(this.soldier.Manipulator.Position + (Vector3.Left * 5));
 
             //Triangle[] tris = this.soldier.GetPoseAtTime(0, baseTrn);
@@ -262,6 +265,7 @@ namespace HeightmapTest
                 if (this.terrain.FindTopGroundPosition(5, 5, out position, out triangle, out distance))
                 {
                     this.torchs.Instances[0].Manipulator.SetScale(1f, 1f, 1f, true);
+                    this.torchs.Instances[0].Manipulator.SetRotation(0f, -MathUtil.PiOverTwo, 0f, true);
                     this.torchs.Instances[0].Manipulator.SetPosition(position, true);
                     BoundingBox tbbox = this.torchs.Instances[0].GetBoundingBox();
 
@@ -311,6 +315,7 @@ namespace HeightmapTest
                 this.terrain.FindTopGroundPosition(pos.X, pos.Z, out pos, out t, out d);
 
                 this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
+                this.torchs.Instances[i].Manipulator.SetRotation(0f, -MathUtil.PiOverTwo, 0f, true);
                 this.torchs.Instances[i].Manipulator.SetPosition(pos, true);
                 BoundingBox tbbox = this.torchs.Instances[i].GetBoundingBox();
 

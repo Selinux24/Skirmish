@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Text;
 
 namespace Engine.Animation
 {
@@ -64,19 +63,6 @@ namespace Engine.Animation
         /// </summary>
         public string Interpolation;
 
-        /// <summary>
-        /// Fills keyframe description into the specified StringBuilder
-        /// </summary>
-        /// <param name="desc">Description to fill</param>
-        public void GetDescription(ref StringBuilder desc)
-        {
-            desc.AppendFormat("Time: {0,-12}: S:{1,-30} T:{2,-30} R:{3,-30}",
-                this.Time,
-                this.Scale.GetDescription(Vector3.One, "None"),
-                this.Translation.GetDescription(Vector3.Zero, "Zero"),
-                this.Rotation.GetDescription());
-            desc.AppendLine();
-        }
         /// <summary>
         /// Gets text representation
         /// </summary>

@@ -24,8 +24,8 @@ SamplerComparisonState SamplerComparisonLessEqual
 };
 
 static const int MAX_LIGHTS_DIRECTIONAL = 3;
-static const int MAX_LIGHTS_POINT = 4;
-static const int MAX_LIGHTS_SPOT = 4;
+static const int MAX_LIGHTS_POINT = 16;
+static const int MAX_LIGHTS_SPOT = 16;
 
 struct Material
 {

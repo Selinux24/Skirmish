@@ -1,7 +1,5 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Engine.Animation
 {
@@ -10,6 +8,10 @@ namespace Engine.Animation
     /// </summary>
     public class Skeleton
     {
+        /// <summary>
+        /// Root transform matrix
+        /// </summary>
+        public readonly Matrix RootTransform = Matrix.Identity;
         /// <summary>
         /// Root joint
         /// </summary>
@@ -39,8 +41,6 @@ namespace Engine.Animation
         /// Flatten skeleton
         /// </summary>
         /// <param name="joint">Joint</param>
-        /// <param name="parentIndex">Parent joint index</param>
-        /// <param name="indices">Joint indices</param>
         /// <param name="names">Joint names</param>
         private static void FlattenSkeleton(Joint joint, List<string> names)
         {
@@ -54,34 +54,51 @@ namespace Engine.Animation
                 }
             }
         }
-
-        private static void BuildTransforms(float time, string clipName, Joint j)
+        /// <summary>
+        /// Built skeleton transforms at time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="clipName">Clip name</param>
+        /// <param name="joint">Joint</param>
+        /// <param name="rootTransform">Root transform</param>
+        private static void BuildTransforms(float time, string clipName, Joint joint, Matrix rootTransform)
         {
-            j.LocalTransform = j.Animations[clipName].Interpolate(time);
+            joint.LocalTransform = joint.Animations[clipName].Interpolate(time);
 
-            if (j.Childs != null && j.Childs.Length > 0)
+            if (joint.Parent == null)
             {
-                for (int i = 0; i < j.Childs.Length; i++)
+                joint.LocalTransform = rootTransform * joint.LocalTransform;
+            }
+
+            if (joint.Childs != null && joint.Childs.Length > 0)
+            {
+                for (int i = 0; i < joint.Childs.Length; i++)
                 {
-                    BuildTransforms(time, clipName, j.Childs[i]);
+                    BuildTransforms(time, clipName, joint.Childs[i], Matrix.Identity);
                 }
             }
         }
-
-        private static void UpdateTransforms(Joint node)
+        /// <summary>
+        /// Updates joint transforms
+        /// </summary>
+        /// <param name="joint">Joint</param>
+        private static void UpdateTransforms(Joint joint)
         {
-            CalculateBoneToWorldTransform(node);
+            UpdateToWorldTransform(joint);
 
-            if (node.Childs != null && node.Childs.Length > 0)
+            if (joint.Childs != null && joint.Childs.Length > 0)
             {
-                for (int i = 0; i < node.Childs.Length; i++)
+                for (int i = 0; i < joint.Childs.Length; i++)
                 {
-                    UpdateTransforms(node.Childs[i]);
+                    UpdateTransforms(joint.Childs[i]);
                 }
             }
         }
-
-        public static void CalculateBoneToWorldTransform(Joint joint)
+        /// <summary>
+        /// Updates joint to world transforms
+        /// </summary>
+        /// <param name="joint">Joint</param>
+        public static void UpdateToWorldTransform(Joint joint)
         {
             joint.GlobalTransform = joint.LocalTransform;
 
@@ -97,9 +114,11 @@ namespace Engine.Animation
         /// Contructor
         /// </summary>
         /// <param name="root">Root joint</param>
-        public Skeleton(Joint root)
+        /// <param name="rootTransform">Root transform</param>
+        public Skeleton(Joint root, Matrix rootTransform)
         {
             this.Root = root;
+            this.RootTransform = rootTransform;
 
             List<string> names = new List<string>();
             FlattenSkeleton(root, names);
@@ -109,10 +128,14 @@ namespace Engine.Animation
             this.FinalTransforms = new Matrix[names.Count];
         }
 
-
+        /// <summary>
+        /// Updates skeleton state at time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="clipName">Clip name</param>
         public void Update(float time, string clipName)
         {
-            BuildTransforms(time, clipName, this.Root);
+            BuildTransforms(time, clipName, this.Root, this.RootTransform);
 
             UpdateTransforms(this.Root);
 
@@ -140,19 +163,6 @@ namespace Engine.Animation
             }
 
             return null;
-        }
-        /// <summary>
-        /// Fills skeleton description into the specified StringBuilder
-        /// </summary>
-        /// <param name="desc">Description to fill</param>
-        public void GetDescription(ref StringBuilder desc)
-        {
-            for (int i = 0; i < this.JointNames.Length; i++)
-            {
-                Joint j = this[this.JointNames[i]];
-
-                j.GetDescription(ref desc);
-            }
         }
     }
 }

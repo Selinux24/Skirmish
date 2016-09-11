@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.76.0 commit date:2015-11-03, commit time:10:56, hash:f337fea</authoring_tool>
     </contributor>
-    <created>2016-09-06T18:32:03</created>
-    <modified>2016-09-06T18:32:03</modified>
+    <created>2016-09-11T22:47:01</created>
+    <modified>2016-09-11T22:47:01</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -1153,41 +1153,68 @@
         <rotate sid="rotationY">0 1 0 0</rotate>
         <rotate sid="rotationX">1 0 0 0</rotate>
         <scale sid="scale">1 1 1</scale>
-        <node id="Stomach" name="Stomach" sid="Stomach" type="JOINT">
-          <matrix sid="transform">1 1.63818e-15 0 -3.41061e-13 -9.80857e-15 1 9.93413e-9 0.09418783 -2.84217e-14 4.96703e-9 1 3.455176 0 0 0 1</matrix>
-          <node id="Upper_Leg_L" name="Upper Leg.L" sid="Upper_Leg_L" type="JOINT">
-            <matrix sid="transform">1 1.68421e-9 1.55218e-11 0.3952149 1.59773e-9 1 0 -0.05563328 1.7776e-9 0 1 -0.1150224 0 0 0 1</matrix>
-            <node id="Lower_Leg_L" name="Lower Leg.L" sid="Lower_Leg_L" type="JOINT">
-              <matrix sid="transform">1 0 -1.33878e-9 -0.002845719 -2.6077e-8 0.9999999 -9.31323e-9 0.02697913 1.39698e-9 -9.31323e-9 1 -1.497125 0 0 0 1</matrix>
-              <node id="Foot_L" name="Foot.L" sid="Foot_L" type="JOINT">
-                <matrix sid="transform">1 1.49012e-8 -9.31323e-9 -0.01285219 -2.98023e-8 1 3.72529e-9 0.06718699 -9.31323e-10 -7.45058e-9 1 -1.600037 0 0 0 1</matrix>
-              </node>
-            </node>
+        <node id="Controller" name="Controller" sid="Controller" type="JOINT">
+          <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 2.38419e-7 0 0 0 1</matrix>
+          <node id="Arm_IK_L" name="Arm IK.L" sid="Arm_IK_L" type="JOINT">
+            <matrix sid="transform">1 0 0 3.707481 0 1 0 0.156222 0 0 1 5.65878 0 0 0 1</matrix>
           </node>
-          <node id="Upper_Leg_R" name="Upper Leg.R" sid="Upper_Leg_R" type="JOINT">
-            <matrix sid="transform">1 5.20046e-10 2.84736e-10 -0.3952152 2.28013e-10 1 0 -0.05563328 4.07219e-10 2.98023e-8 0.9999999 -0.1150224 0 0 0 1</matrix>
-            <node id="Lower_Leg_R" name="Lower Leg.R" sid="Lower_Leg_R" type="JOINT">
-              <matrix sid="transform">0.9999999 -1.86265e-8 -4.44925e-9 0.004135178 -2.65427e-8 1 9.31323e-9 0.02672591 -2.22281e-9 5.58794e-9 0.9999998 -1.497126 0 0 0 1</matrix>
-              <node id="Foot_R" name="Foot.R" sid="Foot_R" type="JOINT">
-                <matrix sid="transform">1 -2.98023e-8 8.3819e-9 0.01156292 -2.98023e-8 1 3.72529e-9 0.06743845 -2.79397e-9 1.11759e-8 1 -1.600036 0 0 0 1</matrix>
-              </node>
-            </node>
+          <node id="Leg_IK_L" name="Leg IK.L" sid="Leg_IK_L" type="JOINT">
+            <matrix sid="transform">1 0 0 0.3795171 0 1 0 0.1327187 0 0 1 0.2429924 0 0 0 1</matrix>
           </node>
-          <node id="Chest" name="Chest" sid="Chest" type="JOINT">
-            <matrix sid="transform">1 0 0 -1.51053e-13 -4.26326e-14 1 5.96046e-8 -0.2825634 -7.10543e-15 1.49012e-8 0.9999999 1.298279 0 0 0 1</matrix>
-            <node id="Head" name="Head" sid="Head" type="JOINT">
-              <matrix sid="transform">1 -1.42109e-14 2.13163e-14 1.99153e-14 -1.42109e-14 0.9999999 0 0.3610496 0 0 1 1.130243 0 0 0 1</matrix>
-            </node>
-            <node id="Upper_Arm_L" name="Upper Arm.L" sid="Upper_Arm_L" type="JOINT">
-              <matrix sid="transform">1 2.1283e-9 1.41565e-9 0.6620801 -1.84613e-10 0.9999999 -2.98023e-8 0.3759929 -4.29857e-10 2.98023e-8 1 1.004181 0 0 0 1</matrix>
-              <node id="Lower_Arm_L" name="Lower Arm.L" sid="Lower_Arm_L" type="JOINT">
-                <matrix sid="transform">1 0 6.51926e-9 1.241133 0 1 -5.96046e-8 0.01720394 -9.31323e-10 -8.9407e-8 1 -0.04224301 0 0 0 1</matrix>
+          <node id="Elbow_L" name="Elbow.L" sid="Elbow_L" type="JOINT">
+            <matrix sid="transform">1 -2.96055e-16 0 1.556863 8.49567e-16 1 0 -1.779529 0 0 1 5.561413 0 0 0 1</matrix>
+          </node>
+          <node id="Knee_L" name="Knee.L" sid="Knee_L" type="JOINT">
+            <matrix sid="transform">1 0 0 0.7876637 0 1 0 -1.810925 0 0 1 1.872397 0 0 0 1</matrix>
+          </node>
+          <node id="Arm_IK_R" name="Arm IK.R" sid="Arm_IK_R" type="JOINT">
+            <matrix sid="transform">1 0 0 -3.707481 0 1 0 0.156222 0 0 1 5.65878 0 0 0 1</matrix>
+          </node>
+          <node id="Leg_IK_R" name="Leg IK.R" sid="Leg_IK_R" type="JOINT">
+            <matrix sid="transform">1 0 0 -0.3795171 0 1 0 0.1327187 0 0 1 0.2429924 0 0 0 1</matrix>
+          </node>
+          <node id="Elbow_R" name="Elbow.R" sid="Elbow_R" type="JOINT">
+            <matrix sid="transform">1 -3.84877e-15 0 -1.556863 -2.70315e-15 1 0 -1.779529 0 0 1 5.561412 0 0 0 1</matrix>
+          </node>
+          <node id="Knee_R" name="Knee.R" sid="Knee_R" type="JOINT">
+            <matrix sid="transform">1 0 0 -0.7876637 0 1 0 -1.810925 0 0 1 1.872397 0 0 0 1</matrix>
+          </node>
+          <node id="Stomach" name="Stomach" sid="Stomach" type="JOINT">
+            <matrix sid="transform">1 1.63818e-15 0 -3.41061e-13 -9.80857e-15 1 9.93413e-9 0.09418783 -2.84217e-14 4.96703e-9 1 3.455176 0 0 0 1</matrix>
+            <node id="Upper_Leg_L" name="Upper Leg.L" sid="Upper_Leg_L" type="JOINT">
+              <matrix sid="transform">1 1.68421e-9 1.55218e-11 0.3952149 1.59773e-9 1 0 -0.05563328 1.7776e-9 0 1 -0.1150224 0 0 0 1</matrix>
+              <node id="Lower_Leg_L" name="Lower Leg.L" sid="Lower_Leg_L" type="JOINT">
+                <matrix sid="transform">1 0 -1.33878e-9 -0.002845719 -2.6077e-8 0.9999999 -9.31323e-9 0.02697913 1.39698e-9 -9.31323e-9 1 -1.497125 0 0 0 1</matrix>
+                <node id="Foot_L" name="Foot.L" sid="Foot_L" type="JOINT">
+                  <matrix sid="transform">1 1.49012e-8 -9.31323e-9 -0.01285219 -2.98023e-8 1 3.72529e-9 0.06718699 -9.31323e-10 -7.45058e-9 1 -1.600037 0 0 0 1</matrix>
+                </node>
               </node>
             </node>
-            <node id="Upper_Arm_R" name="Upper Arm.R" sid="Upper_Arm_R" type="JOINT">
-              <matrix sid="transform">1 3.99098e-9 -4.46995e-10 -0.66208 3.82173e-10 1 -2.98023e-8 0.3759928 1.34445e-9 -2.98023e-8 1 1.004181 0 0 0 1</matrix>
-              <node id="Lower_Arm_R" name="Lower Arm.R" sid="Lower_Arm_R" type="JOINT">
-                <matrix sid="transform">1 3.72529e-9 -1.86265e-9 -1.241137 -1.86265e-9 1 -8.9407e-8 0.01717087 9.31323e-10 0 1 -0.04213601 0 0 0 1</matrix>
+            <node id="Upper_Leg_R" name="Upper Leg.R" sid="Upper_Leg_R" type="JOINT">
+              <matrix sid="transform">1 5.20046e-10 2.84736e-10 -0.3952152 2.28013e-10 1 0 -0.05563328 4.07219e-10 2.98023e-8 0.9999999 -0.1150224 0 0 0 1</matrix>
+              <node id="Lower_Leg_R" name="Lower Leg.R" sid="Lower_Leg_R" type="JOINT">
+                <matrix sid="transform">0.9999999 -1.86265e-8 -4.44925e-9 0.004135178 -2.65427e-8 1 9.31323e-9 0.02672591 -2.22281e-9 5.58794e-9 0.9999998 -1.497126 0 0 0 1</matrix>
+                <node id="Foot_R" name="Foot.R" sid="Foot_R" type="JOINT">
+                  <matrix sid="transform">1 -2.98023e-8 8.3819e-9 0.01156292 -2.98023e-8 1 3.72529e-9 0.06743845 -2.79397e-9 1.11759e-8 1 -1.600036 0 0 0 1</matrix>
+                </node>
+              </node>
+            </node>
+            <node id="Chest" name="Chest" sid="Chest" type="JOINT">
+              <matrix sid="transform">1 0 0 -1.51053e-13 -4.26326e-14 1 5.96046e-8 -0.2825634 -7.10543e-15 1.49012e-8 0.9999999 1.298279 0 0 0 1</matrix>
+              <node id="Head" name="Head" sid="Head" type="JOINT">
+                <matrix sid="transform">1 -1.42109e-14 2.13163e-14 1.99153e-14 -1.42109e-14 0.9999999 0 0.3610496 0 0 1 1.130243 0 0 0 1</matrix>
+              </node>
+              <node id="Upper_Arm_L" name="Upper Arm.L" sid="Upper_Arm_L" type="JOINT">
+                <matrix sid="transform">1 2.1283e-9 1.41565e-9 0.6620801 -1.84613e-10 0.9999999 -2.98023e-8 0.3759929 -4.29857e-10 2.98023e-8 1 1.004181 0 0 0 1</matrix>
+                <node id="Lower_Arm_L" name="Lower Arm.L" sid="Lower_Arm_L" type="JOINT">
+                  <matrix sid="transform">1 0 6.51926e-9 1.241133 0 1 -5.96046e-8 0.01720394 -9.31323e-10 -8.9407e-8 1 -0.04224301 0 0 0 1</matrix>
+                </node>
+              </node>
+              <node id="Upper_Arm_R" name="Upper Arm.R" sid="Upper_Arm_R" type="JOINT">
+                <matrix sid="transform">1 3.99098e-9 -4.46995e-10 -0.66208 3.82173e-10 1 -2.98023e-8 0.3759928 1.34445e-9 -2.98023e-8 1 1.004181 0 0 0 1</matrix>
+                <node id="Lower_Arm_R" name="Lower Arm.R" sid="Lower_Arm_R" type="JOINT">
+                  <matrix sid="transform">1 3.72529e-9 -1.86265e-9 -1.241137 -1.86265e-9 1 -8.9407e-8 0.01717087 9.31323e-10 0 1 -0.04213601 0 0 0 1</matrix>
+                </node>
               </node>
             </node>
           </node>
@@ -1200,7 +1227,7 @@
         <rotate sid="rotationX">1 0 0 0</rotate>
         <scale sid="scale">1 1 1</scale>
         <instance_controller url="#Armature_soldier-skin">
-          <skeleton>#Stomach</skeleton>
+          <skeleton>#Controller</skeleton>
           <bind_material>
             <technique_common>
               <instance_material symbol="soldier-material" target="#soldier-material">

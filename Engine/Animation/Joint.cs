@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Engine.Animation
 {
@@ -55,26 +54,6 @@ namespace Engine.Animation
             this.LocalTransform = local;
         }
 
-        /// <summary>
-        /// Fills joint description into the specified StringBuilder
-        /// </summary>
-        /// <param name="desc">Description to fill</param>
-        public void GetDescription(ref StringBuilder desc)
-        {
-            desc.AppendFormat("Name: {0}; Parent: {1}; Childs: {2};",
-                this.Name,
-                this.Parent != null ? this.Parent.Name : "-",
-                this.Childs != null ? this.Childs.Length : 0);
-
-            desc.AppendLine();
-            desc.AppendLine("BIND MATRIX");
-            desc.AppendLine(this.Offset.GetDescription());
-            desc.AppendLine("LOCAL");
-            desc.AppendLine(this.LocalTransform.GetDescription());
-            desc.AppendLine("GLOBAL");
-            desc.AppendLine(this.GlobalTransform.GetDescription());
-            desc.AppendLine();
-        }
         /// <summary>
         /// Gets text representation
         /// </summary>

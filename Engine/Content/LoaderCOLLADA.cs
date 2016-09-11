@@ -22,12 +22,11 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="fileName">Collada model</param>
-        /// <param name="coordinate">Coordinate system</param>
         /// <param name="orientation">Up axis orientation</param>
         /// <returns>Returns the loaded contents</returns>
-        public static ModelContent[] Load(string contentFolder, string fileName, CoordinateSystems coordinate = CoordinateSystems.LeftHanded, GeometryOrientations orientation = GeometryOrientations.YUp)
+        public static ModelContent[] Load(string contentFolder, string fileName, GeometryOrientations orientation = GeometryOrientations.YUp)
         {
-            return Load(contentFolder, fileName, Matrix.Identity, coordinate, orientation);
+            return Load(contentFolder, fileName, Matrix.Identity, orientation);
         }
         /// <summary>
         /// Load a collada model
@@ -35,10 +34,9 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="fileName">Collada model</param>
         /// <param name="transform">Global geometry transform</param>
-        /// <param name="coordinate">Coordinate system</param>
         /// <param name="orientation">Up axis orientation</param>
         /// <returns>Returns the loaded contents</returns>
-        public static ModelContent[] Load(string contentFolder, string fileName, Matrix transform, CoordinateSystems coordinate = CoordinateSystems.LeftHanded, GeometryOrientations orientation = GeometryOrientations.YUp)
+        public static ModelContent[] Load(string contentFolder, string fileName, Matrix transform, GeometryOrientations orientation = GeometryOrientations.YUp)
         {
             MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList != null && modelList.Length > 0)
@@ -54,12 +52,7 @@ namespace Engine.Content
                     else if (dae.Asset.UpAxis == EnumAxis.YUp) daeUp = GeometryOrientations.YUp;
                     else if (dae.Asset.UpAxis == EnumAxis.ZUp) daeUp = GeometryOrientations.ZUp;
 
-                    LoaderConversion conversion = LoaderConversion.Compute(
-                        transform,
-                        CoordinateSystems.RightHanded,
-                        coordinate,
-                        daeUp,
-                        orientation);
+                    Matrix globalTransform = LoaderConversion.Compute(daeUp, orientation);
 
                     ModelContent modelContent = new ModelContent();
 
@@ -70,8 +63,8 @@ namespace Engine.Content
                     ProcessLibraryImages(dae, modelContent, contentFolder);
                     ProcessLibraryMaterial(dae, modelContent);
 
-                    ProcessLibraryGeometries(dae, modelContent, conversion);
-                    ProcessLibraryControllers(dae, modelContent, conversion);
+                    ProcessLibraryGeometries(dae, modelContent);
+                    ProcessLibraryControllers(dae, modelContent);
 
                     #endregion
 
@@ -122,15 +115,9 @@ namespace Engine.Content
 
                                         if (node.Nodes != null && node.Nodes.Length > 0)
                                         {
-                                            Matrix cnv = new Matrix(
-                                                1, 0, 0, 0,
-                                                0, 0, -1, 0,
-                                                0, 1, 0, 0,
-                                                0, 0, 0, 1);
+                                            Joint root = ProcessJoints(null, node.Nodes[0]);
 
-                                            Joint root = ProcessJoints(cnv * trn, null, node.Nodes[0], conversion);
-
-                                            skeleton = new Skeleton(root);
+                                            skeleton = new Skeleton(root, globalTransform);
                                         }
                                     }
 
@@ -217,7 +204,7 @@ namespace Engine.Content
 
                     #region Animations
 
-                    ProcessLibraryAnimations(dae, modelContent, conversion);
+                    ProcessLibraryAnimations(dae, modelContent);
 
                     #endregion
 
@@ -361,14 +348,13 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        /// <param name="conversion">Conversion</param>
-        public static void ProcessLibraryGeometries(COLLADA dae, ModelContent modelContent, LoaderConversion conversion)
+        public static void ProcessLibraryGeometries(COLLADA dae, ModelContent modelContent)
         {
             if (dae.LibraryGeometries != null && dae.LibraryGeometries.Length > 0)
             {
                 foreach (Geometry geometry in dae.LibraryGeometries)
                 {
-                    SubMeshContent[] info = ProcessGeometry(geometry, conversion);
+                    SubMeshContent[] info = ProcessGeometry(geometry);
                     if (info != null && info.Length > 0)
                     {
                         foreach (SubMeshContent subMesh in info)
@@ -384,14 +370,13 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        /// <param name="conversion">Conversion</param>
-        public static void ProcessLibraryControllers(COLLADA dae, ModelContent modelContent, LoaderConversion conversion)
+        public static void ProcessLibraryControllers(COLLADA dae, ModelContent modelContent)
         {
             if (dae.LibraryControllers != null && dae.LibraryControllers.Length > 0)
             {
                 foreach (Controller controller in dae.LibraryControllers)
                 {
-                    ControllerContent info = ProcessController(controller, conversion);
+                    ControllerContent info = ProcessController(controller);
                     if (info != null)
                     {
                         modelContent.Controllers[controller.Id] = info;
@@ -404,8 +389,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        /// <param name="conversion">Conversion</param>
-        public static void ProcessLibraryAnimations(COLLADA dae, ModelContent modelContent, LoaderConversion conversion)
+        public static void ProcessLibraryAnimations(COLLADA dae, ModelContent modelContent)
         {
             if (dae.LibraryAnimations != null && dae.LibraryAnimations.Length > 0)
             {
@@ -413,7 +397,7 @@ namespace Engine.Content
                 {
                     Animation animation = dae.LibraryAnimations[i];
 
-                    AnimationContent[] info = ProcessAnimation(modelContent, animation, conversion);
+                    AnimationContent[] info = ProcessAnimation(modelContent, animation);
                     if (info != null && info.Length > 0)
                     {
                         modelContent.Animations[animation.Id] = info;
@@ -430,23 +414,22 @@ namespace Engine.Content
         /// Process geometry list
         /// </summary>
         /// <param name="geometry">Geometry info</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessGeometry(Geometry geometry, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessGeometry(Geometry geometry)
         {
             SubMeshContent[] info = null;
 
             if (geometry.Mesh != null)
             {
-                info = ProcessMesh(geometry.Mesh, conversion);
+                info = ProcessMesh(geometry.Mesh);
             }
             else if (geometry.Spline != null)
             {
-                info = ProcessSpline(geometry.Spline, conversion);
+                info = ProcessSpline(geometry.Spline);
             }
             else if (geometry.ConvexMesh != null)
             {
-                info = ProcessConvexMesh(geometry.ConvexMesh, conversion);
+                info = ProcessConvexMesh(geometry.ConvexMesh);
             }
 
             return info;
@@ -455,40 +438,39 @@ namespace Engine.Content
         /// Process mesh
         /// </summary>
         /// <param name="mesh">Mesh</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessMesh(Collada.Mesh mesh, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessMesh(Collada.Mesh mesh)
         {
             SubMeshContent[] res = null;
 
             //Procesar por topología
             if (mesh.Lines != null && mesh.Lines.Length > 0)
             {
-                res = ProcessLines(mesh.Lines, mesh.Sources, conversion);
+                res = ProcessLines(mesh.Lines, mesh.Sources);
             }
             else if (mesh.LineStrips != null && mesh.LineStrips.Length > 0)
             {
-                res = ProcessLineStrips(mesh.LineStrips, mesh.Sources, conversion);
+                res = ProcessLineStrips(mesh.LineStrips, mesh.Sources);
             }
             else if (mesh.Triangles != null && mesh.Triangles.Length > 0)
             {
-                res = ProcessTriangles(mesh.Triangles, mesh.Sources, conversion);
+                res = ProcessTriangles(mesh.Triangles, mesh.Sources);
             }
             else if (mesh.TriFans != null && mesh.TriFans.Length > 0)
             {
-                res = ProcessTriFans(mesh.TriFans, mesh.Sources, conversion);
+                res = ProcessTriFans(mesh.TriFans, mesh.Sources);
             }
             else if (mesh.TriStrips != null && mesh.TriStrips.Length > 0)
             {
-                res = ProcessTriStrips(mesh.TriStrips, mesh.Sources, conversion);
+                res = ProcessTriStrips(mesh.TriStrips, mesh.Sources);
             }
             else if (mesh.PolyList != null && mesh.PolyList.Length > 0)
             {
-                res = ProcessPolyList(mesh.PolyList, mesh.Sources, conversion);
+                res = ProcessPolyList(mesh.PolyList, mesh.Sources);
             }
             else if (mesh.Polygons != null && mesh.Polygons.Length > 0)
             {
-                res = ProcessPolygons(mesh.Polygons, mesh.Sources, conversion);
+                res = ProcessPolygons(mesh.Polygons, mesh.Sources);
             }
 
             return res;
@@ -497,9 +479,8 @@ namespace Engine.Content
         /// Process spline
         /// </summary>
         /// <param name="mesh">Mesh</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessSpline(Spline spline, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessSpline(Spline spline)
         {
             throw new NotImplementedException();
         }
@@ -507,9 +488,8 @@ namespace Engine.Content
         /// Process convex mesh
         /// </summary>
         /// <param name="mesh">Mesh</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessConvexMesh(ConvexMesh convexMesh, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessConvexMesh(ConvexMesh convexMesh)
         {
             throw new NotImplementedException();
         }
@@ -518,9 +498,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="lines">Lines</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessLines(Lines[] lines, Source[] meshSources, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessLines(Lines[] lines, Source[] meshSources)
         {
             throw new NotImplementedException();
         }
@@ -529,9 +508,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="lines">Line strips</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessLineStrips(LineStrips[] lines, Source[] meshSources, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessLineStrips(LineStrips[] lines, Source[] meshSources)
         {
             throw new NotImplementedException();
         }
@@ -540,9 +518,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="triangles">Triangles</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessTriangles(Triangles[] triangles, Source[] meshSources, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessTriangles(Triangles[] triangles, Source[] meshSourcesrsion)
         {
             throw new NotImplementedException();
         }
@@ -551,9 +528,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="triFans">Triangle fans</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessTriFans(TriFans[] triFans, Source[] meshSources, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessTriFans(TriFans[] triFans, Source[] meshSources)
         {
             throw new NotImplementedException();
         }
@@ -562,9 +538,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="triStrips">Triangle strips</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessTriStrips(TriStrips[] triStrips, Source[] meshSources, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessTriStrips(TriStrips[] triStrips, Source[] meshSources)
         {
             throw new NotImplementedException();
         }
@@ -573,9 +548,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="polyLists">Polygon list</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessPolyList(PolyList[] polyLists, Source[] meshSources, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessPolyList(PolyList[] polyLists, Source[] meshSources)
         {
             List<SubMeshContent> res = new List<SubMeshContent>();
 
@@ -657,9 +631,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="polygons">Polygons</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessPolygons(Polygons[] polygons, Source[] meshSources, LoaderConversion conversion)
+        private static SubMeshContent[] ProcessPolygons(Polygons[] polygons, Source[] meshSources)
         {
             throw new NotImplementedException();
         }
@@ -716,19 +689,18 @@ namespace Engine.Content
         /// Process controller
         /// </summary>
         /// <param name="controller">Controller</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns controller content</returns>
-        private static ControllerContent ProcessController(Controller controller, LoaderConversion conversion)
+        private static ControllerContent ProcessController(Controller controller)
         {
             ControllerContent res = null;
 
             if (controller.Skin != null)
             {
-                res = ProcessSkin(controller.Name, controller.Skin, conversion);
+                res = ProcessSkin(controller.Name, controller.Skin);
             }
             else if (controller.Morph != null)
             {
-                res = ProcessMorph(controller.Name, controller.Morph, conversion);
+                res = ProcessMorph(controller.Name, controller.Morph);
             }
 
             return res;
@@ -738,9 +710,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="name">Skin name</param>
         /// <param name="skin">Skin information</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns controller content</returns>
-        private static ControllerContent ProcessSkin(string name, Skin skin, LoaderConversion conversion)
+        private static ControllerContent ProcessSkin(string name, Skin skin)
         {
             ControllerContent res = new ControllerContent();
 
@@ -752,7 +723,7 @@ namespace Engine.Content
             {
                 Dictionary<string, Matrix> ibmList;
                 Weight[] wgList;
-                ProcessVertexWeights(skin, conversion, out ibmList, out wgList);
+                ProcessVertexWeights(skin, out ibmList, out wgList);
 
                 res.InverseBindMatrix = ibmList;
                 res.Weights = wgList;
@@ -765,9 +736,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="name">Morph name</param>
         /// <param name="morph">Morph information</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Returns controller content</returns>
-        private static ControllerContent ProcessMorph(string name, Morph morph, LoaderConversion conversion)
+        private static ControllerContent ProcessMorph(string name, Morph morph)
         {
             throw new NotImplementedException();
         }
@@ -775,10 +745,9 @@ namespace Engine.Content
         /// Process vertext weight information
         /// </summary>
         /// <param name="skin">Skin information</param>
-        /// <param name="conversion">Conversion</param>
         /// <param name="inverseBindMatrixList">Inverse bind matrix list result</param>
         /// <param name="weightList">Weight list result</param>
-        private static void ProcessVertexWeights(Skin skin, LoaderConversion conversion, out Dictionary<string, Matrix> inverseBindMatrixList, out Weight[] weightList)
+        private static void ProcessVertexWeights(Skin skin, out Dictionary<string, Matrix> inverseBindMatrixList, out Weight[] weightList)
         {
             Dictionary<string, Matrix> ibmList = new Dictionary<string, Matrix>();
             List<Weight> wgList = new List<Weight>();
@@ -874,10 +843,10 @@ namespace Engine.Content
         /// <summary>
         /// Process animation
         /// </summary>
+        /// <param name="modelContent">Model content</param>
         /// <param name="animation">Animation information</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Retuns animation content list</returns>
-        private static AnimationContent[] ProcessAnimation(ModelContent modelContent, Animation animation, LoaderConversion conversion)
+        private static AnimationContent[] ProcessAnimation(ModelContent modelContent, Animation animation)
         {
             List<AnimationContent> res = new List<AnimationContent>();
 
@@ -967,18 +936,16 @@ namespace Engine.Content
         /// <summary>
         /// Process skeleton
         /// </summary>
-        /// <param name="trn">Global controller transform</param>
         /// <param name="parent">Parent joint</param>
         /// <param name="node">Armature node</param>
-        /// <param name="conversion">Conversion</param>
         /// <returns>Return skeleton joint hierarchy</returns>
-        private static Joint ProcessJoints(Matrix trn, Joint parent, Node node, LoaderConversion conversion)
+        private static Joint ProcessJoints(Joint parent, Node node)
         {
             Matrix localTransform = Matrix.Transpose(node.ReadMatrix());
 
             Joint jt = new Joint(node.SId, parent, localTransform, Matrix.Identity);
 
-            Skeleton.CalculateBoneToWorldTransform(jt);
+            Skeleton.UpdateToWorldTransform(jt);
 
             if (node.Nodes != null && node.Nodes.Length > 0)
             {
@@ -986,7 +953,7 @@ namespace Engine.Content
 
                 foreach (Node child in node.Nodes)
                 {
-                    childs.Add(ProcessJoints(Matrix.Identity, jt, child, conversion));
+                    childs.Add(ProcessJoints(jt, child));
                 }
 
                 jt.Childs = childs.ToArray();

@@ -330,7 +330,8 @@
     </Content>
     <Content Include="Resources\Soldier\soldier.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>

@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Text;
 
 namespace Engine.Animation
 {
@@ -167,19 +166,6 @@ namespace Engine.Animation
             mat.M43 = pPosition.Z;
 
             return mat;
-        }
-        /// <summary>
-        /// Fills keyframe description into the specified StringBuilder
-        /// </summary>
-        /// <param name="desc">Description to fill</param>
-        public void GetDescription(ref StringBuilder desc)
-        {
-            desc.AppendLine("==> " + this.Joint);
-
-            for (int i = 0; i < this.Keyframes.Length; i++)
-            {
-                this.Keyframes[i].GetDescription(ref desc);
-            }
         }
         /// <summary>
         /// Gets text representation
