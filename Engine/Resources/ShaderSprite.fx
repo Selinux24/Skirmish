@@ -57,39 +57,39 @@ PSVertexPositionTexture VSPositionTexture(VSVertexPositionTexture input)
 
 float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
-	return gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex)) * gColor;
+	return gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)) * gColor;
 }
 float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
 	//Grayscale of red channel
 	return float4(color.rrr, 1);
 }
 float4 PSPositionTextureGREEN(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
 	//Grayscale of green channel
 	return float4(color.ggg, 1);
 }
 float4 PSPositionTextureBLUE(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
    	//Grayscale of blue channel
 	return float4(color.bbb, 1);
 }
 float4 PSPositionTextureALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
    	//Grayscale of alpha channel
 	return float4(color.aaa, 1);
 }
 float4 PSPositionTextureNOALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 
    	//Color channel
 	return float4(color.rgb, 1);

@@ -983,7 +983,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swSpot = Stopwatch.StartNew();
 #endif
-            SceneLightSpot[] spotLights = context.Lights.GetVisibleSpotLights(context.Frustum);
+            SceneLightSpot[] spotLights = context.Lights.GetVisibleSpotLights(context.Frustum, context.EyePosition);
             if (spotLights != null && spotLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredSpotLight;
@@ -1031,7 +1031,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swPoint = Stopwatch.StartNew();
 #endif
-            SceneLightPoint[] pointLights = context.Lights.GetVisiblePointLights(context.Frustum);
+            SceneLightPoint[] pointLights = context.Lights.GetVisiblePointLights(context.Frustum, context.EyePosition);
             if (pointLights != null && pointLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredPointLight;

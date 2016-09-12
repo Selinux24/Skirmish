@@ -270,23 +270,29 @@ namespace Engine
         /// Gets the visible point lights
         /// </summary>
         /// <param name="frustum">Camera frustum</param>
+        /// <param name="viewerPosition">Viewer position</param>
         /// <returns>Returns the visible point lights array</returns>
-        public SceneLightPoint[] GetVisiblePointLights(BoundingFrustum frustum)
+        public SceneLightPoint[] GetVisiblePointLights(BoundingFrustum frustum, Vector3 viewerPosition)
         {
-            return this.pointLights.FindAll(l =>
-                l.Enabled == true &&
-                frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint).ToArray();
+            var lights = this.pointLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
+
+            lights.Sort((l1, l2) => { return Vector3.DistanceSquared(viewerPosition, l1.Position).CompareTo(Vector3.DistanceSquared(viewerPosition, l2.Position)); });
+
+            return lights.ToArray();
         }
         /// <summary>
         /// Gets the visible spot lights
         /// </summary>
         /// <param name="frustum">Camera frustum</param>
+        /// <param name="viewerPosition">Viewer position</param>
         /// <returns>Returns the visible spot lights array</returns>
-        public SceneLightSpot[] GetVisibleSpotLights(BoundingFrustum frustum)
+        public SceneLightSpot[] GetVisibleSpotLights(BoundingFrustum frustum, Vector3 viewerPosition)
         {
-            return this.spotLights.FindAll(l => 
-                l.Enabled == true &&
-                Helper.Contains(frustum, l.BoundingFrustum) != ContainmentType.Disjoint).ToArray();
+            var lights = this.spotLights.FindAll(l => l.Enabled == true && Helper.Contains(frustum, l.BoundingFrustum) != ContainmentType.Disjoint);
+
+            lights.Sort((l1, l2) => { return Vector3.DistanceSquared(viewerPosition, l1.Position).CompareTo(Vector3.DistanceSquared(viewerPosition, l2.Position)); });
+
+            return lights.ToArray();
         }
     }
 }

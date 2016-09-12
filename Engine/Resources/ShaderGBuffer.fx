@@ -264,7 +264,7 @@ GBufferPSOutput PSPositionTexture(PSVertexPositionTexture input)
 {
     GBufferPSOutput output = (GBufferPSOutput)0;
 
-	output.color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+	output.color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	output.normal = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	output.depth = float4(input.positionWorld, 0.0f);
 
@@ -355,7 +355,7 @@ GBufferPSOutput PSPositionNormalTexture(PSVertexPositionNormalTexture input)
 {
     GBufferPSOutput output = (GBufferPSOutput)0;
 
-	output.color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+	output.color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	output.normal = float4(input.normalWorld, gMaterial.SpecularPower);
 	output.depth = float4(input.positionWorld, gMaterial.SpecularIntensity);
 
@@ -456,7 +456,7 @@ GBufferPSOutput PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTang
 {
     GBufferPSOutput output = (GBufferPSOutput)0;
 
-	float4 color = gTextureArray.Sample(SamplerAnisotropic, float3(input.tex, input.textureIndex));
+	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
 	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 

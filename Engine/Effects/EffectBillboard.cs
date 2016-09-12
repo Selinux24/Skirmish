@@ -609,8 +609,8 @@ namespace Engine.Effects
             if (lights != null)
             {
                 var dirLights = lights.GetVisibleDirectionalLights(viewFrustum);
-                var pointLights = lights.GetVisiblePointLights(viewFrustum);
-                var spotLights = lights.GetVisibleSpotLights(viewFrustum);
+                var pointLights = lights.GetVisiblePointLights(viewFrustum, eyePositionWorld);
+                var spotLights = lights.GetVisibleSpotLights(viewFrustum, eyePositionWorld);
 
                 this.DirLights = new[]
                 {
