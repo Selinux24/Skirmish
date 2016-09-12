@@ -127,11 +127,11 @@ namespace Engine
             /// <summary>
             /// Maximum number of patches in high level of detail
             /// </summary>
-            public const int MaxPatchesHighLevel = 6;
+            public const int MaxPatchesHighLevel = 8;
             /// <summary>
             /// Maximum number of patches in medium level
             /// </summary>
-            public const int MaxPatchesMediumLevel = 7;
+            public const int MaxPatchesMediumLevel = 10;
             /// <summary>
             /// Maximum number of patches in low level
             /// </summary>
