@@ -184,7 +184,7 @@ namespace TerrainTest
                 Static = false,
                 TextureIndex = 2,
             };
-            this.helicopter = this.AddModel(heliDesc, Matrix.RotationY(0));
+            this.helicopter = this.AddModel(heliDesc);
             this.helicopter.SetManipulator(new HeliManipulator());
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);

@@ -22,21 +22,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="fileName">Collada model</param>
-        /// <param name="orientation">Up axis orientation</param>
         /// <returns>Returns the loaded contents</returns>
-        public static ModelContent[] Load(string contentFolder, string fileName, GeometryOrientations orientation = GeometryOrientations.YUp)
-        {
-            return Load(contentFolder, fileName, Matrix.Identity, orientation);
-        }
-        /// <summary>
-        /// Load a collada model
-        /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="fileName">Collada model</param>
-        /// <param name="transform">Global geometry transform</param>
-        /// <param name="orientation">Up axis orientation</param>
-        /// <returns>Returns the loaded contents</returns>
-        public static ModelContent[] Load(string contentFolder, string fileName, Matrix transform, GeometryOrientations orientation = GeometryOrientations.YUp)
+        public static ModelContent[] Load(string contentFolder, string fileName)
         {
             MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList != null && modelList.Length > 0)
@@ -46,13 +33,6 @@ namespace Engine.Content
                 for (int i = 0; i < modelList.Length; i++)
                 {
                     COLLADA dae = COLLADA.Load(modelList[i]);
-
-                    GeometryOrientations daeUp = GeometryOrientations.YUp;
-                    if (dae.Asset.UpAxis == EnumAxis.XUp) daeUp = GeometryOrientations.XUp;
-                    else if (dae.Asset.UpAxis == EnumAxis.YUp) daeUp = GeometryOrientations.YUp;
-                    else if (dae.Asset.UpAxis == EnumAxis.ZUp) daeUp = GeometryOrientations.ZUp;
-
-                    Matrix globalTransform = LoaderConversion.Compute(daeUp, orientation);
 
                     ModelContent modelContent = new ModelContent();
 
@@ -117,7 +97,7 @@ namespace Engine.Content
                                         {
                                             Joint root = ProcessJoints(null, node.Nodes[0]);
 
-                                            skeleton = new Skeleton(root, globalTransform);
+                                            skeleton = new Skeleton(root);
                                         }
                                     }
 
@@ -226,7 +206,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        public static void ProcessLibraryLights(COLLADA dae, ModelContent modelContent)
+        private static void ProcessLibraryLights(COLLADA dae, ModelContent modelContent)
         {
             if (dae.LibraryLights != null && dae.LibraryLights.Length > 0)
             {
@@ -282,7 +262,7 @@ namespace Engine.Content
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="contentFolder">Content folder</param>
-        public static void ProcessLibraryImages(COLLADA dae, ModelContent modelContent, string contentFolder)
+        private static void ProcessLibraryImages(COLLADA dae, ModelContent modelContent, string contentFolder)
         {
             if (dae.LibraryImages != null && dae.LibraryImages.Length > 0)
             {
@@ -308,7 +288,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        public static void ProcessLibraryMaterial(COLLADA dae, ModelContent modelContent)
+        private static void ProcessLibraryMaterial(COLLADA dae, ModelContent modelContent)
         {
             if (dae.LibraryMaterials != null && dae.LibraryMaterials.Length > 0 &&
                 dae.LibraryEffects != null && dae.LibraryEffects.Length > 0)
@@ -348,7 +328,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        public static void ProcessLibraryGeometries(COLLADA dae, ModelContent modelContent)
+        private static void ProcessLibraryGeometries(COLLADA dae, ModelContent modelContent)
         {
             if (dae.LibraryGeometries != null && dae.LibraryGeometries.Length > 0)
             {
@@ -370,7 +350,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        public static void ProcessLibraryControllers(COLLADA dae, ModelContent modelContent)
+        private static void ProcessLibraryControllers(COLLADA dae, ModelContent modelContent)
         {
             if (dae.LibraryControllers != null && dae.LibraryControllers.Length > 0)
             {
@@ -389,7 +369,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        public static void ProcessLibraryAnimations(COLLADA dae, ModelContent modelContent)
+        private static void ProcessLibraryAnimations(COLLADA dae, ModelContent modelContent)
         {
             if (dae.LibraryAnimations != null && dae.LibraryAnimations.Length > 0)
             {
@@ -613,11 +593,20 @@ namespace Engine.Content
                     }
                 }
 
+                //Reorder vertices
+                VertexData[] data = new VertexData[verts.Count];
+                for (int i = 0; i < data.Length; i += 3)
+                {
+                    data[i + 0] = verts[i + 0];
+                    data[i + 1] = verts[i + 2];
+                    data[i + 2] = verts[i + 1];
+                }
+
                 SubMeshContent meshInfo = new SubMeshContent()
                 {
                     Topology = PrimitiveTopology.TriangleList,
                     VertexType = vertexType,
-                    Vertices = verts.ToArray(),
+                    Vertices = data,
                     Material = polyList.Material,
                 };
 

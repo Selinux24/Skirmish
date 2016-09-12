@@ -116,10 +116,11 @@ namespace Engine.Collada
 
             for (int i = 0; i < length * stride; i += stride)
             {
+                //To left handed -> Z flipped to Y
                 Vector3 v = new Vector3(
                     this.FloatArray[i + x],
-                    this.FloatArray[i + y],
-                    this.FloatArray[i + z]);
+                    this.FloatArray[i + z],
+                    this.FloatArray[i + y]);
 
                 verts.Add(v);
             }
@@ -145,10 +146,11 @@ namespace Engine.Collada
 
             for (int i = 0; i < length * stride; i += stride)
             {
+                //To left handed -> Z flipped to Y
                 Vector4 v = new Vector4(
                     this.FloatArray[i + x],
-                    this.FloatArray[i + y],
                     this.FloatArray[i + z],
+                    this.FloatArray[i + y],
                     this.FloatArray[i + w]);
 
                 verts.Add(v);
@@ -168,28 +170,39 @@ namespace Engine.Collada
 
             List<Matrix> mats = new List<Matrix>();
 
+            //From right handed
+            //{ rx, ry, rz, 0 }  
+            //{ ux, uy, uz, 0 }  
+            //{ lx, ly, lz, 0 }  
+            //{ px, py, pz, 1 }
+            //To left handed
+            //{ rx, rz, ry, 0 }  
+            //{ lx, lz, ly, 0 }  
+            //{ ux, uz, uy, 0 }  
+            //{ px, pz, py, 1 }
+
             for (int i = 0; i < length * stride; i += stride)
             {
                 Matrix m = new Matrix()
                 {
                     M11 = this.FloatArray[i + 0],
-                    M12 = this.FloatArray[i + 1],
-                    M13 = this.FloatArray[i + 2],
+                    M12 = this.FloatArray[i + 2],
+                    M13 = this.FloatArray[i + 1],
                     M14 = this.FloatArray[i + 3],
 
-                    M21 = this.FloatArray[i + 4],
-                    M22 = this.FloatArray[i + 5],
-                    M23 = this.FloatArray[i + 6],
-                    M24 = this.FloatArray[i + 7],
+                    M31 = this.FloatArray[i + 4],
+                    M32 = this.FloatArray[i + 6],
+                    M33 = this.FloatArray[i + 5],
+                    M34 = this.FloatArray[i + 7],
 
-                    M31 = this.FloatArray[i + 8],
-                    M32 = this.FloatArray[i + 9],
-                    M33 = this.FloatArray[i + 10],
-                    M34 = this.FloatArray[i + 11],
+                    M21 = this.FloatArray[i + 8],
+                    M22 = this.FloatArray[i + 10],
+                    M23 = this.FloatArray[i + 9],
+                    M24 = this.FloatArray[i + 11],
 
                     M41 = this.FloatArray[i + 12],
-                    M42 = this.FloatArray[i + 13],
-                    M43 = this.FloatArray[i + 14],
+                    M42 = this.FloatArray[i + 14],
+                    M43 = this.FloatArray[i + 13],
                     M44 = this.FloatArray[i + 15],
                 };
 

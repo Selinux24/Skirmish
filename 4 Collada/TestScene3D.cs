@@ -91,7 +91,7 @@ namespace Collada
                 Opaque = true,
             };
 
-            this.ground = this.AddScenery(terrainDescription, Matrix.Scaling(20, 10, 20));
+            this.ground = this.AddScenery(terrainDescription);
             this.helicoptersModel = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = "Resources",

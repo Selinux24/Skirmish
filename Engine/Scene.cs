@@ -302,21 +302,9 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Model AddModel(ModelDescription description, bool optimize = true, int order = 0)
         {
-            return AddModel(description, Matrix.Identity, optimize, order);
-        }
-        /// <summary>
-        /// Adds new model
-        /// </summary>
-        /// <param name="description">Model description</param>
-        /// <param name="transform">Initial transform to apply to loaded geometry</param>
-        /// <param name="optimize">Optimize model</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns new model</returns>
-        public Model AddModel(ModelDescription description, Matrix transform, bool optimize = true, int order = 0)
-        {
             Model newModel = null;
 
-            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
+            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName);
             if (geo.Length == 1)
             {
                 if (optimize) geo[0].Optimize();
@@ -364,22 +352,9 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public ModelInstanced AddInstancingModel(ModelInstancedDescription description, bool optimize = true, int order = 0)
         {
-            return AddInstancingModel(description, Matrix.Identity, optimize, order);
-        }
-        /// <summary>
-        /// Adds new instanced model
-        /// </summary>
-        /// <param name="description">Model description</param>
-        /// <param name="transform">Initial transform to apply to loaded geometry</param>
-        /// <param name="instances">Number of instances for the model</param>
-        /// <param name="optimize">Optimize model</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(ModelInstancedDescription description, Matrix transform, bool optimize = true, int order = 0)
-        {
             ModelInstanced newModel = null;
 
-            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, transform);
+            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName);
             if (geo.Length == 1)
             {
                 if (optimize) geo[0].Optimize();
@@ -426,23 +401,11 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Scenery AddScenery(GroundDescription description, bool optimize = true, int order = 0)
         {
-            return AddScenery(description, Matrix.Identity, optimize, order);
-        }
-        /// <summary>
-        /// Adds new terrain model
-        /// </summary>
-        /// <param name="transform">Initial transform to apply to loaded geometry</param>
-        /// <param name="description">Terrain description</param>
-        /// <param name="optimize">Optimize model</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns new model</returns>
-        public Scenery AddScenery(GroundDescription description, Matrix transform, bool optimize = true, int order = 0)
-        {
             ModelContent geo = null;
 
             if (description.Model != null)
             {
-                var t = LoaderCOLLADA.Load(description.ContentPath, description.Model.ModelFileName, transform);
+                var t = LoaderCOLLADA.Load(description.ContentPath, description.Model.ModelFileName);
 
                 geo = t[0];
             }
@@ -453,8 +416,7 @@ namespace Engine
                     description.Heightmap.HeightmapFileName,
                     description.Textures.TexturesLR,
                     description.Heightmap.CellSize,
-                    description.Heightmap.MaximumHeight,
-                    transform);
+                    description.Heightmap.MaximumHeight);
             }
 
             if (geo != null)

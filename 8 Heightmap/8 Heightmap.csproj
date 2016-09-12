@@ -179,8 +179,7 @@
     <Content Include="Resources\Helicopter\helicopter - tires - 2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Helicopter\Helicopter.dae" />
-    <Content Include="Resources\Police\skin.png">
+    <Content Include="Resources\Helicopter\Helicopter.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Scenery\Textures\alpha001.dds">
@@ -319,9 +318,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Content Include="Resources\Scenery\Foliage\Model\tree1.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Police\police.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Scenery\Objects\torch.dae">

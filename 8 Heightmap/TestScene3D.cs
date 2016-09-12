@@ -44,6 +44,8 @@ namespace HeightmapTest
         //private TriangleListDrawer soldierTris = null;
         private LineListDrawer soldierLines = null;
 
+        private Model helicopter = null;
+
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
         {
@@ -243,6 +245,28 @@ namespace HeightmapTest
 
             #endregion
 
+            #region Helicopter
+
+            this.helicopter = this.AddModel(new ModelDescription()
+            {
+                ContentPath = @"Resources/Helicopter",
+                ModelFileName = "Helicopter.dae",
+            });
+
+            this.helicopter.Manipulator.SetScale(10, true);
+
+            {
+                Vector3 position;
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(100, 100, out position, out triangle, out distance))
+                {
+                    this.helicopter.Manipulator.SetPosition(position, true);
+                }
+            }
+
+            #endregion
+
             #region Torchs
 
             int torchCount = 50;
@@ -265,7 +289,6 @@ namespace HeightmapTest
                 if (this.terrain.FindTopGroundPosition(5, 5, out position, out triangle, out distance))
                 {
                     this.torchs.Instances[0].Manipulator.SetScale(1f, 1f, 1f, true);
-                    this.torchs.Instances[0].Manipulator.SetRotation(0f, -MathUtil.PiOverTwo, 0f, true);
                     this.torchs.Instances[0].Manipulator.SetPosition(position, true);
                     BoundingBox tbbox = this.torchs.Instances[0].GetBoundingBox();
 
@@ -315,7 +338,6 @@ namespace HeightmapTest
                 this.terrain.FindTopGroundPosition(pos.X, pos.Z, out pos, out t, out d);
 
                 this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
-                this.torchs.Instances[i].Manipulator.SetRotation(0f, -MathUtil.PiOverTwo, 0f, true);
                 this.torchs.Instances[i].Manipulator.SetPosition(pos, true);
                 BoundingBox tbbox = this.torchs.Instances[i].GetBoundingBox();
 

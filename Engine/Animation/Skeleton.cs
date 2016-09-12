@@ -9,10 +9,6 @@ namespace Engine.Animation
     public class Skeleton
     {
         /// <summary>
-        /// Root transform matrix
-        /// </summary>
-        public readonly Matrix RootTransform = Matrix.Identity;
-        /// <summary>
         /// Root joint
         /// </summary>
         public Joint Root { get; private set; }
@@ -60,21 +56,15 @@ namespace Engine.Animation
         /// <param name="time">Time</param>
         /// <param name="clipName">Clip name</param>
         /// <param name="joint">Joint</param>
-        /// <param name="rootTransform">Root transform</param>
-        private static void BuildTransforms(float time, string clipName, Joint joint, Matrix rootTransform)
+        private static void BuildTransforms(float time, string clipName, Joint joint)
         {
             joint.LocalTransform = joint.Animations[clipName].Interpolate(time);
-
-            if (joint.Parent == null)
-            {
-                joint.LocalTransform = rootTransform * joint.LocalTransform;
-            }
 
             if (joint.Childs != null && joint.Childs.Length > 0)
             {
                 for (int i = 0; i < joint.Childs.Length; i++)
                 {
-                    BuildTransforms(time, clipName, joint.Childs[i], Matrix.Identity);
+                    BuildTransforms(time, clipName, joint.Childs[i]);
                 }
             }
         }
@@ -114,11 +104,9 @@ namespace Engine.Animation
         /// Contructor
         /// </summary>
         /// <param name="root">Root joint</param>
-        /// <param name="rootTransform">Root transform</param>
-        public Skeleton(Joint root, Matrix rootTransform)
+        public Skeleton(Joint root)
         {
             this.Root = root;
-            this.RootTransform = rootTransform;
 
             List<string> names = new List<string>();
             FlattenSkeleton(root, names);
@@ -135,7 +123,7 @@ namespace Engine.Animation
         /// <param name="clipName">Clip name</param>
         public void Update(float time, string clipName)
         {
-            BuildTransforms(time, clipName, this.Root, this.RootTransform);
+            BuildTransforms(time, clipName, this.Root);
 
             UpdateTransforms(this.Root);
 

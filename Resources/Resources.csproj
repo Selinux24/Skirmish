@@ -141,6 +141,7 @@
     <None Include="Blender\Police\skin.png" />
     <Content Include="Collada\Police\police.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <None Include="Collada\Poly\poly.dae" />
     <None Include="Collada\Rocks\rocks.dae" />
@@ -156,7 +157,9 @@
     <None Include="Collada\Tree1\tree1_1.dae" />
     <None Include="Collada\Tree1\tree1_2.dae" />
     <None Include="Collada\Tree2\tree2.dae" />
-    <None Include="Collada\TwoLevels\two_levels.dae" />
+    <Content Include="Collada\TwoLevels\two_levels.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="Blender\AniCube\aniCube.png" />
@@ -227,10 +230,14 @@
     <None Include="Collada\Tree1\leafs1a.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Collada\TwoLevels\terrain.png" />
+    <Content Include="Collada\TwoLevels\terrain.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Collada\TwoLevels\terrain_nmap.png" />
+    <Content Include="Collada\TwoLevels\terrain_nmap.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="Blender\TwoLevels\terrain.png" />

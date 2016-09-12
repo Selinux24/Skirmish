@@ -613,10 +613,11 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="heightMap">Height map</param>
-        /// <param name="texture">Texture</param>
-        /// <param name="transform">Transform to apply to vertices</param>
+        /// <param name="textures">Texture list</param>
+        /// <param name="cellSize">Cell size</param>
+        /// <param name="cellHeight">Cell height</param>
         /// <returns>Returns a new model content</returns>
-        public static ModelContent FromHeightmap(string contentFolder, string heightMap, string[] textures, float cellSize, float cellHeight, Matrix transform)
+        public static ModelContent FromHeightmap(string contentFolder, string heightMap, string[] textures, float cellSize, float cellHeight)
         {
             ModelContent modelContent = new ModelContent();
 
