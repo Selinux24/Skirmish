@@ -565,23 +565,15 @@ namespace Engine.Helpers
             }
         }
         /// <summary>
-        /// Creates a random 1D texture
+        /// Creates a texture filled with specified values
         /// </summary>
         /// <param name="device">Graphics device</param>
         /// <param name="size">Texture size</param>
-        /// <param name="seed">Random seed</param>
+        /// <param name="values">Color values</param>
         /// <returns>Returns created texture</returns>
-        public static ShaderResourceView CreateRandomTexture(this Device device, int size, int seed = 0)
+        public static ShaderResourceView CreateTexture(this Device device, int size, Vector4[] values)
         {
-            Random rnd = new Random(seed);
-
-            var randomValues = new List<Vector4>();
-            for (int i = 0; i < size; i++)
-            {
-                randomValues.Add(rnd.NextVector4(new Vector4(-1, -1, -1, -1), new Vector4(1, 1, 1, 1)));
-            }
-
-            using (DataStream str = DataStream.Create(randomValues.ToArray(), false, false))
+            using (DataStream str = DataStream.Create(values, false, false))
             {
                 using (Resource randTex = new Texture1D(
                     device,
@@ -607,6 +599,25 @@ namespace Engine.Helpers
                     return new ShaderResourceView(device, randTex, srvDesc);
                 }
             }
+        }
+        /// <summary>
+        /// Creates a random 1D texture
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="size">Texture size</param>
+        /// <param name="seed">Random seed</param>
+        /// <returns>Returns created texture</returns>
+        public static ShaderResourceView CreateRandomTexture(this Device device, int size, int seed = 0)
+        {
+            Random rnd = new Random(seed);
+
+            var randomValues = new List<Vector4>();
+            for (int i = 0; i < size; i++)
+            {
+                randomValues.Add(rnd.NextVector4(new Vector4(-1, -1, -1, -1), new Vector4(1, 1, 1, 1)));
+            }
+
+            return CreateTexture(device, size, randomValues.ToArray());
         }
         /// <summary>
         /// Creates a texture for render target use

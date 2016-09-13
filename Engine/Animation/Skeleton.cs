@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.Animation
@@ -24,6 +25,10 @@ namespace Engine.Animation
                 return this.FindJoint(this.Root, jointName);
             }
         }
+        /// <summary>
+        /// Number of joints in the skeleton
+        /// </summary>
+        public int JointCount { get; private set; }
         /// <summary>
         /// Joint names
         /// </summary>
@@ -54,17 +59,17 @@ namespace Engine.Animation
         /// Built skeleton transforms at time
         /// </summary>
         /// <param name="time">Time</param>
-        /// <param name="clipName">Clip name</param>
         /// <param name="joint">Joint</param>
-        private static void BuildTransforms(float time, string clipName, Joint joint)
+        /// <param name="animations">Animation list</param>
+        private static void BuildTransforms(float time, Joint joint, JointAnimation[] animations)
         {
-            joint.LocalTransform = joint.Animations[clipName].Interpolate(time);
+            joint.LocalTransform = Array.Find(animations, a => a.Joint == joint.Name).Interpolate(time);
 
             if (joint.Childs != null && joint.Childs.Length > 0)
             {
                 for (int i = 0; i < joint.Childs.Length; i++)
                 {
-                    BuildTransforms(time, clipName, joint.Childs[i]);
+                    BuildTransforms(time, joint.Childs[i], animations);
                 }
             }
         }
@@ -111,6 +116,7 @@ namespace Engine.Animation
             List<string> names = new List<string>();
             FlattenSkeleton(root, names);
 
+            this.JointCount = names.Count;
             this.JointNames = names.ToArray();
             this.FinalTransforms = Helper.CreateArray<Matrix>(names.Count, Matrix.Identity);
         }
@@ -119,10 +125,10 @@ namespace Engine.Animation
         /// Updates skeleton state at time
         /// </summary>
         /// <param name="time">Time</param>
-        /// <param name="clipName">Clip name</param>
-        public void Update(float time, string clipName)
+        /// <param name="animations">Joint animations list</param>
+        public void Update(float time, JointAnimation[] animations)
         {
-            BuildTransforms(time, clipName, this.Root);
+            BuildTransforms(time, this.Root, animations);
 
             UpdateTransforms(this.Root);
 

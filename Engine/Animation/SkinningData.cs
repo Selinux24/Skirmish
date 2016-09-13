@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.Animation
 {
@@ -13,6 +14,19 @@ namespace Engine.Animation
         public const string DefaultClip = "default";
 
         /// <summary>
+        /// Animations clip dictionary
+        /// </summary>
+        private Dictionary<string, JointAnimation[]> Animations = null;
+        /// <summary>
+        /// Current clip name
+        /// </summary>
+        private string clipName = null;
+        /// <summary>
+        /// Current animation list
+        /// </summary>
+        private JointAnimation[] currentAnimations = null;
+
+        /// <summary>
         /// Skeleton
         /// </summary>
         public Skeleton Skeleton = null;
@@ -23,7 +37,35 @@ namespace Engine.Animation
         /// <summary>
         /// Current clip name
         /// </summary>
-        public string ClipName { get; private set; }
+        public string ClipName
+        {
+            get
+            {
+                return this.clipName;
+            }
+            set
+            {
+                if (this.clipName != value)
+                {
+                    this.clipName = value;
+
+                    if (this.clipName != null)
+                    {
+                        this.currentAnimations = this.Animations[this.clipName];
+                        this.Duration = this.currentAnimations[0].Duration;
+                    }
+                    else
+                    {
+                        this.currentAnimations = null;
+                        this.Duration = 0;
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Current clip animation duration
+        /// </summary>
+        public float Duration { get; private set; }
         /// <summary>
         /// Clip position
         /// </summary>
@@ -37,8 +79,25 @@ namespace Engine.Animation
         /// Constructor
         /// </summary>
         /// <param name="skeleton">Skeleton</param>
-        public SkinningData(Skeleton skeleton)
+        /// <param name="animations">Animation list</param>
+        public SkinningData(Skeleton skeleton, JointAnimation[] animations)
         {
+            this.Animations = new Dictionary<string, JointAnimation[]>();
+            this.Skeleton = skeleton;
+
+            this.Animations.Add(SkinningData.DefaultClip, animations);
+            this.Time = 0;
+            this.ClipName = DefaultClip;
+            this.Loop = true;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="skeleton">Skeleton</param>
+        /// <param name="animations">Animation dictionary</param>
+        public SkinningData(Skeleton skeleton, Dictionary<string, JointAnimation[]> animations)
+        {
+            this.Animations = animations;
             this.Skeleton = skeleton;
             this.Time = 0;
             this.ClipName = DefaultClip;
@@ -49,22 +108,25 @@ namespace Engine.Animation
         /// Update state
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public virtual void Update(GameTime gameTime)
+        public void Update(GameTime gameTime)
         {
             if (this.ClipName != null)
             {
-                this.Skeleton.Update(this.Time, this.ClipName);
-            }
+                this.Skeleton.Update(this.Time, this.currentAnimations);
 
-            this.Time += gameTime.ElapsedSeconds;
+                this.Time += gameTime.ElapsedSeconds;
+            }
         }
         /// <summary>
-        /// Sets clip to play
+        /// Test animation at time
         /// </summary>
-        /// <param name="clipName">Clip name</param>
-        public void SetClip(string clipName)
+        /// <param name="time">Time</param>
+        public void Test(float time)
         {
-            this.ClipName = clipName;
+            if (this.ClipName != null)
+            {
+                this.Skeleton.Update(time, this.currentAnimations);
+            }
         }
         /// <summary>
         /// Gets final transform collection

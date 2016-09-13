@@ -256,9 +256,11 @@ namespace Engine.Common
         {
             if (modelContent.SkinningInfo != null)
             {
-                InitializeJoints(modelContent, modelContent.SkinningInfo.Skeleton.Root);
+                List<JointAnimation> animations = new List<JointAnimation>();
 
-                drw.SkinningData = new SkinningData(modelContent.SkinningInfo.Skeleton);
+                InitializeJoints(modelContent, modelContent.SkinningInfo.Skeleton.Root, animations);
+
+                drw.SkinningData = new SkinningData(modelContent.SkinningInfo.Skeleton, animations.ToArray());
             }
         }
         /// <summary>
@@ -266,7 +268,8 @@ namespace Engine.Common
         /// </summary>
         /// <param name="modelContent">Model content</param>
         /// <param name="joint">Joint to initialize</param>
-        private static void InitializeJoints(ModelContent modelContent, Joint joint)
+        /// <param name="animations">Animation list to feed</param>
+        private static void InitializeJoints(ModelContent modelContent, Joint joint, List<JointAnimation> animations)
         {
             List<JointAnimation> boneAnimations = new List<JointAnimation>();
 
@@ -284,7 +287,7 @@ namespace Engine.Common
             if (boneAnimations.Count > 0)
             {
                 //TODO: Only one bone animation at a time
-                joint.Animations.Add(SkinningData.DefaultClip, boneAnimations.ToArray()[0]);
+                animations.Add(boneAnimations.ToArray()[0]);
             }
 
             foreach (string controllerName in modelContent.SkinningInfo.Controller)
@@ -305,7 +308,7 @@ namespace Engine.Common
             {
                 foreach (var child in joint.Childs)
                 {
-                    InitializeJoints(modelContent, child);
+                    InitializeJoints(modelContent, child, animations);
                 }
             }
         }

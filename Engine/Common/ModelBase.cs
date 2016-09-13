@@ -26,8 +26,6 @@ namespace Engine.Common
         /// </summary>
         public int TextureCount { get; private set; }
 
-        public ModelContent ModelContent = null;
-
         /// <summary>
         /// Base model
         /// </summary>
@@ -57,8 +55,6 @@ namespace Engine.Common
 
             this.defaultLevelOfDetail = LevelOfDetailEnum.High;
             this.LevelOfDetail = LevelOfDetailEnum.High;
-
-            this.ModelContent = content;
         }
         /// <summary>
         /// Base model
@@ -230,7 +226,7 @@ namespace Engine.Common
             if (newData != null && newData.SkinningData != null &&
                 prevData != null && prevData.SkinningData != null)
             {
-                newData.SkinningData.SetClip(prevData.SkinningData.ClipName);
+                newData.SkinningData.ClipName = prevData.SkinningData.ClipName;
                 newData.SkinningData.AnimationVelocity = prevData.SkinningData.AnimationVelocity;
                 newData.SkinningData.Loop = prevData.SkinningData.Loop;
                 newData.SkinningData.Time = prevData.SkinningData.Time;

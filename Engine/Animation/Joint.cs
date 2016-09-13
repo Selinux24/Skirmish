@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 
 namespace Engine.Animation
 {
@@ -32,10 +31,6 @@ namespace Engine.Animation
         /// World transform matrix
         /// </summary>
         public Matrix GlobalTransform { get; set; }
-        /// <summary>
-        /// Joint animation dictionary
-        /// </summary>
-        public Dictionary<string, JointAnimation> Animations { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -43,15 +38,13 @@ namespace Engine.Animation
         /// <param name="name">Joint name</param>
         /// <param name="parent">Parent joint</param>
         /// <param name="local">Local transform</param>
-        /// <param name="world">World transform</param>
-        public Joint(string name, Joint parent, Matrix local, Matrix world)
+        /// <param name="global">Global transform</param>
+        public Joint(string name, Joint parent, Matrix local, Matrix global)
         {
-            this.Animations = new Dictionary<string, JointAnimation>();
-
             this.Name = name;
             this.Parent = parent;
-            this.GlobalTransform = world;
             this.LocalTransform = local;
+            this.GlobalTransform = global;
         }
 
         /// <summary>
