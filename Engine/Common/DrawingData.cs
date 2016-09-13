@@ -36,12 +36,8 @@ namespace Engine.Common
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
-        /// <param name="instanced">Is instanced</param>
-        /// <param name="instances">Instance count</param>
-        /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
-        /// <param name="textureCount">Number of textures</param>
-        /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
-        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
+        /// <param name="description">Data description</param>
+        /// <returns>Returns the generated drawing data objects</returns>
         public static DrawingData Build(Game game, ModelContent modelContent, DrawingDataDescription description)
         {
             DrawingData res = new DrawingData();
@@ -69,7 +65,10 @@ namespace Engine.Common
         /// <summary>
         /// Initialize textures
         /// </summary>
+        /// <param name="drw">Drawing data</param>
+        /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
+        /// <param name="textureCount">Texture count</param>
         private static void InitializeTextures(ref DrawingData drw, Game game, ModelContent modelContent, int textureCount)
         {
             if (modelContent.Images != null)
@@ -92,6 +91,8 @@ namespace Engine.Common
         /// <summary>
         /// Initialize materials
         /// </summary>
+        /// <param name="drw">Drawing data</param>
+        /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
         private static void InitializeMaterials(ref DrawingData drw, Game game, ModelContent modelContent)
         {
@@ -120,11 +121,10 @@ namespace Engine.Common
         /// <summary>
         /// Initilize geometry
         /// </summary>
+        /// <param name="drw">Drawing data</param>
+        /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
-        /// <param name="instanced">Instaced</param>
-        /// <param name="instances">Instance count</param>
-        /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
-        /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
+        /// <param name="description">Description</param>
         private static void InitializeGeometry(ref DrawingData drw, Game game, ModelContent modelContent, DrawingDataDescription description)
         {
             foreach (string meshName in modelContent.Geometry.Keys)
@@ -249,18 +249,23 @@ namespace Engine.Common
         /// <summary>
         /// Initialize skinned data
         /// </summary>
+        /// <param name="drw">Drawing data</param>
+        /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
-        /// <param name="skinList">Skins</param>
         private static void InitializeSkinnedData(ref DrawingData drw, Game game, ModelContent modelContent)
         {
             if (modelContent.SkinningInfo != null)
             {
                 InitializeJoints(modelContent, modelContent.SkinningInfo.Skeleton.Root);
 
-                drw.SkinningData = SkinningData.Create(modelContent.SkinningInfo.Skeleton);
+                drw.SkinningData = new SkinningData(modelContent.SkinningInfo.Skeleton);
             }
         }
-
+        /// <summary>
+        /// Initialize skeleton data
+        /// </summary>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="joint">Joint to initialize</param>
         private static void InitializeJoints(ModelContent modelContent, Joint joint)
         {
             List<JointAnimation> boneAnimations = new List<JointAnimation>();
@@ -307,6 +312,8 @@ namespace Engine.Common
         /// <summary>
         /// Initialize mesh buffers in the graphics device
         /// </summary>
+        /// <param name="drw">Drawing data</param>
+        /// <param name="game">Game</param>
         private static void InitializeMeshes(ref DrawingData drw, Game game)
         {
             foreach (MeshMaterialsDictionary dictionary in drw.Meshes.Values)
@@ -318,11 +325,11 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Find keyframes of a joint
+        /// Find keyframes for a joint
         /// </summary>
         /// <param name="jointName">Joint name</param>
         /// <param name="animations">Animation dictionary</param>
-        /// <returns>Returns animation content of joint</returns>
+        /// <returns>Returns joint's animation content</returns>
         private static AnimationContent[] FindJointKeyframes(string jointName, Dictionary<string, AnimationContent[]> animations)
         {
             foreach (string key in animations.Keys)
@@ -349,49 +356,14 @@ namespace Engine.Common
         /// </summary>
         public void Dispose()
         {
-            if (this.Meshes != null)
-            {
-                foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
-                {
-                    foreach (Mesh mesh in dictionary.Values)
-                    {
-                        mesh.Dispose();
-                    }
-                }
-                this.Meshes.Clear();
-                this.Meshes = null;
-            }
+            Helper.Dispose(this.Meshes);
+            Helper.Dispose(this.Materials);
+            Helper.Dispose(this.Textures);
 
-            if (this.Materials != null)
-            {
-                foreach (MeshMaterial material in this.Materials.Values)
-                {
-                    if (material != null)
-                    {
-                        material.Dispose();
-                    }
-                }
-                this.Materials.Clear();
-                this.Materials = null;
-            }
-
-            if (this.Textures != null)
-            {
-                foreach (ShaderResourceView view in this.Textures.Values)
-                {
-                    if (view != null)
-                    {
-                        view.Dispose();
-                    }
-                }
-                this.Textures.Clear();
-                this.Textures = null;
-            }
-
-            if (this.SkinningData != null)
-            {
-                this.SkinningData = null;
-            }
+            this.Meshes = null;
+            this.Materials = null;
+            this.Textures = null;
+            this.SkinningData = null;
         }
 
         /// <summary>
@@ -399,6 +371,15 @@ namespace Engine.Common
         /// </summary>
         /// <returns>Returns the drawing data's point list</returns>
         public Vector3[] GetPoints()
+        {
+            return this.GetPoints(Matrix.Identity);
+        }
+        /// <summary>
+        /// Gets the drawing data's point list
+        /// </summary>
+        /// <param name="transform">Transform to apply</param>
+        /// <returns>Returns the drawing data's point list</returns>
+        public Vector3[] GetPoints(Matrix transform)
         {
             List<Vector3> points = new List<Vector3>();
 
@@ -409,7 +390,9 @@ namespace Engine.Common
                     Vector3[] meshPoints = mesh.GetPoints();
                     if (meshPoints != null && meshPoints.Length > 0)
                     {
-                        points.AddRange(meshPoints);
+                        Vector3[] trnPoints = new Vector3[meshPoints.Length];
+                        Vector3.TransformCoordinate(meshPoints, ref transform, trnPoints);
+                        points.AddRange(trnPoints);
                     }
                 }
             }
@@ -419,23 +402,37 @@ namespace Engine.Common
         /// <summary>
         /// Gets the drawing data's point list
         /// </summary>
-        /// <param name="transform">Transform to apply</param>
+        /// <param name="boneTransforms">Bone transforms list</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(Matrix transform)
+        public Vector3[] GetPoints(Matrix[] boneTransforms)
         {
-            Vector3[] points = this.GetPoints();
+            return this.GetPoints(Matrix.Identity, boneTransforms);
+        }
+        /// <summary>
+        /// Gets the drawing data's point list
+        /// </summary>
+        /// <param name="transform">Global transform</param>
+        /// <param name="boneTransforms">Bone transforms list</param>
+        /// <returns>Returns the drawing data's point list</returns>
+        public Vector3[] GetPoints(Matrix transform, Matrix[] boneTransforms)
+        {
+            List<Vector3> points = new List<Vector3>();
 
-            if (transform != Matrix.Identity)
+            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
             {
-                Vector3[] trnPoints = new Vector3[points.Length];
-                Vector3.TransformCoordinate(points, ref transform, trnPoints);
+                foreach (Mesh mesh in dictionary.Values)
+                {
+                    Vector3[] meshPoints = mesh.GetPoints(boneTransforms);
+                    if (meshPoints != null && meshPoints.Length > 0)
+                    {
+                        Vector3[] trnPoints = new Vector3[meshPoints.Length];
+                        Vector3.TransformCoordinate(meshPoints, ref transform, trnPoints);
+                        points.AddRange(trnPoints);
+                    }
+                }
+            }
 
-                return trnPoints;
-            }
-            else
-            {
-                return points;
-            }
+            return points.ToArray();
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -443,21 +440,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's triangle list</returns>
         public Triangle[] GetTriangles()
         {
-            List<Triangle> triangles = new List<Triangle>();
-
-            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
-            {
-                foreach (Mesh mesh in dictionary.Values)
-                {
-                    Triangle[] meshTriangles = mesh.GetTriangles();
-                    if (meshTriangles != null && meshTriangles.Length > 0)
-                    {
-                        triangles.AddRange(meshTriangles);
-                    }
-                }
-            }
-
-            return triangles.ToArray();
+            return this.GetTriangles(Matrix.Identity);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -466,16 +449,50 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's triangle list</returns>
         public Triangle[] GetTriangles(Matrix transform)
         {
-            Triangle[] triangles = this.GetTriangles();
+            List<Triangle> triangles = new List<Triangle>();
 
-            if (transform != Matrix.Identity)
+            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
             {
-                return Triangle.Transform(triangles, transform);
+                foreach (Mesh mesh in dictionary.Values)
+                {
+                    Triangle[] meshTriangles = mesh.GetTriangles();
+                    meshTriangles = Triangle.Transform(meshTriangles, transform);
+                    triangles.AddRange(meshTriangles);
+                }
             }
-            else
+
+            return triangles.ToArray();
+        }
+        /// <summary>
+        /// Gets the drawing data's triangle list
+        /// </summary>
+        /// <param name="boneTransforms">Bone transforms list</param>
+        /// <returns>Returns the drawing data's triangle list</returns>
+        public Triangle[] GetTriangles(Matrix[] boneTransforms)
+        {
+            return this.GetTriangles(Matrix.Identity, boneTransforms);
+        }
+        /// <summary>
+        /// Gets the drawing data's triangle list
+        /// </summary>
+        /// <param name="transform">Transform to apply</param>
+        /// <param name="boneTransforms">Bone transforms list</param>
+        /// <returns>Returns the drawing data's triangle list</returns>
+        public Triangle[] GetTriangles(Matrix transform, Matrix[] boneTransforms)
+        {
+            List<Triangle> triangles = new List<Triangle>();
+
+            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
             {
-                return triangles;
+                foreach (Mesh mesh in dictionary.Values)
+                {
+                    Triangle[] meshTriangles = mesh.GetTriangles(boneTransforms);
+                    meshTriangles = Triangle.Transform(meshTriangles, transform);
+                    triangles.AddRange(meshTriangles);
+                }
             }
+
+            return triangles.ToArray();
         }
     }
 }

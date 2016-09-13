@@ -84,43 +84,43 @@ namespace Engine
             /// <param name="technique">Technique</param>
             public void Draw(DrawContext context, Drawer effect)
             {
+                #region Per skinning update
+
+                if (this.DrawingData.SkinningData != null)
+                {
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    {
+                        ((EffectBasic)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        ((EffectBasicGBuffer)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    {
+                        ((EffectBasicShadow)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
+                    }
+                }
+                else
+                {
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    {
+                        ((EffectBasic)effect).UpdatePerSkinning(null);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    {
+                        ((EffectBasicShadow)effect).UpdatePerSkinning(null);
+                    }
+                }
+
+                #endregion
+
                 foreach (string meshName in this.DrawingData.Meshes.Keys)
                 {
-                    #region Per skinning update
-
-                    if (this.DrawingData.SkinningData != null)
-                    {
-                        if (context.DrawerMode == DrawerModesEnum.Forward)
-                        {
-                            ((EffectBasic)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                        {
-                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                        {
-                            ((EffectBasicShadow)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
-                        }
-                    }
-                    else
-                    {
-                        if (context.DrawerMode == DrawerModesEnum.Forward)
-                        {
-                            ((EffectBasic)effect).UpdatePerSkinning(null);
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                        {
-                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                        {
-                            ((EffectBasicShadow)effect).UpdatePerSkinning(null);
-                        }
-                    }
-
-                    #endregion
-
                     var dictionary = this.DrawingData.Meshes[meshName];
 
                     foreach (string material in dictionary.Keys)

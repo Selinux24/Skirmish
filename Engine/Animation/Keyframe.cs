@@ -69,7 +69,7 @@ namespace Engine.Animation
         /// <returns>Return text representation</returns>
         public override string ToString()
         {
-            return string.Format("Time: {0,-12}: {1}", this.Time, this.Transform.GetDescription());
+            return string.Format("Time: {0:0.00000}: {1}", this.Time, this.Transform.GetDescription());
         }
     }
 }

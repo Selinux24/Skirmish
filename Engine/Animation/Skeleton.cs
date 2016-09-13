@@ -112,8 +112,7 @@ namespace Engine.Animation
             FlattenSkeleton(root, names);
 
             this.JointNames = names.ToArray();
-
-            this.FinalTransforms = new Matrix[names.Count];
+            this.FinalTransforms = Helper.CreateArray<Matrix>(names.Count, Matrix.Identity);
         }
 
         /// <summary>

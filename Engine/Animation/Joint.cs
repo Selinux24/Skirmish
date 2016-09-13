@@ -35,7 +35,7 @@ namespace Engine.Animation
         /// <summary>
         /// Joint animation dictionary
         /// </summary>
-        public Dictionary<string, JointAnimation> Animations { get; set; }
+        public Dictionary<string, JointAnimation> Animations { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -60,7 +60,7 @@ namespace Engine.Animation
         /// <returns>Return text representation</returns>
         public override string ToString()
         {
-            return string.Format("Name: {0};", string.IsNullOrEmpty(this.Name) ? "root" : this.Name);
+            return string.Format("Name: {0}; Root: {1}", this.Name, this.Parent == null);
         }
     }
 }

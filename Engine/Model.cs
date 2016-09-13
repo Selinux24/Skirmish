@@ -133,6 +133,8 @@ namespace Engine
             if (this.DrawingData != null && this.DrawingData.SkinningData != null)
             {
                 this.DrawingData.SkinningData.Update(context.GameTime);
+
+                this.InvalidateCache();
             }
 
             this.Manipulator.Update(context.GameTime);
@@ -197,43 +199,43 @@ namespace Engine
                         this.Game.Graphics.SetBlendTransparent();
                     }
 
+                    #region Per skinning update
+
+                    if (this.DrawingData.SkinningData != null)
+                    {
+                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                        {
+                            ((EffectBasic)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                        {
+                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                        {
+                            ((EffectBasicShadow)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
+                        }
+                    }
+                    else
+                    {
+                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                        {
+                            ((EffectBasic)effect).UpdatePerSkinning(null);
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                        {
+                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                        {
+                            ((EffectBasicShadow)effect).UpdatePerSkinning(null);
+                        }
+                    }
+
+                    #endregion
+
                     foreach (string meshName in this.DrawingData.Meshes.Keys)
                     {
-                        #region Per skinning update
-
-                        if (this.DrawingData.SkinningData != null)
-                        {
-                            if (context.DrawerMode == DrawerModesEnum.Forward)
-                            {
-                                ((EffectBasic)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
-                            }
-                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                            {
-                                ((EffectBasicGBuffer)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
-                            }
-                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                            {
-                                ((EffectBasicShadow)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms(meshName));
-                            }
-                        }
-                        else
-                        {
-                            if (context.DrawerMode == DrawerModesEnum.Forward)
-                            {
-                                ((EffectBasic)effect).UpdatePerSkinning(null);
-                            }
-                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                            {
-                                ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
-                            }
-                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                            {
-                                ((EffectBasicShadow)effect).UpdatePerSkinning(null);
-                            }
-                        }
-
-                        #endregion
-
                         var dictionary = this.DrawingData.Meshes[meshName];
 
                         foreach (string material in dictionary.Keys)
@@ -318,6 +320,14 @@ namespace Engine
         /// <param name="e">Event arguments</param>
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
+            this.InvalidateCache();
+        }
+
+        /// <summary>
+        /// Invalidates the internal caché
+        /// </summary>
+        private void InvalidateCache()
+        {
             this.updatePoints = true;
 
             this.updateTriangles = true;
@@ -326,7 +336,6 @@ namespace Engine
             this.boundingBox = new BoundingBox();
             this.orientedBoundingBox = new OrientedBoundingBox();
         }
-
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
         /// </summary>
@@ -336,8 +345,14 @@ namespace Engine
             if (this.updatePoints)
             {
                 var drawingData = this.GetDrawingData(this.GetLODMinimum());
-
-                this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform);
+                if (drawingData.SkinningData != null)
+                {
+                    this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform, drawingData.SkinningData.GetFinalTransforms());
+                }
+                else
+                {
+                    this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform);
+                }
 
                 this.updatePoints = false;
             }
@@ -353,8 +368,14 @@ namespace Engine
             if (this.updateTriangles)
             {
                 var drawingData = this.GetDrawingData(this.GetLODMinimum());
-
-                this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform);
+                if (drawingData.SkinningData != null)
+                {
+                    this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform, drawingData.SkinningData.GetFinalTransforms());
+                }
+                else
+                {
+                    this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform);
+                }
 
                 this.updateTriangles = false;
             }

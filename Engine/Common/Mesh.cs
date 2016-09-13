@@ -345,6 +345,22 @@ namespace Engine.Common
             return this.positionCache;
         }
         /// <summary>
+        /// Gets point list of mesh if the vertex type has position channel
+        /// </summary>
+        /// <param name="boneTransforms">Bone transforms</param>
+        /// <returns>Returns null or position list</returns>
+        public Vector3[] GetPoints(Matrix[] boneTransforms)
+        {
+            Vector3[] res = new Vector3[this.Vertices.Length];
+
+            for (int i = 0; i < this.Vertices.Length; i++)
+            {
+                res[i] = VertexData.ApplyWeight(this.Vertices[i], boneTransforms);
+            }
+
+            return res;
+        }
+        /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
         /// </summary>
         /// <returns>Returns null or triangle list</returns>
@@ -367,6 +383,24 @@ namespace Engine.Common
             }
 
             return this.triangleCache;
+        }
+        /// <summary>
+        /// Gets triangle list of mesh if the vertex type has position channel
+        /// </summary>
+        /// <param name="boneTransforms">Bone transforms</param>
+        /// <returns>Returns null or triangle list</returns>
+        public Triangle[] GetTriangles(Matrix[] boneTransforms)
+        {
+            Vector3[] positions = this.GetPoints(boneTransforms);
+
+            if (this.Indices != null && this.Indices.Length > 0)
+            {
+                return Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
+            }
+            else
+            {
+                return Triangle.ComputeTriangleList(this.Topology, positions);
+            }
         }
     }
 }

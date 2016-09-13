@@ -41,8 +41,9 @@ namespace HeightmapTest
         private SceneLightSpot spotLight2 = null;
 
         private Model soldier = null;
-        //private TriangleListDrawer soldierTris = null;
+        private TriangleListDrawer soldierTris = null;
         private LineListDrawer soldierLines = null;
+        private bool showSoldierDEBUG = false;
 
         private Model helicopter = null;
 
@@ -229,19 +230,6 @@ namespace HeightmapTest
             }
 
             this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
-
-            var bbox2 = this.soldier.GetBoundingBox();
-            this.soldierLines = this.AddLineListDrawer(Line3.CreateWiredBox(bbox2), Color.White);
-
-            //Matrix baseTrn = Matrix.Translation(this.soldier.Manipulator.Position + (Vector3.Left * 5));
-
-            //Triangle[] tris = this.soldier.GetPoseAtTime(0, baseTrn);
-            //this.soldierTris = this.AddTriangleListDrawer(tris, new Color(Color.Red.ToColor3(), 0.6f));
-            //this.soldierTris.EnableDepthStencil = false;
-
-            //Line3[] lines = this.soldier.GetSkeletonAtTime(0, baseTrn);
-            //this.soldierLines = this.AddLineListDrawer(lines, Color.White);
-            //this.soldierLines.EnableDepthStencil = false;
 
             #endregion
 
@@ -507,6 +495,41 @@ namespace HeightmapTest
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
                 this.bboxesDrawer.Visible = !this.bboxesDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.showSoldierDEBUG = !this.showSoldierDEBUG;
+
+                if (this.soldierTris != null) this.soldierTris.Visible = this.showSoldierDEBUG;
+                if (this.soldierLines != null) this.soldierLines.Visible = this.showSoldierDEBUG;
+            }
+
+            if (this.showSoldierDEBUG)
+            {
+                Color color = new Color(Color.Red.ToColor3(), 0.6f);
+
+                Triangle[] tris = this.soldier.GetTriangles();
+                if (this.soldierTris == null)
+                {
+                    this.soldierTris = this.AddTriangleListDrawer(tris, color);
+                    this.soldierTris.EnableDepthStencil = false;
+                }
+                else
+                {
+                    this.soldierTris.SetTriangles(color, tris);
+                }
+
+                BoundingBox bbox = this.soldier.GetBoundingBox();
+                if (this.soldierLines == null)
+                {
+                    this.soldierLines = this.AddLineListDrawer(Line3.CreateWiredBox(bbox), color);
+                    this.soldierLines.EnableDepthStencil = false;
+                }
+                else
+                {
+                    this.soldierLines.SetLines(color, Line3.CreateWiredBox(bbox));
+                }
             }
 
             #endregion

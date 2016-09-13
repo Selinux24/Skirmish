@@ -127,6 +127,14 @@ namespace Engine
         /// <param name="e">Event arguments</param>
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
+            this.InvalidateCache();
+        }
+
+        /// <summary>
+        /// Invalidates the internal caché
+        /// </summary>
+        public void InvalidateCache()
+        {
             this.updatePoints = true;
 
             this.updateTriangles = true;
@@ -135,7 +143,6 @@ namespace Engine
             this.boundingBox = new BoundingBox();
             this.orientedBoundingBox = new OrientedBoundingBox();
         }
-
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
         /// </summary>
@@ -145,8 +152,14 @@ namespace Engine
             if (this.updatePoints)
             {
                 var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
-
-                this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform);
+                if (drawingData.SkinningData != null)
+                {
+                    this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform, drawingData.SkinningData.GetFinalTransforms());
+                }
+                else
+                {
+                    this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform);
+                }
 
                 this.updatePoints = false;
             }
@@ -162,8 +175,14 @@ namespace Engine
             if (this.updateTriangles)
             {
                 var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
-
-                this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform);
+                if (drawingData.SkinningData != null)
+                {
+                    this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform, drawingData.SkinningData.GetFinalTransforms());
+                }
+                else
+                {
+                    this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform);
+                }
 
                 this.updateTriangles = false;
             }

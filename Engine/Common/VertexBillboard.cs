@@ -70,7 +70,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="channel">Data channel</param>
         /// <returns>Returns data for the specified channel</returns>
-        public T GetChannelValue<T>(VertexDataChannels channel) where T : struct
+        public T GetChannelValue<T>(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
             else if (channel == VertexDataChannels.Size) return this.Size.Cast<T>();
@@ -82,7 +82,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="channel">Channel</param>
         /// <param name="value">Value</param>
-        public void SetChannelValue<T>(VertexDataChannels channel, T value) where T : struct
+        public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
             else if (channel == VertexDataChannels.Size) this.Size = value.Cast<Vector2>();

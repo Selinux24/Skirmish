@@ -173,7 +173,7 @@ namespace Engine.Animation
         /// <returns>Returns text representation</returns>
         public override string ToString()
         {
-            return string.Format("Start: {0}; End: {1}; Keyframes: {2}", this.StartTime, this.EndTime, this.Keyframes.Length);
+            return string.Format("Start: {0:0.00000}; End: {1:0.00000}; Keyframes: {2}", this.StartTime, this.EndTime, this.Keyframes.Length);
         }
     }
 }

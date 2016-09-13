@@ -34,22 +34,15 @@ namespace Engine.Animation
         public bool Loop { get; set; }
 
         /// <summary>
-        /// Generates skinning data from animation info
+        /// Constructor
         /// </summary>
-        /// <param name="boneHierarchy">Bone hierarchy</param>
-        /// <param name="boneNames">Bone name list</param>
-        /// <param name="animations">Animation dictionary</param>
-        /// <param name="meshSkinInfo">Skinning data</param>
-        /// <returns>Returns skinning data</returns>
-        public static SkinningData Create(Skeleton skeleton)
+        /// <param name="skeleton">Skeleton</param>
+        public SkinningData(Skeleton skeleton)
         {
-            return new SkinningData()
-            {
-                Skeleton = skeleton,
-                ClipName = DefaultClip,
-                Time = 0f,
-                Loop = true,
-            };
+            this.Skeleton = skeleton;
+            this.Time = 0;
+            this.ClipName = DefaultClip;
+            this.Loop = true;
         }
 
         /// <summary>
@@ -76,9 +69,8 @@ namespace Engine.Animation
         /// <summary>
         /// Gets final transform collection
         /// </summary>
-        /// <param name="meshName">Mesh name</param>
         /// <returns>Returns final transform collection</returns>
-        public Matrix[] GetFinalTransforms(string meshName)
+        public Matrix[] GetFinalTransforms()
         {
             return this.Skeleton.FinalTransforms;
         }
@@ -89,38 +81,7 @@ namespace Engine.Animation
         /// <returns>Returns text representation of skinning data instance</returns>
         public override string ToString()
         {
-            string desc = "";
-
-            //desc += "BoneIndex: " + string.Join(",", this.boneHierarchy) + Environment.NewLine;
-
-            //foreach (string key in this.meshSkinInfo.Keys)
-            //{
-            //    SkinInfo info = this.meshSkinInfo[key];
-
-            //    desc += key + Environment.NewLine;
-            //    desc += string.Format("Offset: {0}", info) + Environment.NewLine;
-            //}
-
-            //int index = 0;
-            //foreach (string key in this.animations.Keys)
-            //{
-            //    AnimationClip clip = this.animations[key];
-
-            //    desc += key + Environment.NewLine + Environment.NewLine;
-
-            //    Array.ForEach(clip.BoneAnimations, (b) =>
-            //    {
-            //        desc += string.Format("Bone: {0}", index++) + Environment.NewLine;
-
-            //        Array.ForEach(b.Keyframes, (k) =>
-            //        {
-            //            desc += string.Format("Transform: {0}", k.Transform.GetDescription()) + Environment.NewLine;
-            //        });
-            //        desc += Environment.NewLine;
-            //    });
-            //}
-
-            return desc;
+            return string.Format("{0}(Loop: {1}) -> {2}", this.ClipName, this.Loop, this.Time);
         }
     }
 }

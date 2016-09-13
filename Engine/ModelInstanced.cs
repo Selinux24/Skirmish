@@ -153,21 +153,26 @@ namespace Engine
         {
             if (this.instances != null && this.instances.Length > 0)
             {
-                for (int i = 0; i < this.instances.Length; i++)
-                {
-                    if (this.instances[i].Active)
-                    {
-                        this.instances[i].Manipulator.Update(context.GameTime);
-                    }
-                }
-
                 //Update by level of detail
+                bool skDataUpdated = false;
                 for (int l = 1; l < (int)LevelOfDetailEnum.Minimum; l *= 2)
                 {
                     var drawingData = this.GetDrawingData((LevelOfDetailEnum)l);
                     if (drawingData != null && drawingData.SkinningData != null)
                     {
                         drawingData.SkinningData.Update(context.GameTime);
+
+                        skDataUpdated = true;
+                    }
+                }
+
+                for (int i = 0; i < this.instances.Length; i++)
+                {
+                    if (this.instances[i].Active)
+                    {
+                        this.instances[i].Manipulator.Update(context.GameTime);
+
+                        if (skDataUpdated) this.instances[i].InvalidateCache();
                     }
                 }
             }
@@ -288,43 +293,43 @@ namespace Engine
                                 var index = Array.IndexOf(this.instancesTmp, ins[0]);
                                 var length = ins.Length;
 
+                                #region Per skinning update
+
+                                if (drawingData.SkinningData != null)
+                                {
+                                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                                    {
+                                        ((EffectBasic)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms());
+                                    }
+                                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                                    {
+                                        ((EffectBasicGBuffer)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms());
+                                    }
+                                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                                    {
+                                        ((EffectBasicShadow)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms());
+                                    }
+                                }
+                                else
+                                {
+                                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                                    {
+                                        ((EffectBasic)effect).UpdatePerSkinning(null);
+                                    }
+                                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                                    {
+                                        ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
+                                    }
+                                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                                    {
+                                        ((EffectBasicShadow)effect).UpdatePerSkinning(null);
+                                    }
+                                }
+
+                                #endregion
+
                                 foreach (string meshName in drawingData.Meshes.Keys)
                                 {
-                                    #region Per skinning update
-
-                                    if (drawingData.SkinningData != null)
-                                    {
-                                        if (context.DrawerMode == DrawerModesEnum.Forward)
-                                        {
-                                            ((EffectBasic)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
-                                        }
-                                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                                        {
-                                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
-                                        }
-                                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                                        {
-                                            ((EffectBasicShadow)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms(meshName));
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (context.DrawerMode == DrawerModesEnum.Forward)
-                                        {
-                                            ((EffectBasic)effect).UpdatePerSkinning(null);
-                                        }
-                                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                                        {
-                                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
-                                        }
-                                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                                        {
-                                            ((EffectBasicShadow)effect).UpdatePerSkinning(null);
-                                        }
-                                    }
-
-                                    #endregion
-
                                     var dictionary = drawingData.Meshes[meshName];
 
                                     foreach (string material in dictionary.Keys)
