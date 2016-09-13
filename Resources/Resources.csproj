@@ -109,6 +109,7 @@
     <None Include="Blender\Ruins\ruins.blend" />
     <None Include="Blender\Soldier\soldier.blend" />
     <None Include="Blender\Soldier\soldier_anim1.blend" />
+    <None Include="Blender\Soldier\soldier_anim2.blend" />
     <None Include="Blender\Soldier\soldier_rigged FK.blend" />
     <None Include="Blender\Soldier\soldier_rigged IK.blend" />
     <None Include="Blender\Tank\tank.blend" />
