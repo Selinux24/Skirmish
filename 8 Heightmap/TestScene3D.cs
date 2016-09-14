@@ -45,6 +45,8 @@ namespace HeightmapTest
         private LineListDrawer soldierLines = null;
         private bool showSoldierDEBUG = false;
 
+        private ModelInstanced troops = null;
+
         private Model helicopter = null;
 
         public TestScene3D(Game game)
@@ -192,16 +194,16 @@ namespace HeightmapTest
 
                     Proportion = 0.25f,
                 },
-                Vegetation = new GroundDescription.VegetationDescription()
-                {
-                    ContentPath = "Foliage/Billboard",
-                    VegetarionTextures = new[] { "grass.png" },
-                    Saturation = 0.3f,
-                    StartRadius = 0f,
-                    EndRadius = 200f,
-                    MinSize = new Vector2(2, 2),
-                    MaxSize = new Vector2(2, 4),
-                }
+                //Vegetation = new GroundDescription.VegetationDescription()
+                //{
+                //    ContentPath = "Foliage/Billboard",
+                //    VegetarionTextures = new[] { "grass.png" },
+                //    Saturation = 0.3f,
+                //    StartRadius = 0f,
+                //    EndRadius = 200f,
+                //    MinSize = new Vector2(2, 2),
+                //    MaxSize = new Vector2(2, 4),
+                //}
             });
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
@@ -230,6 +232,38 @@ namespace HeightmapTest
             }
 
             this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
+
+            #endregion
+
+            #region Troops
+
+            this.troops = this.AddInstancingModel(new ModelInstancedDescription()
+            {
+                ContentPath = @"Resources/Soldier",
+                ModelFileName = "soldier.dae",
+                Instances = 4,
+            });
+
+            Vector3[] iPos = new Vector3[]
+            {
+                new Vector3(4, -2, MathUtil.PiOverFour),
+                new Vector3(5, -5, MathUtil.PiOverTwo),
+                new Vector3(-4, -2, -MathUtil.PiOverFour),
+                new Vector3(-5, -5, -MathUtil.PiOverTwo),
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                Vector3 position;
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(iPos[i].X, iPos[i].Y, out position, out triangle, out distance))
+                {
+                    this.troops.Instances[i].Manipulator.SetPosition(position, true);
+                    this.troops.Instances[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
+                    this.troops.Instances[i].TextureIndex = 1;
+                }
+            }
 
             #endregion
 
