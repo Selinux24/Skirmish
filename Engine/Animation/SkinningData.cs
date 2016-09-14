@@ -1,8 +1,11 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
+using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Animation
 {
+    using Engine.Helpers;
+
     /// <summary>
     /// Skinning data
     /// </summary>
@@ -63,6 +66,10 @@ namespace Engine.Animation
             }
         }
         /// <summary>
+        /// Animation clip names collection
+        /// </summary>
+        public string[] Clips { get; private set; }
+        /// <summary>
         /// Current clip animation duration
         /// </summary>
         public float Duration { get; private set; }
@@ -85,10 +92,12 @@ namespace Engine.Animation
             this.Animations = new Dictionary<string, JointAnimation[]>();
             this.Skeleton = skeleton;
 
-            this.Animations.Add(SkinningData.DefaultClip, animations);
             this.Time = 0;
-            this.ClipName = DefaultClip;
             this.Loop = true;
+            this.Animations.Add(SkinningData.DefaultClip, animations);
+            this.Clips = new string[] { SkinningData.DefaultClip };
+
+            this.ClipName = DefaultClip;
         }
         /// <summary>
         /// Constructor
@@ -97,11 +106,14 @@ namespace Engine.Animation
         /// <param name="animations">Animation dictionary</param>
         public SkinningData(Skeleton skeleton, Dictionary<string, JointAnimation[]> animations)
         {
-            this.Animations = animations;
             this.Skeleton = skeleton;
+
             this.Time = 0;
-            this.ClipName = DefaultClip;
             this.Loop = true;
+            this.Animations = animations;
+            this.Clips = this.Animations.Keys.ToArray();
+
+            this.ClipName = DefaultClip;
         }
 
         /// <summary>
@@ -118,15 +130,13 @@ namespace Engine.Animation
             }
         }
         /// <summary>
-        /// Test animation at time
+        /// Gets the transform list of the pose at specified time
         /// </summary>
         /// <param name="time">Time</param>
-        public void Test(float time)
+        /// <param name="clipName">Clip name</param>
+        public Matrix[] GetPoseAtTime(float time, string clipName)
         {
-            if (this.ClipName != null)
-            {
-                this.Skeleton.Update(time, this.currentAnimations);
-            }
+            return this.Skeleton.GetPoseAtTime(time, this.Animations[clipName]);
         }
         /// <summary>
         /// Gets final transform collection
@@ -135,6 +145,29 @@ namespace Engine.Animation
         public Matrix[] GetFinalTransforms()
         {
             return this.Skeleton.FinalTransforms;
+        }
+
+        public ShaderResourceView CreateAnimationTexture(Game game)
+        {
+            List<Vector4> values = new List<Vector4>();
+
+            const float timestep = 1.0f / 30.0f;
+            foreach (var clip in this.Clips)
+            {
+                for (float t = 0; t < this.Duration; t += timestep)
+                {
+                    var mat = this.GetPoseAtTime(t, clip);
+
+                    for (int m = 0; m < mat.Length; m++)
+                    {
+                        values.Add(new Vector4(mat[m].Row1.X, mat[m].Row1.Y, mat[m].Row1.Z, mat[m].Row4.X));
+                        values.Add(new Vector4(mat[m].Row2.X, mat[m].Row2.Y, mat[m].Row2.Z, mat[m].Row4.Y));
+                        values.Add(new Vector4(mat[m].Row3.X, mat[m].Row3.Y, mat[m].Row3.Z, mat[m].Row4.Z));
+                    }
+                }
+            }
+
+            return game.Graphics.Device.CreateTexture(1024, values.ToArray());
         }
 
         /// <summary>

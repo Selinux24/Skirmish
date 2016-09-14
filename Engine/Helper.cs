@@ -116,6 +116,43 @@ namespace Engine
             return dictionary.Select(item => item.Key);
         }
         /// <summary>
+        /// Gets the internal items of the KeyCollection into a list
+        /// </summary>
+        /// <typeparam name="TKey">Key type</typeparam>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="keys">Key collection</param>
+        /// <returns>Returns the internal items of the KeyCollection into a list</returns>
+        public static IList<TKey> ToList<TKey, TValue>(this Dictionary<TKey, TValue>.KeyCollection keys)
+        {
+            List<TKey> res = new List<TKey>(keys.Count);
+
+            foreach (var key in keys)
+            {
+                res.Add(key);
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets the internal items of the KeyCollection into an array
+        /// </summary>
+        /// <typeparam name="TKey">Key type</typeparam>
+        /// <typeparam name="TValue">Value type</typeparam>
+        /// <param name="keys">Key collection</param>
+        /// <returns>Returns the internal items of the KeyCollection into an array</returns>
+        public static TKey[] ToArray<TKey, TValue>(this Dictionary<TKey, TValue>.KeyCollection keys)
+        {
+            TKey[] res = new TKey[keys.Count];
+
+            int index = 0;
+            foreach (var key in keys)
+            {
+                res[index++] = key;
+            }
+
+            return res;
+        }
+        /// <summary>
         /// Cast object as specified type
         /// </summary>
         /// <typeparam name="T">Type</typeparam>

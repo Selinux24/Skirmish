@@ -138,6 +138,25 @@ namespace Engine.Animation
             }
         }
         /// <summary>
+        /// Gets the transforms list of the pose at specified time
+        /// </summary>
+        /// <param name="time">Pose time</param>
+        /// <param name="animations">Joint animations</param>
+        /// <returns>Returns the transforms list of the pose at specified time</returns>
+        public Matrix[] GetPoseAtTime(float time, JointAnimation[] animations)
+        {
+            BuildTransforms(time, this.Root, animations);
+
+            UpdateTransforms(this.Root);
+
+            for (int i = 0; i < this.JointNames.Length; i++)
+            {
+                this.FinalTransforms[i] = this[this.JointNames[i]].Offset * this[this.JointNames[i]].GlobalTransform;
+            }
+
+            return this.FinalTransforms;
+        }
+        /// <summary>
         /// Finds a joint by name recursively
         /// </summary>
         /// <param name="joint">Joint</param>
