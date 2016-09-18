@@ -84,41 +84,6 @@ namespace Engine
             /// <param name="technique">Technique</param>
             public void Draw(DrawContext context, Drawer effect)
             {
-                #region Per skinning update
-
-                if (this.DrawingData.SkinningData != null)
-                {
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        ((EffectBasic)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        ((EffectBasicGBuffer)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        ((EffectBasicShadow)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
-                    }
-                }
-                else
-                {
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        ((EffectBasic)effect).UpdatePerSkinning(null);
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        ((EffectBasicShadow)effect).UpdatePerSkinning(null);
-                    }
-                }
-
-                #endregion
-
                 foreach (string meshName in this.DrawingData.Meshes.Keys)
                 {
                     var dictionary = this.DrawingData.Meshes[meshName];
@@ -136,11 +101,11 @@ namespace Engine
 
                         if (context.DrawerMode == DrawerModesEnum.Forward)
                         {
-                            ((EffectBasic)effect).UpdatePerObject(matdata, texture, normalMap, 0);
+                            ((EffectBasic)effect).UpdatePerObject(matdata, texture, normalMap, null, 0);
                         }
                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
                         {
-                            ((EffectBasicGBuffer)effect).UpdatePerObject(mat.Material, texture, normalMap, 0);
+                            ((EffectBasicGBuffer)effect).UpdatePerObject(mat.Material, texture, normalMap, null, 0);
                         }
 
                         #endregion

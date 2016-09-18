@@ -1,8 +1,12 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
+using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
+using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
+using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
 {
@@ -13,11 +17,6 @@ namespace Engine.Effects
     /// </summary>
     public class EffectBasicShadow : Drawer
     {
-        /// <summary>
-        /// Maximum number of bones in a skeleton
-        /// </summary>
-        public const int MaxBoneTransforms = 96;
-
         /// <summary>
         /// Position color drawing technique
         /// </summary>
@@ -100,37 +99,26 @@ namespace Engine.Effects
         public readonly EffectTechnique InstancingShadowMapPositionNormalTextureTangentSkinned = null;
 
         /// <summary>
-        /// Bone transformation matrices effect variable
-        /// </summary>
-        private EffectMatrixVariable boneTransforms = null;
-        /// <summary>
         /// World view projection effect variable
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
-
         /// <summary>
-        /// Bone transformations
+        /// Animation data effect variable
         /// </summary>
-        protected Matrix[] BoneTransforms
-        {
-            get
-            {
-                return this.boneTransforms.GetMatrixArray<Matrix>(MaxBoneTransforms);
-            }
-            set
-            {
-                if (value != null && value.Length > MaxBoneTransforms) throw new Exception(string.Format("Bonetransforms must set {0}. Has {1}", MaxBoneTransforms, value.Length));
+        private EffectVectorVariable animationData = null;
+        /// <summary>
+        /// Texture index effect variable
+        /// </summary>
+        private EffectScalarVariable textureIndex = null;
+        /// <summary>
+        /// Animation palette width effect variable
+        /// </summary>
+        private EffectScalarVariable animationPaletteWidth = null;
+        /// <summary>
+        /// Animation palette
+        /// </summary>
+        private EffectShaderResourceVariable animationPalette = null;
 
-                if (value == null)
-                {
-                    this.boneTransforms.SetMatrix(new Matrix[MaxBoneTransforms]);
-                }
-                else
-                {
-                    this.boneTransforms.SetMatrix(value);
-                }
-            }
-        }
         /// <summary>
         /// World view projection matrix
         /// </summary>
@@ -143,6 +131,66 @@ namespace Engine.Effects
             set
             {
                 this.worldViewProjection.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// Animation data
+        /// </summary>
+        protected UInt32[] AnimationData
+        {
+            get
+            {
+                Int4 v = this.animationData.GetIntVector();
+
+                return new UInt32[] { (uint)v.X, (uint)v.Y, (uint)v.Z };
+            }
+            set
+            {
+                Int4 v4 = new Int4((int)value[0], (int)value[1], (int)value[2], 0);
+
+                this.animationData.Set(v4);
+            }
+        }
+        /// <summary>
+        /// Texture index
+        /// </summary>
+        protected int TextureIndex
+        {
+            get
+            {
+                return (int)this.textureIndex.GetFloat();
+            }
+            set
+            {
+                this.textureIndex.Set((float)value);
+            }
+        }
+        /// <summary>
+        /// Animation palette width
+        /// </summary>
+        protected uint AnimationPaletteWidth
+        {
+            get
+            {
+                return (uint)this.animationPaletteWidth.GetFloat();
+            }
+            set
+            {
+                this.animationPaletteWidth.Set((float)value);
+            }
+        }
+        /// <summary>
+        /// Animation palette
+        /// </summary>
+        protected ShaderResourceView AnimationPalette
+        {
+            get
+            {
+                return this.animationPalette.GetResource();
+            }
+            set
+            {
+                this.animationPalette.SetResource(value);
             }
         }
 
@@ -197,8 +245,11 @@ namespace Engine.Effects
             this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput().Merge(VertexInstancingData.GetInput()));
             this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput().Merge(VertexInstancingData.GetInput()));
 
-            this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.animationData = this.Effect.GetVariableByName("gAnimationData").AsVector();
+            this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
+            this.animationPaletteWidth = this.Effect.GetVariableByName("gPaletteWidth").AsScalar();
+            this.animationPalette = this.Effect.GetVariableByName("gAnimationPalette").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -243,22 +294,41 @@ namespace Engine.Effects
                 throw new Exception(string.Format("Bad stage for effect: {0}", stage));
             }
         }
+   
         /// <summary>
         /// Update per frame data
         /// </summary>
         /// <param name="world">World matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
-        public void UpdatePerFrame(Matrix world, Matrix viewProjection)
+        public void UpdatePerFrame(
+            Matrix world,
+            Matrix viewProjection)
         {
             this.WorldViewProjection = world * viewProjection;
         }
         /// <summary>
-        /// Update per model skin data
+        /// Update per group data
         /// </summary>
-        /// <param name="finalTransforms">Skinning final transforms</param>
-        public void UpdatePerSkinning(Matrix[] finalTransforms)
+        /// <param name="animationPalette">Animation palette texture</param>
+        /// <param name="animationPaletteWith">Animation palette texture width</param>
+        public void UpdatePerGroup(
+            ShaderResourceView animationPalette,
+            uint animationPaletteWidth)
         {
-            this.BoneTransforms = finalTransforms;
+            this.AnimationPalette = animationPalette;
+            this.AnimationPaletteWidth = animationPaletteWidth;
+        }
+        /// <summary>
+        /// Update per model object data
+        /// </summary>
+        /// <param name="animationData">Animation data</param>
+        /// <param name="textureIndex">Texture index</param>
+        public void UpdatePerObject(
+            uint[] animationData,
+            int textureIndex)
+        {
+            this.AnimationData = animationData != null ? animationData : new uint[3];
+            this.TextureIndex = textureIndex;
         }
     }
 }

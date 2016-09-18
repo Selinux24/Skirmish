@@ -18,21 +18,23 @@ cbuffer cbPerFrame : register (b0)
 	float gFogRange;
 	float4 gFogColor;
 };
-cbuffer cbPerObject : register (b1)
+cbuffer cbPerGroup : register (b1)
+{
+    uint gPaletteWidth;
+};
+cbuffer cbPerObject : register (b2)
 {
 	Material gMaterial;
 };
-cbuffer cbSkinned : register (b2)
-{
-	float4x4 gBoneTransforms[MAXBONETRANSFORMS];
-};
 cbuffer cbPerInstance : register (b3)
 {
+	uint3 gAnimationData;
 	float gTextureIndex;
 };
 
 Texture2DArray gTextureArray;
 Texture2D gNormalMap;
+Texture2D gAnimationPalette;
 Texture2D gShadowMapStatic;
 Texture2D gShadowMapDynamic;
 
@@ -68,7 +70,9 @@ PSVertexPositionColor VSPositionColorSkinned(VSVertexPositionColorSkinned input)
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionWeights(
-		gBoneTransforms,
+		gAnimationPalette,
+		gAnimationData,
+		gPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -87,7 +91,9 @@ PSVertexPositionColor VSPositionColorSkinnedI(VSVertexPositionColorSkinnedI inpu
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionWeights(
-		gBoneTransforms,
+		gAnimationPalette,
+		input.animationData,
+		gPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -153,7 +159,9 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinned(VSVertexPositionNormalC
 	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionNormalWeights(
-		gBoneTransforms,
+		gAnimationPalette,
+		gAnimationData,
+		gPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -176,7 +184,9 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinnedI(VSVertexPositionNormal
 	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionNormalWeights(
-		gBoneTransforms,
+		gAnimationPalette,
+		input.animationData,
+		gPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -261,7 +271,9 @@ PSVertexPositionTexture VSPositionTextureSkinned(VSVertexPositionTextureSkinned 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionWeights(
-		gBoneTransforms,
+		gAnimationPalette,
+		gAnimationData,
+		gPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -281,7 +293,9 @@ PSVertexPositionTexture VSPositionTextureSkinnedI(VSVertexPositionTextureSkinned
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionWeights(
-		gBoneTransforms,
+		gAnimationPalette,
+		input.animationData,
+		gPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -386,7 +400,9 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNor
 	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionNormalWeights(
-		gBoneTransforms,
+		gAnimationPalette,
+		gAnimationData,
+		gPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -410,7 +426,9 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinnedI(VSVertexPositionNo
 	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	ComputePositionNormalWeights(
-		gBoneTransforms,
+		gAnimationPalette,
+		input.animationData,
+		gPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -502,7 +520,9 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinned(VSVer
 	float4 tangentL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	ComputePositionNormalTangentWeights(
-		gBoneTransforms,
+		gAnimationPalette,
+		gAnimationData,
+		gPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -530,7 +550,9 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinnedI(VSVe
 	float4 tangentL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	ComputePositionNormalTangentWeights(
-		gBoneTransforms,
+		gAnimationPalette,
+		input.animationData,
+		gPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,

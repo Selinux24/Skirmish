@@ -549,9 +549,9 @@
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="Resources\ShaderBasic.fxo" />
     <None Include="Resources\ShaderDeferred.fxo" />
     <None Include="Resources\ShaderGBuffer.fx" />
-    <None Include="Resources\ShaderBasic.fxo" />
     <None Include="Resources\ShaderBillboard.fxo" />
     <None Include="Resources\ShaderCubemap.fxo" />
     <None Include="Resources\ShaderFont.fxo" />

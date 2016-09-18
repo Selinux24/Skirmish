@@ -223,14 +223,7 @@ namespace Engine.Common
         {
             var newData = this.meshesByLOD[newLod];
 
-            if (newData != null && newData.SkinningData != null &&
-                prevData != null && prevData.SkinningData != null)
-            {
-                newData.SkinningData.ClipName = prevData.SkinningData.ClipName;
-                newData.SkinningData.AnimationVelocity = prevData.SkinningData.AnimationVelocity;
-                newData.SkinningData.Loop = prevData.SkinningData.Loop;
-                newData.SkinningData.Time = prevData.SkinningData.Time;
-            }
+            
 
             return newData;
         }

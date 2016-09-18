@@ -59,6 +59,8 @@ namespace HeightmapTest
         {
             base.Initialize();
 
+            Random rnd = new Random(1);
+
             this.Lights.FogColor = Color.WhiteSmoke;
             this.Lights.FogStart = 0;
             this.Lights.FogRange = 0;
@@ -262,6 +264,7 @@ namespace HeightmapTest
                     this.troops.Instances[i].Manipulator.SetPosition(position, true);
                     this.troops.Instances[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
                     this.troops.Instances[i].TextureIndex = 1;
+                    this.troops.Instances[i].AnimationTime = rnd.NextFloat(0f, 8f);
                 }
             }
 
@@ -292,7 +295,6 @@ namespace HeightmapTest
             #region Torchs
 
             int torchCount = 50;
-            Random rnd = new Random(1);
 
             var bbox = this.terrain.GetBoundingBox();
 

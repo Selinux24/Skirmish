@@ -142,7 +142,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            
+
         }
         /// <summary>
         /// Draw objects
@@ -162,8 +162,7 @@ namespace Engine
             Counters.IAIndexBufferSets++;
 
             this.effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-            this.effect.UpdatePerObject(Material.Default, this.Texture, null, 0);
-            this.effect.UpdatePerSkinning(null);
+            this.effect.UpdatePerObject(Material.Default, this.Texture, null, null, 0);
 
             for (int p = 0; p < this.effectTechnique.Description.PassCount; p++)
             {

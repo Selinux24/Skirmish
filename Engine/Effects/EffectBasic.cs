@@ -1,5 +1,5 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
@@ -18,11 +18,6 @@ namespace Engine.Effects
     /// </summary>
     public class EffectBasic : Drawer
     {
-        /// <summary>
-        /// Maximum number of bones in a skeleton
-        /// </summary>
-        public const int MaxBoneTransforms = 96;
-
         /// <summary>
         /// Position color drawing technique
         /// </summary>
@@ -189,6 +184,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable fromLightViewProjection = null;
         /// <summary>
+        /// Animation data effect variable
+        /// </summary>
+        private EffectVectorVariable animationData = null;
+        /// <summary>
         /// Texture index effect variable
         /// </summary>
         private EffectScalarVariable textureIndex = null;
@@ -196,10 +195,6 @@ namespace Engine.Effects
         /// Material effect variable
         /// </summary>
         private EffectVariable material = null;
-        /// <summary>
-        /// Bone transformation matrices effect variable
-        /// </summary>
-        private EffectMatrixVariable boneTransforms = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
@@ -216,6 +211,14 @@ namespace Engine.Effects
         /// Dynamic shadow map effect variable
         /// </summary>
         private EffectShaderResourceVariable shadowMapDynamic = null;
+        /// <summary>
+        /// Animation palette width effect variable
+        /// </summary>
+        private EffectScalarVariable animationPaletteWidth = null;
+        /// <summary>
+        /// Animation palette
+        /// </summary>
+        private EffectShaderResourceVariable animationPalette = null;
 
         /// <summary>
         /// Directional lights
@@ -406,6 +409,24 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Animation data
+        /// </summary>
+        protected UInt32[] AnimationData
+        {
+            get
+            {
+                Int4 v = this.animationData.GetIntVector();
+
+                return new UInt32[] { (uint)v.X, (uint)v.Y, (uint)v.Z };
+            }
+            set
+            {
+                Int4 v4 = new Int4((int)value[0], (int)value[1], (int)value[2], 0);
+
+                this.animationData.Set(v4);
+            }
+        }
+        /// <summary>
         /// Texture index
         /// </summary>
         protected int TextureIndex
@@ -440,29 +461,6 @@ namespace Engine.Effects
                     ds.Position = 0;
 
                     this.material.SetRawValue(ds, default(BufferMaterials).Stride);
-                }
-            }
-        }
-        /// <summary>
-        /// Bone transformations
-        /// </summary>
-        protected Matrix[] BoneTransforms
-        {
-            get
-            {
-                return this.boneTransforms.GetMatrixArray<Matrix>(MaxBoneTransforms);
-            }
-            set
-            {
-                if (value != null && value.Length > MaxBoneTransforms) throw new Exception(string.Format("Bonetransforms must set {0}. Has {1}", MaxBoneTransforms, value.Length));
-
-                if (value == null)
-                {
-                    this.boneTransforms.SetMatrix(new Matrix[MaxBoneTransforms]);
-                }
-                else
-                {
-                    this.boneTransforms.SetMatrix(value);
                 }
             }
         }
@@ -520,6 +518,34 @@ namespace Engine.Effects
             set
             {
                 this.shadowMapDynamic.SetResource(value);
+            }
+        }
+        /// <summary>
+        /// Animation palette width
+        /// </summary>
+        protected uint AnimationPaletteWidth
+        {
+            get
+            {
+                return (uint)this.animationPaletteWidth.GetFloat();
+            }
+            set
+            {
+                this.animationPaletteWidth.Set((float)value);
+            }
+        }
+        /// <summary>
+        /// Animation palette
+        /// </summary>
+        protected ShaderResourceView AnimationPalette
+        {
+            get
+            {
+                return this.animationPalette.GetResource();
+            }
+            set
+            {
+                this.animationPalette.SetResource(value);
             }
         }
 
@@ -598,6 +624,7 @@ namespace Engine.Effects
             this.worldInverse = this.Effect.GetVariableByName("gWorldInverse").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.fromLightViewProjection = this.Effect.GetVariableByName("gLightViewProjection").AsMatrix();
+            this.animationData = this.Effect.GetVariableByName("gAnimationData").AsVector();
             this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
             this.material = this.Effect.GetVariableByName("gMaterial");
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
@@ -607,11 +634,12 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
-            this.boneTransforms = this.Effect.GetVariableByName("gBoneTransforms").AsMatrix();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
             this.shadowMapStatic = this.Effect.GetVariableByName("gShadowMapStatic").AsShaderResource();
             this.shadowMapDynamic = this.Effect.GetVariableByName("gShadowMapDynamic").AsShaderResource();
+            this.animationPaletteWidth = this.Effect.GetVariableByName("gPaletteWidth").AsScalar();
+            this.animationPalette = this.Effect.GetVariableByName("gAnimationPalette").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -748,30 +776,37 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Update per group data
+        /// </summary>
+        /// <param name="animationPalette">Animation palette texture</param>
+        /// <param name="animationPaletteWith">Animation palette texture width</param>
+        public void UpdatePerGroup(
+            ShaderResourceView animationPalette,
+            uint animationPaletteWidth)
+        {
+            this.AnimationPalette = animationPalette;
+            this.AnimationPaletteWidth = animationPaletteWidth;
+        }
+        /// <summary>
         /// Update per model object data
         /// </summary>
         /// <param name="material">Material</param>
         /// <param name="texture">Texture</param>
         /// <param name="normalMap">Normal map</param>
+        /// <param name="animationData">Animation data</param>
         /// <param name="textureIndex">Texture index</param>
         public void UpdatePerObject(
             Material material,
             ShaderResourceView texture,
             ShaderResourceView normalMap,
+            uint[] animationData,
             int textureIndex)
         {
             this.Material = new BufferMaterials(material);
             this.Textures = texture;
             this.NormalMap = normalMap;
+            this.AnimationData = animationData != null ? animationData : new uint[3];
             this.TextureIndex = textureIndex;
-        }
-        /// <summary>
-        /// Update per model skin data
-        /// </summary>
-        /// <param name="finalTransforms">Skinning final transforms</param>
-        public void UpdatePerSkinning(Matrix[] finalTransforms)
-        {
-            this.BoneTransforms = finalTransforms;
         }
     }
 }

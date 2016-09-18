@@ -571,7 +571,7 @@ namespace Engine.Helpers
         /// <param name="size">Texture size</param>
         /// <param name="values">Color values</param>
         /// <returns>Returns created texture</returns>
-        public static ShaderResourceView CreateTexture(this Device device, int size, Vector4[] values)
+        public static ShaderResourceView CreateTexture1D(this Device device, int size, Vector4[] values)
         {
             using (DataStream str = DataStream.Create(values, false, false))
             {
@@ -601,6 +601,51 @@ namespace Engine.Helpers
             }
         }
         /// <summary>
+        /// Creates a texture filled with specified values
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="size">Texture size</param>
+        /// <param name="values">Color values</param>
+        /// <returns>Returns created texture</returns>
+        public static ShaderResourceView CreateTexture2D(this Device device, int size, Vector4[] values)
+        {
+            using (DataStream str = DataStream.Create(values, false, false))
+            {
+                str.Position = 0;
+                DataBox dBox = new DataBox(str.DataPointer, size * (int)FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
+
+                using (Texture2D texture = new Texture2D(
+                    device,
+                    new Texture2DDescription()
+                    {
+                        Format = Format.R32G32B32A32_Float,
+                        Width = size,
+                        Height = size,
+                        ArraySize = 1,
+                        MipLevels = 1,
+                        SampleDescription = new SampleDescription()
+                        {
+                            Count = 1,
+                            Quality = 0,
+                        },
+                        Usage = ResourceUsage.Immutable,
+                        BindFlags = BindFlags.ShaderResource,
+                        CpuAccessFlags = CpuAccessFlags.None,
+                        OptionFlags = ResourceOptionFlags.None,
+                    },
+                    new[] { dBox }))
+                {
+                    ShaderResourceViewDescription srvDesc = new ShaderResourceViewDescription();
+                    srvDesc.Format = Format.R32G32B32A32_Float;
+                    srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
+                    srvDesc.Texture1D.MipLevels = 1;
+                    srvDesc.Texture1D.MostDetailedMip = 0;
+
+                    return new ShaderResourceView(device, texture, srvDesc);
+                }
+            }
+        }
+        /// <summary>
         /// Creates a random 1D texture
         /// </summary>
         /// <param name="device">Graphics device</param>
@@ -617,7 +662,7 @@ namespace Engine.Helpers
                 randomValues.Add(rnd.NextVector4(new Vector4(-1, -1, -1, -1), new Vector4(1, 1, 1, 1)));
             }
 
-            return CreateTexture(device, size, randomValues.ToArray());
+            return CreateTexture1D(device, size, randomValues.ToArray());
         }
         /// <summary>
         /// Creates a texture for render target use

@@ -30,6 +30,14 @@ namespace Engine.Common
         /// Datos de animación
         /// </summary>
         public SkinningData SkinningData = null;
+        /// <summary>
+        /// Animation palette texture width
+        /// </summary>
+        public uint AnimationPaletteWidth;
+        /// <summary>
+        /// Animation palette texture
+        /// </summary>
+        public ShaderResourceView AnimationPalette;
 
         /// <summary>
         /// Model initialization
@@ -261,6 +269,8 @@ namespace Engine.Common
                 InitializeJoints(modelContent, modelContent.SkinningInfo.Skeleton.Root, animations);
 
                 drw.SkinningData = new SkinningData(modelContent.SkinningInfo.Skeleton, animations.ToArray());
+
+                drw.SkinningData.CreateAnimationTexture(game, out drw.AnimationPalette, out drw.AnimationPaletteWidth);
             }
         }
         /// <summary>

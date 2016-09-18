@@ -94,6 +94,14 @@ namespace Engine
                 this.levelOfDetail = this.model.GetLODNearest(value);
             }
         }
+        /// <summary>
+        /// Animation time
+        /// </summary>
+        public float AnimationTime = 0;
+        /// <summary>
+        /// Animation index
+        /// </summary>
+        public int AnimationIndex = 0;
 
         /// <summary>
         /// Constructor

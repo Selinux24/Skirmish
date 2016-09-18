@@ -145,14 +145,7 @@ namespace Engine.Animation
         /// <returns>Returns the transforms list of the pose at specified time</returns>
         public Matrix[] GetPoseAtTime(float time, JointAnimation[] animations)
         {
-            BuildTransforms(time, this.Root, animations);
-
-            UpdateTransforms(this.Root);
-
-            for (int i = 0; i < this.JointNames.Length; i++)
-            {
-                this.FinalTransforms[i] = this[this.JointNames[i]].Offset * this[this.JointNames[i]].GlobalTransform;
-            }
+            this.Update(time, animations);
 
             return this.FinalTransforms;
         }

@@ -61,6 +61,10 @@ namespace Engine
         /// </summary>
         private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
         /// <summary>
+        /// Animation data
+        /// </summary>
+        private uint[] animationData = new uint[] { 0, 0, 0 };
+        /// <summary>
         /// Datos renderización
         /// </summary>
         protected DrawingData DrawingData { get; private set; }
@@ -76,6 +80,14 @@ namespace Engine
         /// Model manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; private set; }
+        /// <summary>
+        /// Current animation index
+        /// </summary>
+        public int AnimationIndex { get; set; }
+        /// <summary>
+        /// Current animation time
+        /// </summary>
+        public float AnimationTime { get; set; }
         /// <summary>
         /// Texture index
         /// </summary>
@@ -132,8 +144,12 @@ namespace Engine
         {
             if (this.DrawingData != null && this.DrawingData.SkinningData != null)
             {
-                this.DrawingData.SkinningData.Update(context.GameTime);
+                this.AnimationTime += context.GameTime.ElapsedSeconds;
 
+                int offset;
+                this.DrawingData.SkinningData.GetAnimationOffset(this.AnimationTime, this.AnimationIndex, out offset);
+                this.animationData[0] = (uint)this.AnimationIndex;
+                this.animationData[1] = (uint)offset;
                 this.InvalidateCache();
             }
 
@@ -185,6 +201,29 @@ namespace Engine
 
                     #endregion
 
+                    #region Per Group update
+
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    {
+                        ((EffectBasic)effect).UpdatePerGroup(
+                            this.DrawingData.AnimationPalette,
+                            this.DrawingData.AnimationPaletteWidth);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    {
+                        ((EffectBasicGBuffer)effect).UpdatePerGroup(
+                            this.DrawingData.AnimationPalette,
+                            this.DrawingData.AnimationPaletteWidth);
+                    }
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    {
+                        ((EffectBasicShadow)effect).UpdatePerGroup(
+                            this.DrawingData.AnimationPalette,
+                            this.DrawingData.AnimationPaletteWidth);
+                    }
+
+                    #endregion
+
                     if (this.EnableDepthStencil)
                     {
                         this.Game.Graphics.SetDepthStencilZEnabled();
@@ -198,41 +237,6 @@ namespace Engine
                     {
                         this.Game.Graphics.SetBlendTransparent();
                     }
-
-                    #region Per skinning update
-
-                    if (this.DrawingData.SkinningData != null)
-                    {
-                        if (context.DrawerMode == DrawerModesEnum.Forward)
-                        {
-                            ((EffectBasic)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                        {
-                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                        {
-                            ((EffectBasicShadow)effect).UpdatePerSkinning(this.DrawingData.SkinningData.GetFinalTransforms());
-                        }
-                    }
-                    else
-                    {
-                        if (context.DrawerMode == DrawerModesEnum.Forward)
-                        {
-                            ((EffectBasic)effect).UpdatePerSkinning(null);
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                        {
-                            ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                        {
-                            ((EffectBasicShadow)effect).UpdatePerSkinning(null);
-                        }
-                    }
-
-                    #endregion
 
                     foreach (string meshName in this.DrawingData.Meshes.Keys)
                     {
@@ -251,11 +255,21 @@ namespace Engine
 
                             if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
-                                ((EffectBasic)effect).UpdatePerObject(matdata, texture, normalMap, this.TextureIndex);
+                                ((EffectBasic)effect).UpdatePerObject(
+                                    matdata,
+                                    texture,
+                                    normalMap,
+                                    this.animationData,
+                                    this.TextureIndex);
                             }
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
-                                ((EffectBasicGBuffer)effect).UpdatePerObject(mat.Material, texture, normalMap, this.TextureIndex);
+                                ((EffectBasicGBuffer)effect).UpdatePerObject(
+                                    mat.Material,
+                                    texture,
+                                    normalMap,
+                                    this.animationData,
+                                    this.TextureIndex);
                             }
 
                             #endregion

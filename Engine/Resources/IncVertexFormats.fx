@@ -1,3 +1,11 @@
+static const float4x4 IDENTITY = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+SamplerState SamplerPointP
+{
+	Filter = MIN_MAG_MIP_LINEAR;
+	AddressU = WRAP;
+	AddressV = WRAP;
+};
+
 /*
 BASIC VS INPUTS
 */
@@ -114,6 +122,7 @@ struct VSVertexPositionI
 {
 	float3 positionLocal : POSITION;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -122,6 +131,7 @@ struct VSVertexPositionColorI
     float3 positionLocal : POSITION;
     float4 color : COLOR0;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -131,6 +141,7 @@ struct VSVertexPositionNormalColorI
     float3 normalLocal : NORMAL;
     float4 color : COLOR0;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -139,6 +150,7 @@ struct VSVertexPositionTextureI
     float3 positionLocal : POSITION;
     float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -148,6 +160,7 @@ struct VSVertexPositionNormalTextureI
     float3 normalLocal : NORMAL;
     float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -158,6 +171,7 @@ struct VSVertexPositionNormalTextureTangentI
 	float3 tangentLocal : TANGENT;
     float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -171,6 +185,7 @@ struct VSVertexPositionSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -181,6 +196,7 @@ struct VSVertexPositionColorSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -192,6 +208,7 @@ struct VSVertexPositionNormalColorSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -202,6 +219,7 @@ struct VSVertexPositionTextureSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -213,6 +231,7 @@ struct VSVertexPositionNormalTextureSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -225,6 +244,7 @@ struct VSVertexPositionNormalTextureTangentSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : localTransform;
+    uint3 animationData : animationData;
 	float textureIndex : textureIndex;
 	uint instanceId : SV_InstanceID;
 };
@@ -376,38 +396,77 @@ struct GBufferPSOutput
 /*
 HELPER FUNCTIONS
 */
-static const int MAXBONETRANSFORMS = 96;
-
-void PopulateWeights(float3 inputWeights, out float weights[4])
+float4x4 DecodeMatrix(float3x4 m)
 {
-	weights[0] = inputWeights.x;
-	weights[1] = inputWeights.y;
-	weights[2] = inputWeights.z;
-	weights[3] = 1.0f - weights[0] - weights[1] - weights[2];
+	return float4x4(
+		float4(m[0].xyz, 0),
+		float4(m[1].xyz, 0),
+		float4(m[2].xyz, 0),
+		float4(m[0].w, m[1].w, m[2].w, 1));
+}
+
+float4x4 LoadBoneMatrix(Texture2D animationTexture, uint3 animationData, uint bone, uint paletteWidth)
+{
+    float4x4 rval = IDENTITY;
+    
+    uint baseIndex = animationData.x + animationData.y;
+    baseIndex += (4*bone);
+        
+    uint baseU = baseIndex % paletteWidth;
+    uint baseV = baseIndex / paletteWidth;
+   
+    float4 mat1 = animationTexture.Load(uint3(baseU,baseV,0));
+    float4 mat2 = animationTexture.Load(uint3(baseU+1,baseV,0));
+    float4 mat3 = animationTexture.Load(uint3(baseU+2,baseV,0));
+
+    rval = DecodeMatrix(float3x4(mat1,mat2,mat3));
+
+    return rval;
+}
+
+void PopulateWeights(float3 inputWeights, out float4 weights)
+{
+	weights = float4(0,0,0,0);
+	weights.x = inputWeights.x;
+	weights.y = inputWeights.y;
+	weights.z = inputWeights.z;
+	weights.w = 1.0f - weights.x - weights.y - weights.w;
 }
 
 void ComputePositionWeights(
-	float4x4 boneTransforms[MAXBONETRANSFORMS],
+	Texture2D animationTexture,
+	uint3 animationData,
+	uint paletteWidth,
 	float3 inputWeights, 
 	uint4 inputBoneIndices, 
 	float3 inputPositionLocal, 
 	out float4 positionLocal)
 {
-	float weights[4];
+	float4 weights;
 	PopulateWeights(inputWeights, weights);
 	
-	positionLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	
-	for(int i = 0; i < 4; ++i)
-	{
-		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]);
-	}
+	float4x4 finalMatrix;
+	finalMatrix = weights.x * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.x, paletteWidth);
+    if(weights.y > 0)
+    {
+        finalMatrix += weights.y * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.y, paletteWidth);
+        if(weights.z > 0)
+        {
+            finalMatrix += weights.z * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.z, paletteWidth);
+            if(weights.w > 0)
+			{
+				finalMatrix += weights.w * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.w, paletteWidth);
+			}
+        }
+    }
 
-	positionLocal.w = 1.0f;
+	positionLocal = mul(float4(inputPositionLocal, 1.0f), finalMatrix);
 }
 
 void ComputePositionNormalWeights(
-	float4x4 boneTransforms[MAXBONETRANSFORMS],
+	Texture2D animationTexture,
+	uint3 animationData,
+	uint paletteWidth,
 	float3 inputWeights, 
 	uint4 inputBoneIndices, 
 	float3 inputPositionLocal, 
@@ -415,24 +474,32 @@ void ComputePositionNormalWeights(
 	out float4 positionLocal,
 	out float4 normalLocal)
 {
-	float weights[4];
+	float4 weights;
 	PopulateWeights(inputWeights, weights);
 	
-	positionLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	normalLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	
-	for(int i = 0; i < 4; ++i)
-	{
-		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]);
-		normalLocal += weights[i] * mul(float4(inputNormalLocal, 0.0f), boneTransforms[inputBoneIndices[i]]);
-	}
+	float4x4 finalMatrix;
+	finalMatrix = weights.x * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.x, paletteWidth);
+    if(weights.y > 0)
+    {
+        finalMatrix += weights.y * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.y, paletteWidth);
+        if(weights.z > 0)
+        {
+            finalMatrix += weights.z * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.z, paletteWidth);
+            if(weights.w > 0)
+			{
+				finalMatrix += weights.w * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.w, paletteWidth);
+			}
+        }
+    }
 
-	positionLocal.w = 1.0f;
-	normalLocal.w = 0.0f;
+	positionLocal = mul(float4(inputPositionLocal, 1.0f), finalMatrix);
+	normalLocal = mul(float4(inputNormalLocal, 0.0f), finalMatrix);
 }
 
 void ComputePositionNormalTangentWeights(
-	float4x4 boneTransforms[MAXBONETRANSFORMS],
+	Texture2D animationTexture,
+	uint3 animationData,
+	uint paletteWidth,
 	float3 inputWeights, 
 	uint4 inputBoneIndices, 
 	float3 inputPositionLocal, 
@@ -442,21 +509,25 @@ void ComputePositionNormalTangentWeights(
 	out float4 normalLocal,
 	out float4 tangentLocal)
 {
-	float weights[4];
+	float4 weights;
 	PopulateWeights(inputWeights, weights);
 	
-	positionLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	normalLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	tangentLocal = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4x4 finalMatrix;
+	finalMatrix = weights.x * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.x, paletteWidth);
+    if(weights.y > 0)
+    {
+        finalMatrix += weights.y * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.y, paletteWidth);
+        if(weights.z > 0)
+        {
+            finalMatrix += weights.z * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.z, paletteWidth);
+            if(weights.w > 0)
+			{
+				finalMatrix += weights.w * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.w, paletteWidth);
+			}
+        }
+    }
 
-	for(int i = 0; i < 4; ++i)
-	{
-		positionLocal += weights[i] * mul(float4(inputPositionLocal, 1.0f), boneTransforms[inputBoneIndices[i]]);
-		normalLocal += weights[i] * mul(float4(inputNormalLocal, 0.0f), boneTransforms[inputBoneIndices[i]]);
-		tangentLocal += weights[i] * mul(float4(inputTangentLocal, 0.0f), boneTransforms[inputBoneIndices[i]]);
-	}
-
-	positionLocal.w = 1.0f;
-	normalLocal.w = 0.0f;
-	tangentLocal.w = 0.0f;
+	positionLocal = mul(float4(inputPositionLocal, 1.0f), finalMatrix);
+	normalLocal = mul(float4(inputNormalLocal, 0.0f), finalMatrix);
+	tangentLocal = mul(float4(inputTangentLocal, 0.0f), finalMatrix);
 }

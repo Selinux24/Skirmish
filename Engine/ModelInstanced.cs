@@ -151,30 +151,77 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            if (this.instances != null && this.instances.Length > 0)
+            //Process only visible instances
+            Array.Copy(this.instances, this.instancesTmp, this.instances.Length);
+
+            for (int i = 0; i < this.instancesTmp.Length; i++)
+            {
+                if (!this.instancesTmp[i].Visible || this.instancesTmp[i].Cull)
+                {
+                    this.instancesTmp[i] = null;
+                }
+            }
+
+            //Sort by LOD
+            Array.Sort(this.instancesTmp, (i1, i2) =>
+            {
+                if (i1 == null)
+                {
+                    return 1;
+                }
+                else if (i2 == null)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+                }
+            });
+
+            if (this.instancesTmp != null && this.instancesTmp.Length > 0)
             {
                 //Update by level of detail
-                bool skDataUpdated = false;
                 for (int l = 1; l < (int)LevelOfDetailEnum.Minimum; l *= 2)
                 {
                     var drawingData = this.GetDrawingData((LevelOfDetailEnum)l);
-                    if (drawingData != null && drawingData.SkinningData != null)
+                    if (drawingData != null)
                     {
-                        drawingData.SkinningData.Update(context.GameTime);
+                        var lodInstances = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == (LevelOfDetailEnum)l);
+                        if (lodInstances != null && lodInstances.Length > 0)
+                        {
+                            int instanceIndex = 0;
+                            for (int i = 0; i < lodInstances.Length; i++)
+                            {
+                                lodInstances[i].Manipulator.Update(context.GameTime);
 
-                        skDataUpdated = true;
+                                this.instancingData[instanceIndex].Local = lodInstances[i].Manipulator.LocalTransform;
+                                this.instancingData[instanceIndex].TextureIndex = lodInstances[i].TextureIndex;
+
+                                if (drawingData.SkinningData != null)
+                                {
+                                    lodInstances[i].AnimationTime += context.GameTime.ElapsedSeconds;
+
+                                    int offset;
+                                    drawingData.SkinningData.GetAnimationOffset(
+                                        lodInstances[i].AnimationTime, 
+                                        lodInstances[i].AnimationIndex, 
+                                        out offset);
+
+                                    lodInstances[i].InvalidateCache();
+
+                                    this.instancingData[instanceIndex].ClipIndex = (uint)lodInstances[i].AnimationIndex;
+                                    this.instancingData[instanceIndex].AnimationOffset = (uint)offset;
+                                }
+
+                                instanceIndex++;
+                            }
+                        }
                     }
                 }
 
-                for (int i = 0; i < this.instances.Length; i++)
-                {
-                    if (this.instances[i].Active)
-                    {
-                        this.instances[i].Manipulator.Update(context.GameTime);
-
-                        if (skDataUpdated) this.instances[i].InvalidateCache();
-                    }
-                }
+                //Writes instancing data
+                this.WriteInstancingData(this.DeviceContext, this.instancingData);
             }
         }
         /// <summary>
@@ -192,49 +239,6 @@ namespace Engine
 
                 if (effect != null)
                 {
-                    //Process only visible instances
-                    Array.Copy(this.instances, this.instancesTmp, this.instances.Length);
-
-                    for (int i = 0; i < this.instancesTmp.Length; i++)
-                    {
-                        if (!this.instancesTmp[i].Visible || this.instancesTmp[i].Cull)
-                        {
-                            this.instancesTmp[i] = null;
-                        }
-                    }
-
-                    //Sort by LOD
-                    Array.Sort(this.instancesTmp, (i1, i2) =>
-                    {
-                        if (i1 == null)
-                        {
-                            return 1;
-                        }
-                        else if (i2 == null)
-                        {
-                            return -1;
-                        }
-                        else
-                        {
-                            return i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
-                        }
-                    });
-
-                    int instanceIndex = 0;
-                    for (int i = 0; i < this.instancesTmp.Length; i++)
-                    {
-                        if (this.instancesTmp[i] != null)
-                        {
-                            this.instancingData[instanceIndex].Local = this.instancesTmp[i].Manipulator.LocalTransform;
-                            this.instancingData[instanceIndex].TextureIndex = this.instancesTmp[i].TextureIndex;
-
-                            instanceIndex++;
-                        }
-                    }
-
-                    //Writes instancing data
-                    this.WriteInstancingData(this.DeviceContext, this.instancingData);
-
                     #region Per frame update
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)
@@ -293,37 +297,25 @@ namespace Engine
                                 var index = Array.IndexOf(this.instancesTmp, ins[0]);
                                 var length = ins.Length;
 
-                                #region Per skinning update
+                                #region Per Group update
 
-                                if (drawingData.SkinningData != null)
+                                if (context.DrawerMode == DrawerModesEnum.Forward)
                                 {
-                                    if (context.DrawerMode == DrawerModesEnum.Forward)
-                                    {
-                                        ((EffectBasic)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms());
-                                    }
-                                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                                    {
-                                        ((EffectBasicGBuffer)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms());
-                                    }
-                                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                                    {
-                                        ((EffectBasicShadow)effect).UpdatePerSkinning(drawingData.SkinningData.GetFinalTransforms());
-                                    }
+                                    ((EffectBasic)effect).UpdatePerGroup(
+                                        drawingData.AnimationPalette,
+                                        drawingData.AnimationPaletteWidth);
                                 }
-                                else
+                                else if (context.DrawerMode == DrawerModesEnum.Deferred)
                                 {
-                                    if (context.DrawerMode == DrawerModesEnum.Forward)
-                                    {
-                                        ((EffectBasic)effect).UpdatePerSkinning(null);
-                                    }
-                                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                                    {
-                                        ((EffectBasicGBuffer)effect).UpdatePerSkinning(null);
-                                    }
-                                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                                    {
-                                        ((EffectBasicShadow)effect).UpdatePerSkinning(null);
-                                    }
+                                    ((EffectBasicGBuffer)effect).UpdatePerGroup(
+                                        drawingData.AnimationPalette,
+                                        drawingData.AnimationPaletteWidth);
+                                }
+                                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                                {
+                                    ((EffectBasicShadow)effect).UpdatePerGroup(
+                                        drawingData.AnimationPalette,
+                                        drawingData.AnimationPaletteWidth);
                                 }
 
                                 #endregion
@@ -345,11 +337,11 @@ namespace Engine
 
                                         if (context.DrawerMode == DrawerModesEnum.Forward)
                                         {
-                                            ((EffectBasic)effect).UpdatePerObject(matdata, texture, normalMap, 0);
+                                            ((EffectBasic)effect).UpdatePerObject(matdata, texture, normalMap, null, 0);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
                                         {
-                                            ((EffectBasicGBuffer)effect).UpdatePerObject(matdata, texture, normalMap, 0);
+                                            ((EffectBasicGBuffer)effect).UpdatePerObject(matdata, texture, normalMap, null, 0);
                                         }
 
                                         #endregion
