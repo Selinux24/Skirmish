@@ -184,11 +184,11 @@ namespace HeightmapTest
                     ContentPath = "Textures",
                     NormalMaps = new[] { "normal001.dds", "normal002.dds" },
 
-                    UseAlphaMapping = false,
+                    UseAlphaMapping = true,
                     AlphaMap = "alpha001.dds",
                     ColorTextures = new[] { "dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds" },
 
-                    UseSlopes = true,
+                    UseSlopes = false,
                     SlopeRanges = new Vector2(0.005f, 0.25f),
                     //TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
                     TexturesLR = new[] { "am01.jpg", "am02.jpg", "am04.jpg" },

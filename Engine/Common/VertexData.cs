@@ -1417,12 +1417,15 @@ namespace Engine.Common
                 for (int w = 0; w < boneIndices.Length; w++)
                 {
                     float weight = boneWeights[w];
-                    int index = boneIndices[w];
-                    var boneTransform = boneTransforms[index];
+                    if (weight > 0)
+                    {
+                        int index = boneIndices[w];
+                        var boneTransform = boneTransforms[index];
 
-                    Vector3.TransformCoordinate(ref position, ref boneTransform, out position);
+                        Vector3.TransformCoordinate(ref position, ref boneTransform, out position);
 
-                    t += position * weight;
+                        t += position * weight;
+                    }
                 }
 
                 return t;

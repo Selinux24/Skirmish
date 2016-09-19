@@ -573,6 +573,8 @@ namespace GameLogic
                     ModelInstance instance = this.soldier.Instances[instanceIndex++];
 
                     instance.TextureIndex = teamIndex;
+                    instance.AnimationIndex = 0;
+                    instance.AnimationTime = soldierIndex;
 
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
                     float z = (teamIndex * teamSeparation) - (gameWidth * 0.5f);
