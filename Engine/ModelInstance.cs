@@ -50,9 +50,7 @@ namespace Engine
         {
             get
             {
-                Vector3[] positions = this.GetPoints();
-
-                return positions != null && positions.Length > 0;
+                return this.positionCache != null && this.positionCache.Length > 0;
             }
         }
         /// <summary>
@@ -136,6 +134,9 @@ namespace Engine
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
             this.InvalidateCache();
+
+            this.boundingSphere = new BoundingSphere();
+            this.boundingBox = new BoundingBox();
         }
 
         /// <summary>
@@ -144,11 +145,8 @@ namespace Engine
         public void InvalidateCache()
         {
             this.updatePoints = true;
-
             this.updateTriangles = true;
 
-            this.boundingSphere = new BoundingSphere();
-            this.boundingBox = new BoundingBox();
             this.orientedBoundingBox = new OrientedBoundingBox();
         }
         /// <summary>

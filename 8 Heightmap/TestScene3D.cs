@@ -556,15 +556,22 @@ namespace HeightmapTest
                     this.soldierTris.SetTriangles(color, tris);
                 }
 
-                BoundingBox bbox = this.soldier.GetBoundingBox();
+                BoundingBox[] bboxes = new BoundingBox[]
+                {
+                    this.soldier.GetBoundingBox(),
+                    this.troops.Instances[0].GetBoundingBox(),
+                    this.troops.Instances[1].GetBoundingBox(),
+                    this.troops.Instances[2].GetBoundingBox(),
+                    this.troops.Instances[3].GetBoundingBox(),
+                };
                 if (this.soldierLines == null)
                 {
-                    this.soldierLines = this.AddLineListDrawer(Line3.CreateWiredBox(bbox), color);
+                    this.soldierLines = this.AddLineListDrawer(Line3.CreateWiredBox(bboxes), color);
                     this.soldierLines.EnableDepthStencil = false;
                 }
                 else
                 {
-                    this.soldierLines.SetLines(color, Line3.CreateWiredBox(bbox));
+                    this.soldierLines.SetLines(color, Line3.CreateWiredBox(bboxes));
                 }
             }
 

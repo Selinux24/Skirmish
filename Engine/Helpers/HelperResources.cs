@@ -609,9 +609,11 @@ namespace Engine.Helpers
         /// <returns>Returns created texture</returns>
         public static ShaderResourceView CreateTexture2D(this Device device, int size, Vector4[] values)
         {
-            using (DataStream str = DataStream.Create(values, false, false))
+            Vector4[] tmp = new Vector4[size * size];
+            Array.Copy(values, tmp, values.Length);
+
+            using (DataStream str = DataStream.Create(tmp, false, false))
             {
-                str.Position = 0;
                 DataBox dBox = new DataBox(str.DataPointer, size * (int)FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
 
                 using (Texture2D texture = new Texture2D(

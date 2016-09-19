@@ -351,14 +351,19 @@ namespace Engine.Common
         /// <returns>Returns null or position list</returns>
         public Vector3[] GetPoints(Matrix[] boneTransforms)
         {
-            Vector3[] res = new Vector3[this.Vertices.Length];
-
-            for (int i = 0; i < this.Vertices.Length; i++)
+            if (this.positionCache == null)
             {
-                res[i] = VertexData.ApplyWeight(this.Vertices[i], boneTransforms);
+                Vector3[] res = new Vector3[this.Vertices.Length];
+
+                for (int i = 0; i < this.Vertices.Length; i++)
+                {
+                    res[i] = VertexData.ApplyWeight(this.Vertices[i], boneTransforms);
+                }
+
+                this.positionCache = res;
             }
 
-            return res;
+            return this.positionCache;
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -391,16 +396,21 @@ namespace Engine.Common
         /// <returns>Returns null or triangle list</returns>
         public Triangle[] GetTriangles(Matrix[] boneTransforms)
         {
-            Vector3[] positions = this.GetPoints(boneTransforms);
+            if (this.triangleCache == null)
+            {
+                Vector3[] positions = this.GetPoints(boneTransforms);
 
-            if (this.Indices != null && this.Indices.Length > 0)
-            {
-                return Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
+                if (this.Indices != null && this.Indices.Length > 0)
+                {
+                    this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
+                }
+                else
+                {
+                    this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions);
+                }
             }
-            else
-            {
-                return Triangle.ComputeTriangleList(this.Topology, positions);
-            }
+
+            return this.triangleCache;
         }
     }
 }

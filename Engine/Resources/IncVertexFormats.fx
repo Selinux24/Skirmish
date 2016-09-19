@@ -1,10 +1,4 @@
 static const float4x4 IDENTITY = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
-SamplerState SamplerPointP
-{
-	Filter = MIN_MAG_MIP_LINEAR;
-	AddressU = WRAP;
-	AddressV = WRAP;
-};
 
 /*
 BASIC VS INPUTS
@@ -407,11 +401,7 @@ float4x4 DecodeMatrix(float3x4 m)
 
 float4x4 LoadBoneMatrix(Texture2D animationTexture, uint3 animationData, uint bone, uint paletteWidth)
 {
-    float4x4 rval = IDENTITY;
-    
-    uint baseIndex = animationData.x + animationData.y;
-    baseIndex += (4*bone);
-        
+    uint baseIndex = animationData.x + animationData.y + (4*bone);
     uint baseU = baseIndex % paletteWidth;
     uint baseV = baseIndex / paletteWidth;
    
@@ -419,18 +409,12 @@ float4x4 LoadBoneMatrix(Texture2D animationTexture, uint3 animationData, uint bo
     float4 mat2 = animationTexture.Load(uint3(baseU+1,baseV,0));
     float4 mat3 = animationTexture.Load(uint3(baseU+2,baseV,0));
 
-    rval = DecodeMatrix(float3x4(mat1,mat2,mat3));
-
-    return rval;
+    return DecodeMatrix(float3x4(mat1,mat2,mat3));
 }
 
 void PopulateWeights(float3 inputWeights, out float4 weights)
 {
-	weights = float4(0,0,0,0);
-	weights.x = inputWeights.x;
-	weights.y = inputWeights.y;
-	weights.z = inputWeights.z;
-	weights.w = 1.0f - weights.x - weights.y - weights.w;
+	weights = float4(inputWeights.x, inputWeights.y, inputWeights.z, 1.0f - inputWeights.x - inputWeights.y - inputWeights.z);
 }
 
 void ComputePositionWeights(
@@ -445,20 +429,23 @@ void ComputePositionWeights(
 	float4 weights;
 	PopulateWeights(inputWeights, weights);
 	
-	float4x4 finalMatrix;
-	finalMatrix = weights.x * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.x, paletteWidth);
-    if(weights.y > 0)
-    {
-        finalMatrix += weights.y * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.y, paletteWidth);
-        if(weights.z > 0)
-        {
-            finalMatrix += weights.z * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.z, paletteWidth);
-            if(weights.w > 0)
+	float4x4 finalMatrix = IDENTITY;
+	if(weights.x > 0)
+	{
+		finalMatrix = weights.x * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.x, paletteWidth);
+		if(weights.y > 0)
+		{
+			finalMatrix += weights.y * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.y, paletteWidth);
+			if(weights.z > 0)
 			{
-				finalMatrix += weights.w * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.w, paletteWidth);
+				finalMatrix += weights.z * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.z, paletteWidth);
+				if(weights.w > 0)
+				{
+					finalMatrix += weights.w * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.w, paletteWidth);
+				}
 			}
-        }
-    }
+		}
+	}
 
 	positionLocal = mul(float4(inputPositionLocal, 1.0f), finalMatrix);
 }
@@ -477,20 +464,23 @@ void ComputePositionNormalWeights(
 	float4 weights;
 	PopulateWeights(inputWeights, weights);
 	
-	float4x4 finalMatrix;
-	finalMatrix = weights.x * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.x, paletteWidth);
-    if(weights.y > 0)
-    {
-        finalMatrix += weights.y * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.y, paletteWidth);
-        if(weights.z > 0)
-        {
-            finalMatrix += weights.z * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.z, paletteWidth);
-            if(weights.w > 0)
+	float4x4 finalMatrix = IDENTITY;
+	if(weights.x > 0)
+	{
+		finalMatrix = weights.x * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.x, paletteWidth);
+		if(weights.y > 0)
+		{
+			finalMatrix += weights.y * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.y, paletteWidth);
+			if(weights.z > 0)
 			{
-				finalMatrix += weights.w * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.w, paletteWidth);
+				finalMatrix += weights.z * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.z, paletteWidth);
+				if(weights.w > 0)
+				{
+					finalMatrix += weights.w * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.w, paletteWidth);
+				}
 			}
-        }
-    }
+		}
+	}
 
 	positionLocal = mul(float4(inputPositionLocal, 1.0f), finalMatrix);
 	normalLocal = mul(float4(inputNormalLocal, 0.0f), finalMatrix);
@@ -512,20 +502,23 @@ void ComputePositionNormalTangentWeights(
 	float4 weights;
 	PopulateWeights(inputWeights, weights);
 	
-	float4x4 finalMatrix;
-	finalMatrix = weights.x * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.x, paletteWidth);
-    if(weights.y > 0)
-    {
-        finalMatrix += weights.y * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.y, paletteWidth);
-        if(weights.z > 0)
-        {
-            finalMatrix += weights.z * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.z, paletteWidth);
-            if(weights.w > 0)
+	float4x4 finalMatrix = IDENTITY;
+	if(weights.x > 0)
+	{
+		finalMatrix = weights.x * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.x, paletteWidth);
+		if(weights.y > 0)
+		{
+			finalMatrix += weights.y * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.y, paletteWidth);
+			if(weights.z > 0)
 			{
-				finalMatrix += weights.w * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.w, paletteWidth);
+				finalMatrix += weights.z * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.z, paletteWidth);
+				if(weights.w > 0)
+				{
+					finalMatrix += weights.w * LoadBoneMatrix(animationTexture, animationData, inputBoneIndices.w, paletteWidth);
+				}
 			}
-        }
-    }
+		}
+	}
 
 	positionLocal = mul(float4(inputPositionLocal, 1.0f), finalMatrix);
 	normalLocal = mul(float4(inputNormalLocal, 0.0f), finalMatrix);

@@ -1,5 +1,8 @@
 
-SamplerState SamplerPoint;
+SamplerState SamplerPoint
+{
+	Filter = MIN_MAG_MIP_POINT;
+};
 SamplerState SamplerLinear
 {
 	Filter = MIN_MAG_MIP_LINEAR;
@@ -10,7 +13,6 @@ SamplerState SamplerAnisotropic
 {
 	Filter = ANISOTROPIC;
 	MaxAnisotropy = 4;
-
 	AddressU = WRAP;
 	AddressV = WRAP;
 };
