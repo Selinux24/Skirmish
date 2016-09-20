@@ -122,7 +122,7 @@ float CalcSphericAttenuation(float radius, float intensity, float maxDistance, f
         return 0.0f;
     }
 }
-float CalcShadowFactor(float4 lightPosition, Texture2D shadowMapStatic, Texture2D shadowMapDynamic)
+float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shadowMapStatic, Texture2D shadowMapDynamic)
 {
 	float shadow = 0.0f;
 
@@ -135,10 +135,27 @@ float CalcShadowFactor(float4 lightPosition, Texture2D shadowMapStatic, Texture2
 	{
 		float2 stc = tex + poissonDisk[i] / 700.0f;
 
-		if (!shadowMapStatic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z) ||
-			!shadowMapDynamic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
+		if(shadows == 1)
 		{
-			shadow += 0.8f;
+			if (!shadowMapStatic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
+			{
+				shadow += 0.8f;
+			}
+		}
+		if(shadows == 2)
+		{
+			if (!shadowMapDynamic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
+			{
+				shadow += 0.8f;
+			}
+		}
+		if(shadows == 3)
+		{
+			if (!shadowMapStatic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z) ||
+				!shadowMapDynamic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
+			{
+				shadow += 0.8f;
+			}
 		}
 	}
 
@@ -199,6 +216,7 @@ float3 ComputeDirectionalLight(
 	float specularIntensity,
 	float specularPower,
 	float4 lightPosition,
+	uint shadows,
 	Texture2D shadowMapStatic,
 	Texture2D shadowMapDynamic)
 {
@@ -207,7 +225,7 @@ float3 ComputeDirectionalLight(
 	[flatten]
 	if(L.CastShadow == 1)
 	{
-		shadowFactor = CalcShadowFactor(lightPosition, shadowMapStatic, shadowMapDynamic);
+		shadowFactor = CalcShadowFactor(lightPosition, shadows, shadowMapStatic, shadowMapDynamic);
 	}
 
 	float3 litColor = ComputeBaseLight(
@@ -311,6 +329,7 @@ float3 ComputeAllLights(
 	float specularIntensity,
 	float specularPower,
 	float4 lightPosition,
+	uint shadows,
 	Texture2D shadowMapStatic,
 	Texture2D shadowMapDynamic)
 {
@@ -332,6 +351,7 @@ float3 ComputeAllLights(
 				specularIntensity,
 				specularPower,
 				lightPosition,
+				shadows,
 				shadowMapStatic,
 				shadowMapDynamic);
 		}

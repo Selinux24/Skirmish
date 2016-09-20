@@ -44,6 +44,7 @@ float4 PSForwardCubic(PSVertexPosition input) : SV_Target
 		0.0f,
 		0.0f,
 		float4(0.0f, 0.0f, 0.0f, 1.0f),
+		0,
 		gShadowMap,
 		gShadowMap);
 

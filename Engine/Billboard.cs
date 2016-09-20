@@ -149,6 +149,7 @@ namespace Engine
                             context.EyePosition,
                             context.Frustum,
                             context.Lights,
+                            context.ShadowMaps,
                             context.ShadowMapStatic,
                             context.ShadowMapDynamic,
                             context.FromLightViewProjection);
@@ -161,6 +162,7 @@ namespace Engine
                             context.EyePosition,
                             context.Frustum,
                             context.Lights,
+                            context.ShadowMaps,
                             context.ShadowMapStatic,
                             context.ShadowMapDynamic,
                             context.FromLightViewProjection);

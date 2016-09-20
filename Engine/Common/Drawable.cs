@@ -210,6 +210,10 @@ namespace Engine.Common
         /// </summary>
         public Matrix FromLightViewProjection;
         /// <summary>
+        /// Shadow maps
+        /// </summary>
+        public int ShadowMaps;
+        /// <summary>
         /// Static shadow map
         /// </summary>
         public ShaderResourceView ShadowMapStatic;

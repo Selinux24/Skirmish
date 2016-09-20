@@ -76,6 +76,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectVectorVariable fogColor = null;
         /// <summary>
+        /// Shadow maps flag effect variable
+        /// </summary>
+        private EffectScalarVariable shadowMaps = null;
+        /// <summary>
         /// Color Map effect variable
         /// </summary>
         private EffectShaderResourceVariable tg1Map = null;
@@ -275,6 +279,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Shadow maps flag
+        /// </summary>
+        protected int ShadowMaps
+        {
+            get
+            {
+                return this.shadowMaps.GetInt();
+            }
+            set
+            {
+                this.shadowMaps.Set(value);
+            }
+        }
+        /// <summary>
         /// Color Map
         /// </summary>
         protected ShaderResourceView TG1Map
@@ -388,6 +406,7 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
+            this.shadowMaps = this.Effect.GetVariableByName("gShadows").AsScalar();
             this.tg1Map = this.Effect.GetVariableByName("gTG1Map").AsShaderResource();
             this.tg2Map = this.Effect.GetVariableByName("gTG2Map").AsShaderResource();
             this.tg3Map = this.Effect.GetVariableByName("gTG3Map").AsShaderResource();
@@ -438,6 +457,7 @@ namespace Engine.Effects
         /// <param name="colorMap">Color map texture</param>
         /// <param name="normalMap">Normal map texture</param>
         /// <param name="depthMap">Depth map texture</param>
+        /// <param name="shadowMaps">Shadow map flags</param>
         /// <param name="shadowMapStatic">Static shadow map texture</param>
         /// <param name="shadowMapDynamic">Dynamic shadow map texture</param>
         public void UpdatePerFrame(
@@ -450,6 +470,7 @@ namespace Engine.Effects
             ShaderResourceView colorMap,
             ShaderResourceView normalMap,
             ShaderResourceView depthMap,
+            int shadowMaps,
             ShaderResourceView shadowMapStatic,
             ShaderResourceView shadowMapDynamic)
         {
@@ -467,6 +488,7 @@ namespace Engine.Effects
 
             this.ShadowMapStatic = shadowMapStatic;
             this.ShadowMapDynamic = shadowMapDynamic;
+            this.ShadowMaps = shadowMaps;
         }
         /// <summary>
         /// Updates per directional light variables

@@ -17,6 +17,7 @@ cbuffer cbPerFrame : register (b0)
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
+	uint gShadows;
 	float4 gParams;
 };
 cbuffer cbPerObject : register (b1)
@@ -156,6 +157,7 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
+		gShadows,
 		gShadowMapStatic,
 		gShadowMapDynamic);
 

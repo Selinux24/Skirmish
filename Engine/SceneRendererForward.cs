@@ -192,6 +192,7 @@ namespace Engine
                 this.DrawContext.EyeTarget = this.UpdateContext.EyeTarget;
                 //Initialize context data from scene
                 this.DrawContext.Lights = scene.Lights;
+                this.DrawContext.ShadowMaps = 0;
                 this.DrawContext.ShadowMapStatic = null;
                 this.DrawContext.ShadowMapDynamic = null;
                 this.DrawContext.FromLightViewProjection = Matrix.Identity;
@@ -242,6 +243,11 @@ namespace Engine
                         var staticObjs = visibleComponents.FindAll(c => c.Opaque == true && c.Static == true);
                         if (staticObjs.Count > 0)
                         {
+                            if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Static))
+                            {
+                                this.shadowMapper.Flags |= ShadowMapFlags.Static;
+                            }
+
                             #region Draw
 #if DEBUG
                             Stopwatch swDraw = Stopwatch.StartNew();
@@ -294,6 +300,10 @@ namespace Engine
 
                         if (draw)
                         {
+                            if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Dynamic))
+                            {
+                                this.shadowMapper.Flags |= ShadowMapFlags.Dynamic;
+                            }
 #if DEBUG
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
@@ -312,6 +322,7 @@ namespace Engine
                     #endregion
 
                     //Set shadow map and transform to drawing context
+                    this.DrawContext.ShadowMaps = (int)this.shadowMapper.Flags;
                     this.DrawContext.ShadowMapStatic = this.shadowMapper.TextureStatic;
                     this.DrawContext.ShadowMapDynamic = this.shadowMapper.TextureDynamic;
                     this.DrawContext.FromLightViewProjection = this.shadowMapper.View * this.shadowMapper.Projection;

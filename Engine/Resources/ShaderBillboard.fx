@@ -13,6 +13,7 @@ cbuffer cbPerFrame : register (b0)
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
+	uint gShadows;
 	float gStartRadius;
 	float gEndRadius;
 	float3 gWindDirection;
@@ -166,6 +167,7 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
+		gShadows,
 		gShadowMapStatic,
 		gShadowMapDynamic);
 

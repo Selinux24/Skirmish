@@ -168,6 +168,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectVectorVariable fogColor = null;
         /// <summary>
+        /// Shadow maps flag effect variable
+        /// </summary>
+        private EffectScalarVariable shadowMaps = null;
+        /// <summary>
         /// World matrix effect variable
         /// </summary>
         private EffectMatrixVariable world = null;
@@ -350,6 +354,20 @@ namespace Engine.Effects
             set
             {
                 this.fogColor.Set(value);
+            }
+        }
+        /// <summary>
+        /// Shadow maps flag
+        /// </summary>
+        protected int ShadowMaps
+        {
+            get
+            {
+                return this.shadowMaps.GetInt();
+            }
+            set
+            {
+                this.shadowMaps.Set(value);
             }
         }
         /// <summary>
@@ -634,6 +652,7 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
+            this.shadowMaps = this.Effect.GetVariableByName("gShadows").AsScalar();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
             this.shadowMapStatic = this.Effect.GetVariableByName("gShadowMapStatic").AsShaderResource();
@@ -694,7 +713,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection)
         {
-            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, new BoundingFrustum(), null, null, null, Matrix.Identity);
+            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, new BoundingFrustum(), null, 0, null, null, Matrix.Identity);
         }
         /// <summary>
         /// Update per frame data
@@ -704,6 +723,7 @@ namespace Engine.Effects
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="viewFrustum">Camera frustum</param>
         /// <param name="lights">Scene ligths</param>
+        /// <param name="shadowMaps">Shadow map flags</param>
         /// <param name="shadowMapStatic">Static shadow map texture</param>
         /// <param name="shadowMapDynamic">Dynamic shadow map texture</param>
         /// <param name="fromLightViewProjection">From light View * Projection transform</param>
@@ -713,6 +733,7 @@ namespace Engine.Effects
             Vector3 eyePositionWorld,
             BoundingFrustum viewFrustum,
             SceneLights lights,
+            int shadowMaps,
             ShaderResourceView shadowMapStatic,
             ShaderResourceView shadowMapDynamic,
             Matrix fromLightViewProjection)
@@ -757,6 +778,7 @@ namespace Engine.Effects
                 this.FromLightViewProjection = fromLightViewProjection;
                 this.ShadowMapStatic = shadowMapStatic;
                 this.ShadowMapDynamic = shadowMapDynamic;
+                this.ShadowMaps = shadowMaps;
             }
             else
             {
@@ -773,6 +795,7 @@ namespace Engine.Effects
                 this.FromLightViewProjection = Matrix.Identity;
                 this.ShadowMapStatic = null;
                 this.ShadowMapDynamic = null;
+                this.ShadowMaps = 0;
             }
         }
         /// <summary>

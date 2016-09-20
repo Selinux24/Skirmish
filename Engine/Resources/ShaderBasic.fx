@@ -17,6 +17,7 @@ cbuffer cbPerFrame : register (b0)
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
+	uint gShadows;
 };
 cbuffer cbPerGroup : register (b1)
 {
@@ -224,6 +225,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
+		gShadows,
 		gShadowMapStatic,
 		gShadowMapDynamic);
 
@@ -467,6 +469,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
+		gShadows,
 		gShadowMapStatic,
 		gShadowMapDynamic);
 
@@ -597,6 +600,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
+		gShadows,
 		gShadowMapStatic,
 		gShadowMapDynamic);
 

@@ -47,6 +47,10 @@ namespace Engine
         /// </summary>
         public DepthStencilView DepthMapDynamic { get; protected set; }
         /// <summary>
+        /// Shadow map flags
+        /// </summary>
+        public ShadowMapFlags Flags { get; set; }
+        /// <summary>
         /// Static deph map texture
         /// </summary>
         public ShaderResourceView TextureStatic { get; protected set; }
@@ -215,5 +219,25 @@ namespace Engine
                 this.TextureDynamic = null;
             }
         }
+    }
+
+    /// <summary>
+    /// Flags
+    /// </summary>
+    [Flags]
+    public enum ShadowMapFlags : int
+    {
+        /// <summary>
+        /// None
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Static shadow map
+        /// </summary>
+        Static = 1,
+        /// <summary>
+        /// Dynamix shadow map
+        /// </summary>
+        Dynamic = 2,
     }
 }

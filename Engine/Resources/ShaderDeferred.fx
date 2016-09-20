@@ -13,6 +13,7 @@ cbuffer cbPerFrame : register (b0)
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
+	uint gShadows;
 };
 
 Texture2D gTG1Map : register(t0);
@@ -103,6 +104,7 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 		depth.w,
 		normal.w,
 		lPosition,
+		gShadows,
 		gShadowMapStatic,
 		gShadowMapDynamic);
 
