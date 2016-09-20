@@ -366,10 +366,10 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Frustum culling test
+        /// Culling test
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        public override void FrustumCulling(BoundingFrustum frustum)
+        public override void Culling(BoundingFrustum frustum)
         {
             //Cull was made per instance
             this.Cull = true;
@@ -378,7 +378,29 @@ namespace Engine
             {
                 if (this.Instances[i].Visible)
                 {
-                    this.Instances[i].FrustumCulling(frustum);
+                    this.Instances[i].Culling(frustum);
+
+                    if (!this.Instances[i].Cull)
+                    {
+                        this.Cull = false;
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Culling test
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        public override void Culling(BoundingSphere sphere)
+        {
+            //Cull was made per instance
+            this.Cull = true;
+
+            for (int i = 0; i < this.Instances.Length; i++)
+            {
+                if (this.Instances[i].Visible)
+                {
+                    this.Instances[i].Culling(sphere);
 
                     if (!this.Instances[i].Cull)
                     {

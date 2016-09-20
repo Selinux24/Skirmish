@@ -289,10 +289,10 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Frustum culling
+        /// Culling
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        public override void FrustumCulling(BoundingFrustum frustum)
+        public override void Culling(BoundingFrustum frustum)
         {
             if (this.hasVolumes)
             {
@@ -307,6 +307,30 @@ namespace Engine
             {
                 var pars = frustum.GetCameraParams();
                 var dist = Vector3.DistanceSquared(this.Manipulator.Position, pars.Position);
+                if (dist < 100f) { this.LevelOfDetail = LevelOfDetailEnum.High; }
+                else if (dist < 400f) { this.LevelOfDetail = LevelOfDetailEnum.Medium; }
+                else if (dist < 1600f) { this.LevelOfDetail = LevelOfDetailEnum.Low; }
+                else { this.LevelOfDetail = LevelOfDetailEnum.Minimum; }
+            }
+        }
+        /// <summary>
+        /// Culling
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        public override void Culling(BoundingSphere sphere)
+        {
+            if (this.hasVolumes)
+            {
+                this.Cull = this.GetBoundingSphere().Contains(ref sphere) == ContainmentType.Disjoint;
+            }
+            else
+            {
+                this.Cull = false;
+            }
+
+            if (!this.Cull)
+            {
+                var dist = Vector3.DistanceSquared(this.Manipulator.Position, sphere.Center);
                 if (dist < 100f) { this.LevelOfDetail = LevelOfDetailEnum.High; }
                 else if (dist < 400f) { this.LevelOfDetail = LevelOfDetailEnum.Medium; }
                 else if (dist < 1600f) { this.LevelOfDetail = LevelOfDetailEnum.Low; }

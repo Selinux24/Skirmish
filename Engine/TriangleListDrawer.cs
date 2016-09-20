@@ -70,10 +70,18 @@ namespace Engine
             base.Draw(context);
         }
         /// <summary>
-        /// No frustum culling
+        /// No culling
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        public override void FrustumCulling(BoundingFrustum frustum)
+        public override void Culling(BoundingFrustum frustum)
+        {
+            this.Cull = false;
+        }
+        /// <summary>
+        /// No culling
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        public override void Culling(BoundingSphere sphere)
         {
             this.Cull = false;
         }

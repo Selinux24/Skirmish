@@ -237,7 +237,26 @@ namespace Engine
 
             for (int i = 0; i < components.Count; i++)
             {
-                components[i].FrustumCulling(frustum);
+                components[i].Culling(frustum);
+
+                if (!components[i].Cull) res = true;
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Makes cull test for specified drawable collection
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="components">Components</param>
+        /// <returns>Returns true if any component passed culling test</returns>
+        public virtual bool CullTest(BoundingSphere sphere, IList<Drawable> components)
+        {
+            bool res = false;
+
+            for (int i = 0; i < components.Count; i++)
+            {
+                components[i].Culling(sphere);
 
                 if (!components[i].Cull) res = true;
             }

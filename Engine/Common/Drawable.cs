@@ -86,11 +86,18 @@ namespace Engine.Common
         public abstract void Dispose();
 
         /// <summary>
-        /// Performs frustum culling test
+        /// Performs culling test
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        /// <returns>Returns true if component passes frustum culling test</returns>
-        public virtual void FrustumCulling(BoundingFrustum frustum)
+        public virtual void Culling(BoundingFrustum frustum)
+        {
+            this.Cull = false;
+        }
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        public virtual void Culling(BoundingSphere sphere)
         {
             this.Cull = false;
         }
