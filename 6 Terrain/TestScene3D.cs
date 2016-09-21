@@ -58,11 +58,12 @@ namespace TerrainTest
         private ModelInstanced rocks = null;
         private ModelInstanced tree1 = null;
         private ModelInstanced tree2 = null;
+        private Color4 objColor = Color.Magenta;
+        private LineListDrawer objLineDrawer = null;
 
         private Model helicopter = null;
         private LineListDrawer helicopterLineDrawer = null;
         private Vector3 heightOffset = (Vector3.Up * 10f);
-
         private Color4 gridColor = new Color4(Color.LightSeaGreen.ToColor3(), 0.5f);
         private Color4 curvesColor = Color.Red;
         private Color4 pointsColor = Color.Blue;
@@ -361,6 +362,8 @@ namespace TerrainTest
 
             Random posRnd = new Random(1);
 
+            List<BoundingBox> bboxes = new List<BoundingBox>();
+
             //Helipod
             Vector3 hPos;
             Triangle hTri;
@@ -369,6 +372,7 @@ namespace TerrainTest
             {
                 this.helipod.Manipulator.SetPosition(hPos, true);
             }
+            bboxes.Add(this.helipod.GetBoundingBox());
 
             //Garage
             Vector3 gPos;
@@ -379,6 +383,7 @@ namespace TerrainTest
                 this.garage.Manipulator.SetPosition(gPos, true);
                 this.garage.Manipulator.SetRotation(MathUtil.PiOverTwo + MathUtil.Pi, 0, 0, true);
             }
+            bboxes.Add(this.garage.GetBoundingBox());
 
             //Obelisk
             for (int i = 0; i < 4; i++)
@@ -393,6 +398,7 @@ namespace TerrainTest
                 {
                     this.obelisk.Instances[i].Manipulator.SetPosition(obeliskPosition, true);
                 }
+                bboxes.Add(this.obelisk.Instances[i].GetBoundingBox());
             }
 
             //Rocks
@@ -419,6 +425,7 @@ namespace TerrainTest
                     this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0, true);
                     this.rocks.Instances[i].Manipulator.SetScale(scale, true);
                 }
+                bboxes.Add(this.rocks.Instances[i].GetBoundingBox());
             }
 
             //Trees
@@ -435,6 +442,7 @@ namespace TerrainTest
                     this.tree1.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
                     this.tree1.Instances[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
                 }
+                bboxes.Add(this.tree1.Instances[i].GetBoundingBox());
             }
 
             for (int i = 0; i < this.tree2.Instances.Length; i++)
@@ -450,7 +458,15 @@ namespace TerrainTest
                     this.tree2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
                     this.tree2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.5f, 1.5f), true);
                 }
+                bboxes.Add(this.tree2.Instances[i].GetBoundingBox());
             }
+
+            this.objLineDrawer = this.AddLineListDrawer(Line3.CreateWiredBox(bboxes.ToArray()), this.objColor);
+
+            this.helipod.Active = this.garage.Active = this.obelisk.Active = false;
+            this.helipod.Visible = this.garage.Visible = this.obelisk.Visible = false;
+            this.rocks.Active = this.tree2.Active = false;
+            this.rocks.Visible = this.tree2.Visible = false;
 
             this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helipod, this.garage, this.obelisk }, false);
             this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.rocks, this.tree1, this.tree2 }, false);
