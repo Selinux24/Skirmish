@@ -151,77 +151,82 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            //Process only visible instances
-            Array.Copy(this.instances, this.instancesTmp, this.instances.Length);
-
-            for (int i = 0; i < this.instancesTmp.Length; i++)
+            if (this.instances != null && this.instances.Length > 0)
             {
-                if (!this.instancesTmp[i].Visible || this.instancesTmp[i].Cull)
+                Array.ForEach(this.instances, i =>
                 {
-                    this.instancesTmp[i] = null;
-                }
-            }
+                    if(i.Active) i.Manipulator.Update(context.GameTime);
+                });
 
-            //Sort by LOD
-            Array.Sort(this.instancesTmp, (i1, i2) =>
-            {
-                if (i1 == null)
-                {
-                    return 1;
-                }
-                else if (i2 == null)
-                {
-                    return -1;
-                }
-                else
-                {
-                    return i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
-                }
-            });
+                //Process only visible instances
+                Array.Copy(this.instances, this.instancesTmp, this.instances.Length);
 
-            if (this.instancesTmp != null && this.instancesTmp.Length > 0)
-            {
-                //Update by level of detail
-                for (int l = 1; l < (int)LevelOfDetailEnum.Minimum; l *= 2)
+                for (int i = 0; i < this.instancesTmp.Length; i++)
                 {
-                    var drawingData = this.GetDrawingData((LevelOfDetailEnum)l);
-                    if (drawingData != null)
+                    if (!this.instancesTmp[i].Visible || this.instancesTmp[i].Cull)
                     {
-                        var lodInstances = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == (LevelOfDetailEnum)l);
-                        if (lodInstances != null && lodInstances.Length > 0)
+                        this.instancesTmp[i] = null;
+                    }
+                }
+
+                //Sort by LOD
+                Array.Sort(this.instancesTmp, (i1, i2) =>
+                {
+                    if (i1 == null)
+                    {
+                        return 1;
+                    }
+                    else if (i2 == null)
+                    {
+                        return -1;
+                    }
+                    else
+                    {
+                        return i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+                    }
+                });
+
+                LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;
+                DrawingData drawingData = null;
+                int instanceIndex = 0;
+                for (int i = 0; i < this.instancesTmp.Length; i++)
+                {
+                    if (this.instancesTmp[i] != null)
+                    {
+                        if (lastLod != this.instancesTmp[i].LevelOfDetail)
                         {
-                            int instanceIndex = 0;
-                            for (int i = 0; i < lodInstances.Length; i++)
-                            {
-                                lodInstances[i].Manipulator.Update(context.GameTime);
-
-                                this.instancingData[instanceIndex].Local = lodInstances[i].Manipulator.LocalTransform;
-                                this.instancingData[instanceIndex].TextureIndex = lodInstances[i].TextureIndex;
-
-                                if (drawingData.SkinningData != null)
-                                {
-                                    lodInstances[i].AnimationTime += context.GameTime.ElapsedSeconds;
-
-                                    int offset;
-                                    drawingData.SkinningData.GetAnimationOffset(
-                                        lodInstances[i].AnimationTime, 
-                                        lodInstances[i].AnimationIndex, 
-                                        out offset);
-
-                                    lodInstances[i].InvalidateCache();
-
-                                    this.instancingData[instanceIndex].ClipIndex = (uint)lodInstances[i].AnimationIndex;
-                                    this.instancingData[instanceIndex].AnimationOffset = (uint)offset;
-                                }
-
-                                instanceIndex++;
-                            }
+                            lastLod = this.instancesTmp[i].LevelOfDetail;
+                            drawingData = this.GetDrawingData(lastLod);
                         }
+
+                        this.instancingData[instanceIndex].Local = this.instancesTmp[i].Manipulator.LocalTransform;
+                        this.instancingData[instanceIndex].TextureIndex = this.instancesTmp[i].TextureIndex;
+
+                        if (drawingData != null && drawingData.SkinningData != null)
+                        {
+                            this.instancesTmp[i].AnimationTime += context.GameTime.ElapsedSeconds;
+
+                            int offset;
+                            drawingData.SkinningData.GetAnimationOffset(
+                                this.instancesTmp[i].AnimationTime,
+                                this.instancesTmp[i].AnimationIndex,
+                                out offset);
+
+                            this.instancesTmp[i].InvalidateCache();
+
+                            this.instancingData[instanceIndex].ClipIndex = (uint)this.instancesTmp[i].AnimationIndex;
+                            this.instancingData[instanceIndex].AnimationOffset = (uint)offset;
+                        }
+
+                        instanceIndex++;
                     }
                 }
 
                 //Writes instancing data
-                this.WriteInstancingData(this.DeviceContext, this.instancingData);
+                if (instanceIndex > 0)
+                {
+                    this.WriteInstancingData(this.DeviceContext, this.instancingData);
+                }
             }
         }
         /// <summary>
