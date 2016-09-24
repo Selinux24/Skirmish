@@ -306,9 +306,12 @@ namespace Engine
         /// <param name="d">Distance</param>
         private void Move(Vector3 d)
         {
-            this.position += d;
+            if (d != Vector3.Zero)
+            {
+                this.position += d;
 
-            this.SetUpdateNeeded(true);
+                this.SetUpdateNeeded(true);
+            }
         }
         /// <summary>
         /// Increments rotation component by axis
@@ -316,11 +319,14 @@ namespace Engine
         /// <param name="yaw">Yaw (Y) amount (radians)</param>
         /// <param name="pitch">Pitch (X) amount (radians)</param>
         /// <param name="roll">Roll (Z) amount (radians)</param>
-        private void Rotate(float yaw, float pitch, float roll)
+        public void Rotate(float yaw, float pitch, float roll)
         {
-            this.rotation *= Quaternion.RotationYawPitchRoll(yaw, pitch, roll);
+            if (yaw != 0f || pitch != 0f || roll != 0f)
+            {
+                this.rotation *= Quaternion.RotationYawPitchRoll(yaw, pitch, roll);
 
-            this.SetUpdateNeeded(true);
+                this.SetUpdateNeeded(true);
+            }
         }
 
         /// <summary>
@@ -484,11 +490,14 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void SetPosition(Vector3 position, bool updateState = false)
         {
-            this.position = position;
+            if (this.position != position)
+            {
+                this.position = position;
 
-            this.SetUpdateNeeded(true);
+                this.SetUpdateNeeded(true);
 
-            if (updateState) this.UpdateLocalTransform();
+                if (updateState) this.UpdateLocalTransform();
+            }
         }
         /// <summary>
         /// Sets rotation
@@ -508,11 +517,14 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void SetRotation(Quaternion rotation, bool updateState = false)
         {
-            this.rotation = rotation;
+            if (this.rotation != rotation)
+            {
+                this.rotation = rotation;
 
-            this.SetUpdateNeeded(true);
+                this.SetUpdateNeeded(true);
 
-            if (updateState) this.UpdateLocalTransform();
+                if (updateState) this.UpdateLocalTransform();
+            }
         }
         /// <summary>
         /// Sets scale
@@ -541,11 +553,14 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void SetScale(Vector3 scale, bool updateState = false)
         {
-            this.scaling = scale;
+            if (this.scaling != scale)
+            {
+                this.scaling = scale;
 
-            this.SetUpdateNeeded(true);
+                this.SetUpdateNeeded(true);
 
-            if (updateState) this.UpdateLocalTransform();
+                if (updateState) this.UpdateLocalTransform();
+            }
         }
         /// <summary>
         /// Look at target

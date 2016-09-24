@@ -13,6 +13,10 @@ namespace Engine
     public class Model : ModelBase, IPickable
     {
         /// <summary>
+        /// Manipulator has changed last frame
+        /// </summary>
+        private bool manipulatorChanged = false;
+        /// <summary>
         /// Update point cache flag
         /// </summary>
         private bool updatePoints = true;
@@ -87,6 +91,10 @@ namespace Engine
         /// </summary>
         public float AnimationTime { get; set; }
         /// <summary>
+        /// Do model animations using manipulator changes only
+        /// </summary>
+        public bool AnimateWithManipulator { get; set; }
+        /// <summary>
         /// Texture index
         /// </summary>
         public int TextureIndex { get; set; }
@@ -118,6 +126,8 @@ namespace Engine
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
 
+            this.AnimateWithManipulator = false;
+
             this.EnableDepthStencil = true;
         }
         /// <summary>
@@ -132,6 +142,8 @@ namespace Engine
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
 
+            this.AnimateWithManipulator = false;
+
             this.EnableDepthStencil = true;
         }
         /// <summary>
@@ -142,14 +154,20 @@ namespace Engine
         {
             if (this.DrawingData != null && this.DrawingData.SkinningData != null)
             {
-                this.AnimationTime += context.GameTime.ElapsedSeconds;
+                bool animate = this.AnimateWithManipulator ? this.manipulatorChanged : true;
+                if (animate)
+                {
+                    this.AnimationTime += context.GameTime.ElapsedSeconds;
 
-                int offset;
-                this.DrawingData.SkinningData.GetAnimationOffset(this.AnimationTime, this.AnimationIndex, out offset);
-                this.animationData[0] = (uint)this.AnimationIndex;
-                this.animationData[1] = (uint)offset;
-                this.InvalidateCache();
+                    int offset;
+                    this.DrawingData.SkinningData.GetAnimationOffset(this.AnimationTime, this.AnimationIndex, out offset);
+                    this.animationData[0] = (uint)this.AnimationIndex;
+                    this.animationData[1] = (uint)offset;
+                    this.InvalidateCache();
+                }
             }
+
+            this.manipulatorChanged = false;
 
             this.Manipulator.Update(context.GameTime);
 
@@ -361,6 +379,8 @@ namespace Engine
 
             this.boundingSphere = new BoundingSphere();
             this.boundingBox = new BoundingBox();
+
+            this.manipulatorChanged = true;
         }
 
         /// <summary>

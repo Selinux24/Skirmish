@@ -8,7 +8,7 @@ namespace HeightmapTest
 {
     public class TestScene3D : Scene
     {
-        private const float near = 0.1f;
+        private const float near = 1f;
         private const float far = 1000f;
         private const float fogStart = 0.01f;
         private const float fogRange = 0.50f;
@@ -220,7 +220,7 @@ namespace HeightmapTest
             this.soldier = this.AddModel(new ModelDescription()
             {
                 ContentPath = @"Resources/Soldier",
-                ModelFileName = "soldier.dae",
+                ModelFileName = "soldier_anim2.dae",
             });
 
             {
@@ -231,6 +231,8 @@ namespace HeightmapTest
                 {
                     this.soldier.Manipulator.SetPosition(position, true);
                 }
+
+                this.soldier.AnimateWithManipulator = true;
             }
 
             this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
@@ -389,8 +391,9 @@ namespace HeightmapTest
             #endregion
 
             {
-                this.Camera.Goto(this.soldier.Manipulator.Position + this.playerHeight + new Vector3(8, 5, -16));
-                this.Camera.LookTo(this.soldier.Manipulator.Position + this.playerHeight + new Vector3(0, 2f, 0));
+                var offset = (this.playerHeight * 1.2f) + (this.soldier.Manipulator.Backward * 10f) + (this.soldier.Manipulator.Left * 3f);
+                var view = (this.soldier.Manipulator.Forward * 4f) + this.soldier.Manipulator.Down;
+                this.Camera.Following = new CameraFollower(this.soldier.Manipulator, offset, view);
             }
 
             #region Debug
@@ -435,43 +438,85 @@ namespace HeightmapTest
 
             #region Camera
 
+            if (this.Camera.Following == null)
+            {
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+                if (this.Game.Input.RightMouseButtonPressed)
 #endif
-            {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                {
+                    this.Camera.RotateMouse(
+                        this.Game.GameTime,
+                        this.Game.Input.MouseXDelta,
+                        this.Game.Input.MouseYDelta);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.A))
+                {
+                    this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.D))
+                {
+                    this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.W))
+                {
+                    this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.S))
+                {
+                    this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+                }
+
+                #region Walk / Fly
+
+                if (this.Game.Input.KeyJustReleased(Keys.P))
+                {
+                    this.playerFlying = !this.playerFlying;
+                }
+
+                #endregion
             }
-
-            if (this.Game.Input.KeyPressed(Keys.A))
+            else
             {
-                this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
-            }
+#if DEBUG
+                if (this.Game.Input.RightMouseButtonPressed)
+#endif
+                {
+                    this.soldier.Manipulator.Rotate(
+                        this.Game.Input.MouseXDelta * 0.001f,
+                        0, 0);
+                }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
-            {
-                this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
-            }
+                if (this.Game.Input.KeyPressed(Keys.A))
+                {
+                    this.soldier.Manipulator.MoveLeft(gameTime, 4);
+                }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
-            {
-                this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
-            }
+                if (this.Game.Input.KeyPressed(Keys.D))
+                {
+                    this.soldier.Manipulator.MoveRight(gameTime, 4);
+                }
 
-            if (this.Game.Input.KeyPressed(Keys.S))
-            {
-                this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
-            }
+                if (this.Game.Input.KeyPressed(Keys.W))
+                {
+                    this.soldier.Manipulator.MoveForward(gameTime, 4);
+                }
 
-            #endregion
+                if (this.Game.Input.KeyPressed(Keys.S))
+                {
+                    this.soldier.Manipulator.MoveBackward(gameTime, 4);
+                }
 
-            #region Walk / Fly
-
-            if (this.Game.Input.KeyJustReleased(Keys.P))
-            {
-                this.playerFlying = !this.playerFlying;
+                Vector3 position;
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(this.soldier.Manipulator.Position.X, this.soldier.Manipulator.Position.Z, out position, out triangle, out distance))
+                {
+                    this.soldier.Manipulator.SetPosition(position);
+                };
             }
 
             #endregion
