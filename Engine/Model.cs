@@ -252,7 +252,9 @@ namespace Engine
 
                     if (this.EnableAlphaBlending)
                     {
-                        this.Game.Graphics.SetBlendTransparent();
+                        if (context.DrawerMode == DrawerModesEnum.Forward) this.Game.Graphics.SetBlendTransparent();
+                        else if (context.DrawerMode == DrawerModesEnum.Deferred) this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap) this.Game.Graphics.SetBlendTransparent();
                     }
 
                     foreach (string meshName in this.DrawingData.Meshes.Keys)

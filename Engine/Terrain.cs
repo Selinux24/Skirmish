@@ -649,18 +649,9 @@ namespace Engine
                 {
                     EffectBillboard effect = DrawerPool.EffectBillboard;
 
-                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        this.game.Graphics.SetBlendTransparent();
-                    }
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        this.game.Graphics.SetBlendDeferredComposerTransparent();
-                    }
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        this.game.Graphics.SetBlendTransparent();
-                    }
+                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward) this.game.Graphics.SetBlendTransparent();
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred) this.game.Graphics.SetBlendDeferredComposerTransparent();
+                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap) this.game.Graphics.SetBlendTransparent();
 
                     #region Per frame update
 

@@ -179,18 +179,9 @@ namespace Engine
 
                     this.Game.Graphics.SetDepthStencilZEnabled();
 
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        this.Game.Graphics.SetBlendTransparent();
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        this.Game.Graphics.SetBlendTransparent();
-                    }
+                    if (context.DrawerMode == DrawerModesEnum.Forward) this.Game.Graphics.SetBlendTransparent();
+                    else if (context.DrawerMode == DrawerModesEnum.Deferred) this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap) this.Game.Graphics.SetBlendTransparent();
 
                     #region Per object update
 

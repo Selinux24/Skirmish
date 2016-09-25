@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.76.0 commit date:2015-11-03, commit time:10:56, hash:f337fea</authoring_tool>
+    </contributor>
+    <created>2016-09-25T19:35:12</created>
+    <modified>2016-09-25T19:35:12</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_cameras>
+    <camera id="Camera-camera" name="Camera">
+      <optics>
+        <technique_common>
+          <perspective>
+            <xfov sid="xfov">49.13434</xfov>
+            <aspect_ratio>1.777778</aspect_ratio>
+            <znear sid="znear">0.1</znear>
+            <zfar sid="zfar">100</zfar>
+          </perspective>
+        </technique_common>
+      </optics>
+      <extra>
+        <technique profile="blender">
+          <YF_dofdist>0</YF_dofdist>
+          <shiftx>0</shiftx>
+          <shifty>0</shifty>
+        </technique>
+      </extra>
+    </camera>
+  </library_cameras>
+  <library_images>
+    <image id="boulder_granite_grey_01_diffuse_dds" name="boulder_granite_grey_01_diffuse_dds">
+      <init_from>boulder_granite_grey_01_diffuse.dds</init_from>
+    </image>
+    <image id="boulder_granite_grey_01_normal_dds" name="boulder_granite_grey_01_normal_dds">
+      <init_from>boulder_granite_grey_01_normal.dds</init_from>
+    </image>
+    <image id="boulder_granite_grey_01_specular_dds" name="boulder_granite_grey_01_specular_dds">
+      <init_from>boulder_granite_grey_01_specular.dds</init_from>
+    </image>
+  </library_images>
+  <library_effects>
+    <effect id="boulder_granite_grey_01-effect">
+      <profile_COMMON>
+        <newparam sid="boulder_granite_grey_01_diffuse_dds-surface">
+          <surface type="2D">
+            <init_from>boulder_granite_grey_01_diffuse_dds</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="boulder_granite_grey_01_diffuse_dds-sampler">
+          <sampler2D>
+            <source>boulder_granite_grey_01_diffuse_dds-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="boulder_granite_grey_01_specular_dds-surface">
+          <surface type="2D">
+            <init_from>boulder_granite_grey_01_specular_dds</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="boulder_granite_grey_01_specular_dds-sampler">
+          <sampler2D>
+            <source>boulder_granite_grey_01_specular_dds-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="boulder_granite_grey_01_normal_dds-surface">
+          <surface type="2D">
+            <init_from>boulder_granite_grey_01_normal_dds</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="boulder_granite_grey_01_normal_dds-sampler">
+          <sampler2D>
+            <source>boulder_granite_grey_01_normal_dds-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="boulder_granite_grey_01_diffuse_dds-sampler" texcoord="bouldercubic8-mesh-map-0"/>
+            </diffuse>
+            <specular>
+              <texture texture="boulder_granite_grey_01_specular_dds-sampler" texcoord="bouldercubic8-mesh-map-0"/>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="boulder_granite_grey_01_normal_dds-sampler" texcoord="bouldercubic8-mesh-map-0"/>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="boulder_granite_grey_01-material" name="boulder_granite_grey_01">
+      <instance_effect url="#boulder_granite_grey_01-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="bouldercubic8-mesh" name="bouldercubic8">
+      <mesh>
+        <source id="bouldercubic8-mesh-positions">
+          <float_array id="bouldercubic8-mesh-positions-array" count="48">0.9023 0.1420307 -0.8590747 0.006176471 -1.026524 0.7711105 -0.9797273 -0.06518399 -0.51697 0.1999127 0.6489902 -0.6116748 -0.7727581 -0.1885611 0.6914682 0.4355826 -0.6217544 0.7433563 0.5161319 0.4560103 0.9236648 0.9640245 0.3607456 -0.2504731 -0.1965098 0.8047704 0.886018 -0.3420515 -0.0739445 -1.003425 0.4489732 0.6600272 0.420965 -0.2831164 -1.014134 -0.6169755 0.3317085 -0.2565606 -1.101097 -0.476864 0.898783 -0.02757769 -0.09135162 -0.6103121 1.108339 0.6416836 -0.6715791 -0.05944281</float_array>
+          <technique_common>
+            <accessor source="#bouldercubic8-mesh-positions-array" count="16" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bouldercubic8-mesh-normals">
+          <float_array id="bouldercubic8-mesh-normals-array" count="48">0.4630403 0.8800573 0.1053224 -0.4599912 0.8767058 -0.1406953 -0.237835 0.7371879 0.6324465 -0.01617515 -0.9019631 0.4315103 0.7675818 -0.6388528 -0.05182111 0.75206 -0.4107611 0.5154428 0.7509554 0.1453019 -0.6441688 0.2691805 -0.2161074 -0.9385305 0.07556545 0.8258486 -0.5588059 0.6124575 0.3632079 0.7021225 -0.1149337 -0.3527667 0.9286258 -0.2481499 -0.8678685 -0.4303788 -0.866414 -0.1275709 0.4827551 0.9122842 0.4095391 -0.003936946 -0.3860021 0.1642828 -0.907752 -0.9264989 0.03766053 -0.3744083</float_array>
+          <technique_common>
+            <accessor source="#bouldercubic8-mesh-normals-array" count="16" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bouldercubic8-mesh-map">
+          <float_array id="bouldercubic8-mesh-map-array" count="168">0.5925756 0.5002804 -0.109832 0.05683618 0.206059 0.7977869 -0.5974712 0.6052454 -0.2822827 0.1655946 -0.2409472 0.7378334 0.9539626 -0.3952457 0.8373301 -0.146293 0.4940086 -0.7208711 0.5925757 0.5002804 0.3758643 -0.38028 -0.109832 0.05683618 0.206059 0.7977869 0.5428959 0.7838177 0.5925756 0.5002804 0.5234376 -0.4645262 0.1212929 -0.2949199 0.2036594 -0.5958961 0.7230089 0.1573837 0.2342465 0.7220196 0.03044766 -0.3408291 -0.5005643 0.7557027 -0.2638073 0.9780602 -0.07264113 0.5714836 0.1212929 -0.2949199 0.1880728 0.6898882 -0.3053131 -0.1000789 0.5710753 0.7900459 0.5189073 -0.07005017 0.7865982 0.5373082 0.5189073 -0.07005017 0.5710753 0.7900459 -0.2409472 0.7378334 0.3614198 0.6629739 0.8115082 0.2334661 -2.50398e-4 0.06267642 -0.3968417 -0.170033 -2.50399e-4 0.06267642 -0.006427884 -0.5739477 -0.497983 -0.290855 -0.07264113 0.5714835 -0.08148413 -0.2058173 0.1908648 -0.257097 0.0507465 0.6742087 0.7208999 0.07991856 0.9129773 0.586986 0.7208999 0.07991856 0.0507465 0.6742087 -0.2822827 0.1655946 0.3294575 -0.4305476 0.5189073 -0.07005017 0.1212929 -0.2949199 0.5537245 -0.09701693 0.6436395 0.4695661 -2.50398e-4 0.06267642 0.8115082 0.2334661 0.4722743 -0.07354825 -0.497983 -0.290855 -0.5005643 0.7557027 -0.07264113 0.5714835 0.5189073 -0.07005017 -0.2409472 0.7378334 -0.2822827 0.1655946 0.3758643 -0.38028 0.5925757 0.5002804 0.9166266 -0.01621985 0.1212929 -0.2949199 0.6436395 0.4695661 0.1880728 0.6898882 -0.3010101 -0.4527226 0.08261132 -0.3797934 0.247305 -0.5892217 -0.05755245 0.3092539 -0.4576824 0.2061138 -0.3424542 0.5215604 -0.4186134 -0.01610666 -0.4864569 -0.270189 -0.1399651 -0.5297253 0.8093087 -0.4026551 0.3758643 -0.38028 0.9166266 -0.01621985 -2.50398e-4 0.06267642 0.4722743 -0.07354825 -0.006427884 -0.5739477</float_array>
+          <technique_common>
+            <accessor source="#bouldercubic8-mesh-map-array" count="84" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bouldercubic8-mesh-vertices">
+          <input semantic="POSITION" source="#bouldercubic8-mesh-positions"/>
+        </vertices>
+        <polylist material="boulder_granite_grey_01-material" count="28">
+          <input semantic="VERTEX" source="#bouldercubic8-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bouldercubic8-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bouldercubic8-mesh-map" offset="2" set="0"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>10 0 0 13 1 1 8 2 2 1 3 3 15 4 4 5 5 5 0 6 6 15 4 7 12 7 8 10 0 9 3 8 10 13 1 11 8 2 12 6 9 13 10 0 14 5 5 15 14 10 16 1 3 17 15 4 18 1 3 19 11 11 20 1 3 21 14 10 22 4 12 23 14 10 24 8 2 25 4 12 26 6 9 27 7 13 28 10 0 29 7 13 30 6 9 31 5 5 32 3 8 33 0 6 34 9 14 35 2 15 36 9 14 37 11 11 38 11 11 39 4 12 40 2 15 41 2 15 42 4 12 43 13 1 44 8 2 45 13 1 46 4 12 47 15 4 48 0 6 49 7 13 50 14 10 51 5 5 52 6 9 53 9 14 54 0 6 55 12 7 56 11 11 57 1 3 58 4 12 59 7 13 60 5 5 61 15 4 62 3 8 63 10 0 64 7 13 65 14 10 66 6 9 67 8 2 68 2 15 69 3 8 70 9 14 71 3 8 72 2 15 73 13 1 74 15 4 75 11 11 76 12 7 77 0 6 78 3 8 79 7 13 80 9 14 81 12 7 82 11 11 83</p>
+        </polylist>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="Camera" name="Camera" type="NODE">
+        <matrix sid="transform">0.6858805 -0.3173701 0.6548619 7.481132 0.7276338 0.3124686 -0.6106656 -6.50764 -0.01081678 0.8953432 0.4452454 5.343665 0 0 0 1</matrix>
+        <instance_camera url="#Camera-camera"/>
+      </node>
+      <node id="bouldercubic8" name="bouldercubic8" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#bouldercubic8-mesh" name="bouldercubic8">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boulder_granite_grey_01-material" target="#boulder_granite_grey_01-material">
+                <bind_vertex_input semantic="bouldercubic8-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

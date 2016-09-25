@@ -32,6 +32,8 @@ namespace Engine.Collada.Types
         Normal,
         [XmlEnum("OUTPUT")]
         Output,
+        [XmlEnum("COLOR")]
+        Color,
         [XmlEnum("TEXCOORD")]
         TexCoord,
         [XmlEnum("POSITION")]

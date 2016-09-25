@@ -159,79 +159,62 @@ namespace Engine
                 });
 
                 //Process only visible instances
-                Array.Copy(this.instances, this.instancesTmp, this.instances.Length);
-
-                for (int i = 0; i < this.instancesTmp.Length; i++)
+                this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && !i.Cull);
+                if (this.instancesTmp != null && this.instancesTmp.Length > 0)
                 {
-                    if (!this.instancesTmp[i].Visible || this.instancesTmp[i].Cull)
-                    {
-                        this.instancesTmp[i] = null;
-                    }
-                }
-
-                //Sort by LOD
-                Array.Sort(this.instancesTmp, (i1, i2) =>
-                {
-                    if (i1 == null)
-                    {
-                        return 1;
-                    }
-                    else if (i2 == null)
-                    {
-                        return -1;
-                    }
-                    else
+                    //Sort by LOD
+                    Array.Sort(this.instancesTmp, (i1, i2) =>
                     {
                         return i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
-                    }
-                });
+                    });
 
-                LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;
-                DrawingData drawingData = null;
-                int instanceIndex = 0;
-                for (int i = 0; i < this.instancesTmp.Length; i++)
-                {
-                    var current = this.instancesTmp[i];
-
-                    if (current != null)
+                    LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;
+                    DrawingData drawingData = null;
+                    int instanceIndex = 0;
+                    for (int i = 0; i < this.instancesTmp.Length; i++)
                     {
-                        if (lastLod != current.LevelOfDetail)
-                        {
-                            lastLod = current.LevelOfDetail;
-                            drawingData = this.GetDrawingData(lastLod);
-                        }
+                        var current = this.instancesTmp[i];
 
-                        this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
-                        this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
-
-                        if (drawingData != null && drawingData.SkinningData != null)
+                        if (current != null)
                         {
-                            bool animate = current.AnimateWithManipulator ? current.ManipulatorChanged : true;
-                            if (animate)
+                            if (lastLod != current.LevelOfDetail)
                             {
-                                current.AnimationTime += context.GameTime.ElapsedSeconds;
-
-                                int offset;
-                                drawingData.SkinningData.GetAnimationOffset(
-                                    current.AnimationTime,
-                                    current.AnimationIndex,
-                                    out offset);
-
-                                current.InvalidateCache();
-
-                                this.instancingData[instanceIndex].ClipIndex = (uint)current.AnimationIndex;
-                                this.instancingData[instanceIndex].AnimationOffset = (uint)offset;
+                                lastLod = current.LevelOfDetail;
+                                drawingData = this.GetDrawingData(lastLod);
                             }
+
+                            this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
+                            this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
+
+                            if (drawingData != null && drawingData.SkinningData != null)
+                            {
+                                bool animate = current.AnimateWithManipulator ? current.ManipulatorChanged : true;
+                                if (animate)
+                                {
+                                    current.AnimationTime += context.GameTime.ElapsedSeconds;
+
+                                    int offset;
+                                    drawingData.SkinningData.GetAnimationOffset(
+                                        current.AnimationTime,
+                                        current.AnimationIndex,
+                                        out offset);
+
+                                    current.InvalidateCache();
+
+                                    this.instancingData[instanceIndex].ClipIndex = (uint)current.AnimationIndex;
+                                    this.instancingData[instanceIndex].AnimationOffset = (uint)offset;
+                                }
+                            }
+
+                            instanceIndex++;
                         }
-
-                        instanceIndex++;
                     }
-                }
 
-                //Writes instancing data
-                if (instanceIndex > 0)
-                {
-                    this.WriteInstancingData(this.DeviceContext, this.instancingData);
+                    //Writes instancing data
+                    if (instanceIndex > 0)
+                    {
+                        this.WriteInstancingData(this.DeviceContext, this.instancingData);
+                    }
                 }
             }
         }
@@ -291,7 +274,9 @@ namespace Engine
 
                     if (this.EnableAlphaBlending)
                     {
-                        this.Game.Graphics.SetBlendTransparent();
+                        if (context.DrawerMode == DrawerModesEnum.Forward) this.Game.Graphics.SetBlendTransparent();
+                        else if (context.DrawerMode == DrawerModesEnum.Deferred) this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap) this.Game.Graphics.SetBlendTransparent();
                     }
 
                     //Render by level of detail

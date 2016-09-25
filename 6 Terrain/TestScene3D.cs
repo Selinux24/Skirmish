@@ -264,7 +264,7 @@ namespace TerrainTest
             {
                 Name = "DEBUG_CUBE_INSTANCED",
                 ContentPath = resources + "/Rocks",
-                ModelFileName = "rocks.dae",
+                ModelFileName = "boulder.dae",
                 Opaque = true,
                 Static = true,
                 Instances = 150,
@@ -280,7 +280,7 @@ namespace TerrainTest
             this.tree1 = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = resources + "/Trees",
-                ModelFileName = "tree1.dae",
+                ModelFileName = "birch_a.dae",
                 Opaque = true,
                 Static = true,
                 Instances = 50,
@@ -288,13 +288,16 @@ namespace TerrainTest
             this.tree2 = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = resources + "/Trees",
-                ModelFileName = "tree2.dae",
+                ModelFileName = "birch_b.dae",
                 Opaque = true,
                 Static = true,
                 Instances = 50,
             });
             sw.Stop();
             loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.tree1.EnableAlphaBlending = true;
+            this.tree2.EnableAlphaBlending = true;
 
             #endregion
 
@@ -440,7 +443,7 @@ namespace TerrainTest
                 {
                     this.tree1.Instances[i].Manipulator.SetPosition(treePosition, true);
                     this.tree1.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
-                    this.tree1.Instances[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                    this.tree1.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f), true);
                 }
                 bboxes.Add(this.tree1.Instances[i].GetBoundingBox());
             }
@@ -456,12 +459,13 @@ namespace TerrainTest
                 {
                     this.tree2.Instances[i].Manipulator.SetPosition(treePosition, true);
                     this.tree2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
-                    this.tree2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.5f, 1.5f), true);
+                    this.tree2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f), true);
                 }
                 bboxes.Add(this.tree2.Instances[i].GetBoundingBox());
             }
 
             this.objLineDrawer = this.AddLineListDrawer(Line3.CreateWiredBox(bboxes.ToArray()), this.objColor);
+            this.objLineDrawer.Visible = false;
 
             this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helipod, this.garage, this.obelisk }, false);
             this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.rocks, this.tree1, this.tree2 }, false);
@@ -874,6 +878,11 @@ namespace TerrainTest
             if (this.Game.Input.KeyJustReleased(Keys.F8))
             {
                 this.useDebugTex = !this.useDebugTex;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F9))
+            {
+                this.objLineDrawer.Visible = !this.objLineDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Add))
