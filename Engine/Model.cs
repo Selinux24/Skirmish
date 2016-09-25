@@ -13,10 +13,6 @@ namespace Engine
     public class Model : ModelBase, IPickable
     {
         /// <summary>
-        /// Manipulator has changed last frame
-        /// </summary>
-        private bool manipulatorChanged = false;
-        /// <summary>
         /// Update point cache flag
         /// </summary>
         private bool updatePoints = true;
@@ -82,6 +78,10 @@ namespace Engine
         /// Model manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; private set; }
+        /// <summary>
+        /// Manipulator has changed last frame
+        /// </summary>
+        public bool ManipulatorChanged { get; private set; }
         /// <summary>
         /// Current animation index
         /// </summary>
@@ -154,7 +154,7 @@ namespace Engine
         {
             if (this.DrawingData != null && this.DrawingData.SkinningData != null)
             {
-                bool animate = this.AnimateWithManipulator ? this.manipulatorChanged : true;
+                bool animate = this.AnimateWithManipulator ? this.ManipulatorChanged : true;
                 if (animate)
                 {
                     this.AnimationTime += context.GameTime.ElapsedSeconds;
@@ -167,7 +167,7 @@ namespace Engine
                 }
             }
 
-            this.manipulatorChanged = false;
+            this.ManipulatorChanged = false;
 
             this.Manipulator.Update(context.GameTime);
 
@@ -380,7 +380,7 @@ namespace Engine
             this.boundingSphere = new BoundingSphere();
             this.boundingBox = new BoundingBox();
 
-            this.manipulatorChanged = true;
+            this.ManipulatorChanged = true;
         }
 
         /// <summary>

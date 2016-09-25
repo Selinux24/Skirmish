@@ -463,11 +463,6 @@ namespace TerrainTest
 
             this.objLineDrawer = this.AddLineListDrawer(Line3.CreateWiredBox(bboxes.ToArray()), this.objColor);
 
-            this.helipod.Active = this.garage.Active = this.obelisk.Active = false;
-            this.helipod.Visible = this.garage.Visible = this.obelisk.Visible = false;
-            this.rocks.Active = this.tree2.Active = false;
-            this.rocks.Visible = this.tree2.Visible = false;
-
             this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helipod, this.garage, this.obelisk }, false);
             this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.rocks, this.tree1, this.tree2 }, false);
             this.terrain.UpdateInternals();
@@ -489,10 +484,6 @@ namespace TerrainTest
                 this.tank.Manipulator.SetPosition(tankPosition, true);
                 this.tank.Manipulator.SetNormal(tankTriangle.Normal);
             }
-
-            //this.rocks.Active = this.rocks.Visible = false;
-            //this.tree1.Active = this.tree1.Visible = false;
-            //this.tree2.Active = this.tree2.Visible = false;
 
             #endregion
 

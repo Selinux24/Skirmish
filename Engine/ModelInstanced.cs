@@ -155,7 +155,7 @@ namespace Engine
             {
                 Array.ForEach(this.instances, i =>
                 {
-                    if(i.Active) i.Manipulator.Update(context.GameTime);
+                    if(i.Active) i.Update(context);
                 });
 
                 //Process only visible instances
@@ -191,31 +191,37 @@ namespace Engine
                 int instanceIndex = 0;
                 for (int i = 0; i < this.instancesTmp.Length; i++)
                 {
-                    if (this.instancesTmp[i] != null)
+                    var current = this.instancesTmp[i];
+
+                    if (current != null)
                     {
-                        if (lastLod != this.instancesTmp[i].LevelOfDetail)
+                        if (lastLod != current.LevelOfDetail)
                         {
-                            lastLod = this.instancesTmp[i].LevelOfDetail;
+                            lastLod = current.LevelOfDetail;
                             drawingData = this.GetDrawingData(lastLod);
                         }
 
-                        this.instancingData[instanceIndex].Local = this.instancesTmp[i].Manipulator.LocalTransform;
-                        this.instancingData[instanceIndex].TextureIndex = this.instancesTmp[i].TextureIndex;
+                        this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
+                        this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
 
                         if (drawingData != null && drawingData.SkinningData != null)
                         {
-                            this.instancesTmp[i].AnimationTime += context.GameTime.ElapsedSeconds;
+                            bool animate = current.AnimateWithManipulator ? current.ManipulatorChanged : true;
+                            if (animate)
+                            {
+                                current.AnimationTime += context.GameTime.ElapsedSeconds;
 
-                            int offset;
-                            drawingData.SkinningData.GetAnimationOffset(
-                                this.instancesTmp[i].AnimationTime,
-                                this.instancesTmp[i].AnimationIndex,
-                                out offset);
+                                int offset;
+                                drawingData.SkinningData.GetAnimationOffset(
+                                    current.AnimationTime,
+                                    current.AnimationIndex,
+                                    out offset);
 
-                            this.instancesTmp[i].InvalidateCache();
+                                current.InvalidateCache();
 
-                            this.instancingData[instanceIndex].ClipIndex = (uint)this.instancesTmp[i].AnimationIndex;
-                            this.instancingData[instanceIndex].AnimationOffset = (uint)offset;
+                                this.instancingData[instanceIndex].ClipIndex = (uint)current.AnimationIndex;
+                                this.instancingData[instanceIndex].AnimationOffset = (uint)offset;
+                            }
                         }
 
                         instanceIndex++;

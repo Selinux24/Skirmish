@@ -63,6 +63,10 @@ namespace Engine
         /// </summary>
         public Manipulator3D Manipulator { get; private set; }
         /// <summary>
+        /// Manipulator has changed last frame
+        /// </summary>
+        public bool ManipulatorChanged { get; private set; }
+        /// <summary>
         /// Texture index
         /// </summary>
         public int TextureIndex = 0;
@@ -93,13 +97,17 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Animation index
+        /// </summary>
+        public int AnimationIndex = 0;
+        /// <summary>
         /// Animation time
         /// </summary>
         public float AnimationTime = 0;
         /// <summary>
-        /// Animation index
+        /// Do model animations using manipulator changes only
         /// </summary>
-        public int AnimationIndex = 0;
+        public bool AnimateWithManipulator { get; set; }
 
         /// <summary>
         /// Constructor
@@ -112,6 +120,17 @@ namespace Engine
             this.Manipulator.Updated += new System.EventHandler(ManipulatorUpdated);
             this.Cull = false;
             this.LevelOfDetail = LevelOfDetailEnum.High;
+        }
+
+        /// <summary>
+        /// Update
+        /// </summary>
+        /// <param name="context">Context</param>
+        public virtual void Update(UpdateContext context)
+        {
+            this.ManipulatorChanged = false;
+
+            this.Manipulator.Update(context.GameTime);
         }
 
         /// <summary>
@@ -137,6 +156,8 @@ namespace Engine
 
             this.boundingSphere = new BoundingSphere();
             this.boundingBox = new BoundingBox();
+
+            this.ManipulatorChanged = true;
         }
 
         /// <summary>
