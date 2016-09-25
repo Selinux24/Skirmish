@@ -88,125 +88,182 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Blender\AniCube\aniCube.blend" />
-    <None Include="Blender\LandRaider\landraider.blend" />
-    <None Include="Blender\CapitalShip\capital ship.blend" />
-    <None Include="Blender\Cube\cube_1.blend" />
-    <None Include="Blender\Cube\cube_2.blend" />
-    <None Include="Blender\Cube\cube_3.blend" />
-    <None Include="Blender\Cube\cube_4.blend" />
-    <None Include="Blender\Garage\garage.blend" />
-    <None Include="Blender\Ground\ground.blend" />
-    <None Include="Blender\Helicopter\helicopter.blend" />
-    <None Include="Blender\Helipod\helipod.blend" />
-    <None Include="Blender\Human\human.blend" />
-    <None Include="Blender\Jagdpanther\jagdpanther.blend" />
-    <None Include="Blender\Leopard\Leopard.blend" />
-    <None Include="Blender\Obelisk\obelisk.blend" />
-    <None Include="Blender\Police\police.blend" />
-    <None Include="Blender\Poly\poly.blend" />
-    <None Include="Blender\Rocks\rocks.blend" />
-    <None Include="Blender\Ruins\ruins.blend" />
-    <None Include="Blender\Soldier\soldier.blend" />
-    <None Include="Blender\Soldier\soldier_anim1.blend" />
-    <None Include="Blender\Soldier\soldier_anim2.blend" />
-    <None Include="Blender\Soldier\soldier_rigged FK.blend" />
-    <None Include="Blender\Soldier\soldier_rigged IK.blend" />
-    <None Include="Blender\Tank\tank.blend" />
-    <None Include="Blender\Terrain\terrain.blend" />
-    <None Include="Blender\Torch\torch.blend" />
-    <None Include="Blender\Tree1\tree1_1.blend" />
-    <None Include="Blender\Tree1\tree1_2.blend" />
-    <None Include="Blender\Tree2\tree2.blend" />
-    <None Include="Blender\TwoLevels\two_levels.blend" />
-    <None Include="Collada\AniCube\aniCube.dae" />
-    <Content Include="Collada\Helicopter\helicopter.dae">
+    <None Include="Blender\Environment\Trees\Birch\birch_b.blend" />
+    <None Include="Blender\Tests\AniCube\aniCube.blend" />
+    <None Include="Blender\Vehicles\LandRaider\landraider.blend" />
+    <None Include="Blender\Vehicles\CapitalShip\capital ship.blend" />
+    <None Include="Blender\Tests\Cube\cube_1.blend" />
+    <None Include="Blender\Tests\Cube\cube_2.blend" />
+    <None Include="Blender\Tests\Cube\cube_3.blend" />
+    <None Include="Blender\Tests\Cube\cube_4.blend" />
+    <None Include="Blender\Buildings\Garage\garage.blend" />
+    <None Include="Blender\Scenery\Ground\ground.blend" />
+    <None Include="Blender\Vehicles\Helicopter\helicopter.blend" />
+    <None Include="Blender\Buildings\Helipod\helipod.blend" />
+    <None Include="Blender\Characters\Human\human.blend" />
+    <None Include="Blender\Vehicles\Jagdpanther\jagdpanther.blend" />
+    <None Include="Blender\Vehicles\Leopard\Leopard.blend" />
+    <None Include="Blender\Buildings\Obelisk\obelisk.blend" />
+    <None Include="Blender\Tests\Poly\poly.blend" />
+    <None Include="Blender\Environment\Rocks\boulder_1.blend" />
+    <None Include="Blender\Environment\Rocks\boulder_2.blend" />
+    <None Include="Blender\Environment\Rocks\boulder_3.blend" />
+    <None Include="Blender\Environment\Rocks\rocks.blend" />
+    <None Include="Blender\Buildings\Ruins\ruins.blend" />
+    <None Include="Blender\Characters\Soldier\soldier_anim1.blend" />
+    <None Include="Blender\Characters\Soldier\soldier_anim2.blend" />
+    <None Include="Blender\Vehicles\Tank\tank.blend" />
+    <None Include="Blender\Scenery\Terrain\terrain.blend" />
+    <None Include="Blender\Furniture\Torch\torch.blend" />
+    <None Include="Blender\Environment\Trees\Tree1\tree1_1.blend" />
+    <None Include="Blender\Environment\Trees\Tree1\tree1_2.blend" />
+    <None Include="Blender\Environment\Trees\Tree2\tree2.blend" />
+    <None Include="Blender\Environment\Trees\Birch\birch_a.blend" />
+    <None Include="Blender\Scenery\TwoLevels\two_levels.blend" />
+    <Content Include="Collada\Environment\Trees\Birch\birch_b.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Collada\LandRaider\landraider.dae" />
-    <None Include="Collada\Cube\cube_1.dae" />
-    <None Include="Collada\Cube\cube_2.dae" />
-    <None Include="Collada\Cube\cube_3.dae" />
-    <None Include="Collada\Cube\cube_4.dae" />
-    <None Include="Collada\Garage\garage.dae" />
-    <None Include="Collada\Ground\ground.dae" />
-    <None Include="Collada\Helipod\helipod.dae" />
-    <None Include="Collada\Jagdpanther\jagdpanther.dae" />
-    <None Include="Collada\Leopard\Leopard.dae" />
-    <None Include="Collada\Obelisk\obelisk.dae" />
-    <None Include="Blender\Police\LICENSE.txt" />
-    <None Include="Blender\Police\output.png" />
-    <None Include="Blender\Police\overlay.svg" />
-    <None Include="Blender\Police\README.txt" />
-    <None Include="Blender\Police\render.png" />
-    <None Include="Blender\Police\skin.png" />
-    <Content Include="Collada\Police\police.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <None Include="Collada\Poly\poly.dae" />
-    <None Include="Collada\Rocks\rocks.dae" />
-    <None Include="Collada\Ruins\ruins.dae" />
-    <Content Include="Collada\Soldier\soldier.dae">
+    <None Include="Collada\Tests\AniCube\aniCube.dae" />
+    <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_diffuse.dds" />
+    <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_normal.dds" />
+    <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_specular.dds" />
+    <None Include="Blender\Environment\Trees\Birch\birch_01_bark_diffuse.dds" />
+    <None Include="Blender\Environment\Trees\Birch\birch_01_bark_normal.dds" />
+    <None Include="Blender\Environment\Trees\Birch\birch_01_leaves_diffuse.dds" />
+    <None Include="Blender\Environment\Trees\Birch\birch_01_leaves_normal.dds" />
+    <Content Include="Collada\Environment\Trees\Birch\birch_01_bark_diffuse.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Soldier\soldier_anim1.dae">
+    <Content Include="Collada\Environment\Trees\Birch\birch_01_bark_normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Soldier\soldier_anim2.dae">
+    <Content Include="Collada\Environment\Trees\Birch\birch_01_leaves_diffuse.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Collada\Tank\tank.dae" />
-    <None Include="Collada\Terrain\terrain.dae" />
-    <Content Include="Collada\Torch\torch.dae">
+    <Content Include="Collada\Environment\Trees\Birch\birch_01_leaves_normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Collada\Tree1\tree1_1.dae" />
-    <None Include="Collada\Tree1\tree1_2.dae" />
-    <None Include="Collada\Tree2\tree2.dae" />
-    <Content Include="Collada\TwoLevels\two_levels.dae">
+    <Content Include="Collada\Environment\Trees\Tree1\leafs1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree1\leafs1a.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree1\wood.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree2\bark_albedo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree2\bark_normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree2\bark_specular.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree2\bushes_albedo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree2\bushes_normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree2\bushes_specular.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Vehicles\Helicopter\helicopter.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Birch\birch_a.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree1\tree1_1.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree1\tree1_2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree2\tree2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Collada\Vehicles\LandRaider\landraider.dae" />
+    <None Include="Collada\Tests\Cube\cube_1.dae" />
+    <None Include="Collada\Tests\Cube\cube_2.dae" />
+    <None Include="Collada\Tests\Cube\cube_3.dae" />
+    <None Include="Collada\Tests\Cube\cube_4.dae" />
+    <None Include="Collada\Buildings\Garage\garage.dae" />
+    <None Include="Collada\Scenery\Ground\ground.dae" />
+    <None Include="Collada\Buildings\Helipod\helipod.dae" />
+    <None Include="Collada\Vehicles\Jagdpanther\jagdpanther.dae" />
+    <None Include="Collada\Vehicles\Leopard\Leopard.dae" />
+    <None Include="Collada\Buildings\Obelisk\obelisk.dae" />
+    <None Include="Collada\Tests\Poly\poly.dae" />
+    <Content Include="Collada\Environment\Rocks\boulder_1.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Rocks\boulder_2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Rocks\boulder_3.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Collada\Environment\Rocks\rocks.dae" />
+    <None Include="Collada\Buildings\Ruins\ruins.dae" />
+    <Content Include="Collada\Environment\Rocks\boulder_granite_grey_01_diffuse.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Rocks\boulder_granite_grey_01_normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Rocks\boulder_granite_grey_01_specular.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\Soldier\soldier_anim1.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Collada\Vehicles\Tank\tank.dae" />
+    <None Include="Collada\Scenery\Terrain\terrain.dae" />
+    <Content Include="Collada\Furniture\Torch\torch.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\TwoLevels\two_levels.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Blender\AniCube\aniCube.png" />
-    <None Include="Blender\Ground\ground.png" />
-    <None Include="Blender\Helicopter\helicopter - black.png" />
-    <None Include="Blender\Helicopter\helicopter - gray.png" />
-    <None Include="Blender\Helicopter\helicopter - green.png" />
-    <None Include="Blender\Helicopter\helicopter - tires.png" />
-    <None Include="Blender\Leopard\Leopard.bmp" />
-    <None Include="Blender\Poly\poly.png" />
-    <None Include="Blender\Soldier\soldier.jpg" />
-    <None Include="Blender\Terrain\terrain.png" />
-    <None Include="Blender\Terrain\terrain_nmap.png" />
-    <None Include="Blender\Tree2\tree2_bark_albedo.png" />
-    <None Include="Blender\Tree2\tree2_bark_normal.png" />
-    <None Include="Blender\Tree2\tree2_bark_specular.png" />
-    <None Include="Blender\Tree2\tree2_bushes_albedo.png" />
-    <None Include="Blender\Tree2\tree2_bushes_normal.png" />
-    <None Include="Blender\Tree2\tree2_bushes_specular.png" />
-    <None Include="Blender\Tree1\wood.jpg" />
-    <None Include="Collada\AniCube\aniCube.png" />
-    <None Include="Collada\Tree2\bark_albedo.png" />
-    <None Include="Collada\Tree2\bark_normal.png" />
-    <None Include="Collada\Tree2\bark_specular.png" />
-    <None Include="Collada\Tree2\bushes_albedo.png" />
-    <None Include="Collada\Tree2\bushes_normal.png" />
-    <None Include="Collada\Tree2\bushes_specular.png" />
-    <None Include="Collada\Ground\ground.png" />
-    <None Include="Collada\Ground\ground_nmap.png" />
-    <None Include="Collada\Helicopter\Helicopter - black.png" />
-    <None Include="Collada\Helicopter\Helicopter - gray.png" />
-    <None Include="Collada\Helicopter\Helicopter - green.png" />
-    <None Include="Collada\Helicopter\helicopter - tires.png" />
-    <None Include="Collada\Poly\Poly.png" />
-    <Content Include="Collada\Soldier\soldier.jpg">
+    <None Include="Blender\Tests\AniCube\aniCube.png" />
+    <None Include="Blender\Scenery\Ground\ground.png" />
+    <None Include="Blender\Vehicles\Helicopter\helicopter - black.png" />
+    <None Include="Blender\Vehicles\Helicopter\helicopter - gray.png" />
+    <None Include="Blender\Vehicles\Helicopter\helicopter - green.png" />
+    <None Include="Blender\Vehicles\Helicopter\helicopter - tires.png" />
+    <None Include="Blender\Vehicles\Leopard\Leopard.bmp" />
+    <None Include="Blender\Tests\Poly\poly.png" />
+    <None Include="Blender\Characters\Soldier\soldier.jpg" />
+    <None Include="Blender\Scenery\Terrain\terrain.png" />
+    <None Include="Blender\Scenery\Terrain\terrain_nmap.png" />
+    <None Include="Blender\Environment\Trees\Tree2\tree2_bark_albedo.png" />
+    <None Include="Blender\Environment\Trees\Tree2\tree2_bark_normal.png" />
+    <None Include="Blender\Environment\Trees\Tree2\tree2_bark_specular.png" />
+    <None Include="Blender\Environment\Trees\Tree2\tree2_bushes_albedo.png" />
+    <None Include="Blender\Environment\Trees\Tree2\tree2_bushes_normal.png" />
+    <None Include="Blender\Environment\Trees\Tree2\tree2_bushes_specular.png" />
+    <None Include="Blender\Environment\Trees\Tree1\wood.jpg" />
+    <None Include="Collada\Tests\AniCube\aniCube.png" />
+    <None Include="Collada\Scenery\Ground\ground.png" />
+    <None Include="Collada\Scenery\Ground\ground_nmap.png" />
+    <None Include="Collada\Vehicles\Helicopter\Helicopter - black.png" />
+    <None Include="Collada\Vehicles\Helicopter\Helicopter - gray.png" />
+    <None Include="Collada\Vehicles\Helicopter\Helicopter - green.png" />
+    <None Include="Collada\Vehicles\Helicopter\helicopter - tires.png" />
+    <None Include="Collada\Tests\Poly\Poly.png" />
+    <Content Include="Collada\Characters\Soldier\soldier.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="Collada\Terrain\terrain.png" />
-    <None Include="Collada\Terrain\terrain_nmap.png" />
-    <None Include="Collada\Tree1\wood.jpg" />
+    <None Include="Collada\Scenery\Terrain\terrain.png" />
+    <None Include="Collada\Scenery\Terrain\terrain_nmap.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -226,36 +283,27 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Collada\Leopard\Leopard.bmp" />
+    <None Include="Collada\Vehicles\Leopard\Leopard.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Blender\Tree1\leafs1.png" />
-    <None Include="Blender\Tree1\leafs1a.png" />
+    <None Include="Blender\Environment\Trees\Tree1\leafs1.png" />
+    <None Include="Blender\Environment\Trees\Tree1\leafs1a.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Collada\Tree1\leafs1.png" />
-    <None Include="Collada\Tree1\leafs1a.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Collada\TwoLevels\terrain.png">
+    <Content Include="Collada\Scenery\TwoLevels\terrain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Collada\TwoLevels\terrain_nmap.png">
+    <Content Include="Collada\Scenery\TwoLevels\terrain_nmap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Blender\TwoLevels\terrain.png" />
+    <None Include="Blender\Scenery\TwoLevels\terrain.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Blender\TwoLevels\terrain_nmap.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Collada\Police\skin.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <None Include="Blender\Scenery\TwoLevels\terrain_nmap.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
