@@ -232,6 +232,7 @@ namespace HeightmapTest
                     this.soldier.Manipulator.SetPosition(position, true);
                 }
 
+                this.soldier.AnimationController.AddClip(0, true, float.MaxValue);
                 this.soldier.AnimateWithManipulator = true;
             }
 
@@ -266,7 +267,9 @@ namespace HeightmapTest
                     this.troops.Instances[i].Manipulator.SetPosition(position, true);
                     this.troops.Instances[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
                     this.troops.Instances[i].TextureIndex = 1;
-                    this.troops.Instances[i].AnimationTime = rnd.NextFloat(0f, 8f);
+
+                    this.troops.Instances[i].AnimationController.AddClip(0, true, float.MaxValue);
+                    this.troops.Instances[i].AnimationController.Time = rnd.NextFloat(0f, 8f);
                 }
             }
 

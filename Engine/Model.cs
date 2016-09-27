@@ -3,6 +3,7 @@ using System;
 
 namespace Engine
 {
+    using Engine.Animation;
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
@@ -83,13 +84,9 @@ namespace Engine
         /// </summary>
         public bool ManipulatorChanged { get; private set; }
         /// <summary>
-        /// Current animation index
+        /// Animation controller
         /// </summary>
-        public int AnimationIndex { get; set; }
-        /// <summary>
-        /// Current animation time
-        /// </summary>
-        public float AnimationTime { get; set; }
+        public AnimationController AnimationController = new AnimationController();
         /// <summary>
         /// Do model animations using manipulator changes only
         /// </summary>
@@ -157,12 +154,10 @@ namespace Engine
                 bool animate = this.AnimateWithManipulator ? this.ManipulatorChanged : true;
                 if (animate)
                 {
-                    this.AnimationTime += context.GameTime.ElapsedSeconds;
+                    this.AnimationController.Update(context.GameTime.ElapsedSeconds);
 
-                    int offset;
-                    this.DrawingData.SkinningData.GetAnimationOffset(this.AnimationTime, this.AnimationIndex, out offset);
-                    this.animationData[0] = (uint)this.AnimationIndex;
-                    this.animationData[1] = (uint)offset;
+                    this.animationData[0] = (uint)this.AnimationController.GetAnimationIndex();
+                    this.animationData[1] = (uint)this.AnimationController.GetAnimationOffset(this.DrawingData.SkinningData);
                     this.InvalidateCache();
                 }
             }

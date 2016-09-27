@@ -191,18 +191,12 @@ namespace Engine
                                 bool animate = current.AnimateWithManipulator ? current.ManipulatorChanged : true;
                                 if (animate)
                                 {
-                                    current.AnimationTime += context.GameTime.ElapsedSeconds;
+                                    current.AnimationController.Update(context.GameTime.ElapsedSeconds);
 
-                                    int offset;
-                                    drawingData.SkinningData.GetAnimationOffset(
-                                        current.AnimationTime,
-                                        current.AnimationIndex,
-                                        out offset);
+                                    this.instancingData[instanceIndex].ClipIndex = (uint)current.AnimationController.GetAnimationIndex();
+                                    this.instancingData[instanceIndex].AnimationOffset = (uint)current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
 
                                     current.InvalidateCache();
-
-                                    this.instancingData[instanceIndex].ClipIndex = (uint)current.AnimationIndex;
-                                    this.instancingData[instanceIndex].AnimationOffset = (uint)offset;
                                 }
                             }
 

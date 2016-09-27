@@ -24,7 +24,7 @@ namespace Engine.Animation
         /// <summary>
         /// Animations clip dictionary
         /// </summary>
-        private Dictionary<string, JointAnimation[]> animations = null;
+        private List<AnimationClip> animations = null;
         /// <summary>
         /// Animation clip names collection
         /// </summary>
@@ -41,10 +41,10 @@ namespace Engine.Animation
         /// <param name="animations">Animation list</param>
         public SkinningData(Skeleton skeleton, JointAnimation[] animations)
         {
-            this.animations = new Dictionary<string, JointAnimation[]>();
+            this.animations = new List<AnimationClip>();
             this.skeleton = skeleton;
 
-            this.animations.Add(SkinningData.DefaultClip, animations);
+            this.animations.Add(new AnimationClip(SkinningData.DefaultClip, animations));
             this.clips = new string[] { SkinningData.DefaultClip };
         }
         /// <summary>
@@ -54,20 +54,70 @@ namespace Engine.Animation
         /// <param name="animations">Animation dictionary</param>
         public SkinningData(Skeleton skeleton, Dictionary<string, JointAnimation[]> animations)
         {
+            this.animations = new List<AnimationClip>();
             this.skeleton = skeleton;
 
-            this.animations = animations;
-            this.clips = this.animations.Keys.ToArray();
+            foreach (var key in animations.Keys)
+            {
+                this.animations.Add(new AnimationClip(key, animations[key]));
+            }
+            this.clips = animations.Keys.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the index of the specified clip in the animation collection
+        /// </summary>
+        /// <param name="clipName">Clip name</param>
+        /// <returns>Returns the index of the clip by name</returns>
+        public int GetClipIndex(string clipName)
+        {
+            return Array.IndexOf(this.clips, clipName);
+        }
+        /// <summary>
+        /// Gets the clip by name
+        /// </summary>
+        /// <param name="clipName">Clip name</param>
+        /// <returns>Returns the clip by name</returns>
+        public AnimationClip GetClip(string clipName)
+        {
+            return this.animations.Find(c => c.Name == clipName);
+        }
+        /// <summary>
+        /// Gets the clip by index
+        /// </summary>
+        /// <param name="clipIndex">Clip index</param>
+        /// <returns>Returns the clip by index</returns>
+        public AnimationClip GetClip(int clipIndex)
+        {
+            return this.animations[clipIndex];
+        }
+        /// <summary>
+        /// Gets the specified animation offset
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="clipIndex">Clip index</param>
+        /// <param name="animationOffset">Animation offset</param>
+        public void GetAnimationOffset(float time, int clipIndex, out int animationOffset)
+        {
+            float duration = this.animations[clipIndex].Duration;
+            int clipLength = (int)(duration / TimeStep);
+
+            float percent = time / duration;
+            int percentINT = (int)percent;
+            percent -= (float)percentINT;
+            int index = (int)((float)clipLength * percent);
+
+            animationOffset = 4 * this.skeleton.JointCount * index;
         }
 
         /// <summary>
         /// Gets the transform list of the pose at specified time
         /// </summary>
         /// <param name="time">Time</param>
-        /// <param name="clipName">Clip name</param>
-        public Matrix[] GetPoseAtTime(float time, string clipName)
+        /// <param name="clip">Clip</param>
+        public Matrix[] GetPoseAtTime(float time, AnimationClip clip)
         {
-            return this.skeleton.GetPoseAtTime(time, this.animations[clipName]);
+            return this.skeleton.GetPoseAtTime(time, clip.Animations);
         }
         /// <summary>
         /// Gets final transform collection
@@ -87,9 +137,9 @@ namespace Engine.Animation
         {
             List<Vector4> values = new List<Vector4>();
 
-            foreach (var clip in this.clips)
+            foreach (var clip in this.animations)
             {
-                float duration = this.animations[clip][0].Duration;
+                float duration = clip.Duration;
 
                 for (float t = 0; t < duration; t += TimeStep)
                 {
@@ -118,25 +168,6 @@ namespace Engine.Animation
 
             palette = game.Graphics.Device.CreateTexture2D(texWidth, values.ToArray());
             width = (uint)texWidth;
-        }
-        /// <summary>
-        /// Gets the specified animation offset
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <param name="clipIndex">Clip index</param>
-        /// <param name="animationOffset">Animation offset</param>
-        public void GetAnimationOffset(float time, int clipIndex, out int animationOffset)
-        {
-            string clipName = this.animations.Keys.ToList()[clipIndex];
-            float duration = this.animations[clipName][0].Duration;
-            int clipLength = (int)(duration / TimeStep);
-
-            float percent = time / duration;
-            int percentINT = (int)percent;
-            percent -= (float)percentINT;
-            int index = (int)((float)clipLength * percent);
-
-            animationOffset = 4 * this.skeleton.JointCount * index;
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace Engine
 {
+    using Engine.Animation;
     using Engine.Common;
 
     /// <summary>
@@ -97,13 +98,9 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Animation index
+        /// Animation controller
         /// </summary>
-        public int AnimationIndex = 0;
-        /// <summary>
-        /// Animation time
-        /// </summary>
-        public float AnimationTime = 0;
+        public AnimationController AnimationController = new AnimationController();
         /// <summary>
         /// Do model animations using manipulator changes only
         /// </summary>
