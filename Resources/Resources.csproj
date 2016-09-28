@@ -87,6 +87,10 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="Collada\Vehicles\M24\m24.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Blender\Vehicles\M24\diffuse_m24_alpha.dds" />
     <None Include="App.config" />
     <None Include="Blender\Environment\Trees\Birch\birch_b.blend" />
     <None Include="Blender\Tests\AniCube\aniCube.blend" />
@@ -112,6 +116,7 @@
     <None Include="Blender\Buildings\Ruins\ruins.blend" />
     <None Include="Blender\Characters\Soldier\soldier_anim1.blend" />
     <None Include="Blender\Characters\Soldier\soldier_anim2.blend" />
+    <None Include="Blender\Vehicles\M24\m24.blend" />
     <None Include="Blender\Vehicles\Tank\tank.blend" />
     <None Include="Blender\Scenery\Terrain\terrain.blend" />
     <None Include="Blender\Furniture\Torch\torch.blend" />
@@ -221,6 +226,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Characters\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Vehicles\M24\m24.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Vehicles\Tank\tank.dae" />

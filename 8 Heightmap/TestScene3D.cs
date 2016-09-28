@@ -279,11 +279,9 @@ namespace HeightmapTest
 
             this.helicopter = this.AddModel(new ModelDescription()
             {
-                ContentPath = @"Resources/Helicopter",
-                ModelFileName = "Helicopter.dae",
+                ContentPath = @"Resources/m24",
+                ModelFileName = "m24.dae",
             });
-
-            this.helicopter.Manipulator.SetScale(10, true);
 
             {
                 Vector3 position;
@@ -294,7 +292,7 @@ namespace HeightmapTest
                     this.helicopter.Manipulator.SetPosition(position, true);
                 }
 
-                this.helicopter.AnimationController.AddClip(0, true, float.MaxValue);
+                //this.helicopter.AnimationController.AddClip(0, true, float.MaxValue);
             }
 
             #endregion
