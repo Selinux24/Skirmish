@@ -293,6 +293,8 @@ namespace HeightmapTest
                 {
                     this.helicopter.Manipulator.SetPosition(position, true);
                 }
+
+                this.helicopter.AnimationController.AddClip(0, true, float.MaxValue);
             }
 
             #endregion
