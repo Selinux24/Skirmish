@@ -159,13 +159,19 @@ namespace Engine
                 });
 
                 //Process only visible instances
-                this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && !i.Cull);
+                this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && !i.Cull && i.LevelOfDetail != LevelOfDetailEnum.None);
                 if (this.instancesTmp != null && this.instancesTmp.Length > 0)
                 {
                     //Sort by LOD
                     Array.Sort(this.instancesTmp, (i1, i2) =>
                     {
-                        return i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+                        var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+                        if (i == 0)
+                        {
+                            i = i1.Id.CompareTo(i2.Id);
+                        }
+
+                        return i;
                     });
 
                     LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;

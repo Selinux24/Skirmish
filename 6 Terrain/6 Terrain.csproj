@@ -250,7 +250,8 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Content Include="Resources\Helicopter\Helicopter.dae">
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Terrain\two_levels.dae">

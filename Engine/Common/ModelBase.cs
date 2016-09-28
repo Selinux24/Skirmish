@@ -16,7 +16,7 @@ namespace Engine.Common
         /// <summary>
         /// Default level of detail
         /// </summary>
-        private readonly LevelOfDetailEnum defaultLevelOfDetail = LevelOfDetailEnum.None;
+        private readonly LevelOfDetailEnum defaultLevelOfDetail = LevelOfDetailEnum.Minimum;
         /// <summary>
         /// Level of detail
         /// </summary>
@@ -53,8 +53,7 @@ namespace Engine.Common
 
             this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
 
-            this.defaultLevelOfDetail = LevelOfDetailEnum.High;
-            this.LevelOfDetail = LevelOfDetailEnum.High;
+            this.LevelOfDetail = LevelOfDetailEnum.None;
         }
         /// <summary>
         /// Base model
@@ -144,11 +143,11 @@ namespace Engine.Common
             {
                 return lod;
             }
-            else if (this.meshesByLOD.Keys.Count > 1)
+            else if (this.meshesByLOD.Keys.Count > 0)
             {
-                int i = Helper.NextPowerOfTwo((int)lod + 1);
+                int i = (int)lod;
 
-                for (int l = i; l < (int)LevelOfDetailEnum.Minimum + 1; l *= 2)
+                for (int l = i; l > 0; l /= 2)
                 {
                     if (this.meshesByLOD.ContainsKey((LevelOfDetailEnum)l))
                     {
@@ -212,20 +211,6 @@ namespace Engine.Common
             }
 
             return null;
-        }
-        /// <summary>
-        /// Changes the drawing data and updates internal state
-        /// </summary>
-        /// <param name="prevData">Previous drawing data</param>
-        /// <param name="newLod">New level of detail</param>
-        /// <returns>Returns the updated drawing data</returns>
-        internal DrawingData ChangeDrawingData(DrawingData prevData, LevelOfDetailEnum newLod)
-        {
-            var newData = this.meshesByLOD[newLod];
-
-            
-
-            return newData;
         }
     }
 }

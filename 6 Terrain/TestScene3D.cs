@@ -191,6 +191,7 @@ namespace TerrainTest
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
             this.helicopter.Manipulator.SetScale(0.75f);
+            this.helicopter.AnimationController.AddClip(0, true, float.MaxValue);
 
             #endregion
 
@@ -425,7 +426,7 @@ namespace TerrainTest
                     }
 
                     this.rocks.Instances[i].Manipulator.SetPosition(rockPosition, true);
-                    this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0, true);
+                    this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
                     this.rocks.Instances[i].Manipulator.SetScale(scale, true);
                 }
                 bboxes.Add(this.rocks.Instances[i].GetBoundingBox());

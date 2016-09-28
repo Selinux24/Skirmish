@@ -13,6 +13,11 @@ namespace Engine
     public class ModelInstance : IPickable
     {
         /// <summary>
+        /// Global id counter
+        /// </summary>
+        private static int InstanceId = 0;
+
+        /// <summary>
         /// Model
         /// </summary>
         private ModelBase model = null;
@@ -59,6 +64,10 @@ namespace Engine
         /// </summary>
         private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
 
+        /// <summary>
+        /// Instance id
+        /// </summary>
+        public readonly int Id;
         /// <summary>
         /// Manipulator
         /// </summary>
@@ -112,11 +121,11 @@ namespace Engine
         /// <param name="model">Model</param>
         public ModelInstance(ModelBase model)
         {
+            this.Id = ++InstanceId;
             this.model = model;
             this.Manipulator = new Manipulator3D();
-            this.Manipulator.Updated += new System.EventHandler(ManipulatorUpdated);
+            this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
             this.Cull = false;
-            this.LevelOfDetail = LevelOfDetailEnum.High;
         }
 
         /// <summary>
