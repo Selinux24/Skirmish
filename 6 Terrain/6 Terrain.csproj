@@ -311,7 +311,8 @@
     </Content>
     <Content Include="Resources\Trees\birch_a.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </Content>
     <Content Include="Resources\Trees\birch_b.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -258,7 +258,7 @@ namespace TerrainTest
 
             #endregion
 
-            #region Roks
+            #region Rocks
 
             sw.Restart();
             this.rocks = this.AddInstancingModel(new ModelInstancedDescription()
@@ -268,7 +268,7 @@ namespace TerrainTest
                 ModelFileName = "boulder.dae",
                 Opaque = true,
                 Static = true,
-                Instances = 150,
+                Instances = 250,
             });
             sw.Stop();
             loadingText += string.Format("rocks: {0} ", sw.Elapsed.TotalSeconds);
@@ -284,7 +284,8 @@ namespace TerrainTest
                 ModelFileName = "birch_a.dae",
                 Opaque = true,
                 Static = true,
-                Instances = 50,
+                Instances = 100,
+                VolumeMeshes = new[] { "Volume" },
             });
             this.tree2 = this.AddInstancingModel(new ModelInstancedDescription()
             {
@@ -292,7 +293,8 @@ namespace TerrainTest
                 ModelFileName = "birch_b.dae",
                 Opaque = true,
                 Static = true,
-                Instances = 50,
+                Instances = 100,
+                VolumeMeshes = new[] { "Volume" },
             });
             sw.Stop();
             loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
@@ -401,6 +403,7 @@ namespace TerrainTest
                 if (this.terrain.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition, out obeliskTri, out obeliskDist))
                 {
                     this.obelisk.Instances[i].Manipulator.SetPosition(obeliskPosition, true);
+                    this.obelisk.Instances[i].Manipulator.SetScale(1.5f, true);
                 }
                 bboxes.Add(this.obelisk.Instances[i].GetBoundingBox());
             }
@@ -416,7 +419,11 @@ namespace TerrainTest
                 if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
                 {
                     var scale = 1f;
-                    if (i < 15)
+                    if (i < 5)
+                    {
+                        scale = posRnd.NextFloat(2f, 5f);
+                    }
+                    else if (i < 30)
                     {
                         scale = posRnd.NextFloat(0.5f, 2f);
                     }
@@ -443,7 +450,7 @@ namespace TerrainTest
                 if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
                 {
                     this.tree1.Instances[i].Manipulator.SetPosition(treePosition, true);
-                    this.tree1.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
+                    this.tree1.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0, true);
                     this.tree1.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f), true);
                 }
                 bboxes.Add(this.tree1.Instances[i].GetBoundingBox());
@@ -459,7 +466,7 @@ namespace TerrainTest
                 if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
                 {
                     this.tree2.Instances[i].Manipulator.SetPosition(treePosition, true);
-                    this.tree2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, 3), 0, 0, true);
+                    this.tree2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0, true);
                     this.tree2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f), true);
                 }
                 bboxes.Add(this.tree2.Instances[i].GetBoundingBox());
@@ -468,8 +475,8 @@ namespace TerrainTest
             this.objLineDrawer = this.AddLineListDrawer(Line3.CreateWiredBox(bboxes.ToArray()), this.objColor);
             this.objLineDrawer.Visible = false;
 
-            this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helipod, this.garage, this.obelisk }, false);
-            this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.rocks, this.tree1, this.tree2 }, false);
+            this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helipod, this.garage, this.obelisk, this.rocks }, false);
+            this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.tree1, this.tree2 }, false);
             this.terrain.UpdateInternals();
 
             Vector3 heliPos;

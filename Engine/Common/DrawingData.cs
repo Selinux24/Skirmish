@@ -27,6 +27,10 @@ namespace Engine.Common
         /// </summary>
         public MeshDictionary Meshes = new MeshDictionary();
         /// <summary>
+        /// Volume mesh
+        /// </summary>
+        public Triangle[] VolumeMesh = null;
+        /// <summary>
         /// Datos de animación
         /// </summary>
         public SkinningData SkinningData = null;
@@ -135,6 +139,8 @@ namespace Engine.Common
         /// <param name="description">Description</param>
         private static void InitializeGeometry(ref DrawingData drw, Game game, ModelContent modelContent, DrawingDataDescription description)
         {
+            List<Triangle> volumeMesh = new List<Triangle>();
+
             foreach (string meshName in modelContent.Geometry.Keys)
             {
                 Dictionary<string, SubMeshContent> dictGeometry = modelContent.Geometry[meshName];
@@ -164,95 +170,104 @@ namespace Engine.Common
                 {
                     SubMeshContent geometry = dictGeometry[material];
 
-                    VertexTypes vertexType = geometry.VertexType;
-
-                    if (isSkinned)
+                    if (geometry.IsVolume)
                     {
-                        //Get skinned equivalent
-                        vertexType = VertexData.GetSkinnedEquivalent(vertexType);
+                        volumeMesh.AddRange(geometry.GetTriangles());
                     }
-
-                    if (description.LoadNormalMaps)
+                    else
                     {
-                        if (!VertexData.IsTangent(vertexType))
-                        {
-                            MeshMaterial meshMaterial = drw.Materials[material];
-                            if (meshMaterial.NormalMap != null)
-                            {
-                                //Get tangent equivalent
-                                vertexType = VertexData.GetTangentEquivalent(vertexType);
+                        VertexTypes vertexType = geometry.VertexType;
 
-                                //Compute tangents
-                                geometry.ComputeTangents();
-                            }
+                        if (isSkinned)
+                        {
+                            //Get skinned equivalent
+                            vertexType = VertexData.GetSkinnedEquivalent(vertexType);
                         }
-                    }
 
-                    vertices = geometry.Vertices;
-                    indices = geometry.Indices;
-
-                    if (description.Constraint.HasValue)
-                    {
-                        List<VertexData> tmpVertices = new List<VertexData>();
-                        List<uint> tmpIndices = new List<uint>();
-
-                        if (indices != null && indices.Length > 0)
+                        if (description.LoadNormalMaps)
                         {
-                            uint index = 0;
-                            for (int i = 0; i < indices.Length; i += 3)
+                            if (!VertexData.IsTangent(vertexType))
                             {
-                                if (description.Constraint.Value.Contains(vertices[indices[i + 0]].Position.Value) != ContainmentType.Disjoint ||
-                                    description.Constraint.Value.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint ||
-                                    description.Constraint.Value.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint)
+                                MeshMaterial meshMaterial = drw.Materials[material];
+                                if (meshMaterial.NormalMap != null)
                                 {
-                                    tmpVertices.Add(vertices[indices[i + 0]]);
-                                    tmpVertices.Add(vertices[indices[i + 1]]);
-                                    tmpVertices.Add(vertices[indices[i + 2]]);
-                                    tmpIndices.Add(index++);
-                                    tmpIndices.Add(index++);
-                                    tmpIndices.Add(index++);
+                                    //Get tangent equivalent
+                                    vertexType = VertexData.GetTangentEquivalent(vertexType);
+
+                                    //Compute tangents
+                                    geometry.ComputeTangents();
                                 }
                             }
-
-                            vertices = tmpVertices.ToArray();
-                            indices = tmpIndices.ToArray();
                         }
-                        else
+
+                        vertices = geometry.Vertices;
+                        indices = geometry.Indices;
+
+                        if (description.Constraint.HasValue)
                         {
-                            for (int i = 0; i < vertices.Length; i += 3)
+                            List<VertexData> tmpVertices = new List<VertexData>();
+                            List<uint> tmpIndices = new List<uint>();
+
+                            if (indices != null && indices.Length > 0)
                             {
-                                if (description.Constraint.Value.Contains(vertices[i + 0].Position.Value) != ContainmentType.Disjoint ||
-                                    description.Constraint.Value.Contains(vertices[i + 1].Position.Value) != ContainmentType.Disjoint ||
-                                    description.Constraint.Value.Contains(vertices[i + 2].Position.Value) != ContainmentType.Disjoint)
+                                uint index = 0;
+                                for (int i = 0; i < indices.Length; i += 3)
                                 {
-                                    tmpVertices.Add(vertices[i + 0]);
-                                    tmpVertices.Add(vertices[i + 1]);
-                                    tmpVertices.Add(vertices[i + 2]);
+                                    if (description.Constraint.Value.Contains(vertices[indices[i + 0]].Position.Value) != ContainmentType.Disjoint ||
+                                        description.Constraint.Value.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint ||
+                                        description.Constraint.Value.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint)
+                                    {
+                                        tmpVertices.Add(vertices[indices[i + 0]]);
+                                        tmpVertices.Add(vertices[indices[i + 1]]);
+                                        tmpVertices.Add(vertices[indices[i + 2]]);
+                                        tmpIndices.Add(index++);
+                                        tmpIndices.Add(index++);
+                                        tmpIndices.Add(index++);
+                                    }
                                 }
+
+                                vertices = tmpVertices.ToArray();
+                                indices = tmpIndices.ToArray();
                             }
+                            else
+                            {
+                                for (int i = 0; i < vertices.Length; i += 3)
+                                {
+                                    if (description.Constraint.Value.Contains(vertices[i + 0].Position.Value) != ContainmentType.Disjoint ||
+                                        description.Constraint.Value.Contains(vertices[i + 1].Position.Value) != ContainmentType.Disjoint ||
+                                        description.Constraint.Value.Contains(vertices[i + 2].Position.Value) != ContainmentType.Disjoint)
+                                    {
+                                        tmpVertices.Add(vertices[i + 0]);
+                                        tmpVertices.Add(vertices[i + 1]);
+                                        tmpVertices.Add(vertices[i + 2]);
+                                    }
+                                }
 
-                            vertices = tmpVertices.ToArray();
+                                vertices = tmpVertices.ToArray();
+                            }
                         }
+
+                        IVertexData[] vertexList = VertexData.Convert(
+                            vertexType,
+                            vertices,
+                            weights,
+                            jointNames,
+                            bindShapeMatrix);
+
+                        Mesh nMesh = new Mesh(
+                            geometry.Material,
+                            geometry.Topology,
+                            vertexList,
+                            indices,
+                            description.Instanced,
+                            description.DynamicBuffers);
+
+                        drw.Meshes.Add(meshName, geometry.Material, nMesh);
                     }
-
-                    IVertexData[] vertexList = VertexData.Convert(
-                        vertexType,
-                        vertices,
-                        weights,
-                        jointNames,
-                        bindShapeMatrix);
-
-                    Mesh nMesh = new Mesh(
-                        geometry.Material,
-                        geometry.Topology,
-                        vertexList,
-                        indices,
-                        description.Instanced,
-                        description.DynamicBuffers);
-
-                    drw.Meshes.Add(meshName, geometry.Material, nMesh);
                 }
             }
+
+            drw.VolumeMesh = volumeMesh.ToArray();
         }
         /// <summary>
         /// Initialize skinned data

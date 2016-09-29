@@ -19,6 +19,10 @@ namespace Engine
         /// </summary>
         public string ModelFileName = null;
         /// <summary>
+        /// Volume meshes collection
+        /// </summary>
+        public string[] VolumeMeshes = null;
+        /// <summary>
         /// Instances
         /// </summary>
         public int Instances = 1;

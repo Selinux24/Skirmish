@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.76.0 commit date:2015-11-03, commit time:10:56, hash:f337fea</authoring_tool>
     </contributor>
-    <created>2016-09-25T21:00:37</created>
-    <modified>2016-09-25T21:00:37</modified>
+    <created>2016-09-29T20:20:22</created>
+    <modified>2016-09-29T20:20:22</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -238,6 +238,39 @@
     </material>
   </library_materials>
   <library_geometries>
+    <geometry id="Volume-mesh" name="Volume">
+      <mesh>
+        <source id="Volume-mesh-positions">
+          <float_array id="Volume-mesh-positions-array" count="48">0 0.4331546 -0.8435341 0 0.4331546 0.02277511 0.3062865 0.3062865 -0.8435341 0.3062865 0.3062865 0.02277511 0.4331546 0 -0.8435341 0.4331546 0 17.72381 0.3062865 -0.3062865 -0.8435341 0.3062865 -0.3062865 17.72381 0 -0.4331546 -0.8435341 0 -0.4331546 17.72381 -0.3062866 -0.3062865 -0.8435341 -0.3062866 -0.3062865 17.72381 -0.4331546 0 -0.8435341 -0.4331546 0 17.72381 -0.3062866 0.3062865 -0.8435341 -0.3062866 0.3062865 0.02277511</float_array>
+          <technique_common>
+            <accessor source="#Volume-mesh-positions-array" count="16" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Volume-mesh-normals">
+          <float_array id="Volume-mesh-normals-array" count="72">0.3826834 0.9238796 0 0.9238796 0.3826836 0 0.9238795 -0.3826836 0 0.3826833 -0.9238796 0 -0.3826836 -0.9238795 0 -0.9238795 -0.3826835 0 0 0 1 -0.3826835 0.9238796 0 -0.9238795 0.3826836 0 3.17683e-7 0 -1 0.9238796 0.3826835 0 0.9238795 -0.3826835 0 0.3826834 -0.9238796 0 -0.3826835 -0.9238795 0 -0.9238796 -0.3826834 0 0.3826498 0.9237985 0.01324218 -0.38265 0.9237985 0.01324218 6.13564e-6 0 1 0 0.9997008 0.02446323 -0.3826835 0.9238795 0 -0.9238798 0.3826832 0 -4.49272e-7 0 -1 0 0 -1 -7.66956e-7 0 -1</float_array>
+          <technique_common>
+            <accessor source="#Volume-mesh-normals-array" count="24" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Volume-mesh-vertices">
+          <input semantic="POSITION" source="#Volume-mesh-positions"/>
+        </vertices>
+        <polylist count="28">
+          <input semantic="VERTEX" source="#Volume-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Volume-mesh-normals" offset="1"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>1 0 3 0 2 0 3 1 5 1 4 1 5 2 7 2 6 2 7 3 9 3 8 3 9 4 11 4 10 4 11 5 13 5 12 5 13 6 9 6 5 6 15 7 1 7 0 7 12 8 13 8 15 8 6 9 10 9 14 9 0 0 1 0 2 0 2 10 3 10 4 10 4 11 5 11 6 11 6 12 7 12 8 12 8 13 9 13 10 13 10 14 11 14 12 14 5 15 3 15 1 15 1 16 15 16 13 16 13 17 11 17 9 17 9 6 7 6 5 6 5 18 1 18 13 18 14 19 15 19 0 19 14 20 12 20 15 20 14 21 0 21 6 21 2 22 4 22 6 22 6 22 8 22 10 22 10 23 12 23 14 23 0 22 2 22 6 22</p>
+        </polylist>
+      </mesh>
+    </geometry>
     <geometry id="birchb80-mesh" name="birchb80">
       <mesh>
         <source id="birchb80-mesh-positions">
@@ -310,6 +343,10 @@
       <node id="Lamp" name="Lamp" type="NODE">
         <matrix sid="transform">-0.2908646 -0.7711008 0.5663932 2.743669 0.9551712 -0.1998834 0.2183912 6.816998 -0.05518906 0.6045247 0.7946723 2.555855 0 0 0 1</matrix>
         <instance_light url="#Lamp-light"/>
+      </node>
+      <node id="Volume" name="Volume" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Volume-mesh" name="Volume"/>
       </node>
       <node id="birchb80" name="birchb80" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>

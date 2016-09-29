@@ -488,6 +488,14 @@ namespace Engine
 
             return this.orientedBoundingBox;
         }
+        /// <summary>
+        /// Gets internal volume
+        /// </summary>
+        /// <returns>Returns interna volume</returns>
+        public Triangle[] GetVolume()
+        {
+            return this.DrawingData.VolumeMesh;
+        }
 
         /// <summary>
         /// Gets nearest picking position of giving ray

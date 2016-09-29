@@ -19,6 +19,10 @@ namespace Engine
         /// </summary>
         public string ModelFileName = null;
         /// <summary>
+        /// Volume meshes collection
+        /// </summary>
+        public string[] VolumeMeshes = null;
+        /// <summary>
         /// Texture index
         /// </summary>
         public int TextureIndex = 0;

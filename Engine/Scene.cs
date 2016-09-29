@@ -323,7 +323,7 @@ namespace Engine
         {
             Model newModel = null;
 
-            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName);
+            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, description.VolumeMeshes);
             if (geo.Length == 1)
             {
                 if (optimize) geo[0].Optimize();
@@ -373,7 +373,7 @@ namespace Engine
         {
             ModelInstanced newModel = null;
 
-            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName);
+            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, description.VolumeMeshes);
             if (geo.Length == 1)
             {
                 if (optimize) geo[0].Optimize();
@@ -424,7 +424,7 @@ namespace Engine
 
             if (description.Model != null)
             {
-                var t = LoaderCOLLADA.Load(description.ContentPath, description.Model.ModelFileName);
+                var t = LoaderCOLLADA.Load(description.ContentPath, description.Model.ModelFileName, null);
 
                 geo = t[0];
             }

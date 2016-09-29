@@ -61,6 +61,10 @@ namespace Engine.Content
         /// Material
         /// </summary>
         public string Material { get; set; }
+        /// <summary>
+        /// Gets or sets whether the current submesh content is a volume mesh
+        /// </summary>
+        public bool IsVolume { get; set; }
 
         /// <summary>
         /// Submesh grouping optimization

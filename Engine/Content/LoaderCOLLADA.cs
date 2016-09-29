@@ -22,8 +22,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="fileName">Collada model</param>
+        /// <param name="volumes">Volume mesh names</param>
         /// <returns>Returns the loaded contents</returns>
-        public static ModelContent[] Load(string contentFolder, string fileName)
+        public static ModelContent[] Load(string contentFolder, string fileName, string[] volumes)
         {
             MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList != null && modelList.Length > 0)
@@ -43,7 +44,7 @@ namespace Engine.Content
                     ProcessLibraryImages(dae, modelContent, contentFolder);
                     ProcessLibraryMaterial(dae, modelContent);
 
-                    ProcessLibraryGeometries(dae, modelContent);
+                    ProcessLibraryGeometries(dae, modelContent, volumes);
                     ProcessLibraryControllers(dae, modelContent);
 
                     #endregion
@@ -328,13 +329,23 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessLibraryGeometries(COLLADA dae, ModelContent modelContent)
+        /// <param name="volumes">Volume mesh names</param>
+        private static void ProcessLibraryGeometries(COLLADA dae, ModelContent modelContent, string[] volumes)
         {
             if (dae.LibraryGeometries != null && dae.LibraryGeometries.Length > 0)
             {
                 foreach (Geometry geometry in dae.LibraryGeometries)
                 {
-                    SubMeshContent[] info = ProcessGeometry(geometry);
+                    bool isVolume = false;
+                    if (volumes != null && volumes.Length >0)
+                    {
+                        if (Array.Exists(volumes, v => v == geometry.Name))
+                        {
+                            isVolume = true;
+                        }
+                    }
+
+                    SubMeshContent[] info = ProcessGeometry(geometry, isVolume);
                     if (info != null && info.Length > 0)
                     {
                         foreach (SubMeshContent subMesh in info)
@@ -394,22 +405,23 @@ namespace Engine.Content
         /// Process geometry list
         /// </summary>
         /// <param name="geometry">Geometry info</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessGeometry(Geometry geometry)
+        private static SubMeshContent[] ProcessGeometry(Geometry geometry, bool isVolume)
         {
             SubMeshContent[] info = null;
 
             if (geometry.Mesh != null)
             {
-                info = ProcessMesh(geometry.Mesh);
+                info = ProcessMesh(geometry.Mesh, isVolume);
             }
             else if (geometry.Spline != null)
             {
-                info = ProcessSpline(geometry.Spline);
+                info = ProcessSpline(geometry.Spline, isVolume);
             }
             else if (geometry.ConvexMesh != null)
             {
-                info = ProcessConvexMesh(geometry.ConvexMesh);
+                info = ProcessConvexMesh(geometry.ConvexMesh, isVolume);
             }
 
             return info;
@@ -418,39 +430,40 @@ namespace Engine.Content
         /// Process mesh
         /// </summary>
         /// <param name="mesh">Mesh</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessMesh(Collada.Mesh mesh)
+        private static SubMeshContent[] ProcessMesh(Collada.Mesh mesh, bool isVolume)
         {
             SubMeshContent[] res = null;
 
             //Procesar por topología
             if (mesh.Lines != null && mesh.Lines.Length > 0)
             {
-                res = ProcessLines(mesh.Lines, mesh.Sources);
+                res = ProcessLines(mesh.Lines, mesh.Sources, isVolume);
             }
             else if (mesh.LineStrips != null && mesh.LineStrips.Length > 0)
             {
-                res = ProcessLineStrips(mesh.LineStrips, mesh.Sources);
+                res = ProcessLineStrips(mesh.LineStrips, mesh.Sources, isVolume);
             }
             else if (mesh.Triangles != null && mesh.Triangles.Length > 0)
             {
-                res = ProcessTriangles(mesh.Triangles, mesh.Sources);
+                res = ProcessTriangles(mesh.Triangles, mesh.Sources, isVolume);
             }
             else if (mesh.TriFans != null && mesh.TriFans.Length > 0)
             {
-                res = ProcessTriFans(mesh.TriFans, mesh.Sources);
+                res = ProcessTriFans(mesh.TriFans, mesh.Sources, isVolume);
             }
             else if (mesh.TriStrips != null && mesh.TriStrips.Length > 0)
             {
-                res = ProcessTriStrips(mesh.TriStrips, mesh.Sources);
+                res = ProcessTriStrips(mesh.TriStrips, mesh.Sources, isVolume);
             }
             else if (mesh.PolyList != null && mesh.PolyList.Length > 0)
             {
-                res = ProcessPolyList(mesh.PolyList, mesh.Sources);
+                res = ProcessPolyList(mesh.PolyList, mesh.Sources, isVolume);
             }
             else if (mesh.Polygons != null && mesh.Polygons.Length > 0)
             {
-                res = ProcessPolygons(mesh.Polygons, mesh.Sources);
+                res = ProcessPolygons(mesh.Polygons, mesh.Sources, isVolume);
             }
 
             return res;
@@ -459,8 +472,9 @@ namespace Engine.Content
         /// Process spline
         /// </summary>
         /// <param name="mesh">Mesh</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessSpline(Spline spline)
+        private static SubMeshContent[] ProcessSpline(Spline spline, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -468,8 +482,9 @@ namespace Engine.Content
         /// Process convex mesh
         /// </summary>
         /// <param name="mesh">Mesh</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessConvexMesh(ConvexMesh convexMesh)
+        private static SubMeshContent[] ProcessConvexMesh(ConvexMesh convexMesh, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -478,8 +493,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="lines">Lines</param>
         /// <param name="meshSources">Mesh sources</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessLines(Lines[] lines, Source[] meshSources)
+        private static SubMeshContent[] ProcessLines(Lines[] lines, Source[] meshSources, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -488,8 +504,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="lines">Line strips</param>
         /// <param name="meshSources">Mesh sources</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessLineStrips(LineStrips[] lines, Source[] meshSources)
+        private static SubMeshContent[] ProcessLineStrips(LineStrips[] lines, Source[] meshSources, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -498,8 +515,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="triangles">Triangles</param>
         /// <param name="meshSources">Mesh sources</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessTriangles(Triangles[] triangles, Source[] meshSourcesrsion)
+        private static SubMeshContent[] ProcessTriangles(Triangles[] triangles, Source[] meshSourcesrsion, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -508,8 +526,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="triFans">Triangle fans</param>
         /// <param name="meshSources">Mesh sources</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessTriFans(TriFans[] triFans, Source[] meshSources)
+        private static SubMeshContent[] ProcessTriFans(TriFans[] triFans, Source[] meshSources, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -518,8 +537,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="triStrips">Triangle strips</param>
         /// <param name="meshSources">Mesh sources</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessTriStrips(TriStrips[] triStrips, Source[] meshSources)
+        private static SubMeshContent[] ProcessTriStrips(TriStrips[] triStrips, Source[] meshSources, bool isVolume)
         {
             throw new NotImplementedException();
         }
@@ -528,8 +548,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="polyLists">Polygon list</param>
         /// <param name="meshSources">Mesh sources</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessPolyList(PolyList[] polyLists, Source[] meshSources)
+        private static SubMeshContent[] ProcessPolyList(PolyList[] polyLists, Source[] meshSources, bool isVolume)
         {
             List<SubMeshContent> res = new List<SubMeshContent>();
 
@@ -608,6 +629,7 @@ namespace Engine.Content
                     VertexType = vertexType,
                     Vertices = data,
                     Material = polyList.Material,
+                    IsVolume = isVolume,
                 };
 
                 res.Add(meshInfo);
@@ -620,8 +642,9 @@ namespace Engine.Content
         /// </summary>
         /// <param name="polygons">Polygons</param>
         /// <param name="meshSources">Mesh sources</param>
+        /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessPolygons(Polygons[] polygons, Source[] meshSources)
+        private static SubMeshContent[] ProcessPolygons(Polygons[] polygons, Source[] meshSources, bool isVolume)
         {
             throw new NotImplementedException();
         }

@@ -370,36 +370,62 @@ namespace Engine
 
                 if (curr.Model is Model)
                 {
+                    var model = (Model)curr.Model;
+
                     if (usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) ||
                         usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePathFinding))
                     {
-                        var cylinder = BoundingCylinder.FromPoints(((Model)curr.Model).GetPoints());
-                        tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
+                        var vTris = model.GetVolume();
+                        if (vTris != null && vTris.Length > 0)
+                        {
+                            //Use volume mesh
+                            tris.AddRange(vTris);
+                        }
+                        else
+                        {
+                            //Generate cylinder
+                            var cylinder = BoundingCylinder.FromPoints(model.GetPoints());
+                            tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
+                        }
                     }
                     else if (
                         usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.FullPicking) ||
                         usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.FullPathFinding))
                     {
-                        tris.AddRange(((Model)curr.Model).GetTriangles());
+                        //Use full mesh
+                        tris.AddRange(model.GetTriangles());
                     }
                 }
                 else if (curr.Model is ModelInstanced)
                 {
+                    var model = (ModelInstanced)curr.Model;
+
                     if (usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) ||
                         usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePathFinding))
                     {
-                        Array.ForEach(((ModelInstanced)curr.Model).Instances, (m) =>
+                        Array.ForEach(model.Instances, (m) =>
                         {
-                            var cylinder = BoundingCylinder.FromPoints(m.GetPoints());
-                            tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
+                            var vTris = m.GetVolume();
+                            if (vTris != null && vTris.Length > 0)
+                            {
+                                //Use volume mesh
+                                tris.AddRange(vTris);
+                            }
+                            else
+                            {
+                                //Generate cylinder
+                                var cylinder = BoundingCylinder.FromPoints(m.GetPoints());
+                                tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
+                            }
                         });
                     }
                     else if (
                         usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.FullPicking) ||
                         usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.FullPathFinding))
                     {
-                        Array.ForEach(((ModelInstanced)curr.Model).Instances, (m) =>
+                        Array.ForEach(model.Instances, (m) =>
                         {
+                            //Use full mesh
                             tris.AddRange(m.GetTriangles());
                         });
                     }

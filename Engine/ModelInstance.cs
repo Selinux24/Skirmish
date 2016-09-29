@@ -274,6 +274,16 @@ namespace Engine
 
             return this.orientedBoundingBox;
         }
+        /// <summary>
+        /// Gets internal volume
+        /// </summary>
+        /// <returns>Returns interna volume</returns>
+        public Triangle[] GetVolume()
+        {
+            var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
+
+            return Triangle.Transform(drawingData.VolumeMesh, this.Manipulator.LocalTransform);
+        }
 
         /// <summary>
         /// Gets nearest picking position of giving ray
