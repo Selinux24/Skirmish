@@ -139,27 +139,30 @@ namespace Engine.Common
         /// <returns>Returns the nearest level of detail for the specified level of detail</returns>
         internal LevelOfDetailEnum GetLODNearest(LevelOfDetailEnum lod)
         {
-            if (this.meshesByLOD.ContainsKey(lod))
+            if (this.meshesByLOD.Keys.Count == 0)
             {
-                return lod;
-            }
-            else if (this.meshesByLOD.Keys.Count > 0)
-            {
-                int i = (int)lod;
-
-                for (int l = i; l > 0; l /= 2)
-                {
-                    if (this.meshesByLOD.ContainsKey((LevelOfDetailEnum)l))
-                    {
-                        return (LevelOfDetailEnum)l;
-                    }
-                }
-
                 return this.defaultLevelOfDetail;
             }
             else
             {
-                return this.defaultLevelOfDetail;
+                if (this.meshesByLOD.Keys.Count == 1)
+                {
+                    return this.meshesByLOD.Keys.ToArray()[0];
+                }
+                else
+                {
+                    int i = (int)lod;
+
+                    for (int l = i; l > 0; l /= 2)
+                    {
+                        if (this.meshesByLOD.ContainsKey((LevelOfDetailEnum)l))
+                        {
+                            return (LevelOfDetailEnum)l;
+                        }
+                    }
+
+                    return this.defaultLevelOfDetail;
+                }
             }
         }
         /// <summary>
