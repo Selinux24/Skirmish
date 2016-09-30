@@ -11,7 +11,6 @@ namespace Engine.Common
     /// <summary>
     /// Mesh data
     /// </summary>
-    [Serializable]
     public class DrawingData : IDisposable
     {
         /// <summary>

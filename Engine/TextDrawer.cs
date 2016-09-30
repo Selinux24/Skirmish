@@ -405,8 +405,7 @@ namespace Engine
     /// <summary>
     /// Font map
     /// </summary>
-    [Serializable]
-    public class FontMap : Dictionary<char, FontMapChar>, IDisposable
+    public class FontMap : IDisposable
     {
         /// <summary>
         /// Font cache
@@ -438,6 +437,11 @@ namespace Engine
         /// Key codes
         /// </summary>
         public const uint KeyCodes = 512;
+
+        /// <summary>
+        /// Map
+        /// </summary>
+        private Dictionary<char, FontMapChar> map = new Dictionary<char, FontMapChar>();
 
         /// <summary>
         /// Font name
@@ -545,7 +549,7 @@ namespace Engine
                                 Height = (int)Math.Round(s.Height),
                             };
 
-                            map.Add(c, chr);
+                            map.map.Add(c, chr);
 
                             left += s.Width;
                         }
@@ -574,14 +578,12 @@ namespace Engine
 
         }
         /// <summary>
-        /// Constructor de serialización
+        /// Dispose map resources
         /// </summary>
-        /// <param name="info">Info</param>
-        /// <param name="context">Context</param>
-        protected FontMap(SerializationInfo info, StreamingContext context)
-            : base(info, context)
+        public void Dispose()
         {
-
+            Helper.Dispose(this.Texture);
+            Helper.Dispose(this.map);
         }
 
         /// <summary>
@@ -617,9 +619,9 @@ namespace Engine
 
             foreach (char c in text)
             {
-                if (this.ContainsKey(c))
+                if (this.map.ContainsKey(c))
                 {
-                    FontMapChar chr = this[c];
+                    FontMapChar chr = this.map[c];
 
                     VertexData[] cv;
                     uint[] ci;
@@ -656,18 +658,6 @@ namespace Engine
             vertices = vertList.ToArray();
             indices = indexList.ToArray();
             size = pos;
-        }
-
-        /// <summary>
-        /// Dispose map resources
-        /// </summary>
-        public void Dispose()
-        {
-            if (this.Texture != null)
-            {
-                this.Texture.Dispose();
-                this.Texture = null;
-            }
         }
     }
 }

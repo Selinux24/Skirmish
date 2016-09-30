@@ -34,7 +34,7 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         bool ICollection<Contour>.IsReadOnly
         {
-            get { return true; }
+            get {  return true; }
         }
         /// <summary>
         /// Gets the number of <see cref="Contour"/>s in the set.

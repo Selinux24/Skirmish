@@ -7,7 +7,6 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A point in a navigation mesh.
     /// </summary>
-    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct PathPoint
     {
