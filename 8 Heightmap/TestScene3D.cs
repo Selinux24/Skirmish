@@ -196,16 +196,16 @@ namespace HeightmapTest
 
                     Proportion = 0.25f,
                 },
-                //Vegetation = new GroundDescription.VegetationDescription()
-                //{
-                //    ContentPath = "Foliage/Billboard",
-                //    VegetarionTextures = new[] { "grass.png" },
-                //    Saturation = 0.3f,
-                //    StartRadius = 0f,
-                //    EndRadius = 200f,
-                //    MinSize = new Vector2(2, 2),
-                //    MaxSize = new Vector2(2, 4),
-                //}
+                Vegetation = new GroundDescription.VegetationDescription()
+                {
+                    ContentPath = "Foliage/Billboard",
+                    VegetarionTextures = new[] { "grass.png" },
+                    Saturation = 0.3f,
+                    StartRadius = 0f,
+                    EndRadius = 200f,
+                    MinSize = new Vector2(1f, 1f),
+                    MaxSize = new Vector2(1.5f, 2f),
+                }
             });
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);

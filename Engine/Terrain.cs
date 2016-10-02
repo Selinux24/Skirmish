@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using SharpDX;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
@@ -754,7 +754,7 @@ namespace Engine
         /// </remarks>
         class TerrainPatch : IDisposable
         {
-            const int MAX = 1024 * 10;
+            const int MAX = 1024 * 8;
 
             /// <summary>
             /// Creates a new patch of the specified level of detail
@@ -916,7 +916,9 @@ namespace Engine
             /// </summary>
             public void Dispose()
             {
+                Helper.Dispose(this.indexBuffer);
                 Helper.Dispose(this.vertexBuffer);
+                Helper.Dispose(this.foliageBuffer);
             }
 
             /// <summary>
@@ -1101,53 +1103,40 @@ namespace Engine
 
                 if (node != null)
                 {
-                    var triangles = node.Triangles;
-                    if (triangles != null && triangles.Length > 0)
+                    Random rnd = new Random(description.Seed);
+                    BoundingBox bbox = node.BoundingBox;
+                    float area = bbox.GetX() * bbox.GetZ();
+                    float density = description.Saturation;
+                    int count = (int)(area * density);
+                    if (count > MAX) count = MAX;
+
+                    //Number of points
+                    while (count > 0)
                     {
-                        Random rnd = new Random(description.Seed);
-                        BoundingBox bbox = node.BoundingBox;
-                        float density = description.Saturation;
-                        int count = 0;
+                        Vector3 pos = new Vector3(
+                            rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
+                            bbox.Maximum.Y + 1f,
+                            rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
 
-                        for (int i = 0; i < triangles.Length; i++)
+                        Ray ray = new Ray(pos, Vector3.Down);
+
+                        Vector3 intersectionPoint;
+                        Triangle t;
+                        if (node.PickFirst(ref ray, out intersectionPoint, out t))
                         {
-                            var tri = triangles[i];
-                            BoundingBox tribox = BoundingBox.FromPoints(tri.GetCorners());
-
-                            float triCount = 0;
-                            float maxCount = tri.Area * density * (tri.Normal.Y);
-
-                            while (triCount < maxCount && count < MAX)
+                            if (t.Normal.Y > 0.5f)
                             {
-                                Vector3 pos = new Vector3(
-                                    rnd.NextFloat(tribox.Minimum.X, tribox.Maximum.X),
-                                    bbox.Maximum.Y + 1f,
-                                    rnd.NextFloat(tribox.Minimum.Z, tribox.Maximum.Z));
-
-                                Ray ray = new Ray(pos, Vector3.Down);
-
-                                Vector3 intersectionPoint;
-                                float d;
-                                if (tri.Intersects(ref ray, out intersectionPoint, out d))
+                                vertexData.Add(new VertexData()
                                 {
-                                    vertexData.Add(new VertexData()
-                                    {
-                                        Position = intersectionPoint,
-                                        Size = new Vector2(
-                                            rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                                            rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
-                                    });
-
-                                    triCount++;
-                                    count++;
-                                }
-                            }
-
-                            if (count >= MAX)
-                            {
-                                break;
+                                    Position = intersectionPoint,
+                                    Size = new Vector2(
+                                        rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
+                                        rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
+                                });
                             }
                         }
+
+                        count--;
                     }
                 }
 

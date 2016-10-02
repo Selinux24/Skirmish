@@ -46,6 +46,8 @@ namespace TerrainTest
         private LensFlare lensFlare = null;
         private Skydom skydom = null;
         private Scenery terrain = null;
+        private Vector3 windDirection = Vector3.UnitX;
+        private float windStrength = 1f;
         private List<Line3> oks = new List<Line3>();
         private List<Line3> errs = new List<Line3>();
         private LineListDrawer terrainLineDrawer = null;
@@ -349,6 +351,16 @@ namespace TerrainTest
                 {
                     Settings = navSettings,
                 },
+                Vegetation = new GroundDescription.VegetationDescription()
+                {
+                    ContentPath = "Foliage/Billboard",
+                    VegetarionTextures = new[] { "grass.png" },
+                    Saturation = 2f,
+                    StartRadius = 0f,
+                    EndRadius = 50f,
+                    MinSize = new Vector2(0.25f, 0.25f),
+                    MaxSize = new Vector2(0.5f, 0.75f),
+                },
                 Opaque = true,
                 Static = true,
                 DelayGeneration = true,
@@ -370,11 +382,13 @@ namespace TerrainTest
 
             List<BoundingBox> bboxes = new List<BoundingBox>();
 
+            this.terrain.SetWind(this.windDirection, this.windStrength);
+
             //Helipod
             Vector3 hPos;
             Triangle hTri;
             float hDist;
-            if (this.terrain.FindTopGroundPosition(70, 70, out hPos, out hTri, out hDist))
+            if (this.terrain.FindTopGroundPosition(75, 75, out hPos, out hTri, out hDist))
             {
                 this.helipod.Manipulator.SetPosition(hPos, true);
             }
@@ -482,7 +496,7 @@ namespace TerrainTest
             Vector3 heliPos;
             Triangle heliTri;
             float heliDist;
-            if (this.terrain.FindTopGroundPosition(70, 70, out heliPos, out heliTri, out heliDist))
+            if (this.terrain.FindTopGroundPosition(this.helipod.Manipulator.Position.X, this.helipod.Manipulator.Position.Z, out heliPos, out heliTri, out heliDist))
             {
                 this.helicopter.Manipulator.SetPosition(heliPos, true);
                 this.helicopter.Manipulator.SetNormal(heliTri.Normal);
