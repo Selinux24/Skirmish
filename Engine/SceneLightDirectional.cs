@@ -74,7 +74,7 @@ namespace Engine
         /// <returns>Returns light position at specified distance</returns>
         public Vector3 GetPosition(float distance)
         {
-            return distance * -this.Direction;
+            return distance * -2f * this.Direction;
         }
     }
 }

@@ -255,6 +255,7 @@ namespace DeferredTest
                 cameraPosition += helicopterPosition;
                 modelCount++;
             }
+            this.helicopter.AnimationController.AddClip(0, true, float.MaxValue);
 
             for (int i = 0; i < this.helicopters.Count; i++)
             {
@@ -268,6 +269,7 @@ namespace DeferredTest
                     cameraPosition += heliPos;
                     modelCount++;
                 }
+                this.helicopters.Instances[i].AnimationController.AddClip(0, true, float.MaxValue);
             }
 
             cameraPosition /= (float)modelCount;

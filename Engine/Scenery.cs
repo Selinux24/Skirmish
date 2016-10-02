@@ -97,7 +97,7 @@ namespace Engine
         /// </remarks>
         class SceneryPatch : IDisposable
         {
-            const int MAX = 1024 * 8;
+            const int MAX = 1024 * 2;
 
             /// <summary>
             /// Creates a new patch

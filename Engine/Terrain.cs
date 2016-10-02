@@ -754,7 +754,7 @@ namespace Engine
         /// </remarks>
         class TerrainPatch : IDisposable
         {
-            const int MAX = 1024 * 8;
+            const int MAX = 1024 * 2;
 
             /// <summary>
             /// Creates a new patch of the specified level of detail

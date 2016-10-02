@@ -285,6 +285,12 @@ namespace Engine
                                     this.animationData,
                                     this.TextureIndex);
                             }
+                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                            {
+                                ((EffectBasicShadow)effect).UpdatePerObject(
+                                    this.animationData,
+                                    this.TextureIndex);
+                            }
 
                             #endregion
 

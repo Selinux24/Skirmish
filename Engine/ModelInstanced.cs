@@ -340,6 +340,10 @@ namespace Engine
                                         {
                                             ((EffectBasicGBuffer)effect).UpdatePerObject(matdata, texture, normalMap, null, 0);
                                         }
+                                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                                        {
+                                            ((EffectBasicShadow)effect).UpdatePerObject(null, 0);
+                                        }
 
                                         #endregion
 
