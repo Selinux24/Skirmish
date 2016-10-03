@@ -48,6 +48,10 @@ namespace Engine.Common
         /// </summary>
         public bool Static { get; set; }
         /// <summary>
+        /// Always visible
+        /// </summary>
+        public bool AlwaysVisible { get; set; }
+        /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>
         public bool CastShadow { get; set; }

@@ -51,6 +51,18 @@ namespace Engine
         /// Spot lights
         /// </summary>
         private List<SceneLightSpot> spotLights = new List<SceneLightSpot>();
+        /// <summary>
+        /// Visible directional lights
+        /// </summary>
+        private SceneLightDirectional[] visibleDirectional = null;
+        /// <summary>
+        /// Visible point lights
+        /// </summary>
+        private SceneLightPoint[] visiblePoints = null;
+        /// <summary>
+        /// Visible spot lights
+        /// </summary>
+        private SceneLightSpot[] visibleSpots = null;
 
         /// <summary>
         /// Gets or sets directional lights
@@ -257,42 +269,57 @@ namespace Engine
             this.spotLights.Clear();
         }
         /// <summary>
+        /// Cull test
+        /// </summary>
+        /// <param name="frustum">Viewing frustum</param>
+        /// <param name="viewerPosition">Viewer position</param>
+        public void Cull(BoundingFrustum frustum, Vector3 viewerPosition)
+        {
+            this.visibleDirectional = this.directionalLights.FindAll(l => l.Enabled == true).ToArray();
+
+            var pLights = this.pointLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
+            pLights.Sort((l1, l2) =>
+            {
+                int i = -frustum.Contains(l1.Position).CompareTo(frustum.Contains(l2.Position));
+                if (i != 0) return i;
+
+                return Vector3.DistanceSquared(viewerPosition, l1.Position).CompareTo(Vector3.DistanceSquared(viewerPosition, l2.Position));
+            });
+            this.visiblePoints = pLights.ToArray();
+
+            var sLights = this.spotLights.FindAll(l => l.Enabled == true && Helper.Contains(frustum, l.BoundingFrustum) != ContainmentType.Disjoint);
+            sLights.Sort((l1, l2) =>
+            {
+                int i = -frustum.Contains(l1.Position).CompareTo(frustum.Contains(l2.Position));
+                if (i != 0) return i;
+
+                return Vector3.DistanceSquared(viewerPosition, l1.Position).CompareTo(Vector3.DistanceSquared(viewerPosition, l2.Position));
+            });
+            this.visibleSpots = sLights.ToArray();
+        }
+        /// <summary>
         /// Gets the visible directional lights
         /// </summary>
-        /// <param name="frustum">Camera frustum</param>
         /// <returns>Returns the visible directional lights array</returns>
-        public SceneLightDirectional[] GetVisibleDirectionalLights(BoundingFrustum frustum)
+        public SceneLightDirectional[] GetVisibleDirectionalLights()
         {
-            return this.directionalLights.FindAll(l =>
-                l.Enabled == true).ToArray();
+            return this.visibleDirectional;
         }
         /// <summary>
         /// Gets the visible point lights
         /// </summary>
-        /// <param name="frustum">Camera frustum</param>
-        /// <param name="viewerPosition">Viewer position</param>
         /// <returns>Returns the visible point lights array</returns>
-        public SceneLightPoint[] GetVisiblePointLights(BoundingFrustum frustum, Vector3 viewerPosition)
+        public SceneLightPoint[] GetVisiblePointLights()
         {
-            var lights = this.pointLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
-
-            lights.Sort((l1, l2) => { return Vector3.DistanceSquared(viewerPosition, l1.Position).CompareTo(Vector3.DistanceSquared(viewerPosition, l2.Position)); });
-
-            return lights.ToArray();
+            return this.visiblePoints;
         }
         /// <summary>
         /// Gets the visible spot lights
         /// </summary>
-        /// <param name="frustum">Camera frustum</param>
-        /// <param name="viewerPosition">Viewer position</param>
         /// <returns>Returns the visible spot lights array</returns>
-        public SceneLightSpot[] GetVisibleSpotLights(BoundingFrustum frustum, Vector3 viewerPosition)
+        public SceneLightSpot[] GetVisibleSpotLights()
         {
-            var lights = this.spotLights.FindAll(l => l.Enabled == true && Helper.Contains(frustum, l.BoundingFrustum) != ContainmentType.Disjoint);
-
-            lights.Sort((l1, l2) => { return Vector3.DistanceSquared(viewerPosition, l1.Position).CompareTo(Vector3.DistanceSquared(viewerPosition, l2.Position)); });
-
-            return lights.ToArray();
+            return this.visibleSpots;
         }
     }
 }

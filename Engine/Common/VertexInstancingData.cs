@@ -23,7 +23,7 @@ namespace Engine.Common
                 new InputElement("localTransform", 1, Format.R32G32B32A32_Float, 16, 1, InputClassification.PerInstanceData, 1),
                 new InputElement("localTransform", 2, Format.R32G32B32A32_Float, 32, 1, InputClassification.PerInstanceData, 1),
                 new InputElement("localTransform", 3, Format.R32G32B32A32_Float, 48, 1, InputClassification.PerInstanceData, 1),
-                new InputElement("animationData", 0, Format.R32G32B32_Float, 64, 1, InputClassification.PerInstanceData, 1),
+                new InputElement("animationData", 0, Format.R32G32B32_UInt, 64, 1, InputClassification.PerInstanceData, 1),
                 new InputElement("textureIndex", 0, Format.R32_Float, 76, 1, InputClassification.PerInstanceData, 1),
             };
         }

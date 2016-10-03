@@ -143,6 +143,9 @@ namespace Engine
             this.UpdateContext.EyePosition = scene.Camera.Position;
             this.UpdateContext.EyeTarget = scene.Camera.Direction;
 
+            //Cull lights
+            scene.Lights.Cull(this.UpdateContext.Frustum, this.UpdateContext.EyePosition);
+
             //Update active components
             var activeComponents = scene.Components.FindAll(c => c.Active);
             for (int i = 0; i < activeComponents.Count; i++)
@@ -167,6 +170,7 @@ namespace Engine
         {
             if (this.Updated)
             {
+                this.Updated = false;
 #if DEBUG
                 long total = 0;
                 long start = 0;
@@ -355,8 +359,7 @@ namespace Engine
 #endif
                     #endregion
 
-                    var solidComponents = visibleComponents.FindAll(c => c.CastShadow);
-                    if (solidComponents.Count > 0)
+                    if (visibleComponents.Count > 0)
                     {
                         #region Cull
 #if DEBUG
@@ -366,7 +369,7 @@ namespace Engine
                         if (scene.PerformFrustumCulling)
                         {
                             //Frustum culling
-                            draw = scene.CullTest(this.DrawContext.Frustum, solidComponents);
+                            draw = scene.CullTest(this.DrawContext.Frustum, visibleComponents);
                         }
                         else
                         {
@@ -379,7 +382,7 @@ namespace Engine
 #endif
                         #endregion
 
-                        #region Draw 3D
+                        #region Draw
 
                         if (draw)
                         {
@@ -387,7 +390,7 @@ namespace Engine
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
                             //Draw solid
-                            this.DrawResultComponents(gameTime, this.DrawContext, solidComponents);
+                            this.DrawResultComponents(gameTime, this.DrawContext, visibleComponents);
 #if DEBUG
                             swDraw.Stop();
 
@@ -398,28 +401,9 @@ namespace Engine
                         #endregion
                     }
 
-                    var otherComponents = visibleComponents.FindAll(c => !c.CastShadow);
-                    if (otherComponents.Count > 0)
-                    {
-                        #region Draw 2D
-#if DEBUG
-                        Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                        //Draw other
-                        this.DrawResultComponents(gameTime, this.DrawContext, otherComponents);
-#if DEBUG
-                        swDraw.Stop();
-
-                        forward_draw2D = swDraw.ElapsedTicks;
-#endif
-                        #endregion
-                    }
-
                     #endregion
 
                     #endregion
-
-                    this.Updated = false;
                 }
 #if DEBUG
                 swTotal.Stop();
@@ -517,7 +501,12 @@ namespace Engine
                 toDraw.ForEach((c) =>
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
-                    this.Game.Graphics.SetBlendDefault();
+
+                    if (c.EnableDepthStencil) this.Game.Graphics.SetDepthStencilZEnabled();
+                    else this.Game.Graphics.SetDepthStencilZDisabled();
+
+                    if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendTransparent();
+                    else this.Game.Graphics.SetBlendDefault();
 
                     c.Draw(context);
                 });
@@ -537,14 +526,12 @@ namespace Engine
                 toDraw.ForEach((c) =>
                 {
                     this.Game.Graphics.SetRasterizerDefault();
-                    if (c.CastShadow)
-                    {
-                        this.Game.Graphics.SetBlendDefault();
-                    }
-                    else
-                    {
-                        this.Game.Graphics.SetBlendTransparent();
-                    }
+
+                    if (c.EnableDepthStencil) this.Game.Graphics.SetDepthStencilZEnabled();
+                    else this.Game.Graphics.SetDepthStencilZDisabled();
+
+                    if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendTransparent();
+                    else this.Game.Graphics.SetBlendDefault();
 
                     c.Draw(context);
                 });

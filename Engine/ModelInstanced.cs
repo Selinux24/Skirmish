@@ -96,8 +96,6 @@ namespace Engine
             this.InstancingBufferStride = instancingData[0].Stride;
 
             this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
-
-            this.EnableDepthStencil = true;
         }
         /// <summary>
         /// Constructor
@@ -121,8 +119,6 @@ namespace Engine
             this.InstancingBufferStride = instancingData[0].Stride;
 
             this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
-
-            this.EnableDepthStencil = true;
         }
         /// <summary>
         /// Dispose model buffers
@@ -233,7 +229,6 @@ namespace Engine
                             context.World,
                             context.ViewProjection,
                             context.EyePosition,
-                            context.Frustum,
                             context.Lights,
                             context.ShadowMaps,
                             context.ShadowMapStatic,
@@ -254,22 +249,6 @@ namespace Engine
                     }
 
                     #endregion
-
-                    if (this.EnableDepthStencil)
-                    {
-                        this.Game.Graphics.SetDepthStencilZEnabled();
-                    }
-                    else
-                    {
-                        this.Game.Graphics.SetDepthStencilZDisabled();
-                    }
-
-                    if (this.EnableAlphaBlending)
-                    {
-                        if (context.DrawerMode == DrawerModesEnum.Forward) this.Game.Graphics.SetBlendTransparent();
-                        else if (context.DrawerMode == DrawerModesEnum.Deferred) this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap) this.Game.Graphics.SetBlendTransparent();
-                    }
 
                     //Render by level of detail
                     for (int l = 1; l < (int)LevelOfDetailEnum.Minimum + 1; l *= 2)

@@ -178,6 +178,13 @@ namespace Engine
         public Sprite(Game game, SpriteDescription description)
             : base(game, ModelContent.GenerateSprite(description.ContentPath, description.Textures), false, 0, false, false, false)
         {
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
+            this.EnableAlphaBlending = true;
+
             this.renderWidth = game.Form.RenderWidth.NextPair();
             this.renderHeight = game.Form.RenderHeight.NextPair();
             this.sourceWidth = description.Width <= 0 ? this.renderWidth : description.Width.NextPair();
@@ -215,8 +222,6 @@ namespace Engine
                 effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
 
                 #endregion
-
-                this.Game.Graphics.SetDepthStencilZDisabled();
 
                 foreach (string meshName in this.DrawingData.Meshes.Keys)
                 {

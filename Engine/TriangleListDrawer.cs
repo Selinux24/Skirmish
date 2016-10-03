@@ -39,6 +39,11 @@ namespace Engine
         public TriangleListDrawer(Game game, Triangle[] triangles, Color4 color)
             : base(game, ModelContent.GenerateTriangleList(triangles, color), true)
         {
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
             this.EnableAlphaBlending = true;
 
             this.dictionary.Add(color, new List<Triangle>(triangles));
@@ -52,6 +57,11 @@ namespace Engine
         public TriangleListDrawer(Game game, int count)
             : base(game, ModelContent.GenerateTriangleList(new Triangle[count], Color.Transparent), true)
         {
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
             this.EnableAlphaBlending = true;
 
             this.dictionaryChanged = false;

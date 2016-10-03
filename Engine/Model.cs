@@ -116,8 +116,6 @@ namespace Engine
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
 
             this.AnimateWithManipulator = false;
-
-            this.EnableDepthStencil = true;
         }
         /// <summary>
         /// Constructor
@@ -132,8 +130,6 @@ namespace Engine
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
 
             this.AnimateWithManipulator = false;
-
-            this.EnableDepthStencil = true;
         }
         /// <summary>
         /// Update
@@ -183,7 +179,6 @@ namespace Engine
                             this.local,
                             context.ViewProjection,
                             context.EyePosition,
-                            context.Frustum,
                             context.Lights,
                             context.ShadowMaps,
                             context.ShadowMapStatic,
@@ -227,22 +222,6 @@ namespace Engine
                     }
 
                     #endregion
-
-                    if (this.EnableDepthStencil)
-                    {
-                        this.Game.Graphics.SetDepthStencilZEnabled();
-                    }
-                    else
-                    {
-                        this.Game.Graphics.SetDepthStencilZDisabled();
-                    }
-
-                    if (this.EnableAlphaBlending)
-                    {
-                        if (context.DrawerMode == DrawerModesEnum.Forward) this.Game.Graphics.SetBlendTransparent();
-                        else if (context.DrawerMode == DrawerModesEnum.Deferred) this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap) this.Game.Graphics.SetBlendTransparent();
-                    }
 
                     foreach (string meshName in this.DrawingData.Meshes.Keys)
                     {

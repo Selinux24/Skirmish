@@ -532,7 +532,17 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Billboard)
                 {
-                    return this.ForwardBillboard;
+                    switch (mode)
+                    {
+                        case DrawerModesEnum.Forward:
+                            return this.ForwardBillboard;
+                        case DrawerModesEnum.Deferred:
+                            return this.DeferredBillboard;
+                        case DrawerModesEnum.ShadowMap:
+                            return this.ShadowMapBillboard;
+                        default:
+                            throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    }
                 }
                 else
                 {
@@ -555,7 +565,7 @@ namespace Engine.Effects
             Matrix viewProjection,
             Vector3 eyePositionWorld)
         {
-            this.UpdatePerFrame(world, viewProjection, eyePositionWorld, new BoundingFrustum(), null, 0, null, null, Matrix.Identity);
+            this.UpdatePerFrame(world, viewProjection, eyePositionWorld, null, 0, null, null, Matrix.Identity);
         }
         /// <summary>
         /// Update per frame data
@@ -563,7 +573,6 @@ namespace Engine.Effects
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
-        /// <param name="viewFrustum">Camera frustum</param>
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMaps">Shadow map flags</param>
         /// <param name="shadowMapStatic">Static shadow map texture</param>
@@ -573,7 +582,6 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
-            BoundingFrustum viewFrustum,
             SceneLights lights,
             int shadowMaps,
             ShaderResourceView shadowMapStatic,
@@ -584,7 +592,6 @@ namespace Engine.Effects
                 world,
                 viewProjection,
                 eyePositionWorld,
-                viewFrustum,
                 lights,
                 shadowMaps,
                 shadowMapStatic,
@@ -601,7 +608,6 @@ namespace Engine.Effects
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
-        /// <param name="viewFrustum">Camera frustum</param>
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMaps">Shadow map flags</param>
         /// <param name="shadowMapStatic">Static shadow map texture</param>
@@ -615,7 +621,6 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
-            BoundingFrustum viewFrustum,
             SceneLights lights,
             int shadowMaps,
             ShaderResourceView shadowMapStatic,
@@ -630,32 +635,29 @@ namespace Engine.Effects
             this.WorldViewProjection = world * viewProjection;
             this.EyePositionWorld = eyePositionWorld;
 
+            var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
+            var bPointLights = new BufferPointLight[BufferPointLight.MAX];
+            var bSpotLights = new BufferSpotLight[BufferSpotLight.MAX];
+
             if (lights != null)
             {
-                var dirLights = lights.GetVisibleDirectionalLights(viewFrustum);
-                var pointLights = lights.GetVisiblePointLights(viewFrustum, eyePositionWorld);
-                var spotLights = lights.GetVisibleSpotLights(viewFrustum, eyePositionWorld);
+                var dirLights = lights.GetVisibleDirectionalLights();
+                for (int i = 0; i < Math.Min(dirLights.Length, BufferDirectionalLight.MAX); i++)
+                {
+                    bDirLights[i] = new BufferDirectionalLight(dirLights[i]);
+                }
 
-                this.DirLights = new[]
+                var pointLights = lights.GetVisiblePointLights();
+                for (int i = 0; i < Math.Min(pointLights.Length, BufferPointLight.MAX); i++)
                 {
-                    dirLights.Length > 0 ? new BufferDirectionalLight(dirLights[0]) : new BufferDirectionalLight(),
-                    dirLights.Length > 1 ? new BufferDirectionalLight(dirLights[1]) : new BufferDirectionalLight(),
-                    dirLights.Length > 2 ? new BufferDirectionalLight(dirLights[2]) : new BufferDirectionalLight(),
-                };
-                this.PointLights = new[]
+                    bPointLights[i] = new BufferPointLight(pointLights[i]);
+                }
+
+                var spotLights = lights.GetVisibleSpotLights();
+                for (int i = 0; i < Math.Min(spotLights.Length, BufferSpotLight.MAX); i++)
                 {
-                    pointLights.Length > 0 ? new BufferPointLight(pointLights[0]) : new BufferPointLight(),
-                    pointLights.Length > 1 ? new BufferPointLight(pointLights[1]) : new BufferPointLight(),
-                    pointLights.Length > 2 ? new BufferPointLight(pointLights[2]) : new BufferPointLight(),
-                    pointLights.Length > 3 ? new BufferPointLight(pointLights[3]) : new BufferPointLight(),
-                };
-                this.SpotLights = new[]
-                {
-                    spotLights.Length > 0 ? new BufferSpotLight(spotLights[0]) : new BufferSpotLight(),
-                    spotLights.Length > 1 ? new BufferSpotLight(spotLights[1]) : new BufferSpotLight(),
-                    spotLights.Length > 2 ? new BufferSpotLight(spotLights[2]) : new BufferSpotLight(),
-                    spotLights.Length > 3 ? new BufferSpotLight(spotLights[3]) : new BufferSpotLight(),
-                };
+                    bSpotLights[i] = new BufferSpotLight(spotLights[i]);
+                }
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;
@@ -668,10 +670,6 @@ namespace Engine.Effects
             }
             else
             {
-                this.DirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
-                this.PointLights = new BufferPointLight[BufferPointLight.MAX];
-                this.SpotLights = new BufferSpotLight[BufferSpotLight.MAX];
-
                 this.FogStart = 0;
                 this.FogRange = 0;
                 this.FogColor = Color.Transparent;
@@ -681,6 +679,10 @@ namespace Engine.Effects
                 this.ShadowMapDynamic = null;
                 this.ShadowMaps = 0;
             }
+
+            this.DirLights = bDirLights;
+            this.PointLights = bPointLights;
+            this.SpotLights = bSpotLights;
 
             this.WindDirection = windDirection;
             this.WindStrength = windStrength;

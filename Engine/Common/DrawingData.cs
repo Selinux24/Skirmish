@@ -253,15 +253,18 @@ namespace Engine.Common
                             jointNames,
                             bindShapeMatrix);
 
-                        Mesh nMesh = new Mesh(
-                            geometry.Material,
-                            geometry.Topology,
-                            vertexList,
-                            indices,
-                            description.Instanced,
-                            description.DynamicBuffers);
+                        if (vertexList.Length > 0)
+                        {
+                            Mesh nMesh = new Mesh(
+                                geometry.Material,
+                                geometry.Topology,
+                                vertexList,
+                                indices,
+                                description.Instanced,
+                                description.DynamicBuffers);
 
-                        drw.Meshes.Add(meshName, geometry.Material, nMesh);
+                            drw.Meshes.Add(meshName, geometry.Material, nMesh);
+                        }
                     }
                 }
             }

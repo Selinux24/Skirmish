@@ -351,6 +351,7 @@
     <Compile Include="Ground.cs" />
     <Compile Include="Helpers\ResourceStatus.cs" />
     <Compile Include="Helpers\ResourceStatusItem.cs" />
+    <Compile Include="MinimapDescription.cs" />
     <Compile Include="ModelDescription.cs" />
     <Compile Include="ModelInstance.cs" />
     <Compile Include="ModelInstancedDescription.cs" />

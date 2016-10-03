@@ -338,9 +338,13 @@ namespace Engine
             }
 
             newModel.Name = !string.IsNullOrEmpty(description.Name) ? description.Name : description.ModelFileName;
-            newModel.CastShadow = description.CastShadow;
+
             newModel.Static = description.Static;
+            newModel.AlwaysVisible = description.AlwaysVisible;
+            newModel.CastShadow = description.CastShadow;
             newModel.DeferredEnabled = description.DeferredEnabled;
+            newModel.EnableDepthStencil = description.EnableDepthStencil;
+            newModel.EnableAlphaBlending = description.EnableAlphaBlending;
             newModel.TextureIndex = description.TextureIndex;
 
             this.AddComponent(newModel, order);
@@ -388,9 +392,13 @@ namespace Engine
             }
 
             newModel.Name = !string.IsNullOrEmpty(description.Name) ? description.Name : description.ModelFileName;
-            newModel.CastShadow = description.CastShadow;
+
             newModel.Static = description.Static;
+            newModel.AlwaysVisible = description.AlwaysVisible;
+            newModel.CastShadow = description.CastShadow;
             newModel.DeferredEnabled = description.DeferredEnabled;
+            newModel.EnableDepthStencil = description.EnableDepthStencil;
+            newModel.EnableAlphaBlending = description.EnableAlphaBlending;
 
             this.AddComponent(newModel, order);
 
@@ -458,7 +466,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Scenery AddScenery(ModelContent content, GroundDescription description, int order = 0)
         {
-            Scenery newModel = new Scenery(this.Game, content, description.ContentPath, description);
+            Scenery newModel = new Scenery(this.Game, content, description);
 
             this.AddComponent(newModel, order);
 
@@ -748,13 +756,15 @@ namespace Engine
                 this.components.Sort((p1, p2) =>
                 {
                     //First transparents
-                    int i = p1.EnableAlphaBlending.CompareTo(p2.EnableAlphaBlending);
-                    if (i == 0)
-                    {
-                        //Then by order property
-                        i = p1.Order.CompareTo(p2.Order);
-                    }
+                    int i = p1.AlwaysVisible.CompareTo(p2.AlwaysVisible);
+                    if (i != 0) return i;
 
+                    //First transparents
+                    i = p1.EnableDepthStencil.CompareTo(p2.EnableDepthStencil);
+                    if (i != 0) return i;
+
+                    //Then by order property
+                    i = p1.Order.CompareTo(p2.Order);
                     return i;
                 });
             }

@@ -217,9 +217,11 @@ namespace Engine
             /// <param name="context">Drawing context</param>
             /// <param name="technique">Technique</param>
             /// <param name="sceneryEffect">Scenery effect</param>
-            /// <param name="foliageDrawer">Foliage effect</param>
-            public void Draw(SceneryDrawContext context, Drawer sceneryEffect, Drawer foliageDrawer)
+            /// <param name="foliageEffect">Foliage effect</param>
+            public void Draw(SceneryDrawContext context, Drawer sceneryEffect, Drawer foliageEffect)
             {
+                #region Scenery
+
                 foreach (string meshName in this.DrawingData.Meshes.Keys)
                 {
                     var dictionary = this.DrawingData.Meshes[meshName];
@@ -243,6 +245,10 @@ namespace Engine
                         {
                             ((EffectBasicGBuffer)sceneryEffect).UpdatePerObject(mat.Material, texture, normalMap, null, 0);
                         }
+                        else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
+                        {
+                            ((EffectBasicShadow)sceneryEffect).UpdatePerObject(null, 0);
+                        }
 
                         #endregion
 
@@ -259,6 +265,10 @@ namespace Engine
                     }
                 }
 
+                #endregion
+
+                #region Foliage
+
                 {
                     if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward) this.Game.Graphics.SetBlendTransparent();
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred) this.Game.Graphics.SetBlendDeferredComposerTransparent();
@@ -268,11 +278,10 @@ namespace Engine
 
                     if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        ((EffectBillboard)foliageDrawer).UpdatePerFrame(
+                        ((EffectBillboard)foliageEffect).UpdatePerFrame(
                             context.BaseContext.World,
                             context.BaseContext.ViewProjection,
                             context.BaseContext.EyePosition,
-                            context.BaseContext.Frustum,
                             context.BaseContext.Lights,
                             context.BaseContext.ShadowMaps,
                             context.BaseContext.ShadowMapStatic,
@@ -285,11 +294,10 @@ namespace Engine
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        ((EffectBillboard)foliageDrawer).UpdatePerFrame(
+                        ((EffectBillboard)foliageEffect).UpdatePerFrame(
                             context.BaseContext.World,
                             context.BaseContext.ViewProjection,
                             context.BaseContext.EyePosition,
-                            context.BaseContext.Frustum,
                             context.BaseContext.Lights,
                             context.BaseContext.ShadowMaps,
                             context.BaseContext.ShadowMapStatic,
@@ -302,11 +310,10 @@ namespace Engine
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        ((EffectBillboard)foliageDrawer).UpdatePerFrame(
+                        ((EffectBillboard)foliageEffect).UpdatePerFrame(
                             context.BaseContext.World,
                             context.BaseContext.ViewProjection,
                             context.BaseContext.EyePosition,
-                            new BoundingFrustum(),
                             null,
                             0,
                             null,
@@ -324,22 +331,22 @@ namespace Engine
 
                     if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        ((EffectBillboard)foliageDrawer).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
+                        ((EffectBillboard)foliageEffect).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        ((EffectBillboard)foliageDrawer).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
+                        ((EffectBillboard)foliageEffect).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        ((EffectBillboard)foliageDrawer).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
+                        ((EffectBillboard)foliageEffect).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
                     }
 
                     #endregion
 
-                    var technique = foliageDrawer.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
+                    var technique = foliageEffect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
 
-                    this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = foliageDrawer.GetInputLayout(technique);
+                    this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = foliageEffect.GetInputLayout(technique);
                     Counters.IAInputLayoutSets++;
                     this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
                     Counters.IAPrimitiveTopologySets++;
@@ -366,6 +373,8 @@ namespace Engine
                         }
                     }
                 }
+
+                #endregion
             }
 
             /// <summary>
@@ -420,10 +429,10 @@ namespace Engine
                     float area = bbox.GetX() * bbox.GetZ();
                     float density = description.Saturation;
                     int count = (int)(area * density);
-                    if(count > MAX) count = MAX;
+                    if (count > MAX) count = MAX;
 
                     //Number of points
-                    while(count > 0)
+                    while (count > 0)
                     {
                         Vector3 pos = new Vector3(
                             rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
@@ -559,15 +568,17 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game class</param>
         /// <param name="content">Geometry content</param>
-        /// <param name="contentFolder">Content folder</param>
         /// <param name="description">Terrain description</param>
-        public Scenery(Game game, ModelContent content, string contentFolder, GroundDescription description)
+        public Scenery(Game game, ModelContent content, GroundDescription description)
             : base(game, description)
         {
             this.Name = this.Description.Name;
-            this.DeferredEnabled = this.Description.DeferredEnabled;
-            this.CastShadow = this.Description.CastShadow;
             this.Static = this.Description.Static;
+            this.AlwaysVisible = this.Description.AlwaysVisible;
+            this.CastShadow = this.Description.CastShadow;
+            this.DeferredEnabled = this.Description.DeferredEnabled;
+            this.EnableDepthStencil = this.Description.EnableDepthStencil;
+            this.EnableAlphaBlending = this.Description.EnableAlphaBlending;
 
             #region Patches
 
@@ -665,20 +676,21 @@ namespace Engine
                 this.drawContext.BaseContext = context;
                 this.drawContext.Time = this.windTime;
 
-                Drawer effect = null;
-                if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectBasic;
-                else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectGBuffer;
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
+                Drawer sceneryEffect = null;
+                if (context.DrawerMode == DrawerModesEnum.Forward) sceneryEffect = DrawerPool.EffectBasic;
+                else if (context.DrawerMode == DrawerModesEnum.Deferred) sceneryEffect = DrawerPool.EffectGBuffer;
+                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) sceneryEffect = DrawerPool.EffectShadow;
+
+                Drawer foliageEffect = DrawerPool.EffectBillboard;
 
                 #region Per frame update
 
                 if (context.DrawerMode == DrawerModesEnum.Forward)
                 {
-                    ((EffectBasic)effect).UpdatePerFrame(
+                    ((EffectBasic)sceneryEffect).UpdatePerFrame(
                         Matrix.Identity,
                         context.ViewProjection,
                         context.EyePosition,
-                        context.Frustum,
                         context.Lights,
                         context.ShadowMaps,
                         context.ShadowMapStatic,
@@ -687,24 +699,22 @@ namespace Engine
                 }
                 else if (context.DrawerMode == DrawerModesEnum.Deferred)
                 {
-                    ((EffectBasicGBuffer)effect).UpdatePerFrame(
+                    ((EffectBasicGBuffer)sceneryEffect).UpdatePerFrame(
                         Matrix.Identity,
                         context.ViewProjection);
                 }
                 else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                 {
-                    ((EffectBasicShadow)effect).UpdatePerFrame(
+                    ((EffectBasicShadow)sceneryEffect).UpdatePerFrame(
                         Matrix.Identity,
                         context.ViewProjection);
                 }
 
                 #endregion
 
-                this.Game.Graphics.SetDepthStencilZEnabled();
-
                 for (int i = 0; i < this.visibleNodes.Length; i++)
                 {
-                    this.patchDictionary[this.visibleNodes[i].Id].Draw(this.drawContext, effect, DrawerPool.EffectBillboard);
+                    this.patchDictionary[this.visibleNodes[i].Id].Draw(this.drawContext, sceneryEffect, foliageEffect);
                 }
             }
         }

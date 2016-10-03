@@ -128,7 +128,12 @@ namespace Engine
         public ParticleSystem(Game game, ParticleSystemDescription description)
             : base(game)
         {
+            this.Static = false;
+            this.AlwaysVisible = true;
             this.CastShadow = description.CastShadow;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = true;
+            this.EnableAlphaBlending = true;
 
             this.particleClass = description.ParticleClass;
             this.maximumParticles = description.MaximumParticles;

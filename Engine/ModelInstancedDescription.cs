@@ -27,16 +27,28 @@ namespace Engine
         /// </summary>
         public int Instances = 1;
         /// <summary>
-        /// Gets or sets whether the object cast shadow
-        /// </summary>
-        public bool CastShadow { get; set; }
-        /// <summary>
         /// Is Static
         /// </summary>
         public bool Static = false;
         /// <summary>
+        /// Always visible
+        /// </summary>
+        public bool AlwaysVisible = false;
+        /// <summary>
+        /// Gets or sets whether the object cast shadow
+        /// </summary>
+        public bool CastShadow = false;
+        /// <summary>
         /// Can be renderer by the deferred renderer
         /// </summary>
         public bool DeferredEnabled = true;
+        /// <summary>
+        /// Enables z-buffer writting
+        /// </summary>
+        public bool EnableDepthStencil = true;
+        /// <summary>
+        /// Enables transparent blending
+        /// </summary>
+        public bool EnableAlphaBlending = false;
     }
 }

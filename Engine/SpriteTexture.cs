@@ -92,6 +92,13 @@ namespace Engine
         public SpriteTexture(Game game, SpriteTextureDescription description)
             : base(game)
         {
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
+            this.EnableAlphaBlending = true;
+
             VertexData[] cv;
             uint[] ci;
             VertexData.CreateSprite(
@@ -150,8 +157,6 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            this.Game.Graphics.SetDepthStencilZDisabled();
-
             this.DeviceContext.InputAssembler.InputLayout = this.effect.GetInputLayout(effectTechnique);
             Counters.IAInputLayoutSets++;
             this.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;

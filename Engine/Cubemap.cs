@@ -55,8 +55,13 @@ namespace Engine
             : base(game, content, false, 0, false, false, false)
         {
             this.Manipulator = new Manipulator3D();
-            this.CastShadow = true;
+
+            this.Static = true;
+            this.AlwaysVisible = false;
+            this.CastShadow = false;
             this.DeferredEnabled = true;
+            this.EnableDepthStencil = false;
+            this.EnableAlphaBlending = false;
         }
         /// <summary>
         /// Update
@@ -89,12 +94,9 @@ namespace Engine
                         this.local,
                         context.ViewProjection,
                         context.EyePosition,
-                        context.Frustum,
                         context.Lights);
 
                     #endregion
-
-                    this.Game.Graphics.SetDepthStencilZDisabled();
 
                     foreach (MeshMaterialsDictionary dictionary in this.DrawingData.Meshes.Values)
                     {

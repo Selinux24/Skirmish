@@ -71,6 +71,13 @@ namespace Engine
         public Billboard(Game game, ModelContent content, int maxCount)
             : base(game)
         {
+            this.Static = true;
+            this.AlwaysVisible = false;
+            this.CastShadow = true;
+            this.DeferredEnabled = true;
+            this.EnableDepthStencil = true;
+            this.EnableAlphaBlending = true;
+
             this.Manipulator = new Manipulator3D();
             this.StartRadius = 0;
             this.EndRadius = 0;
@@ -147,7 +154,6 @@ namespace Engine
                             this.local,
                             context.ViewProjection,
                             context.EyePosition,
-                            context.Frustum,
                             context.Lights,
                             context.ShadowMaps,
                             context.ShadowMapStatic,
@@ -160,7 +166,6 @@ namespace Engine
                             this.local,
                             context.ViewProjection,
                             context.EyePosition,
-                            context.Frustum,
                             context.Lights,
                             context.ShadowMaps,
                             context.ShadowMapStatic,
@@ -176,12 +181,6 @@ namespace Engine
                     }
 
                     #endregion
-
-                    this.Game.Graphics.SetDepthStencilZEnabled();
-
-                    if (context.DrawerMode == DrawerModesEnum.Forward) this.Game.Graphics.SetBlendTransparent();
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred) this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap) this.Game.Graphics.SetBlendTransparent();
 
                     #region Per object update
 

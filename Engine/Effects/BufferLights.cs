@@ -94,7 +94,7 @@ namespace Engine.Effects
         /// <summary>
         /// Maximum light count
         /// </summary>
-        public const int MAX = 4;
+        public const int MAX = 16;
 
         /// <summary>
         /// Light color
@@ -173,7 +173,7 @@ namespace Engine.Effects
         /// <summary>
         /// Maximum light count
         /// </summary>
-        public const int MAX = 4;
+        public const int MAX = 16;
 
         /// <summary>
         /// Light color

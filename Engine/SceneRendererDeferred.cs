@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Linq;
+using System;
 using System.Collections.Generic;
 #if DEBUG
 using System.Diagnostics;
@@ -256,6 +257,9 @@ namespace Engine
             this.UpdateContext.EyePosition = scene.Camera.Position;
             this.UpdateContext.EyeTarget = scene.Camera.Direction;
 
+            //Cull lights
+            scene.Lights.Cull(this.UpdateContext.Frustum, this.UpdateContext.EyePosition);
+
             //Update active components
             List<Drawable> activeComponents = scene.Components.FindAll(c => c.Active);
             for (int i = 0; i < activeComponents.Count; i++)
@@ -280,6 +284,7 @@ namespace Engine
         {
             if (this.Updated)
             {
+                this.Updated = false;
 #if DEBUG
                 long total = 0;
                 long start = 0;
@@ -605,8 +610,6 @@ namespace Engine
                     #endregion
 
                     #endregion
-
-                    this.Updated = false;
                 }
 #if DEBUG
                 swTotal.Stop();
@@ -968,7 +971,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swDirectional = Stopwatch.StartNew();
 #endif
-            SceneLightDirectional[] directionalLights = context.Lights.GetVisibleDirectionalLights(context.Frustum);
+            SceneLightDirectional[] directionalLights = context.Lights.GetVisibleDirectionalLights();
             if (directionalLights != null && directionalLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredDirectionalLight;
@@ -1007,7 +1010,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swSpot = Stopwatch.StartNew();
 #endif
-            SceneLightSpot[] spotLights = context.Lights.GetVisibleSpotLights(context.Frustum, context.EyePosition);
+            SceneLightSpot[] spotLights = context.Lights.GetVisibleSpotLights();
             if (spotLights != null && spotLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredSpotLight;
@@ -1055,7 +1058,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swPoint = Stopwatch.StartNew();
 #endif
-            SceneLightPoint[] pointLights = context.Lights.GetVisiblePointLights(context.Frustum, context.EyePosition);
+            SceneLightPoint[] pointLights = context.Lights.GetVisiblePointLights();
             if (pointLights != null && pointLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredPointLight;
@@ -1252,17 +1255,23 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawShadowsComponents(GameTime gameTime, DrawContext context, IList<Drawable> components)
+        private void DrawShadowsComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
         {
-            for (int i = 0; i < components.Count; i++)
+            var toDraw = components.FindAll(c => !c.Cull);
+            if (toDraw.Count > 0)
             {
-                if (!components[i].Cull)
+                toDraw.ForEach((c) =>
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
-                    this.Game.Graphics.SetBlendDefault();
 
-                    components[i].Draw(context);
-                }
+                    if (c.EnableDepthStencil) this.Game.Graphics.SetDepthStencilZEnabled();
+                    else this.Game.Graphics.SetDepthStencilZDisabled();
+
+                    if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                    else this.Game.Graphics.SetBlendDeferredComposer();
+
+                    c.Draw(context);
+                });
             }
         }
         /// <summary>
@@ -1271,24 +1280,23 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(GameTime gameTime, DrawContext context, IList<Drawable> components)
+        private void DrawResultComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
         {
-            for (int i = 0; i < components.Count; i++)
+            var toDraw = components.FindAll(c => !c.Cull);
+            if (toDraw.Count > 0)
             {
-                if (!components[i].Cull)
+                toDraw.ForEach((c) =>
                 {
                     this.Game.Graphics.SetRasterizerDefault();
-                    if (components[i].CastShadow)
-                    {
-                        this.Game.Graphics.SetBlendDeferredComposer();
-                    }
-                    else
-                    {
-                        this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                    }
 
-                    components[i].Draw(context);
-                }
+                    if (c.EnableDepthStencil) this.Game.Graphics.SetDepthStencilZEnabled();
+                    else this.Game.Graphics.SetDepthStencilZDisabled();
+
+                    if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                    else this.Game.Graphics.SetBlendDeferredComposer();
+
+                    c.Draw(context);
+                });
             }
         }
     }

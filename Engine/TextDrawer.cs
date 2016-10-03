@@ -217,6 +217,13 @@ namespace Engine
         public TextDrawer(Game game, string font, int size, Color4 textColor, Color4 shadowColor)
             : base(game)
         {
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
+            this.EnableAlphaBlending = true;
+
             this.Font = string.Format("{0} {1}", font, size);
 
             this.technique = DrawerPool.EffectFont.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, DrawerModesEnum.Forward);
@@ -271,8 +278,6 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
-                this.Game.Graphics.SetDepthStencilZDisabled();
-
                 this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
                 Counters.IAInputLayoutSets++;
                 this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;

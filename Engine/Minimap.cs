@@ -50,6 +50,13 @@ namespace Engine
         public Minimap(Game game, MinimapDescription description)
             : base(game)
         {
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
+            this.EnableAlphaBlending = true;
+
             this.Drawables = description.Drawables;
 
             this.minimapArea = description.MinimapArea;
@@ -126,10 +133,10 @@ namespace Engine
         {
             if (this.Drawables != null && this.Drawables.Length > 0)
             {
+                this.drawContext.GameTime = context.GameTime;
+
                 this.Game.Graphics.SetViewport(this.viewport);
                 this.Game.Graphics.SetRenderTarget(this.renderTarget, true, Color.Silver, null, false);
-
-                this.Game.Graphics.SetDepthStencilZDisabled();
 
                 for (int i = 0; i < this.Drawables.Length; i++)
                 {
@@ -173,36 +180,5 @@ namespace Engine
         {
             this.minimapBox.Resize();
         }
-    }
-
-    /// <summary>
-    /// Minimap description
-    /// </summary>
-    public class MinimapDescription
-    {
-        /// <summary>
-        /// Top position
-        /// </summary>
-        public int Top;
-        /// <summary>
-        /// Left position
-        /// </summary>
-        public int Left;
-        /// <summary>
-        /// Width
-        /// </summary>
-        public int Width;
-        /// <summary>
-        /// Height
-        /// </summary>
-        public int Height;
-        /// <summary>
-        /// Terrain to draw
-        /// </summary>
-        public Drawable[] Drawables;
-        /// <summary>
-        /// Minimap render area
-        /// </summary>
-        public BoundingBox MinimapArea;
     }
 }

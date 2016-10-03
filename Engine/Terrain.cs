@@ -557,8 +557,6 @@ namespace Engine
             /// <param name="context">Drawing context</param>
             public void Draw(TerrainDrawContext context)
             {
-                this.game.Graphics.SetDepthStencilZEnabled();
-
                 {
                     EffectTerrain effect = DrawerPool.EffectTerrain;
 
@@ -572,7 +570,6 @@ namespace Engine
                             context.BaseContext.World,
                             context.BaseContext.ViewProjection,
                             context.BaseContext.EyePosition,
-                            context.BaseContext.Frustum,
                             context.BaseContext.Lights,
                             context.BaseContext.ShadowMaps,
                             context.BaseContext.ShadowMapStatic,
@@ -661,7 +658,6 @@ namespace Engine
                             context.BaseContext.World,
                             context.BaseContext.ViewProjection,
                             context.BaseContext.EyePosition,
-                            context.BaseContext.Frustum,
                             context.BaseContext.Lights,
                             context.BaseContext.ShadowMaps,
                             context.BaseContext.ShadowMapStatic,
@@ -678,7 +674,6 @@ namespace Engine
                             context.BaseContext.World,
                             context.BaseContext.ViewProjection,
                             context.BaseContext.EyePosition,
-                            context.BaseContext.Frustum,
                             context.BaseContext.Lights,
                             context.BaseContext.ShadowMaps,
                             context.BaseContext.ShadowMapStatic,
@@ -695,7 +690,6 @@ namespace Engine
                             context.BaseContext.World,
                             context.BaseContext.ViewProjection,
                             context.BaseContext.EyePosition,
-                            new BoundingFrustum(),
                             null,
                             0,
                             null,
@@ -1394,8 +1388,12 @@ namespace Engine
             };
 
             //Set drawing parameters for renderer
+            this.Static = true;
+            this.AlwaysVisible = false;
             this.CastShadow = true;
             this.DeferredEnabled = true;
+            this.EnableDepthStencil = true;
+            this.EnableAlphaBlending = false;
 
             if (!this.Description.DelayGeneration)
             {

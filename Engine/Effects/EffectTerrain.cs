@@ -533,7 +533,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection)
         {
-            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, new BoundingFrustum(), null, 0, null, null, Matrix.Identity);
+            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, null, 0, null, null, Matrix.Identity);
         }
         /// <summary>
         /// Update per frame data
@@ -541,7 +541,6 @@ namespace Engine.Effects
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
-        /// <param name="viewFrustum">Camera frustum</param>
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMaps">Shadow map flags</param>
         /// <param name="shadowMapStatic">Static shadow map texture</param>
@@ -551,7 +550,6 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
-            BoundingFrustum viewFrustum,
             SceneLights lights,
             int shadowMaps,
             ShaderResourceView shadowMapStatic,
@@ -562,34 +560,31 @@ namespace Engine.Effects
             this.WorldInverse = Matrix.Invert(world);
             this.WorldViewProjection = world * viewProjection;
 
+            var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
+            var bPointLights = new BufferPointLight[BufferPointLight.MAX];
+            var bSpotLights = new BufferSpotLight[BufferSpotLight.MAX];
+
             if (lights != null)
             {
                 this.EyePositionWorld = eyePositionWorld;
 
-                var dirLights = lights.GetVisibleDirectionalLights(viewFrustum);
-                var pointLights = lights.GetVisiblePointLights(viewFrustum, eyePositionWorld);
-                var spotLights = lights.GetVisibleSpotLights(viewFrustum, eyePositionWorld);
+                var dirLights = lights.GetVisibleDirectionalLights();
+                for (int i = 0; i < Math.Min(dirLights.Length, BufferDirectionalLight.MAX); i++)
+                {
+                    bDirLights[i] = new BufferDirectionalLight(dirLights[i]);
+                }
 
-                this.DirLights = new[]
+                var pointLights = lights.GetVisiblePointLights();
+                for (int i = 0; i < Math.Min(pointLights.Length, BufferPointLight.MAX); i++)
                 {
-                    dirLights.Length > 0 ? new BufferDirectionalLight(dirLights[0]) : new BufferDirectionalLight(),
-                    dirLights.Length > 1 ? new BufferDirectionalLight(dirLights[1]) : new BufferDirectionalLight(),
-                    dirLights.Length > 2 ? new BufferDirectionalLight(dirLights[2]) : new BufferDirectionalLight(),
-                };
-                this.PointLights = new[]
+                    bPointLights[i] = new BufferPointLight(pointLights[i]);
+                }
+
+                var spotLights = lights.GetVisibleSpotLights();
+                for (int i = 0; i < Math.Min(spotLights.Length, BufferSpotLight.MAX); i++)
                 {
-                    pointLights.Length > 0 ? new BufferPointLight(pointLights[0]) : new BufferPointLight(),
-                    pointLights.Length > 1 ? new BufferPointLight(pointLights[1]) : new BufferPointLight(),
-                    pointLights.Length > 2 ? new BufferPointLight(pointLights[2]) : new BufferPointLight(),
-                    pointLights.Length > 3 ? new BufferPointLight(pointLights[3]) : new BufferPointLight(),
-                };
-                this.SpotLights = new[]
-                {
-                    spotLights.Length > 0 ? new BufferSpotLight(spotLights[0]) : new BufferSpotLight(),
-                    spotLights.Length > 1 ? new BufferSpotLight(spotLights[1]) : new BufferSpotLight(),
-                    spotLights.Length > 2 ? new BufferSpotLight(spotLights[2]) : new BufferSpotLight(),
-                    spotLights.Length > 3 ? new BufferSpotLight(spotLights[3]) : new BufferSpotLight(),
-                };
+                    bSpotLights[i] = new BufferSpotLight(spotLights[i]);
+                }
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;
@@ -604,10 +599,6 @@ namespace Engine.Effects
             {
                 this.EyePositionWorld = Vector3.Zero;
 
-                this.DirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
-                this.PointLights = new BufferPointLight[BufferPointLight.MAX];
-                this.SpotLights = new BufferSpotLight[BufferSpotLight.MAX];
-
                 this.FogStart = 0;
                 this.FogRange = 0;
                 this.FogColor = Color.Transparent;
@@ -617,6 +608,10 @@ namespace Engine.Effects
                 this.ShadowMapDynamic = null;
                 this.ShadowMaps = 0;
             }
+
+            this.DirLights = bDirLights;
+            this.PointLights = bPointLights;
+            this.SpotLights = bSpotLights;
         }
         /// <summary>
         /// Update per model object data

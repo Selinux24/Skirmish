@@ -1,5 +1,4 @@
 ﻿using Engine;
-using Engine.Common;
 using Engine.PathFinding.AStar;
 using SharpDX;
 using System;
@@ -73,11 +72,11 @@ namespace Collada
                 Vegetation = new GroundDescription.VegetationDescription()
                 {
                     VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
-                    Saturation = 0.05f,
+                    Saturation = 1f,
                     StartRadius = 0f,
                     EndRadius = 300f,
-                    MinSize = Vector2.One * 10f,
-                    MaxSize = Vector2.One * 15f,
+                    MinSize = Vector2.One * 1.0f,
+                    MaxSize = Vector2.One * 1.5f,
                     Seed = 1024,
                     CastShadow = true,
                 },
@@ -88,16 +87,17 @@ namespace Collada
                         NodeSize = 20f,
                     },
                 },
-                CastShadow = true,
+                DelayGeneration = true,
             };
-
             this.ground = this.AddScenery(terrainDescription);
+
             this.helicoptersModel = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = "Resources",
                 ModelFileName = "Helicopter.dae",
-                Instances = 15,
+                Instances = 5,
             });
+
             this.lampsModel = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = "Resources",
@@ -113,33 +113,10 @@ namespace Collada
             };
             this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(rainEmitter, "raindrop.dds"));
 
-            BoundingBox[] bboxes = this.ground.GetBoundingBoxes(5);
-            Line3[] listBoxes = Line3.CreateWiredBox(bboxes);
-
-            this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
-            this.bboxesDrawer.Visible = false;
-            this.bboxesDrawer.CastShadow = false;
-            this.bboxesDrawer.EnableAlphaBlending = true;
-
-            List<Line3> squares = new List<Line3>();
-
-            var nodes = this.ground.GetNodes(null);
-
-            for (int i = 0; i < nodes.Length; i++)
-            {
-                GridNode node = (GridNode)nodes[i];
-
-                squares.AddRange(Line3.CreateWiredSquare(node.GetPoints()));
-            }
-
-            this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));
-            this.terrainGridDrawer.Visible = false;
-            this.terrainGridDrawer.CastShadow = false;
-            this.terrainGridDrawer.EnableAlphaBlending = true;
-
             this.InitializeCamera();
             this.InitializeEnvironment();
             this.InitializeHelicopters();
+            this.InitializeDEBUG();
         }
         private void InitializeCamera()
         {
@@ -177,6 +154,8 @@ namespace Collada
                 CastShadow = false,
             });
 
+            this.ground.UpdateInternals();
+
             this.SceneVolume = this.ground.GetBoundingSphere();
         }
         private void InitializeHelicopters()
@@ -197,6 +176,7 @@ namespace Collada
             for (int i = 0; i < this.helicoptersModel.Count; i++)
             {
                 this.helicoptersModel.Instances[i].TextureIndex = rnd.Next(0, 2);
+                this.helicoptersModel.Instances[i].AnimationController.AddClip(0, true, float.MaxValue);
 
                 Manipulator3D manipulator = this.helicoptersModel.Instances[i].Manipulator;
 
@@ -230,6 +210,32 @@ namespace Collada
 
             this.Camera.Goto(this.helicopters[this.selectedHelicopter].Manipulator.Position + (Vector3.One * 10f));
             this.Camera.LookTo(this.helicopters[this.selectedHelicopter].Manipulator.Position + (Vector3.UnitY * 2.5f));
+        }
+        private void InitializeDEBUG()
+        {
+            BoundingBox[] bboxes = this.ground.GetBoundingBoxes(5);
+            Line3[] listBoxes = Line3.CreateWiredBox(bboxes);
+
+            this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
+            this.bboxesDrawer.Visible = false;
+            this.bboxesDrawer.CastShadow = false;
+            this.bboxesDrawer.EnableAlphaBlending = true;
+
+            List<Line3> squares = new List<Line3>();
+
+            var nodes = this.ground.GetNodes(null);
+
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                GridNode node = (GridNode)nodes[i];
+
+                squares.AddRange(Line3.CreateWiredSquare(node.GetPoints()));
+            }
+
+            this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));
+            this.terrainGridDrawer.Visible = false;
+            this.terrainGridDrawer.CastShadow = false;
+            this.terrainGridDrawer.EnableAlphaBlending = true;
         }
 
         public override void Update(GameTime gameTime)

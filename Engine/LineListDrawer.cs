@@ -38,6 +38,11 @@ namespace Engine
         public LineListDrawer(Game game, int count)
             : base(game, ModelContent.GenerateLineList(new Line3[count], Color.Transparent), true)
         {
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
             this.EnableAlphaBlending = true;
 
             this.dictionaryChanged = false;
@@ -51,6 +56,11 @@ namespace Engine
         public LineListDrawer(Game game, Line3[] lines, Color4 color)
             : base(game, ModelContent.GenerateLineList(lines, color), true)
         {
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
             this.EnableAlphaBlending = true;
 
             this.dictionary.Add(color, new List<Line3>(lines));
@@ -65,6 +75,11 @@ namespace Engine
         public LineListDrawer(Game game, Triangle[] triangles, Color4 color)
             : base(game, ModelContent.GenerateLineList(Line3.CreateWiredTriangle(triangles), color), true)
         {
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
             this.EnableAlphaBlending = true;
 
             var lines = Line3.CreateWiredTriangle(triangles);
