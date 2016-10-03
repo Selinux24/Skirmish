@@ -2,10 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
+using Buffer = SharpDX.Direct3D11.Buffer;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
-using Buffer = SharpDX.Direct3D11.Buffer;
 
 namespace Engine
 {
@@ -15,7 +16,6 @@ namespace Engine
     using Engine.Effects;
     using Engine.Helpers;
     using Engine.PathFinding;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Terrain model
@@ -486,6 +486,24 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Usage enumeration for internal's update
+        /// </summary>
+        public enum UsageEnum
+        {
+            /// <summary>
+            /// None
+            /// </summary>
+            None,
+            /// <summary>
+            /// For picking test
+            /// </summary>
+            Picking,
+            /// <summary>
+            /// For path finding test
+            /// </summary>
+            PathFinding,
+        }
 
         #endregion
 
@@ -765,7 +783,6 @@ namespace Engine
         {
             return this.pickingQuadtree.BoundingBox;
         }
-
         /// <summary>
         /// Gets terrain bounding boxes at specified level
         /// </summary>
@@ -790,6 +807,19 @@ namespace Engine
             }
 
             return nodes;
+        }
+        /// <summary>
+        /// Sets wind parameters
+        /// </summary>
+        /// <param name="direction">Direction</param>
+        /// <param name="strength">Strength</param>
+        public void SetWind(Vector3 direction, float strength)
+        {
+            if (this.drawContext != null)
+            {
+                this.drawContext.WindDirection = direction;
+                this.drawContext.WindStrength = strength;
+            }
         }
 
         /// <summary>
@@ -871,39 +901,6 @@ namespace Engine
             }
 
             return tris.ToArray();
-        }
-
-        /// <summary>
-        /// Sets wind parameters
-        /// </summary>
-        /// <param name="direction">Direction</param>
-        /// <param name="strength">Strength</param>
-        public void SetWind(Vector3 direction, float strength)
-        {
-            if (this.drawContext != null)
-            {
-                this.drawContext.WindDirection = direction;
-                this.drawContext.WindStrength = strength;
-            }
-        }
-
-        /// <summary>
-        /// Usage enumeration for internal's update
-        /// </summary>
-        public enum UsageEnum
-        {
-            /// <summary>
-            /// None
-            /// </summary>
-            None,
-            /// <summary>
-            /// For picking test
-            /// </summary>
-            Picking,
-            /// <summary>
-            /// For path finding test
-            /// </summary>
-            PathFinding,
         }
     }
 }
