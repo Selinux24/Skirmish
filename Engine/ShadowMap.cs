@@ -17,6 +17,8 @@ using Texture2DDescription = SharpDX.Direct3D11.Texture2DDescription;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Shadow map
     /// </summary>
@@ -59,25 +61,9 @@ namespace Engine
         /// </summary>
         public ShaderResourceView TextureDynamic { get; protected set; }
         /// <summary>
-        /// View matrix
+        /// View * Projection matrix
         /// </summary>
-        public Matrix View { get; protected set; }
-        /// <summary>
-        /// Projection matrix
-        /// </summary>
-        public Matrix Projection { get; protected set; }
-        /// <summary>
-        /// Light position
-        /// </summary>
-        public Vector3 LightPosition { get; protected set; }
-        /// <summary>
-        /// Light direction
-        /// </summary>
-        public Vector3 LightDirection { get; protected set; }
-        /// <summary>
-        /// Shadow transform
-        /// </summary>
-        public Matrix Transform { get; protected set; }
+        public Matrix ViewProjection { get; protected set; }
 
         /// <summary>
         /// Generate internal resources
@@ -162,35 +148,43 @@ namespace Engine
             this.TextureDynamic = srvDynamic;
         }
         /// <summary>
-        /// Updates shadow map generation parameters
+        /// Updates drawing context with shadow map generation parameters
         /// </summary>
-        /// <param name="lightDirection">Light direction</param>
-        /// <param name="sceneVolume">Scene volume</param>
-        public void Update(SceneLightDirectional light, BoundingSphere sceneVolume)
+        /// <param name="light">Light</param>
+        /// <param name="center">Scene center</param>
+        /// <param name="radius">Scene radius</param>
+        /// <param name="context">Drawing context to update</param>
+        public void Update(SceneLightDirectional light, Vector3 center, float radius, ref DrawContext context)
         {
             // Calc light position outside the scene volume
-            this.LightPosition = light.GetPosition(sceneVolume.Radius);
-            this.LightDirection = light.Direction;
+            var lightPosition = light.GetPosition(radius);
+            var lightDirection = light.Direction;
 
             // View from light to scene center position
-            this.View = Matrix.LookAtLH(this.LightPosition, sceneVolume.Center, Vector3.Up);
+            var view = Matrix.LookAtLH(lightPosition, center, Vector3.Up);
 
             // Transform bounding sphere to light space.
-            Vector3 sphereCenterLS = Vector3.TransformCoordinate(sceneVolume.Center, this.View);
+            Vector3 sphereCenterLS = Vector3.TransformCoordinate(center, view);
 
             // Ortho frustum in light space encloses scene.
-            float xleft = sphereCenterLS.X - sceneVolume.Radius;
-            float xright = sphereCenterLS.X + sceneVolume.Radius;
-            float ybottom = sphereCenterLS.Y - sceneVolume.Radius;
-            float ytop = sphereCenterLS.Y + sceneVolume.Radius;
-            float znear = sphereCenterLS.Z - sceneVolume.Radius;
-            float zfar = sphereCenterLS.Z + sceneVolume.Radius;
+            float xleft = sphereCenterLS.X - radius;
+            float xright = sphereCenterLS.X + radius;
+            float ybottom = sphereCenterLS.Y - radius;
+            float ytop = sphereCenterLS.Y + radius;
+            float znear = sphereCenterLS.Z - radius;
+            float zfar = sphereCenterLS.Z + radius;
 
             // Orthogonal projection from center
-            this.Projection = Matrix.OrthoOffCenterLH(xleft, xright, ybottom, ytop, znear, zfar);
+            var projection = Matrix.OrthoOffCenterLH(xleft, xright, ybottom, ytop, znear, zfar);
 
-            // Normal device coordinates transformation
-            this.Transform = Helper.NormalDeviceCoordinatesTransform(this.View, this.Projection);
+            this.ViewProjection = view * projection;
+
+            context.View = view;
+            context.Projection = projection;
+            context.ViewProjection = this.ViewProjection;
+            context.Frustum = new BoundingFrustum(this.ViewProjection);
+            context.EyePosition = lightPosition;
+            context.EyeTarget = lightDirection;
         }
         /// <summary>
         /// Release of resources

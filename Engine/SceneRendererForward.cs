@@ -17,7 +17,7 @@ namespace Engine
     /// </summary>
     public class SceneRendererForward : ISceneRenderer
     {
-        private const int ShadowMapSize = 4096;
+        private const int ShadowMapSize = 2048;
 
         /// <summary>
         /// Shadow mapper
@@ -74,6 +74,10 @@ namespace Engine
         /// Gets or sets whether the static shadow map must be updated in the next frame
         /// </summary>
         protected bool UpdateShadowMapStatic { get; set; }
+        /// <summary>
+        /// Gets or sets whether the renderer was updated
+        /// </summary>
+        protected bool Updated { get; set; }
 
         /// <summary>
         /// Constructor
@@ -145,6 +149,8 @@ namespace Engine
             {
                 activeComponents[i].Update(this.UpdateContext);
             }
+
+            this.Updated = true;
 #if DEBUG
             swTotal.Stop();
 #endif
@@ -212,19 +218,8 @@ namespace Engine
 #if DEBUG
                     Stopwatch swShadowsPreparation = Stopwatch.StartNew();
 #endif
-                    //Update shadow transform using first ligth direction
-                    this.shadowMapper.Update(shadowCastingLights[0], scene.SceneVolume);
-
-                    Matrix shadowViewProj = this.shadowMapper.View * this.shadowMapper.Projection;
-
                     this.DrawShadowsContext.GameTime = gameTime;
                     this.DrawShadowsContext.World = this.UpdateContext.World;
-                    this.DrawShadowsContext.View = this.shadowMapper.View;
-                    this.DrawShadowsContext.Projection = this.shadowMapper.Projection;
-                    this.DrawShadowsContext.ViewProjection = shadowViewProj;
-                    this.DrawShadowsContext.Frustum = new BoundingFrustum(shadowViewProj);
-                    this.DrawShadowsContext.EyePosition = this.shadowMapper.LightPosition;
-                    this.DrawShadowsContext.EyeTarget = this.shadowMapper.LightDirection;
 #if DEBUG
                     swShadowsPreparation.Stop();
 
@@ -235,7 +230,7 @@ namespace Engine
 #endif
                     #endregion
 
-                    if (this.UpdateShadowMapStatic)
+                    if (this.Updated && this.UpdateShadowMapStatic)
                     {
                         #region Static shadow map
 
@@ -254,6 +249,11 @@ namespace Engine
 #endif
                             staticObjs.ForEach(o => o.SetCulling(false));
 
+                            this.shadowMapper.Update(
+                                shadowCastingLights[0], 
+                                scene.SceneVolume.Center, 
+                                scene.SceneVolume.Radius,
+                                ref this.DrawShadowsContext);
                             this.BindShadowMap(this.shadowMapper.DepthMapStatic);
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, staticObjs);
 #if DEBUG
@@ -307,6 +307,11 @@ namespace Engine
 #if DEBUG
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
+                            this.shadowMapper.Update(
+                                shadowCastingLights[0],
+                                scene.SceneVolume.Center,
+                                scene.SceneVolume.Radius,
+                                ref this.DrawShadowsContext);
                             this.BindShadowMap(this.shadowMapper.DepthMapDynamic);
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, dynamicObjs);
 #if DEBUG
@@ -325,7 +330,7 @@ namespace Engine
                     this.DrawContext.ShadowMaps = (int)this.shadowMapper.Flags;
                     this.DrawContext.ShadowMapStatic = this.shadowMapper.TextureStatic;
                     this.DrawContext.ShadowMapDynamic = this.shadowMapper.TextureDynamic;
-                    this.DrawContext.FromLightViewProjection = this.shadowMapper.View * this.shadowMapper.Projection;
+                    this.DrawContext.FromLightViewProjection = this.shadowMapper.ViewProjection;
                 }
 
                 #endregion
@@ -411,6 +416,8 @@ namespace Engine
                 #endregion
 
                 #endregion
+
+                this.Updated = false;
             }
 #if DEBUG
             swTotal.Stop();
