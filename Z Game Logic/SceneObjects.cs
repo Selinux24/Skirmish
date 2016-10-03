@@ -142,14 +142,14 @@ namespace GameLogic
                         NodeSize = 5f,
                     },
                 },
-                Opaque = true,
+                CastShadow = true,
             });
             this.soldier = this.AddInstancingModel(new ModelInstancedDescription()
             {
                 ContentPath = "Resources3D",
                 ModelFileName = "soldier.dae",
                 Instances = this.skirmishGame.AllSoldiers.Length,
-                Opaque = true,
+                CastShadow = true,
             });
 
             #endregion

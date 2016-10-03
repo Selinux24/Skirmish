@@ -120,7 +120,7 @@ namespace TerrainTest
                 ContentPath = resources + "/Cursor",
                 ModelFileName = "cursor.dae",
                 DeferredEnabled = false,
-                Opaque = false,
+                CastShadow = false,
             });
             this.cursor3D.EnableDepthStencil = false;
             sw.Stop();
@@ -183,7 +183,7 @@ namespace TerrainTest
             {
                 ContentPath = resources + "/Helicopter",
                 ModelFileName = "helicopter.dae",
-                Opaque = true,
+                CastShadow = true,
                 Static = false,
                 TextureIndex = 2,
             };
@@ -204,7 +204,7 @@ namespace TerrainTest
             {
                 ContentPath = resources + "/Leopard",
                 ModelFileName = "Leopard.dae",
-                Opaque = true,
+                CastShadow = true,
                 Static = false,
             });
             sw.Stop();
@@ -221,7 +221,7 @@ namespace TerrainTest
             {
                 ContentPath = resources + "/Helipod",
                 ModelFileName = "helipod.dae",
-                Opaque = true,
+                CastShadow = true,
                 Static = true,
             });
             sw.Stop();
@@ -236,7 +236,7 @@ namespace TerrainTest
             {
                 ContentPath = resources + "/Garage",
                 ModelFileName = "garage.dae",
-                Opaque = true,
+                CastShadow = true,
                 Static = true,
             });
             sw.Stop();
@@ -251,7 +251,7 @@ namespace TerrainTest
             {
                 ContentPath = resources + "/Obelisk",
                 ModelFileName = "obelisk.dae",
-                Opaque = true,
+                CastShadow = true,
                 Static = true,
                 Instances = 4,
             });
@@ -268,7 +268,7 @@ namespace TerrainTest
                 Name = "DEBUG_CUBE_INSTANCED",
                 ContentPath = resources + "/Rocks",
                 ModelFileName = "boulder.dae",
-                Opaque = true,
+                CastShadow = true,
                 Static = true,
                 Instances = 250,
             });
@@ -284,7 +284,7 @@ namespace TerrainTest
             {
                 ContentPath = resources + "/Trees",
                 ModelFileName = "birch_a.dae",
-                Opaque = true,
+                CastShadow = true,
                 Static = true,
                 Instances = 100,
                 VolumeMeshes = new[] { "Volume" },
@@ -293,7 +293,7 @@ namespace TerrainTest
             {
                 ContentPath = resources + "/Trees",
                 ModelFileName = "birch_b.dae",
-                Opaque = true,
+                CastShadow = true,
                 Static = true,
                 Instances = 100,
                 VolumeMeshes = new[] { "Volume" },
@@ -361,7 +361,7 @@ namespace TerrainTest
                     MinSize = new Vector2(0.25f, 0.25f),
                     MaxSize = new Vector2(0.5f, 0.75f),
                 },
-                Opaque = true,
+                CastShadow = true,
                 Static = true,
                 DelayGeneration = true,
             };

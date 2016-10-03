@@ -68,14 +68,6 @@ namespace Engine
         /// </summary>
         protected DrawingData DrawingData { get; private set; }
         /// <summary>
-        /// Enables z-buffer writting
-        /// </summary>
-        public bool EnableDepthStencil { get; set; }
-        /// <summary>
-        /// Enables transparent blending
-        /// </summary>
-        public bool EnableAlphaBlending { get; set; }
-        /// <summary>
         /// Model manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; private set; }

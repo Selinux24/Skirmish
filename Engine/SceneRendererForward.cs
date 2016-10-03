@@ -165,115 +165,198 @@ namespace Engine
         /// <param name="scene">Scene</param>
         public virtual void Draw(GameTime gameTime, Scene scene)
         {
-#if DEBUG
-            long total = 0;
-            long start = 0;
-            long shadowMap_start = 0;
-            long shadowMap_cull = 0;
-            long shadowMap_draw = 0;
-            long forward_start = 0;
-            long forward_cull = 0;
-            long forward_draw = 0;
-            long forward_draw2D = 0;
-#endif
-#if DEBUG
-            Stopwatch swTotal = Stopwatch.StartNew();
-#endif
-            //Draw visible components
-            var visibleComponents = scene.Components.FindAll(c => c.Visible);
-            if (visibleComponents.Count > 0)
+            if (this.Updated)
             {
-                #region Preparation
 #if DEBUG
-                Stopwatch swStartup = Stopwatch.StartNew();
+                long total = 0;
+                long start = 0;
+                long shadowMap_start = 0;
+                long shadowMap_cull = 0;
+                long shadowMap_draw = 0;
+                long forward_start = 0;
+                long forward_cull = 0;
+                long forward_draw = 0;
+                long forward_draw2D = 0;
 #endif
-                //Initialize context data from update context
-                this.DrawContext.GameTime = gameTime;
-                this.DrawContext.World = this.UpdateContext.World;
-                this.DrawContext.View = this.UpdateContext.View;
-                this.DrawContext.Projection = this.UpdateContext.Projection;
-                this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
-                this.DrawContext.Frustum = this.UpdateContext.Frustum;
-                this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
-                this.DrawContext.EyeTarget = this.UpdateContext.EyeTarget;
-                //Initialize context data from scene
-                this.DrawContext.Lights = scene.Lights;
-                this.DrawContext.ShadowMaps = 0;
-                this.DrawContext.ShadowMapStatic = null;
-                this.DrawContext.ShadowMapDynamic = null;
-                this.DrawContext.FromLightViewProjection = Matrix.Identity;
 #if DEBUG
-                swStartup.Stop();
-
-                start = swStartup.ElapsedTicks;
+                Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-                #endregion
-
-                #region Shadow mapping
-
-                var shadowCastingLights = scene.Lights.ShadowCastingLights;
-                if (shadowCastingLights.Length > 0)
+                //Draw visible components
+                var visibleComponents = scene.Components.FindAll(c => c.Visible);
+                if (visibleComponents.Count > 0)
                 {
                     #region Preparation
 #if DEBUG
-                    Stopwatch swShadowsPreparation = Stopwatch.StartNew();
+                    Stopwatch swStartup = Stopwatch.StartNew();
 #endif
-                    this.DrawShadowsContext.GameTime = gameTime;
-                    this.DrawShadowsContext.World = this.UpdateContext.World;
+                    //Initialize context data from update context
+                    this.DrawContext.GameTime = gameTime;
+                    this.DrawContext.World = this.UpdateContext.World;
+                    this.DrawContext.View = this.UpdateContext.View;
+                    this.DrawContext.Projection = this.UpdateContext.Projection;
+                    this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
+                    this.DrawContext.Frustum = this.UpdateContext.Frustum;
+                    this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
+                    this.DrawContext.EyeTarget = this.UpdateContext.EyeTarget;
+                    //Initialize context data from scene
+                    this.DrawContext.Lights = scene.Lights;
+                    this.DrawContext.ShadowMaps = 0;
+                    this.DrawContext.ShadowMapStatic = null;
+                    this.DrawContext.ShadowMapDynamic = null;
+                    this.DrawContext.FromLightViewProjection = Matrix.Identity;
 #if DEBUG
-                    swShadowsPreparation.Stop();
+                    swStartup.Stop();
 
-                    shadowMap_cull = 0;
-                    shadowMap_draw = 0;
-
-                    shadowMap_start = swShadowsPreparation.ElapsedTicks;
+                    start = swStartup.ElapsedTicks;
 #endif
                     #endregion
 
-                    if (this.Updated && this.UpdateShadowMapStatic)
-                    {
-                        #region Static shadow map
+                    #region Shadow mapping
 
-                        //Draw static components if drop shadow (opaque)
-                        var staticObjs = visibleComponents.FindAll(c => c.Opaque == true && c.Static == true);
-                        if (staticObjs.Count > 0)
+                    var shadowCastingLights = scene.Lights.ShadowCastingLights;
+                    if (shadowCastingLights.Length > 0)
+                    {
+                        #region Preparation
+#if DEBUG
+                        Stopwatch swShadowsPreparation = Stopwatch.StartNew();
+#endif
+                        this.DrawShadowsContext.GameTime = gameTime;
+                        this.DrawShadowsContext.World = this.UpdateContext.World;
+#if DEBUG
+                        swShadowsPreparation.Stop();
+
+                        shadowMap_cull = 0;
+                        shadowMap_draw = 0;
+
+                        shadowMap_start = swShadowsPreparation.ElapsedTicks;
+#endif
+                        #endregion
+
+                        if (this.UpdateShadowMapStatic)
                         {
-                            if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Static))
+                            #region Static shadow map
+
+                            //Draw static components if drop shadow (opaque)
+                            var staticObjs = visibleComponents.FindAll(c => c.CastShadow == true && c.Static == true);
+                            if (staticObjs.Count > 0)
                             {
-                                this.shadowMapper.Flags |= ShadowMapFlags.Static;
+                                if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Static))
+                                {
+                                    this.shadowMapper.Flags |= ShadowMapFlags.Static;
+                                }
+
+                                #region Draw
+#if DEBUG
+                                Stopwatch swDraw = Stopwatch.StartNew();
+#endif
+                                staticObjs.ForEach(o => o.SetCulling(false));
+
+                                this.shadowMapper.Update(
+                                    shadowCastingLights[0],
+                                    scene.SceneVolume.Center,
+                                    scene.SceneVolume.Radius,
+                                    ref this.DrawShadowsContext);
+                                this.BindShadowMap(this.shadowMapper.DepthMapStatic);
+                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, staticObjs);
+#if DEBUG
+                                swDraw.Stop();
+
+                                shadowMap_draw += swDraw.ElapsedTicks;
+#endif
+                                #endregion
                             }
 
+                            #endregion
+
+                            this.UpdateShadowMapStatic = false;
+                        }
+
+                        #region Dynamic shadow map
+
+                        //Draw dynamic components if drop shadow (opaque)
+                        var dynamicObjs = visibleComponents.FindAll(c => c.CastShadow == true && c.Static == false);
+                        if (dynamicObjs.Count > 0)
+                        {
+                            #region Cull
+#if DEBUG
+                            Stopwatch swCull = Stopwatch.StartNew();
+#endif
+                            bool draw = false;
+                            if (scene.PerformFrustumCulling)
+                            {
+                                //Frustum culling
+                                draw = scene.CullTest(this.DrawContext.Frustum, dynamicObjs);
+                            }
+                            else
+                            {
+                                draw = true;
+                            }
+#if DEBUG
+                            swCull.Stop();
+
+                            shadowMap_cull += swCull.ElapsedTicks;
+#endif
+                            #endregion
+
                             #region Draw
-#if DEBUG
-                            Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                            staticObjs.ForEach(o => o.SetCulling(false));
 
-                            this.shadowMapper.Update(
-                                shadowCastingLights[0], 
-                                scene.SceneVolume.Center, 
-                                scene.SceneVolume.Radius,
-                                ref this.DrawShadowsContext);
-                            this.BindShadowMap(this.shadowMapper.DepthMapStatic);
-                            this.DrawShadowComponents(gameTime, this.DrawShadowsContext, staticObjs);
+                            if (draw)
+                            {
+                                if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Dynamic))
+                                {
+                                    this.shadowMapper.Flags |= ShadowMapFlags.Dynamic;
+                                }
 #if DEBUG
-                            swDraw.Stop();
-
-                            shadowMap_draw += swDraw.ElapsedTicks;
+                                Stopwatch swDraw = Stopwatch.StartNew();
 #endif
+                                this.shadowMapper.Update(
+                                    shadowCastingLights[0],
+                                    scene.SceneVolume.Center,
+                                    scene.SceneVolume.Radius,
+                                    ref this.DrawShadowsContext);
+                                this.BindShadowMap(this.shadowMapper.DepthMapDynamic);
+                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, dynamicObjs);
+#if DEBUG
+                                swDraw.Stop();
+
+                                shadowMap_draw += swDraw.ElapsedTicks;
+#endif
+                            }
+
                             #endregion
                         }
 
                         #endregion
 
-                        this.UpdateShadowMapStatic = false;
+                        //Set shadow map and transform to drawing context
+                        this.DrawContext.ShadowMaps = (int)this.shadowMapper.Flags;
+                        this.DrawContext.ShadowMapStatic = this.shadowMapper.TextureStatic;
+                        this.DrawContext.ShadowMapDynamic = this.shadowMapper.TextureDynamic;
+                        this.DrawContext.FromLightViewProjection = this.shadowMapper.ViewProjection;
                     }
 
-                    #region Dynamic shadow map
+                    #endregion
 
-                    //Draw dynamic components if drop shadow (opaque)
-                    var dynamicObjs = visibleComponents.FindAll(c => c.Opaque == true && c.Static == false);
-                    if (dynamicObjs.Count > 0)
+                    #region Render
+
+                    #region Forward rendering
+
+                    #region Preparation
+#if DEBUG
+                    Stopwatch swPreparation = Stopwatch.StartNew();
+#endif
+                    //Set default render target and depth buffer, and clear it
+                    this.Game.Graphics.SetDefaultViewport();
+                    this.Game.Graphics.SetDefaultRenderTarget(true);
+#if DEBUG
+                    swPreparation.Stop();
+
+                    forward_start = swPreparation.ElapsedTicks;
+#endif
+                    #endregion
+
+                    var solidComponents = visibleComponents.FindAll(c => c.CastShadow);
+                    if (solidComponents.Count > 0)
                     {
                         #region Cull
 #if DEBUG
@@ -283,7 +366,7 @@ namespace Engine
                         if (scene.PerformFrustumCulling)
                         {
                             //Frustum culling
-                            draw = scene.CullTest(this.DrawContext.Frustum, dynamicObjs);
+                            draw = scene.CullTest(this.DrawContext.Frustum, solidComponents);
                         }
                         else
                         {
@@ -292,184 +375,104 @@ namespace Engine
 #if DEBUG
                         swCull.Stop();
 
-                        shadowMap_cull += swCull.ElapsedTicks;
+                        forward_cull = swCull.ElapsedTicks;
 #endif
                         #endregion
 
-                        #region Draw
+                        #region Draw 3D
 
                         if (draw)
                         {
-                            if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Dynamic))
-                            {
-                                this.shadowMapper.Flags |= ShadowMapFlags.Dynamic;
-                            }
 #if DEBUG
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                            this.shadowMapper.Update(
-                                shadowCastingLights[0],
-                                scene.SceneVolume.Center,
-                                scene.SceneVolume.Radius,
-                                ref this.DrawShadowsContext);
-                            this.BindShadowMap(this.shadowMapper.DepthMapDynamic);
-                            this.DrawShadowComponents(gameTime, this.DrawShadowsContext, dynamicObjs);
+                            //Draw solid
+                            this.DrawResultComponents(gameTime, this.DrawContext, solidComponents);
 #if DEBUG
                             swDraw.Stop();
 
-                            shadowMap_draw += swDraw.ElapsedTicks;
+                            forward_draw = swDraw.ElapsedTicks;
 #endif
                         }
 
                         #endregion
                     }
 
-                    #endregion
-
-                    //Set shadow map and transform to drawing context
-                    this.DrawContext.ShadowMaps = (int)this.shadowMapper.Flags;
-                    this.DrawContext.ShadowMapStatic = this.shadowMapper.TextureStatic;
-                    this.DrawContext.ShadowMapDynamic = this.shadowMapper.TextureDynamic;
-                    this.DrawContext.FromLightViewProjection = this.shadowMapper.ViewProjection;
-                }
-
-                #endregion
-
-                #region Render
-
-                #region Forward rendering
-
-                #region Preparation
-#if DEBUG
-                Stopwatch swPreparation = Stopwatch.StartNew();
-#endif
-                //Set default render target and depth buffer, and clear it
-                this.Game.Graphics.SetDefaultViewport();
-                this.Game.Graphics.SetDefaultRenderTarget(true);
-#if DEBUG
-                swPreparation.Stop();
-
-                forward_start = swPreparation.ElapsedTicks;
-#endif
-                #endregion
-
-                var solidComponents = visibleComponents.FindAll(c => c.Opaque);
-                if (solidComponents.Count > 0)
-                {
-                    #region Cull
-#if DEBUG
-                    Stopwatch swCull = Stopwatch.StartNew();
-#endif
-                    bool draw = false;
-                    if (scene.PerformFrustumCulling)
+                    var otherComponents = visibleComponents.FindAll(c => !c.CastShadow);
+                    if (otherComponents.Count > 0)
                     {
-                        //Frustum culling
-                        draw = scene.CullTest(this.DrawContext.Frustum, solidComponents);
-                    }
-                    else
-                    {
-                        draw = true;
-                    }
-#if DEBUG
-                    swCull.Stop();
-
-                    forward_cull = swCull.ElapsedTicks;
-#endif
-                    #endregion
-
-                    #region Draw 3D
-
-                    if (draw)
-                    {
+                        #region Draw 2D
 #if DEBUG
                         Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                        //Draw solid
-                        this.DrawResultComponents(gameTime, this.DrawContext, solidComponents);
+                        //Draw other
+                        this.DrawResultComponents(gameTime, this.DrawContext, otherComponents);
 #if DEBUG
                         swDraw.Stop();
 
-                        forward_draw = swDraw.ElapsedTicks;
+                        forward_draw2D = swDraw.ElapsedTicks;
 #endif
+                        #endregion
                     }
 
                     #endregion
-                }
 
-                var otherComponents = visibleComponents.FindAll(c => !c.Opaque);
-                if (otherComponents.Count > 0)
-                {
-                    #region Draw 2D
-#if DEBUG
-                    Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                    //Draw other
-                    this.DrawResultComponents(gameTime, this.DrawContext, otherComponents);
-#if DEBUG
-                    swDraw.Stop();
-
-                    forward_draw2D = swDraw.ElapsedTicks;
-#endif
                     #endregion
+
+                    this.Updated = false;
+                }
+#if DEBUG
+                swTotal.Stop();
+
+                total = swTotal.ElapsedTicks;
+#endif
+#if DEBUG
+                long totalShadowMap = shadowMap_start + shadowMap_cull + shadowMap_draw;
+                if (totalShadowMap > 0)
+                {
+                    float prcStart = (float)shadowMap_start / (float)totalShadowMap;
+                    float prcCull = (float)shadowMap_cull / (float)totalShadowMap;
+                    float prcDraw = (float)shadowMap_draw / (float)totalShadowMap;
+
+                    Counters.SetStatistics("Scene.Draw.totalShadowMap", string.Format(
+                        "SM = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%",
+                        totalShadowMap,
+                        prcStart * 100f,
+                        prcCull * 100f,
+                        prcDraw * 100f));
                 }
 
-                #endregion
+                long totalForward = forward_start + forward_cull + forward_draw + forward_draw2D;
+                if (totalForward > 0)
+                {
+                    float prcStart = (float)forward_start / (float)totalForward;
+                    float prcCull = (float)forward_cull / (float)totalForward;
+                    float prcDraw = (float)forward_draw / (float)totalForward;
+                    float prcDraw2D = (float)forward_draw2D / (float)totalForward;
 
-                #endregion
+                    Counters.SetStatistics("Scene.Draw.totalForward", string.Format(
+                        "FR = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%; Draw2D {4:00}%",
+                        totalForward,
+                        prcStart * 100f,
+                        prcCull * 100f,
+                        prcDraw * 100f,
+                        prcDraw2D * 100f));
+                }
 
-                this.Updated = false;
-            }
-#if DEBUG
-            swTotal.Stop();
+                long other = total - (totalShadowMap + totalForward);
 
-            total = swTotal.ElapsedTicks;
+                float prcSM = (float)totalShadowMap / (float)total;
+                float prcFR = (float)totalForward / (float)total;
+                float prcOther = (float)other / (float)total;
+
+                Counters.SetStatistics("Scene.Draw", string.Format(
+                    "TOTAL = {0:000000}; Shadows {1:00}%; Forwars {2:00}%; Other {3:00}%;",
+                    total,
+                    prcSM * 100f,
+                    prcFR * 100f,
+                    prcOther * 100f));
 #endif
-#if DEBUG
-            long totalShadowMap = shadowMap_start + shadowMap_cull + shadowMap_draw;
-            if (totalShadowMap > 0)
-            {
-                float prcStart = (float)shadowMap_start / (float)totalShadowMap;
-                float prcCull = (float)shadowMap_cull / (float)totalShadowMap;
-                float prcDraw = (float)shadowMap_draw / (float)totalShadowMap;
-
-                Counters.SetStatistics("Scene.Draw.totalShadowMap", string.Format(
-                    "SM = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%",
-                    totalShadowMap,
-                    prcStart * 100f,
-                    prcCull * 100f,
-                    prcDraw * 100f));
             }
-
-            long totalForward = forward_start + forward_cull + forward_draw + forward_draw2D;
-            if (totalForward > 0)
-            {
-                float prcStart = (float)forward_start / (float)totalForward;
-                float prcCull = (float)forward_cull / (float)totalForward;
-                float prcDraw = (float)forward_draw / (float)totalForward;
-                float prcDraw2D = (float)forward_draw2D / (float)totalForward;
-
-                Counters.SetStatistics("Scene.Draw.totalForward", string.Format(
-                    "FR = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%; Draw2D {4:00}%",
-                    totalForward,
-                    prcStart * 100f,
-                    prcCull * 100f,
-                    prcDraw * 100f,
-                    prcDraw2D * 100f));
-            }
-
-            long other = total - (totalShadowMap + totalForward);
-
-            float prcSM = (float)totalShadowMap / (float)total;
-            float prcFR = (float)totalForward / (float)total;
-            float prcOther = (float)other / (float)total;
-
-            Counters.SetStatistics("Scene.Draw", string.Format(
-                "TOTAL = {0:000000}; Shadows {1:00}%; Forwars {2:00}%; Other {3:00}%;",
-                total,
-                prcSM * 100f,
-                prcFR * 100f,
-                prcOther * 100f));
-#endif
         }
         /// <summary>
         /// Gets renderer resources
@@ -534,7 +537,7 @@ namespace Engine
                 toDraw.ForEach((c) =>
                 {
                     this.Game.Graphics.SetRasterizerDefault();
-                    if (c.Opaque)
+                    if (c.CastShadow)
                     {
                         this.Game.Graphics.SetBlendDefault();
                     }

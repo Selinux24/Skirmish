@@ -89,7 +89,7 @@ namespace DeferredTest
             {
                 ContentPath = resources,
                 ModelFileName = "helicopter.dae",
-                Opaque = true,
+                CastShadow = true,
                 TextureIndex = 2,
             });
             sw.Stop();
@@ -104,7 +104,7 @@ namespace DeferredTest
             {
                 ContentPath = resources,
                 ModelFileName = "helicopter.dae",
-                Opaque = true,
+                CastShadow = true,
                 Instances = 2,
             });
             sw.Stop();
@@ -119,7 +119,7 @@ namespace DeferredTest
             {
                 ContentPath = resources,
                 ModelFileName = "leopard.dae",
-                Opaque = true,
+                CastShadow = true,
             });
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
@@ -302,7 +302,7 @@ namespace DeferredTest
             #region Spot Light Marker
 
             this.lineDrawer = this.AddLineListDrawer(1000);
-            this.lineDrawer.Opaque = false;
+            this.lineDrawer.CastShadow = false;
             this.lineDrawer.Active = false;
             this.lineDrawer.Visible = false;
 

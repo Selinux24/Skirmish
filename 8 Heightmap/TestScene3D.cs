@@ -308,7 +308,7 @@ namespace HeightmapTest
                 ContentPath = "Resources/Scenery/Objects",
                 ModelFileName = "torch.dae",
                 Instances = torchCount,
-                Opaque = true,
+                CastShadow = true,
             });
 
             {
@@ -406,7 +406,7 @@ namespace HeightmapTest
 
             this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
             this.bboxesDrawer.Visible = false;
-            this.bboxesDrawer.Opaque = false;
+            this.bboxesDrawer.CastShadow = false;
             this.bboxesDrawer.EnableAlphaBlending = true;
 
             #endregion

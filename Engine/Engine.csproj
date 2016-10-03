@@ -354,6 +354,8 @@
     <Compile Include="ModelDescription.cs" />
     <Compile Include="ModelInstance.cs" />
     <Compile Include="ModelInstancedDescription.cs" />
+    <Compile Include="ParticleEmitter.cs" />
+    <Compile Include="ParticleSystemDescription.cs" />
     <Compile Include="PathFinding\Agent.cs" />
     <Compile Include="PathFinding\AStar\GridAgent.cs" />
     <Compile Include="PathFinding\AStar\GridGenerationSettings.cs" />

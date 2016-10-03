@@ -92,7 +92,7 @@ namespace ModelDrawing
             };
 
             this.floor = this.AddModel(ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, this.CreateMaterialFloor()));
-            this.floor.Opaque = true;
+            this.floor.CastShadow = true;
         }
         private void InitializeModels()
         {
@@ -115,10 +115,10 @@ namespace ModelDrawing
             this.normalColorModel = this.AddModel(ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalColor, vertices, indices, this.CreateMaterialColor()));
             this.normalTextureModel = this.AddModel(ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, this.CreateMaterialTexture()));
 
-            this.colorModel.Opaque = true;
-            this.textureModel.Opaque = true;
-            this.normalColorModel.Opaque = true;
-            this.normalTextureModel.Opaque = true;
+            this.colorModel.CastShadow = true;
+            this.textureModel.CastShadow = true;
+            this.normalColorModel.CastShadow = true;
+            this.normalTextureModel.CastShadow = true;
 
             this.models = new[]
             {

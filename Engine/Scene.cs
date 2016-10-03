@@ -338,7 +338,7 @@ namespace Engine
             }
 
             newModel.Name = !string.IsNullOrEmpty(description.Name) ? description.Name : description.ModelFileName;
-            newModel.Opaque = description.Opaque;
+            newModel.CastShadow = description.CastShadow;
             newModel.Static = description.Static;
             newModel.DeferredEnabled = description.DeferredEnabled;
             newModel.TextureIndex = description.TextureIndex;
@@ -388,7 +388,7 @@ namespace Engine
             }
 
             newModel.Name = !string.IsNullOrEmpty(description.Name) ? description.Name : description.ModelFileName;
-            newModel.Opaque = description.Opaque;
+            newModel.CastShadow = description.CastShadow;
             newModel.Static = description.Static;
             newModel.DeferredEnabled = description.DeferredEnabled;
 
@@ -747,7 +747,15 @@ namespace Engine
                 this.components.Add(component);
                 this.components.Sort((p1, p2) =>
                 {
-                    return p1.Order.CompareTo(p2.Order);
+                    //First transparents
+                    int i = p1.EnableAlphaBlending.CompareTo(p2.EnableAlphaBlending);
+                    if (i == 0)
+                    {
+                        //Then by order property
+                        i = p1.Order.CompareTo(p2.Order);
+                    }
+
+                    return i;
                 });
             }
         }

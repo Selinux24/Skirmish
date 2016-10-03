@@ -1394,7 +1394,7 @@ namespace Engine
             };
 
             //Set drawing parameters for renderer
-            this.Opaque = true;
+            this.CastShadow = true;
             this.DeferredEnabled = true;
 
             if (!this.Description.DelayGeneration)

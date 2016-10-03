@@ -111,7 +111,7 @@ namespace Skybox
                 ContentPath = "Resources",
                 ModelFileName = "torch.dae",
                 Instances = this.firePositions.Length,
-                Opaque = true,
+                CastShadow = true,
             });
 
             #endregion
@@ -145,7 +145,7 @@ namespace Skybox
                 {
                     Settings = nvSettings,
                 },
-                Opaque = true,
+                CastShadow = true,
                 DelayGeneration = true,
             };
             this.ruins = this.AddScenery(desc, false);
@@ -172,7 +172,7 @@ namespace Skybox
             this.volumesDrawer.DeferredEnabled = false;
             this.volumesDrawer.EnableDepthStencil = false;
             this.volumesDrawer.EnableAlphaBlending = true;
-            this.volumesDrawer.Opaque = false;
+            this.volumesDrawer.CastShadow = false;
 
             this.graphDrawer = this.AddTriangleListDrawer(10000);
             this.graphDrawer.EnableDepthStencil = false;

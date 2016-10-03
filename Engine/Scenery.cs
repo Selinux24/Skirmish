@@ -566,7 +566,7 @@ namespace Engine
         {
             this.Name = this.Description.Name;
             this.DeferredEnabled = this.Description.DeferredEnabled;
-            this.Opaque = this.Description.Opaque;
+            this.CastShadow = this.Description.CastShadow;
             this.Static = this.Description.Static;
 
             #region Patches

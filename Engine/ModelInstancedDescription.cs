@@ -27,9 +27,9 @@ namespace Engine
         /// </summary>
         public int Instances = 1;
         /// <summary>
-        /// Is opaque
+        /// Gets or sets whether the object cast shadow
         /// </summary>
-        public bool Opaque = true;
+        public bool CastShadow { get; set; }
         /// <summary>
         /// Is Static
         /// </summary>

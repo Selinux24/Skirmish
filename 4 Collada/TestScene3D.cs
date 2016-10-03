@@ -79,7 +79,7 @@ namespace Collada
                     MinSize = Vector2.One * 10f,
                     MaxSize = Vector2.One * 15f,
                     Seed = 1024,
-                    Opaque = true,
+                    CastShadow = true,
                 },
                 PathFinder = new GroundDescription.PathFinderDescription()
                 {
@@ -88,7 +88,7 @@ namespace Collada
                         NodeSize = 20f,
                     },
                 },
-                Opaque = true,
+                CastShadow = true,
             };
 
             this.ground = this.AddScenery(terrainDescription);
@@ -118,7 +118,7 @@ namespace Collada
 
             this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
             this.bboxesDrawer.Visible = false;
-            this.bboxesDrawer.Opaque = false;
+            this.bboxesDrawer.CastShadow = false;
             this.bboxesDrawer.EnableAlphaBlending = true;
 
             List<Line3> squares = new List<Line3>();
@@ -134,7 +134,7 @@ namespace Collada
 
             this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));
             this.terrainGridDrawer.Visible = false;
-            this.terrainGridDrawer.Opaque = false;
+            this.terrainGridDrawer.CastShadow = false;
             this.terrainGridDrawer.EnableAlphaBlending = true;
 
             this.InitializeCamera();

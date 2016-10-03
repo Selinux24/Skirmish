@@ -278,126 +278,197 @@ namespace Engine
         /// <param name="scene">Scene</param>
         public virtual void Draw(GameTime gameTime, Scene scene)
         {
-#if DEBUG
-            long total = 0;
-            long start = 0;
-            long shadowMap_start = 0;
-            long shadowMap_cull = 0;
-            long shadowMap_draw = 0;
-            long deferred_cull = 0;
-            long deferred_gbuffer = 0;
-            long deferred_gbufferInit = 0;
-            long deferred_gbufferDraw = 0;
-            long deferred_gbufferResolve = 0;
-            long deferred_lbuffer = 0;
-            long deferred_lbufferInit = 0;
-            long deferred_lbufferDir = 0;
-            long deferred_lbufferPoi = 0;
-            long deferred_lbufferSpo = 0;
-            long deferred_compose = 0;
-            long deferred_composeInit = 0;
-            long deferred_composeDraw = 0;
-            long deferred_draw2D = 0;
-#endif
-#if DEBUG
-            Stopwatch swTotal = Stopwatch.StartNew();
-#endif
-            //Draw visible components
-            List<Drawable> visibleComponents = scene.Components.FindAll(c => c.Visible);
-            if (visibleComponents.Count > 0)
+            if (this.Updated)
             {
-                #region Preparation
 #if DEBUG
-                Stopwatch swStartup = Stopwatch.StartNew();
+                long total = 0;
+                long start = 0;
+                long shadowMap_start = 0;
+                long shadowMap_cull = 0;
+                long shadowMap_draw = 0;
+                long deferred_cull = 0;
+                long deferred_gbuffer = 0;
+                long deferred_gbufferInit = 0;
+                long deferred_gbufferDraw = 0;
+                long deferred_gbufferResolve = 0;
+                long deferred_lbuffer = 0;
+                long deferred_lbufferInit = 0;
+                long deferred_lbufferDir = 0;
+                long deferred_lbufferPoi = 0;
+                long deferred_lbufferSpo = 0;
+                long deferred_compose = 0;
+                long deferred_composeInit = 0;
+                long deferred_composeDraw = 0;
+                long deferred_draw2D = 0;
 #endif
-                //Initialize context data from update context
-                this.DrawContext.GameTime = gameTime;
-                this.DrawContext.World = this.UpdateContext.World;
-                this.DrawContext.View = this.UpdateContext.View;
-                this.DrawContext.Projection = this.UpdateContext.Projection;
-                this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
-                this.DrawContext.Frustum = this.UpdateContext.Frustum;
-                this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
-                this.DrawContext.EyeTarget = this.UpdateContext.EyeTarget;
-                //Initialize context data from scene
-                this.DrawContext.Lights = scene.Lights;
-                this.DrawContext.ShadowMaps = 0;
-                this.DrawContext.ShadowMapStatic = null;
-                this.DrawContext.ShadowMapDynamic = null;
-                this.DrawContext.FromLightViewProjection = Matrix.Identity;
 #if DEBUG
-                swStartup.Stop();
-
-                start = swStartup.ElapsedTicks;
+                Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-                #endregion
-
-                #region Shadow mapping
-
-                var shadowCastingLights = scene.Lights.ShadowCastingLights;
-                if (shadowCastingLights.Length > 0)
+                //Draw visible components
+                List<Drawable> visibleComponents = scene.Components.FindAll(c => c.Visible);
+                if (visibleComponents.Count > 0)
                 {
                     #region Preparation
 #if DEBUG
-                    Stopwatch swShadowsPreparation = Stopwatch.StartNew();
+                    Stopwatch swStartup = Stopwatch.StartNew();
 #endif
-
-                    this.DrawShadowsContext.GameTime = gameTime;
-                    this.DrawShadowsContext.World = this.UpdateContext.World;
+                    //Initialize context data from update context
+                    this.DrawContext.GameTime = gameTime;
+                    this.DrawContext.World = this.UpdateContext.World;
+                    this.DrawContext.View = this.UpdateContext.View;
+                    this.DrawContext.Projection = this.UpdateContext.Projection;
+                    this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
+                    this.DrawContext.Frustum = this.UpdateContext.Frustum;
+                    this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
+                    this.DrawContext.EyeTarget = this.UpdateContext.EyeTarget;
+                    //Initialize context data from scene
+                    this.DrawContext.Lights = scene.Lights;
+                    this.DrawContext.ShadowMaps = 0;
+                    this.DrawContext.ShadowMapStatic = null;
+                    this.DrawContext.ShadowMapDynamic = null;
+                    this.DrawContext.FromLightViewProjection = Matrix.Identity;
 #if DEBUG
-                    swShadowsPreparation.Stop();
+                    swStartup.Stop();
 
-                    shadowMap_cull = 0;
-                    shadowMap_draw = 0;
-
-                    shadowMap_start = swShadowsPreparation.ElapsedTicks;
+                    start = swStartup.ElapsedTicks;
 #endif
                     #endregion
 
-                    if (this.Updated && this.UpdateShadowMapStatic)
-                    {
-                        #region Static shadow map
+                    #region Shadow mapping
 
-                        //Draw static components if drop shadow (opaque)
-                        List<Drawable> staticObjs = visibleComponents.FindAll(c => c.Opaque == true && c.Static == true);
-                        if (staticObjs.Count > 0)
+                    var shadowCastingLights = scene.Lights.ShadowCastingLights;
+                    if (shadowCastingLights.Length > 0)
+                    {
+                        #region Preparation
+#if DEBUG
+                        Stopwatch swShadowsPreparation = Stopwatch.StartNew();
+#endif
+
+                        this.DrawShadowsContext.GameTime = gameTime;
+                        this.DrawShadowsContext.World = this.UpdateContext.World;
+#if DEBUG
+                        swShadowsPreparation.Stop();
+
+                        shadowMap_cull = 0;
+                        shadowMap_draw = 0;
+
+                        shadowMap_start = swShadowsPreparation.ElapsedTicks;
+#endif
+                        #endregion
+
+                        if (this.UpdateShadowMapStatic)
                         {
-                            if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Static))
+                            #region Static shadow map
+
+                            //Draw static components if cast shadow
+                            List<Drawable> staticObjs = visibleComponents.FindAll(c => c.CastShadow == true && c.Static == true);
+                            if (staticObjs.Count > 0)
                             {
-                                this.shadowMapper.Flags |= ShadowMapFlags.Static;
+                                if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Static))
+                                {
+                                    this.shadowMapper.Flags |= ShadowMapFlags.Static;
+                                }
+
+                                #region Draw
+#if DEBUG
+                                Stopwatch swDraw = Stopwatch.StartNew();
+#endif
+                                staticObjs.ForEach(o => o.SetCulling(false));
+
+                                this.shadowMapper.Update(
+                                    shadowCastingLights[0],
+                                    scene.SceneVolume.Center,
+                                    scene.SceneVolume.Radius,
+                                    ref this.DrawShadowsContext);
+                                this.BindShadowMap(this.shadowMapper.DepthMapStatic);
+                                this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, staticObjs);
+#if DEBUG
+                                swDraw.Stop();
+
+                                shadowMap_draw += swDraw.ElapsedTicks;
+#endif
+                                #endregion
                             }
 
+                            #endregion
+
+                            this.UpdateShadowMapStatic = false;
+                        }
+
+                        #region Dynamic shadow map
+
+                        //Draw dynamic components if drop shadow (opaque)
+                        List<Drawable> dynamicObjs = visibleComponents.FindAll(c => c.CastShadow == true && c.Static == false);
+                        if (dynamicObjs.Count > 0)
+                        {
+                            #region Cull
+#if DEBUG
+                            Stopwatch swCull = Stopwatch.StartNew();
+#endif
+                            bool draw = false;
+                            if (scene.PerformFrustumCulling)
+                            {
+                                //Frustum culling
+                                draw = scene.CullTest(this.DrawContext.Frustum, dynamicObjs);
+                            }
+                            else
+                            {
+                                draw = true;
+                            }
+#if DEBUG
+                            swCull.Stop();
+
+                            shadowMap_cull += swCull.ElapsedTicks;
+#endif
+                            #endregion
+
                             #region Draw
-#if DEBUG
-                            Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                            staticObjs.ForEach(o => o.SetCulling(false));
 
-                            this.shadowMapper.Update(
-                                shadowCastingLights[0],
-                                scene.SceneVolume.Center,
-                                scene.SceneVolume.Radius, 
-                                ref this.DrawShadowsContext);
-                            this.BindShadowMap(this.shadowMapper.DepthMapStatic);
-                            this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, staticObjs);
-#if DEBUG
-                            swDraw.Stop();
+                            if (draw)
+                            {
+                                if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Dynamic))
+                                {
+                                    this.shadowMapper.Flags |= ShadowMapFlags.Dynamic;
+                                }
 
-                            shadowMap_draw += swDraw.ElapsedTicks;
+#if DEBUG
+                                Stopwatch swDraw = Stopwatch.StartNew();
 #endif
+                                this.shadowMapper.Update(
+                                    shadowCastingLights[0],
+                                    scene.SceneVolume.Center,
+                                    scene.SceneVolume.Radius,
+                                    ref this.DrawShadowsContext);
+                                this.BindShadowMap(this.shadowMapper.DepthMapDynamic);
+                                this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, dynamicObjs);
+#if DEBUG
+                                swDraw.Stop();
+
+                                shadowMap_draw += swDraw.ElapsedTicks;
+#endif
+                            }
+
                             #endregion
                         }
 
                         #endregion
 
-                        this.UpdateShadowMapStatic = false;
+                        //Set shadow map and transform to drawing context
+                        this.DrawContext.ShadowMaps = (int)this.shadowMapper.Flags;
+                        this.DrawContext.ShadowMapStatic = this.shadowMapper.TextureStatic;
+                        this.DrawContext.ShadowMapDynamic = this.shadowMapper.TextureDynamic;
+                        this.DrawContext.FromLightViewProjection = this.shadowMapper.ViewProjection;
                     }
 
-                    #region Dynamic shadow map
+                    #endregion
 
-                    //Draw dynamic components if drop shadow (opaque)
-                    List<Drawable> dynamicObjs = visibleComponents.FindAll(c => c.Opaque == true && c.Static == false);
-                    if (dynamicObjs.Count > 0)
+                    #region Render
+
+                    #region Deferred rendering
+
+                    //Render to G-Buffer only opaque objects
+                    List<Drawable> solidComponents = visibleComponents.FindAll(c => c.DeferredEnabled);
+                    if (solidComponents.Count > 0)
                     {
                         #region Cull
 #if DEBUG
@@ -407,7 +478,7 @@ namespace Engine
                         if (scene.PerformFrustumCulling)
                         {
                             //Frustum culling
-                            draw = scene.CullTest(this.DrawContext.Frustum, dynamicObjs);
+                            draw = scene.CullTest(this.DrawContext.Frustum, solidComponents);
                         }
                         else
                         {
@@ -416,312 +487,244 @@ namespace Engine
 #if DEBUG
                         swCull.Stop();
 
-                        shadowMap_cull += swCull.ElapsedTicks;
+                        deferred_cull = swCull.ElapsedTicks;
 #endif
                         #endregion
-
-                        #region Draw
 
                         if (draw)
                         {
-                            if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Dynamic))
+                            #region Geometry Buffer
+#if DEBUG
+                            Stopwatch swGeometryBuffer = Stopwatch.StartNew();
+#endif
+#if DEBUG
+                            Stopwatch swGeometryBufferInit = Stopwatch.StartNew();
+#endif
+                            this.BindGBuffer();
+#if DEBUG
+                            swGeometryBufferInit.Stop();
+#endif
+#if DEBUG
+                            Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
+#endif
+                            //Draw scene on g-buffer render targets
+                            this.DrawResultComponents(gameTime, this.DrawContext, solidComponents);
+#if DEBUG
+                            swGeometryBufferDraw.Stop();
+#endif
+#if DEBUG
+                            Stopwatch swGeometryBufferResolve = Stopwatch.StartNew();
+#endif
+#if DEBUG
+                            swGeometryBufferResolve.Stop();
+#endif
+#if DEBUG
+                            swGeometryBuffer.Stop();
+#endif
+#if DEBUG
+                            deferred_gbuffer = swGeometryBuffer.ElapsedTicks;
+                            deferred_gbufferInit = swGeometryBufferInit.ElapsedTicks;
+                            deferred_gbufferDraw = swGeometryBufferDraw.ElapsedTicks;
+                            deferred_gbufferResolve = swGeometryBufferResolve.ElapsedTicks;
+#endif
+                            #endregion
+
+                            #region Light Buffer
+#if DEBUG
+                            Stopwatch swLightBuffer = Stopwatch.StartNew();
+#endif
+                            this.BindLights();
+
+                            //Draw scene lights on light buffer using g-buffer output
+                            this.DrawLights(this.DrawContext);
+#if DEBUG
+                            swLightBuffer.Stop();
+#endif
+#if DEBUG
+                            deferred_lbuffer = swLightBuffer.ElapsedTicks;
+
+                            long[] deferredCounters = Counters.GetStatistics("DEFERRED_LIGHTING") as long[];
+                            if (deferredCounters != null)
                             {
-                                this.shadowMapper.Flags |= ShadowMapFlags.Dynamic;
+                                deferred_lbufferInit = deferredCounters[0];
+                                deferred_lbufferDir = deferredCounters[1];
+                                deferred_lbufferPoi = deferredCounters[2];
+                                deferred_lbufferSpo = deferredCounters[3];
                             }
-
-#if DEBUG
-                            Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                            this.shadowMapper.Update(
-                                shadowCastingLights[0],
-                                scene.SceneVolume.Center,
-                                scene.SceneVolume.Radius, 
-                                ref this.DrawShadowsContext);
-                            this.BindShadowMap(this.shadowMapper.DepthMapDynamic);
-                            this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, dynamicObjs);
-#if DEBUG
-                            swDraw.Stop();
-
-                            shadowMap_draw += swDraw.ElapsedTicks;
-#endif
+                            #endregion
                         }
+                    }
 
+                    #region Final composition
+#if DEBUG
+                    Stopwatch swComponsition = Stopwatch.StartNew();
+#endif
+                    this.BindResult();
+
+                    //Draw scene result on screen using g-buffer and light buffer
+                    this.DrawResult(this.DrawContext);
+#if DEBUG
+                    swComponsition.Stop();
+
+                    deferred_compose = swComponsition.ElapsedTicks;
+
+                    long[] deferredCompositionCounters = Counters.GetStatistics("DEFERRED_COMPOSITION") as long[];
+                    if (deferredCompositionCounters != null)
+                    {
+                        deferred_composeInit = deferredCompositionCounters[0];
+                        deferred_composeDraw = deferredCompositionCounters[1];
+                    }
+#endif
+                    #endregion
+
+                    //Render to screen the rest of objects
+                    List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.DeferredEnabled);
+                    if (otherComponents.Count > 0)
+                    {
+                        #region Draw other
+#if DEBUG
+                        Stopwatch swDraw = Stopwatch.StartNew();
+#endif
+                        //Set forward mode
+                        this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
+
+                        //Draw scene
+                        this.DrawResultComponents(gameTime, this.DrawContext, otherComponents);
+
+                        //Set deferred mode
+                        this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
+#if DEBUG
+                        swDraw.Stop();
+
+                        deferred_draw2D = swDraw.ElapsedTicks;
+#endif
                         #endregion
                     }
 
                     #endregion
 
-                    //Set shadow map and transform to drawing context
-                    this.DrawContext.ShadowMaps = (int)this.shadowMapper.Flags;
-                    this.DrawContext.ShadowMapStatic = this.shadowMapper.TextureStatic;
-                    this.DrawContext.ShadowMapDynamic = this.shadowMapper.TextureDynamic;
-                    this.DrawContext.FromLightViewProjection = this.shadowMapper.ViewProjection;
-                }
-
-                #endregion
-
-                #region Render
-
-                #region Deferred rendering
-
-                //Render to G-Buffer only opaque objects
-                List<Drawable> solidComponents = visibleComponents.FindAll(c => c.DeferredEnabled);
-                if (solidComponents.Count > 0)
-                {
-                    #region Cull
-#if DEBUG
-                    Stopwatch swCull = Stopwatch.StartNew();
-#endif
-                    bool draw = false;
-                    if (scene.PerformFrustumCulling)
-                    {
-                        //Frustum culling
-                        draw = scene.CullTest(this.DrawContext.Frustum, solidComponents);
-                    }
-                    else
-                    {
-                        draw = true;
-                    }
-#if DEBUG
-                    swCull.Stop();
-
-                    deferred_cull = swCull.ElapsedTicks;
-#endif
                     #endregion
 
-                    if (draw)
+                    this.Updated = false;
+                }
+#if DEBUG
+                swTotal.Stop();
+
+                total = swTotal.ElapsedTicks;
+#endif
+#if DEBUG
+                long totalShadowMap = shadowMap_start + shadowMap_cull + shadowMap_draw;
+                if (totalShadowMap > 0)
+                {
+                    float prcStart = (float)shadowMap_start / (float)totalShadowMap;
+                    float prcCull = (float)shadowMap_cull / (float)totalShadowMap;
+                    float prcDraw = (float)shadowMap_draw / (float)totalShadowMap;
+
+                    Counters.SetStatistics("Scene.Draw.totalShadowMap", string.Format(
+                        "SM = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%",
+                        totalShadowMap,
+                        prcStart * 100f,
+                        prcCull * 100f,
+                        prcDraw * 100f));
+                }
+
+                long totalDeferred = deferred_cull + deferred_gbuffer + deferred_lbuffer + deferred_compose + deferred_draw2D;
+                if (totalDeferred > 0)
+                {
+                    float prcCull = (float)deferred_cull / (float)totalDeferred;
+                    float prcGBuffer = (float)deferred_gbuffer / (float)totalDeferred;
+                    float prcLBuffer = (float)deferred_lbuffer / (float)totalDeferred;
+                    float prcCompose = (float)deferred_compose / (float)totalDeferred;
+                    float prcDraw2D = (float)deferred_draw2D / (float)totalDeferred;
+
+                    Counters.SetStatistics("Scene.Draw.totalDeferred", string.Format(
+                        "DR = {0:000000}; Cull {1:00}%; GBuffer {2:00}%; LBuffer {3:00}%; Compose {4:00}%; Draw2D {5:00}%",
+                        totalDeferred,
+                        prcCull * 100f,
+                        prcGBuffer * 100f,
+                        prcLBuffer * 100f,
+                        prcCompose * 100f,
+                        prcDraw2D * 100f));
+
+                    if (deferred_gbuffer > 0)
                     {
-                        #region Geometry Buffer
-#if DEBUG
-                        Stopwatch swGeometryBuffer = Stopwatch.StartNew();
-#endif
-#if DEBUG
-                        Stopwatch swGeometryBufferInit = Stopwatch.StartNew();
-#endif
-                        this.BindGBuffer();
-#if DEBUG
-                        swGeometryBufferInit.Stop();
-#endif
-#if DEBUG
-                        Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
-#endif
-                        //Draw scene on g-buffer render targets
-                        this.DrawResultComponents(gameTime, this.DrawContext, solidComponents);
-#if DEBUG
-                        swGeometryBufferDraw.Stop();
-#endif
-#if DEBUG
-                        Stopwatch swGeometryBufferResolve = Stopwatch.StartNew();
-#endif
-#if DEBUG
-                        swGeometryBufferResolve.Stop();
-#endif
-#if DEBUG
-                        swGeometryBuffer.Stop();
-#endif
-#if DEBUG
-                        deferred_gbuffer = swGeometryBuffer.ElapsedTicks;
-                        deferred_gbufferInit = swGeometryBufferInit.ElapsedTicks;
-                        deferred_gbufferDraw = swGeometryBufferDraw.ElapsedTicks;
-                        deferred_gbufferResolve = swGeometryBufferResolve.ElapsedTicks;
-#endif
-                        #endregion
+                        float prcPass1 = (float)deferred_gbufferInit / (float)deferred_gbuffer;
+                        float prcPass2 = (float)deferred_gbufferDraw / (float)deferred_gbuffer;
+                        float prcPass3 = (float)deferred_gbufferResolve / (float)deferred_gbuffer;
 
-                        #region Light Buffer
-#if DEBUG
-                        Stopwatch swLightBuffer = Stopwatch.StartNew();
-#endif
-                        this.BindLights();
+                        Counters.SetStatistics("Scene.Draw.deferred_gbuffer PRC", string.Format(
+                            "GBuffer = {0:000000}; Init {1:00}%; Draw {2:00}%; Resolve {3:00}%",
+                            deferred_gbuffer,
+                            prcPass1 * 100f,
+                            prcPass2 * 100f,
+                            prcPass3 * 100f));
 
-                        //Draw scene lights on light buffer using g-buffer output
-                        this.DrawLights(this.DrawContext);
-#if DEBUG
-                        swLightBuffer.Stop();
-#endif
-#if DEBUG
-                        deferred_lbuffer = swLightBuffer.ElapsedTicks;
+                        Counters.SetStatistics("Scene.Draw.deferred_gbuffer CNT", string.Format(
+                            "GBuffer = {0:000000}; Init {1:000000}; Draw {2:000000}; Resolve {3:000000}",
+                            deferred_gbuffer,
+                            deferred_gbufferInit,
+                            deferred_gbufferDraw,
+                            deferred_gbufferResolve));
+                    }
 
-                        long[] deferredCounters = Counters.GetStatistics("DEFERRED_LIGHTING") as long[];
-                        if (deferredCounters != null)
-                        {
-                            deferred_lbufferInit = deferredCounters[0];
-                            deferred_lbufferDir = deferredCounters[1];
-                            deferred_lbufferPoi = deferredCounters[2];
-                            deferred_lbufferSpo = deferredCounters[3];
-                        }
-#endif
-                        #endregion
+                    if (deferred_lbuffer > 0)
+                    {
+                        float prcPass1 = (float)deferred_lbufferInit / (float)deferred_lbuffer;
+                        float prcPass2 = (float)deferred_lbufferDir / (float)deferred_lbuffer;
+                        float prcPass3 = (float)deferred_lbufferPoi / (float)deferred_lbuffer;
+                        float prcPass4 = (float)deferred_lbufferSpo / (float)deferred_lbuffer;
+
+                        Counters.SetStatistics("Scene.Draw.deferred_lbuffer PRC", string.Format(
+                            "LBuffer = {0:000000}; Init {1:00}%; Directionals {2:00}%; Points {3:00}%; Spots {4:00}%",
+                            deferred_lbuffer,
+                            prcPass1 * 100f,
+                            prcPass2 * 100f,
+                            prcPass3 * 100f,
+                            prcPass4 * 100f));
+
+                        Counters.SetStatistics("Scene.Draw.deferred_lbuffer CNT", string.Format(
+                            "LBuffer = {0:000000}; Init {1:000000}; Directionals {2:000000}; Points {3:000000}; Spots {4:000000}",
+                            deferred_lbuffer,
+                            deferred_lbufferInit,
+                            deferred_lbufferDir,
+                            deferred_lbufferPoi,
+                            deferred_lbufferSpo));
+                    }
+
+                    if (deferred_compose > 0)
+                    {
+                        float prcPass1 = (float)deferred_composeInit / (float)deferred_compose;
+                        float prcPass2 = (float)deferred_composeDraw / (float)deferred_compose;
+
+                        Counters.SetStatistics("Scene.Draw.deferred_compose PRC", string.Format(
+                            "Compose = {0:000000}; Init {1:00}%; Draw {2:00}%",
+                            deferred_compose,
+                            prcPass1 * 100f,
+                            prcPass2 * 100f));
+
+                        Counters.SetStatistics("Scene.Draw.deferred_compose CNT", string.Format(
+                            "Compose = {0:000000}; Init {1:000000}; Draw {2:000000}",
+                            deferred_compose,
+                            deferred_composeInit,
+                            deferred_composeDraw));
                     }
                 }
 
-                #region Final composition
-#if DEBUG
-                Stopwatch swComponsition = Stopwatch.StartNew();
+                long other = total - (totalShadowMap + totalDeferred);
+
+                float prcSM = (float)totalShadowMap / (float)total;
+                float prcDR = (float)totalDeferred / (float)total;
+                float prcOther = (float)other / (float)total;
+
+                Counters.SetStatistics("Scene.Draw", string.Format(
+                    "TOTAL = {0:000000}; Shadows {1:00}%; Deferred {2:00}%; Other {3:00}%;",
+                    total,
+                    prcSM * 100f,
+                    prcDR * 100f,
+                    prcOther * 100f));
 #endif
-                this.BindResult();
-
-                //Draw scene result on screen using g-buffer and light buffer
-                this.DrawResult(this.DrawContext);
-#if DEBUG
-                swComponsition.Stop();
-
-                deferred_compose = swComponsition.ElapsedTicks;
-
-                long[] deferredCompositionCounters = Counters.GetStatistics("DEFERRED_COMPOSITION") as long[];
-                if (deferredCompositionCounters != null)
-                {
-                    deferred_composeInit = deferredCompositionCounters[0];
-                    deferred_composeDraw = deferredCompositionCounters[1];
-                }
-#endif
-                #endregion
-
-                //Render to screen the rest of objects
-                List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.DeferredEnabled);
-                if (otherComponents.Count > 0)
-                {
-                    #region Draw other
-#if DEBUG
-                    Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                    //Set forward mode
-                    this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
-
-                    //Draw scene
-                    this.DrawResultComponents(gameTime, this.DrawContext, otherComponents);
-
-                    //Set deferred mode
-                    this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
-#if DEBUG
-                    swDraw.Stop();
-
-                    deferred_draw2D = swDraw.ElapsedTicks;
-#endif
-                    #endregion
-                }
-
-                #endregion
-
-                #endregion
-
-                this.Updated = false;
             }
-#if DEBUG
-            swTotal.Stop();
-
-            total = swTotal.ElapsedTicks;
-#endif
-#if DEBUG
-            long totalShadowMap = shadowMap_start + shadowMap_cull + shadowMap_draw;
-            if (totalShadowMap > 0)
-            {
-                float prcStart = (float)shadowMap_start / (float)totalShadowMap;
-                float prcCull = (float)shadowMap_cull / (float)totalShadowMap;
-                float prcDraw = (float)shadowMap_draw / (float)totalShadowMap;
-
-                Counters.SetStatistics("Scene.Draw.totalShadowMap", string.Format(
-                    "SM = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%",
-                    totalShadowMap,
-                    prcStart * 100f,
-                    prcCull * 100f,
-                    prcDraw * 100f));
-            }
-
-            long totalDeferred = deferred_cull + deferred_gbuffer + deferred_lbuffer + deferred_compose + deferred_draw2D;
-            if (totalDeferred > 0)
-            {
-                float prcCull = (float)deferred_cull / (float)totalDeferred;
-                float prcGBuffer = (float)deferred_gbuffer / (float)totalDeferred;
-                float prcLBuffer = (float)deferred_lbuffer / (float)totalDeferred;
-                float prcCompose = (float)deferred_compose / (float)totalDeferred;
-                float prcDraw2D = (float)deferred_draw2D / (float)totalDeferred;
-
-                Counters.SetStatistics("Scene.Draw.totalDeferred", string.Format(
-                    "DR = {0:000000}; Cull {1:00}%; GBuffer {2:00}%; LBuffer {3:00}%; Compose {4:00}%; Draw2D {5:00}%",
-                    totalDeferred,
-                    prcCull * 100f,
-                    prcGBuffer * 100f,
-                    prcLBuffer * 100f,
-                    prcCompose * 100f,
-                    prcDraw2D * 100f));
-
-                if (deferred_gbuffer > 0)
-                {
-                    float prcPass1 = (float)deferred_gbufferInit / (float)deferred_gbuffer;
-                    float prcPass2 = (float)deferred_gbufferDraw / (float)deferred_gbuffer;
-                    float prcPass3 = (float)deferred_gbufferResolve / (float)deferred_gbuffer;
-
-                    Counters.SetStatistics("Scene.Draw.deferred_gbuffer PRC", string.Format(
-                        "GBuffer = {0:000000}; Init {1:00}%; Draw {2:00}%; Resolve {3:00}%",
-                        deferred_gbuffer,
-                        prcPass1 * 100f,
-                        prcPass2 * 100f,
-                        prcPass3 * 100f));
-
-                    Counters.SetStatistics("Scene.Draw.deferred_gbuffer CNT", string.Format(
-                        "GBuffer = {0:000000}; Init {1:000000}; Draw {2:000000}; Resolve {3:000000}",
-                        deferred_gbuffer,
-                        deferred_gbufferInit,
-                        deferred_gbufferDraw,
-                        deferred_gbufferResolve));
-                }
-
-                if (deferred_lbuffer > 0)
-                {
-                    float prcPass1 = (float)deferred_lbufferInit / (float)deferred_lbuffer;
-                    float prcPass2 = (float)deferred_lbufferDir / (float)deferred_lbuffer;
-                    float prcPass3 = (float)deferred_lbufferPoi / (float)deferred_lbuffer;
-                    float prcPass4 = (float)deferred_lbufferSpo / (float)deferred_lbuffer;
-
-                    Counters.SetStatistics("Scene.Draw.deferred_lbuffer PRC", string.Format(
-                        "LBuffer = {0:000000}; Init {1:00}%; Directionals {2:00}%; Points {3:00}%; Spots {4:00}%",
-                        deferred_lbuffer,
-                        prcPass1 * 100f,
-                        prcPass2 * 100f,
-                        prcPass3 * 100f,
-                        prcPass4 * 100f));
-
-                    Counters.SetStatistics("Scene.Draw.deferred_lbuffer CNT", string.Format(
-                        "LBuffer = {0:000000}; Init {1:000000}; Directionals {2:000000}; Points {3:000000}; Spots {4:000000}",
-                        deferred_lbuffer,
-                        deferred_lbufferInit,
-                        deferred_lbufferDir,
-                        deferred_lbufferPoi,
-                        deferred_lbufferSpo));
-                }
-
-                if (deferred_compose > 0)
-                {
-                    float prcPass1 = (float)deferred_composeInit / (float)deferred_compose;
-                    float prcPass2 = (float)deferred_composeDraw / (float)deferred_compose;
-
-                    Counters.SetStatistics("Scene.Draw.deferred_compose PRC", string.Format(
-                        "Compose = {0:000000}; Init {1:00}%; Draw {2:00}%",
-                        deferred_compose,
-                        prcPass1 * 100f,
-                        prcPass2 * 100f));
-
-                    Counters.SetStatistics("Scene.Draw.deferred_compose CNT", string.Format(
-                        "Compose = {0:000000}; Init {1:000000}; Draw {2:000000}",
-                        deferred_compose,
-                        deferred_composeInit,
-                        deferred_composeDraw));
-                }
-            }
-
-            long other = total - (totalShadowMap + totalDeferred);
-
-            float prcSM = (float)totalShadowMap / (float)total;
-            float prcDR = (float)totalDeferred / (float)total;
-            float prcOther = (float)other / (float)total;
-
-            Counters.SetStatistics("Scene.Draw", string.Format(
-                "TOTAL = {0:000000}; Shadows {1:00}%; Deferred {2:00}%; Other {3:00}%;",
-                total,
-                prcSM * 100f,
-                prcDR * 100f,
-                prcOther * 100f));
-#endif
         }
         /// <summary>
         /// Gets renderer resources
@@ -1275,7 +1278,7 @@ namespace Engine
                 if (!components[i].Cull)
                 {
                     this.Game.Graphics.SetRasterizerDefault();
-                    if (components[i].Opaque)
+                    if (components[i].CastShadow)
                     {
                         this.Game.Graphics.SetBlendDeferredComposer();
                     }

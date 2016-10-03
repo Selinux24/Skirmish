@@ -35,14 +35,6 @@ namespace Engine
         protected Buffer InstancingBuffer = null;
 
         /// <summary>
-        /// Enables z-buffer writting
-        /// </summary>
-        public bool EnableDepthStencil { get; set; }
-        /// <summary>
-        /// Enables transparent blending
-        /// </summary>
-        public bool EnableAlphaBlending { get; set; }
-        /// <summary>
         /// Gets manipulator per instance list
         /// </summary>
         /// <returns>Gets manipulator per instance list</returns>

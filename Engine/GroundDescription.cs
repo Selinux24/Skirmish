@@ -122,9 +122,9 @@ namespace Engine
             /// </summary>
             public float Saturation = 0.1f;
             /// <summary>
-            /// Is opaque
+            /// Casts shadow
             /// </summary>
-            public bool Opaque = true;
+            public bool CastShadow = true;
             /// <summary>
             /// Can be renderer by the deferred renderer
             /// </summary>
@@ -206,9 +206,9 @@ namespace Engine
         /// </summary>
         public string Name = null;
         /// <summary>
-        /// Is Opaque
+        /// Gets or sets whether the object cast shadow
         /// </summary>
-        public bool Opaque = true;
+        public bool CastShadow { get; set; }
         /// <summary>
         /// Is Static
         /// </summary>
