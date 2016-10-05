@@ -79,18 +79,18 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game class</param>
         /// <param name="content">Content</param>
-        /// <param name="instances">Number of instances</param>
+        /// <param name="description">Description</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelInstanced(Game game, ModelContent content, int instances, bool dynamic = false)
-            : base(game, content, true, instances, true, true, dynamic)
+        public ModelInstanced(Game game, ModelContent content, ModelInstancedDescription description, bool dynamic = false)
+            : base(game, content, description, true, description.Instances, true, true, dynamic)
         {
-            if (instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
+            if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 
-            this.InstanceCount = instances;
+            this.InstanceCount = description.Instances;
 
-            this.instances = Helper.CreateArray(instances, () => new ModelInstance(this));
-            this.instancesTmp = new ModelInstance[instances];
-            this.instancingData = new VertexInstancingData[instances];
+            this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this));
+            this.instancesTmp = new ModelInstance[this.InstanceCount];
+            this.instancingData = new VertexInstancingData[this.InstanceCount];
 
             this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.instancingData);
             this.InstancingBufferStride = instancingData[0].Stride;
@@ -102,18 +102,18 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game class</param>
         /// <param name="content">Content</param>
-        /// <param name="instances">Number of instances</param>
+        /// <param name="description">Description</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelInstanced(Game game, LODModelContent content, int instances, bool dynamic = false)
-            : base(game, content, true, instances, true, true, dynamic)
+        public ModelInstanced(Game game, LODModelContent content, ModelInstancedDescription description, bool dynamic = false)
+            : base(game, content, description, true, description.Instances, true, true, dynamic)
         {
-            if (instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
+            if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 
-            this.InstanceCount = instances;
+            this.InstanceCount = description.Instances;
 
-            this.instances = Helper.CreateArray(instances, () => new ModelInstance(this));
-            this.instancesTmp = new ModelInstance[instances];
-            this.instancingData = new VertexInstancingData[instances];
+            this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this));
+            this.instancesTmp = new ModelInstance[this.InstanceCount];
+            this.instancingData = new VertexInstancingData[this.InstanceCount];
 
             this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.instancingData);
             this.InstancingBufferStride = instancingData[0].Stride;

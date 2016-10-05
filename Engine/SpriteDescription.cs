@@ -1,22 +1,19 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
-    /// Minimap description
+    /// Sprite description
     /// </summary>
-    public class MinimapDescription : DrawableDescription
+    public class SpriteDescription : DrawableDescription
     {
         /// <summary>
-        /// Top position
+        /// Sprite textures
         /// </summary>
-        public int Top;
+        public string[] Textures;
         /// <summary>
-        /// Left position
+        /// Content path
         /// </summary>
-        public int Left;
+        public string ContentPath = "Resources";
         /// <summary>
         /// Width
         /// </summary>
@@ -26,18 +23,14 @@ namespace Engine
         /// </summary>
         public int Height;
         /// <summary>
-        /// Terrain to draw
+        /// Fit screen
         /// </summary>
-        public Drawable[] Drawables;
-        /// <summary>
-        /// Minimap render area
-        /// </summary>
-        public BoundingBox MinimapArea;
+        public bool FitScreen;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public MinimapDescription()
+        public SpriteDescription()
             : base()
         {
             this.Static = true;

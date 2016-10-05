@@ -75,9 +75,9 @@ namespace Skybox
 
             #region Text
 
-            this.title = this.AddText("Tahoma", 18, Color.White);
-            this.help = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.fps = this.AddText("Lucida Casual", 12, Color.Yellow);
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
+            this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
 
             this.title.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -106,13 +106,17 @@ namespace Skybox
 
             #region Torchs
 
-            this.torchs = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = "Resources",
-                ModelFileName = "torch.dae",
-                Instances = this.firePositions.Length,
-                CastShadow = true,
-            });
+            this.torchs = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = "Resources",
+                    ModelFileName = "torch.dae",
+                },
+                new ModelInstancedDescription()
+                {
+                    Instances = this.firePositions.Length,
+                    CastShadow = true,
+                });
 
             #endregion
 
@@ -134,13 +138,13 @@ namespace Skybox
             var nvSettings = NavigationMeshGenerationSettings.Default;
             nvSettings.Agents[0] = this.walker;
 
-            GroundDescription desc = new GroundDescription()
+            ModelContentDescription content = new ModelContentDescription()
             {
                 ContentPath = "Resources",
-                Model = new GroundDescription.ModelDescription()
-                {
-                    ModelFileName = "ruins.dae",
-                },
+                ModelFileName = "ruins.dae",
+            };
+            GroundDescription desc = new GroundDescription()
+            {
                 PathFinder = new GroundDescription.PathFinderDescription()
                 {
                     Settings = nvSettings,
@@ -148,7 +152,7 @@ namespace Skybox
                 CastShadow = true,
                 DelayGeneration = true,
             };
-            this.ruins = this.AddScenery(desc, false);
+            this.ruins = this.AddScenery(content, desc, false);
 
             #endregion
 

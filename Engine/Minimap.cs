@@ -48,15 +48,8 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="description">Minimap description</param>
         public Minimap(Game game, MinimapDescription description)
-            : base(game)
+            : base(game, description)
         {
-            this.Static = true;
-            this.AlwaysVisible = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = false;
-            this.EnableDepthStencil = false;
-            this.EnableAlphaBlending = true;
-
             this.Drawables = description.Drawables;
 
             this.minimapArea = description.MinimapArea;

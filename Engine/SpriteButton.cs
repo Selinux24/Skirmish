@@ -121,7 +121,7 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="description">Button description</param>
         public SpriteButton(Game game, SpriteButtonDescription description)
-            : base(game)
+            : base(game, description)
         {
             this.button = new Sprite(
                 game,
@@ -133,14 +133,11 @@ namespace Engine
                     FitScreen = false,
                 });
 
-            if (!string.IsNullOrEmpty(description.Font))
+            if (description.TextDescription != null)
             {
                 this.text = new TextDrawer(
                     game,
-                    description.Font,
-                    description.FontSize,
-                    description.TextColor,
-                    description.TextShadowColor);
+                    description.TextDescription);
             }
 
             this.Left = description.Left;
@@ -226,57 +223,5 @@ namespace Engine
                 this.Click(this, e);
             }
         }
-    }
-
-    /// <summary>
-    /// Sprite button description
-    /// </summary>
-    public struct SpriteButtonDescription
-    {
-        /// <summary>
-        /// Texture to show when released state
-        /// </summary>
-        public string TextureReleased;
-        /// <summary>
-        /// Texture to show when pressed state
-        /// </summary>
-        public string TexturePressed;
-        /// <summary>
-        /// Left position
-        /// </summary>
-        public int Left;
-        /// <summary>
-        /// Top position
-        /// </summary>
-        public int Top;
-        /// <summary>
-        /// Width
-        /// </summary>
-        public int Width;
-        /// <summary>
-        /// Height
-        /// </summary>
-        public int Height;
-        /// <summary>
-        /// Font name
-        /// </summary>
-        public string Font;
-        /// <summary>
-        /// Font size
-        /// </summary>
-        public int FontSize;
-        /// <summary>
-        /// Text color
-        /// </summary>
-        public Color TextColor;
-        /// <summary>
-        /// Text shadow color
-        /// </summary>
-        /// <remarks>Set to transparent color if no shadow must be drawn</remarks>
-        public Color TextShadowColor;
-        /// <summary>
-        /// Button text
-        /// </summary>
-        public string Text;
     }
 }

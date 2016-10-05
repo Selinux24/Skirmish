@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SharpDX;
+﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -34,10 +34,29 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="description">Description</param>
+        /// <param name="count">Maximum triangle count</param>
+        public TriangleListDrawer(Game game, TriangleDrawerDescription description, int count)
+            : base(game, ModelContent.GenerateTriangleList(new Triangle[count], Color.Transparent), description, true)
+        {
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
+            this.EnableAlphaBlending = true;
+
+            this.dictionaryChanged = false;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="description">Description</param>
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
-        public TriangleListDrawer(Game game, Triangle[] triangles, Color4 color)
-            : base(game, ModelContent.GenerateTriangleList(triangles, color), true)
+        public TriangleListDrawer(Game game, TriangleDrawerDescription description, Triangle[] triangles, Color4 color)
+            : base(game, ModelContent.GenerateTriangleList(triangles, color), description, true)
         {
             this.Static = true;
             this.AlwaysVisible = true;
@@ -48,23 +67,6 @@ namespace Engine
 
             this.dictionary.Add(color, new List<Triangle>(triangles));
             this.dictionaryChanged = true;
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="count">Maximum triangle count</param>
-        public TriangleListDrawer(Game game, int count)
-            : base(game, ModelContent.GenerateTriangleList(new Triangle[count], Color.Transparent), true)
-        {
-            this.Static = true;
-            this.AlwaysVisible = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = false;
-            this.EnableDepthStencil = false;
-            this.EnableAlphaBlending = true;
-
-            this.dictionaryChanged = false;
         }
         /// <summary>
         /// Draw content

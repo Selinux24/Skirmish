@@ -1,13 +1,10 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Minimap description
     /// </summary>
-    public class MinimapDescription : DrawableDescription
+    public class SpriteTextureDescription : DrawableDescription
     {
         /// <summary>
         /// Top position
@@ -26,18 +23,14 @@ namespace Engine
         /// </summary>
         public int Height;
         /// <summary>
-        /// Terrain to draw
+        /// Channel color
         /// </summary>
-        public Drawable[] Drawables;
-        /// <summary>
-        /// Minimap render area
-        /// </summary>
-        public BoundingBox MinimapArea;
+        public SpriteTextureChannelsEnum Channel = SpriteTextureChannelsEnum.All;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public MinimapDescription()
+        public SpriteTextureDescription()
             : base()
         {
             this.Static = true;

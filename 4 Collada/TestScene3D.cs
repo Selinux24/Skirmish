@@ -50,27 +50,28 @@ namespace Collada
             };
             this.cursor = this.AddCursor(cursorDesc);
 
-            this.title = this.AddText("Tahoma", 18, Color.White);
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
             this.title.Text = "Collada Scene with billboards and animation";
             this.title.Position = Vector2.Zero;
 
-            this.fps = this.AddText("Lucida Casual", 12, Color.Yellow);
+            this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
             this.fps.Text = null;
             this.fps.Position = new Vector2(0, 24);
 
-            this.picks = this.AddText("Lucida Casual", 12, Color.Yellow);
+            this.picks = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
             this.picks.Text = null;
             this.picks.Position = new Vector2(0, 48);
 
-            GroundDescription terrainDescription = new GroundDescription()
+            ModelContentDescription terrainContent = new ModelContentDescription()
             {
                 ContentPath = "Resources",
-                Model = new GroundDescription.ModelDescription()
-                {
-                    ModelFileName = "Ground.dae",
-                },
+                ModelFileName = "Ground.dae",
+            };
+            GroundDescription terrainDescription = new GroundDescription()
+            {
                 Vegetation = new GroundDescription.VegetationDescription()
                 {
+                    ContentPath = "Resources/Vegetation",
                     VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
                     Saturation = 1f,
                     StartRadius = 0f,
@@ -89,21 +90,29 @@ namespace Collada
                 },
                 DelayGeneration = true,
             };
-            this.ground = this.AddScenery(terrainDescription);
+            this.ground = this.AddScenery(terrainContent, terrainDescription);
 
-            this.helicoptersModel = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = "Resources",
-                ModelFileName = "Helicopter.dae",
-                Instances = 5,
-            });
+            this.helicoptersModel = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = "Resources",
+                    ModelFileName = "Helicopter.dae",
+                },
+                new ModelInstancedDescription()
+                {
+                    Instances = 5,
+                });
 
-            this.lampsModel = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = "Resources",
-                ModelFileName = "Poly.dae",
-                Instances = 2
-            });
+            this.lampsModel = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = "Resources",
+                    ModelFileName = "Poly.dae",
+                },
+                new ModelInstancedDescription()
+                {
+                    Instances = 2
+                });
 
             var rainEmitter = new ParticleEmitter()
             {

@@ -185,43 +185,43 @@
     <Content Include="Resources\M24\m24.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\alpha001.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\alpha001.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\am03.png">
+    <Content Include="Resources\Scenery\Heightmap\Textures\am03.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\am01.jpg">
+    <Content Include="Resources\Scenery\Heightmap\Textures\am01.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\am02.jpg">
+    <Content Include="Resources\Scenery\Heightmap\Textures\am02.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\am04.jpg">
+    <Content Include="Resources\Scenery\Heightmap\Textures\am04.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\dirt001.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\dirt001.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\dirt002.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\dirt002.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\dirt004.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\dirt004.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\dirt1lr.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\dirt1lr.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\dirt2lr.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\dirt2lr.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\normal001.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\normal001.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\normal002.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\normal002.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\stone001.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\stone001.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Soldier\soldier0.jpg">
@@ -293,10 +293,10 @@
     <Content Include="Resources\Scenery\Skydom\sunset.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\dirt0hr.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\dirt0hr.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Textures\dirt0lr.dds">
+    <Content Include="Resources\Scenery\Heightmap\Textures\dirt0lr.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="Properties\Resources.resx">

@@ -17,12 +17,11 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="content">Content</param>
-        public Skydom(Game game, ModelContent content)
-            : base(game, content)
+        /// <param name="description">Skydom description</param>
+        public Skydom(Game game, ModelContent content, SkydomDescription description)
+            : base(game, content, description)
         {
             this.Cull = false;
-            this.CastShadow = true;
-            this.Static = true;
         }
 
         /// <summary>

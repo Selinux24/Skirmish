@@ -158,7 +158,6 @@
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="AttachedModelUsesEnum.cs" />
     <Compile Include="BezierPath.cs" />
-    <Compile Include="Billboard.cs" />
     <Compile Include="BoundingCylinder.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="CameraModes.cs" />
@@ -337,6 +336,9 @@
     <Compile Include="CubemapDescription.cs" />
     <Compile Include="CameraFollower.cs" />
     <Compile Include="AttachedModel.cs" />
+    <Compile Include="DrawableDescription.cs" />
+    <Compile Include="Flare.cs" />
+    <Compile Include="HeightmapDescription.cs" />
     <Compile Include="IFollower.cs" />
     <Compile Include="IGround.cs" />
     <Compile Include="IPickable.cs" />
@@ -351,7 +353,10 @@
     <Compile Include="Ground.cs" />
     <Compile Include="Helpers\ResourceStatus.cs" />
     <Compile Include="Helpers\ResourceStatusItem.cs" />
+    <Compile Include="LensFlareDescription.cs" />
+    <Compile Include="LineDrawerDescription.cs" />
     <Compile Include="MinimapDescription.cs" />
+    <Compile Include="ModelContentDescription.cs" />
     <Compile Include="ModelDescription.cs" />
     <Compile Include="ModelInstance.cs" />
     <Compile Include="ModelInstancedDescription.cs" />
@@ -397,6 +402,13 @@
     <Compile Include="PathFinding\NavMesh\PolyMesh.cs" />
     <Compile Include="PathFinding\NavMesh\PolyMeshDetail.cs" />
     <Compile Include="SkydomDescription.cs" />
+    <Compile Include="SpriteBackgroundDescription.cs" />
+    <Compile Include="SpriteButtonDescription.cs" />
+    <Compile Include="SpriteDescription.cs" />
+    <Compile Include="SpriteTextureChannelsEnum.cs" />
+    <Compile Include="SpriteTextureDescription.cs" />
+    <Compile Include="TextDrawerDescription.cs" />
+    <Compile Include="TriangleDrawerDescription.cs" />
     <Compile Include="Vertexi.cs" />
     <Compile Include="PathFinding\NavMesh\Region.cs" />
     <Compile Include="PathFinding\NavMesh\RegionFlags.cs" />

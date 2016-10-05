@@ -16,7 +16,7 @@ namespace SceneTest
         {
             base.Initialize();
 
-            BackgroundDescription bkDesc = new BackgroundDescription()
+            SpriteBackgroundDescription bkDesc = new SpriteBackgroundDescription()
             {
                 ContentPath = "ResourcesHID",
                 Textures = new[] { "background.jpg" },

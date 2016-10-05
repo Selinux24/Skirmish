@@ -1,22 +1,47 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine
 {
     using Engine.Common;
 
+    /// <summary>
+    /// Lens flare
+    /// </summary>
     public class LensFlare : Drawable
     {
+        /// <summary>
+        /// Glow sprote
+        /// </summary>
         private Sprite glowSprite;
+        /// <summary>
+        /// Flares
+        /// </summary>
         private Flare[] flares = null;
+        /// <summary>
+        /// Draw flares flag
+        /// </summary>
         private bool drawFlares = false;
+        /// <summary>
+        /// Light projected position
+        /// </summary>
         private Vector2 lightProjectedPosition;
+        /// <summary>
+        /// Light projected direction
+        /// </summary>
         private Vector2 lightProjectedDirection;
 
+        /// <summary>
+        /// Directional light who flares
+        /// </summary>
         public SceneLightDirectional Light { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game instance</param>
+        /// <param name="description">Description</param>
         public LensFlare(Game game, LensFlareDescription description)
-            : base(game)
+            : base(game, description)
         {
             this.glowSprite = new Sprite(game, new SpriteDescription()
             {
@@ -52,13 +77,18 @@ namespace Engine
                 }
             }
         }
-
+        /// <summary>
+        /// Dispose of resources
+        /// </summary>
         public override void Dispose()
         {
             Helper.Dispose(this.glowSprite);
             Helper.Dispose(this.flares);
         }
-
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="context">Updating context</param>
         public override void Update(UpdateContext context)
         {
             if (this.Light != null)
@@ -98,17 +128,23 @@ namespace Engine
                 }
             }
         }
-
+        /// <summary>
+        /// Draws flare
+        /// </summary>
+        /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
             if (this.drawFlares)
             {
-                this.DrawGlow(context, this.lightProjectedPosition, this.lightProjectedDirection);
-                this.DrawFlares(context, this.lightProjectedPosition, this.lightProjectedDirection);
+                this.DrawGlow(context);
+                this.DrawFlares(context);
             }
         }
-
-        private void DrawGlow(DrawContext context, Vector2 lightPosition, Vector2 lightDirection)
+        /// <summary>
+        /// Draws the glowing sprite
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        private void DrawGlow(DrawContext context)
         {
             Color4 color = this.Light.LightColor;
             color.Alpha = 0.25f;
@@ -116,15 +152,18 @@ namespace Engine
             float scale = 50f / this.glowSprite.Width;
 
             this.glowSprite.Color = color;
-            this.glowSprite.Manipulator.SetPosition(lightPosition - (this.glowSprite.RelativeCenter * scale));
+            this.glowSprite.Manipulator.SetPosition(this.lightProjectedPosition - (this.glowSprite.RelativeCenter * scale));
             this.glowSprite.Manipulator.SetScale(scale);
 
             //Draw sprite with alpha
             this.Game.Graphics.SetBlendAdditive();
             this.glowSprite.Draw(context);
         }
-
-        private void DrawFlares(DrawContext context, Vector2 lightPosition, Vector2 lightDirection)
+        /// <summary>
+        /// Draws the flare list sprites
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        private void DrawFlares(DrawContext context)
         {
             if (this.flares != null && this.flares.Length > 0)
             {
@@ -139,7 +178,7 @@ namespace Engine
                     flareColor.Alpha *= 0.5f;
 
                     // Compute the position of this flare sprite.
-                    Vector2 flarePosition = (lightPosition + lightDirection * flare.Position);
+                    Vector2 flarePosition = (this.lightProjectedPosition + this.lightProjectedDirection * flare.Position);
 
                     flare.FlareSprite.Color = flareColor;
                     flare.FlareSprite.Manipulator.SetScale(flare.Scale);
@@ -149,42 +188,6 @@ namespace Engine
                     flare.FlareSprite.Draw(context);
                 }
             }
-        }
-    }
-
-    public class Flare : IDisposable
-    {
-        public Sprite FlareSprite;
-        public float Position;
-        public float Scale;
-        public Color Color;
-
-        public void Dispose()
-        {
-            Helper.Dispose(this.FlareSprite);
-        }
-    }
-
-    public class LensFlareDescription
-    {
-        public string ContentPath;
-        public string GlowTexture;
-        public FlareDescription[] Flares;
-    }
-
-    public class FlareDescription
-    {
-        public float Position;
-        public float Scale;
-        public Color Color;
-        public string Texture;
-
-        public FlareDescription(float position, float scale, Color color, string texture)
-        {
-            this.Position = position;
-            this.Scale = scale;
-            this.Color = color;
-            this.Texture = texture;
         }
     }
 }

@@ -198,33 +198,11 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        /// <param name="font">Font name</param>
-        /// <param name="size">Font size</param>
-        /// <param name="textColor">Fore color</param>
-        public TextDrawer(Game game, string font, int size, Color4 textColor)
-            : this(game, font, size, textColor, Color.Transparent)
+        /// <param name="description">Text description</param>
+        public TextDrawer(Game game, TextDrawerDescription description)
+            : base(game, description)
         {
-
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game class</param>
-        /// <param name="font">Font name</param>
-        /// <param name="size">Font size</param>
-        /// <param name="textColor">Fore color</param>
-        /// <param name="shadowColor">Shadow color</param>
-        public TextDrawer(Game game, string font, int size, Color4 textColor, Color4 shadowColor)
-            : base(game)
-        {
-            this.Static = true;
-            this.AlwaysVisible = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = false;
-            this.EnableDepthStencil = false;
-            this.EnableAlphaBlending = true;
-
-            this.Font = string.Format("{0} {1}", font, size);
+            this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
 
             this.technique = DrawerPool.EffectFont.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, DrawerModesEnum.Forward);
             this.inputLayout = DrawerPool.EffectFont.GetInputLayout(this.technique);
@@ -233,7 +211,7 @@ namespace Engine
                 game.Form.RenderWidth.NextPair(),
                 game.Form.RenderHeight.NextPair());
 
-            this.fontMap = FontMap.Map(game.Graphics.Device, font, size);
+            this.fontMap = FontMap.Map(game.Graphics.Device, description.Font, description.FontSize);
 
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
 
@@ -249,8 +227,8 @@ namespace Engine
             this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferWrite(new uint[FontMap.MAXTEXTLENGTH * 6]);
             this.indexCount = 0;
 
-            this.TextColor = textColor;
-            this.ShadowColor = shadowColor;
+            this.TextColor = description.TextColor;
+            this.ShadowColor = description.ShadowColor;
             this.ShadowRelative = Vector2.One * 1f;
 
             this.MapText();

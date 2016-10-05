@@ -1257,26 +1257,33 @@ namespace Engine
         private float windTime = 0;
 
         /// <summary>
+        /// Heightmap description
+        /// </summary>
+        public readonly HeightmapDescription HeightmapDescription = null;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="content">Heightmap content</param>
         /// <param name="description">Terrain description</param>
-        public Terrain(Game game, GroundDescription description)
+        public Terrain(Game game, HeightmapDescription content, GroundDescription description)
             : base(game, description)
         {
+            this.HeightmapDescription = content;
+
             #region Read heightmap
 
-            if (this.Description.Heightmap != null)
             {
-                string contentPath = Path.Combine(this.Description.ContentPath, this.Description.Heightmap.ContentPath);
+                string contentPath = this.HeightmapDescription.ContentPath;
 
                 ImageContent heightMapImage = new ImageContent()
                 {
-                    Streams = ContentManager.FindContent(contentPath, this.Description.Heightmap.HeightmapFileName),
+                    Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.HeightmapFileName),
                 };
                 ImageContent colorMapImage = new ImageContent()
                 {
-                    Streams = ContentManager.FindContent(contentPath, this.Description.Heightmap.ColormapFileName),
+                    Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.ColormapFileName),
                 };
 
                 this.heightMap = HeightMap.FromStream(heightMapImage.Stream, colorMapImage.Stream);
@@ -1286,42 +1293,41 @@ namespace Engine
 
             #region Read terrain textures
 
-            if (this.Description.Textures != null)
             {
-                string contentPath = Path.Combine(this.Description.ContentPath, this.Description.Textures.ContentPath);
+                string contentPath = Path.Combine(this.HeightmapDescription.ContentPath, this.HeightmapDescription.Textures.ContentPath);
 
                 ImageContent normalMapTextures = new ImageContent()
                 {
-                    Streams = ContentManager.FindContent(contentPath, this.Description.Textures.NormalMaps),
+                    Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.NormalMaps),
                 };
 
                 this.terrainNormalMaps = game.Graphics.Device.LoadTextureArray(normalMapTextures.Streams);
 
-                if (this.Description.Textures.UseSlopes)
+                if (this.HeightmapDescription.Textures.UseSlopes)
                 {
                     ImageContent terrainTexturesLR = new ImageContent()
                     {
-                        Streams = ContentManager.FindContent(contentPath, this.Description.Textures.TexturesLR),
+                        Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.TexturesLR),
                     };
                     ImageContent terrainTexturesHR = new ImageContent()
                     {
-                        Streams = ContentManager.FindContent(contentPath, this.Description.Textures.TexturesHR),
+                        Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.TexturesHR),
                     };
-                    
+
                     this.terrainTexturesLR = game.Graphics.Device.LoadTextureArray(terrainTexturesLR.Streams);
                     this.terrainTexturesHR = game.Graphics.Device.LoadTextureArray(terrainTexturesHR.Streams);
-                    this.slopeRanges = this.Description.Textures.SlopeRanges;
+                    this.slopeRanges = this.HeightmapDescription.Textures.SlopeRanges;
                 }
 
-                if (this.Description.Textures.UseAlphaMapping)
+                if (this.HeightmapDescription.Textures.UseAlphaMapping)
                 {
                     ImageContent colors = new ImageContent()
                     {
-                        Streams = ContentManager.FindContent(contentPath, this.Description.Textures.ColorTextures),
+                        Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.ColorTextures),
                     };
                     ImageContent alphaMap = new ImageContent()
                     {
-                        Streams = ContentManager.FindContent(contentPath, this.Description.Textures.AlphaMap),
+                        Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.AlphaMap),
                     };
 
                     this.colorTextures = game.Graphics.Device.LoadTextureArray(colors.Streams);
@@ -1333,14 +1339,14 @@ namespace Engine
 
             #region Read foliage textures
 
-            if (this.Description.Vegetation != null)
+            if (description.Vegetation != null)
             {
                 //Read foliage textures
-                string contentPath = Path.Combine(this.Description.ContentPath, this.Description.Vegetation.ContentPath);
+                string contentPath = description.Vegetation.ContentPath;
 
                 ImageContent foliageTextures = new ImageContent()
                 {
-                    Streams = ContentManager.FindContent(contentPath, this.Description.Vegetation.VegetarionTextures),
+                    Streams = ContentManager.FindContent(contentPath, description.Vegetation.VegetarionTextures),
                 };
 
                 this.foliageTextures = game.Graphics.Device.LoadTextureArray(foliageTextures.Streams);
@@ -1370,30 +1376,22 @@ namespace Engine
             {
                 TerrainNormalMaps = this.terrainNormalMaps,
 
-                UseAlphaMap = this.Description.Textures.UseAlphaMapping,
+                UseAlphaMap = this.HeightmapDescription.Textures.UseAlphaMapping,
                 AlphaMap = this.alphaMap,
                 ColorTextures = this.colorTextures,
 
-                UseSlopes = this.Description.Textures.UseSlopes,
+                UseSlopes = this.HeightmapDescription.Textures.UseSlopes,
                 SlopeRanges = this.slopeRanges,
                 TerraintexturesLR = this.terrainTexturesLR,
                 TerraintexturesHR = this.terrainTexturesHR,
 
-                Proportion = this.Description.Textures.Proportion,
+                Proportion = this.HeightmapDescription.Textures.Proportion,
 
                 FoliageTextureCount = this.foliageTextureCount,
                 FoliageTextures = this.foliageTextures,
                 FoliageEndRadius = this.Description.Vegetation != null ? this.Description.Vegetation.EndRadius : 0,
                 RandomTexture = this.textureRandom,
             };
-
-            //Set drawing parameters for renderer
-            this.Static = true;
-            this.AlwaysVisible = false;
-            this.CastShadow = true;
-            this.DeferredEnabled = true;
-            this.EnableDepthStencil = true;
-            this.EnableAlphaBlending = false;
 
             if (!this.Description.DelayGeneration)
             {
@@ -1454,8 +1452,8 @@ namespace Engine
             VertexData[] vertices;
             uint[] indices;
             this.heightMap.BuildGeometry(
-                this.Description.Heightmap.CellSize,
-                this.Description.Heightmap.MaximumHeight,
+                this.HeightmapDescription.CellSize,
+                this.HeightmapDescription.MaximumHeight,
                 out vertices, out indices);
 
             //Initialize Quadtree

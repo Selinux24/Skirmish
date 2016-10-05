@@ -31,7 +31,13 @@ namespace SceneTest
         {
             base.Initialize();
 
-            this.title = this.AddText("Tahoma", 18, Color.BlueViolet, 0);
+            var textDesc = new TextDrawerDescription()
+            {
+                Font = "Tahoma",
+                FontSize = 18,
+                TextColor = Color.BlueViolet,
+            };
+            this.title = this.AddText(textDesc, 0);
             this.title.Text = "3D scene & HID scene";
             this.title.Position = Vector2.Zero;
 
@@ -50,16 +56,16 @@ namespace SceneTest
 
         private void InitializeText(int size)
         {
-            this.txt0 = this.AddText("Times New Roman", size + 0, Color.Red, 0);
-            this.txt1 = this.AddText("Times New Roman", size + 1, Color.Red, 0);
-            this.txt2 = this.AddText("Times New Roman", size + 2, Color.Red, 0);
-            this.txt3 = this.AddText("Times New Roman", size + 3, Color.Red, 0);
-            this.txt4 = this.AddText("Times New Roman", size + 4, Color.Red, 0);
-            this.txt5 = this.AddText("Times New Roman", size + 5, Color.Red, 0);
-            this.txt6 = this.AddText("Times New Roman", size + 6, Color.Red, 0);
-            this.txt7 = this.AddText("Times New Roman", size + 7, Color.Red, 0);
-            this.txt8 = this.AddText("Times New Roman", size + 8, Color.Red, 0);
-            this.txt9 = this.AddText("Times New Roman", size + 9, Color.Red, 0);
+            this.txt0 = this.AddText(TextDrawerDescription.Generate("Times New Roman", size + 0, Color.Red), 0);
+            this.txt1 = this.AddText(TextDrawerDescription.Generate("Times New Roman", size + 1, Color.Red), 0);
+            this.txt2 = this.AddText(TextDrawerDescription.Generate("Times New Roman", size + 2, Color.Red), 0);
+            this.txt3 = this.AddText(TextDrawerDescription.Generate("Times New Roman", size + 3, Color.Red), 0);
+            this.txt4 = this.AddText(TextDrawerDescription.Generate("Times New Roman", size + 4, Color.Red), 0);
+            this.txt5 = this.AddText(TextDrawerDescription.Generate("Times New Roman", size + 5, Color.Red), 0);
+            this.txt6 = this.AddText(TextDrawerDescription.Generate("Times New Roman", size + 6, Color.Red), 0);
+            this.txt7 = this.AddText(TextDrawerDescription.Generate("Times New Roman", size + 7, Color.Red), 0);
+            this.txt8 = this.AddText(TextDrawerDescription.Generate("Times New Roman", size + 8, Color.Red), 0);
+            this.txt9 = this.AddText(TextDrawerDescription.Generate("Times New Roman", size + 9, Color.Red), 0);
 
             this.txt0.Text = this.txt0.Font;
             this.txt1.Text = this.txt1.Font;

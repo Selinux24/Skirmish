@@ -87,10 +87,10 @@ namespace TerrainTest
 
             #region Texts
 
-            this.title = this.AddText("Tahoma", 18, Color.White);
-            this.load = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.counters1 = this.AddText("Lucida Casual", 10, Color.GreenYellow);
-            this.counters2 = this.AddText("Lucida Casual", 10, Color.GreenYellow);
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
+            this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.counters1 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow));
+            this.counters2 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow));
 
             this.title.Text = "Terrain collision and trajectories test";
             this.load.Text = "";
@@ -115,14 +115,18 @@ namespace TerrainTest
             #region Cursor 3D
 
             sw.Restart();
-            this.cursor3D = this.AddModel(new ModelDescription()
-            {
-                ContentPath = resources + "/Cursor",
-                ModelFileName = "cursor.dae",
-                DeferredEnabled = false,
-                CastShadow = false,
-            });
-            this.cursor3D.EnableDepthStencil = false;
+            this.cursor3D = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources + "/Cursor",
+                    ModelFileName = "cursor.dae",
+                },
+                new ModelDescription()
+                {
+                    DeferredEnabled = false,
+                    CastShadow = false,
+                    EnableDepthStencil = false,
+                });
             sw.Stop();
             loadingText += string.Format("cursor3D: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -138,11 +142,10 @@ namespace TerrainTest
                 Width = 16,
                 Height = 16,
             });
-            sw.Stop();
-            loadingText += string.Format("cursor2D: {0} ", sw.Elapsed.TotalSeconds);
-
             this.cursor2D.Color = Color.Red;
             this.cursor2D.Visible = false;
+            sw.Stop();
+            loadingText += string.Format("cursor2D: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
@@ -153,77 +156,85 @@ namespace TerrainTest
             {
                 ContentPath = resources + "/Flare",
                 GlowTexture = "lfGlow.png",
-                Flares = new FlareDescription[]
+                Flares = new[]
                 {
-                    new FlareDescription(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
-                    new FlareDescription( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
-                    new FlareDescription( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
-                    new FlareDescription( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
 
-                    new FlareDescription(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
-                    new FlareDescription( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
-                    new FlareDescription( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
+                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
+                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
+                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
 
-                    new FlareDescription(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
-                    new FlareDescription( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
-                    new FlareDescription( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
+                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
+                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
+                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             });
+            this.lensFlare.Light = this.Lights.DirectionalLights[0];
             sw.Stop();
             loadingText += string.Format("lensFlare: {0} ", sw.Elapsed.TotalSeconds);
-
-            this.lensFlare.Light = this.Lights.DirectionalLights[0];
 
             #endregion
 
             #region Helicopter
 
             sw.Restart();
-            var heliDesc = new ModelDescription()
-            {
-                ContentPath = resources + "/Helicopter",
-                ModelFileName = "helicopter.dae",
-                CastShadow = true,
-                Static = false,
-                TextureIndex = 2,
-            };
-            this.helicopter = this.AddModel(heliDesc);
+            this.helicopter = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources + "/Helicopter",
+                    ModelFileName = "helicopter.dae",
+                },
+                new ModelDescription()
+                {
+                    CastShadow = true,
+                    Static = false,
+                    TextureIndex = 2,
+                });
             this.helicopter.SetManipulator(new HeliManipulator());
-            sw.Stop();
-            loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
-
             this.helicopter.Manipulator.SetScale(0.75f);
             this.helicopter.AnimationController.AddClip(0, true, float.MaxValue);
+            sw.Stop();
+            loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
             #region Tank
 
             sw.Restart();
-            this.tank = this.AddModel(new ModelDescription()
-            {
-                ContentPath = resources + "/Leopard",
-                ModelFileName = "Leopard.dae",
-                CastShadow = true,
-                Static = false,
-            });
+            this.tank = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources + "/Leopard",
+                    ModelFileName = "Leopard.dae",
+                },
+                new ModelDescription()
+                {
+                    CastShadow = true,
+                    Static = false,
+                });
+            this.tank.Manipulator.SetScale(2, true);
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
-
-            this.tank.Manipulator.SetScale(2);
 
             #endregion
 
             #region Helipod
 
             sw.Restart();
-            this.helipod = this.AddModel(new ModelDescription()
-            {
-                ContentPath = resources + "/Helipod",
-                ModelFileName = "helipod.dae",
-                CastShadow = true,
-                Static = true,
-            });
+            this.helipod = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources + "/Helipod",
+                    ModelFileName = "helipod.dae",
+                },
+                new ModelDescription()
+                {
+                    CastShadow = true,
+                    Static = true,
+                });
             sw.Stop();
             loadingText += string.Format("helipod: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -232,13 +243,17 @@ namespace TerrainTest
             #region Garage
 
             sw.Restart();
-            this.garage = this.AddModel(new ModelDescription()
-            {
-                ContentPath = resources + "/Garage",
-                ModelFileName = "garage.dae",
-                CastShadow = true,
-                Static = true,
-            });
+            this.garage = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources + "/Garage",
+                    ModelFileName = "garage.dae",
+                },
+                new ModelDescription()
+                {
+                    CastShadow = true,
+                    Static = true,
+                });
             sw.Stop();
             loadingText += string.Format("garage: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -247,14 +262,18 @@ namespace TerrainTest
             #region Obelisk
 
             sw.Restart();
-            this.obelisk = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = resources + "/Obelisk",
-                ModelFileName = "obelisk.dae",
-                CastShadow = true,
-                Static = true,
-                Instances = 4,
-            });
+            this.obelisk = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources + "/Obelisk",
+                    ModelFileName = "obelisk.dae",
+                },
+                new ModelInstancedDescription()
+                {
+                    CastShadow = true,
+                    Static = true,
+                    Instances = 4,
+                });
             sw.Stop();
             loadingText += string.Format("obelisk: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -263,15 +282,19 @@ namespace TerrainTest
             #region Rocks
 
             sw.Restart();
-            this.rocks = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                Name = "DEBUG_CUBE_INSTANCED",
-                ContentPath = resources + "/Rocks",
-                ModelFileName = "boulder.dae",
-                CastShadow = true,
-                Static = true,
-                Instances = 250,
-            });
+            this.rocks = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources + "/Rocks",
+                    ModelFileName = "boulder.dae",
+                },
+                new ModelInstancedDescription()
+                {
+                    Name = "DEBUG_CUBE_INSTANCED",
+                    CastShadow = true,
+                    Static = true,
+                    Instances = 250,
+                });
             sw.Stop();
             loadingText += string.Format("rocks: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -280,29 +303,36 @@ namespace TerrainTest
             #region Trees
 
             sw.Restart();
-            this.tree1 = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = resources + "/Trees",
-                ModelFileName = "birch_a.dae",
-                CastShadow = true,
-                Static = true,
-                Instances = 100,
-                VolumeMeshes = new[] { "Volume" },
-            });
-            this.tree2 = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = resources + "/Trees",
-                ModelFileName = "birch_b.dae",
-                CastShadow = true,
-                Static = true,
-                Instances = 100,
-                VolumeMeshes = new[] { "Volume" },
-            });
+            this.tree1 = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources + "/Trees",
+                    ModelFileName = "birch_a.dae",
+                    VolumeMeshes = new[] { "Volume" },
+                },
+                new ModelInstancedDescription()
+                {
+                    CastShadow = true,
+                    Static = true,
+                    EnableAlphaBlending = true,
+                    Instances = 100,
+                });
+            this.tree2 = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources + "/Trees",
+                    ModelFileName = "birch_b.dae",
+                    VolumeMeshes = new[] { "Volume" },
+                },
+                new ModelInstancedDescription()
+                {
+                    CastShadow = true,
+                    Static = true,
+                    EnableAlphaBlending = true,
+                    Instances = 100,
+                });
             sw.Stop();
             loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
-
-            this.tree1.EnableAlphaBlending = true;
-            this.tree2.EnableAlphaBlending = true;
 
             #endregion
 
@@ -336,12 +366,22 @@ namespace TerrainTest
                 tankAgent,
             };
 
-            var terrainDescription = new GroundDescription()
+            var terrainContent = new ModelContentDescription()
             {
                 ContentPath = resources + "/Terrain",
-                Model = new GroundDescription.ModelDescription()
+                ModelFileName = "two_levels.dae",
+            };
+            var terrainDescription = new GroundDescription()
+            {
+                Vegetation = new GroundDescription.VegetationDescription()
                 {
-                    ModelFileName = "two_levels.dae",
+                    ContentPath = resources + "/Terrain/Foliage/Billboard",
+                    VegetarionTextures = new[] { "grass.png" },
+                    Saturation = 2f,
+                    StartRadius = 0f,
+                    EndRadius = 50f,
+                    MinSize = new Vector2(0.25f, 0.25f),
+                    MaxSize = new Vector2(0.5f, 0.75f),
                 },
                 Quadtree = new GroundDescription.QuadtreeDescription()
                 {
@@ -351,21 +391,12 @@ namespace TerrainTest
                 {
                     Settings = navSettings,
                 },
-                Vegetation = new GroundDescription.VegetationDescription()
-                {
-                    ContentPath = "Foliage/Billboard",
-                    VegetarionTextures = new[] { "grass.png" },
-                    Saturation = 2f,
-                    StartRadius = 0f,
-                    EndRadius = 50f,
-                    MinSize = new Vector2(0.25f, 0.25f),
-                    MaxSize = new Vector2(0.5f, 0.75f),
-                },
                 CastShadow = true,
                 Static = true,
                 DelayGeneration = true,
             };
-            this.terrain = this.AddScenery(terrainDescription);
+            this.terrain = this.AddScenery(terrainContent, terrainDescription);
+           
             sw.Stop();
 
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);

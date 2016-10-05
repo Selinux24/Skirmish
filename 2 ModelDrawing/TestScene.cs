@@ -34,7 +34,13 @@ namespace ModelDrawing
         {
             base.Initialize();
 
-            this.text = this.AddText("Arial", 24, Color.Yellow);
+            var textDesc = new TextDrawerDescription()
+            {
+                Font = "Arial",
+                FontSize = 24,
+                TextColor = Color.Yellow,
+            };
+            this.text = this.AddText(textDesc);
             this.text.Position = Vector2.One;
 
             this.InitializeFloor();
@@ -66,8 +72,6 @@ namespace ModelDrawing
                 CastShadow = false,
             };
 
-            //this.Lights.Clear();
-            //this.Lights.Add(SceneLightDirectional.Primary);
             this.Lights.Add(this.spotLight);
 
             this.InitializePositions();
@@ -91,8 +95,9 @@ namespace ModelDrawing
                 1, 3, 2,
             };
 
-            this.floor = this.AddModel(ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, this.CreateMaterialFloor()));
-            this.floor.CastShadow = true;
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, this.CreateMaterialFloor());
+
+            this.floor = this.AddModel(content, new ModelDescription() { CastShadow = true, });
         }
         private void InitializeModels()
         {
@@ -110,15 +115,15 @@ namespace ModelDrawing
                 0, 2, 3,
             };
 
-            this.colorModel = this.AddModel(ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionColor, vertices, indices, this.CreateMaterialColor()));
-            this.textureModel = this.AddModel(ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionTexture, vertices, indices, this.CreateMaterialTexture()));
-            this.normalColorModel = this.AddModel(ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalColor, vertices, indices, this.CreateMaterialColor()));
-            this.normalTextureModel = this.AddModel(ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, this.CreateMaterialTexture()));
+            var colorModelContent = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionColor, vertices, indices, this.CreateMaterialColor());
+            var textureModelContent = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionTexture, vertices, indices, this.CreateMaterialTexture());
+            var normalColorModelContent = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalColor, vertices, indices, this.CreateMaterialColor());
+            var normalTextureModelContent = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, this.CreateMaterialTexture());
 
-            this.colorModel.CastShadow = true;
-            this.textureModel.CastShadow = true;
-            this.normalColorModel.CastShadow = true;
-            this.normalTextureModel.CastShadow = true;
+            this.colorModel = this.AddModel(colorModelContent, new ModelDescription() { CastShadow = true, });
+            this.textureModel = this.AddModel(textureModelContent, new ModelDescription() { CastShadow = true, });
+            this.normalColorModel = this.AddModel(normalColorModelContent, new ModelDescription() { CastShadow = true, });
+            this.normalTextureModel = this.AddModel(normalTextureModelContent, new ModelDescription() { CastShadow = true, });
 
             this.models = new[]
             {

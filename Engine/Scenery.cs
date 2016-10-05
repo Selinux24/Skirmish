@@ -572,14 +572,6 @@ namespace Engine
         public Scenery(Game game, ModelContent content, GroundDescription description)
             : base(game, description)
         {
-            this.Name = this.Description.Name;
-            this.Static = this.Description.Static;
-            this.AlwaysVisible = this.Description.AlwaysVisible;
-            this.CastShadow = this.Description.CastShadow;
-            this.DeferredEnabled = this.Description.DeferredEnabled;
-            this.EnableDepthStencil = this.Description.EnableDepthStencil;
-            this.EnableAlphaBlending = this.Description.EnableAlphaBlending;
-
             #region Patches
 
             this.triangleCache = content.GetTriangles();
@@ -598,7 +590,7 @@ namespace Engine
             if (this.Description != null && this.Description.Vegetation != null)
             {
                 //Read foliage textures
-                string contentPath = Path.Combine(this.Description.ContentPath, this.Description.Vegetation.ContentPath);
+                string contentPath = this.Description.Vegetation.ContentPath;
 
                 ImageContent foliageTextures = new ImageContent()
                 {

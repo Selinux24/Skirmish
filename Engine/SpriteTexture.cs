@@ -88,17 +88,10 @@ namespace Engine
         /// Contructor
         /// </summary>
         /// <param name="game">Game</param>
-        /// <param name="description">Minimap description</param>
+        /// <param name="description">Sprite texture description</param>
         public SpriteTexture(Game game, SpriteTextureDescription description)
-            : base(game)
+            : base(game, description)
         {
-            this.Static = true;
-            this.AlwaysVisible = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = false;
-            this.EnableDepthStencil = false;
-            this.EnableAlphaBlending = true;
-
             VertexData[] cv;
             uint[] ci;
             VertexData.CreateSprite(
@@ -213,67 +206,5 @@ namespace Engine
                 this.indexBuffer = null;
             }
         }
-    }
-
-    /// <summary>
-    /// Channel color
-    /// </summary>
-    public enum SpriteTextureChannelsEnum
-    {
-        /// <summary>
-        /// No channel selected
-        /// </summary>
-        None,
-        /// <summary>
-        /// All
-        /// </summary>
-        All,
-        /// <summary>
-        /// Red channel
-        /// </summary>
-        Red,
-        /// <summary>
-        /// Green channel
-        /// </summary>
-        Green,
-        /// <summary>
-        /// Blue channel
-        /// </summary>
-        Blue,
-        /// <summary>
-        /// Alpha channel
-        /// </summary>
-        Alpha,
-        /// <summary>
-        /// Without Alpha Channel
-        /// </summary>
-        NoAlpha,
-    }
-
-    /// <summary>
-    /// Minimap description
-    /// </summary>
-    public class SpriteTextureDescription
-    {
-        /// <summary>
-        /// Top position
-        /// </summary>
-        public int Top;
-        /// <summary>
-        /// Left position
-        /// </summary>
-        public int Left;
-        /// <summary>
-        /// Width
-        /// </summary>
-        public int Width;
-        /// <summary>
-        /// Height
-        /// </summary>
-        public int Height;
-        /// <summary>
-        /// Channel color
-        /// </summary>
-        public SpriteTextureChannelsEnum Channel = SpriteTextureChannelsEnum.All;
     }
 }

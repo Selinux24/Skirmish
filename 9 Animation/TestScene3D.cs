@@ -39,8 +39,8 @@ namespace AnimationTest
 
             #region Texts
 
-            this.title = this.AddText("Tahoma", 18, Color.White);
-            this.runtime = this.AddText("Tahoma", 11, Color.Yellow);
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
+            this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
 
             this.title.Text = "Animation test";
             this.runtime.Text = "";
@@ -54,11 +54,16 @@ namespace AnimationTest
 
             #region Soldier
 
-            this.soldier = this.AddModel(new ModelDescription()
-            {
-                ContentPath = @"Resources/Soldier",
-                ModelFileName = "soldier_anim2.dae",
-            });
+            this.soldier = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = @"Resources/Soldier",
+                    ModelFileName = "soldier_anim2.dae",
+                },
+                new ModelDescription()
+                {
+                    TextureIndex = 1,
+                });
 
             #endregion
 
@@ -87,13 +92,19 @@ namespace AnimationTest
                 mat.NormalMapTexture = "resources/d_road_asphalt_stripes_normal.dds";
                 mat.SpecularTexture = "resources/d_road_asphalt_stripes_specular.dds";
 
-                this.floor = this.AddModel(ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, mat));
-                this.floor.Static = true;
-                this.floor.AlwaysVisible = false;
-                this.floor.CastShadow = false;
-                this.floor.DeferredEnabled = true;
-                this.floor.EnableDepthStencil = true;
-                this.floor.EnableAlphaBlending = false;
+                var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, mat);
+
+                var desc = new ModelDescription()
+                {
+                    Static = true,
+                    AlwaysVisible = false,
+                    CastShadow = false,
+                    DeferredEnabled = true,
+                    EnableDepthStencil = true,
+                    EnableAlphaBlending = false,
+                };
+
+                this.floor = this.AddModel(content, desc);
             }
 
             #endregion

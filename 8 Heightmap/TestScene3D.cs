@@ -87,10 +87,10 @@ namespace HeightmapTest
 
             #region Texts
 
-            this.title = this.AddText("Tahoma", 18, Color.White);
-            this.load = this.AddText("Tahoma", 11, Color.Yellow);
-            this.help = this.AddText("Tahoma", 11, Color.Yellow);
-            this.help2 = this.AddText("Tahoma", 11, Color.Orange);
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
+            this.load = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
+            this.help = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
+            this.help2 = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange));
 
             this.title.Text = "Heightmap Terrain test";
             this.load.Text = "";
@@ -116,20 +116,20 @@ namespace HeightmapTest
             {
                 ContentPath = @"Resources/Scenery/Flare",
                 GlowTexture = "lfGlow.png",
-                Flares = new FlareDescription[]
+                Flares = new[]
                 {
-                    new FlareDescription(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
-                    new FlareDescription( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
-                    new FlareDescription( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
-                    new FlareDescription( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
 
-                    new FlareDescription(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
-                    new FlareDescription( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
-                    new FlareDescription( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
+                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
+                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
+                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
 
-                    new FlareDescription(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
-                    new FlareDescription( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
-                    new FlareDescription( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
+                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
+                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
+                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             });
 
@@ -159,69 +159,73 @@ namespace HeightmapTest
             pfSettings.CellHeight = 20f;
             pfSettings.CellSize = 20f;
 
-            this.terrain = this.AddTerrain(new GroundDescription()
-            {
-                ContentPath = "Resources/Scenery",
-
-                Heightmap = new GroundDescription.HeightmapDescription()
+            this.terrain = this.AddTerrain(
+                new HeightmapDescription()
                 {
-                    ContentPath = "Heightmap",
+                    ContentPath = "Resources/Scenery/Heightmap",
                     HeightmapFileName = "desert0hm.bmp",
                     ColormapFileName = "desert0cm.bmp",
                     CellSize = 5,
                     MaximumHeight = 50,
-                },
-                Quadtree = new GroundDescription.QuadtreeDescription()
-                {
-                    MaximumDepth = 3,
-                },
-                //PathFinder = new GroundDescription.PathFinderDescription()
-                //{
-                //    Settings = pfSettings,
-                //},
-                Textures = new GroundDescription.TexturesDescription()
-                {
-                    ContentPath = "Textures",
-                    NormalMaps = new[] { "normal001.dds", "normal002.dds" },
+                    Textures = new HeightmapDescription.TexturesDescription()
+                    {
+                        ContentPath = "Textures",
+                        NormalMaps = new[] { "normal001.dds", "normal002.dds" },
 
-                    UseAlphaMapping = true,
-                    AlphaMap = "alpha001.dds",
-                    ColorTextures = new[] { "dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds" },
+                        UseAlphaMapping = true,
+                        AlphaMap = "alpha001.dds",
+                        ColorTextures = new[] { "dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds" },
 
-                    UseSlopes = false,
-                    SlopeRanges = new Vector2(0.005f, 0.25f),
-                    //TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
-                    TexturesLR = new[] { "am01.jpg", "am02.jpg", "am04.jpg" },
-                    TexturesHR = new[] { "dirt0hr.dds" },
+                        UseSlopes = false,
+                        SlopeRanges = new Vector2(0.005f, 0.25f),
+                        //TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
+                        TexturesLR = new[] { "am01.jpg", "am02.jpg", "am04.jpg" },
+                        TexturesHR = new[] { "dirt0hr.dds" },
 
-                    Proportion = 0.25f,
+                        Proportion = 0.25f,
+                    },
                 },
-                Vegetation = new GroundDescription.VegetationDescription()
+                new GroundDescription()
                 {
-                    ContentPath = "Foliage/Billboard",
-                    VegetarionTextures = new[] { "grass.png" },
-                    Saturation = 0.3f,
-                    StartRadius = 0f,
-                    EndRadius = 200f,
-                    MinSize = new Vector2(1f, 1f),
-                    MaxSize = new Vector2(1.5f, 2f),
-                }
-            });
+                    Quadtree = new GroundDescription.QuadtreeDescription()
+                    {
+                        MaximumDepth = 3,
+                    },
+                    //PathFinder = new GroundDescription.PathFinderDescription()
+                    //{
+                    //    Settings = pfSettings,
+                    //},
+                    Vegetation = new GroundDescription.VegetationDescription()
+                    {
+                        ContentPath = "Resources/Scenery/Foliage/Billboard",
+                        VegetarionTextures = new[] { "grass.png" },
+                        Saturation = 0.3f,
+                        StartRadius = 0f,
+                        EndRadius = 200f,
+                        MinSize = new Vector2(1f, 1f),
+                        MaxSize = new Vector2(1.5f, 2f),
+                    }
+                });
+            this.terrain.SetWind(this.windDirection, this.windStrength);
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
-            this.terrain.SetWind(this.windDirection, this.windStrength);
 
             #endregion
 
             #region Soldier
 
-            this.soldier = this.AddModel(new ModelDescription()
-            {
-                ContentPath = @"Resources/Soldier",
-                ModelFileName = "soldier_anim2.dae",
-            });
+            this.soldier = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = @"Resources/Soldier",
+                    ModelFileName = "soldier_anim2.dae",
+                },
+                new ModelDescription()
+                {
+                    TextureIndex = 0,
+                });
 
             {
                 Vector3 position;
@@ -242,12 +246,16 @@ namespace HeightmapTest
 
             #region Troops
 
-            this.troops = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = @"Resources/Soldier",
-                ModelFileName = "soldier.dae",
-                Instances = 4,
-            });
+            this.troops = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = @"Resources/Soldier",
+                    ModelFileName = "soldier.dae",
+                },
+                new ModelInstancedDescription()
+                {
+                    Instances = 4,
+                });
 
             Vector3[] iPos = new Vector3[]
             {
@@ -277,11 +285,13 @@ namespace HeightmapTest
 
             #region Helicopter
 
-            this.helicopter = this.AddModel(new ModelDescription()
-            {
-                ContentPath = @"Resources/m24",
-                ModelFileName = "m24.dae",
-            });
+            this.helicopter = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = @"Resources/m24",
+                    ModelFileName = "m24.dae",
+                },
+                new ModelDescription() { });
 
             {
                 Vector3 position;
@@ -303,13 +313,17 @@ namespace HeightmapTest
 
             var bbox = this.terrain.GetBoundingBox();
 
-            this.torchs = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = "Resources/Scenery/Objects",
-                ModelFileName = "torch.dae",
-                Instances = torchCount,
-                CastShadow = true,
-            });
+            this.torchs = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = "Resources/Scenery/Objects",
+                    ModelFileName = "torch.dae",
+                },
+                new ModelInstancedDescription()
+                {
+                    Instances = torchCount,
+                    CastShadow = true,
+                });
 
             {
                 Vector3 position;

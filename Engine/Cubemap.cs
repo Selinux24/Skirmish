@@ -31,7 +31,7 @@ namespace Engine
         /// </summary>
         public Manipulator3D Manipulator { get; set; }
         /// <summary>
-        /// Level of detail
+        /// Gets or sets the level of detail
         /// </summary>
         public override LevelOfDetailEnum LevelOfDetail
         {
@@ -51,17 +51,11 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game class</param>
         /// <param name="content">Content</param>
-        public Cubemap(Game game, ModelContent content)
-            : base(game, content, false, 0, false, false, false)
+        /// <param name="description">Description</param>
+        public Cubemap(Game game, ModelContent content, CubemapDescription description)
+            : base(game, content, description, false, 0, false, false, false)
         {
             this.Manipulator = new Manipulator3D();
-
-            this.Static = true;
-            this.AlwaysVisible = false;
-            this.CastShadow = false;
-            this.DeferredEnabled = true;
-            this.EnableDepthStencil = false;
-            this.EnableAlphaBlending = false;
         }
         /// <summary>
         /// Update

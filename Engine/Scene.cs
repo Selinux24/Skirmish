@@ -315,37 +315,28 @@ namespace Engine
         /// <summary>
         /// Adds new model
         /// </summary>
+        /// <param name="content">Model content description</param>
         /// <param name="description">Model description</param>
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Model AddModel(ModelDescription description, bool optimize = true, int order = 0)
+        public Model AddModel(ModelContentDescription content, ModelDescription description, bool optimize = true, int order = 0)
         {
             Model newModel = null;
 
-            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, description.VolumeMeshes);
+            ModelContent[] geo = LoaderCOLLADA.Load(content.ContentPath, content.ModelFileName, content.VolumeMeshes);
             if (geo.Length == 1)
             {
                 if (optimize) geo[0].Optimize();
 
-                newModel = new Model(this.Game, geo[0]);
+                newModel = new Model(this.Game, geo[0], description);
             }
             else
             {
                 var lod = new LODModelContent(geo, optimize);
 
-                newModel = new Model(this.Game, lod);
+                newModel = new Model(this.Game, lod, description);
             }
-
-            newModel.Name = !string.IsNullOrEmpty(description.Name) ? description.Name : description.ModelFileName;
-
-            newModel.Static = description.Static;
-            newModel.AlwaysVisible = description.AlwaysVisible;
-            newModel.CastShadow = description.CastShadow;
-            newModel.DeferredEnabled = description.DeferredEnabled;
-            newModel.EnableDepthStencil = description.EnableDepthStencil;
-            newModel.EnableAlphaBlending = description.EnableAlphaBlending;
-            newModel.TextureIndex = description.TextureIndex;
 
             this.AddComponent(newModel, order);
 
@@ -355,11 +346,12 @@ namespace Engine
         /// Adds new model
         /// </summary>
         /// <param name="content">Content</param>
+        /// <param name="description">Model description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Model AddModel(ModelContent content, int order = 0)
+        public Model AddModel(ModelContent content, ModelDescription description, int order = 0)
         {
-            Model newModel = new Model(this.Game, content);
+            Model newModel = new Model(this.Game, content, description);
 
             this.AddComponent(newModel, order);
 
@@ -368,37 +360,28 @@ namespace Engine
         /// <summary>
         /// Adds new instanced model
         /// </summary>
+        /// <param name="content">Model content description</param>
         /// <param name="description">Model description</param>
-        /// <param name="instances">Number of instances for the model</param>
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(ModelInstancedDescription description, bool optimize = true, int order = 0)
+        public ModelInstanced AddInstancingModel(ModelContentDescription content, ModelInstancedDescription description, bool optimize = true, int order = 0)
         {
             ModelInstanced newModel = null;
 
-            ModelContent[] geo = LoaderCOLLADA.Load(description.ContentPath, description.ModelFileName, description.VolumeMeshes);
+            ModelContent[] geo = LoaderCOLLADA.Load(content.ContentPath, content.ModelFileName, content.VolumeMeshes);
             if (geo.Length == 1)
             {
                 if (optimize) geo[0].Optimize();
 
-                newModel = new ModelInstanced(this.Game, geo[0], description.Instances);
+                newModel = new ModelInstanced(this.Game, geo[0], description);
             }
             else
             {
                 var lod = new LODModelContent(geo, optimize);
 
-                newModel = new ModelInstanced(this.Game, lod, description.Instances);
+                newModel = new ModelInstanced(this.Game, lod, description);
             }
-
-            newModel.Name = !string.IsNullOrEmpty(description.Name) ? description.Name : description.ModelFileName;
-
-            newModel.Static = description.Static;
-            newModel.AlwaysVisible = description.AlwaysVisible;
-            newModel.CastShadow = description.CastShadow;
-            newModel.DeferredEnabled = description.DeferredEnabled;
-            newModel.EnableDepthStencil = description.EnableDepthStencil;
-            newModel.EnableAlphaBlending = description.EnableAlphaBlending;
 
             this.AddComponent(newModel, order);
 
@@ -408,12 +391,12 @@ namespace Engine
         /// Adds new instanced model
         /// </summary>
         /// <param name="content">Content</param>
-        /// <param name="instances">Number of instances for the model</param>
+        /// <param name="description">Model description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(ModelContent content, int instances, int order = 0)
+        public ModelInstanced AddInstancingModel(ModelContent content, ModelInstancedDescription description, int order = 0)
         {
-            ModelInstanced newModel = new ModelInstanced(this.Game, content, instances);
+            ModelInstanced newModel = new ModelInstanced(this.Game, content, description);
 
             this.AddComponent(newModel, order);
 
@@ -426,36 +409,34 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Scenery AddScenery(GroundDescription description, bool optimize = true, int order = 0)
+        public Scenery AddScenery(ModelContentDescription content, GroundDescription description, bool optimize = true, int order = 0)
         {
-            ModelContent geo = null;
+            var t = LoaderCOLLADA.Load(content.ContentPath, content.ModelFileName, null);
+            ModelContent geo = t[0];
 
-            if (description.Model != null)
-            {
-                var t = LoaderCOLLADA.Load(description.ContentPath, description.Model.ModelFileName, null);
+            if (optimize) geo.Optimize();
 
-                geo = t[0];
-            }
-            else if (description.Heightmap != null)
-            {
-                geo = ModelContent.FromHeightmap(
-                    description.ContentPath,
-                    description.Heightmap.HeightmapFileName,
-                    description.Textures.TexturesLR,
-                    description.Heightmap.CellSize,
-                    description.Heightmap.MaximumHeight);
-            }
+            return AddScenery(geo, description, order);
+        }
+        /// <summary>
+        /// Adds new terrain model
+        /// </summary>
+        /// <param name="description">Terrain description</param>
+        /// <param name="optimize">Optimize model</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new model</returns>
+        public Scenery AddScenery(HeightmapDescription content, GroundDescription description, bool optimize = true, int order = 0)
+        {
+            ModelContent geo = ModelContent.FromHeightmap(
+                content.ContentPath,
+                content.HeightmapFileName,
+                content.Textures.TexturesLR,
+                content.CellSize,
+                content.MaximumHeight);
 
-            if (geo != null)
-            {
-                if (optimize) geo.Optimize();
+            if (optimize) geo.Optimize();
 
-                return AddScenery(geo, description, order);
-            }
-            else
-            {
-                throw new ArgumentException("Model or Heightmap file name is mandatory in TerrainDescription");
-            }
+            return AddScenery(geo, description, order);
         }
         /// <summary>
         /// Adds new terrain model
@@ -475,13 +456,14 @@ namespace Engine
         /// <summary>
         /// Adds new terrain model
         /// </summary>
+        /// <param name="content">Content description</param>
         /// <param name="description">Terrain description</param>
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Terrain AddTerrain(GroundDescription description, bool optimize = true, int order = 0)
+        public Terrain AddTerrain(HeightmapDescription content, GroundDescription description, bool optimize = true, int order = 0)
         {
-            Terrain newModel = new Terrain(this.Game, description);
+            Terrain newModel = new Terrain(this.Game, content, description);
 
             this.AddComponent(newModel, order);
 
@@ -511,7 +493,7 @@ namespace Engine
         {
             ModelContent cubemap = ModelContent.GenerateSphere(description.ContentPath, description.Texture, description.Radius);
 
-            Cubemap newModel = new Cubemap(this.Game, cubemap);
+            Cubemap newModel = new Cubemap(this.Game, cubemap, description);
 
             this.AddComponent(newModel, order);
 
@@ -527,7 +509,7 @@ namespace Engine
         {
             ModelContent skydom = ModelContent.GenerateSkydom(description.ContentPath, description.Texture, description.Radius);
 
-            Skydom newModel = new Skydom(this.Game, skydom);
+            Skydom newModel = new Skydom(this.Game, skydom, description);
 
             this.AddComponent(newModel, -1);
 
@@ -539,7 +521,7 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="order">Order</param>
         /// <returns>Return new model</returns>
-        public Sprite AddBackgroud(BackgroundDescription description, int order = 0)
+        public Sprite AddBackgroud(SpriteBackgroundDescription description, int order = 0)
         {
             Sprite newModel = new Sprite(this.Game, description);
 
@@ -617,31 +599,12 @@ namespace Engine
         /// <summary>
         /// Adds text
         /// </summary>
-        /// <param name="font">Font</param>
-        /// <param name="fontSize">Font size</param>
-        /// <param name="color">Color</param>
+        /// <param name="description">Text description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new text</returns>
-        public TextDrawer AddText(string font, int fontSize, Color4 color, int order = 0)
+        public TextDrawer AddText(TextDrawerDescription description, int order = 0)
         {
-            TextDrawer newModel = new TextDrawer(this.Game, font, fontSize, color);
-
-            this.AddComponent(newModel, order);
-
-            return newModel;
-        }
-        /// <summary>
-        /// Adds text
-        /// </summary>
-        /// <param name="font">Font</param>
-        /// <param name="fontSize">Font size</param>
-        /// <param name="color">Color</param>
-        /// <param name="shadowColor">Shadow color</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns new text</returns>
-        public TextDrawer AddText(string font, int fontSize, Color4 color, Color4 shadowColor, int order = 0)
-        {
-            TextDrawer newModel = new TextDrawer(this.Game, font, fontSize, color, shadowColor);
+            TextDrawer newModel = new TextDrawer(this.Game, description);
 
             this.AddComponent(newModel, order);
 
@@ -664,13 +627,12 @@ namespace Engine
         /// <summary>
         /// Adds a line list drawer
         /// </summary>
-        /// <param name="lines">Line list</param>
-        /// <param name="color">Color</param>
+        /// <param name="count">Line count</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(Line3[] lines, Color4 color, int order = 0)
+        public LineListDrawer AddLineListDrawer(int count, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, lines, color);
+            LineListDrawer newModel = new LineListDrawer(this.Game, new LineDrawerDescription(), count);
 
             this.AddComponent(newModel, order);
 
@@ -679,12 +641,42 @@ namespace Engine
         /// <summary>
         /// Adds a line list drawer
         /// </summary>
-        /// <param name="count">Line count</param>
+        /// <param name="lines">Line list</param>
+        /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(int count, int order = 0)
+        public LineListDrawer AddLineListDrawer(Line3[] lines, Color4 color, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, count);
+            LineListDrawer newModel = new LineListDrawer(this.Game, new LineDrawerDescription(), lines, color);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
+        /// Adds a line list drawer
+        /// </summary>
+        /// <param name="triangles">Triangles list</param>
+        /// <param name="color">Color</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new line list drawer</returns>
+        public LineListDrawer AddLineListDrawer(Triangle[] triangles, Color4 color, int order = 0)
+        {
+            LineListDrawer newModel = new LineListDrawer(this.Game, new LineDrawerDescription(), triangles, color);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
+        /// Adds a triangle list drawer
+        /// </summary>
+        /// <param name="count">Triangle count</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new triangle list drawer</returns>
+        public TriangleListDrawer AddTriangleListDrawer(int count, int order = 0)
+        {
+            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, new TriangleDrawerDescription(), count);
 
             this.AddComponent(newModel, order);
 
@@ -699,21 +691,7 @@ namespace Engine
         /// <returns>Returns new triangle list drawer</returns>
         public TriangleListDrawer AddTriangleListDrawer(Triangle[] triangles, Color4 color, int order = 0)
         {
-            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, triangles, color);
-
-            this.AddComponent(newModel, order);
-
-            return newModel;
-        }
-        /// <summary>
-        /// Adds a triangle list drawer
-        /// </summary>
-        /// <param name="count">Triangle count</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns new triangle list drawer</returns>
-        public TriangleListDrawer AddTriangleListDrawer(int count, int order = 0)
-        {
-            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, count);
+            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, new TriangleDrawerDescription(), triangles, color);
 
             this.AddComponent(newModel, order);
 

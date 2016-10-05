@@ -40,7 +40,7 @@ namespace SpriteDrawing
             };
             this.spriteFixed = this.AddSprite(spriteFixedDesc, 2);
 
-            BackgroundDescription bkDescription = new BackgroundDescription()
+            SpriteBackgroundDescription bkDescription = new SpriteBackgroundDescription()
             {
                 ContentPath = "Resources",
                 Textures = new[] { "background.jpg" },

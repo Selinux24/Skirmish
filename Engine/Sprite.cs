@@ -176,15 +176,8 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="description">Description</param>
         public Sprite(Game game, SpriteDescription description)
-            : base(game, ModelContent.GenerateSprite(description.ContentPath, description.Textures), false, 0, false, false, false)
+            : base(game, ModelContent.GenerateSprite(description.ContentPath, description.Textures), description, false, 0, false, false, false)
         {
-            this.Static = true;
-            this.AlwaysVisible = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = false;
-            this.EnableDepthStencil = false;
-            this.EnableAlphaBlending = true;
-
             this.renderWidth = game.Form.RenderWidth.NextPair();
             this.renderHeight = game.Form.RenderHeight.NextPair();
             this.sourceWidth = description.Width <= 0 ? this.renderWidth : description.Width.NextPair();
@@ -276,51 +269,6 @@ namespace Engine
                 this.Width = ((int)(this.sourceWidth * w)).NextPair();
                 this.Height = ((int)(this.sourceHeight * h)).NextPair();
             }
-        }
-    }
-
-    /// <summary>
-    /// Sprite description
-    /// </summary>
-    public class SpriteDescription
-    {
-        /// <summary>
-        /// Sprite textures
-        /// </summary>
-        public string[] Textures;
-        /// <summary>
-        /// Content path
-        /// </summary>
-        public string ContentPath = "Resources";
-        /// <summary>
-        /// Width
-        /// </summary>
-        public int Width;
-        /// <summary>
-        /// Height
-        /// </summary>
-        public int Height;
-        /// <summary>
-        /// Fit screen
-        /// </summary>
-        public bool FitScreen;
-    }
-
-    /// <summary>
-    /// Background description
-    /// </summary>
-    public class BackgroundDescription : SpriteDescription
-    {
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="contentPath">Content path</param>
-        /// <param name="texture">Tetxure</param>
-        public BackgroundDescription()
-        {
-            this.Width = 0;
-            this.Height = 0;
-            this.FitScreen = true;
         }
     }
 }

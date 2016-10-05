@@ -86,6 +86,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Resources.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Content Include="Collada\Vehicles\M24\m24.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -312,6 +315,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Blender\Scenery\TwoLevels\terrain_nmap.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

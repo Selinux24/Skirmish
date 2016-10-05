@@ -123,40 +123,52 @@ namespace GameLogic
 
             #region 3D models
 
-            this.cursor3D = this.AddModel(new ModelDescription()
-            {
-                ContentPath = "Resources3D",
-                ModelFileName = "cursor.dae",
-            });
-            this.terrain = this.AddScenery(new GroundDescription()
-            {
-                Model = new GroundDescription.ModelDescription()
+            this.cursor3D = this.AddModel(
+                new ModelContentDescription()
                 {
+                    ContentPath = "Resources3D",
+                    ModelFileName = "cursor.dae",
+                },
+                new ModelDescription()
+                {
+                    CastShadow = true
+                });
+
+            this.terrain = this.AddScenery(
+                new ModelContentDescription()
+                {
+                    ContentPath = "Resources3D",
                     ModelFileName = "terrain.dae",
                 },
-                ContentPath = "Resources3D",
-                PathFinder = new GroundDescription.PathFinderDescription()
+                new GroundDescription()
                 {
-                    Settings = new GridGenerationSettings()
+                    PathFinder = new GroundDescription.PathFinderDescription()
                     {
-                        NodeSize = 5f,
+                        Settings = new GridGenerationSettings()
+                        {
+                            NodeSize = 5f,
+                        },
                     },
+                    CastShadow = true,
+                });
+
+            this.soldier = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = "Resources3D",
+                    ModelFileName = "soldier.dae",
                 },
-                CastShadow = true,
-            });
-            this.soldier = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = "Resources3D",
-                ModelFileName = "soldier.dae",
-                Instances = this.skirmishGame.AllSoldiers.Length,
-                CastShadow = true,
-            });
+                new ModelInstancedDescription()
+                {
+                    Instances = this.skirmishGame.AllSoldiers.Length,
+                    CastShadow = true,
+                });
 
             #endregion
 
             #region HUD
 
-            BackgroundDescription bkDesc = new BackgroundDescription()
+            SpriteBackgroundDescription bkDesc = new SpriteBackgroundDescription()
             {
                 ContentPath = "Resources",
                 Textures = new[] { "HUD.png" },
@@ -181,12 +193,12 @@ namespace GameLogic
             };
             this.minimap = this.AddMinimap(minimapDesc);
 
-            this.txtTitle = this.AddText("Tahoma", 24, Color.White, Color.Gray);
-            this.txtGame = this.AddText("Lucida Casual", 12, Color.LightBlue, Color.DarkBlue);
-            this.txtTeam = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.txtSoldier = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.txtActionList = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.txtAction = this.AddText("Lucida Casual", 12, Color.Yellow);
+            this.txtTitle = this.AddText(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray));
+            this.txtGame = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.LightBlue, Color.DarkBlue));
+            this.txtTeam = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.txtSoldier = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.txtActionList = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.txtAction = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
 
             this.butClose = this.AddSpriteButton(new SpriteButtonDescription()
             {
@@ -194,10 +206,13 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 60,
                 Height = 20,
-                Font = "Lucida Casual",
-                FontSize = 12,
-                TextColor = Color.Yellow,
-                TextShadowColor = Color.Orange,
+                TextDescription = new TextDrawerDescription()
+                {
+                    Font = "Lucida Casual",
+                    FontSize = 12,
+                    TextColor = Color.Yellow,
+                    ShadowColor = Color.Orange,
+                },
                 Text = "EXIT",
             });
 
@@ -207,9 +222,12 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 60,
                 Height = 20,
-                Font = "Lucida Casual",
-                FontSize = 10,
-                TextColor = Color.Yellow,
+                TextDescription = new TextDrawerDescription()
+                {
+                    Font = "Lucida Casual",
+                    FontSize = 10,
+                    TextColor = Color.Yellow,
+                },
                 Text = "Next",
             });
 
@@ -219,9 +237,12 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 90,
                 Height = 20,
-                Font = "Lucida Casual",
-                FontSize = 10,
-                TextColor = Color.Yellow,
+                TextDescription = new TextDrawerDescription()
+                {
+                    Font = "Lucida Casual",
+                    FontSize = 10,
+                    TextColor = Color.Yellow,
+                },
                 Text = "Prev.Soldier",
             });
 
@@ -231,9 +252,12 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 90,
                 Height = 20,
-                Font = "Lucida Casual",
-                FontSize = 10,
-                TextColor = Color.Yellow,
+                TextDescription = new TextDrawerDescription()
+                {
+                    Font = "Lucida Casual",
+                    FontSize = 10,
+                    TextColor = Color.Yellow,
+                },
                 Text = "Next Soldier",
             });
 
@@ -243,9 +267,12 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 90,
                 Height = 20,
-                Font = "Lucida Casual",
-                FontSize = 10,
-                TextColor = Color.Yellow,
+                TextDescription = new TextDrawerDescription()
+                {
+                    Font = "Lucida Casual",
+                    FontSize = 10,
+                    TextColor = Color.Yellow,
+                },
                 Text = "Prev.Action",
             });
 
@@ -255,9 +282,12 @@ namespace GameLogic
                 TexturePressed = "button_off.png",
                 Width = 90,
                 Height = 20,
-                Font = "Lucida Casual",
-                FontSize = 10,
-                TextColor = Color.Yellow,
+                TextDescription = new TextDrawerDescription()
+                {
+                    Font = "Lucida Casual",
+                    FontSize = 10,
+                    TextColor = Color.Yellow,
+                },
                 Text = "Next Action",
             });
 

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Diagnostics;
-using Engine;
-using Engine.Common;
+﻿using Engine;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
+using System;
+using System.Diagnostics;
 
 namespace DeferredTest
 {
@@ -85,13 +84,17 @@ namespace DeferredTest
             #region Helicopter
 
             sw.Restart();
-            this.helicopter = this.AddModel(new ModelDescription()
-            {
-                ContentPath = resources,
-                ModelFileName = "helicopter.dae",
-                CastShadow = true,
-                TextureIndex = 2,
-            });
+            this.helicopter = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources,
+                    ModelFileName = "helicopter.dae",
+                },
+                new ModelDescription()
+                {
+                    CastShadow = true,
+                    TextureIndex = 2,
+                });
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -100,13 +103,17 @@ namespace DeferredTest
             #region Helicopters
 
             sw.Restart();
-            this.helicopters = this.AddInstancingModel(new ModelInstancedDescription()
-            {
-                ContentPath = resources,
-                ModelFileName = "helicopter.dae",
-                CastShadow = true,
-                Instances = 2,
-            });
+            this.helicopters = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources,
+                    ModelFileName = "helicopter.dae",
+                },
+                new ModelInstancedDescription()
+                {
+                    CastShadow = true,
+                    Instances = 2,
+                });
             sw.Stop();
             loadingText += string.Format("helicopters: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -115,16 +122,19 @@ namespace DeferredTest
             #region Tank
 
             sw.Restart();
-            this.tank = this.AddModel(new ModelDescription()
-            {
-                ContentPath = resources,
-                ModelFileName = "leopard.dae",
-                CastShadow = true,
-            });
+            this.tank = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = resources,
+                    ModelFileName = "leopard.dae",
+                },
+                new ModelDescription()
+                {
+                    CastShadow = true,
+                });
+            this.tank.Manipulator.SetScale(2);
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
-
-            this.tank.Manipulator.SetScale(2);
 
             #endregion
 
@@ -155,31 +165,33 @@ namespace DeferredTest
                 tankAgent,
             };
 
-            this.terrain = this.AddScenery(new GroundDescription()
-            {
-                ContentPath = resources,
-                Model = new GroundDescription.ModelDescription()
+            this.terrain = this.AddScenery(
+                new ModelContentDescription()
                 {
+                    ContentPath = resources,
                     ModelFileName = "terrain.dae",
                 },
-                Quadtree = new GroundDescription.QuadtreeDescription()
+                new GroundDescription()
                 {
-                    MaximumDepth = 2,
-                },
-                PathFinder = new GroundDescription.PathFinderDescription()
-                {
-                    Settings = navSettings,
-                },
-                Vegetation = new GroundDescription.VegetationDescription()
-                {
-                    VegetarionTextures = new[] { "grass.png" },
-                    Saturation = 20f,
-                    StartRadius = 0f,
-                    EndRadius = 50f,
-                    MinSize = Vector2.One * 0.20f,
-                    MaxSize = Vector2.One * 0.25f,
-                },
-            });
+                    Vegetation = new GroundDescription.VegetationDescription()
+                    {
+                        ContentPath = resources + "/Vegetation",
+                        VegetarionTextures = new[] { "grass.png" },
+                        Saturation = 20f,
+                        StartRadius = 0f,
+                        EndRadius = 50f,
+                        MinSize = Vector2.One * 0.20f,
+                        MaxSize = Vector2.One * 0.25f,
+                    },
+                    Quadtree = new GroundDescription.QuadtreeDescription()
+                    {
+                        MaximumDepth = 2,
+                    },
+                    PathFinder = new GroundDescription.PathFinderDescription()
+                    {
+                        Settings = navSettings,
+                    },
+                });
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -211,10 +223,10 @@ namespace DeferredTest
 
             #region Texts
 
-            this.title = this.AddText("Tahoma", 18, Color.White);
-            this.load = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.help = this.AddText("Lucida Casual", 12, Color.Yellow);
-            this.statistics = this.AddText("Lucida Casual", 10, Color.Red);
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
+            this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.statistics = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red));
 
             this.title.Text = "Deferred Ligthning test";
             this.load.Text = loadingText;

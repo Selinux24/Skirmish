@@ -1,6 +1,6 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Direct3D11;
+using System;
 
 namespace Engine.Common
 {
@@ -72,14 +72,20 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        public Drawable(Game game)
+        public Drawable(Game game, DrawableDescription description)
         {
             this.Game = game;
             this.Active = true;
             this.Visible = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = false;
             this.Order = 0;
+
+            this.Name = description.Name;
+            this.Static = description.Static;
+            this.AlwaysVisible = description.AlwaysVisible;
+            this.CastShadow = description.CastShadow;
+            this.DeferredEnabled = description.DeferredEnabled;
+            this.EnableDepthStencil = description.EnableDepthStencil;
+            this.EnableAlphaBlending = description.EnableAlphaBlending;
         }
 
         /// <summary>

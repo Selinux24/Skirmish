@@ -35,8 +35,9 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="description">Ground description</param>
         public Ground(Game game, GroundDescription description)
-            : base(game)
+            : base(game, description)
         {
             this.Description = description;
         }

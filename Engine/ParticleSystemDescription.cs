@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Particle system description
     /// </summary>
-    public class ParticleSystemDescription
+    public class ParticleSystemDescription : DrawableDescription
     {
         /// <summary>
         /// Emitter types
@@ -20,6 +20,115 @@ namespace Engine
             /// Emit from camera
             /// </summary>
             FromCamera,
+        }
+
+        /// <summary>
+        /// Creates a fire particle system
+        /// </summary>
+        /// <param name="emitter">Emitter</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public static ParticleSystemDescription Fire(ParticleEmitter emitter, params string[] textures)
+        {
+            return Fire(new[] { emitter }, textures);
+        }
+        /// <summary>
+        /// Creates a fire particle system
+        /// </summary>
+        /// <param name="emitters">Emitter list</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public static ParticleSystemDescription Fire(ParticleEmitter[] emitters, params string[] textures)
+        {
+            return new ParticleSystemDescription()
+            {
+                ParticleClass = ParticleClasses.Fire,
+                MaximumParticles = 500,
+                MaximumAge = 0.5f,
+                EmitterAge = 0.005f,
+                Acceleration = new Vector3(0.0f, 5.8f, 0.0f),
+                EmitterType = EmitterTypes.FixedPosition,
+                Textures = textures,
+                Emitters = emitters,
+                Static = false,
+                AlwaysVisible = true,
+                CastShadow = false,
+                DeferredEnabled = false,
+                EnableDepthStencil = true,
+                EnableAlphaBlending = true,
+            };
+        }
+        /// <summary>
+        /// Creates a smoke particle system
+        /// </summary>
+        /// <param name="emitter">Emitter</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public static ParticleSystemDescription Smoke(ParticleEmitter emitter, params string[] textures)
+        {
+            return Smoke(new[] { emitter }, textures);
+        }
+        /// <summary>
+        /// Creates a smoke particle system
+        /// </summary>
+        /// <param name="emitters">Emitter list</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public static ParticleSystemDescription Smoke(ParticleEmitter[] emitters, params string[] textures)
+        {
+            return new ParticleSystemDescription()
+            {
+                ParticleClass = ParticleClasses.Smoke,
+                MaximumParticles = 500,
+                MaximumAge = 1.0f,
+                EmitterAge = 0.33f,
+                Acceleration = new Vector3(0.0f, 2f, 0.0f),
+                EmitterType = EmitterTypes.FixedPosition,
+                Textures = textures,
+                Emitters = emitters,
+                Static = false,
+                AlwaysVisible = true,
+                CastShadow = true,
+                DeferredEnabled = false,
+                EnableDepthStencil = true,
+                EnableAlphaBlending = true,
+            };
+        }
+        /// <summary>
+        /// Creates a rain particle system
+        /// </summary>
+        /// <param name="emitter">Emitter</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public static ParticleSystemDescription Rain(ParticleEmitter emitter, params string[] textures)
+        {
+            return Rain(new[] { emitter }, textures);
+        }
+        /// <summary>
+        /// Creates a rain particle system
+        /// </summary>
+        /// <param name="emitters">Emitter list</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public static ParticleSystemDescription Rain(ParticleEmitter[] emitters, params string[] textures)
+        {
+            return new ParticleSystemDescription()
+            {
+                ParticleClass = ParticleClasses.Rain,
+                MaximumParticles = 10000,
+                MaximumAge = 3.0f,
+                EmitterAge = 0.002f,
+                Acceleration = (GameEnvironment.Gravity + Vector3.UnitX),
+                EmitterType = EmitterTypes.FromCamera,
+                Textures = textures,
+                Emitters = emitters,
+                Static = false,
+                AlwaysVisible = true,
+                CastShadow = false,
+                DeferredEnabled = false,
+                EnableDepthStencil = true,
+                EnableAlphaBlending = true,
+            };
         }
 
         /// <summary>
@@ -55,103 +164,17 @@ namespace Engine
         /// </summary>
         public string ContentPath = "Resources";
         /// <summary>
-        /// Gets or sets whether the object cast shadow
-        /// </summary>
-        public bool CastShadow { get; set; }
-        /// <summary>
         /// Emitters
         /// </summary>
         public ParticleEmitter[] Emitters = null;
 
         /// <summary>
-        /// Creates a fire particle system
+        /// Constructor
         /// </summary>
-        /// <param name="emitter">Emitter</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Fire(ParticleEmitter emitter, params string[] textures)
+        public ParticleSystemDescription()
+            : base()
         {
-            return Fire(new[] { emitter }, textures);
-        }
-        /// <summary>
-        /// Creates a fire particle system
-        /// </summary>
-        /// <param name="emitters">Emitter list</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Fire(ParticleEmitter[] emitters, params string[] textures)
-        {
-            return new ParticleSystemDescription()
-            {
-                ParticleClass = ParticleClasses.Fire,
-                MaximumParticles = 500,
-                MaximumAge = 0.5f,
-                EmitterAge = 0.005f,
-                Acceleration = new Vector3(0.0f, 5.8f, 0.0f),
-                EmitterType = EmitterTypes.FixedPosition,
-                Textures = textures,
-                Emitters = emitters
-            };
-        }
-        /// <summary>
-        /// Creates a smoke particle system
-        /// </summary>
-        /// <param name="emitter">Emitter</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Smoke(ParticleEmitter emitter, params string[] textures)
-        {
-            return Smoke(new[] { emitter }, textures);
-        }
-        /// <summary>
-        /// Creates a smoke particle system
-        /// </summary>
-        /// <param name="emitters">Emitter list</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Smoke(ParticleEmitter[] emitters, params string[] textures)
-        {
-            return new ParticleSystemDescription()
-            {
-                ParticleClass = ParticleClasses.Smoke,
-                MaximumParticles = 500,
-                MaximumAge = 1.0f,
-                EmitterAge = 0.33f,
-                Acceleration = new Vector3(0.0f, 2f, 0.0f),
-                EmitterType = EmitterTypes.FixedPosition,
-                Textures = textures,
-                Emitters = emitters
-            };
-        }
-        /// <summary>
-        /// Creates a rain particle system
-        /// </summary>
-        /// <param name="emitter">Emitter</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Rain(ParticleEmitter emitter, params string[] textures)
-        {
-            return Rain(new[] { emitter }, textures);
-        }
-        /// <summary>
-        /// Creates a rain particle system
-        /// </summary>
-        /// <param name="emitters">Emitter list</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Rain(ParticleEmitter[] emitters, params string[] textures)
-        {
-            return new ParticleSystemDescription()
-            {
-                ParticleClass = ParticleClasses.Rain,
-                MaximumParticles = 10000,
-                MaximumAge = 3.0f,
-                EmitterAge = 0.002f,
-                Acceleration = (GameEnvironment.Gravity + Vector3.UnitX),
-                EmitterType = EmitterTypes.FromCamera,
-                Textures = textures,
-                Emitters = emitters
-            };
+
         }
     }
 }
