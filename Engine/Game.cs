@@ -1,12 +1,11 @@
-﻿using System;
+﻿using SharpDX.DXGI;
+using SharpDX.Windows;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using SharpDX.DXGI;
-using SharpDX.Windows;
 
 namespace Engine
 {
-    using Engine.Common;
     using Engine.Effects;
 
     /// <summary>
@@ -27,6 +26,10 @@ namespace Engine
         /// Name
         /// </summary>
         public string Name = null;
+        /// <summary>
+        /// Resource manager
+        /// </summary>
+        public GameResourceManager ResourceManager { get; private set; }
         /// <summary>
         /// Game form
         /// </summary>
@@ -135,6 +138,8 @@ namespace Engine
 
             this.GameTime = new GameTime();
 
+            this.ResourceManager = new GameResourceManager(this);
+
             this.CPUStats = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
             #region Form
@@ -206,38 +211,16 @@ namespace Engine
         /// </summary>
         public void Dispose()
         {
-            if (this.scenes.Count > 0)
-            {
-                foreach (Scene scene in this.scenes)
-                {
-                    scene.Dispose();
-                }
-
-                this.scenes.Clear();
-                this.scenes = null;
-            }
+            Helper.Dispose(this.scenes);
 
             DrawerPool.Dispose();
 
             FontMap.ClearCache();
 
-            if (this.Graphics != null)
-            {
-                this.Graphics.Dispose();
-                this.Graphics = null;
-            }
-
-            if (this.Input != null)
-            {
-                this.Input.Dispose();
-                this.Input = null;
-            }
-
-            if (this.Form != null)
-            {
-                this.Form.Dispose();
-                this.Form = null;
-            }
+            Helper.Dispose(this.Graphics);
+            Helper.Dispose(this.Input);
+            Helper.Dispose(this.Form);
+            Helper.Dispose(this.ResourceManager);
         }
         /// <summary>
         /// Close game

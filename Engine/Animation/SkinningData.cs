@@ -5,8 +5,6 @@ using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Animation
 {
-    using Engine.Helpers;
-
     /// <summary>
     /// Skinning data
     /// </summary>
@@ -166,7 +164,7 @@ namespace Engine.Animation
             }
             texWidth = texHeight;
 
-            palette = game.Graphics.Device.CreateTexture2D(texWidth, values.ToArray());
+            palette = game.ResourceManager.CreateTexture2D(Guid.NewGuid(), values.ToArray(), texWidth);
             width = (uint)texWidth;
         }
     }

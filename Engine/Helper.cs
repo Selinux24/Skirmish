@@ -252,6 +252,23 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Create the md5 sum string of the specified buffer
+        /// </summary>
+        /// <param name="buffer">Buffer</param>
+        /// <returns>Returns the md5 sum string of the specified buffer</returns>
+        public static string GetMd5Sum(this byte[] buffer)
+        {
+            byte[] result = null;
+            using (MD5 md5 = new MD5CryptoServiceProvider())
+            {
+                result = md5.ComputeHash(buffer);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            Array.ForEach(result, r => sb.Append(r.ToString("X2")));
+            return sb.ToString();
+        }
+        /// <summary>
         /// Create the md5 sum string of the specified string
         /// </summary>
         /// <param name="content">String</param>
@@ -261,35 +278,40 @@ namespace Engine
             byte[] tmp = new byte[content.Length * 2];
             Encoding.Unicode.GetEncoder().GetBytes(content.ToCharArray(), 0, content.Length, tmp, 0, true);
 
-            byte[] result = null;
-            using (MD5 md5 = new MD5CryptoServiceProvider())
-            {
-                result = md5.ComputeHash(tmp);
-            }
+            return tmp.GetMd5Sum();
+        }
+        /// <summary>
+        /// Create the md5 sum string of the specified string list
+        /// </summary>
+        /// <param name="content">String list</param>
+        /// <returns>Returns the md5 sum string of the specified string</returns>
+        public static string GetMd5Sum(this string[] content)
+        {
+            string md5 = null;
+            Array.ForEach(content, p => md5 += p.GetMd5Sum());
 
-            StringBuilder sb = new StringBuilder();
-            Array.ForEach(result, r => sb.Append(r.ToString("X2")));
-            return sb.ToString();
+            return md5;
         }
         /// <summary>
-        /// Create the md5 sum string of the specified enumerable collection
+        /// Create the md5 sum string of the specified stream
         /// </summary>
-        /// <param name="list">Enumerable collection</param>
-        /// <returns>Returns the md5 sum string of the enumerable collection</returns>
-        public static string GetMd5Sum<T>(this T obj)
+        /// <param name="stream">Stream</param>
+        /// <returns>Returns the md5 sum string of the specified stream</returns>
+        public static string GetMd5Sum(this MemoryStream stream)
         {
-            return obj.ToString().GetMd5Sum();
+            return stream.ToArray().GetMd5Sum();
         }
         /// <summary>
-        /// Create the md5 sum string of the specified enumerable collection
+        /// Create the md5 sum string of the specified stream list
         /// </summary>
-        /// <param name="list">Enumerable collection</param>
-        /// <returns>Returns the md5 sum string of the enumerable collection</returns>
-        public static string GetMd5Sum<T>(this IEnumerable<T> list)
+        /// <param name="streams">Stream list</param>
+        /// <returns>Returns the md5 sum string of the specified stream list</returns>
+        public static string GetMd5Sum(this MemoryStream[] streams)
         {
-            StringBuilder text = new StringBuilder();
-            Array.ForEach(list.ToArray(), i => { text.Append(i.ToString()); });
-            return text.ToString().GetMd5Sum();
+            string md5 = null;
+            Array.ForEach(streams, p => md5 += p.GetMd5Sum());
+
+            return md5;
         }
         /// <summary>
         /// Gets the maximum value of the collection 

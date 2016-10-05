@@ -189,8 +189,13 @@ namespace Engine
             this.streamOutBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(this.maximumParticles, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
             this.inputStride = default(VertexParticle).Stride;
 
-            this.textureArray = game.Graphics.Device.LoadTextureArray(ContentManager.FindContent(description.ContentPath, description.Textures));
-            this.textureRandom = game.Graphics.Device.CreateRandomTexture(1024);
+            ImageContent imgContent = new ImageContent()
+            {
+                Streams = ContentManager.FindContent(description.ContentPath, description.Textures),
+            };
+
+            this.textureArray = game.ResourceManager.CreateResource(imgContent);
+            this.textureRandom = game.ResourceManager.CreateRandomTexture(Guid.NewGuid(), 1024);
 
             this.Manipulator = new Manipulator3D();
         }
@@ -202,8 +207,6 @@ namespace Engine
             Helper.Dispose(this.emittersBuffer);
             Helper.Dispose(this.drawingBuffer);
             Helper.Dispose(this.streamOutBuffer);
-            Helper.Dispose(this.textureArray);
-            Helper.Dispose(this.textureRandom);
         }
         /// <summary>
         /// Updating

@@ -64,7 +64,12 @@ namespace Engine
         public LensFlareDescription()
             : base()
         {
-
+            this.Static = false;
+            this.AlwaysVisible = false;
+            this.CastShadow = false;
+            this.DeferredEnabled = true;
+            this.EnableDepthStencil = false;
+            this.EnableAlphaBlending = true;
         }
     }
 }

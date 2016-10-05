@@ -88,7 +88,7 @@ namespace Engine.Common
                 {
                     ImageContent info = modelContent.Images[images];
 
-                    ShaderResourceView view = info.CreateResource(game.Graphics.Device);
+                    ShaderResourceView view = game.ResourceManager.CreateResource(info);
                     if (view != null)
                     {
                         drw.Textures.Add(images, view);
@@ -387,12 +387,14 @@ namespace Engine.Common
         public void Dispose()
         {
             Helper.Dispose(this.Meshes);
-            Helper.Dispose(this.Materials);
-            Helper.Dispose(this.Textures);
-
             this.Meshes = null;
+
+            Helper.Dispose(this.Materials);
             this.Materials = null;
+
+            this.Textures.Clear();
             this.Textures = null;
+
             this.SkinningData = null;
         }
 

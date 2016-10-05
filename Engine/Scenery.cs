@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
@@ -597,7 +596,7 @@ namespace Engine
                     Streams = ContentManager.FindContent(contentPath, this.Description.Vegetation.VegetarionTextures),
                 };
 
-                this.foliageTextures = game.Graphics.Device.LoadTextureArray(foliageTextures.Streams);
+                this.foliageTextures = game.ResourceManager.CreateResource(foliageTextures);
                 this.foliageTextureCount = (uint)foliageTextures.Count;
             }
 
@@ -605,7 +604,7 @@ namespace Engine
 
             #region Random texture generation
 
-            this.textureRandom = game.Graphics.Device.CreateRandomTexture(1024, 24);
+            this.textureRandom = game.ResourceManager.CreateRandomTexture(Guid.NewGuid(), 1024, 24);
 
             #endregion
 
@@ -635,8 +634,6 @@ namespace Engine
         public override void Dispose()
         {
             Helper.Dispose(this.patchDictionary);
-            Helper.Dispose(this.textureRandom);
-            Helper.Dispose(this.foliageTextures);
         }
         /// <summary>
         /// Objects updating

@@ -1301,7 +1301,7 @@ namespace Engine
                     Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.NormalMaps),
                 };
 
-                this.terrainNormalMaps = game.Graphics.Device.LoadTextureArray(normalMapTextures.Streams);
+                this.terrainNormalMaps = game.ResourceManager.CreateResource(normalMapTextures);
 
                 if (this.HeightmapDescription.Textures.UseSlopes)
                 {
@@ -1314,8 +1314,8 @@ namespace Engine
                         Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.TexturesHR),
                     };
 
-                    this.terrainTexturesLR = game.Graphics.Device.LoadTextureArray(terrainTexturesLR.Streams);
-                    this.terrainTexturesHR = game.Graphics.Device.LoadTextureArray(terrainTexturesHR.Streams);
+                    this.terrainTexturesLR = game.ResourceManager.CreateResource(terrainTexturesLR);
+                    this.terrainTexturesHR = game.ResourceManager.CreateResource(terrainTexturesHR);
                     this.slopeRanges = this.HeightmapDescription.Textures.SlopeRanges;
                 }
 
@@ -1330,8 +1330,8 @@ namespace Engine
                         Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.AlphaMap),
                     };
 
-                    this.colorTextures = game.Graphics.Device.LoadTextureArray(colors.Streams);
-                    this.alphaMap = game.Graphics.Device.LoadTexture(alphaMap.Stream);
+                    this.colorTextures = game.ResourceManager.CreateResource(colors);
+                    this.alphaMap = game.ResourceManager.CreateResource(alphaMap);
                 }
             }
 
@@ -1349,7 +1349,7 @@ namespace Engine
                     Streams = ContentManager.FindContent(contentPath, description.Vegetation.VegetarionTextures),
                 };
 
-                this.foliageTextures = game.Graphics.Device.LoadTextureArray(foliageTextures.Streams);
+                this.foliageTextures = game.ResourceManager.CreateResource(foliageTextures);
                 this.foliageTextureCount = (uint)foliageTextures.Count;
             }
 
@@ -1357,7 +1357,7 @@ namespace Engine
 
             #region Random texture generation
 
-            this.textureRandom = game.Graphics.Device.CreateRandomTexture(1024, 24);
+            this.textureRandom = game.ResourceManager.CreateRandomTexture(Guid.NewGuid(), 1024, 24);
 
             #endregion
 
@@ -1403,13 +1403,6 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.terrainTexturesLR);
-            Helper.Dispose(this.terrainTexturesHR);
-            Helper.Dispose(this.terrainNormalMaps);
-            Helper.Dispose(this.foliageTextures);
-            Helper.Dispose(this.textureRandom);
-            Helper.Dispose(this.colorTextures);
-            Helper.Dispose(this.alphaMap);
             Helper.Dispose(this.patches);
         }
         /// <summary>

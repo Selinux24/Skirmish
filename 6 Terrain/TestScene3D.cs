@@ -599,7 +599,7 @@ namespace TerrainTest
             this.shadowMapDrawer.Visible = false;
             this.shadowMapDrawer.DeferredEnabled = false;
 
-            this.debugTex = this.Device.LoadTexture(@"Resources\uvtest.png");
+            this.debugTex = this.Game.ResourceManager.CreateResource(@"Resources\uvtest.png");
 
             #endregion
 

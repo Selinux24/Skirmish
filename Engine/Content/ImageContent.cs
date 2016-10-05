@@ -1,11 +1,7 @@
 ﻿using System.IO;
-using Device = SharpDX.Direct3D11.Device;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Content
 {
-    using Engine.Helpers;
-
     /// <summary>
     /// Image content
     /// </summary>
@@ -200,63 +196,6 @@ namespace Engine.Content
                 IsCubic = true,
                 CubicFaceSize = faceSize,
             };
-        }
-
-        /// <summary>
-        /// Generate the resource view
-        /// </summary>
-        /// <param name="device">Graphics device</param>
-        /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateResource(Device device)
-        {
-            ShaderResourceView view = null;
-
-            if (this.Stream != null)
-            {
-                byte[] buffer = this.Stream.GetBuffer();
-
-                view = device.LoadTexture(buffer);
-            }
-            else
-            {
-                if (this.IsArray)
-                {
-                    if (this.Paths != null && this.Paths.Length > 0)
-                    {
-                        view = device.LoadTextureArray(this.Paths);
-                    }
-                    else if (this.Streams != null && this.Streams.Length > 0)
-                    {
-                        view = device.LoadTextureArray(this.Streams);
-                    }
-                }
-                else if (this.IsCubic)
-                {
-                    int faceSize = this.CubicFaceSize;
-
-                    if (this.Path != null)
-                    {
-                        view = device.LoadTextureCube(this.Path, faceSize);
-                    }
-                    else if (this.Stream != null)
-                    {
-                        view = device.LoadTextureCube(this.Stream, faceSize);
-                    }
-                }
-                else
-                {
-                    if (this.Path != null)
-                    {
-                        view = device.LoadTexture(this.Path);
-                    }
-                    else if (this.Stream != null)
-                    {
-                        view = device.LoadTexture(this.Stream);
-                    }
-                }
-            }
-
-            return view;
         }
 
         /// <summary>
