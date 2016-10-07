@@ -24,6 +24,10 @@ namespace Engine.Animation
         /// </summary>
         private List<AnimationClip> animations = null;
         /// <summary>
+        /// Transition between animations list
+        /// </summary>
+        private List<Transition> transitions = null;
+        /// <summary>
         /// Animation clip names collection
         /// </summary>
         private string[] clips = null;
@@ -40,6 +44,7 @@ namespace Engine.Animation
         public SkinningData(Skeleton skeleton, JointAnimation[] animations)
         {
             this.animations = new List<AnimationClip>();
+            this.transitions = new List<Transition>();
             this.skeleton = skeleton;
 
             this.animations.Add(new AnimationClip(SkinningData.DefaultClip, animations));
@@ -53,6 +58,7 @@ namespace Engine.Animation
         public SkinningData(Skeleton skeleton, Dictionary<string, JointAnimation[]> animations)
         {
             this.animations = new List<AnimationClip>();
+            this.transitions = new List<Transition>();
             this.skeleton = skeleton;
 
             foreach (var key in animations.Keys)
@@ -60,6 +66,26 @@ namespace Engine.Animation
                 this.animations.Add(new AnimationClip(key, animations[key]));
             }
             this.clips = animations.Keys.ToArray();
+        }
+
+        /// <summary>
+        /// Adds a transition between two clips to the internal collection
+        /// </summary>
+        /// <param name="clipFrom">Clip from</param>
+        /// <param name="clipTo">Clip to</param>
+        /// <param name="duration">Transition duration</param>
+        /// <param name="startTimeFrom">Starting time in clipFrom to begin to interpolate</param>
+        /// <param name="startTimeTo">Starting time in clipTo to begin to interpolate</param>
+        public void AddTransition(string clipFrom, string clipTo, float duration, float startTimeFrom, float startTimeTo)
+        {
+            var transition = new Transition(
+                this.GetClip(clipFrom),
+                this.GetClip(clipTo),
+                duration,
+                startTimeFrom,
+                startTimeTo);
+
+            this.transitions.Add(transition);
         }
 
         /// <summary>
@@ -118,14 +144,6 @@ namespace Engine.Animation
             return this.skeleton.GetPoseAtTime(time, clip.Animations);
         }
         /// <summary>
-        /// Gets final transform collection
-        /// </summary>
-        /// <returns>Returns final transform collection</returns>
-        public Matrix[] GetFinalTransforms()
-        {
-            return this.skeleton.FinalTransforms;
-        }
-        /// <summary>
         /// Creates the animation palette
         /// </summary>
         /// <param name="game">Game</param>
@@ -142,6 +160,26 @@ namespace Engine.Animation
                 for (float t = 0; t < duration; t += TimeStep)
                 {
                     var mat = this.GetPoseAtTime(t, clip);
+
+                    for (int m = 0; m < mat.Length; m++)
+                    {
+                        Matrix matr = mat[m];
+
+                        values.Add(new Vector4(matr.Row1.X, matr.Row1.Y, matr.Row1.Z, matr.Row4.X));
+                        values.Add(new Vector4(matr.Row2.X, matr.Row2.Y, matr.Row2.Z, matr.Row4.Y));
+                        values.Add(new Vector4(matr.Row3.X, matr.Row3.Y, matr.Row3.Z, matr.Row4.Z));
+                        values.Add(new Vector4(0, 0, 0, 0));
+                    }
+                }
+            }
+
+            foreach (var transition in this.transitions)
+            {
+                float duration = transition.Duration;
+
+                for (float t = 0; t < duration; t += TimeStep)
+                {
+                    var mat = transition.Interpolate(t);
 
                     for (int m = 0; m < mat.Length; m++)
                     {

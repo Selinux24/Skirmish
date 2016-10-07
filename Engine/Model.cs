@@ -377,14 +377,14 @@ namespace Engine
         /// Gets point list of mesh if the vertex type has position channel
         /// </summary>
         /// <returns>Returns null or position list</returns>
-        public Vector3[] GetPoints()
+        public Vector3[] GetPoints(bool force = false)
         {
-            if (this.updatePoints)
+            if (force || this.updatePoints)
             {
                 var drawingData = this.GetDrawingData(this.GetLODMinimum());
-                if (drawingData.SkinningData != null)
+                if (drawingData.SkinningData != null && this.AnimationController.Playing)
                 {
-                    this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform, drawingData.SkinningData.GetFinalTransforms());
+                    this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform, this.AnimationController.GetPose(drawingData.SkinningData));
                 }
                 else
                 {
@@ -400,14 +400,14 @@ namespace Engine
         /// Gets triangle list of mesh if the vertex type has position channel
         /// </summary>
         /// <returns>Returns null or triangle list</returns>
-        public Triangle[] GetTriangles()
+        public Triangle[] GetTriangles(bool force = false)
         {
-            if (this.updateTriangles)
+            if (force || this.updateTriangles)
             {
                 var drawingData = this.GetDrawingData(this.GetLODMinimum());
-                if (drawingData.SkinningData != null)
+                if (drawingData.SkinningData != null && this.AnimationController.Playing)
                 {
-                    this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform, drawingData.SkinningData.GetFinalTransforms());
+                    this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform, this.AnimationController.GetPose(drawingData.SkinningData));
                 }
                 else
                 {

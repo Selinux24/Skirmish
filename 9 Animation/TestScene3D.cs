@@ -149,7 +149,7 @@ namespace AnimationTest
             if (this.showSoldierDEBUG)
             {
                 Color color = new Color(Color.Red.ToColor3(), 0.6f);
-                Triangle[] tris = this.soldier.GetTriangles();
+                Triangle[] tris = this.soldier.GetTriangles(true);
 
                 if (this.soldierTris == null)
                 {

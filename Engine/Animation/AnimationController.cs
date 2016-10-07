@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.Animation
 {
@@ -23,6 +24,16 @@ namespace Engine.Animation
         /// Controller time
         /// </summary>
         public float Time = 0;
+        /// <summary>
+        /// Gets wheter the controller is currently playing an animation
+        /// </summary>
+        public bool Playing
+        {
+            get
+            {
+                return this.currentIndex >= 0;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -107,6 +118,13 @@ namespace Engine.Animation
             }
 
             return offset;
+        }
+
+        public Matrix[] GetPose(SkinningData skData)
+        {
+            var clipIndex = this.GetAnimationIndex();
+
+            return skData.GetPoseAtTime(this.Time, skData.GetClip(clipIndex));
         }
     }
 }
