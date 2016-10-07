@@ -119,12 +119,16 @@ namespace Engine.Animation
 
             return offset;
         }
-
+        /// <summary>
+        /// Gets the transformation matrix list at current time
+        /// </summary>
+        /// <param name="skData">Skinning data</param>
+        /// <returns>Returns the transformation matrix list at current time</returns>
         public Matrix[] GetPose(SkinningData skData)
         {
             var clipIndex = this.GetAnimationIndex();
 
-            return skData.GetPoseAtTime(this.Time, skData.GetClip(clipIndex));
+            return skData.GetPoseAtTime(this.Time, clipIndex);
         }
     }
 }

@@ -401,17 +401,19 @@ namespace Engine.Common
         /// <summary>
         /// Gets the drawing data's point list
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints()
+        public Vector3[] GetPoints(bool refresh = false)
         {
-            return this.GetPoints(Matrix.Identity);
+            return this.GetPoints(Matrix.Identity, refresh);
         }
         /// <summary>
         /// Gets the drawing data's point list
         /// </summary>
         /// <param name="transform">Transform to apply</param>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(Matrix transform)
+        public Vector3[] GetPoints(Matrix transform, bool refresh = false)
         {
             List<Vector3> points = new List<Vector3>();
 
@@ -419,7 +421,7 @@ namespace Engine.Common
             {
                 foreach (Mesh mesh in dictionary.Values)
                 {
-                    Vector3[] meshPoints = mesh.GetPoints();
+                    Vector3[] meshPoints = mesh.GetPoints(refresh);
                     if (meshPoints != null && meshPoints.Length > 0)
                     {
                         Vector3[] trnPoints = new Vector3[meshPoints.Length];
@@ -435,18 +437,20 @@ namespace Engine.Common
         /// Gets the drawing data's point list
         /// </summary>
         /// <param name="boneTransforms">Bone transforms list</param>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(Matrix[] boneTransforms)
+        public Vector3[] GetPoints(Matrix[] boneTransforms, bool refresh = false)
         {
-            return this.GetPoints(Matrix.Identity, boneTransforms);
+            return this.GetPoints(Matrix.Identity, boneTransforms, refresh);
         }
         /// <summary>
         /// Gets the drawing data's point list
         /// </summary>
         /// <param name="transform">Global transform</param>
         /// <param name="boneTransforms">Bone transforms list</param>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's point list</returns>
-        public Vector3[] GetPoints(Matrix transform, Matrix[] boneTransforms)
+        public Vector3[] GetPoints(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
         {
             List<Vector3> points = new List<Vector3>();
 
@@ -454,7 +458,7 @@ namespace Engine.Common
             {
                 foreach (Mesh mesh in dictionary.Values)
                 {
-                    Vector3[] meshPoints = mesh.GetPoints(boneTransforms);
+                    Vector3[] meshPoints = mesh.GetPoints(boneTransforms, refresh);
                     if (meshPoints != null && meshPoints.Length > 0)
                     {
                         Vector3[] trnPoints = new Vector3[meshPoints.Length];
@@ -469,17 +473,19 @@ namespace Engine.Common
         /// <summary>
         /// Gets the drawing data's triangle list
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles()
+        public Triangle[] GetTriangles(bool refresh = false)
         {
-            return this.GetTriangles(Matrix.Identity);
+            return this.GetTriangles(Matrix.Identity, refresh);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
         /// </summary>
         /// <param name="transform">Transform to apply</param>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(Matrix transform)
+        public Triangle[] GetTriangles(Matrix transform, bool refresh = false)
         {
             List<Triangle> triangles = new List<Triangle>();
 
@@ -487,7 +493,7 @@ namespace Engine.Common
             {
                 foreach (Mesh mesh in dictionary.Values)
                 {
-                    Triangle[] meshTriangles = mesh.GetTriangles();
+                    Triangle[] meshTriangles = mesh.GetTriangles(refresh);
                     meshTriangles = Triangle.Transform(meshTriangles, transform);
                     triangles.AddRange(meshTriangles);
                 }
@@ -499,18 +505,20 @@ namespace Engine.Common
         /// Gets the drawing data's triangle list
         /// </summary>
         /// <param name="boneTransforms">Bone transforms list</param>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(Matrix[] boneTransforms)
+        public Triangle[] GetTriangles(Matrix[] boneTransforms, bool refresh = false)
         {
-            return this.GetTriangles(Matrix.Identity, boneTransforms);
+            return this.GetTriangles(Matrix.Identity, boneTransforms, refresh);
         }
         /// <summary>
         /// Gets the drawing data's triangle list
         /// </summary>
         /// <param name="transform">Transform to apply</param>
         /// <param name="boneTransforms">Bone transforms list</param>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns the drawing data's triangle list</returns>
-        public Triangle[] GetTriangles(Matrix transform, Matrix[] boneTransforms)
+        public Triangle[] GetTriangles(Matrix transform, Matrix[] boneTransforms, bool refresh = false)
         {
             List<Triangle> triangles = new List<Triangle>();
 
@@ -518,7 +526,7 @@ namespace Engine.Common
             {
                 foreach (Mesh mesh in dictionary.Values)
                 {
-                    Triangle[] meshTriangles = mesh.GetTriangles(boneTransforms);
+                    Triangle[] meshTriangles = mesh.GetTriangles(boneTransforms, refresh);
                     meshTriangles = Triangle.Transform(meshTriangles, transform);
                     triangles.AddRange(meshTriangles);
                 }

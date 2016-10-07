@@ -333,6 +333,7 @@
     <Compile Include="Common\MeshDictionary.cs" />
     <Compile Include="Common\MeshMaterialsDictionary.cs" />
     <Compile Include="Common\TextureDictionary.cs" />
+    <Compile Include="Common\VertexDataChannels.cs" />
     <Compile Include="Content\LODModelContent.cs" />
     <Compile Include="CubemapDescription.cs" />
     <Compile Include="CameraFollower.cs" />

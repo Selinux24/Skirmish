@@ -321,10 +321,11 @@ namespace Engine.Common
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or position list</returns>
-        public Vector3[] GetPoints()
+        public Vector3[] GetPoints(bool refresh = false)
         {
-            if (this.positionCache == null)
+            if (refresh || this.positionCache == null)
             {
                 List<Vector3> positionList = new List<Vector3>();
 
@@ -348,10 +349,11 @@ namespace Engine.Common
         /// Gets point list of mesh if the vertex type has position channel
         /// </summary>
         /// <param name="boneTransforms">Bone transforms</param>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or position list</returns>
-        public Vector3[] GetPoints(Matrix[] boneTransforms)
+        public Vector3[] GetPoints(Matrix[] boneTransforms, bool refresh = false)
         {
-            if (this.positionCache == null)
+            if (refresh || this.positionCache == null)
             {
                 Vector3[] res = new Vector3[this.Vertices.Length];
 
@@ -368,12 +370,13 @@ namespace Engine.Common
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or triangle list</returns>
-        public Triangle[] GetTriangles()
+        public Triangle[] GetTriangles(bool refresh = false)
         {
-            if (this.triangleCache == null)
+            if (refresh || this.triangleCache == null)
             {
-                Vector3[] positions = this.GetPoints();
+                Vector3[] positions = this.GetPoints(refresh);
                 if (positions != null && positions.Length > 0)
                 {
                     if (this.Indices != null && this.Indices.Length > 0)
@@ -393,12 +396,13 @@ namespace Engine.Common
         /// Gets triangle list of mesh if the vertex type has position channel
         /// </summary>
         /// <param name="boneTransforms">Bone transforms</param>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or triangle list</returns>
-        public Triangle[] GetTriangles(Matrix[] boneTransforms)
+        public Triangle[] GetTriangles(Matrix[] boneTransforms, bool refresh = false)
         {
-            if (this.triangleCache == null)
+            if (refresh || this.triangleCache == null)
             {
-                Vector3[] positions = this.GetPoints(boneTransforms);
+                Vector3[] positions = this.GetPoints(boneTransforms, refresh);
 
                 if (this.Indices != null && this.Indices.Length > 0)
                 {

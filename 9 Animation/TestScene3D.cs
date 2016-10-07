@@ -146,10 +146,16 @@ namespace AnimationTest
                 if (this.soldierLines != null) this.soldierLines.Visible = this.showSoldierDEBUG;
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.soldier.Visible = !this.soldier.Visible;
+            }
+
             if (this.showSoldierDEBUG)
             {
                 Color color = new Color(Color.Red.ToColor3(), 0.6f);
                 Triangle[] tris = this.soldier.GetTriangles(true);
+                BoundingBox bbox = this.soldier.GetBoundingBox(true);
 
                 if (this.soldierTris == null)
                 {
@@ -163,16 +169,18 @@ namespace AnimationTest
 
                 if (this.soldierLines == null)
                 {
-                    this.soldierLines = this.AddLineListDrawer(Line3.CreateWiredBox(this.soldier.GetBoundingBox()), color);
+                    this.soldierLines = this.AddLineListDrawer(Line3.CreateWiredBox(bbox), color);
                     this.soldierLines.EnableDepthStencil = false;
                 }
                 else
                 {
-                    this.soldierLines.SetLines(color, Line3.CreateWiredBox(this.soldier.GetBoundingBox()));
+                    this.soldierLines.SetLines(color, Line3.CreateWiredBox(bbox));
                 }
             }
 
             #endregion
+
+            this.World *= Matrix.RotationY(MathUtil.PiOverFour * 0.1f * gameTime.ElapsedSeconds);
 
             base.Update(gameTime);
 

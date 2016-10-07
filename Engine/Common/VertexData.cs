@@ -1419,12 +1419,13 @@ namespace Engine.Common
                     float weight = boneWeights[w];
                     if (weight > 0)
                     {
-                        int index = boneIndices[w];
+                        byte index = boneIndices[w];
                         var boneTransform = boneTransforms[index];
 
-                        Vector3.TransformCoordinate(ref position, ref boneTransform, out position);
+                        Vector3 p;
+                        Vector3.TransformCoordinate(ref position, ref boneTransform, out p);
 
-                        t += position * weight;
+                        t += (p * weight);
                     }
                 }
 
@@ -1468,9 +1469,10 @@ namespace Engine.Common
                 {
                     Vector3 position = this.Position.Value;
 
-                    Vector3.TransformCoordinate(ref position, ref transform, out position);
+                    Vector3 p;
+                    Vector3.TransformCoordinate(ref position, ref transform, out p);
 
-                    this.Position = position;
+                    this.Position = p;
                 }
 
                 if (this.Normal.HasValue)
@@ -1525,52 +1527,5 @@ namespace Engine.Common
 
             return text;
         }
-    }
-
-    /// <summary>
-    /// Vertex Channels
-    /// </summary>
-    public enum VertexDataChannels
-    {
-        /// <summary>
-        /// Position
-        /// </summary>
-        Position,
-        /// <summary>
-        /// Normal
-        /// </summary>
-        Normal,
-        /// <summary>
-        /// Tangent
-        /// </summary>
-        Tangent,
-        /// <summary>
-        /// Binormal
-        /// </summary>
-        BiNormal,
-        /// <summary>
-        /// Texture UV
-        /// </summary>
-        Texture,
-        /// <summary>
-        /// Texture UV
-        /// </summary>
-        Texture1,
-        /// <summary>
-        /// Color
-        /// </summary>
-        Color,
-        /// <summary>
-        /// Sprite size
-        /// </summary>
-        Size,
-        /// <summary>
-        /// Vertex weights
-        /// </summary>
-        Weights,
-        /// <summary>
-        /// Bone weights
-        /// </summary>
-        BoneIndices,
     }
 }

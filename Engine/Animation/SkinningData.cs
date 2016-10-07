@@ -138,10 +138,10 @@ namespace Engine.Animation
         /// Gets the transform list of the pose at specified time
         /// </summary>
         /// <param name="time">Time</param>
-        /// <param name="clip">Clip</param>
-        public Matrix[] GetPoseAtTime(float time, AnimationClip clip)
+        /// <param name="index">Clip index</param>
+        public Matrix[] GetPoseAtTime(float time, int index)
         {
-            return this.skeleton.GetPoseAtTime(time, clip.Animations);
+            return this.skeleton.GetPoseAtTime(time, this.animations[index].Animations);
         }
         /// <summary>
         /// Creates the animation palette
@@ -153,13 +153,13 @@ namespace Engine.Animation
         {
             List<Vector4> values = new List<Vector4>();
 
-            foreach (var clip in this.animations)
+            for (int i = 0; i < this.animations.Count; i++)
             {
-                float duration = clip.Duration;
+                float duration = this.animations[i].Duration;
 
                 for (float t = 0; t < duration; t += TimeStep)
                 {
-                    var mat = this.GetPoseAtTime(t, clip);
+                    var mat = this.GetPoseAtTime(t, i);
 
                     for (int m = 0; m < mat.Length; m++)
                     {

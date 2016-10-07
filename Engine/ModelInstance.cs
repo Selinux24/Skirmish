@@ -179,15 +179,19 @@ namespace Engine
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or position list</returns>
-        public Vector3[] GetPoints(bool force = false)
+        public Vector3[] GetPoints(bool refresh = false)
         {
-            if (force || this.updatePoints)
+            if (refresh || this.updatePoints)
             {
                 var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
                 if (drawingData.SkinningData != null)
                 {
-                    this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform, this.AnimationController.GetPose(drawingData.SkinningData));
+                    this.positionCache = drawingData.GetPoints(
+                        this.Manipulator.LocalTransform,
+                        this.AnimationController.GetPose(drawingData.SkinningData),
+                        refresh);
                 }
                 else
                 {
@@ -202,15 +206,19 @@ namespace Engine
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or triangle list</returns>
-        public Triangle[] GetTriangles(bool force = false)
+        public Triangle[] GetTriangles(bool refresh = false)
         {
-            if (force || this.updateTriangles)
+            if (refresh || this.updateTriangles)
             {
                 var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
                 if (drawingData.SkinningData != null)
                 {
-                    this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform, this.AnimationController.GetPose(drawingData.SkinningData));
+                    this.triangleCache = drawingData.GetTriangles(
+                        this.Manipulator.LocalTransform,
+                        this.AnimationController.GetPose(drawingData.SkinningData),
+                        refresh);
                 }
                 else
                 {
@@ -225,12 +233,13 @@ namespace Engine
         /// <summary>
         /// Gets bounding sphere
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere()
+        public BoundingSphere GetBoundingSphere(bool refresh = false)
         {
-            if (this.boundingSphere == new BoundingSphere())
+            if (refresh || this.boundingSphere == new BoundingSphere())
             {
-                Vector3[] positions = this.GetPoints();
+                Vector3[] positions = this.GetPoints(refresh);
                 if (positions != null && positions.Length > 0)
                 {
                     this.boundingSphere = BoundingSphere.FromPoints(positions);
@@ -242,12 +251,13 @@ namespace Engine
         /// <summary>
         /// Gets bounding box
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox()
+        public BoundingBox GetBoundingBox(bool refresh = false)
         {
-            if (this.boundingBox == new BoundingBox())
+            if (refresh || this.boundingBox == new BoundingBox())
             {
-                Vector3[] positions = this.GetPoints();
+                Vector3[] positions = this.GetPoints(refresh);
                 if (positions != null && positions.Length > 0)
                 {
                     this.boundingBox = BoundingBox.FromPoints(positions);
@@ -259,12 +269,13 @@ namespace Engine
         /// <summary>
         /// Gets oriented bounding box
         /// </summary>
+        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns oriented bounding box with identity transformation. Empty if the vertex type hasn't position channel</returns>
-        public OrientedBoundingBox GetOrientedBoundingBox()
+        public OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false)
         {
-            if (this.orientedBoundingBox == new OrientedBoundingBox())
+            if (refresh || this.orientedBoundingBox == new OrientedBoundingBox())
             {
-                Vector3[] positions = this.GetPoints();
+                Vector3[] positions = this.GetPoints(refresh);
                 if (positions != null && positions.Length > 0)
                 {
                     this.orientedBoundingBox = new OrientedBoundingBox(positions);

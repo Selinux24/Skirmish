@@ -77,6 +77,10 @@ namespace Engine
             {
                 return this.world;
             }
+            set
+            {
+                this.world = value;
+            }
         }
         /// <summary>
         /// Camera

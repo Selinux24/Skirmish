@@ -607,7 +607,7 @@ namespace HeightmapTest
             {
                 Color color = new Color(Color.Red.ToColor3(), 0.6f);
 
-                Triangle[] tris = this.soldier.GetTriangles();
+                Triangle[] tris = this.soldier.GetTriangles(true);
                 if (this.soldierTris == null)
                 {
                     this.soldierTris = this.AddTriangleListDrawer(tris, color);
@@ -620,11 +620,11 @@ namespace HeightmapTest
 
                 BoundingBox[] bboxes = new BoundingBox[]
                 {
-                    this.soldier.GetBoundingBox(),
-                    this.troops.Instances[0].GetBoundingBox(),
-                    this.troops.Instances[1].GetBoundingBox(),
-                    this.troops.Instances[2].GetBoundingBox(),
-                    this.troops.Instances[3].GetBoundingBox(),
+                    this.soldier.GetBoundingBox(true),
+                    this.troops.Instances[0].GetBoundingBox(true),
+                    this.troops.Instances[1].GetBoundingBox(true),
+                    this.troops.Instances[2].GetBoundingBox(true),
+                    this.troops.Instances[3].GetBoundingBox(true),
                 };
                 if (this.soldierLines == null)
                 {
