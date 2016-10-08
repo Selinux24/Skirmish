@@ -294,32 +294,35 @@ namespace Engine
 
                                     foreach (string material in dictionary.Keys)
                                     {
-                                        var mesh = dictionary[material];
-                                        var mat = drawingData.Materials[material];
-
                                         #region Per object update
 
-                                        var matdata = mat != null ? mat.Material : Material.Default;
-                                        var texture = mat != null ? mat.DiffuseTexture : null;
-                                        var normalMap = mat != null ? mat.NormalMap : null;
+                                        var mat = drawingData.Materials[material];
 
                                         if (context.DrawerMode == DrawerModesEnum.Forward)
                                         {
-                                            ((EffectBasic)effect).UpdatePerObject(matdata, texture, normalMap, null, 0);
+                                            ((EffectBasic)effect).UpdatePerObject(
+                                                mat.Material, 
+                                                mat.DiffuseTexture, 
+                                                mat.NormalMap, null, 0);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
                                         {
-                                            ((EffectBasicGBuffer)effect).UpdatePerObject(matdata, texture, normalMap, null, 0);
+                                            ((EffectBasicGBuffer)effect).UpdatePerObject(
+                                                mat.Material, 
+                                                mat.DiffuseTexture, 
+                                                mat.NormalMap, null, 0);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                                         {
-                                            ((EffectBasicShadow)effect).UpdatePerObject(null, 0);
+                                            ((EffectBasicShadow)effect).UpdatePerObject(
+                                                null, 
+                                                0);
                                         }
 
                                         #endregion
 
+                                        var mesh = dictionary[material];
                                         var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-
                                         mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 
                                         for (int p = 0; p < technique.Description.PassCount; p++)

@@ -227,22 +227,17 @@ namespace Engine
 
                     foreach (string material in dictionary.Keys)
                     {
-                        var mesh = dictionary[material];
-                        var mat = this.DrawingData.Materials[material];
-
                         #region Per object update
 
-                        var matdata = mat != null ? mat.Material : Material.Default;
-                        var texture = mat != null ? mat.DiffuseTexture : null;
-                        var normalMap = mat != null ? mat.NormalMap : null;
+                        var mat = this.DrawingData.Materials[material];
 
                         if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                         {
-                            ((EffectBasic)sceneryEffect).UpdatePerObject(matdata, texture, normalMap, null, 0);
+                            ((EffectBasic)sceneryEffect).UpdatePerObject(mat.Material, mat.DiffuseTexture, mat.NormalMap, null, 0);
                         }
                         else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                         {
-                            ((EffectBasicGBuffer)sceneryEffect).UpdatePerObject(mat.Material, texture, normalMap, null, 0);
+                            ((EffectBasicGBuffer)sceneryEffect).UpdatePerObject(mat.Material, mat.DiffuseTexture, mat.NormalMap, null, 0);
                         }
                         else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                         {
@@ -251,8 +246,8 @@ namespace Engine
 
                         #endregion
 
+                        var mesh = dictionary[material];
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.BaseContext.DrawerMode);
-
                         mesh.SetInputAssembler(this.Game.Graphics.DeviceContext, sceneryEffect.GetInputLayout(technique));
 
                         for (int p = 0; p < technique.Description.PassCount; p++)

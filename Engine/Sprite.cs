@@ -222,23 +222,16 @@ namespace Engine
 
                     foreach (string material in dictionary.Keys)
                     {
-                        Mesh mesh = dictionary[material];
-                        MeshMaterial mat = this.DrawingData.Materials[material];
-                        EffectTechnique technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-
                         #region Per object update
 
-                        if (mat != null)
-                        {
-                            effect.UpdatePerObject(this.Color, mat.DiffuseTexture, this.TextureIndex);
-                        }
-                        else
-                        {
-                            effect.UpdatePerObject(this.Color, null, this.TextureIndex);
-                        }
+                        var mat = this.DrawingData.Materials[material];
+
+                        effect.UpdatePerObject(this.Color, mat.DiffuseTexture, this.TextureIndex);
 
                         #endregion
 
+                        var mesh = dictionary[material];
+                        var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
                         mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 
                         for (int p = 0; p < technique.Description.PassCount; p++)

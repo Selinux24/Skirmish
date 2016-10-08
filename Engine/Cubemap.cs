@@ -96,15 +96,15 @@ namespace Engine
                     {
                         foreach (string material in dictionary.Keys)
                         {
-                            Mesh mesh = dictionary[material];
-                            MeshMaterial mat = this.DrawingData.Materials[material];
-
                             #region Per object update
+
+                            MeshMaterial mat = this.DrawingData.Materials[material];
 
                             effect.UpdatePerObject(mat.DiffuseTexture);
 
                             #endregion
 
+                            var mesh = dictionary[material];
                             mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 
                             for (int p = 0; p < technique.Description.PassCount; p++)

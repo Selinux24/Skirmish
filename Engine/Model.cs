@@ -235,21 +235,16 @@ namespace Engine
 
                         foreach (string material in dictionary.Keys)
                         {
-                            var mesh = dictionary[material];
-                            var mat = this.DrawingData.Materials[material];
-
                             #region Per object update
 
-                            var matdata = mat != null ? mat.Material : Material.Default;
-                            var texture = mat != null ? mat.DiffuseTexture : null;
-                            var normalMap = mat != null ? mat.NormalMap : null;
+                            var mat = this.DrawingData.Materials[material];
 
                             if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
                                 ((EffectBasic)effect).UpdatePerObject(
-                                    matdata,
-                                    texture,
-                                    normalMap,
+                                    mat.Material,
+                                    mat.DiffuseTexture,
+                                    mat.NormalMap,
                                     this.animationData,
                                     this.TextureIndex);
                             }
@@ -257,8 +252,8 @@ namespace Engine
                             {
                                 ((EffectBasicGBuffer)effect).UpdatePerObject(
                                     mat.Material,
-                                    texture,
-                                    normalMap,
+                                    mat.DiffuseTexture,
+                                    mat.NormalMap,
                                     this.animationData,
                                     this.TextureIndex);
                             }
@@ -271,8 +266,8 @@ namespace Engine
 
                             #endregion
 
+                            var mesh = dictionary[material];
                             var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-
                             mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 
                             for (int p = 0; p < technique.Description.PassCount; p++)

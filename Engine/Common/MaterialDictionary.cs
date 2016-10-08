@@ -11,6 +11,14 @@ namespace Engine.Common
     public class MaterialDictionary : Dictionary<string, MeshMaterial>
     {
         /// <summary>
+        /// Default material
+        /// </summary>
+        private static MeshMaterial Default = new MeshMaterial()
+        {
+            Material = Material.Default,
+        };
+
+        /// <summary>
         /// Gets material description by name
         /// </summary>
         /// <param name="material">Material name</param>
@@ -27,7 +35,7 @@ namespace Engine.Common
                     }
                 }
 
-                return null;
+                return Default;
             }
         }
 
