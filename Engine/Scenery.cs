@@ -207,7 +207,10 @@ namespace Engine
 
                 if (context.FoliageDescription != null)
                 {
-                    this.Plant(context.FoliageDescription);
+                    if (!this.foliageAttached)
+                    {
+                        this.Plant(context.FoliageDescription);
+                    }
                 }
             }
             /// <summary>
@@ -379,10 +382,7 @@ namespace Engine
             {
                 if (this.Current != null)
                 {
-                    this.foliageAttached = false;
-                    this.foliagePlanted = false;
-
-                    if (!this.foliagePlanting)
+                    if (!this.foliagePlanted && !this.foliagePlanting)
                     {
                         //Start planting task
                         this.foliagePlanting = true;
@@ -392,18 +392,6 @@ namespace Engine
                         t.ContinueWith(task => PlantThreadCompleted(task.Result));
                     }
                 }
-            }
-            /// <summary>
-            /// Copies the foliage data from one patch to another
-            /// </summary>
-            /// <param name="patch">The other patch from copy data to</param>
-            public void CopyFoliageData(SceneryPatch patch)
-            {
-                this.foliageCount = patch.foliageCount;
-                this.foliageData = patch.foliageData;
-                this.foliagePlanting = false;
-                this.foliagePlanted = true;
-                this.foliageAttached = false;
             }
 
             /// <summary>
@@ -483,9 +471,9 @@ namespace Engine
                             this.Game.Graphics.DeviceContext,
                             this.foliageBuffer,
                             this.foliageData);
-                    }
 
-                    this.foliageAttached = true;
+                        this.foliageAttached = true;
+                    }
                 }
             }
         }
