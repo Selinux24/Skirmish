@@ -3,10 +3,10 @@
   <asset>
     <contributor>
       <author>Blender User</author>
-      <authoring_tool>Blender 2.72.0 commit date:2014-10-21, commit time:11:38, hash:9e963ae</authoring_tool>
+      <authoring_tool>Blender 2.78.0 commit date:2016-09-26, commit time:12:42, hash:4bb1e22</authoring_tool>
     </contributor>
-    <created>2015-03-22T19:22:01</created>
-    <modified>2015-03-22T19:22:01</modified>
+    <created>2016-10-08T12:57:21</created>
+    <modified>2016-10-08T12:57:21</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -101,10 +101,50 @@
       </extra>
     </light>
   </library_lights>
-  <library_images/>
+  <library_images>
+    <image id="diffus_dds" name="diffus_dds">
+      <init_from>diffus.dds</init_from>
+    </image>
+    <image id="normal_dds" name="normal_dds">
+      <init_from>normal.dds</init_from>
+    </image>
+    <image id="specular_dds" name="specular_dds">
+      <init_from>specular.dds</init_from>
+    </image>
+  </library_images>
   <library_effects>
     <effect id="Material-effect">
       <profile_COMMON>
+        <newparam sid="diffus_dds-surface">
+          <surface type="2D">
+            <init_from>diffus_dds</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="diffus_dds-sampler">
+          <sampler2D>
+            <source>diffus_dds-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="specular_dds-surface">
+          <surface type="2D">
+            <init_from>specular_dds</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="specular_dds-sampler">
+          <sampler2D>
+            <source>specular_dds-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="normal_dds-surface">
+          <surface type="2D">
+            <init_from>normal_dds</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="normal_dds-sampler">
+          <sampler2D>
+            <source>normal_dds-surface</source>
+          </sampler2D>
+        </newparam>
         <technique sid="common">
           <phong>
             <emission>
@@ -114,18 +154,25 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <color sid="diffuse">0.64 0.64 0.64 1</color>
+              <texture texture="diffus_dds-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
-              <color sid="specular">0.5 0.5 0.5 1</color>
+              <texture texture="specular_dds-sampler" texcoord="UVMap"/>
             </specular>
             <shininess>
-              <float sid="shininess">50</float>
+              <float sid="shininess">25</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>
             </index_of_refraction>
           </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="normal_dds-sampler" texcoord="UVMap"/>
+              </bump>
+            </technique>
+          </extra>
         </technique>
       </profile_COMMON>
     </effect>
@@ -149,12 +196,21 @@
           </technique_common>
         </source>
         <source id="Cube-mesh-normals">
-          <float_array id="Cube-mesh-normals-array" count="84">0 0 -1 -0.999525 2.08517e-7 0.03081762 1 -5.66244e-7 3.27004e-7 -4.76837e-7 -1 0 -1 2.08616e-7 0 2.08616e-7 1 2.37821e-7 -0.9492837 2.00485e-7 0.3144209 -4.76611e-7 -0.9995251 0.03081762 2.68093e-7 0.999525 0.03081762 0.999525 -5.65975e-7 0.03081762 0 0 1 -4.89675e-7 -0.9492837 0.3144209 2.67313e-7 0.9492836 0.3144209 0.9492836 -5.34191e-7 0.3144209 0 0 -1 -0.999525 2.22043e-7 0.03081762 1 0 -2.37822e-7 0 -1 -2.97277e-7 -1 2.38419e-7 -1.48638e-7 2.68221e-7 1 1.78366e-7 -0.9492837 2.2258e-7 0.3144209 -5.07526e-7 -0.999525 0.03081762 3.17204e-7 0.9995251 0.03081768 0.9995251 -5.39246e-7 0.03081768 0 0 1 -5.22227e-7 -0.9492837 0.3144209 3.11611e-7 0.9492837 0.3144209 0.9492837 -5.22227e-7 0.3144209</float_array>
+          <float_array id="Cube-mesh-normals-array" count="81">0 0 -1 -0.999525 2.41908e-7 0.03081762 1 0 -2.37822e-7 0 -1 -4.75643e-7 -1 2.37821e-7 0 2.68221e-7 1 2.37821e-7 -0.9492838 2.08721e-7 0.3144206 -4.63657e-7 -0.9995251 0.03081768 2.62067e-7 0.999525 0.03081762 0.9995251 -5.64452e-7 0.03081768 -5.32143e-6 0 1 -9.24123e-7 -0.9492837 0.3144209 5.56589e-7 0.9492837 0.3144208 0.9492839 -4.17781e-7 0.3144205 -0.999525 1.26882e-7 0.03081762 1 -5.94554e-7 3.27004e-7 -4.76837e-7 -1 0 -1 2.37822e-7 -1.48638e-7 2.08616e-7 1 0 -0.9492837 2.08891e-7 0.3144209 -5.39955e-7 -0.999525 0.03081762 3.23422e-7 0.999525 0.03081762 0.9995251 -5.07526e-7 0.03081762 2.94272e-6 0 1 -5.56589e-7 -0.9492837 0.3144208 -3.73502e-7 0.9492837 0.3144209 0.9492837 -5.56589e-7 0.3144208</float_array>
           <technique_common>
-            <accessor source="#Cube-mesh-normals-array" count="28" stride="3">
+            <accessor source="#Cube-mesh-normals-array" count="27" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube-mesh-map">
+          <float_array id="Cube-mesh-map-array" count="168">1.498517 0.1689736 1.996774 0.4990503 1.498517 0.4990503 0.5020034 0.4976343 0.09454911 2.44236 0.003746628 0.4976343 1.498517 0.497634 1.00026 0.1689736 1.498517 0.1689736 0.003746449 0.4976341 -0.4945107 0.1689736 0.00374639 0.1689736 0.5020034 0.4976343 0.00374639 0.1689736 0.5020033 0.1689736 0.5020037 0.1689736 1.000261 0.4976343 0.5020036 0.4976343 0.4112025 2.44236 0.2001433 2.660258 0.09454911 2.44236 0.003746449 0.4976341 -0.4037073 2.442361 -0.4945104 0.4976343 1.000261 0.4976343 0.5928055 2.44236 0.5020036 0.4976343 1.498517 0.497634 1.091063 2.442359 1.00026 0.497634 1.498517 0.4990503 1.603982 0.568917 1.498517 0.568917 -0.4037073 2.442361 -0.1926477 2.660258 -0.298113 2.660258 0.9094588 2.44236 0.6983995 2.660258 0.5928055 2.44236 1.091063 2.442359 1.302122 2.660257 1.196657 2.660257 1.498517 0.1689736 1.996774 0.1689736 1.996774 0.4990503 0.5020034 0.4976343 0.4112025 2.44236 0.09454911 2.44236 1.498517 0.497634 1.00026 0.497634 1.00026 0.1689736 0.003746449 0.4976341 -0.4945104 0.4976343 -0.4945107 0.1689736 0.5020034 0.4976343 0.003746628 0.4976343 0.00374639 0.1689736 0.5020037 0.1689736 1.000261 0.1689736 1.000261 0.4976343 0.4112025 2.44236 0.3056086 2.660258 0.2001433 2.660258 0.003746449 0.4976341 -0.08705383 2.44236 -0.4037073 2.442361 1.000261 0.4976343 0.9094588 2.44236 0.5928055 2.44236 1.498517 0.497634 1.407716 2.442359 1.091063 2.442359 1.498517 0.4990503 1.603982 0.4990503 1.603982 0.568917 -0.4037073 2.442361 -0.08705383 2.44236 -0.1926477 2.660258 0.9094588 2.44236 0.8038647 2.660258 0.6983995 2.660258 1.091063 2.442359 1.407716 2.442359 1.302122 2.660257</float_array>
+          <technique_common>
+            <accessor source="#Cube-mesh-map-array" count="84" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
             </accessor>
           </technique_common>
         </source>
@@ -164,8 +220,9 @@
         <polylist material="Material-material" count="28">
           <input semantic="VERTEX" source="#Cube-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Cube-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Cube-mesh-map" offset="2" set="0"/>
           <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
-          <p>0 0 1 0 2 0 7 1 6 1 10 1 4 2 5 2 1 2 5 3 6 3 2 3 2 4 6 4 7 4 4 5 0 5 3 5 10 6 14 6 15 6 6 7 5 7 9 7 4 8 7 8 11 8 5 9 4 9 8 9 12 10 15 10 14 10 10 11 9 11 13 11 11 12 15 12 12 12 9 13 8 13 12 13 3 14 0 14 2 14 11 15 7 15 10 15 0 16 4 16 1 16 1 17 5 17 2 17 3 18 2 18 7 18 7 19 4 19 3 19 11 20 10 20 15 20 10 21 6 21 9 21 8 22 4 22 11 22 9 23 5 23 8 23 13 24 12 24 14 24 14 25 10 25 13 25 8 26 11 26 12 26 13 27 9 27 12 27</p>
+          <p>0 0 0 2 0 1 3 0 2 6 1 3 11 1 4 7 1 5 4 2 6 1 2 7 0 2 8 5 3 9 2 3 10 1 3 11 6 4 12 3 4 13 2 4 14 0 5 15 7 5 16 4 5 17 10 6 18 15 6 19 11 6 20 5 7 21 10 7 22 6 7 23 7 8 24 8 8 25 4 8 26 4 9 27 9 9 28 5 9 29 15 10 30 13 10 31 12 10 32 10 11 33 13 11 34 14 11 35 11 12 36 12 12 37 8 12 38 9 13 39 12 13 40 13 13 41 0 0 42 1 0 43 2 0 44 6 14 45 10 14 46 11 14 47 4 15 48 5 15 49 1 15 50 5 16 51 6 16 52 2 16 53 6 17 54 7 17 55 3 17 56 0 18 57 3 18 58 7 18 59 10 19 60 14 19 61 15 19 62 5 20 63 9 20 64 10 20 65 7 21 66 11 21 67 8 21 68 4 22 69 8 22 70 9 22 71 15 23 72 14 23 73 13 23 74 10 24 75 9 24 76 13 24 77 11 25 78 15 25 79 12 25 80 9 26 81 8 26 82 12 26 83</p>
         </polylist>
       </mesh>
     </geometry>
@@ -178,16 +235,18 @@
       </node>
       <node id="Cube" name="Cube" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
-        <instance_geometry url="#Cube-mesh">
+        <instance_geometry url="#Cube-mesh" name="Cube">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material-material" target="#Material-material"/>
+              <instance_material symbol="Material-material" target="#Material-material">
+                <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="Lamp" name="Lamp" type="NODE">
-        <matrix sid="transform">-0.2908646 -0.7711008 0.5663932 4.076245 0.9551712 -0.1998834 0.2183912 1.005454 -0.05518906 0.6045247 0.7946723 5.903862 0 0 0 1</matrix>
+        <matrix sid="transform">-0.2908646 -0.7711008 0.5663932 0.9490092 0.9551712 -0.1998834 0.2183912 -2.447292 -0.05518906 0.6045247 0.7946723 15.30145 0 0 0 1</matrix>
         <instance_light url="#Lamp-light"/>
       </node>
     </visual_scene>

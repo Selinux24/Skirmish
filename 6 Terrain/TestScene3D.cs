@@ -428,10 +428,10 @@ namespace TerrainTest
             Vector3 gPos;
             Triangle gTri;
             float gDist;
-            if (this.terrain.FindTopGroundPosition(0, -50, out gPos, out gTri, out gDist))
+            if (this.terrain.FindTopGroundPosition(-10, -40, out gPos, out gTri, out gDist))
             {
                 this.garage.Manipulator.SetPosition(gPos, true);
-                this.garage.Manipulator.SetRotation(MathUtil.PiOverTwo + MathUtil.Pi, 0, 0, true);
+                this.garage.Manipulator.SetRotation(MathUtil.PiOverFour + MathUtil.Pi, 0, 0, true);
             }
             lines.AddRange(Line3.CreateWiredBox(this.garage.GetBoundingBox()));
 
