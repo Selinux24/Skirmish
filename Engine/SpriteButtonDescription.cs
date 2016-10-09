@@ -46,7 +46,12 @@ namespace Engine
         public SpriteButtonDescription()
             : base()
         {
-
+            this.Static = true;
+            this.AlwaysVisible = true;
+            this.CastShadow = false;
+            this.DeferredEnabled = false;
+            this.EnableDepthStencil = false;
+            this.EnableAlphaBlending = true;
         }
     }
 }

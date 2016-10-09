@@ -141,7 +141,14 @@ namespace Engine.Animation
         /// <param name="index">Clip index</param>
         public Matrix[] GetPoseAtTime(float time, int index)
         {
-            return this.skeleton.GetPoseAtTime(time, this.animations[index].Animations);
+            if (index >= 0)
+            {
+                return this.skeleton.GetPoseAtTime(time, this.animations[index].Animations);
+            }
+            else
+            {
+                return new Matrix[this.skeleton.JointCount];
+            }
         }
         /// <summary>
         /// Creates the animation palette

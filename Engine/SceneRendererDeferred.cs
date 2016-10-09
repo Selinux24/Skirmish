@@ -946,10 +946,15 @@ namespace Engine
             var deviceContext = this.Game.Graphics.DeviceContext;
             var effect = DrawerPool.EffectDeferred;
 
+            var directionalLights = context.Lights.GetVisibleDirectionalLights();
+            var spotLights = context.Lights.GetVisibleSpotLights();
+            var pointLights = context.Lights.GetVisiblePointLights();
+
             effect.UpdatePerFrame(
                 context.World,
                 this.ViewProjection,
                 context.EyePosition,
+                directionalLights.Length,
                 context.Lights.FogStart,
                 context.Lights.FogRange,
                 context.Lights.FogColor,
@@ -971,7 +976,6 @@ namespace Engine
 #if DEBUG
             Stopwatch swDirectional = Stopwatch.StartNew();
 #endif
-            SceneLightDirectional[] directionalLights = context.Lights.GetVisibleDirectionalLights();
             if (directionalLights != null && directionalLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredDirectionalLight;
@@ -1010,7 +1014,6 @@ namespace Engine
 #if DEBUG
             Stopwatch swSpot = Stopwatch.StartNew();
 #endif
-            SceneLightSpot[] spotLights = context.Lights.GetVisibleSpotLights();
             if (spotLights != null && spotLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredSpotLight;
@@ -1058,7 +1061,6 @@ namespace Engine
 #if DEBUG
             Stopwatch swPoint = Stopwatch.StartNew();
 #endif
-            SceneLightPoint[] pointLights = context.Lights.GetVisiblePointLights();
             if (pointLights != null && pointLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredPointLight;

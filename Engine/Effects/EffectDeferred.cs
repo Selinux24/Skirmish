@@ -52,6 +52,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectVectorVariable eyePositionWorld = null;
         /// <summary>
+        /// Light count
+        /// </summary>
+        private EffectScalarVariable lightCount = null;
+        /// <summary>
         /// Directional light effect variable
         /// </summary>
         private EffectVariable directionalLight = null;
@@ -162,6 +166,20 @@ namespace Engine.Effects
                 Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
 
                 this.eyePositionWorld.Set(v4);
+            }
+        }
+        /// <summary>
+        /// Light count
+        /// </summary>
+        protected float LightCount
+        {
+            get
+            {
+                return this.lightCount.GetFloat();
+            }
+            set
+            {
+                this.lightCount.Set(value);
             }
         }
         /// <summary>
@@ -400,6 +418,7 @@ namespace Engine.Effects
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.lightViewProjection = this.Effect.GetVariableByName("gLightViewProjection").AsMatrix();
             this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
+            this.lightCount = this.Effect.GetVariableByName("gLightCount").AsScalar();
             this.directionalLight = this.Effect.GetVariableByName("gDirLight");
             this.pointLight = this.Effect.GetVariableByName("gPointLight");
             this.spotLight = this.Effect.GetVariableByName("gSpotLight");
@@ -451,6 +470,7 @@ namespace Engine.Effects
         /// <param name="world">World matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="lightCount">Light count</param>
         /// <param name="fogStart">Fog start</param>
         /// <param name="fogRange">Fog range</param>
         /// <param name="fogColor">Fog color</param>
@@ -463,7 +483,8 @@ namespace Engine.Effects
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
-            Vector3 eyePositionWorld, 
+            Vector3 eyePositionWorld,
+            float lightCount,
             float fogStart, 
             float fogRange, 
             Color4 fogColor,
@@ -478,6 +499,7 @@ namespace Engine.Effects
             this.WorldViewProjection = world * viewProjection;
             this.EyePositionWorld = eyePositionWorld;
 
+            this.LightCount = lightCount;
             this.FogStart = fogStart;
             this.FogRange = fogRange;
             this.FogColor = fogColor;

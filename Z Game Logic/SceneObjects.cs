@@ -19,6 +19,7 @@ namespace GameLogic
         private TextDrawer txtActionList = null;
         private TextDrawer txtAction = null;
 
+        private string fontName = "Lucida Sans";
         private Sprite sprHUD = null;
         private SpriteButton butClose = null;
         private SpriteButton butNext = null;
@@ -194,11 +195,11 @@ namespace GameLogic
             this.minimap = this.AddMinimap(minimapDesc);
 
             this.txtTitle = this.AddText(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray));
-            this.txtGame = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.LightBlue, Color.DarkBlue));
-            this.txtTeam = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
-            this.txtSoldier = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
-            this.txtActionList = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
-            this.txtAction = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.txtGame = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue));
+            this.txtTeam = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow));
+            this.txtSoldier = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow));
+            this.txtActionList = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow));
+            this.txtAction = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow));
 
             this.butClose = this.AddSpriteButton(new SpriteButtonDescription()
             {
@@ -208,7 +209,7 @@ namespace GameLogic
                 Height = 20,
                 TextDescription = new TextDrawerDescription()
                 {
-                    Font = "Lucida Casual",
+                    Font = this.fontName,
                     FontSize = 12,
                     TextColor = Color.Yellow,
                     ShadowColor = Color.Orange,
@@ -224,7 +225,7 @@ namespace GameLogic
                 Height = 20,
                 TextDescription = new TextDrawerDescription()
                 {
-                    Font = "Lucida Casual",
+                    Font = this.fontName,
                     FontSize = 10,
                     TextColor = Color.Yellow,
                 },
@@ -239,7 +240,7 @@ namespace GameLogic
                 Height = 20,
                 TextDescription = new TextDrawerDescription()
                 {
-                    Font = "Lucida Casual",
+                    Font = this.fontName,
                     FontSize = 10,
                     TextColor = Color.Yellow,
                 },
@@ -254,7 +255,7 @@ namespace GameLogic
                 Height = 20,
                 TextDescription = new TextDrawerDescription()
                 {
-                    Font = "Lucida Casual",
+                    Font = this.fontName,
                     FontSize = 10,
                     TextColor = Color.Yellow,
                 },
@@ -269,7 +270,7 @@ namespace GameLogic
                 Height = 20,
                 TextDescription = new TextDrawerDescription()
                 {
-                    Font = "Lucida Casual",
+                    Font = this.fontName,
                     FontSize = 10,
                     TextColor = Color.Yellow,
                 },
@@ -284,7 +285,7 @@ namespace GameLogic
                 Height = 20,
                 TextDescription = new TextDrawerDescription()
                 {
-                    Font = "Lucida Casual",
+                    Font = this.fontName,
                     FontSize = 10,
                     TextColor = Color.Yellow,
                 },

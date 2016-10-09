@@ -11,7 +11,7 @@ namespace Engine
         {
             this.Static = true;
             this.AlwaysVisible = false;
-            this.CastShadow = true;
+            this.CastShadow = false;
             this.DeferredEnabled = true;
             this.EnableDepthStencil = false;
             this.EnableAlphaBlending = false;

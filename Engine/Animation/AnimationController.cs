@@ -57,6 +57,11 @@ namespace Engine.Animation
                 Loop = loop,
                 Duration = duration,
             });
+
+            if (this.currentIndex < 0)
+            {
+                this.currentIndex = index;
+            }
         }
         /// <summary>
         /// Updates internal state

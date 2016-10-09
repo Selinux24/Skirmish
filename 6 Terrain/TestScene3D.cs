@@ -122,6 +122,7 @@ namespace TerrainTest
                 },
                 new ModelDescription()
                 {
+                    AlwaysVisible = true,
                     DeferredEnabled = false,
                     CastShadow = false,
                     EnableDepthStencil = false,
@@ -395,7 +396,7 @@ namespace TerrainTest
                 DelayGeneration = true,
             };
             this.terrain = this.AddScenery(terrainContent, terrainDescription);
-           
+
             sw.Stop();
 
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
@@ -546,8 +547,8 @@ namespace TerrainTest
             #region Lights
 
             this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = false;
-            this.Lights.DirectionalLights[2].Enabled = false;
+            this.Lights.DirectionalLights[1].Enabled = true;
+            this.Lights.DirectionalLights[2].Enabled = true;
             this.Lights.Add(new SceneLightPoint()
             {
                 Name = "One point",

@@ -188,7 +188,10 @@ GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
 	clip(textureColor.a - 0.05f);
 
-	output.color = textureColor;
+	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
+	float distToEye = length(toEyeWorld);
+
+	output.color = float4(textureColor.xyz, textureColor.a * (1.0f - (distToEye / gEndRadius * 0.5f)));
 	output.normal = float4(input.normalWorld, gMaterial.SpecularPower);
 	output.depth = float4(input.positionWorld, gMaterial.SpecularIntensity);
 

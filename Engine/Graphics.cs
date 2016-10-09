@@ -760,15 +760,6 @@ namespace Engine
                 desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
 
-                desc.RenderTarget[3].IsBlendEnabled = true;
-                desc.RenderTarget[3].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[3].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[3].SourceBlend = BlendOption.One;
-                desc.RenderTarget[3].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[3].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[3].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[3].DestinationAlphaBlend = BlendOption.Zero;
-
                 this.blendDeferredComposer = new BlendState(this.Device, desc);
             }
             #endregion
@@ -786,7 +777,7 @@ namespace Engine
                 desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
                 desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
                 desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
                 desc.RenderTarget[1].IsBlendEnabled = true;
@@ -795,7 +786,7 @@ namespace Engine
                 desc.RenderTarget[1].SourceBlend = BlendOption.One;
                 desc.RenderTarget[1].DestinationBlend = BlendOption.Zero;
                 desc.RenderTarget[1].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[1].SourceAlphaBlend = BlendOption.Zero;
+                desc.RenderTarget[1].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[1].DestinationAlphaBlend = BlendOption.Zero;
 
                 desc.RenderTarget[2].IsBlendEnabled = true;
@@ -804,17 +795,8 @@ namespace Engine
                 desc.RenderTarget[2].SourceBlend = BlendOption.One;
                 desc.RenderTarget[2].DestinationBlend = BlendOption.Zero;
                 desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[2].SourceAlphaBlend = BlendOption.Zero;
+                desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
-
-                desc.RenderTarget[3].IsBlendEnabled = true;
-                desc.RenderTarget[3].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[3].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[3].SourceBlend = BlendOption.One;
-                desc.RenderTarget[3].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[3].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[3].SourceAlphaBlend = BlendOption.Zero;
-                desc.RenderTarget[3].DestinationAlphaBlend = BlendOption.Zero;
 
                 this.blendDeferredComposerTransparent = new BlendState(this.Device, desc);
             }
@@ -853,15 +835,6 @@ namespace Engine
                 desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
                 desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
-
-                desc.RenderTarget[3].IsBlendEnabled = true;
-                desc.RenderTarget[3].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[3].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[3].SourceBlend = BlendOption.One;
-                desc.RenderTarget[3].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[3].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[3].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[3].DestinationAlphaBlend = BlendOption.Zero;
 
                 this.blendDeferredComposerAdditive = new BlendState(this.Device, desc);
             }

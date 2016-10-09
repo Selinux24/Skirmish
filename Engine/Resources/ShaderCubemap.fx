@@ -28,34 +28,7 @@ PSVertexPosition VSCubic(VSVertexPosition input)
 
 float4 PSForwardCubic(PSVertexPosition input) : SV_Target
 {
-    float4 textureColor = gCubemap.Sample(SamplerLinear, input.positionLocal);
-
-	float3 toEyeWorld = gEyePositionWorld - input.positionLocal;
-	float3 toEye = normalize(toEyeWorld);
-
-	float3 litColor = ComputeAllLights(
-		gDirLights, 
-		gPointLights, 
-		gSpotLights,
-		toEye,
-		textureColor.rgb,
-		input.positionLocal,
-		float3(0.0f, 0.0f, 0.0f),
-		0.0f,
-		0.0f,
-		float4(0.0f, 0.0f, 0.0f, 1.0f),
-		0,
-		gShadowMap,
-		gShadowMap);
-
-	if(gFogRange > 0)
-	{
-		float distToEye = length(toEyeWorld);
-
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
-	}
-
-	return float4(litColor, textureColor.a);
+    return gCubemap.Sample(SamplerLinear, input.positionLocal);
 }
 GBufferPSOutput PSDeferredCubic(PSVertexPosition input)
 {
