@@ -12,6 +12,7 @@ namespace AnimationTest
     {
         private TextDrawer title = null;
         private TextDrawer runtime = null;
+        private TextDrawer animText = null;
 
         private Model floor = null;
 
@@ -43,12 +44,15 @@ namespace AnimationTest
 
             this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
             this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
+            this.animText = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange));
 
             this.title.Text = "Animation test";
             this.runtime.Text = "";
+            this.animText.Text = "";
 
             this.title.Position = Vector2.Zero;
             this.runtime.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
+            this.animText.Position = new Vector2(5, this.runtime.Top + this.runtime.Height + 3);
 
             #endregion
 
@@ -57,9 +61,9 @@ namespace AnimationTest
             #region Soldier
 
             AnimationDescription ani = new AnimationDescription();
-            ani.AddClip("idle", 0, 5);
-            ani.AddClip("walk", 5, 9);
-            ani.AddTransition("idle", "walk", 0.5f, 0, 0.3333333f);
+            ani.AddClip("idle1", 0, 7);
+            ani.AddClip("walk", 8, 16);
+            ani.AddTransition("idle1", "walk", 0.5f, 0, 0.3333333f);
 
             this.soldier = this.AddModel(
                 new ModelContentDescription()
@@ -119,16 +123,7 @@ namespace AnimationTest
 
             {
                 this.soldier.Manipulator.SetPosition(0, 0, 0, true);
-                this.soldier.AnimationController.AddClip(0, false, 0.6666667f);
-                this.soldier.AnimationController.AddClip(1, false, 0.4999997f);
-                this.soldier.AnimationController.AddClip(0, false, 0.6666667f);
-                this.soldier.AnimationController.AddClip(1, false, 0.4999997f);
-                this.soldier.AnimationController.AddClip(0, false, 0.6666667f);
-                this.soldier.AnimationController.AddClip(1, false, 0.4999997f);
-                this.soldier.AnimationController.AddClip(0, false, 0.6666667f);
-                this.soldier.AnimationController.AddClip(1, false, 0.4999997f);
-                this.soldier.AnimationController.AddClip(0, false, 0.6666667f);
-                this.soldier.AnimationController.AddClip(1, false, 0.4999997f);
+                this.soldier.AnimationController.AddClip(0, 1, 0, 1, 0, 1);
 
                 float playerHeight = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
@@ -157,7 +152,7 @@ namespace AnimationTest
             if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
                 this.soldier.AnimationController.TimeDelta += 0.1f;
-                this.soldier.AnimationController.TimeDelta = Math.Min(0, this.soldier.AnimationController.TimeDelta);
+                this.soldier.AnimationController.TimeDelta = Math.Min(1, this.soldier.AnimationController.TimeDelta);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Up))
@@ -236,6 +231,7 @@ namespace AnimationTest
             base.Update(gameTime);
 
             this.runtime.Text = this.Game.RuntimeText;
+            this.animText.Text = string.Format("Delta: {0}; Time: {1}", this.soldier.AnimationController.TimeDelta, this.soldier.AnimationController.Time);
         }
     }
 }

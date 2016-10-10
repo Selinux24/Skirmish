@@ -185,7 +185,7 @@ namespace Engine
                                 bool animate = current.AnimateWithManipulator ? current.ManipulatorChanged : true;
                                 if (animate)
                                 {
-                                    current.AnimationController.Update(context.GameTime.ElapsedSeconds);
+                                    current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
 
                                     this.instancingData[instanceIndex].ClipIndex = (uint)current.AnimationController.GetAnimationIndex();
                                     this.instancingData[instanceIndex].AnimationOffset = (uint)current.AnimationController.GetAnimationOffset(drawingData.SkinningData);

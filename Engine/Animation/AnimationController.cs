@@ -57,7 +57,7 @@ namespace Engine.Animation
         /// <param name="index">Clip index in the skinning data clip list</param>
         /// <param name="loop">Loops animation</param>
         /// <param name="duration">Total animation clip duration in the controller. It passes to the next clip when reached</param>
-        public void AddClip(int index, bool loop, float duration)
+        public void AddClip(int index, bool loop, float duration = 0)
         {
             this.clips.Add(new AnimationControllerClip()
             {
@@ -72,10 +72,32 @@ namespace Engine.Animation
             }
         }
         /// <summary>
+        /// Adds clips to the controller clips list
+        /// </summary>
+        /// <param name="indices">Clip indices in the skinning data clip list</param>
+        public void AddClip(params int[] indices)
+        {
+            for (int i = 0; i < indices.Length; i++)
+            {
+                this.clips.Add(new AnimationControllerClip()
+                {
+                    Index = indices[i],
+                    Loop = false,
+                    Duration = 0,
+                });
+            }
+
+            if (this.currentIndex < 0)
+            {
+                this.currentIndex = 0;
+            }
+        }
+        /// <summary>
         /// Updates internal state
         /// </summary>
         /// <param name="delta">Time delta</param>
-        public void Update(float delta)
+        /// <param name="skData">Skinning data</param>
+        public void Update(float delta, SkinningData skData)
         {
             if (this.active)
             {
@@ -85,6 +107,10 @@ namespace Engine.Animation
                 for (int i = 0; i < this.clips.Count; i++)
                 {
                     float t = this.clips[i].Duration;
+                    if (t == 0)
+                    {
+                        t = skData.GetClip(this.clips[i].Index).Duration;
+                    }
 
                     if (this.Time < this.previousTime + t)
                     {
