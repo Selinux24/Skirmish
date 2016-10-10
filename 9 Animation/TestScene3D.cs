@@ -1,7 +1,9 @@
 ﻿using Engine;
+using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
+using System;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace AnimationTest
@@ -54,11 +56,17 @@ namespace AnimationTest
 
             #region Soldier
 
+            AnimationDescription ani = new AnimationDescription();
+            ani.AddClip("idle", 0, 5);
+            ani.AddClip("walk", 5, 9);
+            ani.AddTransition("idle", "walk", 0.5f, 0, 0.3333333f);
+
             this.soldier = this.AddModel(
                 new ModelContentDescription()
                 {
                     ContentPath = @"Resources/Soldier",
                     ModelFileName = "soldier_anim2.dae",
+                    Animation = ani,
                 },
                 new ModelDescription()
                 {
@@ -111,7 +119,16 @@ namespace AnimationTest
 
             {
                 this.soldier.Manipulator.SetPosition(0, 0, 0, true);
-                this.soldier.AnimationController.AddClip(0, true, float.MaxValue);
+                this.soldier.AnimationController.AddClip(0, false, 0.6666667f);
+                this.soldier.AnimationController.AddClip(1, false, 0.4999997f);
+                this.soldier.AnimationController.AddClip(0, false, 0.6666667f);
+                this.soldier.AnimationController.AddClip(1, false, 0.4999997f);
+                this.soldier.AnimationController.AddClip(0, false, 0.6666667f);
+                this.soldier.AnimationController.AddClip(1, false, 0.4999997f);
+                this.soldier.AnimationController.AddClip(0, false, 0.6666667f);
+                this.soldier.AnimationController.AddClip(1, false, 0.4999997f);
+                this.soldier.AnimationController.AddClip(0, false, 0.6666667f);
+                this.soldier.AnimationController.AddClip(1, false, 0.4999997f);
 
                 float playerHeight = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
@@ -129,14 +146,47 @@ namespace AnimationTest
                 this.Game.Exit();
             }
 
+            #region Animation control
+
+            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            {
+                this.soldier.AnimationController.TimeDelta -= 0.1f;
+                this.soldier.AnimationController.TimeDelta = Math.Max(0, this.soldier.AnimationController.TimeDelta);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Right))
+            {
+                this.soldier.AnimationController.TimeDelta += 0.1f;
+                this.soldier.AnimationController.TimeDelta = Math.Min(0, this.soldier.AnimationController.TimeDelta);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Up))
+            {
+                if (this.Game.Input.KeyPressed(Keys.ShiftKey))
+                {
+                    this.soldier.AnimationController.Start();
+                }
+                else
+                {
+                    this.soldier.AnimationController.Resume();
+                }
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Down))
+            {
+                this.soldier.AnimationController.Pause();
+            }
+
+            #endregion
+
+            #region Debug
+
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
                 this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
                     SceneModesEnum.DeferredLightning :
                     SceneModesEnum.ForwardLigthning;
             }
-
-            #region Debug
 
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
@@ -180,6 +230,7 @@ namespace AnimationTest
 
             #endregion
 
+            //Rotates the scene
             this.World *= Matrix.RotationY(MathUtil.PiOverFour * 0.1f * gameTime.ElapsedSeconds);
 
             base.Update(gameTime);

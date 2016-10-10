@@ -328,7 +328,7 @@ namespace Engine
         {
             Model newModel = null;
 
-            ModelContent[] geo = LoaderCOLLADA.Load(content.ContentPath, content.ModelFileName, content.VolumeMeshes);
+            ModelContent[] geo = LoaderCOLLADA.Load(content);
             if (geo.Length == 1)
             {
                 if (optimize) geo[0].Optimize();
@@ -373,7 +373,7 @@ namespace Engine
         {
             ModelInstanced newModel = null;
 
-            ModelContent[] geo = LoaderCOLLADA.Load(content.ContentPath, content.ModelFileName, content.VolumeMeshes);
+            ModelContent[] geo = LoaderCOLLADA.Load(content);
             if (geo.Length == 1)
             {
                 if (optimize) geo[0].Optimize();
@@ -415,7 +415,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Scenery AddScenery(ModelContentDescription content, GroundDescription description, bool optimize = true, int order = 0)
         {
-            var t = LoaderCOLLADA.Load(content.ContentPath, content.ModelFileName, null);
+            var t = LoaderCOLLADA.Load(content);
             ModelContent geo = t[0];
 
             if (optimize) geo.Optimize();

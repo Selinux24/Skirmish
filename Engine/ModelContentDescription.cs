@@ -1,6 +1,8 @@
 ﻿
 namespace Engine
 {
+    using Engine.Animation;
+
     /// <summary>
     /// Model content description
     /// </summary>
@@ -18,5 +20,9 @@ namespace Engine
         /// Volume meshes collection
         /// </summary>
         public string[] VolumeMeshes = null;
+        /// <summary>
+        /// Animation description
+        /// </summary>
+        public AnimationDescription Animation = null;
     }
 }

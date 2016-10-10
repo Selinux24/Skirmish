@@ -1,11 +1,12 @@
-﻿using System;
+﻿using SharpDX;
+using SharpDX.Direct3D;
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using SharpDX;
-using SharpDX.Direct3D;
 
 namespace Engine.Content
 {
+    using Engine.Animation;
     using Engine.Common;
 
     public class ModelContent
@@ -302,6 +303,11 @@ namespace Engine.Content
         [Serializable]
         public class AnimationDictionary : Dictionary<string, AnimationContent[]>
         {
+            /// <summary>
+            /// Animation definition
+            /// </summary>
+            public AnimationDescription Definition { get; set; }
+
             /// <summary>
             /// Constructor
             /// </summary>

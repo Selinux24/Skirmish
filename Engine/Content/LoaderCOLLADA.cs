@@ -20,11 +20,21 @@ namespace Engine.Content
         /// <summary>
         /// Load a collada model
         /// </summary>
+        /// <param name="content">Conten description</param>
+        /// <returns>Returns the loaded contents</returns>
+        public static ModelContent[] Load(ModelContentDescription content)
+        {
+            return Load(content.ContentPath, content.ModelFileName, content.VolumeMeshes, content.Animation);
+        }
+        /// <summary>
+        /// Load a collada model
+        /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="fileName">Collada model</param>
         /// <param name="volumes">Volume mesh names</param>
+        /// <param name="animation">Animation description</param>
         /// <returns>Returns the loaded contents</returns>
-        public static ModelContent[] Load(string contentFolder, string fileName, string[] volumes)
+        public static ModelContent[] Load(string contentFolder, string fileName, string[] volumes, AnimationDescription animation)
         {
             MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList != null && modelList.Length > 0)
@@ -186,6 +196,8 @@ namespace Engine.Content
                     #region Animations
 
                     ProcessLibraryAnimations(dae, modelContent);
+
+                    modelContent.Animations.Definition = animation;
 
                     #endregion
 
@@ -386,12 +398,12 @@ namespace Engine.Content
             {
                 for (int i = 0; i < dae.LibraryAnimations.Length; i++)
                 {
-                    Animation animation = dae.LibraryAnimations[i];
+                    Animation animationLib = dae.LibraryAnimations[i];
 
-                    AnimationContent[] info = ProcessAnimation(modelContent, animation);
+                    AnimationContent[] info = ProcessAnimation(modelContent, animationLib);
                     if (info != null && info.Length > 0)
                     {
-                        modelContent.Animations[animation.Id] = info;
+                        modelContent.Animations[animationLib.Id] = info;
                     }
                 }
             }
@@ -856,13 +868,13 @@ namespace Engine.Content
         /// Process animation
         /// </summary>
         /// <param name="modelContent">Model content</param>
-        /// <param name="animation">Animation information</param>
+        /// <param name="animationLibrary">Animation library</param>
         /// <returns>Retuns animation content list</returns>
-        private static AnimationContent[] ProcessAnimation(ModelContent modelContent, Animation animation)
+        private static AnimationContent[] ProcessAnimation(ModelContent modelContent, Animation animationLibrary)
         {
             List<AnimationContent> res = new List<AnimationContent>();
 
-            foreach (Channel channel in animation.Channels)
+            foreach (Channel channel in animationLibrary.Channels)
             {
                 string jointName = channel.Target.Split("/".ToCharArray())[0];
 
@@ -873,7 +885,7 @@ namespace Engine.Content
                     if (j == null) continue;
                 }
 
-                foreach (Sampler sampler in animation.Samplers)
+                foreach (Sampler sampler in animationLibrary.Samplers)
                 {
                     int inputOffset = -1;
                     int outputOffset = -1;
@@ -889,7 +901,7 @@ namespace Engine.Content
                     {
                         inputOffset = inputsInput.Offset;
 
-                        inputs = animation[inputsInput.Source].ReadFloat();
+                        inputs = animationLibrary[inputsInput.Source].ReadFloat();
                     }
 
                     //Keyframe transform matrix
@@ -898,7 +910,7 @@ namespace Engine.Content
                     {
                         outputOffset = outputsInput.Offset;
 
-                        outputs = animation[outputsInput.Source].ReadMatrix();
+                        outputs = animationLibrary[outputsInput.Source].ReadMatrix();
                         for (int i = 0; i < outputs.Length; i++)
                         {
                             outputs[i] = Matrix.Transpose(outputs[i]);
@@ -911,7 +923,7 @@ namespace Engine.Content
                     {
                         interpolationOffset = interpolationsInput.Offset;
 
-                        interpolations = animation[interpolationsInput.Source].ReadString();
+                        interpolations = animationLibrary[interpolationsInput.Source].ReadString();
                     }
 
                     List<Keyframe> keyframes = new List<Keyframe>();

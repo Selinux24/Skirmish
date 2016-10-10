@@ -21,9 +21,17 @@ namespace Engine.Animation
         /// </summary>
         private float previousTime;
         /// <summary>
+        /// Animation active flag
+        /// </summary>
+        private bool active = false;
+        /// <summary>
         /// Controller time
         /// </summary>
         public float Time = 0;
+        /// <summary>
+        /// Time delta to aply to controller time
+        /// </summary>
+        public float TimeDelta = 1f;
         /// <summary>
         /// Gets wheter the controller is currently playing an animation
         /// </summary>
@@ -60,7 +68,7 @@ namespace Engine.Animation
 
             if (this.currentIndex < 0)
             {
-                this.currentIndex = index;
+                this.currentIndex = 0;
             }
         }
         /// <summary>
@@ -69,24 +77,27 @@ namespace Engine.Animation
         /// <param name="delta">Time delta</param>
         public void Update(float delta)
         {
-            this.Time += delta;
-
-            this.previousTime = 0;
-            for (int i = 0; i < this.clips.Count; i++)
+            if (this.active)
             {
-                float t = this.clips[i].Duration;
+                this.Time += delta * this.TimeDelta;
 
-                if (Time < this.previousTime + t)
+                this.previousTime = 0;
+                for (int i = 0; i < this.clips.Count; i++)
                 {
-                    if (this.currentIndex != i)
+                    float t = this.clips[i].Duration;
+
+                    if (this.Time < this.previousTime + t)
                     {
-                        this.currentIndex = i;
+                        if (this.currentIndex != i)
+                        {
+                            this.currentIndex = i;
+                        }
+
+                        break;
                     }
 
-                    break;
+                    this.previousTime += t;
                 }
-
-                this.previousTime += t;
             }
         }
         /// <summary>
@@ -97,7 +108,9 @@ namespace Engine.Animation
         {
             if (this.currentIndex >= 0)
             {
-                return this.clips[this.currentIndex].Index;
+                //TODO: Only one animation set for now, with all clips in one line. Return always 0
+                //return this.clips[this.currentIndex].Index;
+                return 0;
             }
             else
             {
@@ -134,6 +147,39 @@ namespace Engine.Animation
             var clipIndex = this.GetAnimationIndex();
 
             return skData.GetPoseAtTime(this.Time, clipIndex);
+        }
+
+        /// <summary>
+        /// Start
+        /// </summary>
+        /// <param name="time">At time</param>
+        public void Start(float time = 0)
+        {
+            this.active = true;
+            this.Time = time;
+        }
+        /// <summary>
+        /// Stop
+        /// </summary>
+        /// <param name="time">At time</param>
+        public void Stop(float time = 0)
+        {
+            this.active = false;
+            this.Time = time;
+        }
+        /// <summary>
+        /// Resume playback
+        /// </summary>
+        public void Resume()
+        {
+            this.active = true;
+        }
+        /// <summary>
+        /// Pause playback
+        /// </summary>
+        public void Pause()
+        {
+            this.active = false;
         }
     }
 }

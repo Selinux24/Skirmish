@@ -17,7 +17,7 @@ namespace Engine.Animation
         /// <summary>
         /// Default time step
         /// </summary>
-        public const float TimeStep = 1.0f / 30.0f;
+        public const float TimeStep = 1.0f / 24.0f;
 
         /// <summary>
         /// Animations clip dictionary
@@ -123,15 +123,27 @@ namespace Engine.Animation
         /// <param name="animationOffset">Animation offset</param>
         public void GetAnimationOffset(float time, int clipIndex, out int animationOffset)
         {
-            float duration = this.animations[clipIndex].Duration;
-            int clipLength = (int)(duration / TimeStep);
+            animationOffset = 0;
 
-            float percent = time / duration;
-            int percentINT = (int)percent;
-            percent -= (float)percentINT;
-            int index = (int)((float)clipLength * percent);
+            int index = 0;
+            for (int i = 0; i <= clipIndex; i++)
+            {
+                float duration = this.animations[i].Duration;
+                int clipLength = (int)(duration / TimeStep);
+                if (i != clipIndex)
+                {
+                    index += clipLength;
+                }
+                else
+                {
+                    float percent = time / duration;
+                    int percentINT = (int)percent;
+                    percent -= (float)percentINT;
+                    index += (int)((float)clipLength * percent);
+                }
+            }
 
-            animationOffset = 4 * this.skeleton.JointCount * index;
+            animationOffset += (4 * this.skeleton.JointCount * index);
         }
 
         /// <summary>
@@ -160,14 +172,16 @@ namespace Engine.Animation
         {
             List<Vector4> values = new List<Vector4>();
 
+            int count = 0;
             for (int i = 0; i < this.animations.Count; i++)
             {
                 float duration = this.animations[i].Duration;
+                int clipLength = (int)(duration / TimeStep);
 
-                for (float t = 0; t < duration; t += TimeStep)
+                for (int t = 0; t < clipLength; t++)
                 {
-                    var mat = this.GetPoseAtTime(t, i);
-
+                    var mat = this.GetPoseAtTime(t * TimeStep, i);
+                    count++;
                     for (int m = 0; m < mat.Length; m++)
                     {
                         Matrix matr = mat[m];
@@ -207,7 +221,7 @@ namespace Engine.Animation
             {
                 texHeight = texHeight << 1;
             }
-            texWidth = texHeight;
+            texWidth = Math.Max(texHeight, 512);
 
             palette = game.ResourceManager.CreateTexture2D(Guid.NewGuid(), values.ToArray(), texWidth);
             width = (uint)texWidth;
