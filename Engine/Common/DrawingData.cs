@@ -159,7 +159,7 @@ namespace Engine.Common
                         //Apply shape matrix if controller exists but we are not loading animation info
                         bindShapeMatrix = cInfo.BindShapeMatrix;
                         weights = cInfo.Weights;
-                        jointNames = modelContent.SkinningInfo.Skeleton.JointNames;
+                        jointNames = modelContent.SkinningInfo.Skeleton.GetJointNames();
 
                         isSkinned = true;
                     }
@@ -317,9 +317,9 @@ namespace Engine.Common
                         drw.SkinningData.AddTransition(
                             transition.ClipFrom,
                             transition.ClipTo,
-                            transition.Duration,
                             transition.StartFrom,
-                            transition.StartTo);
+                            transition.StartTo,
+                            transition.Duration);
                     }
                 }
                 else

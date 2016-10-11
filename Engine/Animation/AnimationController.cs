@@ -42,6 +42,16 @@ namespace Engine.Animation
                 return this.currentIndex >= 0;
             }
         }
+        /// <summary>
+        /// Gets the current clip index in skinning data
+        /// </summary>
+        public int CurrentIndex
+        {
+            get
+            {
+                return this.clips[this.currentIndex].Index;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -109,7 +119,7 @@ namespace Engine.Animation
                     float t = this.clips[i].Duration;
                     if (t == 0)
                     {
-                        t = skData.GetClip(this.clips[i].Index).Duration;
+                        t = skData.GetClipDuration(this.clips[i].Index);
                     }
 
                     if (this.Time < this.previousTime + t)
@@ -120,6 +130,10 @@ namespace Engine.Animation
                         }
 
                         break;
+                    }
+                    else if (i == this.clips.Count - 1)
+                    {
+                        this.active = false;
                     }
 
                     this.previousTime += t;

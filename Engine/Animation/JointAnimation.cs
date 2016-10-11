@@ -64,17 +64,10 @@ namespace Engine.Animation
             this.Interpolate(time, out translation, out rotation, out scale);
 
             //Create the combined transformation matrix
-            var mat = Matrix.RotationQuaternion(rotation);
-
-            mat.M11 *= scale.X; mat.M21 *= scale.X; mat.M31 *= scale.X;
-            mat.M12 *= scale.Y; mat.M22 *= scale.Y; mat.M32 *= scale.Y;
-            mat.M13 *= scale.Z; mat.M23 *= scale.Z; mat.M33 *= scale.Z;
-
-            mat.M41 = translation.X;
-            mat.M42 = translation.Y;
-            mat.M43 = translation.Z;
-
-            return mat;
+            return 
+                Matrix.Scaling(scale) * 
+                Matrix.RotationQuaternion(rotation) * 
+                Matrix.Translation(translation);
         }
         /// <summary>
         /// Interpolate bone transformation

@@ -61,9 +61,9 @@ namespace AnimationTest
             #region Soldier
 
             AnimationDescription ani = new AnimationDescription();
-            ani.AddClip("idle1", 0, 7);
-            ani.AddClip("walk", 8, 16);
-            ani.AddTransition("idle1", "walk", 0.5f, 0, 0.3333333f);
+            ani.AddClip("idle1", 0, 8);
+            ani.AddClip("walk", 8, 17);
+            ani.AddTransition("idle1", "walk", 0f, 0f, 1.333333f);
 
             this.soldier = this.AddModel(
                 new ModelContentDescription()
@@ -123,7 +123,8 @@ namespace AnimationTest
 
             {
                 this.soldier.Manipulator.SetPosition(0, 0, 0, true);
-                this.soldier.AnimationController.AddClip(0, 1, 0, 1, 0, 1);
+                this.soldier.AnimationController.AddClip(0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+                this.soldier.AnimationController.TimeDelta = 1f;
 
                 float playerHeight = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
@@ -225,13 +226,25 @@ namespace AnimationTest
 
             #endregion
 
-            //Rotates the scene
-            this.World *= Matrix.RotationY(MathUtil.PiOverFour * 0.1f * gameTime.ElapsedSeconds);
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                //Rotates the scene
+                this.World *= Matrix.RotationY(MathUtil.PiOverFour * 0.1f * gameTime.ElapsedSeconds);
+            }
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                //Rotates the scene
+                this.World *= Matrix.RotationY(-MathUtil.PiOverFour * 0.1f * gameTime.ElapsedSeconds);
+            }
 
             base.Update(gameTime);
 
             this.runtime.Text = this.Game.RuntimeText;
-            this.animText.Text = string.Format("Delta: {0}; Time: {1}", this.soldier.AnimationController.TimeDelta, this.soldier.AnimationController.Time);
+            this.animText.Text = string.Format(
+                "Index: {0}; Delta: {1}; Time: {2}",
+                this.soldier.AnimationController.CurrentIndex,
+                this.soldier.AnimationController.TimeDelta,
+                this.soldier.AnimationController.Time);
         }
     }
 }

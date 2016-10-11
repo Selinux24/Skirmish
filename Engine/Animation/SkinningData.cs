@@ -30,7 +30,7 @@ namespace Engine.Animation
         /// <summary>
         /// Animation clip names collection
         /// </summary>
-        private string[] clips = null;
+        private List<string> clips = null;
         /// <summary>
         /// Skeleton
         /// </summary>
@@ -45,10 +45,11 @@ namespace Engine.Animation
         {
             this.animations = new List<AnimationClip>();
             this.transitions = new List<Transition>();
+            this.clips = new List<string>();
             this.skeleton = skeleton;
 
             this.animations.Add(new AnimationClip(SkinningData.DefaultClip, animations));
-            this.clips = new string[] { SkinningData.DefaultClip };
+            this.clips.Add(SkinningData.DefaultClip);
         }
         /// <summary>
         /// Constructor
@@ -59,13 +60,14 @@ namespace Engine.Animation
         {
             this.animations = new List<AnimationClip>();
             this.transitions = new List<Transition>();
+            this.clips = new List<string>();
             this.skeleton = skeleton;
 
             foreach (var key in animations.Keys)
             {
                 this.animations.Add(new AnimationClip(key, animations[key]));
+                this.clips.Add(key);
             }
-            this.clips = animations.Keys.ToArray();
         }
 
         /// <summary>
@@ -76,16 +78,18 @@ namespace Engine.Animation
         /// <param name="duration">Transition duration</param>
         /// <param name="startTimeFrom">Starting time in clipFrom to begin to interpolate</param>
         /// <param name="startTimeTo">Starting time in clipTo to begin to interpolate</param>
-        public void AddTransition(string clipFrom, string clipTo, float duration, float startTimeFrom, float startTimeTo)
+        public void AddTransition(string clipFrom, string clipTo, float startTimeFrom, float startTimeTo, float duration)
         {
             var transition = new Transition(
-                this.GetClip(clipFrom),
-                this.GetClip(clipTo),
-                duration,
+                this.animations.FindIndex(c => c.Name == clipFrom),
+                this.animations.FindIndex(c => c.Name == clipTo),
                 startTimeFrom,
-                startTimeTo);
+                startTimeTo,
+                duration);
 
             this.transitions.Add(transition);
+
+            this.clips.Add(clipFrom + clipTo);
         }
 
         /// <summary>
@@ -95,25 +99,23 @@ namespace Engine.Animation
         /// <returns>Returns the index of the clip by name</returns>
         public int GetClipIndex(string clipName)
         {
-            return Array.IndexOf(this.clips, clipName);
+            return this.clips.IndexOf(clipName);
         }
         /// <summary>
-        /// Gets the clip by name
-        /// </summary>
-        /// <param name="clipName">Clip name</param>
-        /// <returns>Returns the clip by name</returns>
-        public AnimationClip GetClip(string clipName)
-        {
-            return this.animations.Find(c => c.Name == clipName);
-        }
-        /// <summary>
-        /// Gets the clip by index
+        /// Gets the duration of the specified by index clip
         /// </summary>
         /// <param name="clipIndex">Clip index</param>
-        /// <returns>Returns the clip by index</returns>
-        public AnimationClip GetClip(int clipIndex)
+        /// <returns>Returns the duration of the clip</returns>
+        public float GetClipDuration(int clipIndex)
         {
-            return this.animations[clipIndex];
+            if (clipIndex < this.animations.Count)
+            {
+                return this.animations[clipIndex].Duration;
+            }
+            else
+            {
+                return this.transitions[clipIndex - this.animations.Count].Duration;
+            }
         }
         /// <summary>
         /// Gets the specified animation offset
@@ -128,7 +130,7 @@ namespace Engine.Animation
             int index = 0;
             for (int i = 0; i <= clipIndex; i++)
             {
-                float duration = this.animations[i].Duration;
+                float duration = this.GetClipDuration(i);
                 int clipLength = (int)(duration / TimeStep);
                 if (i != clipIndex)
                 {
@@ -144,6 +146,8 @@ namespace Engine.Animation
             }
 
             animationOffset += (4 * this.skeleton.JointCount * index);
+
+            //animationOffset = 9672 + (52 * 10);
         }
 
         /// <summary>
@@ -151,17 +155,71 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="time">Time</param>
         /// <param name="index">Clip index</param>
+        /// <returns>Returns the resulting transform list</returns>
         public Matrix[] GetPoseAtTime(float time, int index)
         {
+            var res = new Matrix[this.skeleton.JointCount];
+
             if (index >= 0)
             {
-                return this.skeleton.GetPoseAtTime(time, this.animations[index].Animations);
+                this.skeleton.GetPoseAtTime(time, this.animations[index].Animations, ref res);
             }
-            else
-            {
-                return new Matrix[this.skeleton.JointCount];
-            }
+
+            return res;
         }
+        /// <summary>
+        /// Gets the transform list of the pose's combination at specified time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="index1">First clip index</param>
+        /// <param name="index2">Second clip index</param>
+        /// <param name="offset1">Time offset for first clip</param>
+        /// <param name="offset2">Time offset from second clip</param>
+        /// <param name="duration">Total duration</param>
+        /// <returns>Returns the resulting transform list</returns>
+        public Matrix[] GetPoseAtTime(float time, int index1, int index2, float offset1, float offset2, float duration)
+        {
+            var res = new Matrix[this.skeleton.JointCount];
+
+            if (index1 >= 0 && index2 >= 0)
+            {
+                var mats1 = new Matrix[this.skeleton.JointCount];
+                var mats2 = new Matrix[this.skeleton.JointCount];
+
+                this.skeleton.GetPoseAtTime(time + offset1, this.animations[index1].Animations, ref mats1);
+                this.skeleton.GetPoseAtTime(time + offset2, this.animations[index2].Animations, ref mats2);
+
+                float factor = time / duration;
+
+                for (int i = 0; i < res.Length; i++)
+                {
+                    Vector3 sca1;
+                    Quaternion rot1;
+                    Vector3 pos1;
+                    mats1[i].Decompose(out sca1, out rot1, out pos1);
+
+                    Vector3 sca2;
+                    Quaternion rot2;
+                    Vector3 pos2;
+                    mats2[i].Decompose(out sca2, out rot2, out pos2);
+
+                    rot1.Normalize();
+                    rot2.Normalize();
+
+                    Vector3 translation = pos1 + (pos2 - pos1) * factor;
+                    Quaternion rotation = Quaternion.Slerp(rot1, rot2, factor);
+                    Vector3 scale = sca1 + (sca2 - sca1) * factor;
+
+                    res[i] =
+                        Matrix.Scaling(scale) *
+                        Matrix.RotationQuaternion(rotation) *
+                        Matrix.Translation(translation);
+                }
+            }
+
+            return res;
+        }
+      
         /// <summary>
         /// Creates the animation palette
         /// </summary>
@@ -172,7 +230,6 @@ namespace Engine.Animation
         {
             List<Vector4> values = new List<Vector4>();
 
-            int count = 0;
             for (int i = 0; i < this.animations.Count; i++)
             {
                 float duration = this.animations[i].Duration;
@@ -181,7 +238,7 @@ namespace Engine.Animation
                 for (int t = 0; t < clipLength; t++)
                 {
                     var mat = this.GetPoseAtTime(t * TimeStep, i);
-                    count++;
+                    
                     for (int m = 0; m < mat.Length; m++)
                     {
                         Matrix matr = mat[m];
@@ -197,10 +254,15 @@ namespace Engine.Animation
             foreach (var transition in this.transitions)
             {
                 float duration = transition.Duration;
+                int clipLength = (int)(duration / TimeStep);
 
-                for (float t = 0; t < duration; t += TimeStep)
+                for (int t = 0; t < clipLength; t++)
                 {
-                    var mat = transition.Interpolate(t);
+                    var mat = this.GetPoseAtTime(
+                        t * TimeStep,
+                        transition.ClipFrom, transition.ClipTo,
+                        transition.StartFrom, transition.StartTo,
+                        transition.Duration);
 
                     for (int m = 0; m < mat.Length; m++)
                     {
@@ -221,7 +283,7 @@ namespace Engine.Animation
             {
                 texHeight = texHeight << 1;
             }
-            texWidth = Math.Max(texHeight, 512);
+            texWidth = texHeight;
 
             palette = game.ResourceManager.CreateTexture2D(Guid.NewGuid(), values.ToArray(), texWidth);
             width = (uint)texWidth;
