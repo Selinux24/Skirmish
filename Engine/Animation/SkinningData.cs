@@ -17,7 +17,7 @@ namespace Engine.Animation
         /// <summary>
         /// Default time step
         /// </summary>
-        public const float TimeStep = 1.0f / 24.0f;
+        public const float TimeStep = 1.0f / 60.0f;
 
         /// <summary>
         /// Animations clip dictionary
