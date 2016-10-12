@@ -32,10 +32,9 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="clipFrom">Clip from name</param>
         /// <param name="clipTo">Clip to name</param>
-        /// <param name="duration">Total duration of the transition</param>
         /// <param name="startFrom">Start time of the "from" clip</param>
         /// <param name="startTo">Start time of the "to" clip</param>
-        public void AddTransition(string clipFrom, string clipTo, float startFrom, float startTo, float duration)
+        public void AddTransition(string clipFrom, string clipTo, float startFrom, float startTo)
         {
             this.Transitions.Add(new TransitionDescription()
             {
@@ -43,7 +42,6 @@ namespace Engine.Animation
                 ClipTo = clipTo,
                 StartFrom = startFrom,
                 StartTo = startTo,
-                Duration = duration,
             });
         }
     }

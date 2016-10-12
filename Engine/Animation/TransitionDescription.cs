@@ -15,10 +15,6 @@ namespace Engine.Animation
         /// </summary>
         public string ClipTo;
         /// <summary>
-        /// Total duration
-        /// </summary>
-        public float Duration;
-        /// <summary>
         /// Clip from start
         /// </summary>
         public float StartFrom;

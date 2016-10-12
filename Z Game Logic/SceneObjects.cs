@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Animation;
 using Engine.Common;
 using Engine.PathFinding.AStar;
 using SharpDX;
@@ -604,8 +605,10 @@ namespace GameLogic
                     ModelInstance instance = this.soldier.Instances[instanceIndex++];
 
                     instance.TextureIndex = teamIndex;
-                    instance.AnimationController.AddClip(0, true, float.MaxValue);
-                    instance.AnimationController.Time = soldierIndex;
+                    AnimationPath p = new AnimationPath();
+                    p.AddLoop("default");
+                    instance.AnimationController.AddClip(p);
+                    instance.AnimationController.Start(soldierIndex);
 
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
                     float z = (teamIndex * teamSeparation) - (gameWidth * 0.5f);

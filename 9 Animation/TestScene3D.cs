@@ -21,6 +21,15 @@ namespace AnimationTest
         private LineListDrawer soldierLines = null;
         private bool showSoldierDEBUG = false;
 
+        private int aIdle1 = 0;
+        private int aWalk = 25948 / 52;
+        private int aIdle1Walk = 30056 / 52;
+        private int aWalkIdle1 = 34164 / 52;
+        private int aEnd = 60112 / 52;
+
+        private int aFrom = 0;
+        private int aTo = (25948 / 52) - 1;
+
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
         {
@@ -44,7 +53,7 @@ namespace AnimationTest
 
             this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
             this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
-            this.animText = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange));
+            this.animText = this.AddText(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange));
 
             this.title.Text = "Animation test";
             this.runtime.Text = "";
@@ -63,7 +72,8 @@ namespace AnimationTest
             AnimationDescription ani = new AnimationDescription();
             ani.AddClip("idle1", 0, 8);
             ani.AddClip("walk", 8, 17);
-            ani.AddTransition("idle1", "walk", 0f, 0f, 1.333333f);
+            ani.AddTransition("idle1", "walk", 0f, 0f);
+            ani.AddTransition("walk", "idle1", 0f, 0f);
 
             this.soldier = this.AddModel(
                 new ModelContentDescription()
@@ -123,13 +133,17 @@ namespace AnimationTest
 
             {
                 this.soldier.Manipulator.SetPosition(0, 0, 0, true);
-                this.soldier.AnimationController.AddClip(0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-                this.soldier.AnimationController.TimeDelta = 1f;
+
+                AnimationPath p = new AnimationPath();
+                p.Add("idle1");
+                p.AddRepeat("walk", 5);
+                p.AddLoop("idle1");
+                this.soldier.AnimationController.AddClip(p);
 
                 float playerHeight = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
                 this.Camera.Goto(0, playerHeight, -12f);
-                this.Camera.LookTo(0, playerHeight * 0.5f, 0);
+                this.Camera.LookTo(0, playerHeight * 0.6f, 0);
             }
 
             #endregion
@@ -142,6 +156,31 @@ namespace AnimationTest
                 this.Game.Exit();
             }
 
+            #region World
+
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                //Rotates the scene
+                this.World *= Matrix.RotationY(MathUtil.PiOverFour * gameTime.ElapsedSeconds);
+            }
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                //Rotates the scene
+                this.World *= Matrix.RotationY(-MathUtil.PiOverFour * gameTime.ElapsedSeconds);
+            }
+            if (this.Game.Input.KeyPressed(Keys.W))
+            {
+                //Rotates the scene
+                this.Camera.MoveForward(gameTime, false);
+            }
+            if (this.Game.Input.KeyPressed(Keys.S))
+            {
+                //Rotates the scene
+                this.Camera.MoveBackward(gameTime, false);
+            }
+
+            #endregion
+
             #region Animation control
 
             if (this.Game.Input.KeyJustReleased(Keys.Left))
@@ -153,14 +192,14 @@ namespace AnimationTest
             if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
                 this.soldier.AnimationController.TimeDelta += 0.1f;
-                this.soldier.AnimationController.TimeDelta = Math.Min(1, this.soldier.AnimationController.TimeDelta);
+                this.soldier.AnimationController.TimeDelta = Math.Min(2, this.soldier.AnimationController.TimeDelta);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Up))
             {
                 if (this.Game.Input.KeyPressed(Keys.ShiftKey))
                 {
-                    this.soldier.AnimationController.Start();
+                    this.soldier.AnimationController.Start(8.333333f);
                 }
                 else
                 {
@@ -184,12 +223,47 @@ namespace AnimationTest
                     SceneModesEnum.ForwardLigthning;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            if (this.Game.Input.KeyPressed(Keys.D1))
             {
-                this.showSoldierDEBUG = !this.showSoldierDEBUG;
+                SkinningData.DEBUGINDEX = this.aFrom = this.aIdle1;
+                this.aTo = this.aWalk - 1;
+            }
+            if (this.Game.Input.KeyPressed(Keys.D2))
+            {
+                SkinningData.DEBUGINDEX = this.aFrom = this.aWalk;
+                this.aTo = this.aIdle1Walk - 1;
+            }
+            if (this.Game.Input.KeyPressed(Keys.D3))
+            {
+                SkinningData.DEBUGINDEX = this.aFrom = this.aIdle1Walk;
+                this.aTo = this.aWalkIdle1 - 1;
+            }
+            if (this.Game.Input.KeyPressed(Keys.D4))
+            {
+                SkinningData.DEBUGINDEX = this.aFrom = this.aWalkIdle1;
+                this.aTo = this.aEnd - 1;
+            }
 
-                if (this.soldierTris != null) this.soldierTris.Visible = this.showSoldierDEBUG;
-                if (this.soldierLines != null) this.soldierLines.Visible = this.showSoldierDEBUG;
+            if (this.Game.Input.KeyPressed(Keys.D5))
+            {
+                //First from walk
+                SkinningData.DEBUGINDEX = this.aWalk;
+            }
+            if (this.Game.Input.KeyPressed(Keys.D6))
+            {
+                //Last from idle1walf
+                SkinningData.DEBUGINDEX = this.aWalkIdle1 - 1;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Add))
+            {
+                SkinningData.DEBUGINDEX++;
+                if (SkinningData.DEBUGINDEX > aTo) SkinningData.DEBUGINDEX = aTo;
+            }
+            if (this.Game.Input.KeyPressed(Keys.Subtract))
+            {
+                SkinningData.DEBUGINDEX--;
+                if (SkinningData.DEBUGINDEX < aFrom) SkinningData.DEBUGINDEX = aFrom;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F2))
@@ -226,25 +300,14 @@ namespace AnimationTest
 
             #endregion
 
-            if (this.Game.Input.KeyPressed(Keys.A))
-            {
-                //Rotates the scene
-                this.World *= Matrix.RotationY(MathUtil.PiOverFour * 0.1f * gameTime.ElapsedSeconds);
-            }
-            if (this.Game.Input.KeyPressed(Keys.D))
-            {
-                //Rotates the scene
-                this.World *= Matrix.RotationY(-MathUtil.PiOverFour * 0.1f * gameTime.ElapsedSeconds);
-            }
-
             base.Update(gameTime);
 
             this.runtime.Text = this.Game.RuntimeText;
             this.animText.Text = string.Format(
-                "Index: {0}; Delta: {1}; Time: {2}",
+                "Index: {0}; Delta: {1} {2}",
                 this.soldier.AnimationController.CurrentIndex,
                 this.soldier.AnimationController.TimeDelta,
-                this.soldier.AnimationController.Time);
+                SkinningData.DEBUGINDEX - this.aFrom);
         }
     }
 }

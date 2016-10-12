@@ -61,10 +61,10 @@ namespace Engine.Animation
         /// <summary>
         /// Built skeleton transforms at time
         /// </summary>
-        /// <param name="time">Time</param>
         /// <param name="joint">Joint</param>
+        /// <param name="time">Time</param>
         /// <param name="animations">Animation list</param>
-        private static void BuildTransforms(float time, Joint joint, JointAnimation[] animations)
+        private static void BuildTransforms(Joint joint, float time, JointAnimation[] animations)
         {
             joint.LocalTransform = Array.Find(animations, a => a.Joint == joint.Name).Interpolate(time);
 
@@ -72,7 +72,32 @@ namespace Engine.Animation
             {
                 for (int i = 0; i < joint.Childs.Length; i++)
                 {
-                    BuildTransforms(time, joint.Childs[i], animations);
+                    BuildTransforms(joint.Childs[i], time, animations);
+                }
+            }
+        }
+
+        private static void BuildTransforms(Joint joint, float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor)
+        {
+            Vector3 pos1; Quaternion rot1; Vector3 sca1;
+            Vector3 pos2; Quaternion rot2; Vector3 sca2;
+            Array.Find(animations1, a => a.Joint == joint.Name).Interpolate(time1, out pos1, out rot1, out sca1);
+            Array.Find(animations2, a => a.Joint == joint.Name).Interpolate(time2, out pos2, out rot2, out sca2);
+
+            Vector3 translation = pos1 + (pos2 - pos1) * factor;
+            Quaternion rotation = Quaternion.Slerp(rot1, rot2, factor);
+            Vector3 scale = sca1 + (sca2 - sca1) * factor;
+
+            joint.LocalTransform =
+                Matrix.Scaling(scale) *
+                Matrix.RotationQuaternion(rotation) *
+                Matrix.Translation(translation);
+
+            if (joint.Childs != null && joint.Childs.Length > 0)
+            {
+                for (int i = 0; i < joint.Childs.Length; i++)
+                {
+                    BuildTransforms(joint.Childs[i], time1, animations1, time2, animations2, factor);
                 }
             }
         }
@@ -124,10 +149,30 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="time">Pose time</param>
         /// <param name="animations">Joint animations</param>
-        /// <returns>Returns the transforms list of the pose at specified time</returns>
+        /// <param name="transforms">Returns the transforms list of the pose at specified time</param>
         public void GetPoseAtTime(float time, JointAnimation[] animations, ref Matrix[] transforms)
         {
-            BuildTransforms(time, this.Root, animations);
+            BuildTransforms(this.Root, time, animations);
+
+            UpdateTransforms(this.Root);
+
+            for (int i = 0; i < this.jointNames.Count; i++)
+            {
+                transforms[i] = this[this.jointNames[i]].Offset * this[this.jointNames[i]].GlobalTransform;
+            }
+        }
+        /// <summary>
+        /// Gets the transforms list of tow poses at specified time
+        /// </summary>
+        /// <param name="time1">First pose time</param>
+        /// <param name="animations1">First joint animation set</param>
+        /// <param name="time2">Second pose time</param>
+        /// <param name="animations2">Second joint animation set</param>
+        /// <param name="factor">Interpolation factor</param>
+        /// <param name="transforms">Returns the transforms list of the pose at specified time</param>
+        public void GetPoseAtTime(float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor, ref Matrix[] transforms)
+        {
+            BuildTransforms(this.Root, time1, animations1, time2, animations2, factor);
 
             UpdateTransforms(this.Root);
 
@@ -144,7 +189,7 @@ namespace Engine.Animation
         {
             return this.jointNames.ToArray();
         }
-    
+
         /// <summary>
         /// Finds a joint by name recursively
         /// </summary>

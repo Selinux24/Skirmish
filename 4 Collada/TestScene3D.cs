@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Animation;
 using Engine.PathFinding.AStar;
 using SharpDX;
 using System;
@@ -185,7 +186,10 @@ namespace Collada
             for (int i = 0; i < this.helicoptersModel.Count; i++)
             {
                 this.helicoptersModel.Instances[i].TextureIndex = rnd.Next(0, 2);
-                this.helicoptersModel.Instances[i].AnimationController.AddClip(0, true, float.MaxValue);
+                AnimationPath ap = new AnimationPath();
+                ap.AddLoop("default");
+                this.helicoptersModel.Instances[i].AnimationController.AddClip(ap);
+                this.helicoptersModel.Instances[i].AnimationController.Start();
 
                 Manipulator3D manipulator = this.helicoptersModel.Instances[i].Manipulator;
 

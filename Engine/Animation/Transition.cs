@@ -23,25 +23,31 @@ namespace Engine.Animation
         /// </summary>
         public readonly float StartTo;
         /// <summary>
-        /// Animation duration
+        /// Transition total duration
         /// </summary>
-        public readonly float Duration;
+        public readonly float TotalDuration;
+        /// <summary>
+        /// Interpolation duration
+        /// </summary>
+        public readonly float InterpolationDuration;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="from">From clip</param>
         /// <param name="to">To clip</param>
-        /// <param name="duration">Transition duration</param>
         /// <param name="fromStart">Starting time of from clip</param>
         /// <param name="toStart">Starting time of to clip</param>
-        public Transition(int from, int to, float fromStart, float toStart, float duration)
+        /// <param name="totalDuration">Total transition duration</param>
+        /// <param name="interpolationDuration">Total interpolation duration</param>
+        public Transition(int from, int to, float fromStart, float toStart, float totalDuration, float interpolationDuration)
         {
             this.ClipFrom = from;
             this.ClipTo = to;
-            this.Duration = duration;
             this.StartFrom = fromStart;
             this.StartTo = toStart;
+            this.TotalDuration = totalDuration;
+            this.InterpolationDuration = interpolationDuration;
         }
     }
 }

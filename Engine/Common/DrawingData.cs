@@ -318,8 +318,7 @@ namespace Engine.Common
                             transition.ClipFrom,
                             transition.ClipTo,
                             transition.StartFrom,
-                            transition.StartTo,
-                            transition.Duration);
+                            transition.StartTo);
                     }
                 }
                 else

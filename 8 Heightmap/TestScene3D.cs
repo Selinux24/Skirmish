@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Animation;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
@@ -61,7 +62,7 @@ namespace HeightmapTest
 
             Random rnd = new Random(1);
 
-            this.Lights.FogColor = Color.WhiteSmoke;
+            this.Lights.FogColor = new Color((byte)54, (byte)56, (byte)68);
             this.Lights.FogStart = 0;
             this.Lights.FogRange = 0;
 
@@ -236,7 +237,9 @@ namespace HeightmapTest
                     this.soldier.Manipulator.SetPosition(position, true);
                 }
 
-                this.soldier.AnimationController.AddClip(0, true, float.MaxValue);
+                AnimationPath p = new AnimationPath();
+                p.AddLoop("default");
+                this.soldier.AnimationController.AddClip(p);
                 this.soldier.AnimationController.Start();
                 this.soldier.AnimateWithManipulator = true;
             }
@@ -277,7 +280,9 @@ namespace HeightmapTest
                     this.troops.Instances[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
                     this.troops.Instances[i].TextureIndex = 1;
 
-                    this.troops.Instances[i].AnimationController.AddClip(0, true, float.MaxValue);
+                    AnimationPath p = new AnimationPath();
+                    p.AddLoop("default");
+                    this.troops.Instances[i].AnimationController.AddClip(p);
                     this.troops.Instances[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
                 }
             }

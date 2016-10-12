@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Animation;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
@@ -323,7 +324,10 @@ namespace DeferredTest
                     cameraPosition += p;
                     modelCount++;
                 }
-                this.helicopter.AnimationController.AddClip(0, true, float.MaxValue);
+                AnimationPath ap = new AnimationPath();
+                ap.AddLoop("default");
+                this.helicopter.AnimationController.AddClip(ap);
+                this.helicopter.AnimationController.Start();
             }
             #endregion
 
@@ -341,7 +345,10 @@ namespace DeferredTest
                         cameraPosition += p;
                         modelCount++;
                     }
-                    this.helicopters.Instances[i].AnimationController.AddClip(0, true, float.MaxValue);
+                    AnimationPath ap = new AnimationPath();
+                    ap.AddLoop("default");
+                    this.helicopters.Instances[i].AnimationController.AddClip(ap);
+                    this.helicopters.Instances[i].AnimationController.Start();
                 }
             }
             #endregion

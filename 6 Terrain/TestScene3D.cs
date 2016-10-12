@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Animation;
 using Engine.Common;
 using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
@@ -195,7 +196,10 @@ namespace TerrainTest
                 });
             this.helicopter.SetManipulator(new HeliManipulator());
             this.helicopter.Manipulator.SetScale(0.75f);
-            this.helicopter.AnimationController.AddClip(0, true, float.MaxValue);
+            AnimationPath p = new AnimationPath();
+            p.AddLoop("default");
+            this.helicopter.AnimationController.AddClip(p);
+            this.helicopter.AnimationController.Start();
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 

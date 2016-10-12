@@ -11,23 +11,15 @@ namespace Engine.Animation
         /// <summary>
         /// Controller clips
         /// </summary>
-        private List<AnimationControllerClip> clips = new List<AnimationControllerClip>();
+        private List<AnimationPath> animationPaths = new List<AnimationPath>();
         /// <summary>
         /// Current clip index in the animation controller clips list
         /// </summary>
         private int currentIndex = -1;
         /// <summary>
-        /// Time counter for previous clips in the controller
-        /// </summary>
-        private float previousTime;
-        /// <summary>
         /// Animation active flag
         /// </summary>
         private bool active = false;
-        /// <summary>
-        /// Controller time
-        /// </summary>
-        public float Time = 0;
         /// <summary>
         /// Time delta to aply to controller time
         /// </summary>
@@ -43,13 +35,13 @@ namespace Engine.Animation
             }
         }
         /// <summary>
-        /// Gets the current clip index in skinning data
+        /// Gets the current clip in the clip collection
         /// </summary>
         public int CurrentIndex
         {
             get
             {
-                return this.clips[this.currentIndex].Index;
+                return this.currentIndex;
             }
         }
 
@@ -65,16 +57,9 @@ namespace Engine.Animation
         /// Adds a clip to the controller clips list
         /// </summary>
         /// <param name="index">Clip index in the skinning data clip list</param>
-        /// <param name="loop">Loops animation</param>
-        /// <param name="duration">Total animation clip duration in the controller. It passes to the next clip when reached</param>
-        public void AddClip(int index, bool loop, float duration = 0)
+        public void AddClip(AnimationPath path)
         {
-            this.clips.Add(new AnimationControllerClip()
-            {
-                Index = index,
-                Loop = loop,
-                Duration = duration,
-            });
+            this.animationPaths.Add(path);
 
             if (this.currentIndex < 0)
             {
@@ -85,17 +70,9 @@ namespace Engine.Animation
         /// Adds clips to the controller clips list
         /// </summary>
         /// <param name="indices">Clip indices in the skinning data clip list</param>
-        public void AddClip(params int[] indices)
+        public void AddClip(params AnimationPath[] paths)
         {
-            for (int i = 0; i < indices.Length; i++)
-            {
-                this.clips.Add(new AnimationControllerClip()
-                {
-                    Index = indices[i],
-                    Loop = false,
-                    Duration = 0,
-                });
-            }
+            this.animationPaths.AddRange(paths);
 
             if (this.currentIndex < 0)
             {
@@ -109,35 +86,13 @@ namespace Engine.Animation
         /// <param name="skData">Skinning data</param>
         public void Update(float delta, SkinningData skData)
         {
-            if (this.active)
+            if (this.active && this.currentIndex >= 0)
             {
-                this.Time += delta * this.TimeDelta;
+                //Get the path
+                var path = this.animationPaths[this.currentIndex];
 
-                this.previousTime = 0;
-                for (int i = 0; i < this.clips.Count; i++)
-                {
-                    float t = this.clips[i].Duration;
-                    if (t == 0)
-                    {
-                        t = skData.GetClipDuration(this.clips[i].Index);
-                    }
-
-                    if (this.Time < this.previousTime + t)
-                    {
-                        if (this.currentIndex != i)
-                        {
-                            this.currentIndex = i;
-                        }
-
-                        break;
-                    }
-                    else if (i == this.clips.Count - 1)
-                    {
-                        this.active = false;
-                    }
-
-                    this.previousTime += t;
-                }
+                //Modify controller current time
+                path.Update(delta * this.TimeDelta, skData);
             }
         }
         /// <summary>
@@ -167,12 +122,18 @@ namespace Engine.Animation
             int offset = 0;
             if (this.currentIndex >= 0)
             {
-                float animationTime = this.Time - this.previousTime;
+                //Get the path
+                var path = this.animationPaths[this.currentIndex];
 
-                skData.GetAnimationOffset(
-                    animationTime,
-                    this.clips[this.currentIndex].Index,
-                    out offset);
+                //Get the path item
+                var pathItem = path.GetCurrentItem();
+                if (pathItem != null)
+                {
+                    skData.GetAnimationOffset(
+                        path.Time,
+                        skData.GetClipIndex(pathItem.ClipName),
+                        out offset);
+                }
             }
 
             return offset;
@@ -186,7 +147,17 @@ namespace Engine.Animation
         {
             var clipIndex = this.GetAnimationIndex();
 
-            return skData.GetPoseAtTime(this.Time, clipIndex);
+            //Get the path
+            if (this.currentIndex >= 0)
+            {
+                var path = this.animationPaths[this.currentIndex];
+
+                return skData.GetPoseAtTime(path.Time, clipIndex);
+            }
+            else
+            {
+                return skData.GetPoseAtTime(0, clipIndex);
+            }
         }
 
         /// <summary>
@@ -196,7 +167,13 @@ namespace Engine.Animation
         public void Start(float time = 0)
         {
             this.active = true;
-            this.Time = time;
+
+            if (this.currentIndex >= 0)
+            {
+                var path = this.animationPaths[this.currentIndex];
+             
+                path.Time = time;
+            }
         }
         /// <summary>
         /// Stop
@@ -205,7 +182,13 @@ namespace Engine.Animation
         public void Stop(float time = 0)
         {
             this.active = false;
-            this.Time = time;
+
+            if (this.currentIndex >= 0)
+            {
+                var path = this.animationPaths[this.currentIndex];
+
+                path.Time = time;
+            }
         }
         /// <summary>
         /// Resume playback

@@ -154,8 +154,9 @@
   <ItemGroup>
     <Compile Include="Animation\AnimationClip.cs" />
     <Compile Include="Animation\AnimationController.cs" />
-    <Compile Include="Animation\AnimationControllerClip.cs" />
     <Compile Include="Animation\AnimationDescription.cs" />
+    <Compile Include="Animation\AnimationPath.cs" />
+    <Compile Include="Animation\AnimationPathItem.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Animation\TransitionDescription.cs" />
