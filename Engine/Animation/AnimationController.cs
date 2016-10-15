@@ -79,6 +79,21 @@ namespace Engine.Animation
             }
         }
 
+        public string CurrentPathClip
+        {
+            get
+            {
+                if (this.currentIndex >= 0)
+                {
+                    var path = this.animationPaths[this.currentIndex];
+
+                    return path.GetCurrentItem().ClipName;
+                }
+
+                return "None";
+            }
+        }
+
         /// <summary>
         /// Constructor
         /// </summary>
