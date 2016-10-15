@@ -32,6 +32,10 @@ namespace Engine.Animation
         /// </summary>
         private List<string> clips = null;
         /// <summary>
+        /// Clip offsets in animation palette
+        /// </summary>
+        private List<int> offsets = null;
+        /// <summary>
         /// Skeleton
         /// </summary>
         private Skeleton skeleton = null;
@@ -46,6 +50,7 @@ namespace Engine.Animation
             this.animations = new List<AnimationClip>();
             this.transitions = new List<Transition>();
             this.clips = new List<string>();
+            this.offsets = new List<int>();
             this.skeleton = skeleton;
 
             this.animations.Add(new AnimationClip(SkinningData.DefaultClip, animations));
@@ -61,6 +66,7 @@ namespace Engine.Animation
             this.animations = new List<AnimationClip>();
             this.transitions = new List<Transition>();
             this.clips = new List<string>();
+            this.offsets = new List<int>();
             this.skeleton = skeleton;
 
             foreach (var key in animations.Keys)
@@ -124,6 +130,20 @@ namespace Engine.Animation
             return this.clips.IndexOf(clipName);
         }
         /// <summary>
+        /// Gets the clip offset in animation palette
+        /// </summary>
+        /// <param name="clipIndex">Clip index</param>
+        /// <returns>Returns the clip offset in animation palette</returns>
+        public int GetClipOffset(int clipIndex)
+        {
+            if (clipIndex >= 0)
+            {
+                return this.offsets[clipIndex];
+            }
+
+            return 0;
+        }
+        /// <summary>
         /// Gets the duration of the specified by index clip
         /// </summary>
         /// <param name="clipIndex">Clip index</param>
@@ -147,33 +167,21 @@ namespace Engine.Animation
         /// Gets the specified animation offset
         /// </summary>
         /// <param name="time">Time</param>
-        /// <param name="clipIndex">Clip index</param>
+        /// <param name="clipName">Clip name</param>
         /// <param name="animationOffset">Animation offset</param>
-        public void GetAnimationOffset(float time, int clipIndex, out int animationOffset)
+        public void GetAnimationOffset(float time, string clipName, out int animationOffset)
         {
-            animationOffset = 0;
+            int clipIndex = this.GetClipIndex(clipName);
+            int offset = this.GetClipOffset(clipIndex);
+            float duration = this.GetClipDuration(clipIndex);
+            int clipLength = (int)(duration / TimeStep);
 
-            int index = 0;
-            for (int i = 0; i <= clipIndex; i++)
-            {
-                float duration = this.GetClipDuration(i);
-                int clipLength = (int)(duration / TimeStep);
-                if (i != clipIndex)
-                {
-                    index += clipLength;
-                }
-                else
-                {
-                    float percent = time / duration;
-                    int percentINT = (int)percent;
-                    percent -= (float)percentINT;
-                    index += (int)((float)clipLength * percent);
-                }
-            }
+            float percent = time / duration;
+            int percentINT = (int)percent;
+            percent -= (float)percentINT;
+            int index = (int)((float)clipLength * percent);
 
-            animationOffset += (4 * this.skeleton.JointCount * index);
-
-            animationOffset = (52 * DEBUGINDEX);
+            animationOffset = offset + (4 * this.skeleton.JointCount * index);
         }
 
         /// <summary>
@@ -210,8 +218,8 @@ namespace Engine.Animation
             if (index1 >= 0 && index2 >= 0)
             {
                 this.skeleton.GetPoseAtTime(
-                    time + offset1, this.animations[index1].Animations, 
-                    time + offset2, this.animations[index2].Animations, 
+                    time + offset1, this.animations[index1].Animations,
+                    time + offset2, this.animations[index2].Animations,
                     factor,
                     ref res);
             }
@@ -231,6 +239,8 @@ namespace Engine.Animation
 
             for (int i = 0; i < this.animations.Count; i++)
             {
+                this.offsets.Add(values.Count);
+
                 float duration = this.animations[i].Duration;
                 int clipLength = (int)(duration / TimeStep);
 
@@ -252,6 +262,8 @@ namespace Engine.Animation
 
             foreach (var transition in this.transitions)
             {
+                this.offsets.Add(values.Count);
+
                 float totalDuration = transition.TotalDuration;
                 float interDuration = transition.InterpolationDuration;
 
@@ -261,7 +273,7 @@ namespace Engine.Animation
                 {
                     float time = (float)t * TimeStep;
                     float factor = Math.Min(time / interDuration, 1f);
-                    
+
                     var mat = this.GetPoseAtTime(
                         time,
                         transition.ClipFrom, transition.ClipTo,
@@ -292,7 +304,5 @@ namespace Engine.Animation
             palette = game.ResourceManager.CreateTexture2D(Guid.NewGuid(), values.ToArray(), texWidth);
             width = (uint)texWidth;
         }
-
-        public static int DEBUGINDEX = 0;
     }
 }

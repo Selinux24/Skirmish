@@ -44,6 +44,40 @@ namespace Engine.Animation
                 return this.currentIndex;
             }
         }
+        /// <summary>
+        /// Current path time
+        /// </summary>
+        public float CurrentPathTime
+        {
+            get
+            {
+                if (this.currentIndex >= 0)
+                {
+                    var path = this.animationPaths[this.currentIndex];
+
+                    return path.Time;
+                }
+
+                return 0;
+            }
+        }
+        /// <summary>
+        /// Current path item time
+        /// </summary>
+        public float CurrentPathItemTime
+        {
+            get
+            {
+                if (this.currentIndex >= 0)
+                {
+                    var path = this.animationPaths[this.currentIndex];
+
+                    return path.ItemTime;
+                }
+
+                return 0;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -130,8 +164,8 @@ namespace Engine.Animation
                 if (pathItem != null)
                 {
                     skData.GetAnimationOffset(
-                        path.Time,
-                        skData.GetClipIndex(pathItem.ClipName),
+                        path.ItemTime,
+                        pathItem.ClipName,
                         out offset);
                 }
             }
@@ -171,8 +205,9 @@ namespace Engine.Animation
             if (this.currentIndex >= 0)
             {
                 var path = this.animationPaths[this.currentIndex];
-             
+
                 path.Time = time;
+                path.ItemTime = time;
             }
         }
         /// <summary>
@@ -188,6 +223,7 @@ namespace Engine.Animation
                 var path = this.animationPaths[this.currentIndex];
 
                 path.Time = time;
+                path.ItemTime = time;
             }
         }
         /// <summary>

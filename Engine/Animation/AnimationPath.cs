@@ -20,6 +20,10 @@ namespace Engine.Animation
         /// Path time
         /// </summary>
         public float Time { get; set; }
+        /// <summary>
+        /// Current item time
+        /// </summary>
+        public float ItemTime { get; set; }
 
         /// <summary>
         /// Constructor
@@ -27,6 +31,7 @@ namespace Engine.Animation
         public AnimationPath()
         {
             this.Time = 0f;
+            this.ItemTime = 0f;
         }
 
         /// <summary>
@@ -104,6 +109,7 @@ namespace Engine.Animation
 
             float nextTime = this.Time + delta;
             float time = 0;
+            float clipTime = nextTime;
             bool atEnd = false;
 
             if (nextTime > 0)
@@ -116,6 +122,7 @@ namespace Engine.Animation
 
                     //Gets total time in this clip
                     float t = skData.GetClipDuration(clipIndex) * this.items[i].Repeats * this.items[i].TimeDelta;
+                    if (t == 0) continue;
 
                     if (this.items[i].Loop)
                     {
@@ -131,16 +138,19 @@ namespace Engine.Animation
                         //This is the item
                         break;
                     }
-                    else if (nextTime >= time)
+                    else if (this.items[i].Loop)
                     {
-                        //Item passed
-                        if (!this.items[i].Loop && i == this.items.Count - 1)
-                        {
-                            //It's end item
-                            atEnd = true;
-                            break;
-                        }
+                        //Do loop
+                        continue;
                     }
+                    else if (nextTime >= time && i == this.items.Count - 1)
+                    {
+                        //Item passed, it's end item
+                        atEnd = true;
+                        break;
+                    }
+                 
+                    clipTime -= t;
                 }
             }
 
@@ -152,6 +162,8 @@ namespace Engine.Animation
             {
                 this.Time = nextTime;
             }
+
+            this.ItemTime = clipTime;
 
             this.currentIndex = itemIndex;
         }

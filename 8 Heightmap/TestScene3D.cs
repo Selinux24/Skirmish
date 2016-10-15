@@ -215,14 +215,23 @@ namespace HeightmapTest
 
             #endregion
 
+            AnimationDescription ani = new AnimationDescription();
+            ani.AddClip("idle1", 0, 8);
+            ani.AddClip("walk", 8, 17);
+            ani.AddTransition("idle1", "walk", 0f, 0f);
+            ani.AddTransition("walk", "idle1", 0f, 0f);
+
+            ModelContentDescription soldierModel = new ModelContentDescription()
+            {
+                ContentPath = @"Resources/Soldier",
+                ModelFileName = "soldier_anim2.dae",
+                Animation = ani,
+            };
+
             #region Soldier
 
             this.soldier = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = @"Resources/Soldier",
-                    ModelFileName = "soldier_anim2.dae",
-                },
+                soldierModel,
                 new ModelDescription()
                 {
                     TextureIndex = 0,
@@ -238,7 +247,7 @@ namespace HeightmapTest
                 }
 
                 AnimationPath p = new AnimationPath();
-                p.AddLoop("default");
+                p.AddLoop("idle1");
                 this.soldier.AnimationController.AddClip(p);
                 this.soldier.AnimationController.Start();
                 this.soldier.AnimateWithManipulator = true;
@@ -251,11 +260,7 @@ namespace HeightmapTest
             #region Troops
 
             this.troops = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = @"Resources/Soldier",
-                    ModelFileName = "soldier.dae",
-                },
+                soldierModel,
                 new ModelInstancedDescription()
                 {
                     Instances = 4,
@@ -281,7 +286,7 @@ namespace HeightmapTest
                     this.troops.Instances[i].TextureIndex = 1;
 
                     AnimationPath p = new AnimationPath();
-                    p.AddLoop("default");
+                    p.AddLoop("idle1");
                     this.troops.Instances[i].AnimationController.AddClip(p);
                     this.troops.Instances[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
                 }

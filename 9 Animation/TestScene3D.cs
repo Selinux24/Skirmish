@@ -21,15 +21,6 @@ namespace AnimationTest
         private LineListDrawer soldierLines = null;
         private bool showSoldierDEBUG = false;
 
-        private int aIdle1 = 0;
-        private int aWalk = 25948 / 52;
-        private int aIdle1Walk = 30056 / 52;
-        private int aWalkIdle1 = 34164 / 52;
-        private int aEnd = 60112 / 52;
-
-        private int aFrom = 0;
-        private int aTo = (25948 / 52) - 1;
-
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
         {
@@ -136,7 +127,7 @@ namespace AnimationTest
 
                 AnimationPath p = new AnimationPath();
                 p.Add("idle1");
-                p.AddRepeat("walk", 5);
+                p.AddRepeat("walk", 10);
                 p.AddLoop("idle1");
                 this.soldier.AnimationController.AddClip(p);
 
@@ -192,14 +183,14 @@ namespace AnimationTest
             if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
                 this.soldier.AnimationController.TimeDelta += 0.1f;
-                this.soldier.AnimationController.TimeDelta = Math.Min(2, this.soldier.AnimationController.TimeDelta);
+                this.soldier.AnimationController.TimeDelta = Math.Min(5, this.soldier.AnimationController.TimeDelta);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Up))
             {
                 if (this.Game.Input.KeyPressed(Keys.ShiftKey))
                 {
-                    this.soldier.AnimationController.Start(8.333333f);
+                    this.soldier.AnimationController.Start(0);
                 }
                 else
                 {
@@ -221,49 +212,6 @@ namespace AnimationTest
                 this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
                     SceneModesEnum.DeferredLightning :
                     SceneModesEnum.ForwardLigthning;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.D1))
-            {
-                SkinningData.DEBUGINDEX = this.aFrom = this.aIdle1;
-                this.aTo = this.aWalk - 1;
-            }
-            if (this.Game.Input.KeyPressed(Keys.D2))
-            {
-                SkinningData.DEBUGINDEX = this.aFrom = this.aWalk;
-                this.aTo = this.aIdle1Walk - 1;
-            }
-            if (this.Game.Input.KeyPressed(Keys.D3))
-            {
-                SkinningData.DEBUGINDEX = this.aFrom = this.aIdle1Walk;
-                this.aTo = this.aWalkIdle1 - 1;
-            }
-            if (this.Game.Input.KeyPressed(Keys.D4))
-            {
-                SkinningData.DEBUGINDEX = this.aFrom = this.aWalkIdle1;
-                this.aTo = this.aEnd - 1;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.D5))
-            {
-                //First from walk
-                SkinningData.DEBUGINDEX = this.aWalk;
-            }
-            if (this.Game.Input.KeyPressed(Keys.D6))
-            {
-                //Last from idle1walf
-                SkinningData.DEBUGINDEX = this.aWalkIdle1 - 1;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Add))
-            {
-                SkinningData.DEBUGINDEX++;
-                if (SkinningData.DEBUGINDEX > aTo) SkinningData.DEBUGINDEX = aTo;
-            }
-            if (this.Game.Input.KeyPressed(Keys.Subtract))
-            {
-                SkinningData.DEBUGINDEX--;
-                if (SkinningData.DEBUGINDEX < aFrom) SkinningData.DEBUGINDEX = aFrom;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F2))
@@ -304,10 +252,11 @@ namespace AnimationTest
 
             this.runtime.Text = this.Game.RuntimeText;
             this.animText.Text = string.Format(
-                "Index: {0}; Delta: {1} {2}",
+                "Index: {0}; Delta: {1:0.0}; Time: {2:0.00}; Item Time: {3:0.00}",
                 this.soldier.AnimationController.CurrentIndex,
                 this.soldier.AnimationController.TimeDelta,
-                SkinningData.DEBUGINDEX - this.aFrom);
+                this.soldier.AnimationController.CurrentPathTime,
+                this.soldier.AnimationController.CurrentPathItemTime);
         }
     }
 }
