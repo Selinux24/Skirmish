@@ -108,8 +108,9 @@ namespace Engine.Animation
             int itemIndex = 0;
 
             float nextTime = this.Time + delta;
-            float time = 0;
             float clipTime = nextTime;
+            
+            float time = 0;
             bool atEnd = false;
 
             if (nextTime > 0)
@@ -118,10 +119,9 @@ namespace Engine.Animation
                 {
                     itemIndex = i;
 
-                    int clipIndex = skData.GetClipIndex(this.items[i].ClipName);
-
                     //Gets total time in this clip
-                    float t = skData.GetClipDuration(clipIndex) * this.items[i].Repeats * this.items[i].TimeDelta;
+                    int clipIndex = skData.GetClipIndex(this.items[i].ClipName);
+                    float t = skData.GetClipDuration(clipIndex) * this.items[i].Repeats / this.items[i].TimeDelta;
                     if (t == 0) continue;
 
                     if (this.items[i].Loop)

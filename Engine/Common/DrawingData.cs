@@ -295,8 +295,8 @@ namespace Engine.Common
                         JointAnimation[] ja = new JointAnimation[animations.Count];
                         for (int c = 0; c < ja.Length; c++)
                         {
-                            Keyframe[] kfs = new Keyframe[clip.Value.Item2 - clip.Value.Item1];
-                            Array.Copy(animations[c].Keyframes, clip.Value.Item1, kfs, 0, kfs.Length);
+                            Keyframe[] kfs = new Keyframe[clip.To - clip.From + 1];
+                            Array.Copy(animations[c].Keyframes, clip.From, kfs, 0, kfs.Length);
 
                             float dTime = kfs[0].Time;
                             for (int k = 0; k < kfs.Length; k++)
@@ -307,7 +307,7 @@ namespace Engine.Common
                             ja[c] = new JointAnimation(animations[c].Joint, kfs);
                         }
 
-                        dict.Add(clip.Key, ja);
+                        dict.Add(clip.Name, ja);
                     }
 
                     drw.SkinningData = new SkinningData(modelContent.SkinningInfo.Skeleton, dict);

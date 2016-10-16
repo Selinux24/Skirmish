@@ -20,6 +20,7 @@ namespace Engine.Animation
         /// Animation active flag
         /// </summary>
         private bool active = false;
+
         /// <summary>
         /// Time delta to aply to controller time
         /// </summary>
@@ -78,8 +79,10 @@ namespace Engine.Animation
                 return 0;
             }
         }
-
-        public string CurrentPathClip
+        /// <summary>
+        /// Gets the current path item clip name
+        /// </summary>
+        public string CurrentPathItemClip
         {
             get
             {

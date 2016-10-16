@@ -1,20 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace Engine.Animation
 {
     /// <summary>
     /// Animation description class
     /// </summary>
+    [Serializable]
     public class AnimationDescription
     {
         /// <summary>
         /// Clips
         /// </summary>
-        public Dictionary<string, Tuple<int, int>> Clips = new Dictionary<string, Tuple<int, int>>();
+        [XmlArray("animations")]
+        [XmlArrayItem("animation", typeof(AnimtionClipDescription))]
+        public List<AnimtionClipDescription> Clips = new List<AnimtionClipDescription>();
         /// <summary>
         /// Transitions
         /// </summary>
+        [XmlArray("transitions")]
+        [XmlArrayItem("transition", typeof(TransitionDescription))]
         public List<TransitionDescription> Transitions = new List<TransitionDescription>();
 
         /// <summary>
@@ -25,7 +31,12 @@ namespace Engine.Animation
         /// <param name="endTime">End time</param>
         public void AddClip(string clipName, int startTime, int endTime)
         {
-            this.Clips.Add(clipName, new Tuple<int, int>(startTime, endTime));
+            this.Clips.Add(new AnimtionClipDescription()
+            {
+                Name = clipName,
+                From = startTime,
+                To = endTime,
+            });
         }
         /// <summary>
         /// Adds a transition between two clips into de transition list

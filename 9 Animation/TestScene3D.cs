@@ -61,13 +61,20 @@ namespace AnimationTest
             #region Soldier
 
             AnimationDescription ani = new AnimationDescription();
-            ani.AddClip("idle1", 0, 8);
-            ani.AddClip("idle2", 7, 18);
-            ani.AddClip("walk", 18, 27);
+            ani.AddClip("idle1", 0, 7);
+            ani.AddClip("idle2", 7, 17);
+            ani.AddClip("stand", 18, 20);
+            ani.AddClip("walk", 21, 29);
             ani.AddTransition("idle1", "walk", 0f, 0f);
+            ani.AddTransition("idle1", "stand", 0f, 0f);
             ani.AddTransition("idle2", "walk", 0f, 0f);
+            ani.AddTransition("idle2", "stand", 0f, 0f);
+            ani.AddTransition("stand", "idle1", 0f, 0f);
+            ani.AddTransition("stand", "idle2", 0f, 0f);
+            ani.AddTransition("stand", "walk", 0f, 0f);
             ani.AddTransition("walk", "idle1", 0f, 0f);
             ani.AddTransition("walk", "idle2", 0f, 0f);
+            ani.AddTransition("walk", "stand", 0f, 0f);
 
             this.soldier = this.AddModel(
                 new ModelContentDescription()
@@ -130,10 +137,12 @@ namespace AnimationTest
 
                 AnimationPath p = new AnimationPath();
                 p.Add("idle1");
-                p.AddRepeat("walk", 5);
-                p.Add("idle1");
+                p.Add("stand");
+                p.AddRepeat("stand", 5);
+                p.Add("stand");
                 p.Add("idle2");
                 p.AddRepeat("walk", 5);
+                p.Add("stand");
                 p.AddLoop("idle1");
                 this.soldier.AnimationController.AddClip(p);
 
@@ -261,7 +270,7 @@ namespace AnimationTest
                 "Delta: {0:0.0}; Index: {1}; Clip: {2}; Time: {3:0.00}; Item Time: {4:0.00}",
                 this.soldier.AnimationController.TimeDelta,
                 this.soldier.AnimationController.CurrentIndex,
-                this.soldier.AnimationController.CurrentPathClip,
+                this.soldier.AnimationController.CurrentPathItemClip,
                 this.soldier.AnimationController.CurrentPathTime,
                 this.soldier.AnimationController.CurrentPathItemTime);
         }

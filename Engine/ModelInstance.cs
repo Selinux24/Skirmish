@@ -110,10 +110,6 @@ namespace Engine
         /// Animation controller
         /// </summary>
         public AnimationController AnimationController = new AnimationController();
-        /// <summary>
-        /// Do model animations using manipulator changes only
-        /// </summary>
-        public bool AnimateWithManipulator { get; set; }
 
         /// <summary>
         /// Constructor

@@ -143,7 +143,7 @@ namespace Engine
             {
                 Array.ForEach(this.instances, i =>
                 {
-                    if(i.Active) i.Update(context);
+                    if (i.Active) i.Update(context);
                 });
 
                 //Process only visible instances
@@ -182,16 +182,12 @@ namespace Engine
 
                             if (drawingData != null && drawingData.SkinningData != null)
                             {
-                                bool animate = current.AnimateWithManipulator ? current.ManipulatorChanged : true;
-                                if (animate)
-                                {
-                                    current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
+                                current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
 
-                                    this.instancingData[instanceIndex].ClipIndex = (uint)current.AnimationController.GetAnimationIndex();
-                                    this.instancingData[instanceIndex].AnimationOffset = (uint)current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
+                                this.instancingData[instanceIndex].ClipIndex = (uint)current.AnimationController.GetAnimationIndex();
+                                this.instancingData[instanceIndex].AnimationOffset = (uint)current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
 
-                                    current.InvalidateCache();
-                                }
+                                current.InvalidateCache();
                             }
 
                             instanceIndex++;
@@ -301,21 +297,21 @@ namespace Engine
                                         if (context.DrawerMode == DrawerModesEnum.Forward)
                                         {
                                             ((EffectBasic)effect).UpdatePerObject(
-                                                mat.Material, 
-                                                mat.DiffuseTexture, 
+                                                mat.Material,
+                                                mat.DiffuseTexture,
                                                 mat.NormalMap, null, 0);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
                                         {
                                             ((EffectBasicGBuffer)effect).UpdatePerObject(
-                                                mat.Material, 
-                                                mat.DiffuseTexture, 
+                                                mat.Material,
+                                                mat.DiffuseTexture,
                                                 mat.NormalMap, null, 0);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                                         {
                                             ((EffectBasicShadow)effect).UpdatePerObject(
-                                                null, 
+                                                null,
                                                 0);
                                         }
 

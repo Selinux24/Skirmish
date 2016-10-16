@@ -63,10 +63,12 @@ namespace Engine
         /// Animation data
         /// </summary>
         private uint[] animationData = new uint[] { 0, 0, 0 };
+      
         /// <summary>
         /// Datos renderización
         /// </summary>
         protected DrawingData DrawingData { get; private set; }
+      
         /// <summary>
         /// Model manipulator
         /// </summary>
@@ -79,10 +81,6 @@ namespace Engine
         /// Animation controller
         /// </summary>
         public AnimationController AnimationController = new AnimationController();
-        /// <summary>
-        /// Do model animations using manipulator changes only
-        /// </summary>
-        public bool AnimateWithManipulator { get; set; }
         /// <summary>
         /// Texture index
         /// </summary>
@@ -117,8 +115,6 @@ namespace Engine
 
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
-
-            this.AnimateWithManipulator = false;
         }
         /// <summary>
         /// Constructor
@@ -134,8 +130,6 @@ namespace Engine
 
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
-
-            this.AnimateWithManipulator = false;
         }
         /// <summary>
         /// Update
@@ -145,15 +139,11 @@ namespace Engine
         {
             if (this.DrawingData != null && this.DrawingData.SkinningData != null)
             {
-                bool animate = this.AnimateWithManipulator ? this.ManipulatorChanged : true;
-                if (animate)
-                {
-                    this.AnimationController.Update(context.GameTime.ElapsedSeconds, this.DrawingData.SkinningData);
+                this.AnimationController.Update(context.GameTime.ElapsedSeconds, this.DrawingData.SkinningData);
 
-                    this.animationData[0] = (uint)this.AnimationController.GetAnimationIndex();
-                    this.animationData[1] = (uint)this.AnimationController.GetAnimationOffset(this.DrawingData.SkinningData);
-                    this.InvalidateCache();
-                }
+                this.animationData[0] = (uint)this.AnimationController.GetAnimationIndex();
+                this.animationData[1] = (uint)this.AnimationController.GetAnimationOffset(this.DrawingData.SkinningData);
+                this.InvalidateCache();
             }
 
             this.ManipulatorChanged = false;
@@ -381,7 +371,7 @@ namespace Engine
                 if (drawingData.SkinningData != null && this.AnimationController.Playing)
                 {
                     this.positionCache = drawingData.GetPoints(
-                        this.Manipulator.LocalTransform, 
+                        this.Manipulator.LocalTransform,
                         this.AnimationController.GetPose(drawingData.SkinningData),
                         true);
                 }
@@ -408,7 +398,7 @@ namespace Engine
                 if (drawingData.SkinningData != null && this.AnimationController.Playing)
                 {
                     this.triangleCache = drawingData.GetTriangles(
-                        this.Manipulator.LocalTransform, 
+                        this.Manipulator.LocalTransform,
                         this.AnimationController.GetPose(drawingData.SkinningData),
                         refresh);
                 }

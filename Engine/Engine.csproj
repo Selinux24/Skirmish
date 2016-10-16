@@ -157,6 +157,7 @@
     <Compile Include="Animation\AnimationDescription.cs" />
     <Compile Include="Animation\AnimationPath.cs" />
     <Compile Include="Animation\AnimationPathItem.cs" />
+    <Compile Include="Animation\AnimtionClipDescription.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Animation\TransitionDescription.cs" />
