@@ -326,7 +326,7 @@ namespace DeferredTest
                 }
                 AnimationPath ap = new AnimationPath();
                 ap.AddLoop("default");
-                this.helicopter.AnimationController.AddClip(ap);
+                this.helicopter.AnimationController.AddPath(ap);
                 this.helicopter.AnimationController.Start();
             }
             #endregion
@@ -347,7 +347,7 @@ namespace DeferredTest
                     }
                     AnimationPath ap = new AnimationPath();
                     ap.AddLoop("default");
-                    this.helicopters.Instances[i].AnimationController.AddClip(ap);
+                    this.helicopters.Instances[i].AnimationController.AddPath(ap);
                     this.helicopters.Instances[i].AnimationController.Start();
                 }
             }

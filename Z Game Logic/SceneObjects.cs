@@ -607,7 +607,7 @@ namespace GameLogic
                     instance.TextureIndex = teamIndex;
                     AnimationPath p = new AnimationPath();
                     p.AddLoop("default");
-                    instance.AnimationController.AddClip(p);
+                    instance.AnimationController.AddPath(p);
                     instance.AnimationController.Start(soldierIndex);
 
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.Animation
@@ -98,6 +99,11 @@ namespace Engine.Animation
         }
 
         /// <summary>
+        /// On path ending event
+        /// </summary>
+        public event EventHandler PathEnding;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public AnimationController()
@@ -106,12 +112,12 @@ namespace Engine.Animation
         }
 
         /// <summary>
-        /// Adds a clip to the controller clips list
+        /// Adds clips to the controller clips list
         /// </summary>
-        /// <param name="index">Clip index in the skinning data clip list</param>
-        public void AddClip(AnimationPath path)
+        /// <param name="indices">Clip indices in the skinning data clip list</param>
+        public void AddPath(params AnimationPath[] paths)
         {
-            this.animationPaths.Add(path);
+            this.animationPaths.AddRange(paths);
 
             if (this.currentIndex < 0)
             {
@@ -119,11 +125,12 @@ namespace Engine.Animation
             }
         }
         /// <summary>
-        /// Adds clips to the controller clips list
+        /// Sets the specified past as current path list
         /// </summary>
-        /// <param name="indices">Clip indices in the skinning data clip list</param>
-        public void AddClip(params AnimationPath[] paths)
+        /// <param name="paths">Path list</param>
+        public void SetPath(params AnimationPath[] paths)
         {
+            this.animationPaths.Clear();
             this.animationPaths.AddRange(paths);
 
             if (this.currentIndex < 0)
@@ -134,17 +141,31 @@ namespace Engine.Animation
         /// <summary>
         /// Updates internal state
         /// </summary>
-        /// <param name="delta">Time delta</param>
+        /// <param name="time">Time</param>
         /// <param name="skData">Skinning data</param>
-        public void Update(float delta, SkinningData skData)
+        public void Update(float time, SkinningData skData)
         {
             if (this.active && this.currentIndex >= 0)
             {
-                //Get the path
                 var path = this.animationPaths[this.currentIndex];
 
-                //Modify controller current time
-                path.Update(delta * this.TimeDelta, skData);
+                //Update current path
+                path.Update(time * this.TimeDelta, skData);
+
+                if (!path.Playing)
+                {
+                    this.currentIndex++;
+                    if (this.currentIndex >= this.animationPaths.Count)
+                    {
+                        //No paths to do
+                        this.currentIndex = -1;
+
+                        if (this.PathEnding != null)
+                        {
+                            this.PathEnding(this, new EventArgs());
+                        }
+                    }
+                }
             }
         }
         /// <summary>

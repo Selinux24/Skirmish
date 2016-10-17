@@ -198,7 +198,7 @@ namespace TerrainTest
             this.helicopter.Manipulator.SetScale(0.75f);
             AnimationPath p = new AnimationPath();
             p.AddLoop("default");
-            this.helicopter.AnimationController.AddClip(p);
+            this.helicopter.AnimationController.AddPath(p);
             this.helicopter.AnimationController.Start();
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);

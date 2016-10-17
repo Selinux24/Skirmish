@@ -4,6 +4,7 @@ using Engine.Common;
 using Engine.Content;
 using SharpDX;
 using System;
+using System.Collections.Generic;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace AnimationTest
@@ -17,9 +18,12 @@ namespace AnimationTest
         private Model floor = null;
 
         private Model soldier = null;
+        private List<AnimationPath> soldierPaths = new List<AnimationPath>();
         private TriangleListDrawer soldierTris = null;
         private LineListDrawer soldierLines = null;
         private bool showSoldierDEBUG = false;
+
+        private Random rnd = new Random();
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -135,16 +139,29 @@ namespace AnimationTest
             {
                 this.soldier.Manipulator.SetPosition(0, 0, 0, true);
 
-                AnimationPath p = new AnimationPath();
-                p.Add("idle1");
-                p.Add("stand");
-                p.AddRepeat("stand", 5);
-                p.Add("stand");
-                p.Add("idle2");
-                p.AddRepeat("walk", 5);
-                p.Add("stand");
-                p.AddLoop("idle1");
-                this.soldier.AnimationController.AddClip(p);
+                this.soldier.AnimationController.PathEnding += AnimationController_PathEnding;
+
+                AnimationPath p0 = new AnimationPath();
+                p0.Add("idle1");
+                p0.Add("stand");
+                p0.AddRepeat("stand", 5);
+                p0.Add("stand");
+                p0.Add("idle2");
+                p0.AddRepeat("walk", 5);
+                p0.Add("stand");
+                p0.Add("idle1");
+
+                AnimationPath p1 = new AnimationPath();
+                p1.AddRepeat("idle1", 2);
+
+                AnimationPath p2 = new AnimationPath();
+                p2.Add("idle2");
+
+                this.soldierPaths.Add(p0);
+                this.soldierPaths.Add(p1);
+                this.soldierPaths.Add(p2);
+
+                this.soldier.AnimationController.AddPath(p0);
 
                 float playerHeight = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
@@ -273,6 +290,14 @@ namespace AnimationTest
                 this.soldier.AnimationController.CurrentPathItemClip,
                 this.soldier.AnimationController.CurrentPathTime,
                 this.soldier.AnimationController.CurrentPathItemTime);
+        }
+
+        private void AnimationController_PathEnding(object sender, EventArgs e)
+        {
+            int index = Math.Min(this.rnd.Next(1, 3), this.soldierPaths.Count - 1);
+
+            ((AnimationController)sender).SetPath(this.soldierPaths[index]);
+            ((AnimationController)sender).Start(0);
         }
     }
 }

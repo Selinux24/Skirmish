@@ -188,7 +188,7 @@ namespace Collada
                 this.helicoptersModel.Instances[i].TextureIndex = rnd.Next(0, 2);
                 AnimationPath ap = new AnimationPath();
                 ap.AddLoop("default");
-                this.helicoptersModel.Instances[i].AnimationController.AddClip(ap);
+                this.helicoptersModel.Instances[i].AnimationController.AddPath(ap);
                 this.helicoptersModel.Instances[i].AnimationController.Start();
 
                 Manipulator3D manipulator = this.helicoptersModel.Instances[i].Manipulator;

@@ -248,9 +248,8 @@ namespace HeightmapTest
 
                 AnimationPath p = new AnimationPath();
                 p.AddLoop("idle1");
-                this.soldier.AnimationController.AddClip(p);
+                this.soldier.AnimationController.AddPath(p);
                 this.soldier.AnimationController.Start();
-                this.soldier.AnimateWithManipulator = true;
             }
 
             this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
@@ -287,7 +286,7 @@ namespace HeightmapTest
 
                     AnimationPath p = new AnimationPath();
                     p.AddLoop("idle1");
-                    this.troops.Instances[i].AnimationController.AddClip(p);
+                    this.troops.Instances[i].AnimationController.AddPath(p);
                     this.troops.Instances[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
                 }
             }

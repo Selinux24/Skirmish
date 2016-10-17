@@ -24,6 +24,10 @@ namespace Engine.Animation
         /// Current item time
         /// </summary>
         public float ItemTime { get; set; }
+        /// <summary>
+        /// Gets if the animation path is running
+        /// </summary>
+        public bool Playing { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -163,6 +167,7 @@ namespace Engine.Animation
                 this.Time = nextTime;
             }
 
+            this.Playing = !atEnd;
             this.ItemTime = clipTime;
 
             this.currentIndex = itemIndex;
