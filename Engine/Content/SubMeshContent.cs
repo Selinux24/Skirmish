@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using SharpDX;
 using SharpDX.Direct3D;
-using SharpDX;
+using System;
+using System.Collections.Generic;
 
 namespace Engine.Content
 {

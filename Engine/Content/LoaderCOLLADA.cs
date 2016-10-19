@@ -79,8 +79,7 @@ namespace Engine.Content
 
                                     if (node.IsLight)
                                     {
-                                        Matrix trn = Matrix.Transpose(node.ReadMatrix());
-
+                                        Matrix trn = node.ReadMatrix();
                                     }
 
                                     #endregion
@@ -94,15 +93,7 @@ namespace Engine.Content
                                             throw new Exception("Only one armature definition per file!");
                                         }
 
-                                        Matrix trn = Matrix.Identity;
-                                        if (node.Matrix != null)
-                                        {
-                                            trn = Matrix.Transpose(node.ReadMatrix());
-                                        }
-                                        else
-                                        {
-                                            trn = node.ReadTransforms().Matrix;
-                                        }
+                                        Matrix trn = node.ReadMatrix();
 
                                         if (node.Nodes != null && node.Nodes.Length > 0)
                                         {
@@ -118,15 +109,7 @@ namespace Engine.Content
 
                                     if (node.HasGeometry)
                                     {
-                                        Matrix trn = Matrix.Identity;
-                                        if (node.Matrix != null)
-                                        {
-                                            trn = Matrix.Transpose(node.ReadMatrix());
-                                        }
-                                        else
-                                        {
-                                            trn = node.ReadTransforms().Matrix;
-                                        }
+                                        Matrix trn = node.ReadMatrix();
 
                                         if (!trn.IsIdentity)
                                         {
@@ -155,15 +138,7 @@ namespace Engine.Content
                                     if (node.HasController)
                                     {
                                         //TODO: Where to apply this transform?
-                                        Matrix trn = Matrix.Identity;
-                                        if (node.Matrix != null)
-                                        {
-                                            trn = Matrix.Transpose(node.ReadMatrix());
-                                        }
-                                        else
-                                        {
-                                            trn = node.ReadTransforms().Matrix;
-                                        }
+                                        Matrix trn = node.ReadMatrix();
 
                                         if (node.InstanceController != null && node.InstanceController.Length > 0)
                                         {
@@ -349,7 +324,7 @@ namespace Engine.Content
                 foreach (Geometry geometry in dae.LibraryGeometries)
                 {
                     bool isVolume = false;
-                    if (volumes != null && volumes.Length >0)
+                    if (volumes != null && volumes.Length > 0)
                     {
                         if (Array.Exists(volumes, v => v == geometry.Name))
                         {
@@ -965,7 +940,7 @@ namespace Engine.Content
         /// <returns>Return skeleton joint hierarchy</returns>
         private static Joint ProcessJoints(Joint parent, Node node)
         {
-            Matrix localTransform = Matrix.Transpose(node.ReadMatrix());
+            Matrix localTransform = node.ReadMatrix();
 
             Joint jt = new Joint(node.SId, parent, localTransform, Matrix.Identity);
 
@@ -1235,5 +1210,404 @@ namespace Engine.Content
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Extensions for collada to sharpDX data parse
+    /// </summary>
+    public static class LoaderCOLLADAExtensions
+    {
+        /// <summary>
+        /// Reads a Vector2 from BasicFloat2
+        /// </summary>
+        /// <param name="vector">BasicFloat2 vector</param>
+        /// <returns>Returns the parsed Vector2 from BasicFloat2</returns>
+        public static Vector2 ToVector2(this BasicFloat2 vector)
+        {
+            if (vector.Values != null && vector.Values.Length == 2)
+            {
+                return new Vector2(vector.Values[0], vector.Values[1]);
+            }
+            else
+            {
+                throw new Exception("El valor no es un Vector2 válido.");
+            }
+        }
+        /// <summary>
+        /// Reads a Vector3 from BasicFloat3
+        /// </summary>
+        /// <param name="vector">BasicFloat3 vector</param>
+        /// <returns>Returns the parsed Vector3 from BasicFloat3</returns>
+        public static Vector3 ToVector3(this BasicFloat3 vector)
+        {
+            if (vector.Values != null && vector.Values.Length == 3)
+            {
+                return new Vector3(vector.Values[0], vector.Values[1], vector.Values[2]);
+            }
+            else
+            {
+                throw new Exception("El valor no es un Vector3 válido.");
+            }
+        }
+        /// <summary>
+        /// Reads a Vector4 from BasicFloat4
+        /// </summary>
+        /// <param name="vector">BasicFloat4 vector</param>
+        /// <returns>Returns the parsed Vector4 from BasicFloat4</returns>
+        public static Vector4 ToVector4(this BasicFloat4 vector)
+        {
+            if (vector.Values != null && vector.Values.Length == 4)
+            {
+                return new Vector4(vector.Values[0], vector.Values[1], vector.Values[2], vector.Values[3]);
+            }
+            else
+            {
+                throw new Exception("El valor no es un Vector4 válido.");
+            }
+        }
+        /// <summary>
+        /// Reads a Color4 from BasicColor
+        /// </summary>
+        /// <param name="color">BasicColor color</param>
+        /// <returns>Returns the parsed Color4 from BasicColor</returns>
+        public static Color4 ToColor4(this BasicColor color)
+        {
+            if (color.Values != null && color.Values.Length == 3)
+            {
+                return new Color4(color.Values[0], color.Values[1], color.Values[2], 1f);
+            }
+            else if (color.Values != null && color.Values.Length == 4)
+            {
+                return new Color4(color.Values[0], color.Values[1], color.Values[2], color.Values[3]);
+            }
+            else
+            {
+                throw new Exception("El valor no es un Color4 válido.");
+            }
+        }
+        /// <summary>
+        /// Reads a Matrix from BasicFloat4x4
+        /// </summary>
+        /// <param name="matrix">BasicFloat4x4 matrix</param>
+        /// <returns>Returns the parsed Matrix from BasicFloat4x4</returns>
+        public static Matrix ToMatrix(this BasicFloat4x4 matrix)
+        {
+            if (matrix.Values != null && matrix.Values.Length == 16)
+            {
+                //From right handed
+                //{ rx, ry, rz, 0 }  
+                //{ ux, uy, uz, 0 }  
+                //{ lx, ly, lz, 0 }  
+                //{ px, py, pz, 1 }
+                //To left handed
+                //{ rx, rz, ry, 0 }  
+                //{ lx, lz, ly, 0 }  
+                //{ ux, uz, uy, 0 }  
+                //{ px, pz, py, 1 }
+
+                Matrix m = new Matrix()
+                {
+                    M11 = matrix.Values[0],
+                    M12 = matrix.Values[2],
+                    M13 = matrix.Values[1],
+                    M14 = matrix.Values[3],
+
+                    M31 = matrix.Values[4],
+                    M32 = matrix.Values[6],
+                    M33 = matrix.Values[5],
+                    M34 = matrix.Values[7],
+
+                    M21 = matrix.Values[8],
+                    M22 = matrix.Values[10],
+                    M23 = matrix.Values[9],
+                    M24 = matrix.Values[11],
+
+                    M41 = matrix.Values[12],
+                    M42 = matrix.Values[14],
+                    M43 = matrix.Values[13],
+                    M44 = matrix.Values[15],
+                };
+
+                return m;
+            }
+            else
+            {
+                throw new Exception("El valor no es una matriz válida.");
+            }
+        }
+
+        /// <summary>
+        /// Reads a transform matrix (SRT) from a Node
+        /// </summary>
+        /// <param name="node">Node</param>
+        /// <returns>Returns the parsed matrix</returns>
+        public static Matrix ReadMatrix(this Node node)
+        {
+            if (node.Matrix != null)
+            {
+                Matrix m = SharpDX.Matrix.Identity;
+
+                BasicFloat4x4 trn = Array.Find(node.Matrix, t => string.Equals(t.SId, "transform"));
+                if (trn != null) m = trn.ToMatrix();
+
+                return m;
+            }
+            else
+            {
+                Matrix finalTranslation = SharpDX.Matrix.Identity;
+                Matrix finalRotation = SharpDX.Matrix.Identity;
+                Matrix finalScale = SharpDX.Matrix.Identity;
+
+                if (node.Translate != null)
+                {
+                    BasicFloat3 loc = Array.Find(node.Translate, t => string.Equals(t.SId, "location"));
+                    if (loc != null) finalTranslation *= SharpDX.Matrix.Translation(loc.ToVector3());
+                }
+
+                if (node.Rotate != null)
+                {
+                    BasicFloat4 rotX = Array.Find(node.Rotate, t => string.Equals(t.SId, "rotationX"));
+                    if (rotX != null)
+                    {
+                        Vector4 r = rotX.ToVector4();
+                        finalRotation *= SharpDX.Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                    }
+
+                    BasicFloat4 rotY = Array.Find(node.Rotate, t => string.Equals(t.SId, "rotationY"));
+                    if (rotY != null)
+                    {
+                        Vector4 r = rotY.ToVector4();
+                        finalRotation *= SharpDX.Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                    }
+
+                    BasicFloat4 rotZ = Array.Find(node.Rotate, t => string.Equals(t.SId, "rotationZ"));
+                    if (rotZ != null)
+                    {
+                        Vector4 r = rotZ.ToVector4();
+                        finalRotation *= SharpDX.Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                    }
+                }
+
+                if (node.Scale != null)
+                {
+                    BasicFloat3 sca = Array.Find(node.Scale, t => string.Equals(t.SId, "scale"));
+                    if (sca != null) finalScale *= SharpDX.Matrix.Scaling(sca.ToVector3());
+                }
+
+                return finalScale * finalRotation * finalTranslation;
+            }
+        }
+
+        /// <summary>
+        /// Reads a float array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the float array</returns>
+        public static float[] ReadFloat(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != 1)
+            {
+                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(float)));
+            }
+
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            List<float> n = new List<float>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                float v = source.FloatArray[i];
+
+                n.Add(v);
+            }
+
+            return n.ToArray();
+        }
+        /// <summary>
+        /// Reads a string array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the string array</returns>
+        public static string[] ReadString(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != 1)
+            {
+                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(string)));
+            }
+
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            List<string> names = new List<string>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                string v = source.NameArray[i];
+
+                names.Add(v);
+            }
+
+            return names.ToArray();
+        }
+        /// <summary>
+        /// Reads a Vector2 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Vector2 array</returns>
+        public static Vector2[] ReadVector2(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != 2)
+            {
+                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(Vector2)));
+            }
+
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            int s = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "S");
+            int t = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "T");
+
+            List<Vector2> verts = new List<Vector2>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                Vector2 v = new Vector2(
+                    source.FloatArray[i + s],
+                    source.FloatArray[i + t]);
+
+                verts.Add(v);
+            }
+
+            return verts.ToArray();
+        }
+        /// <summary>
+        /// Reads a Vector3 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Vector3 array</returns>
+        public static Vector3[] ReadVector3(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != 3)
+            {
+                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(Vector3)));
+            }
+
+            int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
+            int y = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "Y");
+            int z = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "Z");
+
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            List<Vector3> verts = new List<Vector3>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                //To left handed -> Z flipped to Y
+                Vector3 v = new Vector3(
+                    source.FloatArray[i + x],
+                    source.FloatArray[i + z],
+                    source.FloatArray[i + y]);
+
+                verts.Add(v);
+            }
+
+            return verts.ToArray();
+        }
+        /// <summary>
+        /// Reads a Vector4 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Vector4 array</returns>
+        public static Vector4[] ReadVector4(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != 4)
+            {
+                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(Vector3)));
+            }
+
+            int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
+            int y = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "Y");
+            int z = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "Z");
+            int w = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "W");
+
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            List<Vector4> verts = new List<Vector4>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                //To left handed -> Z flipped to Y
+                Vector4 v = new Vector4(
+                    source.FloatArray[i + x],
+                    source.FloatArray[i + z],
+                    source.FloatArray[i + y],
+                    source.FloatArray[i + w]);
+
+                verts.Add(v);
+            }
+
+            return verts.ToArray();
+        }
+        /// <summary>
+        /// Reads a Matrix array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Matrix array</returns>
+        public static Matrix[] ReadMatrix(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != 16)
+            {
+                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(Matrix)));
+            }
+
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            List<Matrix> mats = new List<Matrix>();
+
+            //From right handed
+            //{ rx, ry, rz, 0 }  
+            //{ ux, uy, uz, 0 }  
+            //{ lx, ly, lz, 0 }  
+            //{ px, py, pz, 1 }
+            //To left handed
+            //{ rx, rz, ry, 0 }  
+            //{ lx, lz, ly, 0 }  
+            //{ ux, uz, uy, 0 }  
+            //{ px, pz, py, 1 }
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                Matrix m = new Matrix()
+                {
+                    M11 = source.FloatArray[i + 0],
+                    M12 = source.FloatArray[i + 2],
+                    M13 = source.FloatArray[i + 1],
+                    M14 = source.FloatArray[i + 3],
+
+                    M31 = source.FloatArray[i + 4],
+                    M32 = source.FloatArray[i + 6],
+                    M33 = source.FloatArray[i + 5],
+                    M34 = source.FloatArray[i + 7],
+
+                    M21 = source.FloatArray[i + 8],
+                    M22 = source.FloatArray[i + 10],
+                    M23 = source.FloatArray[i + 9],
+                    M24 = source.FloatArray[i + 11],
+
+                    M41 = source.FloatArray[i + 12],
+                    M42 = source.FloatArray[i + 14],
+                    M43 = source.FloatArray[i + 13],
+                    M44 = source.FloatArray[i + 15],
+                };
+
+                mats.Add(m);
+            }
+
+            return mats.ToArray();
+        }
     }
 }

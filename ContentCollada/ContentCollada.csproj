@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B5E51939-46DC-412D-A096-E1C892F95FB3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Content</RootNamespace>
+    <AssemblyName>Engine.Content.Collada</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>ContentCollada.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ManagedMinimumRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Collada\Accessor.cs" />
+    <Compile Include="Collada\AmbientDirectional.cs" />
+    <Compile Include="Collada\Animation.cs" />
+    <Compile Include="Collada\AnimationClip.cs" />
+    <Compile Include="Collada\Annotate.cs" />
+    <Compile Include="Collada\Asset.cs" />
+    <Compile Include="Collada\BindMaterial.cs" />
+    <Compile Include="Collada\Camera.cs" />
+    <Compile Include="Collada\Channel.cs" />
+    <Compile Include="Collada\COLLADA.cs" />
+    <Compile Include="Collada\Contributor.cs" />
+    <Compile Include="Collada\Controller.cs" />
+    <Compile Include="Collada\ConvexMesh.cs" />
+    <Compile Include="Collada\Effect.cs" />
+    <Compile Include="Collada\EvaluateScene.cs" />
+    <Compile Include="Collada\Extra.cs" />
+    <Compile Include="Collada\ForceField.cs" />
+    <Compile Include="Collada\FX\BlinnPhong.cs" />
+    <Compile Include="Collada\FX\Code.cs" />
+    <Compile Include="Collada\FX\Constant.cs" />
+    <Compile Include="Collada\FX\EnumChannels.cs" />
+    <Compile Include="Collada\FX\EnumOption.cs" />
+    <Compile Include="Collada\FX\EnumPrecision.cs" />
+    <Compile Include="Collada\FX\EnumRange.cs" />
+    <Compile Include="Collada\FX\EnumSamplerFilter.cs" />
+    <Compile Include="Collada\FX\EnumSamplerWrap.cs" />
+    <Compile Include="Collada\FX\EnumSurfaceFaces.cs" />
+    <Compile Include="Collada\FX\EnumSurfaceTypes.cs" />
+    <Compile Include="Collada\FX\Include.cs" />
+    <Compile Include="Collada\FX\Lambert.cs" />
+    <Compile Include="Collada\FX\NewParam.cs" />
+    <Compile Include="Collada\FX\Pass.cs" />
+    <Compile Include="Collada\FX\ProfileCG.cs" />
+    <Compile Include="Collada\FX\ProfileCOMMON.cs" />
+    <Compile Include="Collada\FX\ProfileGLES.cs" />
+    <Compile Include="Collada\FX\ProfileGLSL.cs" />
+    <Compile Include="Collada\FX\Sampler2D.cs" />
+    <Compile Include="Collada\FX\Surface.cs" />
+    <Compile Include="Collada\FX\SurfaceFormatHint.cs" />
+    <Compile Include="Collada\FX\SurfaceInitCube.cs" />
+    <Compile Include="Collada\FX\SurfaceInitFrom.cs" />
+    <Compile Include="Collada\FX\SurfaceInitPlanar.cs" />
+    <Compile Include="Collada\FX\SurfaceInitVolume.cs" />
+    <Compile Include="Collada\FX\TechniqueCOMMON.cs" />
+    <Compile Include="Collada\FX\TechniqueFX.cs" />
+    <Compile Include="Collada\Geometry.cs" />
+    <Compile Include="Collada\Image.cs" />
+    <Compile Include="Collada\Imager.cs" />
+    <Compile Include="Collada\Input.cs" />
+    <Compile Include="Collada\InputLocal.cs" />
+    <Compile Include="Collada\InstanceController.cs" />
+    <Compile Include="Collada\InstanceEffect.cs" />
+    <Compile Include="Collada\InstanceGeometry.cs" />
+    <Compile Include="Collada\InstanceMaterial.cs" />
+    <Compile Include="Collada\InstanceWithExtra.cs" />
+    <Compile Include="Collada\Joints.cs" />
+    <Compile Include="Collada\Light.cs" />
+    <Compile Include="Collada\LightTechniqueCommon.cs" />
+    <Compile Include="Collada\Lines.cs" />
+    <Compile Include="Collada\LineStrips.cs" />
+    <Compile Include="Collada\Material.cs" />
+    <Compile Include="Collada\Mesh.cs" />
+    <Compile Include="Collada\MeshElements.cs" />
+    <Compile Include="Collada\Morph.cs" />
+    <Compile Include="Collada\Node.cs" />
+    <Compile Include="Collada\Optics.cs" />
+    <Compile Include="Collada\OpticsTechniqueCommon.cs" />
+    <Compile Include="Collada\Orthographic.cs" />
+    <Compile Include="Collada\Param.cs" />
+    <Compile Include="Collada\Perspective.cs" />
+    <Compile Include="Collada\Ph.cs" />
+    <Compile Include="Collada\PhysicMaterial.cs" />
+    <Compile Include="Collada\PhysicsModel.cs" />
+    <Compile Include="Collada\PhysicsScene.cs" />
+    <Compile Include="Collada\Point.cs" />
+    <Compile Include="Collada\Polygons.cs" />
+    <Compile Include="Collada\PolyList.cs" />
+    <Compile Include="Collada\Render.cs" />
+    <Compile Include="Collada\Sampler.cs" />
+    <Compile Include="Collada\Scene.cs" />
+    <Compile Include="Collada\SetParam.cs" />
+    <Compile Include="Collada\Skin.cs" />
+    <Compile Include="Collada\Source.cs" />
+    <Compile Include="Collada\SourceTechniqueCommon.cs" />
+    <Compile Include="Collada\Spline.cs" />
+    <Compile Include="Collada\Spot.cs" />
+    <Compile Include="Collada\Targets.cs" />
+    <Compile Include="Collada\Technique.cs" />
+    <Compile Include="Collada\TechniqueHint.cs" />
+    <Compile Include="Collada\Triangles.cs" />
+    <Compile Include="Collada\TriFans.cs" />
+    <Compile Include="Collada\TriStrips.cs" />
+    <Compile Include="Collada\Types\BasicBool.cs" />
+    <Compile Include="Collada\Types\BasicBool2.cs" />
+    <Compile Include="Collada\Types\BasicBool3.cs" />
+    <Compile Include="Collada\Types\BasicBool4.cs" />
+    <Compile Include="Collada\Types\BasicBoolArray.cs" />
+    <Compile Include="Collada\Types\BasicColor.cs" />
+    <Compile Include="Collada\Types\BasicFloat.cs" />
+    <Compile Include="Collada\Types\BasicFloat2.cs" />
+    <Compile Include="Collada\Types\BasicFloat2x2.cs" />
+    <Compile Include="Collada\Types\BasicFloat3.cs" />
+    <Compile Include="Collada\Types\BasicFloat3x3.cs" />
+    <Compile Include="Collada\Types\BasicFloat4.cs" />
+    <Compile Include="Collada\Types\BasicFloat4x4.cs" />
+    <Compile Include="Collada\Types\BasicFloatArray.cs" />
+    <Compile Include="Collada\Types\BasicIDREF.cs" />
+    <Compile Include="Collada\Types\BasicInt.cs" />
+    <Compile Include="Collada\Types\BasicInt2.cs" />
+    <Compile Include="Collada\Types\BasicInt3.cs" />
+    <Compile Include="Collada\Types\BasicInt4.cs" />
+    <Compile Include="Collada\Types\BasicIntArray.cs" />
+    <Compile Include="Collada\Types\BasicParam.cs" />
+    <Compile Include="Collada\Types\BasicTexture.cs" />
+    <Compile Include="Collada\Types\BasicTransparent.cs" />
+    <Compile Include="Collada\Types\EnumAxis.cs" />
+    <Compile Include="Collada\Types\EnumMorphMethods.cs" />
+    <Compile Include="Collada\Types\EnumNodeType.cs" />
+    <Compile Include="Collada\Types\EnumOpaque.cs" />
+    <Compile Include="Collada\Types\EnumSemantics.cs" />
+    <Compile Include="Collada\Types\EnumVersions.cs" />
+    <Compile Include="Collada\Types\NamedArray.cs" />
+    <Compile Include="Collada\Types\NamedBoolArray.cs" />
+    <Compile Include="Collada\Types\NamedFloatArray.cs" />
+    <Compile Include="Collada\Types\NamedIDREFArray.cs" />
+    <Compile Include="Collada\Types\NamedIntArray.cs" />
+    <Compile Include="Collada\Types\NamedNameArray.cs" />
+    <Compile Include="Collada\Types\NamedNode.cs" />
+    <Compile Include="Collada\Types\VarColorOrTexture.cs" />
+    <Compile Include="Collada\Types\VarFloatOrParam.cs" />
+    <Compile Include="Collada\Unit.cs" />
+    <Compile Include="Collada\VertexWeights.cs" />
+    <Compile Include="Collada\Vertices.cs" />
+    <Compile Include="Collada\VisualScene.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ContentCollada.snk" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

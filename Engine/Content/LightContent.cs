@@ -1,9 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine.Content
 {
@@ -31,13 +27,5 @@ namespace Engine.Content
         {
             throw new NotImplementedException();
         }
-    }
-
-    public enum LightContentTypeEnum
-    {
-        Unknown,
-        Directional,
-        Point,
-        Spot,
     }
 }
