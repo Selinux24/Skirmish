@@ -279,7 +279,7 @@ namespace Engine.PathFinding.NavMesh
                     {
                         int i1 = Next(i, n);
                         int i2 = Next(i1, n);
-                        if (DiagonalieLoose(i, i2, verts, indices))
+                        if (DiagonalLoose(i, i2, verts, indices))
                         {
                             int p0 = RemoveDiagonalFlag(indices[i]);
                             int p2 = RemoveDiagonalFlag(indices[Next(i2, n)]);
