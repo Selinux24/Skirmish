@@ -184,7 +184,8 @@
     </Compile>
     <Content Include="Resources\Soldier\soldier_anim2.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>

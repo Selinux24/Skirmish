@@ -69,16 +69,21 @@ namespace AnimationTest
             ani.AddClip("idle2", 7, 17);
             ani.AddClip("stand", 18, 20);
             ani.AddClip("walk", 21, 29);
-            ani.AddTransition("idle1", "walk", 0f, 0f);
-            ani.AddTransition("idle1", "stand", 0f, 0f);
-            ani.AddTransition("idle2", "walk", 0f, 0f);
-            ani.AddTransition("idle2", "stand", 0f, 0f);
+            ani.AddClip("run", 30, 42);
+
             ani.AddTransition("stand", "idle1", 0f, 0f);
+            ani.AddTransition("idle1", "stand", 0f, 0f);
             ani.AddTransition("stand", "idle2", 0f, 0f);
+            ani.AddTransition("idle2", "stand", 0f, 0f);
+
             ani.AddTransition("stand", "walk", 0f, 0f);
-            ani.AddTransition("walk", "idle1", 0f, 0f);
-            ani.AddTransition("walk", "idle2", 0f, 0f);
             ani.AddTransition("walk", "stand", 0f, 0f);
+
+            ani.AddTransition("stand", "run", 0f, 0f);
+            ani.AddTransition("run", "stand", 0f, 0f);
+
+            ani.AddTransition("walk", "run", 0f, 0f);
+            ani.AddTransition("run", "walk", 0f, 0f);
 
             this.soldier = this.AddModel(
                 new ModelContentDescription()
@@ -143,11 +148,11 @@ namespace AnimationTest
 
                 AnimationPath p0 = new AnimationPath();
                 p0.Add("idle1");
-                p0.Add("stand");
                 p0.AddRepeat("stand", 5);
-                p0.Add("stand");
                 p0.Add("idle2");
+                p0.Add("stand");
                 p0.AddRepeat("walk", 5);
+                p0.AddRepeat("run", 5);
                 p0.Add("stand");
                 p0.Add("idle1");
 

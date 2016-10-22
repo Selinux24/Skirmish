@@ -56,7 +56,7 @@ namespace Engine.Common
             //Animation
             if (description.LoadAnimation)
             {
-                InitializeSkinnedData(ref res, game, modelContent);
+                InitializeSkinningData(ref res, game, modelContent);
             }
 
             //Images
@@ -272,12 +272,12 @@ namespace Engine.Common
             drw.VolumeMesh = volumeMesh.ToArray();
         }
         /// <summary>
-        /// Initialize skinned data
+        /// Initialize skinning data
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
-        private static void InitializeSkinnedData(ref DrawingData drw, Game game, ModelContent modelContent)
+        private static void InitializeSkinningData(ref DrawingData drw, Game game, ModelContent modelContent)
         {
             if (modelContent.SkinningInfo != null)
             {

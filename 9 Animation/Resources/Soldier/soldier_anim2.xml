@@ -5,17 +5,19 @@
     <animation name="idle2" indexFrom="7" indexTo="17" />
     <animation name="stand" indexFrom="18" indexTo="20" />
     <animation name="walk" indexFrom="21" indexTo="29" />
+    <animation name="run" indexFrom="30" indexTo="42" />
   </animations>
   <transitions>
-    <transition from="idle1" to="walk" startFrom="0" startTo="0" />
-    <transition from="idle1" to="stand" startFrom="0" startTo="0" />
-    <transition from="idle2" to="walk" startFrom="0" startTo="0" />
-    <transition from="idle2" to="stand" startFrom="0" startTo="0" />
     <transition from="stand" to="idle1" startFrom="0" startTo="0" />
+    <transition from="idle1" to="stand" startFrom="0" startTo="0" />
     <transition from="stand" to="idle2" startFrom="0" startTo="0" />
+    <transition from="idle2" to="stand" startFrom="0" startTo="0" />
+
     <transition from="stand" to="walk" startFrom="0" startTo="0" />
-    <transition from="walk" to="idle1" startFrom="0" startTo="0" />
-    <transition from="walk" to="idle2" startFrom="0" startTo="0" />
+    <transition from="stand" to="run" startFrom="0" startTo="0" />
     <transition from="walk" to="stand" startFrom="0" startTo="0" />
+    <transition from="walk" to="run" startFrom="0" startTo="0" />
+    <transition from="run" to="stand" startFrom="0" startTo="0" />
+    <transition from="run" to="walk" startFrom="0" startTo="0" />
   </transitions>
 </animation_descrition>
