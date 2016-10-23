@@ -121,6 +121,26 @@ namespace Engine.Animation
         }
 
         /// <summary>
+        /// Gets the specified animation offset
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="clipName">Clip name</param>
+        /// <param name="animationOffset">Animation offset</param>
+        public void GetAnimationOffset(float time, string clipName, out int animationOffset)
+        {
+            int clipIndex = this.GetClipIndex(clipName);
+            int offset = this.GetClipOffset(clipIndex);
+            float duration = this.GetClipDuration(clipIndex);
+            int clipLength = (int)(duration / TimeStep);
+
+            float percent = time / duration;
+            int percentINT = (int)percent;
+            percent -= (float)percentINT;
+            int index = (int)((float)clipLength * percent);
+
+            animationOffset = offset + (4 * this.skeleton.JointCount * index);
+        }
+        /// <summary>
         /// Gets the index of the specified clip in the animation collection
         /// </summary>
         /// <param name="clipName">Clip name</param>
@@ -163,40 +183,47 @@ namespace Engine.Animation
                 return this.transitions[clipIndex - this.animations.Count].TotalDuration;
             }
         }
-        /// <summary>
-        /// Gets the specified animation offset
-        /// </summary>
-        /// <param name="time">Time</param>
-        /// <param name="clipName">Clip name</param>
-        /// <param name="animationOffset">Animation offset</param>
-        public void GetAnimationOffset(float time, string clipName, out int animationOffset)
-        {
-            int clipIndex = this.GetClipIndex(clipName);
-            int offset = this.GetClipOffset(clipIndex);
-            float duration = this.GetClipDuration(clipIndex);
-            int clipLength = (int)(duration / TimeStep);
-
-            float percent = time / duration;
-            int percentINT = (int)percent;
-            percent -= (float)percentINT;
-            int index = (int)((float)clipLength * percent);
-
-            animationOffset = offset + (4 * this.skeleton.JointCount * index);
-        }
 
         /// <summary>
         /// Gets the transform list of the pose at specified time
         /// </summary>
         /// <param name="time">Time</param>
-        /// <param name="index">Clip index</param>
+        /// <param name="clipName">Clip mame</param>
         /// <returns>Returns the resulting transform list</returns>
-        public Matrix[] GetPoseAtTime(float time, int index)
+        public Matrix[] GetPoseAtTime(float time, string clipName)
+        {
+            int clipIndex = this.GetClipIndex(clipName);
+
+            if (clipIndex < 0)
+            {
+                return new Matrix[this.skeleton.JointCount];
+            }
+            else if (clipIndex < this.animations.Count)
+            {
+                return this.GetPoseAtTime(time, clipIndex);
+            }
+            else
+            {
+                var transition = this.transitions[clipIndex - this.animations.Count];
+
+                float factor = Math.Min(time / transition.InterpolationDuration, 1f);
+
+                return this.GetPoseAtTime(time, transition.ClipFrom, transition.ClipTo, transition.StartFrom, transition.StartTo, factor);
+            }
+        }
+        /// <summary>
+        /// Gets the transform list of the pose at specified time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="clipIndex">Clip index</param>
+        /// <returns>Returns the resulting transform list</returns>
+        public Matrix[] GetPoseAtTime(float time, int clipIndex)
         {
             var res = new Matrix[this.skeleton.JointCount];
 
-            if (index >= 0)
+            if (clipIndex >= 0)
             {
-                this.skeleton.GetPoseAtTime(time, this.animations[index].Animations, ref res);
+                this.skeleton.GetPoseAtTime(time, this.animations[clipIndex].Animations, ref res);
             }
 
             return res;
@@ -205,21 +232,35 @@ namespace Engine.Animation
         /// Gets the transform list of the pose's combination at specified time
         /// </summary>
         /// <param name="time">Time</param>
-        /// <param name="index1">First clip index</param>
-        /// <param name="index2">Second clip index</param>
+        /// <param name="clipName1">First clip name</param>
+        /// <param name="clipName2">Second clip name</param>
         /// <param name="offset1">Time offset for first clip</param>
         /// <param name="offset2">Time offset from second clip</param>
         /// <param name="factor">Interpolation factor</param>
         /// <returns>Returns the resulting transform list</returns>
-        public Matrix[] GetPoseAtTime(float time, int index1, int index2, float offset1, float offset2, float factor)
+        public Matrix[] GetPoseAtTime(float time, string clipName1, string clipName2, float offset1, float offset2, float factor)
+        {
+            return this.GetPoseAtTime(time, this.GetClipIndex(clipName1), this.GetClipIndex(clipName2), offset1, offset2, factor);
+        }
+        /// <summary>
+        /// Gets the transform list of the pose's combination at specified time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="clipIndex1">First clip index</param>
+        /// <param name="clipIndex2">Second clip index</param>
+        /// <param name="offset1">Time offset for first clip</param>
+        /// <param name="offset2">Time offset from second clip</param>
+        /// <param name="factor">Interpolation factor</param>
+        /// <returns>Returns the resulting transform list</returns>
+        public Matrix[] GetPoseAtTime(float time, int clipIndex1, int clipIndex2, float offset1, float offset2, float factor)
         {
             var res = new Matrix[this.skeleton.JointCount];
 
-            if (index1 >= 0 && index2 >= 0)
+            if (clipIndex1 >= 0 && clipIndex2 >= 0)
             {
                 this.skeleton.GetPoseAtTime(
-                    time + offset1, this.animations[index1].Animations,
-                    time + offset2, this.animations[index2].Animations,
+                    time + offset1, this.animations[clipIndex1].Animations,
+                    time + offset2, this.animations[clipIndex2].Animations,
                     factor,
                     ref res);
             }

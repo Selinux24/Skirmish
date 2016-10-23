@@ -186,7 +186,7 @@ namespace Engine
                 {
                     this.positionCache = drawingData.GetPoints(
                         this.Manipulator.LocalTransform,
-                        this.AnimationController.GetPose(drawingData.SkinningData),
+                        this.AnimationController.GetCurrentPose(drawingData.SkinningData),
                         refresh);
                 }
                 else
@@ -213,7 +213,7 @@ namespace Engine
                 {
                     this.triangleCache = drawingData.GetTriangles(
                         this.Manipulator.LocalTransform,
-                        this.AnimationController.GetPose(drawingData.SkinningData),
+                        this.AnimationController.GetCurrentPose(drawingData.SkinningData),
                         refresh);
                 }
                 else

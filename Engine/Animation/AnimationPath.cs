@@ -103,6 +103,29 @@ namespace Engine.Animation
         }
 
         /// <summary>
+        /// Connects the specified path to the current path adding transitions between them
+        /// </summary>
+        /// <param name="animationPath">Animation path to connect with current path</param>
+        public void ConnectTo(AnimationPath animationPath)
+        {
+            var lastItem = this.items[this.items.Count - 1];
+            var nextItem = animationPath.items[animationPath.items.Count - 1];
+
+            if (lastItem.ClipName != nextItem.ClipName)
+            {
+                var newItem = new AnimationPathItem()
+                {
+                    ClipName = lastItem.ClipName + nextItem.ClipName,
+                    TimeDelta = 1f,
+                    Loop = false,
+                    Repeats = 1,
+                };
+
+                animationPath.items.Insert(0, newItem);
+            }
+        }
+
+        /// <summary>
         /// Updates internal state
         /// </summary>
         /// <param name="delta">Delta time</param>
@@ -113,7 +136,7 @@ namespace Engine.Animation
 
             float nextTime = this.Time + delta;
             float clipTime = nextTime;
-            
+
             float time = 0;
             bool atEnd = false;
 
@@ -153,7 +176,7 @@ namespace Engine.Animation
                         atEnd = true;
                         break;
                     }
-                 
+
                     clipTime -= t;
                 }
             }

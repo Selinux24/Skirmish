@@ -117,6 +117,12 @@ namespace Engine.Animation
         /// <param name="indices">Clip indices in the skinning data clip list</param>
         public void AddPath(params AnimationPath[] paths)
         {
+            if (this.animationPaths.Count > 0)
+            {
+                //Adds transitions
+                this.animationPaths[this.animationPaths.Count - 1].ConnectTo(paths[0]);
+            }
+
             this.animationPaths.AddRange(paths);
 
             if (this.currentIndex < 0)
@@ -130,6 +136,12 @@ namespace Engine.Animation
         /// <param name="paths">Path list</param>
         public void SetPath(params AnimationPath[] paths)
         {
+            if (this.animationPaths.Count > 0)
+            {
+                //Adds transitions
+                this.animationPaths[this.animationPaths.Count - 1].ConnectTo(paths[0]);
+            }
+
             this.animationPaths.Clear();
             this.animationPaths.AddRange(paths);
 
@@ -216,21 +228,26 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="skData">Skinning data</param>
         /// <returns>Returns the transformation matrix list at current time</returns>
-        public Matrix[] GetPose(SkinningData skData)
+        public Matrix[] GetCurrentPose(SkinningData skData)
         {
             var clipIndex = this.GetAnimationIndex();
 
-            //Get the path
             if (this.currentIndex >= 0)
             {
+                //Get the path
                 var path = this.animationPaths[this.currentIndex];
 
-                return skData.GetPoseAtTime(path.Time, clipIndex);
+                //Get the path item
+                var pathItem = path.GetCurrentItem();
+                if (pathItem != null)
+                {
+                    return skData.GetPoseAtTime(
+                        path.ItemTime,
+                        pathItem.ClipName);
+                }
             }
-            else
-            {
-                return skData.GetPoseAtTime(0, clipIndex);
-            }
+
+            return null;
         }
 
         /// <summary>

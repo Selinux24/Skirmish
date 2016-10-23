@@ -251,6 +251,11 @@ namespace AnimationTest
                     SceneModesEnum.ForwardLigthning;
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.showSoldierDEBUG = !this.showSoldierDEBUG;
+            }
+
             if (this.Game.Input.KeyJustReleased(Keys.F2))
             {
                 this.soldier.Visible = !this.soldier.Visible;
