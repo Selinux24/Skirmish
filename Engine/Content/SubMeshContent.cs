@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 
 namespace Engine.Content
@@ -150,29 +149,17 @@ namespace Engine.Content
                 };
             }
 
-            if (optimizedMesh != null)
-            {
-                if (optimizedMesh.indices.Count == 0)
-                {
-                    var distincts = optimizedMesh.vertices.Distinct().ToList();
-                    if (distincts.Count != optimizedMesh.vertices.Count)
-                    {
-                        List<uint> indices = new List<uint>();
-
-                        //Compute indexes
-                        for (int i = 0; i < optimizedMesh.vertices.Count; i++)
-                        {
-                            indices.Add((uint)distincts.IndexOf(optimizedMesh.vertices[i]));
-                        }
-
-                        optimizedMesh.vertices = distincts;
-                        optimizedMesh.indices = indices;
-                    }
-                }
-            }
-
             return true;
         }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SubMeshContent()
+        {
+            this.Id = ID++;
+        }
+
         /// <summary>
         /// Compute UV tangen space
         /// </summary>
@@ -267,14 +254,6 @@ namespace Engine.Content
             {
                 throw new InvalidOperationException(string.Format("Bad source topology for triangle list: {0}", this.Topology));
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public SubMeshContent()
-        {
-            this.Id = ID++;
         }
 
         /// <summary>

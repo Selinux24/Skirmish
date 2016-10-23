@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.76.0 commit date:2015-11-03, commit time:10:56, hash:f337fea</authoring_tool>
+    </contributor>
+    <created>2016-09-25T19:34:55</created>
+    <modified>2016-09-25T19:34:55</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_cameras>
+    <camera id="Camera-camera" name="Camera">
+      <optics>
+        <technique_common>
+          <perspective>
+            <xfov sid="xfov">49.13434</xfov>
+            <aspect_ratio>1.777778</aspect_ratio>
+            <znear sid="znear">0.1</znear>
+            <zfar sid="zfar">100</zfar>
+          </perspective>
+        </technique_common>
+      </optics>
+      <extra>
+        <technique profile="blender">
+          <YF_dofdist>0</YF_dofdist>
+          <shiftx>0</shiftx>
+          <shifty>0</shifty>
+        </technique>
+      </extra>
+    </camera>
+  </library_cameras>
+  <library_images>
+    <image id="boulder_granite_grey_01_diffuse_dds" name="boulder_granite_grey_01_diffuse_dds">
+      <init_from>boulder_granite_grey_01_diffuse.dds</init_from>
+    </image>
+    <image id="boulder_granite_grey_01_normal_dds" name="boulder_granite_grey_01_normal_dds">
+      <init_from>boulder_granite_grey_01_normal.dds</init_from>
+    </image>
+    <image id="boulder_granite_grey_01_specular_dds" name="boulder_granite_grey_01_specular_dds">
+      <init_from>boulder_granite_grey_01_specular.dds</init_from>
+    </image>
+  </library_images>
+  <library_effects>
+    <effect id="boulder_granite_grey_01-effect">
+      <profile_COMMON>
+        <newparam sid="boulder_granite_grey_01_diffuse_dds-surface">
+          <surface type="2D">
+            <init_from>boulder_granite_grey_01_diffuse_dds</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="boulder_granite_grey_01_diffuse_dds-sampler">
+          <sampler2D>
+            <source>boulder_granite_grey_01_diffuse_dds-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="boulder_granite_grey_01_specular_dds-surface">
+          <surface type="2D">
+            <init_from>boulder_granite_grey_01_specular_dds</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="boulder_granite_grey_01_specular_dds-sampler">
+          <sampler2D>
+            <source>boulder_granite_grey_01_specular_dds-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="boulder_granite_grey_01_normal_dds-surface">
+          <surface type="2D">
+            <init_from>boulder_granite_grey_01_normal_dds</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="boulder_granite_grey_01_normal_dds-sampler">
+          <sampler2D>
+            <source>boulder_granite_grey_01_normal_dds-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="boulder_granite_grey_01_diffuse_dds-sampler" texcoord="bouldercubic64-mesh-map-0"/>
+            </diffuse>
+            <specular>
+              <texture texture="boulder_granite_grey_01_specular_dds-sampler" texcoord="bouldercubic64-mesh-map-0"/>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="boulder_granite_grey_01_normal_dds-sampler" texcoord="bouldercubic64-mesh-map-0"/>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="boulder_granite_grey_01-material" name="boulder_granite_grey_01">
+      <instance_effect url="#boulder_granite_grey_01-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="bouldercubic64-mesh" name="bouldercubic64">
+      <mesh>
+        <source id="bouldercubic64-mesh-positions">
+          <float_array id="bouldercubic64-mesh-positions-array" count="114">0.7570752 0.08143079 -0.930753 0.02659583 -0.8811425 0.9271422 -0.03923642 0.7759281 -0.4021666 -0.964859 -0.167469 -0.4212642 0.1453879 -1.079914 0.3449069 -0.1967214 0.4198291 -0.5345177 -0.1476493 0.8999832 0.6376117 -0.5119021 -0.4724661 0.120526 -0.8725621 0.08499503 -0.5833078 0.4355826 -0.6217544 0.7433563 0.3608126 0.1991307 1.050572 0.756413 -0.391593 -0.2363922 0.9282754 0.4134135 -0.3237316 -0.8586464 -0.1445478 0.4577462 -0.387361 0.6285426 0.8148815 -0.3420515 -0.0739445 -1.003425 0.6127575 0.5261266 0.09269416 -0.1987252 -0.9115169 0.7473149 -0.3696166 -0.9452143 -0.6161 0.9092619 -0.1142691 -0.6868255 -0.1506238 -1.066203 -0.1792038 0.1945537 0.609341 -0.6780176 -0.6590933 -0.124072 0.7886478 0.669676 -0.4795419 -0.3261352 -0.1921425 -0.9589028 -0.6761733 0.9024492 0.2786462 0.02230864 0.5694001 0.4793272 0.8069634 0.3317085 -0.2565606 -1.101097 -0.3414603 0.921884 -0.02849197 -0.5214198 0.744739 0.2388359 -0.6857687 -0.3703183 0.721625 -0.2369371 -0.5844157 1.044594 -0.722975 0.5137489 -0.2478241 0.4449067 0.7112751 0.5025902 0.6505478 -0.6958261 -0.04208409 0.7261617 0.4218614 -0.7078597 0.07857817 -0.3554012 1.122545 -0.001365661 0.6950026 0.9702111</float_array>
+          <technique_common>
+            <accessor source="#bouldercubic64-mesh-positions-array" count="38" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bouldercubic64-mesh-normals">
+          <float_array id="bouldercubic64-mesh-normals-array" count="114">0.5479097 0.8285024 0.1156674 -0.2464154 0.9498012 -0.1927619 -0.101294 0.9479338 0.3019288 -0.9640157 -0.1418541 0.2248362 -0.6874666 0.09527969 0.7199386 -0.6287584 0.4544017 0.6310168 0.01541203 0.5999727 0.7998721 0.4704498 0.07443571 0.8792818 0.747307 0.4014264 0.5295179 0.2707065 -0.9546145 0.1242137 0.8108297 -0.5832798 -0.04837262 0.762923 -0.4162841 0.4946272 0.881347 -0.3283306 -0.3397449 0.6703529 -0.6485927 -0.3604921 0.2339281 -0.2372851 -0.9428539 0.5439063 0.8387487 0.02581888 -0.03482204 0.8784561 -0.4765527 0.9446468 0.1991653 0.2607216 0.8339199 0.5494154 -0.05215811 -0.9526067 -0.224868 -0.2048777 -0.7604885 0.3150238 -0.567818 -0.384941 0.1433801 -0.9117361 -0.5611626 -0.7196505 -0.4089007 0.04266613 -0.7691503 -0.6376422 -0.2132965 -0.9758417 -0.04730427 0.1475292 -0.1152706 0.9823176 0.1518046 -0.7170283 0.6803131 0.5572834 0.1704506 -0.8126388 0.5002452 0.6805849 -0.5353121 0.9128296 -0.4072483 0.02984774 -0.7471203 0.5968112 -0.2926221 -0.7893254 0.5821897 0.194989 -0.5131257 -0.7968357 0.3189907 -0.3998327 -0.2955484 0.8676318 -0.814083 -0.4328306 0.3872036 -0.7502135 -0.654537 0.09360116 -0.02264517 0.757608 -0.6523169 -0.4130722 0.5976806 -0.6871312</float_array>
+          <technique_common>
+            <accessor source="#bouldercubic64-mesh-normals-array" count="38" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="bouldercubic64-mesh-map">
+          <float_array id="bouldercubic64-mesh-map-array" count="432">0.5769288 0.5569738 -0.04672157 0.09481292 0.1425786 0.624657 0.1513563 0.4951339 0.1618713 0.7992274 0.7110015 0.7591928 0.2544032 0.7029778 0.5393269 0.3088172 0.6791637 0.5243102 -0.5974712 0.6052454 -0.3001278 0.1877194 -0.2409472 0.7378334 0.9539626 -0.3952457 0.7677337 -0.1390752 0.4940086 -0.7208711 0.6250289 0.7219973 0.4126477 0.989862 -0.2409472 0.7378334 0.659583 0.2574925 0.2187955 -0.1433353 -0.04672157 0.09481292 0.6805754 0.2725612 0.8113555 0.5991291 0.6250289 0.7219973 0.659583 0.2574925 0.9807721 0.09198224 0.8977361 -0.04808467 0.04472094 -0.3463171 0.258413 -0.4473873 0.1523694 -0.5971888 -0.04090732 -0.3159036 0.07279175 -0.3877483 0.1243579 0.01193308 0.1425786 0.624657 0.5428959 0.7838177 0.5769288 0.5569738 0.5234376 -0.4645262 0.2920927 -0.1592354 0.2522644 -0.584448 0.7230089 0.1573837 0.3453829 0.3956324 0.1243579 0.01193308 0.3453829 0.3956324 0.5234376 0.7438493 0.2522644 0.8844199 0.7230089 0.1573837 0.1243579 0.01193308 0.07279175 -0.3877483 0.3143137 -0.5150327 0.5381483 -0.3919221 0.5318435 -0.1333418 0.7677337 -0.1390752 0.9539626 -0.3952456 0.8832178 -0.1510519 0.2386342 0.8866291 0.1425786 0.624657 -0.02224367 0.7858933 0.6297606 -0.06514692 0.8627996 0.3057789 0.9933925 0.08574593 0.5428959 0.7838177 0.1425786 0.624657 0.2386342 0.8866291 -0.5005643 0.7557027 -0.2638073 0.9780602 -0.05071806 0.7330272 0.2920927 -0.1592354 0.2544032 0.7029778 -0.2412762 0.05743598 0.8627996 0.3057789 0.6297606 -0.06514692 0.7110015 0.7591928 0.6250289 0.7219973 0.4749804 0.1448659 0.6805754 0.2725612 -0.479164 0.2562199 -0.3236883 -0.08289378 -0.1744286 0.2108029 0.4043569 -0.4232623 0.2187955 -0.1433353 0.8093087 -0.4026551 0.4749804 0.1448659 0.6250289 0.7219973 -0.2409472 0.7378334 0.4040158 0.6371948 0.8220453 0.1906816 -2.50398e-4 0.06267642 -0.1197112 0.2246389 -0.5005643 0.7557027 -0.05071806 0.7330272 0.05337721 -0.3488727 0.1338307 -0.6123431 0.2522644 -0.584448 0.3453829 0.3956324 0.1174476 0.7557027 0.1243579 0.01193308 -0.5842179 0.2211111 -0.08148413 -0.2058173 -0.4937639 -0.3159036 -0.3968417 -0.170033 -2.50399e-4 0.06267642 -0.09674102 -0.4649952 -0.5842179 0.2211111 -0.1197112 0.2246389 -0.08148413 -0.2058173 0.1300926 -0.3952456 0.5318435 -0.1333418 0.4749804 0.1448659 0.1425786 0.624657 -0.04672157 0.09481292 -0.1499667 0.318817 0.1096024 -0.2160478 0.1513563 0.4951339 0.6297606 -0.06514692 0.7110015 0.7591928 0.6297606 -0.06514692 0.1513563 0.4951339 -0.02889627 -0.04660922 0.1300926 -0.3952456 0.4749804 0.1448659 0.2920927 -0.1592354 0.5537245 -0.09701693 0.5393269 0.3088172 -0.02889627 -0.04660922 -0.3001278 0.1877194 -0.1664523 -0.1326369 0.1300926 -0.3952456 0.3143137 -0.5150327 0.5318435 -0.1333418 -2.50398e-4 0.06267642 0.8220453 0.1906816 0.4722743 -0.07354825 -0.5842179 0.2211111 -0.5005643 0.7557027 -0.1197112 0.2246389 0.05337721 -0.3488727 0.2522644 -0.584448 0.2920927 -0.1592354 0.0623151 0.4605914 -0.3424542 0.5215604 0.1100271 0.7843332 0.1513563 0.4951339 -0.04179066 0.7455815 0.1618713 0.7992274 0.05707049 -0.6505514 -0.09674102 -0.4649952 0.4722743 -0.07354825 0.3453829 0.3956324 0.2522644 0.8844199 0.1174476 0.7557027 0.8093087 0.4760256 0.8220453 0.1906816 0.4040158 0.6371948 0.2187955 -0.1433353 -0.2410371 -0.02211648 -0.04672157 0.09481292 0.4749804 0.1448659 -0.2409472 0.7378334 -0.02889627 -0.04660922 0.659583 0.2574925 -0.04672157 0.09481292 0.5769288 0.5569738 0.0623151 0.4605914 0.1100271 0.7843332 0.4043569 0.6380893 0.2187955 -0.1433353 0.659583 0.2574925 0.8977361 -0.04808467 -0.02889627 -0.04660922 -0.2409472 0.7378334 -0.3001278 0.1877194 0.9744845 0.5345443 0.8627996 0.3057789 0.7110015 0.7591928 0.2920927 -0.1592354 0.5393269 0.3088172 0.2544032 0.7029778 -0.479164 0.2562199 -0.1744286 0.2108029 -0.3145676 0.7330272 0.3099443 -0.3172491 0.1096024 -0.2160478 0.6297606 -0.06514692 -0.2412762 0.05743598 0.2544032 0.7029778 -0.02974164 0.6469048 0.4040158 0.6371948 -2.50398e-4 0.06267642 0.1004383 0.3820641 -0.3010101 -0.4527226 0.08261132 -0.3797934 0.247305 -0.5892217 0.4722743 -0.07354825 0.8220453 0.1906816 0.8044365 0.02400612 -0.05755245 0.3092539 -0.4576824 0.2061138 -0.3424542 0.5215604 -0.2827753 -0.2017205 -0.4864569 -0.270189 -0.1399651 -0.5297253 -0.2412762 0.05743598 0.05337721 -0.3488727 0.2920927 -0.1592354 0.05337721 -0.3488727 -0.2412762 0.05743598 -0.3238281 -0.1456212 0.8093087 -0.4026551 0.2187955 -0.1433353 0.8977361 -0.04808467 -2.50398e-4 0.06267642 0.4722743 -0.07354825 -0.09674102 -0.4649952 -0.2827753 -0.2017205 -0.4308112 5.60872e-4 -0.4864569 -0.270189</float_array>
+          <technique_common>
+            <accessor source="#bouldercubic64-mesh-map-array" count="216" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="bouldercubic64-mesh-vertices">
+          <input semantic="POSITION" source="#bouldercubic64-mesh-positions"/>
+        </vertices>
+        <polylist material="boulder_granite_grey_01-material" count="72">
+          <input semantic="VERTEX" source="#bouldercubic64-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#bouldercubic64-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#bouldercubic64-mesh-map" offset="2" set="0"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>33 0 0 28 1 1 6 2 2 13 3 3 22 4 4 14 5 5 37 6 6 10 7 7 26 8 8 4 9 9 34 10 10 9 11 11 19 12 12 23 13 13 27 14 14 26 8 15 10 7 16 9 11 17 16 15 18 2 16 19 28 1 20 16 15 21 33 0 22 26 8 23 16 15 24 25 17 25 12 18 26 3 19 27 8 20 28 15 21 29 18 22 30 24 23 31 20 24 32 6 2 33 26 8 34 33 0 35 9 11 36 36 25 37 1 26 38 34 10 39 4 9 40 20 24 41 4 9 42 9 11 43 1 26 44 34 10 45 20 24 46 24 23 47 0 27 48 35 28 49 12 18 50 23 13 51 19 12 52 11 29 53 37 6 54 6 2 55 14 5 56 32 30 57 29 31 58 28 1 59 26 8 60 6 2 61 37 6 62 17 32 63 31 33 64 30 34 65 36 25 66 37 6 67 22 4 68 29 31 69 32 30 70 14 5 71 26 8 72 25 17 73 16 15 74 13 3 75 3 19 76 7 35 77 21 36 78 2 16 79 35 28 80 25 17 81 26 8 82 9 11 83 21 36 84 0 27 85 15 21 86 7 35 87 17 32 88 30 34 89 31 33 90 17 32 91 1 26 92 4 9 93 17 32 94 20 24 95 20 24 96 3 19 97 18 22 98 3 19 99 15 21 100 18 22 101 20 24 102 7 35 103 3 19 104 19 12 105 12 18 106 25 17 107 6 2 108 28 1 109 29 31 110 3 19 111 13 3 112 32 30 113 14 5 114 32 30 115 13 3 116 11 29 117 19 12 118 25 17 119 36 25 120 9 11 121 10 7 122 11 29 123 34 10 124 23 13 125 19 12 126 0 27 127 12 18 128 15 21 129 0 27 130 27 14 131 20 24 132 17 32 133 7 35 134 31 33 135 1 26 136 36 25 137 5 37 138 32 30 139 2 16 140 13 3 141 30 34 142 22 4 143 24 23 144 18 22 145 27 14 146 4 9 147 1 26 148 17 32 149 35 28 150 0 27 151 21 36 152 2 16 153 32 30 154 28 1 155 25 17 156 9 11 157 11 29 158 16 15 159 28 1 160 33 0 161 5 37 162 2 16 163 21 36 164 2 16 165 16 15 166 12 18 167 11 29 168 9 11 169 34 10 170 6 2 171 29 31 172 14 5 173 36 25 174 10 7 175 37 6 176 13 3 177 7 35 178 30 34 179 8 20 180 3 19 181 32 30 182 22 4 183 37 6 184 14 5 185 21 36 186 15 21 187 5 37 188 8 20 189 5 37 190 15 21 191 27 14 192 0 27 193 19 12 194 5 37 195 8 20 196 32 30 197 23 13 198 24 23 199 27 14 200 22 4 201 31 33 202 36 25 203 31 33 204 22 4 205 30 34 206 35 28 207 2 16 208 12 18 209 15 21 210 27 14 211 18 22 212 23 13 213 34 10 214 24 23 215</p>
+        </polylist>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="Camera" name="Camera" type="NODE">
+        <matrix sid="transform">0.6858805 -0.3173701 0.6548619 7.481132 0.7276338 0.3124686 -0.6106656 -6.50764 -0.01081678 0.8953432 0.4452454 5.343665 0 0 0 1</matrix>
+        <instance_camera url="#Camera-camera"/>
+      </node>
+      <node id="bouldercubic64" name="bouldercubic64" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#bouldercubic64-mesh" name="bouldercubic64">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="boulder_granite_grey_01-material" target="#boulder_granite_grey_01-material">
+                <bind_vertex_input semantic="bouldercubic64-mesh-map-0" input_semantic="TEXCOORD" input_set="0"/>
+              </instance_material>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

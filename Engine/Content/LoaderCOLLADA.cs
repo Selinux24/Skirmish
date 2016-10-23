@@ -1350,7 +1350,7 @@ namespace Engine.Content
                 BasicFloat4x4 trn = Array.Find(node.Matrix, t => string.Equals(t.SId, "transform"));
                 if (trn != null) m = trn.ToMatrix();
 
-                return m;
+                return Matrix.Transpose(m);
             }
             else
             {

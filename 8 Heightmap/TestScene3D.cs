@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.Common;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
@@ -40,6 +41,8 @@ namespace HeightmapTest
         private SceneLightPoint[] torchLights = null;
         private SceneLightSpot spotLight1 = null;
         private SceneLightSpot spotLight2 = null;
+
+        private ModelInstanced rocks = null;
 
         private Model soldier = null;
         private TriangleListDrawer soldierTris = null;
@@ -152,6 +155,111 @@ namespace HeightmapTest
 
             #endregion
 
+            #region Rocks
+
+            sw.Restart();
+            this.rocks = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = "Resources/Rocks",
+                    ModelFileName = "boulder.dae",
+                },
+                new ModelInstancedDescription()
+                {
+                    Name = "DEBUG_CUBE_INSTANCED",
+                    CastShadow = true,
+                    Static = true,
+                    Instances = 250,
+                });
+            sw.Stop();
+            loadingText += string.Format("rocks: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Soldier model content (for soldier and troops)
+
+            AnimationDescription ani = new AnimationDescription();
+            ani.AddClip("idle1", 0, 7);
+            ani.AddClip("idle2", 7, 17);
+            ani.AddClip("stand", 18, 20);
+            ani.AddClip("walk", 21, 29);
+            ani.AddClip("run", 30, 42);
+
+            ani.AddTransition("stand", "idle1", 0f, 0f);
+            ani.AddTransition("idle1", "stand", 0f, 0f);
+            ani.AddTransition("stand", "idle2", 0f, 0f);
+            ani.AddTransition("idle2", "stand", 0f, 0f);
+
+            ani.AddTransition("stand", "walk", 0f, 0f);
+            ani.AddTransition("walk", "stand", 0f, 0f);
+
+            ani.AddTransition("stand", "run", 0f, 0f);
+            ani.AddTransition("run", "stand", 0f, 0f);
+
+            ani.AddTransition("walk", "run", 0f, 0f);
+            ani.AddTransition("run", "walk", 0f, 0f);
+
+            ModelContentDescription soldierModel = new ModelContentDescription()
+            {
+                ContentPath = @"Resources/Soldier",
+                ModelFileName = "soldier_anim2.dae",
+                Animation = ani,
+            };
+
+            #endregion
+
+            #region Soldier
+
+            this.soldier = this.AddModel(
+                soldierModel,
+                new ModelDescription()
+                {
+                    TextureIndex = 0,
+                });
+
+            this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
+
+            #endregion
+
+            #region Troops
+
+            this.troops = this.AddInstancingModel(
+                soldierModel,
+                new ModelInstancedDescription()
+                {
+                    Instances = 4,
+                });
+
+            #endregion
+
+            #region Helicopter
+
+            this.helicopter = this.AddModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = @"Resources/m24",
+                    ModelFileName = "m24.dae",
+                },
+                new ModelDescription() { });
+
+            #endregion
+
+            #region Torchs
+
+            this.torchs = this.AddInstancingModel(
+                new ModelContentDescription()
+                {
+                    ContentPath = "Resources/Scenery/Objects",
+                    ModelFileName = "torch.dae",
+                },
+                new ModelInstancedDescription()
+                {
+                    Instances = 50,
+                    CastShadow = true,
+                });
+
+            #endregion
+
             #region Terrain
 
             sw.Restart();
@@ -196,16 +304,16 @@ namespace HeightmapTest
                     //{
                     //    Settings = pfSettings,
                     //},
-                    Vegetation = new GroundDescription.VegetationDescription()
-                    {
-                        ContentPath = "Resources/Scenery/Foliage/Billboard",
-                        VegetarionTextures = new[] { "grass.png" },
-                        Saturation = 0.3f,
-                        StartRadius = 0f,
-                        EndRadius = 200f,
-                        MinSize = new Vector2(1f, 1f),
-                        MaxSize = new Vector2(1.5f, 2f),
-                    }
+                    //Vegetation = new GroundDescription.VegetationDescription()
+                    //{
+                    //    ContentPath = "Resources/Scenery/Foliage/Billboard",
+                    //    VegetarionTextures = new[] { "grass.png" },
+                    //    Saturation = 0.3f,
+                    //    StartRadius = 0f,
+                    //    EndRadius = 200f,
+                    //    MinSize = new Vector2(1f, 1f),
+                    //    MaxSize = new Vector2(1.5f, 2f),
+                    //}
                 });
             this.terrain.SetWind(this.windDirection, this.windStrength);
             sw.Stop();
@@ -215,28 +323,143 @@ namespace HeightmapTest
 
             #endregion
 
-            AnimationDescription ani = new AnimationDescription();
-            ani.AddClip("idle1", 0, 8);
-            ani.AddClip("walk", 8, 17);
-            ani.AddTransition("idle1", "walk", 0f, 0f);
-            ani.AddTransition("walk", "idle1", 0f, 0f);
+            this.load.Text = loadingText;
 
-            ModelContentDescription soldierModel = new ModelContentDescription()
+            #endregion
+
+            #region Positioning
+
+            //Helicopter
             {
-                ContentPath = @"Resources/Soldier",
-                ModelFileName = "soldier_anim2.dae",
-                Animation = ani,
-            };
-
-            #region Soldier
-
-            this.soldier = this.AddModel(
-                soldierModel,
-                new ModelDescription()
+                Vector3 position;
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(100, 100, out position, out triangle, out distance))
                 {
-                    TextureIndex = 0,
-                });
+                    this.helicopter.Manipulator.SetPosition(position, true);
+                }
+            }
 
+            //Rocks
+            {
+                Random posRnd = new Random(1);
+
+                for (int i = 0; i < this.rocks.Instances.Length; i++)
+                {
+                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+
+                    Vector3 rockPosition;
+                    Triangle rockTri;
+                    float rockDist;
+                    if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
+                    {
+                        var scale = 1f;
+                        if (i < 5)
+                        {
+                            scale = posRnd.NextFloat(10f, 30f);
+                        }
+                        else if (i < 30)
+                        {
+                            scale = posRnd.NextFloat(2f, 5f);
+                        }
+                        else
+                        {
+                            scale = posRnd.NextFloat(0.1f, 1f);
+                        }
+
+                        this.rocks.Instances[i].Manipulator.SetPosition(rockPosition, true);
+                        this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
+                        this.rocks.Instances[i].Manipulator.SetScale(scale, true);
+                    }
+                }
+            }
+
+            //Torchs
+            {
+                var bbox = this.terrain.GetBoundingBox();
+
+                {
+                    Vector3 position;
+                    Triangle triangle;
+                    float distance;
+                    if (this.terrain.FindTopGroundPosition(5, 5, out position, out triangle, out distance))
+                    {
+                        this.torchs.Instances[0].Manipulator.SetScale(1f, 1f, 1f, true);
+                        this.torchs.Instances[0].Manipulator.SetPosition(position, true);
+                        BoundingBox tbbox = this.torchs.Instances[0].GetBoundingBox();
+
+                        position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
+
+                        this.spotLight1 = new SceneLightSpot(position, Vector3.Normalize(Vector3.One * -1f), 25, 25)
+                        {
+                            Name = "Spot",
+                            LightColor = Color.Red,
+                            AmbientIntensity = 0.2f,
+                            DiffuseIntensity = 10f,
+                            Enabled = true,
+                            CastShadow = false,
+                        };
+
+                        this.spotLight2 = new SceneLightSpot(position, Vector3.Normalize(Vector3.One * -1f), 25, 25)
+                        {
+                            Name = "Spot",
+                            LightColor = Color.Blue,
+                            AmbientIntensity = 0.2f,
+                            DiffuseIntensity = 10f,
+                            Enabled = true,
+                            CastShadow = false,
+                        };
+
+                        this.Lights.Add(this.spotLight1);
+                        this.Lights.Add(this.spotLight2);
+                    };
+                }
+
+                this.torchLights = new SceneLightPoint[this.torchs.Count - 1];
+                for (int i = 1; i < this.torchs.Count; i++)
+                {
+                    Color color = new Color(
+                        rnd.NextFloat(0, 1),
+                        rnd.NextFloat(0, 1),
+                        rnd.NextFloat(0, 1),
+                        1);
+
+                    Vector3 pos = new Vector3(
+                        rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
+                        0f,
+                        rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
+
+                    Triangle t;
+                    float d;
+                    this.terrain.FindTopGroundPosition(pos.X, pos.Z, out pos, out t, out d);
+
+                    this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
+                    this.torchs.Instances[i].Manipulator.SetPosition(pos, true);
+                    BoundingBox tbbox = this.torchs.Instances[i].GetBoundingBox();
+
+                    pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
+
+                    this.torchLights[i - 1] = new SceneLightPoint()
+                    {
+                        Name = string.Format("Torch {0}", i),
+                        LightColor = color,
+                        AmbientIntensity = 0.1f,
+                        DiffuseIntensity = 5f,
+                        Position = pos,
+                        Radius = 4f,
+                        Enabled = true,
+                        CastShadow = false,
+                    };
+
+                    this.Lights.Add(this.torchLights[i - 1]);
+                }
+            }
+
+            this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helicopter, this.rocks }, false);
+            this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.torchs }, false);
+            this.terrain.UpdateInternals();
+
+            //Player soldier
             {
                 Vector3 position;
                 Triangle triangle;
@@ -247,180 +470,52 @@ namespace HeightmapTest
                 }
 
                 AnimationPath p = new AnimationPath();
-                p.AddLoop("idle1");
+                p.AddLoop("stand");
                 this.soldier.AnimationController.AddPath(p);
                 this.soldier.AnimationController.Start();
             }
 
-            this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
-
-            #endregion
-
-            #region Troops
-
-            this.troops = this.AddInstancingModel(
-                soldierModel,
-                new ModelInstancedDescription()
-                {
-                    Instances = 4,
-                });
-
-            Vector3[] iPos = new Vector3[]
+            //Instanced soldiers
             {
-                new Vector3(4, -2, MathUtil.PiOverFour),
-                new Vector3(5, -5, MathUtil.PiOverTwo),
-                new Vector3(-4, -2, -MathUtil.PiOverFour),
-                new Vector3(-5, -5, -MathUtil.PiOverTwo),
-            };
-
-            for (int i = 0; i < 4; i++)
-            {
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.terrain.FindTopGroundPosition(iPos[i].X, iPos[i].Y, out position, out triangle, out distance))
+                Vector3[] iPos = new Vector3[]
                 {
-                    this.troops.Instances[i].Manipulator.SetPosition(position, true);
-                    this.troops.Instances[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
-                    this.troops.Instances[i].TextureIndex = 1;
+                    new Vector3(4, -2, MathUtil.PiOverFour),
+                    new Vector3(5, -5, MathUtil.PiOverTwo),
+                    new Vector3(-4, -2, -MathUtil.PiOverFour),
+                    new Vector3(-5, -5, -MathUtil.PiOverTwo),
+                };
 
-                    AnimationPath p = new AnimationPath();
-                    p.AddLoop("idle1");
-                    this.troops.Instances[i].AnimationController.AddPath(p);
-                    this.troops.Instances[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
+                for (int i = 0; i < 4; i++)
+                {
+                    Vector3 position;
+                    Triangle triangle;
+                    float distance;
+                    if (this.terrain.FindTopGroundPosition(iPos[i].X, iPos[i].Y, out position, out triangle, out distance))
+                    {
+                        this.troops.Instances[i].Manipulator.SetPosition(position, true);
+                        this.troops.Instances[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
+                        this.troops.Instances[i].TextureIndex = 1;
+
+                        AnimationPath p = new AnimationPath();
+                        p.AddLoop("idle1");
+                        this.troops.Instances[i].AnimationController.AddPath(p);
+                        this.troops.Instances[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
+                    }
                 }
             }
 
             #endregion
 
-            #region Helicopter
+            this.Camera.Position = new Vector3(-10, 10, -20);
+            this.Camera.Interest = new Vector3(0, 4, 0);
 
-            this.helicopter = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = @"Resources/m24",
-                    ModelFileName = "m24.dae",
-                },
-                new ModelDescription() { });
-
+            if (this.playerFlying)
             {
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.terrain.FindTopGroundPosition(100, 100, out position, out triangle, out distance))
-                {
-                    this.helicopter.Manipulator.SetPosition(position, true);
-                }
-
-                //this.helicopter.AnimationController.AddClip(0, true, float.MaxValue);
+                this.Fly();
             }
-
-            #endregion
-
-            #region Torchs
-
-            int torchCount = 50;
-
-            var bbox = this.terrain.GetBoundingBox();
-
-            this.torchs = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = "Resources/Scenery/Objects",
-                    ModelFileName = "torch.dae",
-                },
-                new ModelInstancedDescription()
-                {
-                    Instances = torchCount,
-                    CastShadow = true,
-                });
-
+            else
             {
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.terrain.FindTopGroundPosition(5, 5, out position, out triangle, out distance))
-                {
-                    this.torchs.Instances[0].Manipulator.SetScale(1f, 1f, 1f, true);
-                    this.torchs.Instances[0].Manipulator.SetPosition(position, true);
-                    BoundingBox tbbox = this.torchs.Instances[0].GetBoundingBox();
-
-                    position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
-
-                    this.spotLight1 = new SceneLightSpot(position, Vector3.Normalize(Vector3.One * -1f), 25, 25)
-                    {
-                        Name = "Spot",
-                        LightColor = Color.Red,
-                        AmbientIntensity = 0.2f,
-                        DiffuseIntensity = 10f,
-                        Enabled = true,
-                        CastShadow = false,
-                    };
-
-                    this.spotLight2 = new SceneLightSpot(position, Vector3.Normalize(Vector3.One * -1f), 25, 25)
-                    {
-                        Name = "Spot",
-                        LightColor = Color.Blue,
-                        AmbientIntensity = 0.2f,
-                        DiffuseIntensity = 10f,
-                        Enabled = true,
-                        CastShadow = false,
-                    };
-
-                    this.Lights.Add(this.spotLight1);
-                    this.Lights.Add(this.spotLight2);
-                };
-            }
-
-            this.torchLights = new SceneLightPoint[torchCount - 1];
-            for (int i = 1; i < torchCount; i++)
-            {
-                Color color = new Color(
-                    rnd.NextFloat(0, 1),
-                    rnd.NextFloat(0, 1),
-                    rnd.NextFloat(0, 1),
-                    1);
-
-                Vector3 pos = new Vector3(
-                    rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
-                    0f,
-                    rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
-
-                Triangle t;
-                float d;
-                this.terrain.FindTopGroundPosition(pos.X, pos.Z, out pos, out t, out d);
-
-                this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
-                this.torchs.Instances[i].Manipulator.SetPosition(pos, true);
-                BoundingBox tbbox = this.torchs.Instances[i].GetBoundingBox();
-
-                pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
-
-                this.torchLights[i - 1] = new SceneLightPoint()
-                {
-                    Name = string.Format("Torch {0}", i),
-                    LightColor = color,
-                    AmbientIntensity = 0.1f,
-                    DiffuseIntensity = 5f,
-                    Position = pos,
-                    Radius = 4f,
-                    Enabled = true,
-                    CastShadow = false,
-                };
-
-                this.Lights.Add(this.torchLights[i - 1]);
-            }
-
-            #endregion
-
-            this.load.Text = loadingText;
-
-            #endregion
-
-            {
-                var offset = (this.playerHeight * 1.2f) + (this.soldier.Manipulator.Backward * 10f) + (this.soldier.Manipulator.Left * 3f);
-                var view = (this.soldier.Manipulator.Forward * 4f) + this.soldier.Manipulator.Down;
-                this.Camera.Following = new CameraFollower(this.soldier.Manipulator, offset, view);
+                this.Walk();
             }
 
             #region Debug
@@ -443,29 +538,29 @@ namespace HeightmapTest
                 this.Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
-            {
-                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F))
-            {
-                this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
-                this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.G))
-            {
-                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
-            }
-
             Ray cursorRay = this.GetPickingRay();
+
+            #region Walk / Fly
+
+            if (this.Game.Input.KeyJustReleased(Keys.P))
+            {
+                this.playerFlying = !this.playerFlying;
+
+                if (this.playerFlying)
+                {
+                    this.Fly();
+                }
+                else
+                {
+                    this.Walk();
+                }
+            }
+
+            #endregion
 
             #region Camera
 
-            if (this.Camera.Following == null)
+            if (this.playerFlying)
             {
 #if DEBUG
                 if (this.Game.Input.RightMouseButtonPressed)
@@ -479,32 +574,23 @@ namespace HeightmapTest
 
                 if (this.Game.Input.KeyPressed(Keys.A))
                 {
-                    this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+                    this.Camera.MoveLeft(gameTime, false);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.D))
                 {
-                    this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+                    this.Camera.MoveRight(gameTime, false);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.W))
                 {
-                    this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+                    this.Camera.MoveForward(gameTime, false);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.S))
                 {
-                    this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+                    this.Camera.MoveBackward(gameTime, false);
                 }
-
-                #region Walk / Fly
-
-                if (this.Game.Input.KeyJustReleased(Keys.P))
-                {
-                    this.playerFlying = !this.playerFlying;
-                }
-
-                #endregion
             }
             else
             {
@@ -587,6 +673,8 @@ namespace HeightmapTest
 
             #endregion
 
+            #region Lights
+
             {
                 float d = 1f;
                 float v = 5f;
@@ -597,6 +685,8 @@ namespace HeightmapTest
                 this.spotLight1.Direction = Vector3.Normalize(new Vector3(x, -1, z));
                 this.spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
             }
+
+            #endregion
 
             #region Debug
 
@@ -611,6 +701,24 @@ namespace HeightmapTest
 
                 if (this.soldierTris != null) this.soldierTris.Visible = this.showSoldierDEBUG;
                 if (this.soldierLines != null) this.soldierLines.Visible = this.showSoldierDEBUG;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F))
+            {
+                this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
+                this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.G))
+            {
+                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
             }
 
             if (this.showSoldierDEBUG)
@@ -651,25 +759,41 @@ namespace HeightmapTest
 
             base.Update(gameTime);
 
-            if (!this.playerFlying)
-            {
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.terrain.FindTopGroundPosition(this.Camera.Position.X, this.Camera.Position.Z, out position, out triangle, out distance))
-                {
-                    position += this.playerHeight;
-
-                    this.Camera.Goto(position);
-                };
-            }
-
             this.help.Text = string.Format(
                 "{0}. Wind {1} {2} - Next {3}",
                 this.Renderer,
                 this.windDirection, this.windStrength, this.windNextStrength);
 
             this.help2.Text = this.Game.RuntimeText;
+        }
+
+        private void Fly()
+        {
+            this.Camera.Following = null;
+        }
+        private void Walk()
+        {
+            var offset = (this.playerHeight * 1.2f) + (Vector3.ForwardLH * 10f) + (Vector3.Left * 3f);
+            var view = (Vector3.BackwardLH * 4f) + Vector3.Down;
+            this.Camera.Following = new CameraFollower(this.soldier.Manipulator, offset, view);
+        }
+
+        private Vector3 GetRandomPoint(Random rnd, Vector3 offset)
+        {
+            BoundingBox bbox = this.terrain.GetBoundingBox();
+
+            while (true)
+            {
+                Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
+
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (terrain.FindTopGroundPosition(v.X, v.Z, out p, out t, out d))
+                {
+                    return p + offset;
+                }
+            }
         }
     }
 }
