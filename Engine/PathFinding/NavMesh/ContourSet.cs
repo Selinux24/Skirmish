@@ -74,7 +74,6 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="maxVertsPerContour">The maximum number of vertices per contour within the set.</param>
         public void GetVertexLimits(out int maxVertices, out int maxTris, out int maxVertsPerContour)
         {
-            //TODO refactor name of function?
             maxVertices = 0;
             maxTris = 0;
             maxVertsPerContour = 0;

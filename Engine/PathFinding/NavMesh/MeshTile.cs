@@ -834,7 +834,6 @@ namespace Engine.PathFinding.NavMesh
 
         public bool Equals(MeshTile other)
         {
-            //TODO use more for equals?
             return this.Location == other.Location && this.Layer == other.Layer;
         }
 

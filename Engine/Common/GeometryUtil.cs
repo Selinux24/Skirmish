@@ -503,7 +503,6 @@ namespace Engine.Common
 
             if (Math.Abs(magnitude) < 1e-6f)
             {
-                //TODO is NaN the best value to set here?
                 s = float.NaN;
                 t = float.NaN;
                 return false;

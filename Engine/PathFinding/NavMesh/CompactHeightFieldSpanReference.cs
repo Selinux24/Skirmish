@@ -106,11 +106,10 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
-            //TODO should "null" references all have the same hash?
             int hash = 27;
-            hash = (13 * hash) + X.GetHashCode();
-            hash = (13 * hash) + Y.GetHashCode();
-            hash = (13 * hash) + Index.GetHashCode();
+            hash = (13 * hash) + this.X.GetHashCode();
+            hash = (13 * hash) + this.Y.GetHashCode();
+            hash = (13 * hash) + this.Index.GetHashCode();
 
             return hash;
         }

@@ -313,7 +313,6 @@ namespace Engine
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
-            //TODO write a better hashcode
             return this.X.GetHashCode() ^ this.Y.GetHashCode() ^ this.Z.GetHashCode();
         }
         /// <summary>

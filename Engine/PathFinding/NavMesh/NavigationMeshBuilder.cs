@@ -214,7 +214,6 @@ namespace Engine.PathFinding.NavMesh
             }
 
             //store header
-            //HACK TiledNavMesh should figure out the X/Y/layer instead of the user maybe?
             this.Header = new NavigationMeshInfo()
             {
                 X = 0,
@@ -345,7 +344,7 @@ namespace Engine.PathFinding.NavMesh
                         {
                             VertexCount = 2,
                             Vertices = verts,
-                            Area = polyMesh.Polys[offMeshCons[i].Poly].Area, //HACK is this correct?
+                            Area = polyMesh.Polys[offMeshCons[i].Poly].Area,
                             PolyType = PolyType.OffMeshConnection,
                         };
                         n++;

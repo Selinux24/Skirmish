@@ -52,6 +52,10 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public int MaxRegions { get; private set; }
         /// <summary>
+        /// Maximum walk contour iterations
+        /// </summary>
+        public int MaxWalkContourIterations { get; private set; }
+        /// <summary>
         /// Gets the cells.
         /// </summary>
         public CompactHeightFieldCell[] Cells { get; private set; }
@@ -175,6 +179,8 @@ namespace Engine.PathFinding.NavMesh
             this.Cells = new CompactHeightFieldCell[this.Width * this.Length];
             this.Spans = new CompactHeightFieldSpan[spanCount];
             this.Areas = new Area[spanCount];
+
+            this.MaxWalkContourIterations = 40000; 
 
             //iterate over the Heightfield's cells
             int spanIndex = 0;
@@ -591,7 +597,6 @@ namespace Engine.PathFinding.NavMesh
                     {
                         CompactHeightFieldSpanReference spanRef = new CompactHeightFieldSpanReference(x, y, i);
 
-                        //HACK since the border region flag makes r negative, I changed r == 0 to r <= 0. Figure out exactly what maxRegionId's purpose is and see if Region.IsBorderOrNull is all we need.
                         int r = (int)regionIds[i];
                         if (r <= 0 || (int)r >= numRegions)
                         {
@@ -1244,7 +1249,6 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Always true.</returns>
         private bool FloodRegion(RegionId[] regions, int[] floodDistances, int regionIndex, int level, ref CompactHeightFieldSpanReference start)
         {
-            //TODO this method should always return true, make it not return a bool?
             //flood fill mark region
             Stack<CompactHeightFieldSpanReference> stack = new Stack<CompactHeightFieldSpanReference>();
             stack.Push(start);
@@ -1566,9 +1570,8 @@ namespace Engine.PathFinding.NavMesh
 
             Area area = this.Areas[startIndex];
 
-            //TODO make the max iterations value a variable
             int iter = 0;
-            while (++iter < 40000)
+            while (++iter < this.MaxWalkContourIterations)
             {
                 // this direction is connected
                 if (EdgeFlagsHelper.IsConnected(ref flags[spanReference.Index], dir))
@@ -1643,7 +1646,6 @@ namespace Engine.PathFinding.NavMesh
                     if (di == -1)
                     {
                         // shouldn't happen
-                        // TODO if this shouldn't happen, this check shouldn't be necessary.
                         throw new InvalidOperationException("Something went wrong");
                     }
 

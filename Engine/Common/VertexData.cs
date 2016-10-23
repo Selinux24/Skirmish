@@ -589,8 +589,6 @@ namespace Engine.Common
         /// <param name="v">Result vertices</param>
         public static void CreateLineList(Line3[] lines, Color4 color, out VertexData[] v)
         {
-            //TODO: Vertex generation specifying data channels
-
             List<VertexData> data = new List<VertexData>();
 
             for (int i = 0; i < lines.Length; i++)

@@ -113,8 +113,6 @@ namespace Engine.PathFinding.NavMesh
 
             //only allow 31 salt bits, since salt mask is calculated using 32-bit int and it will overflow
             int saltBits = Math.Min(31, 32 - tileBits - polyBits);
-
-            //TODO handle this in a sane way/do we need this?
             if (saltBits < 10)
             {
                 return;
@@ -132,8 +130,6 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="id"></param>
         public void AddTileAt(MeshTile tile, int id)
         {
-            //TODO more error checking, what if tile already exists?
-
             Point loc = tile.Location;
             List<MeshTile> locList;
             if (!tileSet.TryGetValue(loc, out locList))
@@ -150,9 +146,6 @@ namespace Engine.PathFinding.NavMesh
             tileRefs.Add(tile, id);
 
             int index = this.IdManager.DecodeTileIndex(ref id);
-
-            //HACK this is pretty bad but only way to insert at index
-            //TODO tileIndex should have a level of indirection from the list?
             while (index >= tileList.Count)
             {
                 tileList.Add(null);

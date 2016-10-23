@@ -165,8 +165,7 @@ namespace Engine
 
                 VertexParticle p = new VertexParticle
                 {
-                    //REVISION: it was camera position
-                    Position = Vector3.Zero,
+                    Position = Vector3.Zero, //HACK: must be camera position?
                     Velocity = description.ParticleClass == ParticleClasses.Rain ? description.Acceleration : description.Acceleration * emitter.Size,
                     Size = new Vector2(emitter.Size),
                     Color = emitter.Color,

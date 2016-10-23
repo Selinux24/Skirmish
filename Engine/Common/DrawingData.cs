@@ -353,8 +353,8 @@ namespace Engine.Common
 
             if (boneAnimations.Count > 0)
             {
-                //TODO: Only one bone animation at a time
-                animations.Add(boneAnimations.ToArray()[0]);
+                //TODO: Only one bone animation for now
+                animations.Add(boneAnimations[0]);
             }
 
             foreach (string controllerName in modelContent.SkinningInfo.Controller)
