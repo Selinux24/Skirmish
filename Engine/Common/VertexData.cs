@@ -13,7 +13,7 @@ namespace Engine.Common
     /// Vertex helper
     /// </summary>
     [Serializable]
-    public struct VertexData
+    public struct VertexData : IComparable<VertexData>, IComparer<VertexData>, IEquatable<VertexData>
     {
         /// <summary>
         /// Face index
@@ -1526,6 +1526,45 @@ namespace Engine.Common
             if (this.BoneIndices != null && this.BoneIndices.Length > 0) text += string.Format("BoneIndices: {0}; ", this.BoneIndices.Length);
 
             return text;
+        }
+
+
+        public int CompareTo(VertexData other)
+        {
+            return this.Compare(this, other);
+        }
+
+        public int Compare(VertexData x, VertexData y)
+        {
+            int res = 0;
+
+            res = x.Position == y.Position ? 0 : -1; if (res != 0) return res;
+            res = x.Normal == y.Normal ? 0 : -1; if (res != 0) return res;
+            res = x.Tangent == y.Tangent ? 0 : -1; if (res != 0) return res;
+            res = x.BiNormal == y.BiNormal ? 0 : -1; if (res != 0) return res;
+            res = x.Texture0 == y.Texture0 ? 0 : -1; if (res != 0) return res;
+            res = x.Texture1 == y.Texture1 ? 0 : -1; if (res != 0) return res;
+            res = x.Color == y.Color ? 0 : -1; if (res != 0) return res;
+            res = x.Size == y.Size ? 0 : -1; if (res != 0) return res;
+
+            res = x.Weights == null && y.Weights == null ? 0 : -1; if (res != 0) return res;
+            if (x.Weights != null && y.Weights != null)
+            {
+                res = x.Weights.Length == y.Weights.Length ? 0 : -1; if (res != 0) return res;
+            }
+
+            res = x.BoneIndices == null && y.BoneIndices == null ? 0 : -1; if (res != 0) return res;
+            if (x.BoneIndices != null && y.BoneIndices != null)
+            {
+                res = x.BoneIndices.Length == y.BoneIndices.Length ? 0 : -1; if (res != 0) return res;
+            }
+
+            return res;
+        }
+
+        public bool Equals(VertexData other)
+        {
+            return this.Compare(this, other) == 0;
         }
     }
 }

@@ -435,7 +435,6 @@ namespace Engine.Content
             };
 
             modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
-            modelContent.Optimize();
 
             return modelContent;
         }
@@ -469,7 +468,6 @@ namespace Engine.Content
             };
 
             modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
-            modelContent.Optimize();
 
             return modelContent;
         }
@@ -522,7 +520,6 @@ namespace Engine.Content
             modelContent.Images.Add(imageName, image);
             modelContent.Materials.Add(materialName, material);
             modelContent.Geometry.Add(geoName, materialName, geo);
-            modelContent.Optimize();
 
             return modelContent;
         }
@@ -565,7 +562,6 @@ namespace Engine.Content
             modelContent.Images.Add(imageName, image);
             modelContent.Materials.Add(materialName, material);
             modelContent.Geometry.Add(geoName, materialName, geo);
-            modelContent.Optimize();
 
             return modelContent;
         }
@@ -610,7 +606,6 @@ namespace Engine.Content
             modelContent.Images.Add(imageName, image);
             modelContent.Materials.Add(materialName, material);
             modelContent.Geometry.Add(geoName, materialName, geo);
-            modelContent.Optimize();
 
             return modelContent;
         }
@@ -662,7 +657,6 @@ namespace Engine.Content
             modelContent.Images.Add(texureName, textureImage);
             modelContent.Materials.Add(materialName, material);
             modelContent.Geometry.Add(geoName, materialName, geo);
-            modelContent.Optimize();
 
             return modelContent;
         }

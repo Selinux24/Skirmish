@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Engine.Content
@@ -13,14 +14,23 @@ namespace Engine.Content
     public class SubMeshContent
     {
         /// <summary>
+        /// Global id counter
+        /// </summary>
+        private static int ID = 1;
+
+        /// <summary>
         /// Vertices
         /// </summary>
-        private VertexData[] vertices;
+        private List<VertexData> vertices = new List<VertexData>();
         /// <summary>
         /// Indices
         /// </summary>
-        private uint[] indices;
+        private List<uint> indices = new List<uint>();
 
+        /// <summary>
+        /// Submesh id
+        /// </summary>
+        public int Id { get; private set; }
         /// <summary>
         /// Vertex Topology
         /// </summary>
@@ -36,11 +46,15 @@ namespace Engine.Content
         {
             get
             {
-                return this.vertices;
+                return this.vertices.ToArray();
             }
             set
             {
-                this.vertices = value;
+                this.vertices.Clear();
+                if (value != null && value.Length > 0)
+                {
+                    this.vertices.AddRange(value);
+                }
             }
         }
         /// <summary>
@@ -50,11 +64,15 @@ namespace Engine.Content
         {
             get
             {
-                return this.indices;
+                return this.indices.ToArray();
             }
             set
             {
-                this.indices = value;
+                this.indices.Clear();
+                if (value != null && value.Length > 0)
+                {
+                    this.indices.AddRange(value);
+                }
             }
         }
         /// <summary>
@@ -77,14 +95,10 @@ namespace Engine.Content
             if (meshArray == null || meshArray.Length == 0)
             {
                 optimizedMesh = null;
-
-                return true;
             }
             else if (meshArray.Length == 1)
             {
                 optimizedMesh = meshArray[0];
-
-                return true;
             }
             else
             {
@@ -106,17 +120,17 @@ namespace Engine.Content
                         return false;
                     }
 
-                    if (mesh.Vertices != null && mesh.Vertices.Length > 0)
+                    if (mesh.vertices.Count > 0)
                     {
-                        foreach (VertexData v in mesh.Vertices)
+                        foreach (VertexData v in mesh.vertices)
                         {
                             vertices.Add(v);
                         }
                     }
 
-                    if (mesh.Indices != null && mesh.Indices.Length > 0)
+                    if (mesh.indices.Count > 0)
                     {
-                        foreach (uint i in mesh.Indices)
+                        foreach (uint i in mesh.indices)
                         {
                             indices.Add(indexOffset + i);
                         }
@@ -130,54 +144,88 @@ namespace Engine.Content
                     Material = material,
                     Topology = topology,
                     VertexType = vertexType,
-                    Indices = indices.ToArray(),
-                    Vertices = vertices.ToArray(),
-                };
 
-                return true;
+                    indices = indices,
+                    vertices = vertices,
+                };
             }
+
+            if (optimizedMesh != null)
+            {
+                if (optimizedMesh.indices.Count == 0)
+                {
+                    var distincts = optimizedMesh.vertices.Distinct().ToList();
+                    if (distincts.Count != optimizedMesh.vertices.Count)
+                    {
+                        List<uint> indices = new List<uint>();
+
+                        //Compute indexes
+                        for (int i = 0; i < optimizedMesh.vertices.Count; i++)
+                        {
+                            indices.Add((uint)distincts.IndexOf(optimizedMesh.vertices[i]));
+                        }
+
+                        optimizedMesh.vertices = distincts;
+                        optimizedMesh.indices = indices;
+                    }
+                }
+            }
+
+            return true;
         }
         /// <summary>
         /// Compute UV tangen space
         /// </summary>
         public void ComputeTangents()
         {
-            if (this.vertices != null && this.vertices.Length > 0)
+            if (this.vertices.Count > 0)
             {
-                if (this.indices != null && this.indices.Length > 0)
+                if (this.indices.Count > 0)
                 {
-                    for (int i = 0; i < this.indices.Length; i += 3)
+                    for (int i = 0; i < this.indices.Count; i += 3)
                     {
+                        var v0 = this.vertices[(int)this.indices[i + 0]];
+                        var v1 = this.vertices[(int)this.indices[i + 1]];
+                        var v2 = this.vertices[(int)this.indices[i + 2]];
+
                         Vector3 tangent;
                         Vector3 binormal;
                         Vector3 normal;
                         VertexData.ComputeNormals(
-                            this.vertices[this.indices[i + 0]],
-                            this.vertices[this.indices[i + 1]],
-                            this.vertices[this.indices[i + 2]],
+                            v0, v1, v2,
                             out tangent, out binormal, out normal);
 
-                        this.vertices[this.indices[i + 0]].Tangent = tangent;
-                        this.vertices[this.indices[i + 1]].Tangent = tangent;
-                        this.vertices[this.indices[i + 2]].Tangent = tangent;
+                        v0.Tangent = tangent;
+                        v1.Tangent = tangent;
+                        v2.Tangent = tangent;
+
+                        this.vertices[(int)this.indices[i + 0]] = v0;
+                        this.vertices[(int)this.indices[i + 1]] = v1;
+                        this.vertices[(int)this.indices[i + 2]] = v2;
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < this.vertices.Length; i += 3)
+                    for (int i = 0; i < this.vertices.Count; i += 3)
                     {
+                        var v0 = this.vertices[i + 0];
+                        var v1 = this.vertices[i + 1];
+                        var v2 = this.vertices[i + 2];
+
                         Vector3 tangent;
                         Vector3 binormal;
                         Vector3 normal;
                         VertexData.ComputeNormals(
-                            this.vertices[i + 0],
-                            this.vertices[i + 1],
-                            this.vertices[i + 2],
+                            v0, v1, v2,
                             out tangent, out binormal, out normal);
 
-                        this.vertices[i + 0].Tangent = tangent;
-                        this.vertices[i + 1].Tangent = tangent;
-                        this.vertices[i + 2].Tangent = tangent;
+                        v0.Tangent = tangent;
+                        v1.Tangent = tangent;
+                        v2.Tangent = tangent;
+
+                        this.vertices[i + 0] = v0;
+                        this.vertices[i + 1] = v1;
+                        this.vertices[i + 2] = v2;
                     }
                 }
             }
@@ -192,19 +240,19 @@ namespace Engine.Content
             {
                 List<Triangle> triangles = new List<Triangle>();
 
-                if (this.indices != null && this.indices.Length > 0)
+                if (this.indices.Count > 0)
                 {
-                    for (int i = 0; i < this.indices.Length; i += 3)
+                    for (int i = 0; i < this.indices.Count; i += 3)
                     {
                         triangles.Add(new Triangle(
-                            this.vertices[this.indices[i + 0]].Position.Value,
-                            this.vertices[this.indices[i + 1]].Position.Value,
-                            this.vertices[this.indices[i + 2]].Position.Value));
+                            this.vertices[(int)this.indices[i + 0]].Position.Value,
+                            this.vertices[(int)this.indices[i + 1]].Position.Value,
+                            this.vertices[(int)this.indices[i + 2]].Position.Value));
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < this.vertices.Length; i += 3)
+                    for (int i = 0; i < this.vertices.Count; i += 3)
                     {
                         triangles.Add(new Triangle(
                             this.vertices[i + 0].Position.Value,
@@ -219,6 +267,14 @@ namespace Engine.Content
             {
                 throw new InvalidOperationException(string.Format("Bad source topology for triangle list: {0}", this.Topology));
             }
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SubMeshContent()
+        {
+            this.Id = ID++;
         }
 
         /// <summary>
