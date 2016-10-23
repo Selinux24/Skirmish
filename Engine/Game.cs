@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 namespace Engine
 {
+    using Engine.Common;
     using Engine.Effects;
 
     /// <summary>

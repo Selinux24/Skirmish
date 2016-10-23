@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
 {
@@ -10,7 +9,7 @@ namespace Engine
     /// <summary>
     /// Sprite drawer
     /// </summary>
-    public class Sprite : ModelBase, IScreenFitted
+    public class Sprite : Drawable, IScreenFitted
     {
         /// <summary>
         /// Creates view and orthoprojection from specified size
@@ -68,10 +67,6 @@ namespace Engine
         /// View * projection matrix
         /// </summary>
         private Matrix viewProjection;
-        /// <summary>
-        /// Level of detail
-        /// </summary>
-        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
 
         /// <summary>
         /// Datos renderización
@@ -154,21 +149,6 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator2D Manipulator { get; private set; }
-        /// <summary>
-        /// Level of detail
-        /// </summary>
-        public override LevelOfDetailEnum LevelOfDetail
-        {
-            get
-            {
-                return this.levelOfDetail;
-            }
-            set
-            {
-                this.levelOfDetail = this.GetLODNearest(value);
-                this.DrawingData = this.GetDrawingData(this.levelOfDetail);
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -176,8 +156,13 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="description">Description</param>
         public Sprite(Game game, SpriteDescription description)
-            : base(game, ModelContent.GenerateSprite(description.ContentPath, description.Textures), description, false, 0, false, false, false)
+            : base(game, description)
         {
+            this.DrawingData = DrawingData.Build(
+                game,
+                ModelContent.GenerateSprite(description.ContentPath, description.Textures), 
+                new DrawingDataDescription());
+
             this.renderWidth = game.Form.RenderWidth.NextPair();
             this.renderHeight = game.Form.RenderHeight.NextPair();
             this.sourceWidth = description.Width <= 0 ? this.renderWidth : description.Width.NextPair();
@@ -262,6 +247,11 @@ namespace Engine
                 this.Width = ((int)(this.sourceWidth * w)).NextPair();
                 this.Height = ((int)(this.sourceHeight * h)).NextPair();
             }
+        }
+
+        public override void Dispose()
+        {
+            Helper.Dispose(this.DrawingData);
         }
     }
 }
