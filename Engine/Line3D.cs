@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// 3D Line
     /// </summary>
-    public struct Line3
+    public struct Line3D
     {
         /// <summary>
         /// Start point
@@ -34,9 +34,9 @@ namespace Engine
         /// <param name="line">Line</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line</returns>
-        public static Line3 Transform(Line3 line, Matrix transform)
+        public static Line3D Transform(Line3D line, Matrix transform)
         {
-            return new Line3(
+            return new Line3D(
                 Vector3.TransformCoordinate(line.Point1, transform),
                 Vector3.TransformCoordinate(line.Point2, transform));
         }
@@ -46,9 +46,9 @@ namespace Engine
         /// <param name="lines">Line list</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line list</returns>
-        public static Line3[] Transform(Line3[] lines, Matrix transform)
+        public static Line3D[] Transform(Line3D[] lines, Matrix transform)
         {
-            Line3[] trnLines = new Line3[lines.Length];
+            Line3D[] trnLines = new Line3D[lines.Length];
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -58,9 +58,9 @@ namespace Engine
             return trnLines;
         }
 
-        public static Line3[] CreateWiredTriangle(Triangle[] triangleList)
+        public static Line3D[] CreateWiredTriangle(Triangle[] triangleList)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             for (int i = 0; i < triangleList.Length; i++)
             {
@@ -69,13 +69,13 @@ namespace Engine
 
             return lines.ToArray();
         }
-        public static Line3[] CreateWiredTriangle(Triangle triangle)
+        public static Line3D[] CreateWiredTriangle(Triangle triangle)
         {
             return CreateWiredTriangle(triangle.GetCorners());
         }
-        public static Line3[] CreateWiredTriangle(Vector3[] corners)
+        public static Line3D[] CreateWiredTriangle(Vector3[] corners)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             int[] indexes = new int[6];
 
@@ -90,9 +90,9 @@ namespace Engine
 
             return CreateFromVertices(corners, indexes);
         }
-        public static Line3[] CreateWiredSquare(Vector3[] corners)
+        public static Line3D[] CreateWiredSquare(Vector3[] corners)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             int[] indexes = new int[8];
 
@@ -110,9 +110,9 @@ namespace Engine
 
             return CreateFromVertices(corners, indexes);
         }
-        public static Line3[] CreateWiredPolygon(Vector3[] points)
+        public static Line3D[] CreateWiredPolygon(Vector3[] points)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             int[] indexes = new int[points.Length * 2];
 
@@ -129,9 +129,9 @@ namespace Engine
 
             return CreateFromVertices(points, indexes);
         }
-        public static Line3[] CreateWiredBox(BoundingBox[] bboxList)
+        public static Line3D[] CreateWiredBox(BoundingBox[] bboxList)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             for (int i = 0; i < bboxList.Length; i++)
             {
@@ -140,13 +140,13 @@ namespace Engine
 
             return lines.ToArray();
         }
-        public static Line3[] CreateWiredBox(BoundingBox bbox)
+        public static Line3D[] CreateWiredBox(BoundingBox bbox)
         {
             return CreateWiredBox(bbox.GetCorners());
         }
-        public static Line3[] CreateWiredBox(OrientedBoundingBox[] obboxList)
+        public static Line3D[] CreateWiredBox(OrientedBoundingBox[] obboxList)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             for (int i = 0; i < obboxList.Length; i++)
             {
@@ -155,11 +155,11 @@ namespace Engine
 
             return lines.ToArray();
         }
-        public static Line3[] CreateWiredBox(OrientedBoundingBox obbox)
+        public static Line3D[] CreateWiredBox(OrientedBoundingBox obbox)
         {
             return CreateWiredBox(obbox.GetCorners());
         }
-        public static Line3[] CreateWiredBox(Vector3[] corners)
+        public static Line3D[] CreateWiredBox(Vector3[] corners)
         {
             int[] indexes = new int[24];
 
@@ -182,9 +182,9 @@ namespace Engine
 
             return CreateFromVertices(corners, indexes);
         }
-        public static Line3[] CreateWiredSphere(BoundingSphere[] bsphList, int sliceCount, int stackCount)
+        public static Line3D[] CreateWiredSphere(BoundingSphere[] bsphList, int sliceCount, int stackCount)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             for (int i = 0; i < bsphList.Length; i++)
             {
@@ -193,11 +193,11 @@ namespace Engine
 
             return lines.ToArray();
         }
-        public static Line3[] CreateWiredSphere(BoundingSphere bsph, int sliceCount, int stackCount)
+        public static Line3D[] CreateWiredSphere(BoundingSphere bsph, int sliceCount, int stackCount)
         {
             return CreateWiredSphere(bsph.Center, bsph.Radius, sliceCount, stackCount);
         }
-        public static Line3[] CreateWiredSphere(Vector3 center, float radius, int sliceCount, int stackCount)
+        public static Line3D[] CreateWiredSphere(Vector3 center, float radius, int sliceCount, int stackCount)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<int> indexList = new List<int>();
@@ -236,7 +236,7 @@ namespace Engine
 
             return CreateFromVertices(vertList.ToArray(), indexList.ToArray());
         }
-        public static Line3[] CreateWiredCone(Vector3 center, float radius, int sliceCount, float height)
+        public static Line3D[] CreateWiredCone(Vector3 center, float radius, int sliceCount, float height)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<int> indexList = new List<int>();
@@ -272,9 +272,9 @@ namespace Engine
 
             return CreateFromVertices(vertList.ToArray(), indexList.ToArray());
         }
-        public static Line3[] CreateWiredCylinder(BoundingCylinder cylinder, int segments)
+        public static Line3D[] CreateWiredCylinder(BoundingCylinder cylinder, int segments)
         {
-            List<Line3> resultList = new List<Line3>();
+            List<Line3D> resultList = new List<Line3D>();
 
             List<Vector3> verts = new List<Vector3>();
 
@@ -294,27 +294,27 @@ namespace Engine
             {
                 if (i == segments - 1)
                 {
-                    resultList.Add(new Line3(verts[i], verts[0]));
-                    resultList.Add(new Line3(verts[i + segments], verts[0 + segments]));
+                    resultList.Add(new Line3D(verts[i], verts[0]));
+                    resultList.Add(new Line3D(verts[i + segments], verts[0 + segments]));
 
-                    resultList.Add(new Line3(verts[i], verts[i + segments]));
+                    resultList.Add(new Line3D(verts[i], verts[i + segments]));
                 }
                 else
                 {
-                    resultList.Add(new Line3(verts[i], verts[i + 1]));
-                    resultList.Add(new Line3(verts[i + segments], verts[i + 1 + segments]));
+                    resultList.Add(new Line3D(verts[i], verts[i + 1]));
+                    resultList.Add(new Line3D(verts[i + segments], verts[i + 1 + segments]));
 
-                    resultList.Add(new Line3(verts[i], verts[i + segments]));
+                    resultList.Add(new Line3D(verts[i], verts[i + segments]));
                 }
             }
 
             return resultList.ToArray();
         }
-        public static Line3[] CreateWiredFrustum(BoundingFrustum frustum)
+        public static Line3D[] CreateWiredFrustum(BoundingFrustum frustum)
         {
             return CreateWiredBox(frustum.GetCorners());
         }
-        public static Line3[] CreateWiredPyramid(BoundingFrustum frustum)
+        public static Line3D[] CreateWiredPyramid(BoundingFrustum frustum)
         {
             FrustumCameraParams prms = frustum.GetCameraParams();
             Vector3[] corners = frustum.GetCorners();
@@ -343,20 +343,20 @@ namespace Engine
 
             return CreateFromVertices(vertices, indexes);
         }
-        public static Line3[] CreatePath(Vector3[] path)
+        public static Line3D[] CreatePath(Vector3[] path)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             for (int i = 0; i < path.Length - 1; i++)
             {
-                lines.Add(new Line3(path[i], path[i + 1]));
+                lines.Add(new Line3D(path[i], path[i + 1]));
             }
 
             return lines.ToArray();
         }
-        public static Line3[] CreateAxis(Matrix transform, float size)
+        public static Line3D[] CreateAxis(Matrix transform, float size)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             Vector3 p = transform.TranslationVector;
 
@@ -368,35 +368,35 @@ namespace Engine
             Vector3 c1 = (forward * 0.8f) + (left * 0.2f);
             Vector3 c2 = (forward * 0.8f) + (right * 0.2f);
 
-            lines.Add(new Line3(p, up));
-            lines.Add(new Line3(p, forward));
-            lines.Add(new Line3(p, left));
+            lines.Add(new Line3D(p, up));
+            lines.Add(new Line3D(p, forward));
+            lines.Add(new Line3D(p, left));
 
-            lines.Add(new Line3(forward, c1));
-            lines.Add(new Line3(forward, c2));
+            lines.Add(new Line3D(forward, c1));
+            lines.Add(new Line3D(forward, c2));
 
             return lines.ToArray();
         }
-        public static Line3[] CreateCrossList(Vector3[] points, float size)
+        public static Line3D[] CreateCrossList(Vector3[] points, float size)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             for (int i = 0; i < points.Length; i++)
             {
                 Vector3 p = points[i];
 
                 float h = size * 0.5f;
-                lines.Add(new Line3(p + new Vector3(h, h, h), p - new Vector3(h, h, h)));
-                lines.Add(new Line3(p + new Vector3(h, h, -h), p - new Vector3(h, h, -h)));
-                lines.Add(new Line3(p + new Vector3(-h, h, h), p - new Vector3(-h, h, h)));
-                lines.Add(new Line3(p + new Vector3(-h, h, -h), p - new Vector3(-h, h, -h)));
+                lines.Add(new Line3D(p + new Vector3(h, h, h), p - new Vector3(h, h, h)));
+                lines.Add(new Line3D(p + new Vector3(h, h, -h), p - new Vector3(h, h, -h)));
+                lines.Add(new Line3D(p + new Vector3(-h, h, h), p - new Vector3(-h, h, h)));
+                lines.Add(new Line3D(p + new Vector3(-h, h, -h), p - new Vector3(-h, h, -h)));
             }
 
             return lines.ToArray();
         }
-        public static Line3[] CreateLineList(Vector3[] points)
+        public static Line3D[] CreateLineList(Vector3[] points)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             Vector3 p0 = points[0];
 
@@ -404,7 +404,7 @@ namespace Engine
             {
                 Vector3 p1 = points[i];
 
-                lines.Add(new Line3(p0, p1));
+                lines.Add(new Line3D(p0, p1));
 
                 p0 = p1;
             }
@@ -412,13 +412,13 @@ namespace Engine
             return lines.ToArray();
         }
 
-        private static Line3[] CreateFromVertices(Vector3[] vertices, int[] indices)
+        private static Line3D[] CreateFromVertices(Vector3[] vertices, int[] indices)
         {
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             for (int i = 0; i < indices.Length; i += 2)
             {
-                Line3 l = new Line3()
+                Line3D l = new Line3D()
                 {
                     Point1 = vertices[indices[i + 0]],
                     Point2 = vertices[indices[i + 1]],
@@ -439,7 +439,7 @@ namespace Engine
         /// <param name="x2">X coordinate of end point</param>
         /// <param name="y2">Y coordinate of end point</param>
         /// <param name="z2">Z coordinate of end point</param>
-        public Line3(float x1, float y1, float z1, float x2, float y2, float z2)
+        public Line3D(float x1, float y1, float z1, float x2, float y2, float z2)
         {
             this.Point1 = new Vector3(x1, y1, z1);
             this.Point2 = new Vector3(x2, y2, z2);
@@ -449,7 +449,7 @@ namespace Engine
         /// </summary>
         /// <param name="p1">Start point</param>
         /// <param name="p2">End point</param>
-        public Line3(Vector3 p1, Vector3 p2)
+        public Line3D(Vector3 p1, Vector3 p2)
         {
             this.Point1 = p1;
             this.Point2 = p2;
@@ -458,7 +458,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="ray">Ray</param>
-        public Line3(Ray ray)
+        public Line3D(Ray ray)
         {
             this.Point1 = ray.Position;
             this.Point2 = ray.Position + ray.Direction;

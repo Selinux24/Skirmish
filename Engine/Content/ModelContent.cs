@@ -412,7 +412,7 @@ namespace Engine.Content
         /// <param name="color">Color</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateLineList(Line3[] lines, Color4 color, MaterialContent material = null)
+        public static ModelContent GenerateLineList(Line3D[] lines, Color4 color, MaterialContent material = null)
         {
             ModelContent modelContent = new ModelContent();
 

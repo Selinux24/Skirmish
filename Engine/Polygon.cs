@@ -472,19 +472,19 @@ namespace Engine
         /// Get the array of edges
         /// </summary>
         /// <returns>Returns the array of edges</returns>
-        public Line3[] GetEdges()
+        public Line3D[] GetEdges()
         {
-            Line3[] edges = new Line3[this.points.Length];
+            Line3D[] edges = new Line3D[this.points.Length];
 
             for (int i = 0; i < this.points.Length; i++)
             {
                 if (i < this.points.Length - 1)
                 {
-                    edges[i] = new Line3(this.points[i], this.points[i + 1]);
+                    edges[i] = new Line3D(this.points[i], this.points[i + 1]);
                 }
                 else
                 {
-                    edges[i] = new Line3(this.points[i], this.points[0]);
+                    edges[i] = new Line3D(this.points[i], this.points[0]);
                 }
             }
 
@@ -531,16 +531,16 @@ namespace Engine
         {
             List<Vector3> toRemove = new List<Vector3>();
 
-            Line3[] edges = this.GetEdges();
+            Line3D[] edges = this.GetEdges();
 
             for (int i = 1; i < edges.Length; i++)
             {
-                Line3 edge1 = edges[i - 1];
-                Line3 edge2 = edges[i];
+                Line3D edge1 = edges[i - 1];
+                Line3D edge2 = edges[i];
 
                 //Project
-                Line2 pEdge1 = new Line2(new Vector2(edge1.Point1.X, edge1.Point1.Z), new Vector2(edge1.Point2.X, edge1.Point2.Z));
-                Line2 pEdge2 = new Line2(new Vector2(edge2.Point1.X, edge2.Point1.Z), new Vector2(edge2.Point2.X, edge2.Point2.Z));
+                Line2D pEdge1 = new Line2D(new Vector2(edge1.Point1.X, edge1.Point1.Z), new Vector2(edge1.Point2.X, edge1.Point2.Z));
+                Line2D pEdge2 = new Line2D(new Vector2(edge2.Point1.X, edge2.Point1.Z), new Vector2(edge2.Point2.X, edge2.Point2.Z));
 
                 if (pEdge1.Direction == pEdge2.Direction)
                 {

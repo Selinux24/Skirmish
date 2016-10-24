@@ -159,11 +159,8 @@ namespace HeightmapTest
 
             sw.Restart();
             this.rocks = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = "Resources/Rocks",
-                    ModelFileName = "boulder.dae",
-                },
+                @"Resources/Rocks",
+                @"boulder.xml",
                 new ModelInstancedDescription()
                 {
                     Name = "DEBUG_CUBE_INSTANCED",
@@ -176,42 +173,11 @@ namespace HeightmapTest
 
             #endregion
 
-            #region Soldier model content (for soldier and troops)
-
-            AnimationDescription ani = new AnimationDescription();
-            ani.AddClip("idle1", 0, 7);
-            ani.AddClip("idle2", 7, 17);
-            ani.AddClip("stand", 18, 20);
-            ani.AddClip("walk", 21, 29);
-            ani.AddClip("run", 30, 42);
-
-            ani.AddTransition("stand", "idle1", 0f, 0f);
-            ani.AddTransition("idle1", "stand", 0f, 0f);
-            ani.AddTransition("stand", "idle2", 0f, 0f);
-            ani.AddTransition("idle2", "stand", 0f, 0f);
-
-            ani.AddTransition("stand", "walk", 0f, 0f);
-            ani.AddTransition("walk", "stand", 0f, 0f);
-
-            ani.AddTransition("stand", "run", 0f, 0f);
-            ani.AddTransition("run", "stand", 0f, 0f);
-
-            ani.AddTransition("walk", "run", 0f, 0f);
-            ani.AddTransition("run", "walk", 0f, 0f);
-
-            ModelContentDescription soldierModel = new ModelContentDescription()
-            {
-                ContentPath = @"Resources/Soldier",
-                ModelFileName = "soldier_anim2.dae",
-                Animation = ani,
-            };
-
-            #endregion
-
             #region Soldier
 
             this.soldier = this.AddModel(
-                soldierModel,
+                @"Resources/Soldier",
+                @"soldier_anim2.xml",
                 new ModelDescription()
                 {
                     TextureIndex = 0,
@@ -224,7 +190,8 @@ namespace HeightmapTest
             #region Troops
 
             this.troops = this.AddInstancingModel(
-                soldierModel,
+                @"Resources/Soldier",
+                @"soldier_anim2.xml",
                 new ModelInstancedDescription()
                 {
                     Instances = 4,
@@ -235,11 +202,8 @@ namespace HeightmapTest
             #region Helicopter
 
             this.helicopter = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = @"Resources/m24",
-                    ModelFileName = "m24.dae",
-                },
+                @"Resources/m24",
+                @"m24.xml",
                 new ModelDescription() { });
 
             #endregion
@@ -247,11 +211,8 @@ namespace HeightmapTest
             #region Torchs
 
             this.torchs = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = "Resources/Scenery/Objects",
-                    ModelFileName = "torch.dae",
-                },
+                @"Resources/Scenery/Objects",
+                @"torch.xml",
                 new ModelInstancedDescription()
                 {
                     Instances = 50,
@@ -521,7 +482,7 @@ namespace HeightmapTest
             #region Debug
 
             var bboxes = this.terrain.GetBoundingBoxes(5);
-            var listBoxes = Line3.CreateWiredBox(bboxes);
+            var listBoxes = Line3D.CreateWiredBox(bboxes);
 
             this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
             this.bboxesDrawer.Visible = false;
@@ -746,12 +707,12 @@ namespace HeightmapTest
                 };
                 if (this.soldierLines == null)
                 {
-                    this.soldierLines = this.AddLineListDrawer(Line3.CreateWiredBox(bboxes), color);
+                    this.soldierLines = this.AddLineListDrawer(Line3D.CreateWiredBox(bboxes), color);
                     this.soldierLines.EnableDepthStencil = false;
                 }
                 else
                 {
-                    this.soldierLines.SetLines(color, Line3.CreateWiredBox(bboxes));
+                    this.soldierLines.SetLines(color, Line3D.CreateWiredBox(bboxes));
                 }
             }
 

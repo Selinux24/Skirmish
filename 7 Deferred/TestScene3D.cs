@@ -65,8 +65,6 @@ namespace DeferredTest
 
             #region Models
 
-            string resources = @"Resources";
-
             Stopwatch sw = Stopwatch.StartNew();
 
             string loadingText = null;
@@ -77,7 +75,7 @@ namespace DeferredTest
             this.skydom = this.AddSkydom(new SkydomDescription()
             {
                 Name = "Sky",
-                ContentPath = resources,
+                ContentPath = "Resources",
                 Radius = far,
                 Texture = "sunset.dds",
             });
@@ -90,11 +88,8 @@ namespace DeferredTest
 
             sw.Restart();
             this.helicopter = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources,
-                    ModelFileName = "helicopter.dae",
-                },
+                "Resources",
+                "helicopter.xml",
                 new ModelDescription()
                 {
                     Name = "Helicopter",
@@ -110,11 +105,8 @@ namespace DeferredTest
 
             sw.Restart();
             this.helicopters = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources,
-                    ModelFileName = "helicopter.dae",
-                },
+                "Resources",
+                "helicopter.xml",
                 new ModelInstancedDescription()
                 {
                     Name = "Bunch of Helicopters",
@@ -130,11 +122,8 @@ namespace DeferredTest
 
             sw.Restart();
             this.tank = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources,
-                    ModelFileName = "leopard.dae",
-                },
+                "Resources",
+                "leopard.xml",
                 new ModelDescription()
                 {
                     Name = "Tank",
@@ -162,17 +151,14 @@ namespace DeferredTest
             };
 
             this.terrain = this.AddScenery(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources,
-                    ModelFileName = "terrain.dae",
-                },
+                "Resources",
+                "terrain.xml",
                 new GroundDescription()
                 {
                     Name = "Terrain",
                     Vegetation = new GroundDescription.VegetationDescription()
                     {
-                        ContentPath = resources + "/Vegetation",
+                        ContentPath = "Resources/Vegetation",
                         VegetarionTextures = new[] { "grass.png" },
                         Saturation = 20f,
                         StartRadius = 0f,
@@ -200,12 +186,8 @@ namespace DeferredTest
 
             sw.Restart();
             this.tree = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = "resources/trees",
-                    ModelFileName = "birch_a.dae",
-                    VolumeMeshes = new[] { "Volume" },
-                },
+                "resources/trees",
+                "birch_a.xml",
                 new ModelDescription()
                 {
                     Name = "Lonely tree",
@@ -219,12 +201,8 @@ namespace DeferredTest
 
             sw.Restart();
             this.trees = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = "resources/trees",
-                    ModelFileName = "birch_a.dae",
-                    VolumeMeshes = new[] { "Volume" },
-                },
+                "resources/trees",
+                "birch_b.xml",
                 new ModelInstancedDescription()
                 {
                     Name = "Bunch of trees",
@@ -325,7 +303,7 @@ namespace DeferredTest
                     modelCount++;
                 }
                 AnimationPath ap = new AnimationPath();
-                ap.AddLoop("default");
+                ap.AddLoop("roll");
                 this.helicopter.AnimationController.AddPath(ap);
                 this.helicopter.AnimationController.Start();
             }
@@ -346,7 +324,7 @@ namespace DeferredTest
                         modelCount++;
                     }
                     AnimationPath ap = new AnimationPath();
-                    ap.AddLoop("default");
+                    ap.AddLoop("roll");
                     this.helicopters.Instances[i].AnimationController.AddPath(ap);
                     this.helicopters.Instances[i].AnimationController.Start();
                 }
@@ -655,7 +633,7 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyPressed(Keys.Space))
             {
-                this.lineDrawer.SetLines(Color.Yellow, Line3.CreateWiredFrustum(this.Camera.Frustum));
+                this.lineDrawer.SetLines(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
                 this.lineDrawer.Visible = true;
             }
 
@@ -748,8 +726,8 @@ namespace DeferredTest
                     this.spotLight.DiffuseIntensity = Math.Max(0f, this.spotLight.DiffuseIntensity);
                 }
 
-                this.lineDrawer.SetLines(Color.White, Line3.CreateWiredFrustum(this.spotLight.BoundingFrustum));
-                this.lineDrawer.SetLines(Color.Red, Line3.CreateAxis(this.spotLight.Transform, 1f));
+                this.lineDrawer.SetLines(Color.White, Line3D.CreateWiredFrustum(this.spotLight.BoundingFrustum));
+                this.lineDrawer.SetLines(Color.Red, Line3D.CreateAxis(this.spotLight.Transform, 1f));
             }
             else
             {

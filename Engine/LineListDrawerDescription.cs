@@ -4,12 +4,12 @@ namespace Engine
     /// <summary>
     /// Line drawer description
     /// </summary>
-    public class LineDrawerDescription : ModelDescription
+    public class LineListDrawerDescription : ModelDescription
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public LineDrawerDescription()
+        public LineListDrawerDescription()
             : base()
         {
             this.Static = true;

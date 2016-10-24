@@ -126,22 +126,16 @@ namespace GameLogic
             #region 3D models
 
             this.cursor3D = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = "Resources3D",
-                    ModelFileName = "cursor.dae",
-                },
+                "Resources3D",
+                "cursor.xml",
                 new ModelDescription()
                 {
                     CastShadow = true
                 });
 
             this.terrain = this.AddScenery(
-                new ModelContentDescription()
-                {
-                    ContentPath = "Resources3D",
-                    ModelFileName = "terrain.dae",
-                },
+                "Resources3D",
+                "terrain.xml",
                 new GroundDescription()
                 {
                     PathFinder = new GroundDescription.PathFinderDescription()
@@ -155,11 +149,8 @@ namespace GameLogic
                 });
 
             this.soldier = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = "Resources3D",
-                    ModelFileName = "soldier.dae",
-                },
+                "Resources3D",
+                "soldier_anim2.xml",
                 new ModelInstancedDescription()
                 {
                     Instances = this.skirmishGame.AllSoldiers.Length,
@@ -606,7 +597,7 @@ namespace GameLogic
 
                     instance.TextureIndex = teamIndex;
                     AnimationPath p = new AnimationPath();
-                    p.AddLoop("default");
+                    p.AddLoop("stand");
                     instance.AnimationController.AddPath(p);
                     instance.AnimationController.Start(soldierIndex);
 
@@ -640,7 +631,7 @@ namespace GameLogic
         }
         private void SetFrustum()
         {
-            this.lineDrawer.SetLines(this.frstColor, Line3.CreateWiredFrustum(this.Camera.Frustum));
+            this.lineDrawer.SetLines(this.frstColor, Line3D.CreateWiredFrustum(this.Camera.Frustum));
         }
 
         private void NewGame()
@@ -770,7 +761,7 @@ namespace GameLogic
             BoundingSphere bsph = this.soldierModels[soldier].GetBoundingSphere();
 
             this.Camera.LookTo(bsph.Center, CameraTranslations.Quick);
-            this.lineDrawer.SetLines(this.bsphColor, Line3.CreateWiredSphere(bsph, this.bsphSlices, this.bsphStacks));
+            this.lineDrawer.SetLines(this.bsphColor, Line3D.CreateWiredSphere(bsph, this.bsphSlices, this.bsphStacks));
         }
         private void UpdateSoldierStates()
         {

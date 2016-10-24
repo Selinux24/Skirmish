@@ -63,11 +63,6 @@ namespace Collada
             this.picks.Text = null;
             this.picks.Position = new Vector2(0, 48);
 
-            ModelContentDescription terrainContent = new ModelContentDescription()
-            {
-                ContentPath = "Resources",
-                ModelFileName = "Ground.dae",
-            };
             GroundDescription terrainDescription = new GroundDescription()
             {
                 Vegetation = new GroundDescription.VegetationDescription()
@@ -91,25 +86,19 @@ namespace Collada
                 },
                 DelayGeneration = true,
             };
-            this.ground = this.AddScenery(terrainContent, terrainDescription);
+            this.ground = this.AddScenery("resources", "ground.xml", terrainDescription);
 
             this.helicoptersModel = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = "Resources",
-                    ModelFileName = "Helicopter.dae",
-                },
+                "resources", 
+                "Helicopter.xml",
                 new ModelInstancedDescription()
                 {
                     Instances = 5,
                 });
 
             this.lampsModel = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = "Resources",
-                    ModelFileName = "Poly.dae",
-                },
+                "resources",
+                "Poly.xml",
                 new ModelInstancedDescription()
                 {
                     Instances = 2
@@ -187,7 +176,7 @@ namespace Collada
             {
                 this.helicoptersModel.Instances[i].TextureIndex = rnd.Next(0, 2);
                 AnimationPath ap = new AnimationPath();
-                ap.AddLoop("default");
+                ap.AddLoop("roll");
                 this.helicoptersModel.Instances[i].AnimationController.AddPath(ap);
                 this.helicoptersModel.Instances[i].AnimationController.Start();
 
@@ -227,14 +216,14 @@ namespace Collada
         private void InitializeDEBUG()
         {
             BoundingBox[] bboxes = this.ground.GetBoundingBoxes(5);
-            Line3[] listBoxes = Line3.CreateWiredBox(bboxes);
+            Line3D[] listBoxes = Line3D.CreateWiredBox(bboxes);
 
             this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
             this.bboxesDrawer.Visible = false;
             this.bboxesDrawer.CastShadow = false;
             this.bboxesDrawer.EnableAlphaBlending = true;
 
-            List<Line3> squares = new List<Line3>();
+            List<Line3D> squares = new List<Line3D>();
 
             var nodes = this.ground.GetNodes(null);
 
@@ -242,7 +231,7 @@ namespace Collada
             {
                 GridNode node = (GridNode)nodes[i];
 
-                squares.AddRange(Line3.CreateWiredSquare(node.GetPoints()));
+                squares.AddRange(Line3D.CreateWiredSquare(node.GetPoints()));
             }
 
             this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));

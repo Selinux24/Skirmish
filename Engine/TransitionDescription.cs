@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Engine.Animation
+namespace Engine
 {
     /// <summary>
     /// Transition description
@@ -12,22 +12,22 @@ namespace Engine.Animation
         /// <summary>
         /// Clip from name
         /// </summary>
-        [XmlElement("from")]
+        [XmlAttribute("from")]
         public string ClipFrom;
         /// <summary>
         /// Clip to name
         /// </summary>
-        [XmlElement("to")]
+        [XmlAttribute("to")]
         public string ClipTo;
         /// <summary>
         /// Clip from start
         /// </summary>
-        [XmlElement("startFrom")]
+        [XmlAttribute("startFrom")]
         public float StartFrom;
         /// <summary>
         /// Clip to start
         /// </summary>
-        [XmlElement("startTo")]
+        [XmlAttribute("startTo")]
         public float StartTo;
     }
 }

@@ -48,8 +48,8 @@ namespace TerrainTest
         private Scenery terrain = null;
         private Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
-        private List<Line3> oks = new List<Line3>();
-        private List<Line3> errs = new List<Line3>();
+        private List<Line3D> oks = new List<Line3D>();
+        private List<Line3D> errs = new List<Line3D>();
         private LineListDrawer terrainLineDrawer = null;
         private LineListDrawer terrainPointDrawer = null;
         private TriangleListDrawer terrainGraphDrawer = null;
@@ -64,6 +64,7 @@ namespace TerrainTest
         private LineListDrawer objLineDrawer = null;
 
         private Model helicopter = null;
+        private AnimationPath helicopterRollPath = null;
         private LineListDrawer helicopterLineDrawer = null;
         private Vector3 heightOffset = (Vector3.Up * 10f);
         private Color4 gridColor = new Color4(Color.LightSeaGreen.ToColor3(), 0.5f);
@@ -106,8 +107,6 @@ namespace TerrainTest
 
             #region Loading models
 
-            string resources = @"Resources";
-
             Stopwatch sw = Stopwatch.StartNew();
 
             string loadingText = null;
@@ -116,11 +115,8 @@ namespace TerrainTest
 
             sw.Restart();
             this.cursor3D = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources + "/Cursor",
-                    ModelFileName = "cursor.dae",
-                },
+                "resources/cursor",
+                "cursor.xml",
                 new ModelDescription()
                 {
                     AlwaysVisible = true,
@@ -138,7 +134,7 @@ namespace TerrainTest
             sw.Restart();
             this.cursor2D = this.AddCursor(new SpriteDescription()
             {
-                ContentPath = resources + "/Cursor",
+                ContentPath = "resources/Cursor",
                 Textures = new[] { "target.png" },
                 Width = 16,
                 Height = 16,
@@ -155,7 +151,7 @@ namespace TerrainTest
             sw.Restart();
             this.lensFlare = this.AddLensFlare(new LensFlareDescription()
             {
-                ContentPath = resources + "/Flare",
+                ContentPath = "resources/Flare",
                 GlowTexture = "lfGlow.png",
                 Flares = new[]
                 {
@@ -183,11 +179,8 @@ namespace TerrainTest
 
             sw.Restart();
             this.helicopter = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources + "/Helicopter",
-                    ModelFileName = "helicopter.dae",
-                },
+                "resources/Helicopter",
+                "Helicopter.xml",
                 new ModelDescription()
                 {
                     CastShadow = true,
@@ -209,11 +202,8 @@ namespace TerrainTest
 
             sw.Restart();
             this.tank = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources + "/Leopard",
-                    ModelFileName = "Leopard.dae",
-                },
+                "resources/Leopard",
+                "Leopard.xml",
                 new ModelDescription()
                 {
                     CastShadow = true,
@@ -229,11 +219,8 @@ namespace TerrainTest
 
             sw.Restart();
             this.helipod = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources + "/Helipod",
-                    ModelFileName = "helipod.dae",
-                },
+                "resources/Helipod",
+                "Helipod.xml",
                 new ModelDescription()
                 {
                     CastShadow = true,
@@ -248,11 +235,8 @@ namespace TerrainTest
 
             sw.Restart();
             this.garage = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources + "/Garage",
-                    ModelFileName = "garage.dae",
-                },
+                "resources/Garage",
+                "Garage.xml",
                 new ModelDescription()
                 {
                     CastShadow = true,
@@ -267,11 +251,8 @@ namespace TerrainTest
 
             sw.Restart();
             this.obelisk = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources + "/Obelisk",
-                    ModelFileName = "obelisk.dae",
-                },
+                "resources/Obelisk",
+                "Obelisk.xml",
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -287,11 +268,8 @@ namespace TerrainTest
 
             sw.Restart();
             this.rocks = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources + "/Rocks",
-                    ModelFileName = "boulder.dae",
-                },
+                "resources/Rocks",
+                "boulder.xml",
                 new ModelInstancedDescription()
                 {
                     Name = "DEBUG_CUBE_INSTANCED",
@@ -308,12 +286,8 @@ namespace TerrainTest
 
             sw.Restart();
             this.tree1 = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources + "/Trees",
-                    ModelFileName = "birch_a.dae",
-                    VolumeMeshes = new[] { "Volume" },
-                },
+                "resources/Trees",
+                "birch_a.xml",
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -322,12 +296,8 @@ namespace TerrainTest
                     Instances = 100,
                 });
             this.tree2 = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = resources + "/Trees",
-                    ModelFileName = "birch_b.dae",
-                    VolumeMeshes = new[] { "Volume" },
-                },
+                "resources/Trees",
+                "birch_b.xml",
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -345,7 +315,7 @@ namespace TerrainTest
             sw.Restart();
             this.skydom = this.AddSkydom(new SkydomDescription()
             {
-                ContentPath = resources + "/Skydom",
+                ContentPath = "resources/Skydom",
                 Texture = "sunset.dds",
                 Radius = this.Camera.FarPlaneDistance,
             });
@@ -370,16 +340,11 @@ namespace TerrainTest
                 tankAgent,
             };
 
-            var terrainContent = new ModelContentDescription()
-            {
-                ContentPath = resources + "/Terrain",
-                ModelFileName = "two_levels.dae",
-            };
             var terrainDescription = new GroundDescription()
             {
                 Vegetation = new GroundDescription.VegetationDescription()
                 {
-                    ContentPath = resources + "/Terrain/Foliage/Billboard",
+                    ContentPath = "resources/Terrain/Foliage/Billboard",
                     VegetarionTextures = new[] { "grass.png" },
                     Saturation = 2f,
                     StartRadius = 0f,
@@ -399,7 +364,10 @@ namespace TerrainTest
                 Static = true,
                 DelayGeneration = true,
             };
-            this.terrain = this.AddScenery(terrainContent, terrainDescription);
+            this.terrain = this.AddScenery(
+                "resources/Terrain",
+                "two_levels.xml",
+                terrainDescription);
 
             sw.Stop();
 
@@ -415,7 +383,7 @@ namespace TerrainTest
 
             Random posRnd = new Random(1);
 
-            List<Line3> lines = new List<Line3>();
+            List<Line3D> lines = new List<Line3D>();
 
             this.terrain.SetWind(this.windDirection, this.windStrength);
 
@@ -427,7 +395,7 @@ namespace TerrainTest
             {
                 this.helipod.Manipulator.SetPosition(hPos, true);
             }
-            lines.AddRange(Line3.CreateWiredBox(this.helipod.GetBoundingBox()));
+            lines.AddRange(Line3D.CreateWiredBox(this.helipod.GetBoundingBox()));
 
             //Garage
             Vector3 gPos;
@@ -438,7 +406,7 @@ namespace TerrainTest
                 this.garage.Manipulator.SetPosition(gPos, true);
                 this.garage.Manipulator.SetRotation(MathUtil.PiOverFour + MathUtil.Pi, 0, 0, true);
             }
-            lines.AddRange(Line3.CreateWiredBox(this.garage.GetBoundingBox()));
+            lines.AddRange(Line3D.CreateWiredBox(this.garage.GetBoundingBox()));
 
             //Obelisk
             for (int i = 0; i < 4; i++)
@@ -454,7 +422,7 @@ namespace TerrainTest
                     this.obelisk.Instances[i].Manipulator.SetPosition(obeliskPosition, true);
                     this.obelisk.Instances[i].Manipulator.SetScale(1.5f, true);
                 }
-                lines.AddRange(Line3.CreateWiredBox(this.obelisk.Instances[i].GetBoundingBox()));
+                lines.AddRange(Line3D.CreateWiredBox(this.obelisk.Instances[i].GetBoundingBox()));
             }
 
             //Rocks
@@ -485,7 +453,7 @@ namespace TerrainTest
                     this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
                     this.rocks.Instances[i].Manipulator.SetScale(scale, true);
                 }
-                lines.AddRange(Line3.CreateWiredBox(this.rocks.Instances[i].GetBoundingBox()));
+                lines.AddRange(Line3D.CreateWiredBox(this.rocks.Instances[i].GetBoundingBox()));
             }
 
             //Trees
@@ -502,7 +470,7 @@ namespace TerrainTest
                     this.tree1.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0, true);
                     this.tree1.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f), true);
                 }
-                lines.AddRange(Line3.CreateWiredTriangle(this.tree1.Instances[i].GetVolume()));
+                lines.AddRange(Line3D.CreateWiredTriangle(this.tree1.Instances[i].GetVolume()));
             }
 
             for (int i = 0; i < this.tree2.Instances.Length; i++)
@@ -518,7 +486,7 @@ namespace TerrainTest
                     this.tree2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0, true);
                     this.tree2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f), true);
                 }
-                lines.AddRange(Line3.CreateWiredTriangle(this.tree2.Instances[i].GetVolume()));
+                lines.AddRange(Line3D.CreateWiredTriangle(this.tree2.Instances[i].GetVolume()));
             }
 
             this.objLineDrawer = this.AddLineListDrawer(lines.ToArray(), this.objColor);
@@ -536,6 +504,9 @@ namespace TerrainTest
                 this.helicopter.Manipulator.SetPosition(heliPos, true);
                 this.helicopter.Manipulator.SetNormal(heliTri.Normal);
             }
+
+            this.helicopterRollPath = new AnimationPath();
+            this.helicopterRollPath.AddLoop("roll");
 
             Vector3 tankPosition;
             Triangle tankTriangle;
@@ -631,11 +602,11 @@ namespace TerrainTest
                     float dist;
                     if (this.terrain.FindTopGroundPosition(x, z, out pos, out tri, out dist))
                     {
-                        this.oks.Add(new Line3(pos, pos + Vector3.Up));
+                        this.oks.Add(new Line3D(pos, pos + Vector3.Up));
                     }
                     else
                     {
-                        this.errs.Add(new Line3(x, 10, z, x, -10, z));
+                        this.errs.Add(new Line3D(x, 10, z, x, -10, z));
                     }
                 }
             }
@@ -684,7 +655,7 @@ namespace TerrainTest
             this.curveLineDrawer.DeferredEnabled = false;
             this.curveLineDrawer.EnableAlphaBlending = true;
             this.curveLineDrawer.EnableDepthStencil = false;
-            this.curveLineDrawer.SetLines(this.wAxisColor, Line3.CreateAxis(Matrix.Identity, 20f));
+            this.curveLineDrawer.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
 
             #endregion
 
@@ -874,6 +845,7 @@ namespace TerrainTest
             {
                 Curve3D curve = this.DEBUGGenerateHelicopterPath();
                 ((HeliManipulator)this.helicopter.Manipulator).Follow(curve, 10f, 0.001f);
+                this.helicopter.AnimationController.SetPath(this.helicopterRollPath);
                 this.DEBUGDrawHelicopterPath(curve);
             }
 
@@ -883,13 +855,13 @@ namespace TerrainTest
             if (this.curveLineDrawer.Visible)
             {
                 Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
-                this.curveLineDrawer.SetLines(this.hAxisColor, Line3.CreateAxis(rot, 5f));
+                this.curveLineDrawer.SetLines(this.hAxisColor, Line3D.CreateAxis(rot, 5f));
             }
 
             if (this.helicopterLineDrawer.Visible)
             {
                 BoundingSphere sph = this.helicopter.GetBoundingSphere();
-                this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.55f), Line3.CreateWiredSphere(sph, 50, 20));
+                this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(sph, 50, 20));
             }
 
             #endregion
@@ -1025,11 +997,11 @@ namespace TerrainTest
             float[] distances;
             if (this.terrain.FindAllGroundPosition(position.X, position.Z, out positions, out triangles, out distances))
             {
-                this.terrainPointDrawer.SetLines(Color.Magenta, Line3.CreateCrossList(positions, 1f));
-                this.terrainPointDrawer.SetLines(Color.DarkCyan, Line3.CreateWiredTriangle(triangles));
+                this.terrainPointDrawer.SetLines(Color.Magenta, Line3D.CreateCrossList(positions, 1f));
+                this.terrainPointDrawer.SetLines(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
                 if (positions.Length > 1)
                 {
-                    this.terrainPointDrawer.SetLines(Color.Cyan, new Line3(positions[0], positions[positions.Length - 1]));
+                    this.terrainPointDrawer.SetLines(Color.Cyan, new Line3D(positions[0], positions[positions.Length - 1]));
                 }
             }
         }
@@ -1094,26 +1066,26 @@ namespace TerrainTest
                 path.Add(pos);
             }
 
-            this.curveLineDrawer.SetLines(this.curvesColor, Line3.CreatePath(path.ToArray()));
-            this.curveLineDrawer.SetLines(this.pointsColor, Line3.CreateCrossList(curve.Points, 0.5f));
-            this.curveLineDrawer.SetLines(this.segmentsColor, Line3.CreatePath(curve.Points));
+            this.curveLineDrawer.SetLines(this.curvesColor, Line3D.CreatePath(path.ToArray()));
+            this.curveLineDrawer.SetLines(this.pointsColor, Line3D.CreateCrossList(curve.Points, 0.5f));
+            this.curveLineDrawer.SetLines(this.segmentsColor, Line3D.CreatePath(curve.Points));
         }
         private void DEBUGDrawTankPath(Vector3 from, PathFindingPath path)
         {
             int count = Math.Min(path.ReturnPath.Count, MaxPickingTest);
 
-            Line3[] lines = new Line3[count + 1];
+            Line3D[] lines = new Line3D[count + 1];
 
             for (int i = 0; i < count; i++)
             {
-                Line3 line;
+                Line3D line;
                 if (i == 0)
                 {
-                    line = new Line3(from, path.ReturnPath[i]);
+                    line = new Line3D(from, path.ReturnPath[i]);
                 }
                 else
                 {
-                    line = new Line3(path.ReturnPath[i - 1], path.ReturnPath[i]);
+                    line = new Line3D(path.ReturnPath[i - 1], path.ReturnPath[i]);
                 }
 
                 lines[i] = line;

@@ -107,11 +107,8 @@ namespace Skybox
             #region Torchs
 
             this.torchs = this.AddInstancingModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = "Resources",
-                    ModelFileName = "torch.dae",
-                },
+                "Resources",
+                "torch.xml",
                 new ModelInstancedDescription()
                 {
                     Instances = this.firePositions.Length,
@@ -138,11 +135,6 @@ namespace Skybox
             var nvSettings = NavigationMeshGenerationSettings.Default;
             nvSettings.Agents[0] = this.walker;
 
-            ModelContentDescription content = new ModelContentDescription()
-            {
-                ContentPath = "Resources",
-                ModelFileName = "ruins.dae",
-            };
             GroundDescription desc = new GroundDescription()
             {
                 PathFinder = new GroundDescription.PathFinderDescription()
@@ -152,7 +144,11 @@ namespace Skybox
                 CastShadow = true,
                 DelayGeneration = true,
             };
-            this.ruins = this.AddScenery(content, desc, false);
+            this.ruins = this.AddScenery(
+                "Resources",
+                "ruins.xml",
+                desc, 
+                false);
 
             #endregion
 
@@ -439,12 +435,12 @@ namespace Skybox
 
         private void DEBUGUpdateVolumesDrawer()
         {
-            this.volumesDrawer.SetLines(this.ruinsVolumeColor, Line3.CreateWiredBox(this.ruins.GetBoundingBox()));
+            this.volumesDrawer.SetLines(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.GetBoundingBox()));
 
-            List<Line3> volumesTorchs = new List<Line3>();
+            List<Line3D> volumesTorchs = new List<Line3D>();
             for (int i = 0; i < this.torchs.Count; i++)
             {
-                volumesTorchs.AddRange(Line3.CreateWiredBox(this.torchs.Instances[i].GetBoundingBox()));
+                volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs.Instances[i].GetBoundingBox()));
             }
             this.volumesDrawer.SetLines(this.torchVolumeColor, volumesTorchs.ToArray());
 
@@ -454,7 +450,7 @@ namespace Skybox
 
                 this.volumesDrawer.SetLines(
                     light.LightColor,
-                    Line3.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
+                    Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
             }
         }
         private void DEBUGUpdateMovingVolumesDrawer()
@@ -463,7 +459,7 @@ namespace Skybox
 
             this.volumesDrawer.SetLines(
                 light.LightColor,
-                Line3.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
+                Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
         }
         private void DEBUGUpdateGraphDrawer()
         {

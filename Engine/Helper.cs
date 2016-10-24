@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace Engine
 {
@@ -26,6 +27,38 @@ namespace Engine
         public const uint PRIMEX = 0x8da6b343;
         public const uint PRIMEY = 0xd8163841;
 
+        /// <summary>
+        /// Serializes the specified object to XML file
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object to serialize</param>
+        /// <param name="fileName">File name</param>
+        /// <param name="nameSpace">Name space</param>
+        public static void SerializeToFile<T>(T obj, string fileName, string nameSpace = null)
+        {
+            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
+            {
+                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+
+                sr.Serialize(wr, obj);
+            }
+        }
+        /// <summary>
+        /// Deserializes an object from a XML file
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="fileName">File name</param>
+        /// <param name="nameSpace">Name space</param>
+        /// <returns>Returns the deserialized object</returns>
+        public static T DeserializeFromFile<T>(string fileName, string nameSpace = null)
+        {
+            using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
+            {
+                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+
+                return (T)sr.Deserialize(rd);
+            }
+        }
         /// <summary>
         /// Generate an array initialized to defaultValue
         /// </summary>

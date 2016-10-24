@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// 2D Line
     /// </summary>
-    public class Line2
+    public class Line2D
     {
         /// <summary>
         /// Start point
@@ -40,9 +40,9 @@ namespace Engine
         /// <param name="line">Line</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line</returns>
-        public static Line2 Transform(Line2 line, Matrix transform)
+        public static Line2D Transform(Line2D line, Matrix transform)
         {
-            return new Line2(
+            return new Line2D(
                 Vector2.TransformCoordinate(line.Point1, transform),
                 Vector2.TransformCoordinate(line.Point2, transform));
         }
@@ -52,9 +52,9 @@ namespace Engine
         /// <param name="lines">Line list</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line list</returns>
-        public static Line2[] Transform(Line2[] lines, Matrix transform)
+        public static Line2D[] Transform(Line2D[] lines, Matrix transform)
         {
-            Line2[] trnLines = new Line2[lines.Length];
+            Line2D[] trnLines = new Line2D[lines.Length];
 
             for (int i = 0; i < lines.Length; i++)
             {
@@ -71,7 +71,7 @@ namespace Engine
         /// <param name="y1">Y coordinate of start point</param>
         /// <param name="x2">X coordinate of end point</param>
         /// <param name="y2">Y coordinate of end point</param>
-        public Line2(float x1, float y1, float x2, float y2)
+        public Line2D(float x1, float y1, float x2, float y2)
         {
             this.Point1 = new Vector2(x1, y1);
             this.Point2 = new Vector2(x2, y2);
@@ -81,7 +81,7 @@ namespace Engine
         /// </summary>
         /// <param name="p1">Start point</param>
         /// <param name="p2">End point</param>
-        public Line2(Vector2 p1, Vector2 p2)
+        public Line2D(Vector2 p1, Vector2 p2)
         {
             this.Point1 = p1;
             this.Point2 = p2;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace Engine.Animation
+namespace Engine
 {
     /// <summary>
     /// Animation description class
@@ -14,8 +14,8 @@ namespace Engine.Animation
         /// Clips
         /// </summary>
         [XmlArray("animations")]
-        [XmlArrayItem("animation", typeof(AnimtionClipDescription))]
-        public List<AnimtionClipDescription> Clips = new List<AnimtionClipDescription>();
+        [XmlArrayItem("animation", typeof(AnimationClipDescription))]
+        public List<AnimationClipDescription> Clips = new List<AnimationClipDescription>();
         /// <summary>
         /// Transitions
         /// </summary>
@@ -31,7 +31,7 @@ namespace Engine.Animation
         /// <param name="endTime">End time</param>
         public void AddClip(string clipName, int startTime, int endTime)
         {
-            this.Clips.Add(new AnimtionClipDescription()
+            this.Clips.Add(new AnimationClipDescription()
             {
                 Name = clipName,
                 From = startTime,

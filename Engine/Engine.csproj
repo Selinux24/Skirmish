@@ -154,13 +154,13 @@
   <ItemGroup>
     <Compile Include="Animation\AnimationClip.cs" />
     <Compile Include="Animation\AnimationController.cs" />
-    <Compile Include="Animation\AnimationDescription.cs" />
+    <Compile Include="AnimationDescription.cs" />
     <Compile Include="Animation\AnimationPath.cs" />
     <Compile Include="Animation\AnimationPathItem.cs" />
-    <Compile Include="Animation\AnimtionClipDescription.cs" />
+    <Compile Include="AnimationClipDescription.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
-    <Compile Include="Animation\TransitionDescription.cs" />
+    <Compile Include="TransitionDescription.cs" />
     <Compile Include="AttachedModelUsesEnum.cs" />
     <Compile Include="BezierPath.cs" />
     <Compile Include="BoundingCylinder.cs" />
@@ -210,7 +210,7 @@
     <Compile Include="Helpers\ResourceStatus.cs" />
     <Compile Include="Helpers\ResourceStatusItem.cs" />
     <Compile Include="LensFlareDescription.cs" />
-    <Compile Include="LineDrawerDescription.cs" />
+    <Compile Include="LineListDrawerDescription.cs" />
     <Compile Include="MinimapDescription.cs" />
     <Compile Include="ModelContentDescription.cs" />
     <Compile Include="ModelDescription.cs" />
@@ -286,7 +286,7 @@
     <Compile Include="Effects\EffectNull.cs" />
     <Compile Include="LensFlare.cs" />
     <Compile Include="LevelOfDetailEnum.cs" />
-    <Compile Include="Line2.cs" />
+    <Compile Include="Line2D.cs" />
     <Compile Include="PathFinding\GraphTypes.cs" />
     <Compile Include="PathFinding\IGraph.cs" />
     <Compile Include="PathFinding\IGraphNode.cs" />
@@ -315,7 +315,7 @@
     <Compile Include="Effects\DrawerPool.cs" />
     <Compile Include="Effects\EffectBasicShadow.cs" />
     <Compile Include="Headings.cs" />
-    <Compile Include="Line3.cs" />
+    <Compile Include="Line3D.cs" />
     <Compile Include="Common\VertexParticle.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalColor.cs" />
     <Compile Include="Common\VertexSkinnedPositionColor.cs" />

@@ -64,34 +64,9 @@ namespace AnimationTest
 
             #region Soldier
 
-            AnimationDescription ani = new AnimationDescription();
-            ani.AddClip("idle1", 0, 7);
-            ani.AddClip("idle2", 7, 17);
-            ani.AddClip("stand", 18, 20);
-            ani.AddClip("walk", 21, 29);
-            ani.AddClip("run", 30, 42);
-
-            ani.AddTransition("stand", "idle1", 0f, 0f);
-            ani.AddTransition("idle1", "stand", 0f, 0f);
-            ani.AddTransition("stand", "idle2", 0f, 0f);
-            ani.AddTransition("idle2", "stand", 0f, 0f);
-
-            ani.AddTransition("stand", "walk", 0f, 0f);
-            ani.AddTransition("walk", "stand", 0f, 0f);
-
-            ani.AddTransition("stand", "run", 0f, 0f);
-            ani.AddTransition("run", "stand", 0f, 0f);
-
-            ani.AddTransition("walk", "run", 0f, 0f);
-            ani.AddTransition("run", "walk", 0f, 0f);
-
             this.soldier = this.AddModel(
-                new ModelContentDescription()
-                {
-                    ContentPath = @"Resources/Soldier",
-                    ModelFileName = "soldier_anim2.dae",
-                    Animation = ani,
-                },
+                @"Resources/Soldier",
+                @"soldier_anim2.xml",
                 new ModelDescription()
                 {
                     TextureIndex = 1,
@@ -279,12 +254,12 @@ namespace AnimationTest
 
                 if (this.soldierLines == null)
                 {
-                    this.soldierLines = this.AddLineListDrawer(Line3.CreateWiredBox(bbox), color);
+                    this.soldierLines = this.AddLineListDrawer(Line3D.CreateWiredBox(bbox), color);
                     this.soldierLines.EnableDepthStencil = false;
                 }
                 else
                 {
-                    this.soldierLines.SetLines(color, Line3.CreateWiredBox(bbox));
+                    this.soldierLines.SetLines(color, Line3D.CreateWiredBox(bbox));
                 }
             }
 

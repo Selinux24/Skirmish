@@ -1,28 +1,28 @@
 ﻿using System;
 using System.Xml.Serialization;
 
-namespace Engine.Animation
+namespace Engine
 {
     /// <summary>
     /// Animation clip description
     /// </summary>
     [Serializable]
-    public class AnimtionClipDescription
+    public class AnimationClipDescription
     {
         /// <summary>
         /// Clip name
         /// </summary>
-        [XmlElement("name")]
+        [XmlAttribute("name")]
         public string Name;
         /// <summary>
         /// Index from
         /// </summary>
-        [XmlElement("from")]
+        [XmlAttribute("from")]
         public int From;
         /// <summary>
         /// Index to
         /// </summary>
-        [XmlElement("to")]
+        [XmlAttribute("to")]
         public int To;
     }
 }

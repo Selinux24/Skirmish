@@ -24,7 +24,7 @@ namespace Engine
         /// <summary>
         /// Lines dictionary by color
         /// </summary>
-        private Dictionary<Color4, List<Line3>> dictionary = new Dictionary<Color4, List<Line3>>();
+        private Dictionary<Color4, List<Line3D>> dictionary = new Dictionary<Color4, List<Line3D>>();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>
@@ -36,8 +36,8 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="description">Component description</param>
         /// <param name="count">Maximum line count</param>
-        public LineListDrawer(Game game, LineDrawerDescription description, int count)
-            : base(game, ModelContent.GenerateLineList(new Line3[count], Color.Transparent), description, true)
+        public LineListDrawer(Game game, LineListDrawerDescription description, int count)
+            : base(game, ModelContent.GenerateLineList(new Line3D[count], Color.Transparent), description, true)
         {
             this.dictionaryChanged = false;
         }
@@ -48,7 +48,7 @@ namespace Engine
         /// <param name="description">Component description</param>
         /// <param name="lines">Line list</param>
         /// <param name="color">Color</param>
-        public LineListDrawer(Game game, LineDrawerDescription description, Line3[] lines, Color4 color)
+        public LineListDrawer(Game game, LineListDrawerDescription description, Line3D[] lines, Color4 color)
             : base(game, ModelContent.GenerateLineList(lines, color), description, true)
         {
             this.Static = true;
@@ -58,7 +58,7 @@ namespace Engine
             this.EnableDepthStencil = false;
             this.EnableAlphaBlending = true;
 
-            this.dictionary.Add(color, new List<Line3>(lines));
+            this.dictionary.Add(color, new List<Line3D>(lines));
             this.dictionaryChanged = true;
         }
         /// <summary>
@@ -68,8 +68,8 @@ namespace Engine
         /// <param name="description">Component description</param>
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
-        public LineListDrawer(Game game, LineDrawerDescription description, Triangle[] triangles, Color4 color)
-            : base(game, ModelContent.GenerateLineList(Line3.CreateWiredTriangle(triangles), color), description, true)
+        public LineListDrawer(Game game, LineListDrawerDescription description, Triangle[] triangles, Color4 color)
+            : base(game, ModelContent.GenerateLineList(Line3D.CreateWiredTriangle(triangles), color), description, true)
         {
             this.Static = true;
             this.AlwaysVisible = true;
@@ -78,9 +78,9 @@ namespace Engine
             this.EnableDepthStencil = false;
             this.EnableAlphaBlending = true;
 
-            var lines = Line3.CreateWiredTriangle(triangles);
+            var lines = Line3D.CreateWiredTriangle(triangles);
 
-            this.dictionary.Add(color, new List<Line3>(lines));
+            this.dictionary.Add(color, new List<Line3D>(lines));
             this.dictionaryChanged = true;
         }
         /// <summary>
@@ -118,7 +118,7 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="line">Line</param>
-        public void SetLines(Color4 color, Line3 line)
+        public void SetLines(Color4 color, Line3D line)
         {
             SetLines(color, new[] { line });
         }
@@ -127,13 +127,13 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Line list</param>
-        public void SetLines(Color4 color, Line3[] lines)
+        public void SetLines(Color4 color, Line3D[] lines)
         {
             if (lines != null && lines.Length > 0)
             {
                 if (!this.dictionary.ContainsKey(color))
                 {
-                    this.dictionary.Add(color, new List<Line3>());
+                    this.dictionary.Add(color, new List<Line3D>());
                 }
                 else
                 {
@@ -159,7 +159,7 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="line">Line</param>
-        public void AddLines(Color4 color, Line3 line)
+        public void AddLines(Color4 color, Line3D line)
         {
             AddLines(color, new[] { line });
         }
@@ -168,11 +168,11 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Line list</param>
-        public void AddLines(Color4 color, Line3[] lines)
+        public void AddLines(Color4 color, Line3D[] lines)
         {
             if (!this.dictionary.ContainsKey(color))
             {
-                this.dictionary.Add(color, new List<Line3>());
+                this.dictionary.Add(color, new List<Line3D>());
             }
 
             this.dictionary[color].AddRange(lines);
@@ -190,14 +190,14 @@ namespace Engine
             {
                 if (!this.dictionary.ContainsKey(color))
                 {
-                    this.dictionary.Add(color, new List<Line3>());
+                    this.dictionary.Add(color, new List<Line3D>());
                 }
                 else
                 {
                     this.dictionary[color].Clear();
                 }
 
-                this.dictionary[color].AddRange(Line3.CreateWiredTriangle(triangles));
+                this.dictionary[color].AddRange(Line3D.CreateWiredTriangle(triangles));
 
                 this.dictionaryChanged = true;
             }
@@ -220,10 +220,10 @@ namespace Engine
         {
             if (!this.dictionary.ContainsKey(color))
             {
-                this.dictionary.Add(color, new List<Line3>());
+                this.dictionary.Add(color, new List<Line3D>());
             }
 
-            this.dictionary[color].AddRange(Line3.CreateWiredTriangle(triangles));
+            this.dictionary[color].AddRange(Line3D.CreateWiredTriangle(triangles));
 
             this.dictionaryChanged = true;
         }
@@ -260,7 +260,7 @@ namespace Engine
 
                 foreach (Color4 color in this.dictionary.Keys)
                 {
-                    List<Line3> lines = this.dictionary[color];
+                    List<Line3D> lines = this.dictionary[color];
                     if (lines.Count > 0)
                     {
                         for (int i = 0; i < lines.Count; i++)

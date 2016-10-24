@@ -2,44 +2,44 @@
 namespace Engine
 {
     /// <summary>
-    /// Direcciones
+    /// Directions
     /// </summary>
     public enum Headings : int
     {
         /// <summary>
-        /// Sin especificar
+        /// None
         /// </summary>
         None = 0,
         /// <summary>
-        /// Norte
+        /// North
         /// </summary>
         North = 1,
         /// <summary>
-        /// Sur
+        /// South
         /// </summary>
         South = 2,
         /// <summary>
-        /// Este
+        /// East
         /// </summary>
         East = 3,
         /// <summary>
-        /// Oeste
+        /// West
         /// </summary>
         West = 4,
         /// <summary>
-        /// Nordeste
+        /// North east
         /// </summary>
         NorthEast = 5,
         /// <summary>
-        /// Sudeste
+        /// South east
         /// </summary>
         SouthEast = 6,
         /// <summary>
-        /// Noroeste
+        /// North west
         /// </summary>
         NorthWest = 7,
         /// <summary>
-        /// 
+        /// South west
         /// </summary>
         SouthWest = 8,
     }

@@ -20,11 +20,12 @@ namespace Engine.Content
         /// <summary>
         /// Load a collada model
         /// </summary>
+        /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Conten description</param>
         /// <returns>Returns the loaded contents</returns>
-        public static ModelContent[] Load(ModelContentDescription content)
+        public static ModelContent[] Load(string contentFolder, ModelContentDescription content)
         {
-            return Load(content.ContentPath, content.ModelFileName, content.VolumeMeshes, content.Animation);
+            return Load(contentFolder, content.ModelFileName, content.VolumeMeshes, content.Animation);
         }
         /// <summary>
         /// Load a collada model

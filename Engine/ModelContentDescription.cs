@@ -1,28 +1,29 @@
-﻿
+﻿using System;
+using System.Xml.Serialization;
+
 namespace Engine
 {
-    using Engine.Animation;
-
     /// <summary>
     /// Model content description
     /// </summary>
+    [Serializable]
     public class ModelContentDescription
     {
         /// <summary>
-        /// Content path
-        /// </summary>
-        public string ContentPath = "Resources";
-        /// <summary>
         /// Model file name
         /// </summary>
+        [XmlElement("model_filename")]
         public string ModelFileName = null;
         /// <summary>
         /// Volume meshes collection
         /// </summary>
+        [XmlArray("volumes")]
+        [XmlArrayItem("volume", typeof(string))]
         public string[] VolumeMeshes = null;
         /// <summary>
         /// Animation description
         /// </summary>
+        [XmlElement("animation_description")]
         public AnimationDescription Animation = null;
     }
 }

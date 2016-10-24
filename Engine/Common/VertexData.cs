@@ -587,7 +587,7 @@ namespace Engine.Common
         /// <param name="lines">Line list</param>
         /// <param name="color">Color</param>
         /// <param name="v">Result vertices</param>
-        public static void CreateLineList(Line3[] lines, Color4 color, out VertexData[] v)
+        public static void CreateLineList(Line3D[] lines, Color4 color, out VertexData[] v)
         {
             List<VertexData> data = new List<VertexData>();
 

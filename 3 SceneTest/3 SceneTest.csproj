@@ -170,6 +170,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources3D\Poly.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="ResourcesHID\background.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

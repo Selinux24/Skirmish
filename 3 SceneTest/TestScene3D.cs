@@ -17,13 +17,7 @@ namespace SceneTest
         {
             base.Initialize();
 
-            ModelContentDescription desc = new ModelContentDescription()
-            {
-                ContentPath = "Resources3D",
-                ModelFileName = "poly.dae",
-            };
-
-            this.model = this.AddModel(desc, new ModelDescription());
+            this.model = this.AddModel("Resources3D", "poly.xml", new ModelDescription());
         }
 
         public override void Update(GameTime gameTime)

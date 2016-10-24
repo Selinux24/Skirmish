@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Direct3D11;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Engine
 {
@@ -319,16 +320,32 @@ namespace Engine
         /// <summary>
         /// Adds new model
         /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="modelContentFile">Model content file name</param>
+        /// <param name="description">Model description</param>
+        /// <param name="optimize">Optimize model</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new model</returns>
+        public Model AddModel(string contentFolder, string modelContentFile, ModelDescription description, bool optimize = true, int order = 0)
+        {
+            var content = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(contentFolder, modelContentFile));
+
+            return this.AddModel(contentFolder, content, description, optimize, order);
+        }
+        /// <summary>
+        /// Adds new model
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Model content description</param>
         /// <param name="description">Model description</param>
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Model AddModel(ModelContentDescription content, ModelDescription description, bool optimize = true, int order = 0)
+        public Model AddModel(string contentFolder, ModelContentDescription content, ModelDescription description, bool optimize = true, int order = 0)
         {
             Model newModel = null;
 
-            ModelContent[] geo = LoaderCOLLADA.Load(content);
+            ModelContent[] geo = LoaderCOLLADA.Load(contentFolder, content);
             if (geo.Length == 1)
             {
                 if (optimize) geo[0].Optimize();
@@ -364,16 +381,32 @@ namespace Engine
         /// <summary>
         /// Adds new instanced model
         /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="modelContentFile">Model content file name</param>
+        /// <param name="description">Model description</param>
+        /// <param name="optimize">Optimize model</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new model</returns>
+        public ModelInstanced AddInstancingModel(string contentFolder, string modelContentFile, ModelInstancedDescription description, bool optimize = true, int order = 0)
+        {
+            var content = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(contentFolder, modelContentFile));
+
+            return this.AddInstancingModel(contentFolder, content, description, optimize, order);
+        }
+        /// <summary>
+        /// Adds new instanced model
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Model content description</param>
         /// <param name="description">Model description</param>
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(ModelContentDescription content, ModelInstancedDescription description, bool optimize = true, int order = 0)
+        public ModelInstanced AddInstancingModel(string contentFolder, ModelContentDescription content, ModelInstancedDescription description, bool optimize = true, int order = 0)
         {
             ModelInstanced newModel = null;
 
-            ModelContent[] geo = LoaderCOLLADA.Load(content);
+            ModelContent[] geo = LoaderCOLLADA.Load(contentFolder, content);
             if (geo.Length == 1)
             {
                 if (optimize) geo[0].Optimize();
@@ -409,13 +442,30 @@ namespace Engine
         /// <summary>
         /// Adds new terrain model
         /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="modelContentFile">Model content file name</param>
         /// <param name="description">Terrain description</param>
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Scenery AddScenery(ModelContentDescription content, GroundDescription description, bool optimize = true, int order = 0)
+        public Scenery AddScenery(string contentFolder, string modelContentFile, GroundDescription description, bool optimize = true, int order = 0)
         {
-            var t = LoaderCOLLADA.Load(content);
+            var content = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(contentFolder, modelContentFile));
+
+            return this.AddScenery(contentFolder, content, description, optimize, order);
+        }
+        /// <summary>
+        /// Adds new terrain model
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="content">Content</param>
+        /// <param name="description">Terrain description</param>
+        /// <param name="optimize">Optimize model</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new model</returns>
+        public Scenery AddScenery(string contentFolder, ModelContentDescription content, GroundDescription description, bool optimize = true, int order = 0)
+        {
+            var t = LoaderCOLLADA.Load(contentFolder, content);
             ModelContent geo = t[0];
 
             if (optimize) geo.Optimize();
@@ -636,7 +686,7 @@ namespace Engine
         /// <returns>Returns new line list drawer</returns>
         public LineListDrawer AddLineListDrawer(int count, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, new LineDrawerDescription(), count);
+            LineListDrawer newModel = new LineListDrawer(this.Game, new LineListDrawerDescription(), count);
 
             this.AddComponent(newModel, order);
 
@@ -649,9 +699,9 @@ namespace Engine
         /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(Line3[] lines, Color4 color, int order = 0)
+        public LineListDrawer AddLineListDrawer(Line3D[] lines, Color4 color, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, new LineDrawerDescription(), lines, color);
+            LineListDrawer newModel = new LineListDrawer(this.Game, new LineListDrawerDescription(), lines, color);
 
             this.AddComponent(newModel, order);
 
@@ -666,7 +716,7 @@ namespace Engine
         /// <returns>Returns new line list drawer</returns>
         public LineListDrawer AddLineListDrawer(Triangle[] triangles, Color4 color, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, new LineDrawerDescription(), triangles, color);
+            LineListDrawer newModel = new LineListDrawer(this.Game, new LineListDrawerDescription(), triangles, color);
 
             this.AddComponent(newModel, order);
 
