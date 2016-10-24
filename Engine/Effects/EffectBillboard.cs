@@ -92,6 +92,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectScalarVariable textureCount = null;
         /// <summary>
+        /// Toggle UV coordinates by primitive ID
+        /// </summary>
+        private EffectScalarVariable uvToggleByPID = null;
+        /// <summary>
         /// Texture effect variable
         /// </summary>
         private EffectShaderResourceVariable textures = null;
@@ -375,6 +379,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Toggle UV coordinates by primitive ID
+        /// </summary>
+        protected uint UVToggleByPID
+        {
+            get
+            {
+                return (uint)this.uvToggleByPID.GetInt();
+            }
+            set
+            {
+                this.uvToggleByPID.Set(value);
+            }
+        }
+        /// <summary>
         /// Texture
         /// </summary>
         protected ShaderResourceView Textures
@@ -509,6 +527,7 @@ namespace Engine.Effects
             this.startRadius = this.Effect.GetVariableByName("gStartRadius").AsScalar();
             this.endRadius = this.Effect.GetVariableByName("gEndRadius").AsScalar();
             this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
+            this.uvToggleByPID = this.Effect.GetVariableByName("gUVToggleByPID").AsScalar();
             this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
             this.shadowMapStatic = this.Effect.GetVariableByName("gShadowMapStatic").AsShaderResource();
             this.shadowMapDynamic = this.Effect.GetVariableByName("gShadowMapDynamic").AsShaderResource();
@@ -696,18 +715,21 @@ namespace Engine.Effects
         /// <param name="startRadius">Drawing start radius</param>
         /// <param name="endRadius">Drawing end radius</param>
         /// <param name="textureCount">Texture count</param>
+        /// <param name="uvToggle">Toggle UV by primitive ID</param>
         /// <param name="texture">Texture</param>
         public void UpdatePerObject(
             Material material,
             float startRadius,
             float endRadius,
             uint textureCount,
+            bool uvToggle,
             ShaderResourceView texture)
         {
             this.Material = new BufferMaterials(material);
             this.StartRadius = startRadius;
             this.EndRadius = endRadius;
             this.TextureCount = textureCount;
+            this.UVToggleByPID = (uint)(uvToggle ? 1 : 0);
             this.Textures = texture;
         }
     }

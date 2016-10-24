@@ -56,6 +56,10 @@ namespace Engine
             /// </summary>
             public uint FoliageTextureCount;
             /// <summary>
+            /// Toggles UV horizontal coordinate by primitive ID
+            /// </summary>
+            public bool FoliageToggleUV;
+            /// <summary>
             /// Foliage end radius
             /// </summary>
             public float FoliageEndRadius;
@@ -328,15 +332,15 @@ namespace Engine
 
                     if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        ((EffectBillboard)foliageEffect).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
+                        ((EffectBillboard)foliageEffect).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageToggleUV, context.FoliageTextures);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        ((EffectBillboard)foliageEffect).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
+                        ((EffectBillboard)foliageEffect).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageToggleUV, context.FoliageTextures);
                     }
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        ((EffectBillboard)foliageEffect).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageTextures);
+                        ((EffectBillboard)foliageEffect).UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageToggleUV, context.FoliageTextures);
                     }
 
                     #endregion
@@ -600,6 +604,7 @@ namespace Engine
             //Initialize draw context
             this.drawContext = new SceneryDrawContext()
             {
+                FoliageToggleUV = true,
                 FoliageTextureCount = this.foliageTextureCount,
                 FoliageTextures = this.foliageTextures,
                 FoliageEndRadius = this.Description.Vegetation != null ? this.Description.Vegetation.EndRadius : 0,

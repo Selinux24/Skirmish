@@ -24,15 +24,23 @@ cbuffer cbPerObject : register (b1)
 {
 	Material gMaterial;
 	uint gTextureCount;
+	uint gUVToggleByPID;
 };
 cbuffer cbFixed : register (b2)
 {
-	float2 gQuadTexC[4] = 
+	float2 gQuadTexCL[4] = 
 	{
 		float2(0.0f, 1.0f),
 		float2(0.0f, 0.0f),
 		float2(1.0f, 1.0f),
 		float2(1.0f, 0.0f)
+	};
+	float2 gQuadTexCR[4] = 
+	{
+		float2(1.0f, 1.0f),
+		float2(1.0f, 0.0f),
+		float2(0.0f, 1.0f),
+		float2(0.0f, 0.0f)
 	};
 };
 
@@ -96,7 +104,16 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 			gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
 			gout.positionWorld = mul(v[i], gWorld).xyz;
 			gout.normalWorld = up;
-			gout.tex = gQuadTexC[i];
+
+			if (gUVToggleByPID == 0 || fmod(primID, 2) < 1)
+			{
+				gout.tex = gQuadTexCL[i];
+			}
+			else
+			{
+				gout.tex = gQuadTexCR[i];
+			}
+
 			gout.primitiveID = primID;
 
 			outputStream.Append(gout);
@@ -137,7 +154,16 @@ void GSSMBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveI
 		{
 			gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
 			gout.depth = v[i];
-			gout.tex = gQuadTexC[i];
+
+			if (gUVToggleByPID == 0 || fmod(primID, 2) < 1)
+			{
+				gout.tex = gQuadTexCL[i];
+			}
+			else
+			{
+				gout.tex = gQuadTexCR[i];
+			}
+			
 			gout.primitiveID = primID;
 
 			outputStream.Append(gout);
