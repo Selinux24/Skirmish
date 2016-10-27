@@ -160,6 +160,7 @@
     <Compile Include="AnimationClipDescription.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
+    <Compile Include="ParticleSystem2.cs" />
     <Compile Include="TransitionDescription.cs" />
     <Compile Include="AttachedModelUsesEnum.cs" />
     <Compile Include="BezierPath.cs" />
