@@ -12,17 +12,7 @@ namespace ModelDrawing
 
         private Model floor = null;
 
-        private Model colorModel = null;
-        private Model textureModel = null;
-        private Model normalColorModel = null;
-        private Model normalTextureModel = null;
-        private Model[] models = null;
-
-        private SceneLightSpot spotLight = null;
-
-        private int selected = 0;
-        private float angle = 25f;
-        private float radius = 25f;
+        private ParticleSystem pFire = null;
 
         public TestScene(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -33,6 +23,8 @@ namespace ModelDrawing
         public override void Initialize()
         {
             base.Initialize();
+
+            GameEnvironment.Background = Color.CornflowerBlue;
 
             var textDesc = new TextDrawerDescription()
             {
@@ -49,44 +41,18 @@ namespace ModelDrawing
 
             this.Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             this.Camera.LookTo(Vector3.Zero);
-
-            this.radius = Vector3.Distance(this.Camera.Position, Vector3.Zero);
-
-            Ray r = new Ray(this.Camera.Position, this.Camera.Direction);
-
-            Vector3 p;
-            Triangle t;
-            float d;
-            if (this.floor.PickNearest(ref r, true, out p, out t, out d))
-            {
-                this.radius = Vector3.Distance(this.Camera.Position, p);
-            }
-
-            this.spotLight = new SceneLightSpot(this.Camera.Position, this.Camera.Direction, MathUtil.DegreesToRadians(this.angle), this.radius * 10f)
-            {
-                Name = "Red Spot",
-                LightColor = Color.White,
-                AmbientIntensity = 0.2f,
-                DiffuseIntensity = 25f,
-                Enabled = true,
-                CastShadow = false,
-            };
-
-            this.Lights.Add(this.spotLight);
-
-            this.InitializePositions();
         }
         private void InitializeFloor()
         {
-            float l = 20f;
-            float h = 4f;
+            float l = 10f;
+            float h = 0f;
 
             VertexData[] vertices = new VertexData[]
             {
                 new VertexData{ Position = new Vector3(-l, -h, -l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, -h, +l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+l, -h, -l), Normal = Vector3.Up, Texture0 = new Vector2(1.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, -h, +l), Normal = Vector3.Up, Texture0 = new Vector2(1.0f, 1.0f) },
+                new VertexData{ Position = new Vector3(-l, -h, +l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, l) },
+                new VertexData{ Position = new Vector3(+l, -h, -l), Normal = Vector3.Up, Texture0 = new Vector2(l, 0.0f) },
+                new VertexData{ Position = new Vector3(+l, -h, +l), Normal = Vector3.Up, Texture0 = new Vector2(l, l) },
             };
 
             uint[] indices = new uint[]
@@ -95,70 +61,20 @@ namespace ModelDrawing
                 1, 3, 2,
             };
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, this.CreateMaterialFloor());
+            var material = MaterialContent.Default;
+            material.DiffuseTexture = "resources/floor.png";
 
-            this.floor = this.AddModel(content, new ModelDescription() { CastShadow = true, });
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, material);
+
+            this.floor = this.AddModel(content, new ModelDescription() { });
         }
         private void InitializeModels()
         {
-            VertexData[] vertices = new VertexData[]
-            {
-                new VertexData{ Position = new Vector3(-1f, +0f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture0 = new Vector2(0.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+0f, +2f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture0 = new Vector2(0.5f, 0.0f) },
-                new VertexData{ Position = new Vector3(+1f, +0f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture0 = new Vector2(1.0f, 1.0f) },
-                new VertexData{ Position = new Vector3(+0f, -2f, +0f), Normal = Vector3.BackwardLH, Color = Color.Red, Texture0 = new Vector2(0.5f, 0.0f) },
-            };
+            var pSystem = new ParticleSystemDescription();
 
-            uint[] indices = new uint[]
-            {
-                0, 1, 2,
-                0, 2, 3,
-            };
+            pSystem.Add(ParticleEmitterDescription.Fire("resources", "fire.dds"));
 
-            var colorModelContent = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionColor, vertices, indices, this.CreateMaterialColor());
-            var textureModelContent = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionTexture, vertices, indices, this.CreateMaterialTexture());
-            var normalColorModelContent = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalColor, vertices, indices, this.CreateMaterialColor());
-            var normalTextureModelContent = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, this.CreateMaterialTexture());
-
-            this.colorModel = this.AddModel(colorModelContent, new ModelDescription() { CastShadow = true, });
-            this.textureModel = this.AddModel(textureModelContent, new ModelDescription() { CastShadow = true, });
-            this.normalColorModel = this.AddModel(normalColorModelContent, new ModelDescription() { CastShadow = true, });
-            this.normalTextureModel = this.AddModel(normalTextureModelContent, new ModelDescription() { CastShadow = true, });
-
-            this.models = new[]
-            {
-                this.colorModel,
-                this.textureModel,
-                this.normalColorModel,
-                this.normalTextureModel,
-            };
-        }
-        private void InitializePositions()
-        {
-            this.colorModel.Manipulator.SetPosition(Vector3.UnitX * -3f);
-            this.textureModel.Manipulator.SetPosition(Vector3.UnitX * -1f);
-            this.normalColorModel.Manipulator.SetPosition(Vector3.UnitX * 1f);
-            this.normalTextureModel.Manipulator.SetPosition(Vector3.UnitX * 3f);
-        }
-        private MaterialContent CreateMaterialFloor()
-        {
-            MaterialContent mat = MaterialContent.Default;
-
-            mat.DiffuseTexture = "resources/floor.png";
-
-            return mat;
-        }
-        private MaterialContent CreateMaterialColor()
-        {
-            return MaterialContent.Default;
-        }
-        private MaterialContent CreateMaterialTexture()
-        {
-            MaterialContent mat = MaterialContent.Default;
-
-            mat.DiffuseTexture = "resources/seafloor.dds";
-
-            return mat;
+            this.pFire = this.AddParticleSystem(pSystem);
         }
 
         public override void Update(GameTime gameTime)
@@ -166,11 +82,13 @@ namespace ModelDrawing
             base.Update(gameTime);
 
             if (this.Game.Input.KeyJustReleased(Keys.Escape)) { this.Game.Exit(); }
-            if (this.Game.Input.KeyJustReleased(Keys.Home)) { this.InitializePositions(); }
-            if (this.Game.Input.KeyJustReleased(Keys.Tab)) { this.NextModel(); }
 
-            if (this.Game.Input.KeyJustReleased(Keys.L)) { this.spotLight.Enabled = !this.spotLight.Enabled; }
-
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning;
+            }
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
 #endif
@@ -200,47 +118,12 @@ namespace ModelDrawing
             {
                 this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
             }
-
-            Manipulator3D selectedModel = this.models[this.selected].Manipulator;
-            if (selectedModel != null)
-            {
-                if (this.Game.Input.KeyPressed(Keys.Left)) { selectedModel.MoveRight(gameTime); }
-                if (this.Game.Input.KeyPressed(Keys.Right)) { selectedModel.MoveLeft(gameTime); }
-                if (this.Game.Input.KeyPressed(Keys.Up)) { selectedModel.MoveUp(gameTime); }
-                if (this.Game.Input.KeyPressed(Keys.Down)) { selectedModel.MoveDown(gameTime); }
-                if (this.Game.Input.KeyPressed(Keys.PageUp)) { selectedModel.MoveBackward(gameTime); }
-                if (this.Game.Input.KeyPressed(Keys.PageDown)) { selectedModel.MoveForward(gameTime); }
-
-                if (this.Game.Input.KeyPressed(Keys.J)) { selectedModel.YawLeft(gameTime, MathUtil.PiOverTwo); }
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Add))
-            {
-                this.angle += 0.01f;
-            }
-            if (this.Game.Input.KeyPressed(Keys.Subtract))
-            {
-                this.angle -= 0.01f;
-            }
-            if (this.angle < 0f) this.angle = 0f;
-
-            this.spotLight.Position = this.Camera.Position;
-            this.spotLight.Direction = this.Camera.Direction;
-            this.spotLight.Angle = this.angle;
-            this.spotLight.Radius = this.radius;
-
-            this.text.Text = string.Format("Angle {0:0.00}; Radius {1}; Enabled {2}", this.spotLight.Angle, this.spotLight.Radius, this.spotLight.Enabled);
         }
-        private void NextModel()
+        public override void Draw(GameTime gameTime)
         {
-            if (this.selected >= this.models.Length - 1)
-            {
-                this.selected = 0;
-            }
-            else
-            {
-                this.selected++;
-            }
+            base.Draw(gameTime);
+
+            this.text.Text = "Model Drawing";
         }
     }
 }

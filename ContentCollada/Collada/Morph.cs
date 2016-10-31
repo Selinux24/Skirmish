@@ -13,11 +13,19 @@ namespace Engine.Collada
         [XmlAttribute("source")]
         public string SourceUri { get; set; }
         [XmlElement("source", typeof(Source))]
-        public Source[] Source { get; set; }
+        public Source[] Sources { get; set; }
         [XmlElement("targets", typeof(Targets))]
         public Targets Targets { get; set; }
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
+        [XmlIgnore]
+        public Source this[string id]
+        {
+            get
+            {
+                return Array.Find(this.Sources, s => string.Equals("#" + s.Id, id));
+            }
+        }
 
         public Morph()
         {

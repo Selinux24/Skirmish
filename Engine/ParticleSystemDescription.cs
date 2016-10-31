@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -7,166 +8,27 @@ namespace Engine
     /// </summary>
     public class ParticleSystemDescription : DrawableDescription
     {
-        /// <summary>
-        /// Emitter types
-        /// </summary>
-        public enum EmitterTypes
-        {
-            /// <summary>
-            /// Emit from position
-            /// </summary>
-            FixedPosition,
-            /// <summary>
-            /// Emit from camera
-            /// </summary>
-            FromCamera,
-        }
+        private List<ParticleEmitterDescription> emitters = new List<ParticleEmitterDescription>();
 
-        /// <summary>
-        /// Creates a fire particle system
-        /// </summary>
-        /// <param name="emitter">Emitter</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Fire(ParticleEmitter emitter, params string[] textures)
-        {
-            return Fire(new[] { emitter }, textures);
-        }
-        /// <summary>
-        /// Creates a fire particle system
-        /// </summary>
-        /// <param name="emitters">Emitter list</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Fire(ParticleEmitter[] emitters, params string[] textures)
-        {
-            return new ParticleSystemDescription()
-            {
-                ParticleClass = ParticleClasses.Fire,
-                MaximumParticles = 500,
-                MaximumAge = 0.5f,
-                EmitterAge = 0.005f,
-                Acceleration = new Vector3(0.0f, 5.8f, 0.0f),
-                EmitterType = EmitterTypes.FixedPosition,
-                Textures = textures,
-                Emitters = emitters,
-                Static = false,
-                AlwaysVisible = true,
-                CastShadow = false,
-                DeferredEnabled = false,
-                EnableDepthStencil = true,
-                EnableAlphaBlending = true,
-            };
-        }
-        /// <summary>
-        /// Creates a smoke particle system
-        /// </summary>
-        /// <param name="emitter">Emitter</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Smoke(ParticleEmitter emitter, params string[] textures)
-        {
-            return Smoke(new[] { emitter }, textures);
-        }
-        /// <summary>
-        /// Creates a smoke particle system
-        /// </summary>
-        /// <param name="emitters">Emitter list</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Smoke(ParticleEmitter[] emitters, params string[] textures)
-        {
-            return new ParticleSystemDescription()
-            {
-                ParticleClass = ParticleClasses.Smoke,
-                MaximumParticles = 500,
-                MaximumAge = 1.0f,
-                EmitterAge = 0.33f,
-                Acceleration = new Vector3(0.0f, 2f, 0.0f),
-                EmitterType = EmitterTypes.FixedPosition,
-                Textures = textures,
-                Emitters = emitters,
-                Static = false,
-                AlwaysVisible = true,
-                CastShadow = true,
-                DeferredEnabled = false,
-                EnableDepthStencil = true,
-                EnableAlphaBlending = true,
-            };
-        }
-        /// <summary>
-        /// Creates a rain particle system
-        /// </summary>
-        /// <param name="emitter">Emitter</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Rain(ParticleEmitter emitter, params string[] textures)
-        {
-            return Rain(new[] { emitter }, textures);
-        }
-        /// <summary>
-        /// Creates a rain particle system
-        /// </summary>
-        /// <param name="emitters">Emitter list</param>
-        /// <param name="textures">Texture list</param>
-        /// <returns>Returns particle system description</returns>
-        public static ParticleSystemDescription Rain(ParticleEmitter[] emitters, params string[] textures)
-        {
-            return new ParticleSystemDescription()
-            {
-                ParticleClass = ParticleClasses.Rain,
-                MaximumParticles = 10000,
-                MaximumAge = 3.0f,
-                EmitterAge = 0.002f,
-                Acceleration = (GameEnvironment.Gravity + Vector3.UnitX),
-                EmitterType = EmitterTypes.FromCamera,
-                Textures = textures,
-                Emitters = emitters,
-                Static = false,
-                AlwaysVisible = true,
-                CastShadow = false,
-                DeferredEnabled = false,
-                EnableDepthStencil = true,
-                EnableAlphaBlending = true,
-            };
-        }
-
-        /// <summary>
-        /// Particle class
-        /// </summary>
-        public ParticleClasses ParticleClass = ParticleClasses.Unknown;
-        /// <summary>
-        /// Maximum particles
-        /// </summary>
-        public int MaximumParticles = 1000;
-        /// <summary>
-        /// Maximum age of particle
-        /// </summary>
-        public float MaximumAge = 5f;
-        /// <summary>
-        /// Particle age to emit new flares
-        /// </summary>
-        public float EmitterAge = 0.001f;
-        /// <summary>
-        /// Acceleration vector
-        /// </summary>
-        public Vector3 Acceleration = GameEnvironment.Gravity;
-        /// <summary>
-        /// Emitter type
-        /// </summary>
-        public EmitterTypes EmitterType = EmitterTypes.FromCamera;
-        /// <summary>
-        /// Texture list
-        /// </summary>
-        public string[] Textures = null;
-        /// <summary>
-        /// Content path
-        /// </summary>
-        public string ContentPath = "Resources";
         /// <summary>
         /// Emitters
         /// </summary>
-        public ParticleEmitter[] Emitters = null;
+        public ParticleEmitterDescription[] Emitters
+        {
+            get
+            {
+                return this.emitters.ToArray();
+            }
+            set
+            {
+                this.emitters.Clear();
+
+                if (value != null && value.Length > 0)
+                {
+                    this.emitters.AddRange(value);
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -176,5 +38,96 @@ namespace Engine
         {
 
         }
+
+        public void Add(ParticleEmitterDescription desc)
+        {
+            this.emitters.Add(desc);
+        }
+    }
+
+    public class ParticleEmitterDescription
+    {
+        public static ParticleEmitterDescription Fire(string contentPath, params string[] textures)
+        {
+            return new ParticleEmitterDescription()
+            {
+                ParticleCountMax = 5000,
+                EmissionRate = 300,
+
+                Ellipsoid = true,
+                OrbitPosition = true,
+                OrbitVelocity = true,
+                OrbitAcceleration = false,
+                SizeStartMin = 1.5f,
+                SizeStartMax = 2f,
+                SizeEndMin = 0.5f,
+                SizeEndMax = 1f,
+                EnergyMin = 750f,
+                EnergyMax = 1000f,
+                ColorStart = new Color4(1, 0.2f, 0, 1),
+                ColorStartVariance = new Color4(0.25f, 0, 0, 0),
+                ColorEnd = new Color4(0, 0, 0, 0),
+                ColorEndVariance = new Color4(0, 0, 0, 0),
+                Position = Vector3.Zero,
+                PositionVariance = Vector3.Zero,
+                Velocity = new Vector3(0, 10, 0),
+                VelocityVariance = new Vector3(0, 10, 0),
+                Acceleration = new Vector3(0, 2, 0),
+                AccelerationVariance = new Vector3(0, 2, 0),
+                RotationParticleSpeedMin = -1.5f,
+                RotationParticleSpeedMax = 1.5f,
+                RotationSpeedMin = 0f,
+                RotationSpeedMax = 0f,
+                Angle = 0f,
+                RotationAxis = Vector3.Zero,
+                RotationAxisVariance = Vector3.Zero,
+
+                Textures = textures,
+                ContentPath = contentPath,
+            };
+        }
+
+        public int ParticleCountMax;
+        public int EmissionRate;
+        public bool Ellipsoid;
+        public bool OrbitPosition;
+        public bool OrbitVelocity;
+        public bool OrbitAcceleration;
+
+        public Vector3 Position;
+        public Vector3 PositionVariance;
+        public Vector3 Velocity;
+        public Vector3 VelocityVariance;
+        public Vector3 Acceleration;
+        public Vector3 AccelerationVariance;
+        public Color4 ColorStart;
+        public Color4 ColorStartVariance;
+        public Color4 ColorEnd;
+        public Color4 ColorEndVariance;
+        public float RotationParticleSpeedMin;
+        public float RotationParticleSpeedMax;
+        public Vector3 RotationAxis;
+        public Vector3 RotationAxisVariance;
+        public float RotationSpeedMin;
+        public float RotationSpeedMax;
+        public float Angle;
+        public float EnergyMin;
+        public float EnergyMax;
+        public float SizeStartMin;
+        public float SizeStartMax;
+        public float SizeEndMin;
+        public float SizeEndMax;
+
+        public Vector3 Translation;
+        public Quaternion Rotation;
+
+        /// <summary>
+        /// Texture list
+        /// </summary>
+        public string[] Textures = null;
+        /// <summary>
+        /// Content path
+        /// </summary>
+        public string ContentPath = "Resources";
     }
 }

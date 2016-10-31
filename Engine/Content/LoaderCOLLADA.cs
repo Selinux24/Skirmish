@@ -739,7 +739,14 @@ namespace Engine.Content
         /// <returns>Returns controller content</returns>
         private static ControllerContent ProcessMorph(string name, Morph morph)
         {
-            throw new NotImplementedException();
+            ControllerContent res = new ControllerContent();
+
+            Weight[] wgList;
+            ProcessVertexWeights(morph, out wgList);
+
+            res.Weights = wgList;
+
+            return res;
         }
         /// <summary>
         /// Process vertext weight information
@@ -770,7 +777,7 @@ namespace Engine.Content
                 Input jInput = skin.Joints[EnumSemantics.Joint];
                 if (jInput != null)
                 {
-                    joints = skin[jInput.Source].ReadString();
+                    joints = skin[jInput.Source].ReadNames();
                 }
 
                 //Inverse bind matrix for each joint
@@ -833,6 +840,42 @@ namespace Engine.Content
             }
 
             inverseBindMatrixList = ibmList;
+            weightList = wgList.ToArray();
+        }
+        /// <summary>
+        /// Process vertext weight information
+        /// </summary>
+        /// <param name="morph">Morph information</param>
+        /// <param name="weightList">Weight list result</param>
+        private static void ProcessVertexWeights(Morph morph, out Weight[] weightList)
+        {
+            List<Weight> wgList = new List<Weight>();
+
+            int targetsOffset = -1;
+            int weightsOffset = -1;
+
+            string[] targets = null;
+            float[] weights = null;
+
+            var targetsInput = morph.Targets[EnumSemantics.MorphTarget];
+            if (targetsInput != null)
+            {
+                targetsOffset = targetsInput.Offset;
+
+                targets = morph[targetsInput.Source].ReadIDRefs();
+            }
+
+            var weightsInput = morph.Targets[EnumSemantics.MorphWeight];
+            if (weightsInput != null)
+            {
+                weightsOffset = weightsInput.Offset;
+
+                weights = morph[weightsInput.Source].ReadFloat();
+            }
+
+            //TODO: Processing the morph
+
+
             weightList = wgList.ToArray();
         }
 
@@ -899,7 +942,7 @@ namespace Engine.Content
                     {
                         interpolationOffset = interpolationsInput.Offset;
 
-                        interpolations = animationLibrary[interpolationsInput.Source].ReadString();
+                        interpolations = animationLibrary[interpolationsInput.Source].ReadNames();
                     }
 
                     List<Keyframe> keyframes = new List<Keyframe>();
@@ -1430,7 +1473,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="source">Source</param>
         /// <returns>Returns the string array</returns>
-        public static string[] ReadString(this Source source)
+        public static string[] ReadNames(this Source source)
         {
             int stride = source.TechniqueCommon.Accessor.Stride;
             if (stride != 1)
@@ -1445,6 +1488,32 @@ namespace Engine.Content
             for (int i = 0; i < length * stride; i += stride)
             {
                 string v = source.NameArray[i];
+
+                names.Add(v);
+            }
+
+            return names.ToArray();
+        }
+        /// <summary>
+        /// Reads a string array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the string array</returns>
+        public static string[] ReadIDRefs(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != 1)
+            {
+                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(string)));
+            }
+
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            List<string> names = new List<string>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                string v = source.IDREFArray[i];
 
                 names.Add(v);
             }

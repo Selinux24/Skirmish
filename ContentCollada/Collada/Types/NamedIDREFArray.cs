@@ -7,7 +7,31 @@ namespace Engine.Collada.Types
     public class NamedIDREFArray : NamedArray
     {
         [XmlText(DataType = "IDREFS")]
-        public string Value { get; set; }
+        public string Value
+        {
+            get
+            {
+                return COLLADA.ConvertArrayToString(this.Values);
+            }
+            set
+            {
+                this.Values = COLLADA.ConvertArray<string>(value);
+            }
+        }
+        [XmlIgnore]
+        public string[] Values { get; set; }
+        [XmlIgnore]
+        public string this[int index]
+        {
+            get
+            {
+                return this.Values[index];
+            }
+            set
+            {
+                this.Values[index] = value;
+            }
+        }
 
         public override string ToString()
         {

@@ -11,6 +11,7 @@ using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using StreamOutputBufferBinding = SharpDX.Direct3D11.StreamOutputBufferBinding;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -40,85 +41,14 @@ namespace Engine
         }
 
         /// <summary>
-        /// First stream out flag
+        /// Emitter list
         /// </summary>
-        private bool firstRun = true;
+        private List<ParticleEmitter> emitters = new List<ParticleEmitter>();
 
-        /// <summary>
-        /// Particle class
-        /// </summary>
-        private ParticleClasses particleClass = ParticleClasses.Unknown;
-        /// <summary>
-        /// Initial particles
-        /// </summary>
-        private int initialParticles = 0;
-        /// <summary>
-        /// Maximum particle count
-        /// </summary>
-        private int maximumParticles = 0;
-        /// <summary>
-        /// Maximum particle age
-        /// </summary>
-        private float maximumAge;
-        /// <summary>
-        /// Age of particle to emit new flares
-        /// </summary>
-        private float emitterAge;
-        /// <summary>
-        /// Acceleration vector
-        /// </summary>
-        private Vector3 particleAcceleration;
-        /// <summary>
-        /// Total game time
-        /// </summary>
-        private float totalTime = 0f;
-        /// <summary>
-        /// Elapsed game time
-        /// </summary>
-        private float elapsedTime = 0f;
-        /// <summary>
-        /// Local system transform
-        /// </summary>
-        private Matrix local = Matrix.Identity;
-
-        /// <summary>
-        /// Input layout
-        /// </summary>
-        private InputLayout inputLayout = null;
-        /// <summary>
-        /// Selected stream out technique
-        /// </summary>
-        private EffectTechnique techniqueForStreamOut = null;
-
-        /// <summary>
-        /// Emitter initialization buffer
-        /// </summary>
-        private Buffer emittersBuffer;
-        /// <summary>
-        /// Drawing buffer
-        /// </summary>
-        private Buffer drawingBuffer;
-        /// <summary>
-        /// Stream out buffer
-        /// </summary>
-        private Buffer streamOutBuffer;
-        /// <summary>
-        /// Stride
-        /// </summary>
-        private int inputStride;
-        /// <summary>
-        /// Textures
-        /// </summary>
-        private ShaderResourceView textureArray;
         /// <summary>
         /// Random texture
         /// </summary>
         private ShaderResourceView textureRandom;
-
-        /// <summary>
-        /// Manipulator
-        /// </summary>
-        public Manipulator3D Manipulator { get; set; }
 
         /// <summary>
         /// Contructor
@@ -128,84 +58,85 @@ namespace Engine
         public ParticleSystem(Game game, ParticleSystemDescription description)
             : base(game, description)
         {
-            this.particleClass = description.ParticleClass;
-            this.maximumParticles = description.MaximumParticles;
-            this.maximumAge = description.MaximumAge;
-            this.emitterAge = description.EmitterAge;
-            this.particleAcceleration = description.Acceleration;
+            List<VertexParticle> data = new List<VertexParticle>();
 
-            VertexParticle[] data = null;
-
-            if (description.EmitterType == ParticleSystemDescription.EmitterTypes.FixedPosition)
+            foreach (var emitter in description.Emitters)
             {
-                this.initialParticles = description.Emitters.Length;
-
-                data = new VertexParticle[this.initialParticles];
-
-                for (int i = 0; i < this.initialParticles; i++)
+                for (int i = 0; i < emitter.ParticleCountMax; i++)
                 {
-                    var emitter = description.Emitters[i];
-
-                    data[i] = new VertexParticle
+                    VertexParticle v = new VertexParticle()
                     {
-                        Position = emitter.Position,
-                        Velocity = description.ParticleClass == ParticleClasses.Rain ? description.Acceleration : description.Acceleration * emitter.Size,
-                        Size = new Vector2(emitter.Size),
-                        Color = emitter.Color,
                         Age = 0,
                         Type = (uint)ParticleTypes.Emitter,
                     };
+
+                    data.Add(v);
                 }
-            }
-            else if (description.EmitterType == ParticleSystemDescription.EmitterTypes.FromCamera)
-            {
-                this.initialParticles = 1;
 
-                var emitter = description.Emitters[0];
-
-                VertexParticle p = new VertexParticle
+                ImageContent imgContent = new ImageContent()
                 {
-                    Position = Vector3.Zero, //HACK: must be camera position?
-                    Velocity = description.ParticleClass == ParticleClasses.Rain ? description.Acceleration : description.Acceleration * emitter.Size,
-                    Size = new Vector2(emitter.Size),
-                    Color = emitter.Color,
-                    Age = 0,
-                    Type = (uint)ParticleTypes.Emitter,
+                    Streams = ContentManager.FindContent(emitter.ContentPath, emitter.Textures),
                 };
 
-                data = new[] { p };
+                var textureCount = imgContent.Count;
+                var textureArray = game.ResourceManager.CreateResource(imgContent);
+
+                var emittersBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(data.ToArray(), ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
+                var drawingBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(1000, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
+                var streamOutBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(1000, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
+                var inputStride = default(VertexParticle).Stride;
+
+                var pEmitter = new ParticleEmitter()
+                {
+                    ParticleCountMax = emitter.ParticleCountMax,
+                    EmissionRate = emitter.EmissionRate,
+                    Ellipsoid = emitter.Ellipsoid,
+                    OrbitPosition = emitter.OrbitPosition,
+                    OrbitVelocity = emitter.OrbitVelocity,
+                    OrbitAcceleration = emitter.OrbitAcceleration,
+                    SizeStartMin = emitter.SizeStartMin,
+                    SizeStartMax = emitter.SizeStartMax,
+                    SizeEndMin = emitter.SizeEndMin,
+                    SizeEndMax = emitter.SizeEndMax,
+                    EnergyMin = emitter.EnergyMin,
+                    EnergyMax = emitter.EnergyMax,
+                    ColorStart = emitter.ColorStart,
+                    ColorStartVariance = emitter.ColorStartVariance,
+                    ColorEnd = emitter.ColorEnd,
+                    ColorEndVariance = emitter.ColorEndVariance,
+                    Position = emitter.Position,
+                    PositionVariance = emitter.PositionVariance,
+                    Velocity = emitter.Velocity,
+                    VelocityVariance = emitter.VelocityVariance,
+                    Acceleration = emitter.Acceleration,
+                    AccelerationVariance = emitter.AccelerationVariance,
+                    RotationParticleSpeedMin = emitter.RotationParticleSpeedMin,
+                    RotationParticleSpeedMax = emitter.RotationParticleSpeedMax,
+                    RotationSpeedMin = emitter.RotationSpeedMin,
+                    RotationSpeedMax = emitter.RotationSpeedMax,
+                    Angle = emitter.Angle,
+                    RotationAxis = emitter.RotationAxis,
+                    RotationAxisVariance = emitter.RotationAxisVariance,
+
+                    TextureCount = (uint)textureCount,
+                    TextureArray = textureArray,
+                    EmittersBuffer = emittersBuffer,
+                    DrawingBuffer = drawingBuffer,
+                    StreamOutBuffer = streamOutBuffer,
+                    InputStride = inputStride,
+                };
+
+                this.emitters.Add(pEmitter);
             }
-            else
-            {
-                throw new Exception(string.Format("Bad emitter type: {0}", description.EmitterType));
-            }
 
-            this.techniqueForStreamOut = DrawerPool.EffectParticles.GetTechniqueForStreamOut(VertexTypes.Particle, description.ParticleClass);
-            this.inputLayout = DrawerPool.EffectParticles.GetInputLayout(this.techniqueForStreamOut);
-
-            this.emittersBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
-            this.drawingBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(this.maximumParticles, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            this.streamOutBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(this.maximumParticles, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            this.inputStride = default(VertexParticle).Stride;
-
-            ImageContent imgContent = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(description.ContentPath, description.Textures),
-            };
-
-            this.textureArray = game.ResourceManager.CreateResource(imgContent);
             this.textureRandom = game.ResourceManager.CreateRandomTexture(Guid.NewGuid(), 1024);
-
-            this.Manipulator = new Manipulator3D();
         }
         /// <summary>
         /// Dispose resources
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.emittersBuffer);
-            Helper.Dispose(this.drawingBuffer);
-            Helper.Dispose(this.streamOutBuffer);
+            Helper.Dispose(this.emitters);
         }
         /// <summary>
         /// Updating
@@ -213,11 +144,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            this.Manipulator.Update(context.GameTime);
 
-            this.local = context.World * this.Manipulator.LocalTransform;
-            this.totalTime = context.GameTime.TotalSeconds;
-            this.elapsedTime = context.GameTime.ElapsedSeconds;
         }
         /// <summary>
         /// Drawing
@@ -229,6 +156,9 @@ namespace Engine
             this.Game.Graphics.DeviceContext.OutputMerger.BlendFactor = Color.Zero;
             this.Game.Graphics.DeviceContext.OutputMerger.BlendSampleMask = -1;
 
+            var techniqueForStreamOut = DrawerPool.EffectParticles.GetTechniqueForStreamOut(VertexTypes.Particle);
+
+            var inputLayout = DrawerPool.EffectParticles.GetInputLayout(techniqueForStreamOut);
             this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
             Counters.IAInputLayoutSets++;
             this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
@@ -239,116 +169,125 @@ namespace Engine
             #region Per frame update
 
             DrawerPool.EffectParticles.UpdatePerFrame(
-                this.local,
+                context.World,
                 context.ViewProjection,
                 context.EyePosition,
                 context.Lights,
-                (uint)this.textureArray.Description.Texture2DArray.ArraySize,
-                this.textureArray,
-                this.textureRandom,
-                this.emitterAge,
-                this.maximumAge,
-                this.totalTime,
-                this.elapsedTime,
-                this.particleAcceleration);
+                context.GameTime.ElapsedSeconds,
+                this.textureRandom);
 
             #endregion
 
-            #region Stream out
-
+            foreach (var emitter in this.emitters)
             {
-                VertexBufferBinding iaBinding = new VertexBufferBinding(this.firstRun ? this.emittersBuffer : this.drawingBuffer, this.inputStride, 0);
-                StreamOutputBufferBinding soBinding = new StreamOutputBufferBinding(this.streamOutBuffer, 0);
+                #region Per emitter update
 
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
-                Counters.IAVertexBuffersSets++;
-                this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(new[] { soBinding });
-
-                this.Game.Graphics.SetDepthStencilRDZDisabled();
-
-                for (int p = 0; p < this.techniqueForStreamOut.Description.PassCount; p++)
+                if (emitter.FirstRun)
                 {
-                    this.techniqueForStreamOut.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
-
-                    if (this.firstRun)
-                    {
-                        this.Game.Graphics.DeviceContext.Draw(this.initialParticles, 0);
-
-                        this.firstRun = false;
-                    }
-                    else
-                    {
-                        this.Game.Graphics.DeviceContext.DrawAuto();
-                    }
-
-                    Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
+                    DrawerPool.EffectParticles.UpdatePerEmitter(
+                        emitter.EmissionRate,
+                        emitter.OrbitPosition,
+                        emitter.OrbitVelocity,
+                        emitter.OrbitAcceleration,
+                        emitter.Ellipsoid,
+                        emitter.Position,
+                        emitter.PositionVariance,
+                        emitter.Velocity,
+                        emitter.VelocityVariance,
+                        emitter.Acceleration,
+                        emitter.AccelerationVariance,
+                        emitter.ColorStart,
+                        emitter.ColorStartVariance,
+                        emitter.ColorEnd,
+                        emitter.ColorEndVariance,
+                        emitter.EnergyMax,
+                        emitter.EnergyMin,
+                        emitter.SizeStartMax,
+                        emitter.SizeStartMin,
+                        emitter.SizeEndMax,
+                        emitter.SizeEndMin,
+                        emitter.RotationParticleSpeedMin,
+                        emitter.RotationParticleSpeedMax,
+                        emitter.RotationAxis,
+                        emitter.RotationAxisVariance,
+                        emitter.RotationParticleSpeedMin,
+                        emitter.RotationParticleSpeedMax,
+                        emitter.TextureCount,
+                        emitter.TextureArray);
                 }
 
-                this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(null);
-            }
+                #endregion
 
-            #endregion
+                #region Stream out
 
-            this.ToggleBuffers();
-
-            #region Draw
-
-            {
-                VertexBufferBinding iaBinding = new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0);
-
-                var technique = DrawerPool.EffectParticles.GetTechniqueForDrawing(VertexTypes.Particle, this.particleClass, context.DrawerMode);
-
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
-                Counters.IAVertexBuffersSets++;
-
-                this.Game.Graphics.SetDepthStencilRDZEnabled();
-
-                if (context.DrawerMode == DrawerModesEnum.Forward)
                 {
-                    if (this.particleClass != ParticleClasses.Rain)
+                    this.Game.Graphics.SetDepthStencilRDZDisabled();
+
+                    var iaBinding = new VertexBufferBinding(emitter.FirstRun ? emitter.EmittersBuffer : emitter.DrawingBuffer, emitter.InputStride, 0);
+                    this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
+                    Counters.IAVertexBuffersSets++;
+                    var soBinding = new StreamOutputBufferBinding(emitter.StreamOutBuffer, 0);
+                    this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(new[] { soBinding });
+
+                    for (int p = 0; p < techniqueForStreamOut.Description.PassCount; p++)
                     {
-                        this.Game.Graphics.SetBlendAdditive();
+                        techniqueForStreamOut.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                        if (emitter.FirstRun)
+                        {
+                            this.Game.Graphics.DeviceContext.Draw(emitter.ParticleCountMax, 0);
+
+                            emitter.FirstRun = false;
+                        }
+                        else
+                        {
+                            this.Game.Graphics.DeviceContext.DrawAuto();
+                        }
+
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame++;
                     }
-                    else
+
+                    this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(null);
+                }
+
+                #endregion
+
+                emitter.ToggleBuffers();
+
+                #region Draw
+
+                {
+                    this.Game.Graphics.SetDepthStencilRDZEnabled();
+
+                    if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
                         this.Game.Graphics.SetBlendDefault();
                     }
-                }
 
-                if (context.DrawerMode == DrawerModesEnum.Deferred)
-                {
-                    if (this.particleClass != ParticleClasses.Rain)
-                    {
-                        this.Game.Graphics.SetBlendDeferredComposerAdditive();
-                    }
-                    else
+                    if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
                         this.Game.Graphics.SetBlendDeferredComposer();
                     }
+
+                    var iaBinding = new VertexBufferBinding(emitter.DrawingBuffer, emitter.InputStride, 0);
+                    this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
+                    Counters.IAVertexBuffersSets++;
+
+                    var technique = DrawerPool.EffectParticles.GetTechniqueForDrawing(VertexTypes.Particle, context.DrawerMode);
+                    for (int p = 0; p < technique.Description.PassCount; p++)
+                    {
+                        technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                        this.Game.Graphics.DeviceContext.DrawAuto();
+
+                        Counters.DrawCallsPerFrame++;
+                        Counters.InstancesPerFrame++;
+                    }
                 }
 
-                for (int p = 0; p < technique.Description.PassCount; p++)
-                {
-                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
-
-                    this.Game.Graphics.DeviceContext.DrawAuto();
-
-                    Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
-                }
+                #endregion
             }
-
-            #endregion
-        }
-        /// <summary>
-        /// Toggle stream out and drawing buffers
-        /// </summary>
-        private void ToggleBuffers()
-        {
-            Buffer temp = this.drawingBuffer;
-            this.drawingBuffer = this.streamOutBuffer;
-            this.streamOutBuffer = temp;
         }
     }
 }

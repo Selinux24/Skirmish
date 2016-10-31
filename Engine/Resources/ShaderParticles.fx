@@ -1,28 +1,54 @@
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
-#define PC_FIRE 1
-#define PC_RAIN 2
-
 #define PT_EMITTER 0
 #define PT_FLARE 1
 
 cbuffer cbPerFrame : register (b0)
 {
-	float gMaximumAge;
-	float gEmitterAge;
-	float gTotalTime;
-	float gElapsedTime;
-	float3 gAccelerationWorld;
-	float3 gEyePositionWorld;
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
-	uint gTextureCount;
+	float3 gEyePositionWorld;
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
+
+	float3 gPosition;
+	float4x4 gRotation;
+	float gElapsedTime;
 };
-cbuffer cbFixed : register (b1)
+cbuffer cbPerEmitter : register (b1)
+{
+	float gEmissionRate;
+
+	float4 gParticleOrbit;
+	float gParticleEllipsoid;
+	float3 gParticlePosition;
+	float3 gParticlePositionVariance;
+	float3 gParticleVelocity;
+	float3 gParticleVelocityVariance;
+	float3 gParticleAcceleration;
+	float3 gParticleAccelerationVariance;
+	float4 gParticleColorStart;
+	float4 gParticleColorStartVariance;
+	float4 gParticleColorEnd;
+	float4 gParticleColorEndVariance;
+	float gParticleEnergyMax;
+	float gParticleEnergyMin;
+	float gParticleSizeStartMax;
+	float gParticleSizeStartMin;
+	float gParticleSizeEndMax;
+	float gParticleSizeEndMin;
+	float gParticleRotationPerParticleSpeedMin;
+	float gParticleRotationPerParticleSpeedMax;
+	float3 gParticleRotationAxis;
+	float3 gParticleRotationAxisVariance;
+	float gParticleRotationSpeedMin;
+	float gParticleRotationSpeedMax;
+
+	uint gTextureCount;
+};
+cbuffer cbFixed : register (b2)
 {
 	float2 gQuadTexC[4] = 
 	{
@@ -36,164 +62,171 @@ cbuffer cbFixed : register (b1)
 Texture2DArray gTextureArray;
 Texture1D gTextureRandom;
 
-float3 RandomVector3(float offset)
+float4 RandomVector4(float offset)
 {
 	//Use game time plus offset to sample random texture.
-	float u = (gTotalTime + offset);
+	float u = (gElapsedTime + offset);
 	
-	return gTextureRandom.SampleLevel(SamplerLinear, u, 0).xyz;
+	return gTextureRandom.SampleLevel(SamplerLinear, u, 0);
+}
+float GenerateScalar(float min, float max)
+{
+	return min + (max - min) * RandomVector4(0.0f).x;
+}
+float4 GenerateColor(float4 base, float4 variance)
+{
+	return base + variance * RandomVector4(0.0f);
+}
+float3 GenerateVectorInRect(float3 base, float3 variance)
+{
+	return base * variance * RandomVector4(0.0f).xyz;
+}
+float3 GenerateVectorInEllipsoid(float3 center, float3 scale)
+{
+	float3 res = float3(1,1,1);
+
+	while (length(res) > 1.0f)
+    {
+        res = RandomVector4(0.0f).xyz;
+    }
+
+	res *= scale;
+	res += center;
+
+	return res;
 }
 
-VSVertexParticle VSStreamOut(VSVertexParticle input)
+/***********************************************
+ STREAM OUT
+***********************************************/
+VSVertexParticle VSBasicStreamOut(VSVertexParticle input)
 {
     return input;
 }
-
 [maxvertexcount(2)]
-void GSStreamOutFire(point VSVertexParticle input[1], inout PointStream<VSVertexParticle> ptStream)
+void GSStreamOutBasic(point VSVertexParticle input[1], inout PointStream<VSVertexParticle> ptStream)
 {
 	input[0].age += gElapsedTime;
 	
 	if(input[0].type == PT_EMITTER)
 	{
-		if(input[0].age > gEmitterAge)
+		if(input[0].age > gEmissionRate)
 		{
-			float3 vRandom = normalize(RandomVector3(0.0f));
-			vRandom.x *= 0.33f;
-			vRandom.z *= 0.33f;
+			input[0].age = 0.0f;
+
+			//Initializes a new particle
+			float3 position = gParticleEllipsoid == 0.0f ? GenerateVectorInRect(gParticlePosition, gParticlePositionVariance) : GenerateVectorInEllipsoid(gParticlePosition, gParticlePositionVariance);
+			float3 velocity = GenerateVectorInRect(gParticleVelocity, gParticleVelocityVariance);
+			float3 acceleration = GenerateVectorInRect(gParticleAcceleration, gParticleAccelerationVariance);
+			float4 colorStart = GenerateColor(gParticleColorStart, gParticleColorStartVariance);
+			float4 colorEnd = GenerateColor(gParticleColorEnd, gParticleColorEndVariance);
+			float rotationPP = GenerateScalar(gParticleRotationPerParticleSpeedMin, gParticleRotationPerParticleSpeedMax);
+			float3 rotationAxis = GenerateVectorInRect(gParticleRotationAxis, gParticleRotationAxisVariance);
+			float rotation = GenerateScalar(gParticleRotationSpeedMin, gParticleRotationSpeedMax);
+			float angle = GenerateScalar(0, rotationPP);
+			float energy = GenerateScalar(gParticleEnergyMax, gParticleEnergyMin);
+			float sizeStart = GenerateScalar(gParticleSizeStartMax, gParticleSizeStartMin);
+			float sizeEnd = GenerateScalar(gParticleSizeEndMax, gParticleSizeEndMin);
+
+			if(gParticleOrbit.x != 0.0f) position = mul(float4(position, 1), gRotation).xyz;
+			if(gParticleOrbit.y != 0.0f) velocity = mul(float4(velocity, 1), gRotation).xyz;
+			if(gParticleOrbit.z != 0.0f) acceleration = mul(float4(acceleration, 1), gRotation).xyz;
+
+			if (rotation != 0.0f && length(rotationAxis) != 0.0f)
+            {
+				rotationAxis = mul(float4(rotationAxis, 1), gRotation).xyz;
+            }
+
+			position += gPosition;
 
 			VSVertexParticle p;
-			p.positionWorld = input[0].positionWorld;
-			p.velocityWorld = vRandom * input[0].sizeWorld.x;
-			p.sizeWorld = input[0].sizeWorld;
-			p.color = input[0].color;
+			p.position = position;
+			p.velocity = velocity;
+			p.acceleration = acceleration;
+			p.colorStart = colorStart;
+			p.colorEnd = colorEnd;
+			p.color = colorStart;
+			p.rotationParticleSpeed = rotationPP;
+			p.rotationAxis = rotationAxis;
+			p.rotationSpeed = rotation;
+			p.angle = angle;
+			p.energyStart = energy;
+			p.energy = energy;
+			p.sizeStart = sizeStart;
+			p.sizeEnd = sizeEnd;
+			p.size = sizeStart;
 			p.age = 0.0f;
 			p.type = PT_FLARE;
 
 			ptStream.Append(p);
-			
-			input[0].age = 0.0f;
 		}
 		
 		ptStream.Append(input[0]);
 	}
 	else
 	{
-		if(input[0].age <= gMaximumAge)
+		input[0].energy -= gElapsedTime;
+
+		if(input[0].energy > 0.0f)
 		{
-			ptStream.Append(input[0]);
-		}
-	}
-}
-[maxvertexcount(50)]
-void GSStreamOutSmoke(point VSVertexParticle input[1], inout PointStream<VSVertexParticle> ptStream)
-{
-	input[0].age += gElapsedTime;
-	
-	if(input[0].type == PT_EMITTER)
-	{
-		if(input[0].age > gEmitterAge)
-		{
-			for(int i = 0; i < 49; ++i)
+			//Updates particle state
+
+			/*if (output.rotationSpeed != 0.0f && length(output.rotationAxis) != 0.0f)
 			{
-				float3 vRandom = normalize(RandomVector3((float)i / 49.0f));
-				vRandom.x *= 0.5f;
-				vRandom.z *= 0.5f;
+				Matrix pRotation;
+				Matrix.RotationAxis(ref p.RotationAxis, p.RotationSpeed * gameTime.ElapsedSeconds, out pRotation);
 
-				VSVertexParticle p;
-				p.positionWorld = input[0].positionWorld;
-				p.velocityWorld = vRandom * input[0].sizeWorld.x * 0.5f;
-				p.sizeWorld = input[0].sizeWorld;
-				p.color = input[0].color;
-				p.age = 0.0f;
-				p.type = PT_FLARE;
+				Vector3.TransformCoordinate(ref p.Velocity, ref pRotation, out p.Velocity);
+				Vector3.TransformCoordinate(ref p.Acceleration, ref pRotation, out p.Acceleration);
+			}*/
 
-				ptStream.Append(p);
-			}
-			
-			input[0].age = 0.0f;
-		}
-		
-		ptStream.Append(input[0]);
-	}
-	else
-	{
-		if(input[0].age <= gMaximumAge)
-		{
-			ptStream.Append(input[0]);
-		}
-	}
-}
-[maxvertexcount(6)]
-void GSStreamOutRain(point VSVertexParticle input[1], inout PointStream<VSVertexParticle> ptStream)
-{
-	input[0].age += gElapsedTime;
-	
-	if(input[0].type == PT_EMITTER)
-	{
-		if(input[0].age > gEmitterAge)
-		{
-			for(int i = 0; i < 5; ++i)
-			{
-				float3 vRandom = 35.0f * RandomVector3((float)i / 5.0f);
-				vRandom.y = (gEyePositionWorld.y - (gAccelerationWorld.y * gMaximumAge)) * 0.5f;
+			float3 velocity = input[0].velocity + input[0].acceleration * gElapsedTime;
+			float3 position = input[0].position + input[0].velocity * gElapsedTime;
+			float angle = input[0].angle + input[0].rotationParticleSpeed * gElapsedTime;
 
-				VSVertexParticle p;
-				p.positionWorld = gEyePositionWorld.xyz + vRandom;
-				p.velocityWorld = gAccelerationWorld;
-				p.color = input[0].color;
-				p.sizeWorld = input[0].sizeWorld;
-				p.age = 0.0f;
-				p.type = PT_FLARE;
+			float percent = 1.0f - (input[0].energy / input[0].energyStart);
+			float4 color = input[0].colorStart + (input[0].colorEnd - input[0].colorStart) * percent;
+			float size = input[0].sizeStart + (input[0].sizeEnd - input[0].sizeStart) * percent;
 
-				ptStream.Append(p);
-			}
+			input[0].position = position;
+			input[0].velocity = velocity;
+			input[0].angle = angle;
+			input[0].color = color;
+			input[0].size = size;
 
-			input[0].age = 0.0f;
-		}
-
-		ptStream.Append(input[0]);
-	}
-	else
-	{
-		if(input[0].age <= gMaximumAge)
-		{
 			ptStream.Append(input[0]);
 		}
 	}
 }
 
-GSParticleSolid VSDrawSolid(VSVertexParticle input)
-{
-	float t = input.age;
-	float opacity = 1.0f - smoothstep(0.0f, 1.0f, t / 1.0f);
-	
-	float3 pos = 0.5f * t * t * gAccelerationWorld + t * input.velocityWorld + input.positionWorld;
+GeometryShader gsStreamOutBasic = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutBasic()), "POSITION.xyz; VELOCITY.xyz; ACCELERATION.xyz; COLOR_START.rgba; COLOR_END.rgba; COLOR.rgba; ROTATION_PARTICLE_SPEED.x; ROTATION_AXIS.xyz; ROTATION_SPEED.x; ANGLE.x; ENERGY_START.x; ENERGY.x; SIZE_START.x; SIZE_END.x; SIZE.x; AGE.x; TYPE.x");
 
-	GSParticleSolid output;
-	output.positionWorld = pos;
-	output.color = float4(input.color.rgb, opacity);
-	output.sizeWorld = input.sizeWorld;
-	output.type  = input.type;
-	
-	return output;
+technique11 ParticleStreamOut
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSBasicStreamOut()));
+        SetGeometryShader(gsStreamOutBasic);
+        SetPixelShader(NULL);
+    }
 }
-GSParticleLine VSDrawLine(VSVertexParticle input)
+
+/***********************************************
+ DRAW
+***********************************************/
+GSParticleBasic VSDrawBasic(VSVertexParticle input)
 {
-	float t = input.age;
-
-	float3 pos = 0.5f * t * t * gAccelerationWorld + t * input.velocityWorld + input.positionWorld;
-
-	GSParticleLine output;
-	output.positionWorld = pos;
+	//Updates particle state
+	GSParticleBasic output;
+	output.positionWorld = input.position;
 	output.color = input.color;
+	output.sizeWorld = float2(input.size, input.size);
 	output.type  = input.type;
 	
 	return output;
 }
-
 [maxvertexcount(4)]
-void GSDrawSolid(point GSParticleSolid input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSParticleSolid> triStream)
+void GSDrawBasic(point GSParticleBasic input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSParticleSolid> triStream)
 {
 	if(input[0].type != PT_EMITTER)
 	{
@@ -201,82 +234,35 @@ void GSDrawSolid(point GSParticleSolid input[1], uint primID : SV_PrimitiveID, i
 		float3 right = normalize(cross(float3(0, 1, 0), look));
 		float3 up    = cross(look, right);
 
-		float halfWidth  = 0.5f * input[0].sizeWorld.x;
-		float halfHeight = 0.5f * input[0].sizeWorld.y;
-	
+		float2 halfSize  = 0.5f * input[0].sizeWorld;
 		float4 v[4];
-		v[0] = float4(input[0].positionWorld + halfWidth * right - halfHeight * up, 1.0f);
-		v[1] = float4(input[0].positionWorld + halfWidth * right + halfHeight * up, 1.0f);
-		v[2] = float4(input[0].positionWorld - halfWidth * right - halfHeight * up, 1.0f);
-		v[3] = float4(input[0].positionWorld - halfWidth * right + halfHeight * up, 1.0f);
+		v[0] = float4(input[0].positionWorld + halfSize.x * right - halfSize.y * up, 1.0f);
+		v[1] = float4(input[0].positionWorld + halfSize.x * right + halfSize.y * up, 1.0f);
+		v[2] = float4(input[0].positionWorld - halfSize.x * right - halfSize.y * up, 1.0f);
+		v[3] = float4(input[0].positionWorld - halfSize.x * right + halfSize.y * up, 1.0f);
 		
 		PSParticleSolid output;
 		[unroll]
 		for(int i = 0; i < 4; ++i)
 		{
-			v[i].y += halfHeight;
+			v[i].y += halfSize.y;
 
 			output.positionHomogeneous = mul(v[i], gWorldViewProjection);
 			output.positionWorld = mul(v[i], gWorld).xyz;
 			output.tex = gQuadTexC[i];
 			output.color = input[0].color;
 			output.primitiveID = primID;
-			
+
 			triStream.Append(output);
 		}
 	}
 }
-[maxvertexcount(2)]
-void GSDrawLine(point GSParticleLine input[1], uint primID : SV_PrimitiveID, inout LineStream<PSParticleLine> lineStream)
-{
-	if( input[0].type != PT_EMITTER )
-	{
-		float3 p0 = input[0].positionWorld;
-		float3 p1 = input[0].positionWorld + 0.07f * gAccelerationWorld;
-		
-		PSParticleLine v0;
-		v0.positionHomogeneous = mul(float4(p0, 1.0f), gWorldViewProjection);
-		v0.positionWorld = mul(float4(p0, 1), gWorld).xyz;
-		v0.color = input[0].color;
-		v0.tex = float2(0.0f, 0.0f);
-		v0.primitiveID = primID;
-		lineStream.Append(v0);
-		
-		PSParticleLine v1;
-		v1.positionHomogeneous = mul(float4(p1, 1.0f), gWorldViewProjection);
-		v1.positionWorld = mul(float4(p1, 1), gWorld).xyz;
-		v1.color = input[0].color;
-		v1.tex  = float2(1.0f, 1.0f);
-		v1.primitiveID = primID;
-		lineStream.Append(v1);
-	}
-}
-
-float4 PSDrawSolid(PSParticleSolid input) : SV_TARGET
+float4 PSDrawBasic(PSParticleSolid input) : SV_TARGET
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
-
-	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
-
-	float3 litColor = textureColor.rgb;
-
-	if(gFogRange > 0)
-	{
-		float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
-		float distToEye = length(toEyeWorld);
-
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
-	}
-
-	return float4(litColor, textureColor.a);
-}
-float4 PSDrawLine(PSParticleLine input) : SV_TARGET
-{
-	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
-
 	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
 
-	float3 litColor = textureColor.rgb;
+	float3 litColor = (textureColor * input.color).rgb;
 
 	if(gFogRange > 0)
 	{
@@ -288,100 +274,36 @@ float4 PSDrawLine(PSParticleLine input) : SV_TARGET
 
 	return float4(litColor, textureColor.a);
 }
-
-GBufferPSOutput PSDeferredDrawSolid(PSParticleSolid input)
+GBufferPSOutput PSDeferredDrawBasic(PSParticleSolid input)
 {
 	GBufferPSOutput output = (GBufferPSOutput)0;
 
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
-	float4 color = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
+	float4 color = gTextureArray.Sample(SamplerLinear, uvw);
+	float3 litColor = (color * input.color).rgb;
 	
-	output.color = color;
-	output.normal = 0.0f;
-	output.depth = float4(input.positionHomogeneous.xyz, 0.0f);
-	
-	return output;
-}
-GBufferPSOutput PSDeferredDrawLine(PSParticleLine input)
-{
-	GBufferPSOutput output = (GBufferPSOutput)0;
-
-	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
-	float4 color = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
-
-	output.color = color;
+	output.color = float4(litColor, color.a);
 	output.normal = 0.0f;
 	output.depth = float4(input.positionHomogeneous.xyz, 0.0f);
 	
 	return output;
 }
 
-GeometryShader gsStreamOutFire = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutFire()), "POSITION.xyz; COLOR.rgba; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
-GeometryShader gsStreamOutSmoke = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutSmoke()), "POSITION.xyz; COLOR.rgba; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
-GeometryShader gsStreamOutRain = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOutRain()), "POSITION.xyz; COLOR.rgba; VELOCITY.xyz; SIZE.xy; AGE.x; TYPE.x");
-
-technique11 FireStreamOut
+technique11 ParticleDraw
 {
     pass P0
     {
-        SetVertexShader(CompileShader(vs_5_0, VSStreamOut()));
-        SetGeometryShader(gsStreamOutFire);
-        SetPixelShader(NULL);
+        SetVertexShader(CompileShader(vs_5_0, VSDrawBasic()));
+        SetGeometryShader(CompileShader(gs_5_0, GSDrawBasic()));
+        SetPixelShader(CompileShader(ps_5_0, PSDrawBasic()));
     }
 }
-technique11 SmokeStreamOut
+technique11 DeferredParticleDraw
 {
     pass P0
     {
-        SetVertexShader(CompileShader(vs_5_0, VSStreamOut()));
-        SetGeometryShader(gsStreamOutSmoke);
-        SetPixelShader(NULL);
-    }
-}
-technique11 RainStreamOut
-{
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSStreamOut()));
-        SetGeometryShader(gsStreamOutRain);
-        SetPixelShader(NULL);
-    }
-}
-
-technique11 SolidDraw
-{
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSDrawSolid()));
-        SetGeometryShader(CompileShader(gs_5_0, GSDrawSolid()));
-        SetPixelShader(CompileShader(ps_5_0, PSDrawSolid()));
-    }
-}
-technique11 LineDraw
-{
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSDrawLine()));
-        SetGeometryShader(CompileShader(gs_5_0, GSDrawLine()));
-        SetPixelShader(CompileShader(ps_5_0, PSDrawLine()));
-    }
-}
-
-technique11 DeferredSolidDraw
-{
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSDrawSolid()));
-        SetGeometryShader(CompileShader(gs_5_0, GSDrawSolid()));
-        SetPixelShader(CompileShader(ps_5_0, PSDeferredDrawSolid()));
-    }
-}
-technique11 DeferredLineDraw
-{
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSDrawLine()));
-        SetGeometryShader(CompileShader(gs_5_0, GSDrawLine()));
-        SetPixelShader(CompileShader(ps_5_0, PSDeferredDrawLine()));
+        SetVertexShader(CompileShader(vs_5_0, VSDrawBasic()));
+        SetGeometryShader(CompileShader(gs_5_0, GSDrawBasic()));
+        SetPixelShader(CompileShader(ps_5_0, PSDeferredDrawBasic()));
     }
 }

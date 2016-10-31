@@ -139,7 +139,7 @@ namespace Engine
         {
             this.Started = false;
         }
-        public void Update(float elapsedTime, Vector3 translation, Matrix rotation)
+        public void Update(GameTime gameTime, Vector3 translation, Matrix rotation)
         {
             if (!this.Active)
             {
@@ -149,21 +149,15 @@ namespace Engine
             // Cap particle updates at a maximum rate. This saves processing
             // and also improves precision since updating with very small
             // time increments is more lossy.
-            float runningTime = elapsedTime;
-            if (runningTime < PARTICLE_UPDATE_RATE_MAX)
+            if (gameTime.ElapsedMilliseconds < PARTICLE_UPDATE_RATE_MAX)
             {
                 return;
             }
 
-            float elapsedMs = runningTime;
-            runningTime = 0;
-
-            float elapsedSecs = elapsedMs * 0.001f;
-
             if (this.Started && this.EmissionRate > 0)
             {
                 // Calculate how much time has passed since we last emitted particles.
-                this.EmitTime += elapsedMs;
+                this.EmitTime += gameTime.ElapsedMilliseconds;
 
                 // How many particles should we emit this frame?
                 int emitCount = (int)(this.EmitTime / this.TimePerEmission);
@@ -181,23 +175,23 @@ namespace Engine
             for (int particlesIndex = 0; particlesIndex < this.ParticleCount; ++particlesIndex)
             {
                 Particle p = this.particles[particlesIndex];
-                p.Energy -= elapsedMs;
 
+                p.Energy -= gameTime.ElapsedMilliseconds;
                 if (p.Energy > 0.0f)
                 {
                     if (p.RotationSpeed != 0.0f && !p.RotationAxis.IsZero)
                     {
                         Matrix pRotation;
-                        Matrix.RotationAxis(ref p.RotationAxis, p.RotationSpeed * elapsedSecs, out pRotation);
+                        Matrix.RotationAxis(ref p.RotationAxis, p.RotationSpeed * gameTime.ElapsedSeconds, out pRotation);
 
                         Vector3.TransformCoordinate(ref p.Velocity, ref pRotation, out p.Velocity);
                         Vector3.TransformCoordinate(ref p.Acceleration, ref pRotation, out p.Acceleration);
                     }
 
                     // Particle is still alive.
-                    p.Velocity += p.Acceleration * elapsedSecs;
-                    p.Position += p.Velocity * elapsedSecs;
-                    p.Angle += p.RotationPerParticleSpeed * elapsedSecs;
+                    p.Velocity += p.Acceleration * gameTime.ElapsedSeconds;
+                    p.Position += p.Velocity * gameTime.ElapsedSeconds;
+                    p.Angle += p.RotationPerParticleSpeed * gameTime.ElapsedSeconds;
 
                     // Simple linear interpolation of color and size.
                     float percent = 1.0f - (p.Energy / p.EnergyStart);
@@ -207,8 +201,8 @@ namespace Engine
                 }
                 else
                 {
-                    // Particle is dead.  Move the particle furthest from the start of the array
-                    // down to take its place, and re-use the slot at the end of the list of living particles.
+                    // Particle is dead.
+                    // Move the particle furthest from the start of the array down to take its place, and re-use the slot at the end of the list of living particles.
                     if (particlesIndex != this.ParticleCount - 1)
                     {
                         this.particles[particlesIndex] = this.particles[this.ParticleCount - 1];
