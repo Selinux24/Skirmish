@@ -31,14 +31,9 @@ namespace Engine
         public ParticleSystem(Game game, ParticleSystemDescription description)
             : base(game, description)
         {
-            Random rnd = new Random();
-
             foreach (var emitterDesc in description.Emitters)
             {
-                var emitter = new ParticleEmitter(game, emitterDesc)
-                {
-                    RandomSeed = rnd.Next(int.MinValue, int.MaxValue),
-                };
+                var emitter = new ParticleEmitter(game, emitterDesc);
 
                 this.emitters.Add(emitter);
             }
@@ -94,7 +89,7 @@ namespace Engine
                     #region Per emitter update
 
                     effect.UpdatePerEmitter(
-                        emitter.TotalTime + emitter.RandomSeed,
+                        emitter.TotalTime,
                         emitter.ElapsedTime,
                         emitter.Description.EmissionRate,
                         (uint)emitter.TextureArray.Description.Texture2DArray.ArraySize,

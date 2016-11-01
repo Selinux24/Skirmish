@@ -42,10 +42,6 @@ namespace Engine
         /// </summary>
         public ParticleEmitterDescription Description;
         /// <summary>
-        /// Seed for random numbers
-        /// </summary>
-        public int RandomSeed = 0;
-        /// <summary>
         /// Total game time
         /// </summary>
         public float TotalTime = 0f;
@@ -71,7 +67,7 @@ namespace Engine
         {
             this.Description = emitter;
 
-            VertexParticle[] data = Helper.CreateArray(emitter.ParticleCountMax, new VertexParticle());
+            VertexParticle[] data = Helper.CreateArray(1, new VertexParticle());
 
             this.emittersBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
             this.drawingBuffer = game.Graphics.Device.CreateBuffer<VertexParticle>(emitter.ParticleCountMax, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);

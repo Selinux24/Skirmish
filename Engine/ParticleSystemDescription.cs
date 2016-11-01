@@ -56,9 +56,9 @@ namespace Engine
         {
             return new ParticleEmitterDescription()
             {
-                EmissionRate = 0.01f,
-                EnergyMin = 5f,
-                EnergyMax = 10f,
+                EmissionRate = 0.2f,
+                EnergyMin = 2f,
+                EnergyMax = 2.5f,
                 Ellipsoid = false,
                 OrbitPosition = true,
                 OrbitVelocity = true,
@@ -73,10 +73,10 @@ namespace Engine
                 ColorEndVar = new Color4(0, 0, 0, 0),
                 Position = position,
                 PositionVar = Vector3.Zero,
-                Velocity = Vector3.Zero,
-                VelocityVar = Vector3.Zero,
+                Velocity = new Vector3(0, 0.1f, 0),
+                VelocityVar = new Vector3(0.1f, 0.1f, 0.1f),
                 Acceleration = new Vector3(0, 0.1f, 0),
-                AccelerationVar = Vector3.Zero,
+                AccelerationVar = new Vector3(0.1f, 0.1f, 0.1f),
 
                 ContentPath = contentPath,
                 Textures = textures,
