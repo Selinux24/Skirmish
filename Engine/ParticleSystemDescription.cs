@@ -8,25 +8,19 @@ namespace Engine
     /// </summary>
     public class ParticleSystemDescription : DrawableDescription
     {
+        /// <summary>
+        /// Emitters
+        /// </summary>
         private List<ParticleEmitterDescription> emitters = new List<ParticleEmitterDescription>();
 
         /// <summary>
-        /// Emitters
+        /// Gets the particle emitters collection
         /// </summary>
         public ParticleEmitterDescription[] Emitters
         {
             get
             {
                 return this.emitters.ToArray();
-            }
-            set
-            {
-                this.emitters.Clear();
-
-                if (value != null && value.Length > 0)
-                {
-                    this.emitters.AddRange(value);
-                }
             }
         }
 
@@ -39,88 +33,85 @@ namespace Engine
 
         }
 
-        public void Add(ParticleEmitterDescription desc)
+        /// <summary>
+        /// Creates a fire particle system
+        /// </summary>
+        /// <param name="emitters">Emitter list</param>
+        /// <param name="textures">Texture list</param>
+        /// <returns>Returns particle system description</returns>
+        public void AddFire(Vector3 position, string contentPath, params string[] textures)
         {
-            this.emitters.Add(desc);
+            var emitter = ParticleEmitterDescription.GenerateFire(position, contentPath, textures);
+
+            this.emitters.Add(emitter);
         }
     }
 
+    /// <summary>
+    /// Particle emitter description
+    /// </summary>
     public class ParticleEmitterDescription
     {
-        public static ParticleEmitterDescription Fire(string contentPath, params string[] textures)
+        public static ParticleEmitterDescription GenerateFire(Vector3 position, string contentPath, params string[] textures)
         {
             return new ParticleEmitterDescription()
             {
-                ParticleCountMax = 5000,
-                EmissionRate = 300,
-
-                Ellipsoid = true,
+                EmissionRate = 0.01f,
+                EnergyMin = 5f,
+                EnergyMax = 10f,
+                Ellipsoid = false,
                 OrbitPosition = true,
                 OrbitVelocity = true,
                 OrbitAcceleration = false,
-                SizeStartMin = 1.5f,
-                SizeStartMax = 2f,
-                SizeEndMin = 0.5f,
-                SizeEndMax = 1f,
-                EnergyMin = 750f,
-                EnergyMax = 1000f,
-                ColorStart = new Color4(1, 0.2f, 0, 1),
-                ColorStartVariance = new Color4(0.25f, 0, 0, 0),
+                SizeStartMin = 1f,
+                SizeStartMax = 1.25f,
+                SizeEndMin = 1.25f,
+                SizeEndMax = 1.5f,
+                ColorStart = new Color4(1f, 0.2f, 0f, 1f),
+                ColorStartVar = new Color4(0.25f, 0f, 0f, 0f),
                 ColorEnd = new Color4(0, 0, 0, 0),
-                ColorEndVariance = new Color4(0, 0, 0, 0),
-                Position = Vector3.Zero,
-                PositionVariance = Vector3.Zero,
-                Velocity = new Vector3(0, 10, 0),
-                VelocityVariance = new Vector3(0, 10, 0),
-                Acceleration = new Vector3(0, 2, 0),
-                AccelerationVariance = new Vector3(0, 2, 0),
-                RotationParticleSpeedMin = -1.5f,
-                RotationParticleSpeedMax = 1.5f,
-                RotationSpeedMin = 0f,
-                RotationSpeedMax = 0f,
-                Angle = 0f,
-                RotationAxis = Vector3.Zero,
-                RotationAxisVariance = Vector3.Zero,
+                ColorEndVar = new Color4(0, 0, 0, 0),
+                Position = position,
+                PositionVar = Vector3.Zero,
+                Velocity = Vector3.Zero,
+                VelocityVar = Vector3.Zero,
+                Acceleration = new Vector3(0, 0.1f, 0),
+                AccelerationVar = Vector3.Zero,
 
-                Textures = textures,
                 ContentPath = contentPath,
+                Textures = textures,
             };
         }
 
-        public int ParticleCountMax;
-        public int EmissionRate;
+        public float EmissionRate;
+        public float EnergyMin;
+        public float EnergyMax;
         public bool Ellipsoid;
         public bool OrbitPosition;
         public bool OrbitVelocity;
         public bool OrbitAcceleration;
-
-        public Vector3 Position;
-        public Vector3 PositionVariance;
-        public Vector3 Velocity;
-        public Vector3 VelocityVariance;
-        public Vector3 Acceleration;
-        public Vector3 AccelerationVariance;
-        public Color4 ColorStart;
-        public Color4 ColorStartVariance;
-        public Color4 ColorEnd;
-        public Color4 ColorEndVariance;
-        public float RotationParticleSpeedMin;
-        public float RotationParticleSpeedMax;
-        public Vector3 RotationAxis;
-        public Vector3 RotationAxisVariance;
-        public float RotationSpeedMin;
-        public float RotationSpeedMax;
-        public float Angle;
-        public float EnergyMin;
-        public float EnergyMax;
         public float SizeStartMin;
         public float SizeStartMax;
         public float SizeEndMin;
         public float SizeEndMax;
+        public Color4 ColorStart;
+        public Color4 ColorStartVar;
+        public Color4 ColorEnd;
+        public Color4 ColorEndVar;
+        public Vector3 Position;
+        public Vector3 PositionVar;
+        public Vector3 Velocity;
+        public Vector3 VelocityVar;
+        public Vector3 Acceleration;
+        public Vector3 AccelerationVar;
 
-        public Vector3 Translation;
-        public Quaternion Rotation;
-
+        public int ParticleCountMax
+        {
+            get
+            {
+                return (int)((1f / this.EmissionRate) * this.EnergyMax) * 10;
+            }
+        }
         /// <summary>
         /// Texture list
         /// </summary>

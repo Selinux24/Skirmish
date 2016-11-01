@@ -127,14 +127,16 @@ namespace Engine
         /// </summary>
         /// <param name="identifier">Identifier</param>
         /// <param name="size">Texture size</param>
+        /// <param name="min">Minimum value</param>
+        /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateRandomTexture(Guid identifier, int size, int seed = 0)
+        public ShaderResourceView CreateRandomTexture(Guid identifier, int size, float min, float max, int seed = 0)
         {
             string md5 = identifier.ToByteArray().GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.Device.CreateRandomTexture(size, seed);
+                var view = this.game.Graphics.Device.CreateRandomTexture(size, min, max, seed);
                 this.resources.Add(md5, view);
             }
 

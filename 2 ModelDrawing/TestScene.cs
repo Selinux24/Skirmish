@@ -72,7 +72,12 @@ namespace ModelDrawing
         {
             var pSystem = new ParticleSystemDescription();
 
-            pSystem.Add(ParticleEmitterDescription.Fire("resources", "fire.dds"));
+            for (int i = 0; i < 10; i++)
+            {
+                pSystem.AddFire(
+                    new Vector3(-5 + i, 0, 0),
+                    "resources", "fire.dds");
+            }
 
             this.pFire = this.AddParticleSystem(pSystem);
         }

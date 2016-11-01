@@ -24,7 +24,6 @@ namespace Collada
         private Scenery ground = null;
         private ModelInstanced lampsModel = null;
         private ModelInstanced helicoptersModel = null;
-        private ParticleSystem rain = null;
 
         private int selectedHelicopter = 0;
         private Helicopter[] helicopters = null;
@@ -103,14 +102,6 @@ namespace Collada
                 {
                     Instances = 2
                 });
-
-            var rainEmitter = new ParticleEmitter()
-            {
-                Color = Color.LightBlue,
-                Size = 0.5f,
-                Position = Vector3.Zero,
-            };
-            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(rainEmitter, "raindrop.dds"));
 
             this.InitializeCamera();
             this.InitializeEnvironment();

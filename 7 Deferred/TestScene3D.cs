@@ -28,7 +28,6 @@ namespace DeferredTest
         private ModelInstanced helicopters = null;
         private Skydom skydom = null;
         private Scenery terrain = null;
-        private ParticleSystem fire = null;
 
         Model tree = null;
         ModelInstanced trees = null;
@@ -217,18 +216,6 @@ namespace DeferredTest
 
             #endregion
 
-            #region Moving fire
-
-            var fireEmitter = new ParticleEmitter()
-            {
-                Color = Color.Yellow,
-                Size = 0.5f,
-                Position = new Vector3(0, 10, 0),
-            };
-            this.fire = this.AddParticleSystem(ParticleSystemDescription.Fire(fireEmitter, "flare2.png"));
-
-            #endregion
-
             #endregion
 
             #region Debug Buffer Drawer
@@ -360,18 +347,6 @@ namespace DeferredTest
                         cameraPosition += p;
                         modelCount++;
                     }
-                }
-            }
-            #endregion
-
-            #region Fire
-            {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.terrain.FindTopGroundPosition(0, 0, out p, out t, out d))
-                {
-                    this.fire.Manipulator.SetPosition(p, true);
                 }
             }
             #endregion

@@ -1361,7 +1361,7 @@ namespace Engine
 
             #region Random texture generation
 
-            this.textureRandom = game.ResourceManager.CreateRandomTexture(Guid.NewGuid(), 1024, 24);
+            this.textureRandom = game.ResourceManager.CreateRandomTexture(Guid.NewGuid(), 1024, -1, 1, 24);
 
             #endregion
 

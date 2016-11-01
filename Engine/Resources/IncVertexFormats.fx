@@ -11,21 +11,16 @@ struct VSVertexBillboard
 struct VSVertexParticle
 {
 	float3 position : POSITION;
-	float3 velocity : VELOCITY;
-	float3 acceleration : ACCELERATION;
+	float4 color: COLOR0;
 	float4 colorStart: COLOR_START;
 	float4 colorEnd: COLOR_END;
-	float4 color: COLOR;
-	float rotationParticleSpeed : ROTATION_PARTICLE_SPEED;
-	float3 rotationAxis : ROTATION_AXIS;
-	float rotationSpeed : ROTATION_SPEED;
-	float angle : ANGLE;
-	float energyStart : ENERGY_START;
+	float3 velocity : VELOCITY;
+	float3 acceleration : ACCELERATION;
+	float2 size : SIZE;
+	float2 sizeStart : SIZE_START;
+	float2 sizeEnd : SIZE_END;
 	float energy : ENERGY;
-	float sizeStart : SIZE_START;
-	float sizeEnd : SIZE_END;
-	float size : SIZE;
-	float age : AGE;
+	float energyStart : ENERGY_START;
 	uint type : TYPE;
 };
 struct VSVertexPosition
@@ -262,7 +257,7 @@ struct GSVertexBillboard
 	float3 centerWorld : POSITION;
 	float2 sizeWorld : SIZE;
 };
-struct GSParticleBasic
+struct GSParticle
 {
 	float3 positionWorld : POSITION;
 	float2 sizeWorld : SIZE;
@@ -281,15 +276,7 @@ struct PSVertexBillboard
 	float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PrimitiveID;
 };
-struct PSParticleSolid
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float4 color : COLOR0;
-	float2 tex : TEXCOORD0;
-	uint primitiveID : SV_PrimitiveID;
-};
-struct PSParticleLine
+struct PSParticle
 {
 	float4 positionHomogeneous : SV_POSITION;
 	float3 positionWorld : POSITION;

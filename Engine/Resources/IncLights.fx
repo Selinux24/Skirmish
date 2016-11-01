@@ -25,6 +25,63 @@ SamplerComparisonState SamplerComparisonLessEqual
 	ComparisonFunc = LESS_EQUAL;
 };
 
+float roll(float rnd, float min, float max)
+{
+   return min + (rnd * (max - min));
+}
+
+float RandomScalar(float seed, Texture1D rndTex)
+{
+	return rndTex.SampleLevel(SamplerLinear, seed, 0).x;
+}
+float2 RandomVector2(float seed, Texture1D rndTex)
+{
+	return rndTex.SampleLevel(SamplerLinear, seed, 0).xy;
+}
+float3 RandomVector3(float seed, Texture1D rndTex)
+{
+	return rndTex.SampleLevel(SamplerLinear, seed, 0).xyz;
+}
+float4 RandomVector4(float seed, Texture1D rndTex)
+{
+	return rndTex.SampleLevel(SamplerLinear, seed, 0);
+}
+
+float RandomScalar(float min, float max, float seed, Texture1D rndTex)
+{
+	float r = rndTex.SampleLevel(SamplerLinear, seed, 0).x;
+	r = roll(r, min, max);
+
+	return r;
+}
+float2 RandomVector2(float min, float max, float seed, Texture1D rndTex)
+{
+	float2 r = rndTex.SampleLevel(SamplerLinear, seed, 0).xy;
+	r.x = roll(r.x, min, max);
+	r.y = roll(r.y, min, max);
+
+	return r;
+}
+float3 RandomVector3(float min, float max, float seed, Texture1D rndTex)
+{
+	float3 r = rndTex.SampleLevel(SamplerLinear, seed, 0).xyz;
+	r.x = roll(r.x, min, max);
+	r.y = roll(r.y, min, max);
+	r.z = roll(r.z, min, max);
+
+	return r;
+}
+float4 RandomVector4(float min, float max, float seed, Texture1D rndTex)
+{
+	float4 r = rndTex.SampleLevel(SamplerLinear, seed, 0);
+	r.x = roll(r.x, min, max);
+	r.y = roll(r.y, min, max);
+	r.z = roll(r.z, min, max);
+	r.w = roll(r.w, min, max);
+
+	return r;
+}
+
 static const int MAX_LIGHTS_DIRECTIONAL = 3;
 static const int MAX_LIGHTS_POINT = 16;
 static const int MAX_LIGHTS_SPOT = 16;

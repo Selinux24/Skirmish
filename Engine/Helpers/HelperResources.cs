@@ -652,16 +652,18 @@ namespace Engine.Helpers
         /// </summary>
         /// <param name="device">Graphics device</param>
         /// <param name="size">Texture size</param>
+        /// <param name="min">Minimum value</param>
+        /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns created texture</returns>
-        public static ShaderResourceView CreateRandomTexture(this Device device, int size, int seed = 0)
+        public static ShaderResourceView CreateRandomTexture(this Device device, int size, float min, float max, int seed = 0)
         {
             Random rnd = new Random(seed);
 
             var randomValues = new List<Vector4>();
             for (int i = 0; i < size; i++)
             {
-                randomValues.Add(rnd.NextVector4(new Vector4(-1, -1, -1, -1), new Vector4(1, 1, 1, 1)));
+                randomValues.Add(rnd.NextVector4(new Vector4(min), new Vector4(max)));
             }
 
             return CreateTexture1D(device, size, randomValues.ToArray());

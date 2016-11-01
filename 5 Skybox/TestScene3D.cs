@@ -39,13 +39,12 @@ namespace Skybox
         private LineListDrawer volumesDrawer = null;
         private TriangleListDrawer graphDrawer = null;
 
-        private ParticleSystem rain = null;
+        private ParticleSystem fires = null;
 
         private ModelInstanced torchs = null;
-        private ParticleSystem torchFire = null;
         private SceneLightPoint[] torchLights = null;
 
-        private ParticleSystem movingfire = null;
+        private ParticleEmitter movingFireEmitter = null;
         private SceneLightPoint movingFireLight = null;
 
         private int directionalLightCount = 0;
@@ -117,19 +116,6 @@ namespace Skybox
 
             #endregion
 
-            #region Rain
-
-            var rainEmitter = new ParticleEmitter()
-            {
-                Color = Color.LightBlue,
-                Size = 0.5f,
-                Position = Vector3.Zero,
-            };
-
-            this.rain = this.AddParticleSystem(ParticleSystemDescription.Rain(rainEmitter, "raindrop.dds"));
-
-            #endregion
-
             #region Terrain
 
             var nvSettings = NavigationMeshGenerationSettings.Default;
@@ -147,21 +133,20 @@ namespace Skybox
             this.ruins = this.AddScenery(
                 "Resources",
                 "ruins.xml",
-                desc, 
+                desc,
                 false);
+
+            #endregion
+
+            #region Particle System
+
+            this.fires = this.AddParticleSystem(new ParticleSystemDescription() { Name = "Fires" });
 
             #endregion
 
             #region Moving fire
 
-            var movingFireEmitter = new ParticleEmitter()
-            {
-                Color = Color.Orange,
-                Size = 0.5f,
-                Position = Vector3.Zero,
-            };
-
-            this.movingfire = this.AddParticleSystem(ParticleSystemDescription.Fire(movingFireEmitter, "flare2.png"));
+            this.movingFireEmitter = this.fires.Add(ParticleEmitterDescription.GenerateFire(Vector3.Zero, "resources", "flare0.dds"));
 
             #endregion
 
@@ -202,7 +187,7 @@ namespace Skybox
             };
             this.Lights.Add(this.movingFireLight);
 
-            ParticleEmitter[] firePositions3D = new ParticleEmitter[this.firePositions.Length];
+            Vector3[] firePositions3D = new Vector3[this.firePositions.Length];
             this.torchLights = new SceneLightPoint[this.firePositions.Length];
             for (int i = 0; i < this.firePositions.Length; i++)
             {
@@ -211,23 +196,17 @@ namespace Skybox
                 if (i == 2) color = Color.Green;
                 if (i == 3) color = Color.LightBlue;
 
-                firePositions3D[i] = new ParticleEmitter()
-                {
-                    Color = color,
-                    Size = 0.2f,
-                    Position = Vector3.Zero,
-                };
-
+                firePositions3D[i] = Vector3.Zero;
                 Triangle t;
                 float d;
-                this.ruins.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i].Position, out t, out d);
+                this.ruins.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i], out t, out d);
 
                 this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
-                this.torchs.Instances[i].Manipulator.SetPosition(firePositions3D[i].Position, true);
+                this.torchs.Instances[i].Manipulator.SetPosition(firePositions3D[i], true);
 
                 BoundingBox bbox = this.torchs.Instances[i].GetBoundingBox();
 
-                firePositions3D[i].Position.Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
+                firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
 
                 this.torchLights[i] = new SceneLightPoint()
                 {
@@ -235,15 +214,16 @@ namespace Skybox
                     LightColor = color,
                     AmbientIntensity = 0.1f,
                     DiffuseIntensity = 5f,
-                    Position = firePositions3D[i].Position,
+                    Position = firePositions3D[i],
                     Radius = 4f,
                     Enabled = true,
                     CastShadow = false,
                 };
 
                 this.Lights.Add(this.torchLights[i]);
+
+                this.fires.Add(ParticleEmitterDescription.GenerateFire(firePositions3D[i], "resources", "flare0.dds"));
             }
-            this.torchFire = this.AddParticleSystem(ParticleSystemDescription.Fire(firePositions3D, "flare1.png"));
 
             this.ruins.AttachFullPickingFullPathFinding(this.torchs);
 
@@ -289,18 +269,15 @@ namespace Skybox
 
             #region Light
 
-            if (this.movingfire.Visible)
-            {
-                float d = 0.5f;
+            float d = 0.5f;
 
-                Vector3 position = Vector3.Zero;
-                position.X = 3.0f * d * (float)Math.Cos(0.4f * this.Game.GameTime.TotalSeconds);
-                position.Y = 1f;
-                position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
+            Vector3 position = Vector3.Zero;
+            position.X = 3.0f * d * (float)Math.Cos(0.4f * this.Game.GameTime.TotalSeconds);
+            position.Y = 1f;
+            position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
 
-                this.movingfire.Manipulator.SetPosition(position);
-                this.movingFireLight.Position = this.movingfire.Manipulator.Position;
-            }
+            this.movingFireEmitter.Description.Position = position;
+            this.movingFireLight.Position = position;
 
             this.DEBUGUpdateMovingVolumesDrawer();
 

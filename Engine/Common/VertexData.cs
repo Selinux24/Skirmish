@@ -346,10 +346,9 @@ namespace Engine.Common
         {
             return new VertexParticle
             {
-                Type = 0,
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Velocity = Vector3.Zero,
-                Size = v.Size.HasValue ? v.Size.Value.X : 1f,
+                Size = v.Size.HasValue ? v.Size.Value : Vector2.One,
             };
         }
         /// <summary>
