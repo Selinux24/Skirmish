@@ -106,9 +106,29 @@
     <Content Include="Collada\Buildings\Obelisk\specular.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Collada\Characters\MySoldier\body_diffuse.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\MySoldier\body_normalMap.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\MySoldier\body_specular.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\MySoldier\head_diffuse.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\MySoldier\head_normalMap.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\MySoldier\head_specular.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Collada\Vehicles\M24\m24.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Blender\Characters\MySoldier\MySoldier.blend" />
+    <None Include="Blender\Characters\MySoldier\MySoldierAnim.blend" />
     <None Include="Blender\Vehicles\M24\diffuse_m24_alpha.dds" />
     <None Include="App.config" />
     <None Include="Blender\Environment\Trees\Birch\birch_b.blend" />
@@ -144,6 +164,12 @@
     <None Include="Blender\Environment\Trees\Birch\birch_a.blend" />
     <None Include="Blender\Scenery\TwoLevels\two_levels.blend" />
     <Content Include="Collada\Environment\Trees\Birch\birch_b.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\MySoldier\MySoldier.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\MySoldier\MySoldierAnim.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Tests\AniCube\aniCube.dae" />
