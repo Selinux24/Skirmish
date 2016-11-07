@@ -160,6 +160,14 @@
     <Compile Include="AnimationClipDescription.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
+    <Compile Include="Common\VertexCPUParticle.cs" />
+    <Compile Include="Effects\EffectCPUParticles.cs" />
+    <Compile Include="ParticleManager.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="TransitionDescription.cs" />
     <Compile Include="AttachedModelUsesEnum.cs" />
     <Compile Include="BezierPath.cs" />
@@ -216,8 +224,8 @@
     <Compile Include="ModelDescription.cs" />
     <Compile Include="ModelInstance.cs" />
     <Compile Include="ModelInstancedDescription.cs" />
-    <Compile Include="ParticleEmitter.cs" />
-    <Compile Include="ParticleSystemDescription.cs" />
+    <Compile Include="GPUParticleEmitter.cs" />
+    <Compile Include="GPUParticleSystemDescription.cs" />
     <Compile Include="PathFinding\Agent.cs" />
     <Compile Include="PathFinding\AStar\GridAgent.cs" />
     <Compile Include="PathFinding\AStar\GridGenerationSettings.cs" />
@@ -316,7 +324,7 @@
     <Compile Include="Effects\EffectBasicShadow.cs" />
     <Compile Include="Headings.cs" />
     <Compile Include="Line3D.cs" />
-    <Compile Include="Common\VertexParticle.cs" />
+    <Compile Include="Common\VertexGPUParticle.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalColor.cs" />
     <Compile Include="Common\VertexSkinnedPositionColor.cs" />
     <Compile Include="Common\VertexSkinnedPositionTexture.cs" />
@@ -349,13 +357,12 @@
     <Compile Include="GroundDescription.cs" />
     <Compile Include="TriangleListDrawer.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
-    <Compile Include="Effects\EffectParticles.cs" />
+    <Compile Include="Effects\EffectGPUParticles.cs" />
     <Compile Include="Effects\IDrawer.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Manipulator2D.cs" />
-    <Compile Include="ParticleClasses.cs" />
-    <Compile Include="ParticleSystem.cs" />
+    <Compile Include="GPUParticleSystem.cs" />
     <Compile Include="LineListDrawer.cs" />
     <Compile Include="Cubemap.cs" />
     <Compile Include="Effects\EffectBillboard.cs" />
@@ -377,11 +384,6 @@
     <Compile Include="Effects\Drawer.cs" />
     <Compile Include="GameTime.cs" />
     <Compile Include="Model.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="GameEnvironment.cs" />
     <Compile Include="IsometricAxis.cs" />
     <Compile Include="Game.cs" />
@@ -420,13 +422,15 @@
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Engine.snk" />
     <None Include="packages.config" />
+    <None Include="Resources\ShaderCPUParticles.fx" />
     <None Include="Resources\ShaderBasic.fxo" />
+    <None Include="Resources\ShaderCPUParticles.fxo" />
     <None Include="Resources\ShaderDeferred.fxo" />
     <None Include="Resources\ShaderGBuffer.fx" />
     <None Include="Resources\ShaderBillboard.fxo" />
@@ -434,14 +438,14 @@
     <None Include="Resources\ShaderFont.fxo" />
     <None Include="Resources\ShaderGBuffer.fxo" />
     <None Include="Resources\ShaderNull.fxo" />
-    <None Include="Resources\ShaderParticles.fxo" />
+    <None Include="Resources\ShaderGPUParticles.fxo" />
     <None Include="Resources\ShaderShadow.fx" />
     <None Include="Resources\IncVertexFormats.fx" />
     <None Include="Resources\ShaderBasic.fx" />
     <None Include="Resources\ShaderBillboard.fx" />
     <None Include="Resources\ShaderFont.fx" />
     <None Include="Resources\ShaderCubemap.fx" />
-    <None Include="Resources\ShaderParticles.fx" />
+    <None Include="Resources\ShaderGPUParticles.fx" />
     <None Include="Resources\ShaderShadow.fxo" />
     <None Include="Resources\ShaderSprite.fxo" />
     <None Include="Resources\ShaderTerrain.fxo" />

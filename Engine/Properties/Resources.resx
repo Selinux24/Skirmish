@@ -169,11 +169,11 @@
   <data name="ShaderNullFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ShaderNull.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderParticlesFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderGPUParticlesFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadergpuparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderParticlesFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderparticles.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderGPUParticlesFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadergpuparticles.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="ShaderShadowFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shadershadow.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -192,5 +192,11 @@
   </data>
   <data name="ShaderTerrainFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderterrain.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderCPUParticlesFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadercpuparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderCPUParticlesFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadercpuparticles.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

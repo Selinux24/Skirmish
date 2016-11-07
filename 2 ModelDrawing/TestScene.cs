@@ -12,7 +12,9 @@ namespace ModelDrawing
 
         private Model floor = null;
 
-        private ParticleSystem pFire = null;
+        private GPUParticleSystem pFire = null;
+
+        private CPUParticleManager pManager = null;
 
         public TestScene(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -38,6 +40,9 @@ namespace ModelDrawing
             this.InitializeFloor();
 
             this.InitializeModels();
+
+            this.pManager = this.AddParticleSystem(new CPUParticleManagerDescription());
+            this.pManager.AddParticleGenerator(CPUParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png"), 100f, new Vector3(0, 0, 10), Vector3.Up);
 
             this.Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             this.Camera.LookTo(Vector3.Zero);
@@ -70,7 +75,7 @@ namespace ModelDrawing
         }
         private void InitializeModels()
         {
-            var pSystem = new ParticleSystemDescription();
+            var pSystem = new GPUParticleSystemDescription();
 
             for (int i = 0; i < 10; i++)
             {

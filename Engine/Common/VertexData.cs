@@ -342,9 +342,22 @@ namespace Engine.Common
         /// </summary>
         /// <param name="v">Helper</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexParticle CreateVertexParticle(VertexData v)
+        public static VertexCPUParticle CreateVertexParticle(VertexData v)
         {
-            return new VertexParticle
+            return new VertexCPUParticle
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Velocity = Vector3.Zero,
+            };
+        }
+        /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexGPUParticle CreateVertexGPUParticle(VertexData v)
+        {
+            return new VertexGPUParticle
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Velocity = Vector3.Zero,
@@ -1085,7 +1098,11 @@ namespace Engine.Common
                 }
                 else if (vertices[0].VertexType == VertexTypes.Particle)
                 {
-                    buffer = CreateVertexBuffer<VertexParticle>(device, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexCPUParticle>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.GPUParticle)
+                {
+                    buffer = CreateVertexBuffer<VertexGPUParticle>(device, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.Position)
                 {

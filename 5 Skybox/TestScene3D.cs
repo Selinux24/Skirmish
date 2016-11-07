@@ -39,12 +39,12 @@ namespace Skybox
         private LineListDrawer volumesDrawer = null;
         private TriangleListDrawer graphDrawer = null;
 
-        private ParticleSystem fires = null;
+        private GPUParticleSystem fires = null;
 
         private ModelInstanced torchs = null;
         private SceneLightPoint[] torchLights = null;
 
-        private ParticleEmitter movingFireEmitter = null;
+        private GPUParticleEmitter movingFireEmitter = null;
         private SceneLightPoint movingFireLight = null;
 
         private int directionalLightCount = 0;
@@ -140,13 +140,13 @@ namespace Skybox
 
             #region Particle System
 
-            this.fires = this.AddParticleSystem(new ParticleSystemDescription() { Name = "Fires" });
+            this.fires = this.AddParticleSystem(new GPUParticleSystemDescription() { Name = "Fires" });
 
             #endregion
 
             #region Moving fire
 
-            this.movingFireEmitter = this.fires.Add(ParticleEmitterDescription.GenerateFire(Vector3.Zero, "resources", "flare0.dds"));
+            this.movingFireEmitter = this.fires.Add(GPUParticleEmitterDescription.GenerateFire(Vector3.Zero, "resources", "flare0.dds"));
 
             #endregion
 
@@ -222,7 +222,7 @@ namespace Skybox
 
                 this.Lights.Add(this.torchLights[i]);
 
-                this.fires.Add(ParticleEmitterDescription.GenerateFire(firePositions3D[i], "resources", "flare0.dds"));
+                this.fires.Add(GPUParticleEmitterDescription.GenerateFire(firePositions3D[i], "resources", "flare0.dds"));
             }
 
             this.ruins.AttachFullPickingFullPathFinding(this.torchs);

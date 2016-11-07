@@ -34,9 +34,13 @@ namespace Engine.Effects
         /// </summary>
         public static EffectFont EffectFont { get; private set; }
         /// <summary>
-        /// Particles drawing effect
+        /// CPU Particles drawing effect
         /// </summary>
-        public static EffectParticles EffectParticles { get; private set; }
+        public static EffectCPUParticles EffectCPUParticles { get; private set; }
+        /// <summary>
+        /// GPU Particles drawing effect
+        /// </summary>
+        public static EffectGPUParticles EffectGPUParticles { get; private set; }
         /// <summary>
         /// Terrain drawing effect
         /// </summary>
@@ -132,13 +136,22 @@ namespace Engine.Effects
                 EffectBillboard = new EffectBillboard(device, Resources.ShaderBillboardFx, true);
             }
 
-            if (Resources.ShaderParticlesFxo != null)
+            if (Resources.ShaderCPUParticlesFxo != null)
             {
-                EffectParticles = new EffectParticles(device, Resources.ShaderParticlesFxo, false);
+                EffectCPUParticles = new EffectCPUParticles(device, Resources.ShaderCPUParticlesFxo, false);
             }
             else
             {
-                EffectParticles = new EffectParticles(device, Resources.ShaderParticlesFx, true);
+                EffectCPUParticles = new EffectCPUParticles(device, Resources.ShaderCPUParticlesFx, true);
+            }
+
+            if (Resources.ShaderGPUParticlesFxo != null)
+            {
+                EffectGPUParticles = new EffectGPUParticles(device, Resources.ShaderGPUParticlesFxo, false);
+            }
+            else
+            {
+                EffectGPUParticles = new EffectGPUParticles(device, Resources.ShaderGPUParticlesFx, true);
             }
 
             if (Resources.ShaderTerrainFxo != null)
@@ -169,7 +182,8 @@ namespace Engine.Effects
             Helper.Dispose(EffectBillboard);
             Helper.Dispose(EffectCubemap);
             Helper.Dispose(EffectFont);
-            Helper.Dispose(EffectParticles);
+            Helper.Dispose(EffectCPUParticles);
+            Helper.Dispose(EffectGPUParticles);
             Helper.Dispose(EffectTerrain);
             Helper.Dispose(EffectShadow);
             Helper.Dispose(EffectGBuffer);
