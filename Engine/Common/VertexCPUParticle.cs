@@ -22,7 +22,7 @@ namespace Engine.Common
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
                 new InputElement("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, 0, InputClassification.PerVertexData, 0),
                 new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 24, 0, InputClassification.PerVertexData, 0),
-                new InputElement("ENERGY", 0, SharpDX.DXGI.Format.R32_Float, 40, 0, InputClassification.PerVertexData, 0),
+                new InputElement("MAX_AGE", 0, SharpDX.DXGI.Format.R32_Float, 40, 0, InputClassification.PerVertexData, 0),
             };
         }
 
@@ -39,9 +39,9 @@ namespace Engine.Common
         /// </summary>
         public Color4 Color;
         /// <summary>
-        /// Particle energy
+        /// Particle maximum age
         /// </summary>
-        public float Energy;
+        public float MaxAge;
         /// <summary>
         /// Vertex type
         /// </summary>

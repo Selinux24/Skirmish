@@ -3,6 +3,7 @@ using Engine.Common;
 using Engine.Content;
 using SharpDX;
 using SharpDX.Direct3D;
+using System;
 
 namespace ModelDrawing
 {
@@ -13,8 +14,10 @@ namespace ModelDrawing
         private Model floor = null;
 
         private GPUParticleSystem pFire = null;
-
         private CPUParticleManager pManager = null;
+        private CPUParticleSystemDescription pPlume = null;
+
+        private Random rnd = new Random();
 
         public TestScene(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -40,9 +43,6 @@ namespace ModelDrawing
             this.InitializeFloor();
 
             this.InitializeModels();
-
-            this.pManager = this.AddParticleSystem(new CPUParticleManagerDescription());
-            this.pManager.AddParticleGenerator(CPUParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png"), 100f, new Vector3(0, 0, 10), Vector3.Up);
 
             this.Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             this.Camera.LookTo(Vector3.Zero);
@@ -85,6 +85,10 @@ namespace ModelDrawing
             }
 
             this.pFire = this.AddParticleSystem(pSystem);
+            this.pFire.Visible = this.pFire.Active = false;
+
+            this.pManager = this.AddParticleSystem(new CPUParticleManagerDescription());
+            this.pPlume = CPUParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png");
         }
 
         public override void Update(GameTime gameTime)
@@ -127,6 +131,14 @@ namespace ModelDrawing
             if (this.Game.Input.KeyPressed(Keys.S))
             {
                 this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyJustPressed(Keys.P))
+            {
+                this.pManager.AddParticleGenerator(
+                    this.pPlume, 100f, 
+                    new Vector3(0, 0, 10), 
+                    Vector3.Up);
             }
         }
         public override void Draw(GameTime gameTime)

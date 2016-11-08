@@ -54,8 +54,8 @@ namespace Engine.Effects
 
 
         private EffectScalarVariable viewportHeight = null;
-        private EffectScalarVariable duration = null;
-        private EffectScalarVariable durationRandomness = null;
+        private EffectScalarVariable maxDuration = null;
+        private EffectScalarVariable maxDurationRandomness = null;
         private EffectScalarVariable endVelocity = null;
         private EffectVectorVariable gravity = null;
         private EffectVectorVariable startSize = null;
@@ -166,26 +166,26 @@ namespace Engine.Effects
                 this.viewportHeight.Set(value);
             }
         }
-        protected float Duration
+        protected float MaxDuration
         {
             get
             {
-                return this.duration.GetFloat();
+                return this.maxDuration.GetFloat();
             }
             set
             {
-                this.duration.Set(value);
+                this.maxDuration.Set(value);
             }
         }
-        protected float DurationRandomness
+        protected float MaxDurationRandomness
         {
             get
             {
-                return this.durationRandomness.GetFloat();
+                return this.maxDurationRandomness.GetFloat();
             }
             set
             {
-                this.durationRandomness.Set(value);
+                this.maxDurationRandomness.Set(value);
             }
         }
         protected float EndVelocity
@@ -307,8 +307,8 @@ namespace Engine.Effects
             this.textureArray = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
 
             this.viewportHeight = this.Effect.GetVariableByName("gViewportHeight").AsScalar();
-            this.duration = this.Effect.GetVariableByName("gDuration").AsScalar();
-            this.durationRandomness = this.Effect.GetVariableByName("gDurationRandomness").AsScalar();
+            this.maxDuration = this.Effect.GetVariableByName("gMaxDuration").AsScalar();
+            this.maxDurationRandomness = this.Effect.GetVariableByName("gMaxDurationRandomness").AsScalar();
             this.endVelocity = this.Effect.GetVariableByName("gEndVelocity").AsScalar();
             this.gravity = this.Effect.GetVariableByName("gGravity").AsVector();
             this.startSize = this.Effect.GetVariableByName("gStartSize").AsVector();
@@ -363,34 +363,28 @@ namespace Engine.Effects
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
+            float vpHeight,
             Vector3 eyePositionWorld,
             float totalTime,
-            uint textureCount,
-            ShaderResourceView textures)
-        {
-            this.World = world;
-            this.WorldViewProjection = world * viewProjection;
-            this.EyePositionWorld = eyePositionWorld;
-            this.TotalTime = totalTime;
-            this.TextureCount = textureCount;
-            this.TextureArray = textures;
-        }
-
-        public void UpdatePerEmitter(
-            float vpHeight,
-            float duration,
-            float durationRandomness,
+            float maxDuration,
+            float maxDurationRandomness,
             float endVelocity,
             Vector3 gravity,
             Vector2 startSize,
             Vector2 endSize,
             Color4 minColor,
             Color4 maxColor,
-            Vector2 rotateSpeed)
+            Vector2 rotateSpeed,
+            uint textureCount,
+            ShaderResourceView textures)
         {
+            this.World = world;
+            this.WorldViewProjection = world * viewProjection;
             this.ViewportHeight = vpHeight;
-            this.Duration = duration;
-            this.DurationRandomness = durationRandomness;
+            this.EyePositionWorld = eyePositionWorld;
+            this.TotalTime = totalTime;
+            this.MaxDuration = maxDuration;
+            this.MaxDurationRandomness = maxDurationRandomness;
             this.EndVelocity = endVelocity;
             this.Gravity = gravity;
             this.StartSize = startSize;
@@ -398,6 +392,8 @@ namespace Engine.Effects
             this.MinColor = minColor;
             this.MaxColor = maxColor;
             this.RotateSpeed = rotateSpeed;
+            this.TextureCount = textureCount;
+            this.TextureArray = textures;
         }
     }
 }

@@ -5,13 +5,13 @@ cbuffer cbPerFrame : register (b0)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
+	float gViewportHeight;
 	float3 gEyePositionWorld;
 	float gTotalTime;
 	uint gTextureCount;
 
-	float gViewportHeight;
-	float gDuration;
-	float gDurationRandomness;
+	float gMaxDuration;
+	float gMaxDurationRandomness;
 	float gEndVelocity;
 	float3 gGravity;
 	float2 gStartSize;
@@ -37,27 +37,26 @@ float3 ComputeParticlePosition(float3 position, float3 velocity, float age, floa
 {
     float startVelocity = length(velocity);
     float endVelocity = startVelocity * gEndVelocity;
-    float velocityIntegral = startVelocity * normalizedAge + (endVelocity - startVelocity) * normalizedAge * normalizedAge / 2;
+    float velocityIntegral = startVelocity * normalizedAge + (endVelocity - startVelocity) * normalizedAge * normalizedAge * 0.5f;
      
-    position += normalize(velocity) * velocityIntegral * gDuration;
-    position += gGravity * age * normalizedAge;
+    float3 p = (normalize(velocity) * velocityIntegral) + (gGravity * age * normalizedAge);
     
-    return position;
+    return position + p;
 }
-float ComputeParticleSize(float4 projectedPosition, float randomValue, float normalizedAge)
+float2 ComputeParticleSize(float randomValue, float normalizedAge)
 {
     float startSize = lerp(gStartSize.x, gStartSize.y, randomValue);
     float endSize = lerp(gEndSize.x, gEndSize.y, randomValue);
     
     float size = lerp(startSize, endSize, normalizedAge);
     
-    return size * gWorldViewProjection._m11 / projectedPosition.w * gViewportHeight * 0.5f;
+    return float2(size, size);
 }
-float4 ComputeParticleColor(float4 projectedPosition, float randomValue, float normalizedAge)
+float4 ComputeParticleColor(float randomValue, float normalizedAge)
 {
     float4 color = lerp(gMinColor, gMaxColor, randomValue);
     
-    color.a *= normalizedAge * (1-normalizedAge) * (1-normalizedAge) * 6.7;
+    color.a *= normalizedAge * (1-normalizedAge) * (1-normalizedAge) * 6.7f;
 
 	return color;
 }
@@ -72,8 +71,8 @@ float4 ComputeParticleRotation(float randomValue, float age)
     
     float4 rotationMatrix = float4(c, -s, s, c);
     
-    rotationMatrix *= 0.5;
-    rotationMatrix += 0.5;
+    rotationMatrix *= 0.5f;
+    rotationMatrix += 0.5f;
     
     return rotationMatrix;
 }
@@ -82,10 +81,15 @@ GSCPUParticle VSParticle(VSVertexCPUParticle input)
 {
 	GSCPUParticle output;
 
-	output.positionWorld = input.positionWorld;
-	output.velocityWorld = input.velocityWorld;
-	output.color = input.color;
-	output.energy = input.energy;
+	float age = gTotalTime - input.maxAge;
+	age *= 1.0f + input.color.x * gMaxDurationRandomness;
+	age = 0;
+	float normalizedAge = saturate(age / gMaxDuration);
+
+	output.centerWorld = ComputeParticlePosition(input.positionWorld, input.velocityWorld, age, normalizedAge);
+	output.sizeWorld = ComputeParticleSize(input.color.y, normalizedAge);
+	output.color = ComputeParticleColor(input.color.z, normalizedAge);
+	output.rotationWorld = ComputeParticleRotation(input.color.w, age);
 
 	return output;
 }
@@ -93,15 +97,10 @@ GSCPUParticle VSParticle(VSVertexCPUParticle input)
 [maxvertexcount(4)]
 void GSParticle(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSCPUParticle> outputStream)
 {
-	float age = gTotalTime - input[0].energy;
-	age *= 1 + input[0].color.x * gDurationRandomness;
-	float normalizedAge = saturate(age / gDuration);
-
-	float3 centerWorld = ComputeParticlePosition(input[0].positionWorld, input[0].velocityWorld, age, normalizedAge);
-	float4 projPosition = mul(float4(centerWorld, 1), gWorldViewProjection);
-	float2 sizeWorld = ComputeParticleSize(projPosition, input[0].color.y, normalizedAge);
-	float4 color = ComputeParticleColor(projPosition, input[0].color.z, normalizedAge);
-	float4 rotationWorld = ComputeParticleRotation(input[0].color.w, age);
+	float3 centerWorld = input[0].centerWorld;
+	float2 sizeWorld = float2(1,1);//input[0].sizeWorld;
+	float4 color = float4(1,1,1,1);//input[0].color;
+	float4 rotationWorld = float4(0,0,0,0);//input[0].rotationWorld;
 
 	//Compute the local coordinate system of the sprite relative to the world space such that the billboard is aligned with the y-axis and faces the eye.
 	float3 look = gEyePositionWorld - centerWorld;
@@ -126,9 +125,9 @@ void GSParticle(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inou
 	{
 		gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
 		gout.positionWorld = mul(v[i], gWorld).xyz;
-		gout.rotationWorld = rotationWorld;
 		gout.tex = gQuadTexC[i];
 		gout.color = color;
+		gout.rotationWorld = rotationWorld;
 		gout.primitiveID = primID;
 
 		outputStream.Append(gout);

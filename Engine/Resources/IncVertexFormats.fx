@@ -13,7 +13,7 @@ struct VSVertexCPUParticle
 	float3 positionWorld : POSITION;
 	float3 velocityWorld : VELOCITY;
 	float4 color: COLOR0;
-	float energy : ENERGY;
+	float maxAge : MAX_AGE;
 };
 struct VSVertexGPUParticle
 {
@@ -266,10 +266,10 @@ struct GSVertexBillboard
 };
 struct GSCPUParticle
 {
-	float3 positionWorld : POSITION;
-	float3 velocityWorld : VELOCITY;
+	float3 centerWorld : CENTER;
+	float2 sizeWorld : SIZE;
 	float4 color : COLOR;
-	float energy : ENERGY;
+	float4 rotationWorld : ROTATION;
 };
 struct GSGPUParticle
 {
