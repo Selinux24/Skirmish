@@ -16,7 +16,7 @@ namespace Engine
 
         private VertexCPUParticle[] particles;
         private Buffer vertexBuffer;
-        private VertexBufferBinding vertexBufferBinding;
+        private VertexBufferBinding[] vertexBufferBinding;
 
         private int firstActiveParticle;
         private int firstNewParticle;
@@ -63,11 +63,13 @@ namespace Engine
             this.Texture = game.ResourceManager.CreateResource(imgContent);
             this.TextureCount = (uint)imgContent.Count;
 
-            int inputStride = default(VertexCPUParticle).Stride;
-            this.vertexBufferBinding = new VertexBufferBinding(this.vertexBuffer, inputStride, 0);
-
             this.particles = new VertexCPUParticle[description.MaxParticles];
+
             this.vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(this.particles);
+            this.vertexBufferBinding = new[]
+            {
+                new VertexBufferBinding(this.vertexBuffer, default(VertexCPUParticle).Stride, 0),
+            };
         }
         public void Dispose()
         {

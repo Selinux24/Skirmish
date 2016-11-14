@@ -266,7 +266,7 @@ struct GSVertexBillboard
 };
 struct GSCPUParticle
 {
-	float3 centerWorld : CENTER;
+	float3 centerWorld : POSITION;
 	float2 sizeWorld : SIZE;
 	float4 color : COLOR;
 	float4 rotationWorld : ROTATION;

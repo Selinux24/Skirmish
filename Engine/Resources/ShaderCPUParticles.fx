@@ -83,7 +83,6 @@ GSCPUParticle VSParticle(VSVertexCPUParticle input)
 
 	float age = gTotalTime - input.maxAge;
 	age *= 1.0f + input.color.x * gMaxDurationRandomness;
-	age = 0;
 	float normalizedAge = saturate(age / gMaxDuration);
 
 	output.centerWorld = ComputeParticlePosition(input.positionWorld, input.velocityWorld, age, normalizedAge);
@@ -98,9 +97,9 @@ GSCPUParticle VSParticle(VSVertexCPUParticle input)
 void GSParticle(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSCPUParticle> outputStream)
 {
 	float3 centerWorld = input[0].centerWorld;
-	float2 sizeWorld = float2(1,1);//input[0].sizeWorld;
-	float4 color = float4(1,1,1,1);//input[0].color;
-	float4 rotationWorld = float4(0,0,0,0);//input[0].rotationWorld;
+	float2 sizeWorld = input[0].sizeWorld;
+	float4 color = input[0].color;
+	float4 rotationWorld = input[0].rotationWorld;
 
 	//Compute the local coordinate system of the sprite relative to the world space such that the billboard is aligned with the y-axis and faces the eye.
 	float3 look = gEyePositionWorld - centerWorld;
