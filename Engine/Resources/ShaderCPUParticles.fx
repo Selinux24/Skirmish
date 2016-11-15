@@ -136,24 +136,7 @@ void GSParticle(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inou
 float4 PSForwardParticle(PSCPUParticle input) : SV_Target
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
-	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
-	clip(textureColor.a - 0.05f);
-
-	return textureColor;
-}
-GBufferPSOutput PSDeferredParticle(PSCPUParticle input)
-{
-    GBufferPSOutput output = (GBufferPSOutput)0;
-
-	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
-	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw) * input.color;
-	clip(textureColor.a - 0.05f);
-
-	output.color = textureColor;
-	output.normal = float4(0, 0, 0, 0);
-	output.depth = float4(input.positionWorld, 0);
-
-    return output;
+	return gTextureArray.Sample(SamplerLinear, uvw) * input.color;
 }
 
 technique11 ForwardParticle
@@ -163,14 +146,5 @@ technique11 ForwardParticle
 		SetVertexShader(CompileShader(vs_5_0, VSParticle()));
 		SetGeometryShader(CompileShader(gs_5_0, GSParticle()));
 		SetPixelShader(CompileShader(ps_5_0, PSForwardParticle()));
-	}
-}
-technique11 DeferredParticle
-{
-	pass P0
-	{
-		SetVertexShader(CompileShader(vs_5_0, VSParticle()));
-		SetGeometryShader(CompileShader(gs_5_0, GSParticle()));
-		SetPixelShader(CompileShader(ps_5_0, PSDeferredParticle()));
 	}
 }

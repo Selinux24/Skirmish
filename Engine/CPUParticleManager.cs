@@ -8,6 +8,7 @@ using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
+using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
@@ -72,61 +73,33 @@ namespace Engine
 
                     this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
                     Counters.IAInputLayoutSets++;
-                    this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.PointList;
+                    this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
                     Counters.IAPrimitiveTopologySets++;
 
-                    if (context.DrawerMode == DrawerModesEnum.Forward) this.Game.Graphics.SetBlendDefault();
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred) this.Game.Graphics.SetBlendDeferredComposer();
+                    this.Game.Graphics.SetDepthStencilRDZEnabled();
+                    this.Game.Graphics.SetBlendDefaultAlpha();
 
                     foreach (var generator in this.particleGenerators)
                     {
-                        generator.ParticleSystem.Test(
-                            0, 
-                            context.World, context.ViewProjection, context.EyePosition,
-                            this.Game.Graphics.Viewport.Height);
-
                         #region Per frame update
 
-                        if (context.DrawerMode == DrawerModesEnum.Forward)
-                        {
-                            effect.UpdatePerFrame(
-                                context.World,
-                                context.ViewProjection,
-                                this.Game.Graphics.Viewport.Height,
-                                context.EyePosition,
-                                generator.ParticleSystem.TotalTime,
-                                generator.ParticleSystem.MaxDuration,
-                                generator.ParticleSystem.MaxDurationRandomness,
-                                generator.ParticleSystem.EndVelocity,
-                                generator.ParticleSystem.Gravity,
-                                generator.ParticleSystem.StartSize,
-                                generator.ParticleSystem.EndSize,
-                                generator.ParticleSystem.MinColor,
-                                generator.ParticleSystem.MaxColor,
-                                generator.ParticleSystem.RotateSpeed,
-                                generator.ParticleSystem.TextureCount,
-                                generator.ParticleSystem.Texture);
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                        {
-                            effect.UpdatePerFrame(
-                                context.World,
-                                context.ViewProjection,
-                                this.Game.Graphics.Viewport.Height,
-                                context.EyePosition,
-                                generator.ParticleSystem.TotalTime,
-                                generator.ParticleSystem.MaxDuration,
-                                generator.ParticleSystem.MaxDurationRandomness,
-                                generator.ParticleSystem.EndVelocity,
-                                generator.ParticleSystem.Gravity,
-                                generator.ParticleSystem.StartSize,
-                                generator.ParticleSystem.EndSize,
-                                generator.ParticleSystem.MinColor,
-                                generator.ParticleSystem.MaxColor,
-                                generator.ParticleSystem.RotateSpeed,
-                                generator.ParticleSystem.TextureCount,
-                                generator.ParticleSystem.Texture);
-                        }
+                        effect.UpdatePerFrame(
+                            context.World,
+                            context.ViewProjection,
+                            this.Game.Graphics.Viewport.Height,
+                            context.EyePosition,
+                            generator.ParticleSystem.TotalTime,
+                            generator.ParticleSystem.MaxDuration,
+                            generator.ParticleSystem.MaxDurationRandomness,
+                            generator.ParticleSystem.EndVelocity,
+                            generator.ParticleSystem.Gravity,
+                            generator.ParticleSystem.StartSize,
+                            generator.ParticleSystem.EndSize,
+                            generator.ParticleSystem.MinColor,
+                            generator.ParticleSystem.MaxColor,
+                            generator.ParticleSystem.RotateSpeed,
+                            generator.ParticleSystem.TextureCount,
+                            generator.ParticleSystem.Texture);
 
                         #endregion
 

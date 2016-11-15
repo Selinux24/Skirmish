@@ -137,7 +137,7 @@ namespace ModelDrawing
             {
                 this.pManager.AddParticleGenerator(
                     this.pPlume, 100f, 
-                    new Vector3(0, 0, 10), 
+                    new Vector3(0, 0, 0), 
                     Vector3.Up);
             }
         }

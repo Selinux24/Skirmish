@@ -21,10 +21,6 @@ namespace Engine.Effects
         /// Forward drawing technique
         /// </summary>
         public readonly EffectTechnique ForwardDraw = null;
-        /// <summary>
-        /// Deferred drawing technique
-        /// </summary>
-        public readonly EffectTechnique DeferredDraw = null;
 
         /// <summary>
         /// World effect variable
@@ -294,10 +290,8 @@ namespace Engine.Effects
             : base(device, effect, compile)
         {
             this.ForwardDraw = this.Effect.GetTechniqueByName("ForwardParticle");
-            this.DeferredDraw = this.Effect.GetTechniqueByName("DeferredParticle");
 
             this.AddInputLayout(this.ForwardDraw, VertexCPUParticle.GetInput());
-            this.AddInputLayout(this.DeferredDraw, VertexCPUParticle.GetInput());
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
@@ -335,8 +329,6 @@ namespace Engine.Effects
                     {
                         case DrawerModesEnum.Forward:
                             return this.ForwardDraw;
-                        case DrawerModesEnum.Deferred:
-                            return this.DeferredDraw;
                         default:
                             throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }

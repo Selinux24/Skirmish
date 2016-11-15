@@ -9,7 +9,6 @@ namespace Engine
         public float Duration { get; set; }
         public Vector3 Position { get; set; }
         public Vector3 Velocity { get; set; }
-        public bool Added = false;
 
         public CPUParticleGenerator(Game game, CPUParticleSystemDescription settings, float duration, Vector3 position, Vector3 velocity)
         {
@@ -25,12 +24,7 @@ namespace Engine
 
         public void AddParticle(Game game)
         {
-            if (!this.Added)
-            {
-                this.ParticleSystem.AddParticle(game, this.Position, this.Velocity);
-
-                this.Added = true;
-            }
+            this.ParticleSystem.AddParticle(game, this.Position, this.Velocity);
         }
     }
 }

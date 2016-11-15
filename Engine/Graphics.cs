@@ -125,6 +125,10 @@ namespace Engine
         /// </summary>
         private BlendState blendDefault = null;
         /// <summary>
+        /// Default alpha blend state
+        /// </summary>
+        private BlendState blendDefaultAlpha = null;
+        /// <summary>
         /// Blend state for transparent blending
         /// </summary>
         private BlendState blendTransparent = null;
@@ -140,6 +144,10 @@ namespace Engine
         /// Blend state for defered composer blending
         /// </summary>
         private BlendState blendDeferredComposer = null;
+        /// <summary>
+        /// Blend state for defered composer alpha blending
+        /// </summary>
+        private BlendState blendDeferredComposerAlpha = null;
         /// <summary>
         /// Blend state for transparent defered composer blending
         /// </summary>
@@ -664,6 +672,27 @@ namespace Engine
             }
             #endregion
 
+            #region Alpha blend state
+            {
+                BlendStateDescription desc = new BlendStateDescription();
+                desc.AlphaToCoverageEnable = false;
+                desc.IndependentBlendEnable = false;
+
+                desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+                this.blendDefaultAlpha = new BlendState(this.Device, desc);
+            }
+            #endregion
+
             #region Transparent blend state
             {
                 BlendStateDescription desc = new BlendStateDescription();
@@ -727,7 +756,7 @@ namespace Engine
             }
             #endregion
 
-            #region Deferred composer blend state
+            #region Deferred composer blend state (no alpha)
             {
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = false;
@@ -761,6 +790,44 @@ namespace Engine
                 desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
 
                 this.blendDeferredComposer = new BlendState(this.Device, desc);
+            }
+            #endregion
+
+            #region Deferred composer alpha blend state
+            {
+                BlendStateDescription desc = new BlendStateDescription();
+                desc.AlphaToCoverageEnable = false;
+                desc.IndependentBlendEnable = true;
+
+                //Transparent blending only in first buffer
+                desc.RenderTarget[0].IsBlendEnabled = true;
+                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
+                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[1].IsBlendEnabled = true;
+                desc.RenderTarget[1].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[1].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[1].SourceBlend = BlendOption.One;
+                desc.RenderTarget[1].DestinationBlend = BlendOption.Zero;
+                desc.RenderTarget[1].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[1].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[1].DestinationAlphaBlend = BlendOption.Zero;
+
+                desc.RenderTarget[2].IsBlendEnabled = true;
+                desc.RenderTarget[2].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[2].BlendOperation = BlendOperation.Add;
+                desc.RenderTarget[2].SourceBlend = BlendOption.One;
+                desc.RenderTarget[2].DestinationBlend = BlendOption.Zero;
+                desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
+                desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
+
+                this.blendDeferredComposerAlpha = new BlendState(this.Device, desc);
             }
             #endregion
 
@@ -1052,6 +1119,13 @@ namespace Engine
             this.SetBlendState(this.blendDefault, Color.Transparent, -1);
         }
         /// <summary>
+        /// Sets default alpha blend state
+        /// </summary>
+        public void SetBlendDefaultAlpha()
+        {
+            this.SetBlendState(this.blendDefaultAlpha, Color.Transparent, -1);
+        }
+        /// <summary>
         /// Sets transparent blend state
         /// </summary>
         public void SetBlendTransparent()
@@ -1078,6 +1152,13 @@ namespace Engine
         public void SetBlendDeferredComposer()
         {
             this.SetBlendState(this.blendDeferredComposer, Color.Transparent, -1);
+        }
+        /// <summary>
+        /// Sets deferred composer alpha blend state
+        /// </summary>
+        public void SetBlendDeferredComposerAlpha()
+        {
+            this.SetBlendState(this.blendDeferredComposerAlpha, Color.Transparent, -1);
         }
         /// <summary>
         /// Sets transparent deferred composer blend state
@@ -1289,6 +1370,7 @@ namespace Engine
             Helper.Dispose(this.rasterizerCullFrontFace);
 
             Helper.Dispose(this.blendDefault);
+            Helper.Dispose(this.blendDefaultAlpha);
             Helper.Dispose(this.blendTransparent);
             Helper.Dispose(this.blendAdditive);
             Helper.Dispose(this.blendDeferredLighting);
