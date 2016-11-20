@@ -1,70 +1,81 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
-using BindFlags = SharpDX.Direct3D11.BindFlags;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags;
-using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
-using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Content;
-    using Engine.Helpers;
     using Engine.Effects;
 
+    /// <summary>
+    /// CPU particle manager
+    /// </summary>
     public class CPUParticleManager : Drawable
     {
-        private List<CPUParticleGenerator> particleGenerators = new List<CPUParticleGenerator>();
-        private List<CPUParticleGenerator> toDelete = new List<CPUParticleGenerator>();
+        /// <summary>
+        /// Particle systems list
+        /// </summary>
+        private List<CPUParticleSystem> particleSystems = new List<CPUParticleSystem>();
+        /// <summary>
+        /// Collection for particle system disposition
+        /// </summary>
+        private List<CPUParticleSystem> toDelete = new List<CPUParticleSystem>();
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="description">Particle manager description</param>
         public CPUParticleManager(Game game, CPUParticleManagerDescription description)
             : base(game, description)
         {
 
         }
+        /// <summary>
+        /// Resource disposal
+        /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.particleGenerators);
+            Helper.Dispose(this.particleSystems);
+            Helper.Dispose(this.toDelete);
         }
 
+        /// <summary>
+        /// Updates the internal state
+        /// </summary>
+        /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            float elapsed = context.GameTime.ElapsedSeconds;
-
-            if (this.particleGenerators != null && this.particleGenerators.Count > 0)
+            if (this.particleSystems != null && this.particleSystems.Count > 0)
             {
                 toDelete.Clear();
 
-                foreach (CPUParticleGenerator generator in this.particleGenerators)
+                foreach (var particleSystem in this.particleSystems)
                 {
-                    generator.ParticleSystem.TotalTime += elapsed;
-                    generator.AddParticle(this.Game);
+                    particleSystem.Update(context);
 
-                    generator.Duration -= elapsed;
-
-                    if (generator.Duration <= 0)
+                    if (particleSystem.Active)
                     {
-                        toDelete.Add(generator);
+                        toDelete.Add(particleSystem);
                     }
                 }
 
                 if (toDelete.Count > 0)
                 {
-                    foreach (CPUParticleGenerator generator in toDelete)
+                    foreach (var particleSystem in toDelete)
                     {
-                        this.particleGenerators.Remove(generator);
+                        this.particleSystems.Remove(particleSystem);
                     }
                 }
             }
         }
+        /// <summary>
+        /// Draws the active particle systems
+        /// </summary>
+        /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.particleGenerators != null && this.particleGenerators.Count > 0)
+            if (this.particleSystems != null && this.particleSystems.Count > 0)
             {
                 var effect = DrawerPool.EffectCPUParticles;
                 if (effect != null)
@@ -76,49 +87,34 @@ namespace Engine
                     this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
                     Counters.IAPrimitiveTopologySets++;
 
-                    this.Game.Graphics.SetDepthStencilRDZEnabled();
-                    this.Game.Graphics.SetBlendDefaultAlpha();
-
-                    foreach (var generator in this.particleGenerators)
+                    foreach (var particleSystem in this.particleSystems)
                     {
-                        #region Per frame update
-
-                        effect.UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection,
-                            this.Game.Graphics.Viewport.Height,
-                            context.EyePosition,
-                            generator.ParticleSystem.TotalTime,
-                            generator.ParticleSystem.MaxDuration,
-                            generator.ParticleSystem.MaxDurationRandomness,
-                            generator.ParticleSystem.EndVelocity,
-                            generator.ParticleSystem.Gravity,
-                            generator.ParticleSystem.StartSize,
-                            generator.ParticleSystem.EndSize,
-                            generator.ParticleSystem.MinColor,
-                            generator.ParticleSystem.MaxColor,
-                            generator.ParticleSystem.RotateSpeed,
-                            generator.ParticleSystem.TextureCount,
-                            generator.ParticleSystem.Texture);
-
-                        #endregion
-
-                        generator.ParticleSystem.SetBuffer(this.Game);
-
-                        for (int p = 0; p < technique.Description.PassCount; p++)
-                        {
-                            technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
-
-                            generator.ParticleSystem.Draw(this.Game);
-                        }
+                        particleSystem.Draw(context, effect, technique);
                     }
                 }
             }
         }
 
-        public void AddParticleGenerator(CPUParticleSystemDescription description, float duration, Vector3 position, Vector3 velocity)
+        /// <summary>
+        /// Adds a new particle system to the collection
+        /// </summary>
+        /// <param name="description">Particle system description</param>
+        /// <param name="position">Initial position</param>
+        /// <param name="velocity">Initial velocity</param>
+        /// <param name="duration">Emission duration</param>
+        /// <param name="emissionRate">Emission rate</param>
+        public void AddParticleGenerator(CPUParticleSystemDescription description, Vector3 position, Vector3 velocity, float duration, float emissionRate)
         {
-            this.particleGenerators.Add(new CPUParticleGenerator(this.Game, description, duration, position, velocity));
+            this.particleSystems.Add(new CPUParticleSystem(this.Game, description, position, velocity, duration, emissionRate));
+        }
+
+        /// <summary>
+        /// Gets the text representation of the particle manager
+        /// </summary>
+        /// <returns>Returns the text representation of the particle manager</returns>
+        public override string ToString()
+        {
+            return string.Format("Count: {0}", particleSystems.Count);
         }
     }
 }

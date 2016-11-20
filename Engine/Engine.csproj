@@ -161,7 +161,6 @@
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
-    <Compile Include="CPUParticleGenerator.cs" />
     <Compile Include="CPUParticleManager.cs" />
     <Compile Include="CPUParticleManagerDescription.cs" />
     <Compile Include="CPUParticleSystem.cs" />

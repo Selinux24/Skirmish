@@ -34,7 +34,7 @@ namespace ModelDrawing
             var textDesc = new TextDrawerDescription()
             {
                 Font = "Arial",
-                FontSize = 24,
+                FontSize = 20,
                 TextColor = Color.Yellow,
             };
             this.text = this.AddText(textDesc);
@@ -87,7 +87,7 @@ namespace ModelDrawing
             this.pFire = this.AddParticleSystem(pSystem);
             this.pFire.Visible = this.pFire.Active = false;
 
-            this.pManager = this.AddParticleSystem(new CPUParticleManagerDescription());
+            this.pManager = this.AddParticleManager(new CPUParticleManagerDescription());
             this.pPlume = CPUParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png");
         }
 
@@ -136,16 +136,19 @@ namespace ModelDrawing
             if (this.Game.Input.KeyJustPressed(Keys.P))
             {
                 this.pManager.AddParticleGenerator(
-                    this.pPlume, 100f, 
-                    new Vector3(0, 0, 0), 
-                    Vector3.Up);
+                    this.pPlume, 
+                    new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10)),
+                    Vector3.Up,
+                    this.rnd.NextFloat(1, 60), this.rnd.NextFloat(0.1f, 2f));
             }
         }
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
 
-            this.text.Text = "Model Drawing";
+            string particle = this.pManager.ToString();
+
+            this.text.Text = "Model Drawing " + particle;
         }
     }
 }

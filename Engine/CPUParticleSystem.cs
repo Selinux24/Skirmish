@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using Buffer = SharpDX.Direct3D11.Buffer;
+using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
@@ -8,53 +9,166 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
+    using Engine.Effects;
     using Engine.Helpers;
 
+    /// <summary>
+    /// CPU particle system
+    /// </summary>
     public class CPUParticleSystem : IDisposable
     {
-        protected CPUParticleSystemDescription Settings = new CPUParticleSystemDescription();
-
+        /// <summary>
+        /// Particle list
+        /// </summary>
         private VertexCPUParticle[] particles;
+        /// <summary>
+        /// Particles buffer
+        /// </summary>
         private Buffer vertexBuffer;
+        /// <summary>
+        /// Vertex buffer binding
+        /// </summary>
         private VertexBufferBinding[] vertexBufferBinding;
-
-        private int firstActiveParticle;
-        private int firstNewParticle;
-        private int firstFreeParticle;
-        private int firstRetiredParticle;
+        /// <summary>
+        /// Current particle index to update data
+        /// </summary>
+        private int currentParticleIndex = 0;
+        /// <summary>
+        /// Time to next particle emission
+        /// </summary>
+        private float timeToNextParticle = 0;
+        /// <summary>
+        /// Random instance
+        /// </summary>
         private Random rnd = new Random();
 
-        public CPUParticleSystemTypes ParticleType
-        {
-            get
-            {
-                return this.Settings.ParticleType;
-            }
-        }
-        public float TotalTime;
+        /// <summary>
+        /// Game instance
+        /// </summary>
+        protected Game Game = null;
+
+        /// <summary>
+        /// Particle texture
+        /// </summary>
         public ShaderResourceView Texture;
+        /// <summary>
+        /// Texture count
+        /// </summary>
         public uint TextureCount;
-        public int VertexCount
+        /// <summary>
+        /// Active particle count
+        /// </summary>
+        public int ActiveParticles { get; private set; }
+        /// <summary>
+        /// Total particle system time
+        /// </summary>
+        public float TotalTime { get; private set; }
+        /// <summary>
+        /// Time to end
+        /// </summary>
+        public float TimeToEnd { get; private set; }
+
+        /// <summary>
+        /// Emitter position
+        /// </summary>
+        public Vector3 Position { get; set; }
+        /// <summary>
+        /// Emitter velocity vector
+        /// </summary>
+        public Vector3 Velocity { get; set; }
+        /// <summary>
+        /// Emitter duration
+        /// </summary>
+        public float Duration { get; private set; }
+        /// <summary>
+        /// Emitter rate interval
+        /// </summary>
+        /// <remarks>Particles per second</remarks>
+        public float EmissionRate { get; private set; }
+        /// <summary>
+        /// Gets if the current particle system is active
+        /// </summary>
+        public bool Active
         {
             get
             {
-                return this.particles.Length;
+                return this.Duration <= 0 && this.TimeToEnd <= 0;
             }
         }
+        /// <summary>
+        /// Maximum particle age
+        /// </summary>
+        public float MaximumAge { get; private set; }
+        /// <summary>
+        /// Macimum age variation
+        /// </summary>
+        public float MaximumAgeVariation { get; private set; }
+        /// <summary>
+        /// Velocity at end
+        /// </summary>
+        public float VelocityAtEnd { get; private set; }
+        /// <summary>
+        /// Gravity vector
+        /// </summary>
+        public Vector3 Gravity { get; private set; }
+        /// <summary>
+        /// Starting size
+        /// </summary>
+        public Vector2 StartSize { get; private set; }
+        /// <summary>
+        /// Ending size
+        /// </summary>
+        public Vector2 EndSize { get; private set; }
+        /// <summary>
+        /// Minimum color
+        /// </summary>
+        public Color MinimumColor { get; private set; }
+        /// <summary>
+        /// Maximum color
+        /// </summary>
+        public Color MaximumColor { get; private set; }
+        /// <summary>
+        /// Horizontal velocity
+        /// </summary>
+        public Vector2 HorizontalVelocity { get; private set; }
+        /// <summary>
+        /// Vertical velocity
+        /// </summary>
+        public Vector2 VerticalVelocity { get; private set; }
+        /// <summary>
+        /// Rotation speed
+        /// </summary>
+        public Vector2 RotateSpeed { get; private set; }
+        /// <summary>
+        /// Emitter velocity sensitivity
+        /// </summary>
+        public float EmitterVelocitySensitivity { get; private set; }
 
-        public float MaxDuration { get { return this.Settings.MaxDuration; } }
-        public float MaxDurationRandomness { get { return this.Settings.MaxDurationRandomness; } }
-        public float EndVelocity { get { return this.Settings.EndVelocity; } }
-        public Vector3 Gravity { get { return this.Settings.Gravity; } }
-        public Vector2 StartSize { get { return new Vector2(this.Settings.MinStartSize, this.Settings.MaxStartSize); } }
-        public Vector2 EndSize { get { return new Vector2(this.Settings.MinEndSize, this.Settings.MaxEndSize); } }
-        public Color MinColor { get { return this.Settings.MinColor; } }
-        public Color MaxColor { get { return this.Settings.MaxColor; } }
-        public Vector2 RotateSpeed { get { return new Vector2(this.Settings.MinRotateSpeed, this.Settings.MaxRotateSpeed); } }
-
-        public CPUParticleSystem(Game game, CPUParticleSystemDescription description)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="description">Particle system description</param>
+        /// <param name="position">Initial position</param>
+        /// <param name="velocity">Initial velocity</param>
+        /// <param name="duration">Total duration</param>
+        /// <param name="emissionRate">Emission rate (particles per second)</param>
+        public CPUParticleSystem(Game game, CPUParticleSystemDescription description, Vector3 position, Vector3 velocity, float duration, float emissionRate)
         {
-            this.Settings = description;
+            this.Game = game;
+
+            this.MaximumAge = description.MaxDuration;
+            this.MaximumAgeVariation = description.MaxDurationRandomness;
+            this.VelocityAtEnd = description.EndVelocity;
+            this.Gravity = description.Gravity;
+            this.StartSize = new Vector2(description.MinStartSize, description.MaxStartSize);
+            this.EndSize = new Vector2(description.MinEndSize, description.MaxEndSize);
+            this.MinimumColor = description.MinColor;
+            this.MaximumColor = description.MaxColor;
+            this.HorizontalVelocity = new Vector2(description.MinHorizontalVelocity, description.MaxHorizontalVelocity);
+            this.VerticalVelocity = new Vector2(description.MinVerticalVelocity, description.MaxVerticalVelocity);
+            this.RotateSpeed = new Vector2(description.MinRotateSpeed, description.MaxRotateSpeed);
+            this.EmitterVelocitySensitivity = description.EmitterVelocitySensitivity;
 
             ImageContent imgContent = new ImageContent()
             {
@@ -63,7 +177,14 @@ namespace Engine
             this.Texture = game.ResourceManager.CreateResource(imgContent);
             this.TextureCount = (uint)imgContent.Count;
 
-            this.particles = new VertexCPUParticle[description.MaxParticles];
+            this.Duration = duration;
+            this.EmissionRate = emissionRate;
+            this.Position = position;
+            this.Velocity = velocity;
+
+            float maxActiveParticles = description.MaxDuration * (1f / this.EmissionRate);
+            maxActiveParticles = maxActiveParticles != (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles;
+            this.particles = new VertexCPUParticle[(int)maxActiveParticles];
 
             this.vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(this.particles);
             this.vertexBufferBinding = new[]
@@ -71,54 +192,111 @@ namespace Engine
                 new VertexBufferBinding(this.vertexBuffer, default(VertexCPUParticle).Stride, 0),
             };
         }
+        /// <summary>
+        /// Resource disposal
+        /// </summary>
         public void Dispose()
         {
             Helper.Dispose(this.vertexBuffer);
         }
 
-        public void Update()
+        /// <summary>
+        /// Update internal state
+        /// </summary>
+        /// <param name="context">Context</param>
+        public void Update(UpdateContext context)
         {
+            float elapsed = context.GameTime.ElapsedSeconds;
 
+            this.Duration -= elapsed;
+
+            if (this.Duration > 0 && this.timeToNextParticle <= 0)
+            {
+                this.timeToNextParticle = this.EmissionRate;
+
+                this.AddParticle();
+            }
+
+            this.timeToNextParticle -= elapsed;
+
+            this.TotalTime += elapsed;
+            this.TimeToEnd -= elapsed;
         }
-        public void Draw(Game game)
+        /// <summary>
+        /// Draw particles
+        /// </summary>
+        /// <param name="context">Context</param>
+        /// <param name="effect">Effect</param>
+        /// <param name="technique">Technique</param>
+        public void Draw(DrawContext context, EffectCPUParticles effect, EffectTechnique technique)
         {
-            game.Graphics.DeviceContext.Draw(1, 0);
+            this.Game.Graphics.SetDepthStencilRDZEnabled();
+            this.Game.Graphics.SetBlendDefaultAlpha();
 
-            Counters.DrawCallsPerFrame++;
-            Counters.InstancesPerFrame++;
-            Counters.TrianglesPerFrame += 2 * 1;
+            effect.UpdatePerFrame(
+                context.World,
+                context.ViewProjection,
+                this.Game.Graphics.Viewport.Height,
+                context.EyePosition,
+                this.TotalTime,
+                this.MaximumAge,
+                this.MaximumAgeVariation,
+                this.VelocityAtEnd,
+                this.Gravity,
+                this.StartSize,
+                this.EndSize,
+                this.MinimumColor,
+                this.MaximumColor,
+                this.RotateSpeed,
+                this.TextureCount,
+                this.Texture);
+
+            this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+            Counters.IAVertexBuffersSets++;
+            this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
+            Counters.IAIndexBufferSets++;
+
+            for (int p = 0; p < technique.Description.PassCount; p++)
+            {
+                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                this.Game.Graphics.DeviceContext.Draw(this.ActiveParticles, 0);
+
+                Counters.DrawCallsPerFrame++;
+                Counters.InstancesPerFrame++;
+                Counters.TrianglesPerFrame += 2 * 1;
+            }
         }
 
-        public void AddParticle(Game game, Vector3 position, Vector3 velocity)
+        /// <summary>
+        /// Adds a new particle to system
+        /// </summary>
+        private void AddParticle()
         {
-            int nextFreeParticle = this.firstFreeParticle + 1;
+            int nextFreeParticle = this.currentParticleIndex + 1;
+
+            if (this.ActiveParticles < nextFreeParticle)
+            {
+                this.ActiveParticles = nextFreeParticle;
+            }
 
             if (nextFreeParticle >= this.particles.Length)
             {
                 nextFreeParticle = 0;
             }
 
-            if (nextFreeParticle == this.firstRetiredParticle)
-            {
-                return;
-            }
-
-            velocity *= this.Settings.EmitterVelocitySensitivity;
+            Vector3 velocity = this.Velocity * this.EmitterVelocitySensitivity;
 
             float horizontalVelocity = MathUtil.Lerp(
-                this.Settings.MinHorizontalVelocity,
-                this.Settings.MaxHorizontalVelocity,
+                this.HorizontalVelocity.X,
+                this.HorizontalVelocity.Y,
                 this.rnd.NextFloat(0, 1));
 
             double horizontalAngle = this.rnd.NextDouble() * MathUtil.TwoPi;
 
             velocity.X += horizontalVelocity * (float)Math.Cos(horizontalAngle);
             velocity.Z += horizontalVelocity * (float)Math.Sin(horizontalAngle);
-
-            velocity.Y += MathUtil.Lerp(
-                this.Settings.MinVerticalVelocity,
-                this.Settings.MaxVerticalVelocity,
-                this.rnd.NextFloat(0, 1));
+            velocity.Y += MathUtil.Lerp(this.VerticalVelocity.X, this.VerticalVelocity.Y, this.rnd.NextFloat(0, 1));
 
             Color randomValues = new Color(
                 this.rnd.NextFloat(0, 1),
@@ -126,154 +304,29 @@ namespace Engine
                 this.rnd.NextFloat(0, 1),
                 this.rnd.NextFloat(0, 1));
 
-            this.particles[this.firstFreeParticle].Position = position;
-            this.particles[this.firstFreeParticle].Velocity = velocity;
-            this.particles[this.firstFreeParticle].Color = randomValues;
-            this.particles[this.firstFreeParticle].MaxAge = this.TotalTime;
+            this.particles[this.currentParticleIndex].Position = this.Position;
+            this.particles[this.currentParticleIndex].Velocity = velocity;
+            this.particles[this.currentParticleIndex].Color = randomValues;
+            this.particles[this.currentParticleIndex].MaxAge = this.TotalTime;
 
-            this.firstFreeParticle = nextFreeParticle;
+            this.Game.Graphics.DeviceContext.WriteBuffer(this.vertexBuffer, this.particles);
 
-            game.Graphics.DeviceContext.WriteBuffer(this.vertexBuffer, this.particles);
-        }
-        private void RetireActiveParticles()
-        {
-            float particleDuration = this.Settings.MaxDuration;
-
-            while (this.firstActiveParticle != this.firstNewParticle)
-            {
-                float particleAge = this.TotalTime - this.particles[this.firstActiveParticle].MaxAge;
-
-                if (particleAge < particleDuration)
-                {
-                    break;
-                }
-
-                this.particles[this.firstActiveParticle].MaxAge = this.TotalTime;
-
-                this.firstActiveParticle++;
-
-                if (this.firstActiveParticle >= this.particles.Length)
-                {
-                    this.firstActiveParticle = 0;
-                }
-            }
-        }
-        private void FreeRetiredParticles()
-        {
-            while (this.firstRetiredParticle != this.firstActiveParticle)
-            {
-                float age = this.TotalTime - (int)this.particles[this.firstRetiredParticle].MaxAge;
-
-                if (age < 3)
-                {
-                    break;
-                }
-
-                this.firstRetiredParticle++;
-
-                if (this.firstRetiredParticle >= this.particles.Length)
-                {
-                    this.firstRetiredParticle = 0;
-                }
-            }
+            this.currentParticleIndex = nextFreeParticle;
+            this.TimeToEnd = Math.Max(this.TimeToEnd, this.MaximumAge);
         }
 
-        public void SetBuffer(Game game)
+        /// <summary>
+        /// Gets the text representation of the particle system
+        /// </summary>
+        /// <returns>Returns the text representation of the particle system</returns>
+        public override string ToString()
         {
-            game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-            Counters.IAVertexBuffersSets++;
-            game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
-        }
-
-        private Vector3 ComputeParticlePosition(Vector3 position, Vector3 velocity, float age, float normalizedAge, float gEndVelocity, float gDuration, Vector3 gGravity)
-        {
-            float startVelocity = velocity.Length();
-            float endVelocity = startVelocity * gEndVelocity;
-            float velocityIntegral = startVelocity * normalizedAge + (endVelocity - startVelocity) * normalizedAge * normalizedAge * 0.5f;
-
-            position += Vector3.Normalize(velocity) * velocityIntegral;
-            position += gGravity * age * normalizedAge;
-
-            return position;
-        }
-        private Vector2 ComputeParticleSize(Vector3 position, float randomValue, float normalizedAge, Vector2 gStartSize, Vector2 gEndSize, Matrix gWorldViewProjection, float gViewportHeight)
-        {
-            float startSize = MathUtil.Lerp(gStartSize.X, gStartSize.Y, randomValue);
-            float endSize = MathUtil.Lerp(gEndSize.X, gEndSize.Y, randomValue);
-
-            float size = MathUtil.Lerp(startSize, endSize, normalizedAge);
-
-            return new Vector2(size, size);
-        }
-        private Color4 ComputeParticleColor(float randomValue, float normalizedAge, Color4 gMinColor, Color4 gMaxColor)
-        {
-            Color4 color = Color4.Lerp(gMinColor, gMaxColor, randomValue);
-
-            color.Alpha *= normalizedAge * (1 - normalizedAge) * (1 - normalizedAge) * 6.7f;
-
-            return color;
-        }
-        private Vector4 ComputeParticleRotation(float randomValue, float age, Vector2 gRotateSpeed)
-        {
-            float rotateSpeed = MathUtil.Lerp(gRotateSpeed.X, gRotateSpeed.Y, randomValue);
-
-            float rotation = rotateSpeed * age;
-
-            float c = (float)Math.Cos(rotation);
-            float s = (float)Math.Sin(rotation);
-
-            Vector4 rotationMatrix = new Vector4(c, -s, s, c);
-
-            rotationMatrix *= 0.5f;
-            rotationMatrix += 0.5f;
-
-            return rotationMatrix;
-        }
-        public void Test(int index, Matrix world, Matrix viewProj, Vector3 eyePos, float vpHeight)
-        {
-            Matrix gWorld = world;
-            Matrix gWorldViewProjection = world * viewProj;
-            float gViewportHeight = vpHeight;
-            Vector3 gEyePositionWorld = eyePos;
-            float gTotalTime = this.TotalTime;
-            //uint gTextureCount = 1;
-
-            float gMaxDuration = this.MaxDuration;
-            float gMaxDurationRandomness = this.MaxDurationRandomness;
-            float gEndVelocity = this.EndVelocity;
-            Vector3 gGravity = this.Gravity;
-            Vector2 gStartSize = this.StartSize;
-            Vector2 gEndSize = this.EndSize;
-            Color4 gMinColor = this.MinColor;
-            Color4 gMaxColor = this.MaxColor;
-            Vector2 gRotateSpeed = this.RotateSpeed;
-
-            var input = this.particles;
-
-            float age = gTotalTime - input[0].MaxAge;
-            age *= 1 + input[0].Color.Red * gMaxDurationRandomness;
-            float normalizedAge = Math.Min(age / gMaxDuration, 1f);
-
-            Vector3 centerWorld = ComputeParticlePosition(input[0].Position, input[0].Velocity, age, normalizedAge, gEndVelocity, gMaxDuration, gGravity);
-            Vector2 sizeWorld = ComputeParticleSize(input[0].Position, input[0].Color.Green, normalizedAge, gStartSize, gEndSize, gWorldViewProjection, gViewportHeight);
-            Color4 color = ComputeParticleColor(input[0].Color.Blue, normalizedAge, gMinColor, gMaxColor);
-            Vector4 rotationWorld = ComputeParticleRotation(input[0].Color.Alpha, age, gRotateSpeed);
-
-            Vector3 look = gEyePositionWorld - centerWorld;
-            look.Y = 0.0f; // y-axis aligned, so project to xz-plane
-            look = Vector3.Normalize(look);
-            Vector3 up = new Vector3(0.0f, 1.0f, 0.0f);
-            Vector3 right = Vector3.Cross(up, look);
-
-            //Compute triangle strip vertices (quad) in world space.
-            float halfWidth = 0.5f * sizeWorld.X;
-            float halfHeight = 0.5f * sizeWorld.Y;
-            Vector4[] v = new Vector4[4];
-            v[0] = new Vector4(centerWorld + halfWidth * right - halfHeight * up, 1.0f);
-            v[1] = new Vector4(centerWorld + halfWidth * right + halfHeight * up, 1.0f);
-            v[2] = new Vector4(centerWorld - halfWidth * right - halfHeight * up, 1.0f);
-            v[3] = new Vector4(centerWorld - halfWidth * right + halfHeight * up, 1.0f);
+            return string.Format("Index: {0}; Count: {1}; Total: {2:0.00}/{3:0.00}; ToEnd: {4:0.00};", 
+                this.currentParticleIndex, 
+                this.ActiveParticles, 
+                this.TotalTime, 
+                this.Duration,
+                this.TimeToEnd);
         }
     }
 }

@@ -1,18 +1,24 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine
 {
+    /// <summary>
+    /// Particle system description
+    /// </summary>
     public class CPUParticleSystemDescription
     {
+        /// <summary>
+        /// Initializes dust particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
         public static CPUParticleSystemDescription InitializeDust(string contentPath, string texture)
         {
             CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
-
-            settings.MaxParticles = 1000;
 
             settings.MaxDuration = 1;
 
@@ -40,14 +46,18 @@ namespace Engine
 
             return settings;
         }
+        /// <summary>
+        /// Initializes explosion particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
         public static CPUParticleSystemDescription InitializeExplosion(string contentPath, string texture)
         {
             CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
-
-            settings.MaxParticles = 1000;
 
             settings.MaxDuration = 2;
             settings.MaxDurationRandomness = 1;
@@ -76,14 +86,18 @@ namespace Engine
 
             return settings;
         }
+        /// <summary>
+        /// Initializes explosion with smoke particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
         public static CPUParticleSystemDescription InitializeExplosionSmoke(string contentPath, string texture)
         {
             CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
-
-            settings.MaxParticles = 1000;
 
             settings.MaxDuration = 4;
 
@@ -111,14 +125,18 @@ namespace Engine
 
             return settings;
         }
+        /// <summary>
+        /// Initializes fire particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
         public static CPUParticleSystemDescription InitializeFire(string contentPath, string texture)
         {
             CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
-
-            settings.MaxParticles = 500;
 
             settings.MaxDuration = 2;
             settings.MaxDurationRandomness = 1;
@@ -144,14 +162,18 @@ namespace Engine
 
             return settings;
         }
+        /// <summary>
+        /// Initializes plasma engine particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
         public static CPUParticleSystemDescription InitializePlasmaEngine(string contentPath, string texture)
         {
             CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
-
-            settings.MaxParticles = 500;
 
             settings.MaxDuration = 0.5f;
             settings.MaxDurationRandomness = 0f;
@@ -177,14 +199,18 @@ namespace Engine
 
             return settings;
         }
+        /// <summary>
+        /// Initializes porjectile trail particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
         public static CPUParticleSystemDescription InitializeProjectileTrail(string contentPath, string texture)
         {
             CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
-
-            settings.MaxParticles = 250;
 
             settings.MaxDuration = 0.5f;
             settings.MaxDurationRandomness = 1.5f;
@@ -211,14 +237,18 @@ namespace Engine
 
             return settings;
         }
+        /// <summary>
+        /// Initializes smoke engine particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
         public static CPUParticleSystemDescription InitializeSmokeEngine(string contentPath, string texture)
         {
             CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
-
-            settings.MaxParticles = 1000;
 
             settings.MaxDuration = 1;
 
@@ -243,14 +273,18 @@ namespace Engine
 
             return settings;
         }
+        /// <summary>
+        /// Initializes smoke plume particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
         public static CPUParticleSystemDescription InitializeSmokePlume(string contentPath, string texture)
         {
             CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
-
-            settings.MaxParticles = 5000;
 
             settings.MaxDuration = 10;
 
@@ -276,46 +310,108 @@ namespace Engine
             return settings;
         }
 
+        /// <summary>
+        /// Particle type
+        /// </summary>
         public CPUParticleSystemTypes ParticleType { get; set; }
 
-        public int MaxParticles { get; set; }
-
+        /// <summary>
+        /// Content path
+        /// </summary>
         public string ContentPath { get; set; }
+        /// <summary>
+        /// Texture name
+        /// </summary>
         public string TextureName { get; set; }
 
+        /// <summary>
+        /// Maximum particle duration
+        /// </summary>
         public float MaxDuration { get; set; }
+        /// <summary>
+        /// Duration randomness
+        /// </summary>
         public float MaxDurationRandomness { get; set; }
 
+        /// <summary>
+        /// Maximum horizontal velocity
+        /// </summary>
         public float MaxHorizontalVelocity { get; set; }
+        /// <summary>
+        /// Minimum horizontal velocity
+        /// </summary>
         public float MinHorizontalVelocity { get; set; }
 
+        /// <summary>
+        /// Maximum vertical velocity
+        /// </summary>
         public float MaxVerticalVelocity { get; set; }
+        /// <summary>
+        /// Minimum vertical velocity
+        /// </summary>
         public float MinVerticalVelocity { get; set; }
 
+        /// <summary>
+        /// Gravity
+        /// </summary>
         public Vector3 Gravity { get; set; }
-
+        /// <summary>
+        /// Velocity at end
+        /// </summary>
         public float EndVelocity { get; set; }
 
+        /// <summary>
+        /// Minimum color variation
+        /// </summary>
         public Color MinColor { get; set; }
+        /// <summary>
+        /// Maximum color variation
+        /// </summary>
         public Color MaxColor { get; set; }
 
+        /// <summary>
+        /// Minimum rotation speed
+        /// </summary>
         public float MinRotateSpeed { get; set; }
+        /// <summary>
+        /// Maximum rotation speed
+        /// </summary>
         public float MaxRotateSpeed { get; set; }
 
+        /// <summary>
+        /// Minimum starting size
+        /// </summary>
         public float MinStartSize { get; set; }
+        /// <summary>
+        /// Maximum starting size
+        /// </summary>
         public float MaxStartSize { get; set; }
 
+        /// <summary>
+        /// Minimum ending size
+        /// </summary>
         public float MinEndSize { get; set; }
+        /// <summary>
+        /// Maximum ending size
+        /// </summary>
         public float MaxEndSize { get; set; }
 
+        /// <summary>
+        /// Gets or sets wheter the particles were transparent
+        /// </summary>
         public bool Transparent { get; set; }
 
+        /// <summary>
+        /// Emitter velocity sensitivity
+        /// </summary>
         public float EmitterVelocitySensitivity { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public CPUParticleSystemDescription()
         {
             this.ParticleType = CPUParticleSystemTypes.None;
-            this.MaxParticles = 0;
             this.ContentPath = "Resources";
             this.TextureName = null;
             this.MaxDuration = 0;

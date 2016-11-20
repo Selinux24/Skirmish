@@ -664,8 +664,13 @@ namespace Engine
 
             return newModel;
         }
-
-        public CPUParticleManager AddParticleSystem(CPUParticleManagerDescription description, int order = 0)
+        /// <summary>
+        /// Adds a new CPU particle manager
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new particle manager</returns>
+        public CPUParticleManager AddParticleManager(CPUParticleManagerDescription description, int order = 0)
         {
             CPUParticleManager newModel = new CPUParticleManager(this.Game, description);
 
@@ -674,7 +679,7 @@ namespace Engine
             return newModel;
         }
         /// <summary>
-        /// Adds particle system
+        /// Adds a new GPU particle system
         /// </summary>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>

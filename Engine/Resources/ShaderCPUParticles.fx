@@ -90,6 +90,8 @@ GSCPUParticle VSParticle(VSVertexCPUParticle input)
 	output.color = ComputeParticleColor(input.color.z, normalizedAge);
 	output.rotationWorld = ComputeParticleRotation(input.color.w, age);
 
+	output.centerWorld.y += (output.sizeWorld.y * 0.5f);
+
 	return output;
 }
 

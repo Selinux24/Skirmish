@@ -190,7 +190,20 @@ namespace Engine.Helpers
         /// <param name="deviceContext">Graphic context</param>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, T[] data)
+        public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, params T[] data)
+            where T : struct
+        {
+            WriteBuffer<T>(deviceContext, buffer, 0, data);
+        }
+        /// <summary>
+        /// Write data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Buffer element offset to write</param>
+        /// <param name="data">Complete data</param>
+        public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, long offset, params T[] data)
             where T : struct
         {
             Counters.BufferWrites++;
@@ -201,13 +214,26 @@ namespace Engine.Helpers
                 deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out stream);
                 using (stream)
                 {
-                    stream.Position = 0;
+                    stream.Position = Marshal.SizeOf(default(T)) * offset;
                     stream.WriteRange(data);
                 }
                 deviceContext.UnmapSubresource(buffer, 0);
             }
         }
 
+        /// <summary>
+        /// Reads an array of values from buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphics context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="length">Array length</param>
+        /// <returns>Returns readed data</returns>
+        public static T[] ReadBuffer<T>(this DeviceContext deviceContext, Buffer buffer, int length)
+            where T : struct
+        {
+            return ReadBuffer<T>(deviceContext, buffer, 0, length);
+        }
         /// <summary>
         /// Reads an array of values from buffer
         /// </summary>
@@ -228,7 +254,7 @@ namespace Engine.Helpers
             deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out stream);
             using (stream)
             {
-                stream.Position = offset;
+                stream.Position = Marshal.SizeOf(default(T)) * offset;
 
                 for (int i = 0; i < length; i++)
                 {
