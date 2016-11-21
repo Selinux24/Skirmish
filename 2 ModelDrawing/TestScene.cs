@@ -13,9 +13,11 @@ namespace ModelDrawing
 
         private Model floor = null;
 
-        private GPUParticleSystem pFire = null;
         private CPUParticleManager pManager = null;
         private CPUParticleSystemDescription pPlume = null;
+        private CPUParticleSystemDescription pFire = null;
+        private CPUParticleSystemDescription pDust = null;
+        private CPUParticleSystemDescription pProjectile = null;
 
         private Random rnd = new Random();
 
@@ -75,20 +77,11 @@ namespace ModelDrawing
         }
         private void InitializeModels()
         {
-            var pSystem = new GPUParticleSystemDescription();
-
-            for (int i = 0; i < 10; i++)
-            {
-                pSystem.AddFire(
-                    new Vector3(-5 + i, 0, 0),
-                    "resources", "fire.dds");
-            }
-
-            this.pFire = this.AddParticleSystem(pSystem);
-            this.pFire.Visible = this.pFire.Active = false;
-
             this.pManager = this.AddParticleManager(new CPUParticleManagerDescription());
             this.pPlume = CPUParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png");
+            this.pFire = CPUParticleSystemDescription.InitializeFire("resources", "fire.png");
+            this.pDust = CPUParticleSystemDescription.InitializeDust("resources", "smoke.png");
+            this.pProjectile = CPUParticleSystemDescription.InitializeProjectileTrail("resources", "smoke.png");
         }
 
         public override void Update(GameTime gameTime)
@@ -135,13 +128,40 @@ namespace ModelDrawing
 
             if (this.Game.Input.KeyJustPressed(Keys.P))
             {
-                this.pManager.AddParticleGenerator(
-                    this.pPlume, 
-                    new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10)),
-                    Vector3.Up,
-                    this.rnd.NextFloat(1, 60), this.rnd.NextFloat(0.1f, 2f));
+                this.AddSystem();
             }
         }
+        private void AddSystem()
+        {
+            float percent = this.rnd.NextFloat(0, 1);
+            if (percent <= 0.33f)
+            {
+                Vector3 position = new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10));
+                float duration = this.rnd.NextFloat(1, 60);
+                float rate = this.rnd.NextFloat(0.1f, 2f);
+
+                this.pManager.AddParticleGenerator(this.pFire, position, Vector3.Up, duration, rate);
+                this.pManager.AddParticleGenerator(this.pPlume, position, Vector3.Up, duration + (duration * 0.1f), rate);
+            }
+            else if (percent <= 0.66f)
+            {
+                this.pManager.AddParticleGenerator(this.pDust, Vector3.Zero, Vector3.Up, 60, 0.05f);
+            }
+            else
+            {
+                this.pManager.AddParticleGenerator(this.pProjectile, Vector3.Up, Vector3.Up, 60, 0.05f);
+            }
+        }
+        private Vector3 GetPosition(float d)
+        {
+            Vector3 position = Vector3.Zero;
+            position.X = 3.0f * d * (float)Math.Cos(0.4f * this.Game.GameTime.TotalSeconds);
+            position.Y = 1f;
+            position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
+
+            return position;
+        }
+
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);

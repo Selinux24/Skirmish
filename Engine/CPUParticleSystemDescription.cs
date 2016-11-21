@@ -23,29 +23,144 @@ namespace Engine
             settings.MaxDuration = 1;
 
             settings.MinHorizontalVelocity = 0;
-            settings.MaxHorizontalVelocity = 2;
+            settings.MaxHorizontalVelocity = 0.5f;
 
-            settings.MinVerticalVelocity = 0;
-            settings.MaxVerticalVelocity = 2;
+            settings.MinVerticalVelocity = -1;
+            settings.MaxVerticalVelocity = 1;
 
-            settings.Gravity = new Vector3(-0.15f, -0.15f, 0);
+            settings.Gravity = new Vector3(0.0f, -0.35f, 0.0f);
 
             settings.EndVelocity = 0.1f;
 
-            settings.MinColor = Color.SandyBrown;
+            settings.MinColor = Color.SandyBrown * 0.5f;
             settings.MaxColor = Color.SandyBrown;
 
             settings.MinRotateSpeed = -1;
             settings.MaxRotateSpeed = 1;
 
+            settings.MinStartSize = 0.25f;
+            settings.MaxStartSize = 0.5f;
+
+            settings.MinEndSize = 0.5f;
+            settings.MaxEndSize = 1f;
+
+            settings.Transparent = true;
+
+            return settings;
+        }
+        /// <summary>
+        /// Initializes fire particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
+        public static CPUParticleSystemDescription InitializeFire(string contentPath, string texture)
+        {
+            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
+
+            settings.ContentPath = contentPath;
+            settings.TextureName = texture;
+
+            settings.MaxDuration = 2;
+            settings.MaxDurationRandomness = 1;
+
+            settings.MinHorizontalVelocity = 0;
+            settings.MaxHorizontalVelocity = 1.5f;
+
+            settings.MinVerticalVelocity = -1;
+            settings.MaxVerticalVelocity = 1;
+
+            settings.Gravity = new Vector3(0, 1, 0);
+
+            settings.MinColor = new Color(1f, 1f, 1f, 0.55f);
+            settings.MaxColor = new Color(1f, 1f, 1f, 1f);
+
+            settings.MinStartSize = 0.5f;
+            settings.MaxStartSize = 1;
+
+            settings.MinEndSize = 2.5f;
+            settings.MaxEndSize = 4f;
+
+            settings.Transparent = true;
+
+            return settings;
+        }
+        /// <summary>
+        /// Initializes smoke plume particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
+        public static CPUParticleSystemDescription InitializeSmokePlume(string contentPath, string texture)
+        {
+            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
+
+            settings.ContentPath = contentPath;
+            settings.TextureName = texture;
+
+            settings.MaxDuration = 10;
+
+            settings.MinHorizontalVelocity = 0;
+            settings.MaxHorizontalVelocity = 0.5f;
+
+            settings.MinVerticalVelocity = 1.0f;
+            settings.MaxVerticalVelocity = 2.0f;
+
+            settings.Gravity = new Vector3(0.0f, 0.5f, 0.0f);
+
+            settings.EndVelocity = 0.75f;
+
+            settings.MinRotateSpeed = -1f;
+            settings.MaxRotateSpeed = 1f;
+
             settings.MinStartSize = 1;
             settings.MaxStartSize = 2;
 
             settings.MinEndSize = 5;
-            settings.MaxEndSize = 10;
+            settings.MaxEndSize = 20;
 
             return settings;
         }
+        /// <summary>
+        /// Initializes porjectile trail particle systems
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="texture">Texture</param>
+        /// <returns>Returns the new generated particle system description</returns>
+        public static CPUParticleSystemDescription InitializeProjectileTrail(string contentPath, string texture)
+        {
+            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
+
+            settings.ContentPath = contentPath;
+            settings.TextureName = texture;
+
+            settings.MaxDuration = 0.5f;
+            settings.MaxDurationRandomness = 1.5f;
+
+            settings.EmitterVelocitySensitivity = 0.1f;
+
+            settings.MinHorizontalVelocity = -0.1f;
+            settings.MaxHorizontalVelocity = 0.1f;
+
+            settings.MinVerticalVelocity = -0.1f;
+            settings.MaxVerticalVelocity = 0.1f;
+
+            settings.MinColor = Color.Gray;
+            settings.MaxColor = Color.White;
+
+            settings.MinRotateSpeed = 1;
+            settings.MaxRotateSpeed = 1;
+
+            settings.MinStartSize = 0.25f;
+            settings.MaxStartSize = 0.5f;
+
+            settings.MinEndSize = 0.5f;
+            settings.MaxEndSize = 1.0f;
+
+            return settings;
+        }
+
+
         /// <summary>
         /// Initializes explosion particle systems
         /// </summary>
@@ -126,43 +241,6 @@ namespace Engine
             return settings;
         }
         /// <summary>
-        /// Initializes fire particle systems
-        /// </summary>
-        /// <param name="contentPath">Content path</param>
-        /// <param name="texture">Texture</param>
-        /// <returns>Returns the new generated particle system description</returns>
-        public static CPUParticleSystemDescription InitializeFire(string contentPath, string texture)
-        {
-            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
-
-            settings.ContentPath = contentPath;
-            settings.TextureName = texture;
-
-            settings.MaxDuration = 2;
-            settings.MaxDurationRandomness = 1;
-
-            settings.MinHorizontalVelocity = 0;
-            settings.MaxHorizontalVelocity = 15;
-
-            settings.MinVerticalVelocity = -10;
-            settings.MaxVerticalVelocity = 10;
-
-            settings.Gravity = new Vector3(0, 15, 0);
-
-            settings.MinColor = new Color(255, 255, 255, 10);
-            settings.MaxColor = new Color(255, 255, 255, 40);
-
-            settings.MinStartSize = 5;
-            settings.MaxStartSize = 10;
-
-            settings.MinEndSize = 10;
-            settings.MaxEndSize = 40;
-
-            settings.Transparent = true;
-
-            return settings;
-        }
-        /// <summary>
         /// Initializes plasma engine particle systems
         /// </summary>
         /// <param name="contentPath">Content path</param>
@@ -200,44 +278,6 @@ namespace Engine
             return settings;
         }
         /// <summary>
-        /// Initializes porjectile trail particle systems
-        /// </summary>
-        /// <param name="contentPath">Content path</param>
-        /// <param name="texture">Texture</param>
-        /// <returns>Returns the new generated particle system description</returns>
-        public static CPUParticleSystemDescription InitializeProjectileTrail(string contentPath, string texture)
-        {
-            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
-
-            settings.ContentPath = contentPath;
-            settings.TextureName = texture;
-
-            settings.MaxDuration = 0.5f;
-            settings.MaxDurationRandomness = 1.5f;
-
-            settings.EmitterVelocitySensitivity = 0.1f;
-
-            settings.MinHorizontalVelocity = -1;
-            settings.MaxHorizontalVelocity = 1;
-
-            settings.MinVerticalVelocity = -1;
-            settings.MaxVerticalVelocity = 1;
-
-            settings.MinColor = Color.Gray;
-            settings.MaxColor = Color.White;
-
-            settings.MinRotateSpeed = 1;
-            settings.MaxRotateSpeed = 1;
-
-            settings.MinStartSize = 0.5f;
-            settings.MaxStartSize = 1f;
-
-            settings.MinEndSize = 1f;
-            settings.MaxEndSize = 2f;
-
-            return settings;
-        }
-        /// <summary>
         /// Initializes smoke engine particle systems
         /// </summary>
         /// <param name="contentPath">Content path</param>
@@ -270,42 +310,6 @@ namespace Engine
 
             settings.MinEndSize = 2;
             settings.MaxEndSize = 4;
-
-            return settings;
-        }
-        /// <summary>
-        /// Initializes smoke plume particle systems
-        /// </summary>
-        /// <param name="contentPath">Content path</param>
-        /// <param name="texture">Texture</param>
-        /// <returns>Returns the new generated particle system description</returns>
-        public static CPUParticleSystemDescription InitializeSmokePlume(string contentPath, string texture)
-        {
-            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
-
-            settings.ContentPath = contentPath;
-            settings.TextureName = texture;
-
-            settings.MaxDuration = 10;
-
-            settings.MinHorizontalVelocity = 0;
-            settings.MaxHorizontalVelocity = 0.5f;
-
-            settings.MinVerticalVelocity = 1.0f;
-            settings.MaxVerticalVelocity = 2.0f;
-
-            settings.Gravity = new Vector3(0.0f, +0.5f, 0.0f);
-
-            settings.EndVelocity = 0.75f;
-
-            settings.MinRotateSpeed = -1f;
-            settings.MaxRotateSpeed = 1f;
-
-            settings.MinStartSize = 0.5f;
-            settings.MaxStartSize = 1.0f;
-
-            settings.MinEndSize = 5.0f;
-            settings.MaxEndSize = 20.0f;
 
             return settings;
         }
