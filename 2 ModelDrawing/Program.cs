@@ -12,6 +12,14 @@ namespace ModelDrawing
             using (Game cl = new Game("2 ModelDrawing"))
 #endif
             {
+#if DEBUG
+                cl.VisibleMouse = false;
+                cl.LockMouse = false;
+#else
+                cl.VisibleMouse = false;
+                cl.LockMouse = true;
+#endif
+                
                 cl.AddScene(new TestScene(cl) { Active = true, });
 
                 cl.Run();

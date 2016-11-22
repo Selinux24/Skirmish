@@ -4,7 +4,6 @@ using Engine.Content;
 using SharpDX;
 using SharpDX.Direct3D;
 using System;
-using System.Collections.Generic;
 
 namespace ModelDrawing
 {
@@ -15,12 +14,13 @@ namespace ModelDrawing
         private Model floor = null;
 
         private CPUParticleManager pManager = null;
-        private List<ParticleEmitter> pEmitters = new List<ParticleEmitter>();
 
         private CPUParticleSystemDescription pPlume = null;
         private CPUParticleSystemDescription pFire = null;
         private CPUParticleSystemDescription pDust = null;
         private CPUParticleSystemDescription pProjectile = null;
+        private CPUParticleSystemDescription pExplosion = null;
+        private CPUParticleSystemDescription pSmokeExplosion = null;
 
         private Random rnd = new Random();
 
@@ -85,6 +85,8 @@ namespace ModelDrawing
             this.pFire = CPUParticleSystemDescription.InitializeFire("resources", "fire.png");
             this.pDust = CPUParticleSystemDescription.InitializeDust("resources", "smoke.png");
             this.pProjectile = CPUParticleSystemDescription.InitializeProjectileTrail("resources", "smoke.png");
+            this.pExplosion = CPUParticleSystemDescription.InitializeExplosion("resources", "fire.png");
+            this.pSmokeExplosion = CPUParticleSystemDescription.InitializeExplosion("resources", "smoke.png");
         }
 
         public override void Update(GameTime gameTime)
@@ -129,6 +131,23 @@ namespace ModelDrawing
                 this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
             }
 
+            if (this.Game.Input.KeyJustPressed(Keys.D1))
+            {
+                this.AddSmokePlumeSystem();
+            }
+            if (this.Game.Input.KeyJustPressed(Keys.D2))
+            {
+                this.AddDustSystem();
+            }
+            if (this.Game.Input.KeyJustPressed(Keys.D3))
+            {
+                this.AddProjectileTrailSystem();
+            }
+            if (this.Game.Input.KeyJustPressed(Keys.D4))
+            {
+                this.AddExplosionSystem();
+            }
+
             if (this.Game.Input.KeyJustPressed(Keys.P))
             {
                 this.AddSystem();
@@ -137,58 +156,101 @@ namespace ModelDrawing
         private void AddSystem()
         {
             float percent = this.rnd.NextFloat(0, 1);
-            if (percent <= 0.33f)
+            if (percent <= 0.25f)
             {
-                Vector3 position = new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10));
-                Vector3 velocity = Vector3.Up;
-                float duration = this.rnd.NextFloat(10, 60);
-                float rate = this.rnd.NextFloat(0.1f, 1f);
-
-                var emitter1 = new ParticleEmitter()
-                {
-                    Position = position,
-                    Velocity = velocity,
-                    Duration = duration,
-                    EmissionRate = rate,
-                    InfiniteDuration = false,
-                };
-
-                var emitter2 = new ParticleEmitter()
-                {
-                    Position = position,
-                    Velocity = velocity,
-                    Duration = duration + (duration * 0.1f),
-                    EmissionRate = rate,
-                    InfiniteDuration = false,
-                };
-
-                this.pManager.AddParticleGenerator(this.pFire, emitter1);
-                this.pManager.AddParticleGenerator(this.pPlume, emitter2);
+                AddExplosionSystem();
             }
-            else if (percent <= 0.66f)
+            else if (percent <= 0.50f)
             {
-                var emitter = new MovingEmitter()
-                {
-                    EmissionRate = 0.1f,
-                    InfiniteDuration = true,
-                    AngularVelocity = 1,
-                    Radius = 3,
-                };
-
-                this.pManager.AddParticleGenerator(this.pDust, emitter);
+                AddSmokePlumeSystem();
+            }
+            else if (percent <= 0.75f)
+            {
+                AddDustSystem();
             }
             else
             {
-                var emitter = new MovingEmitter()
-                {
-                    EmissionRate = 0.005f,
-                    InfiniteDuration = true,
-                    AngularVelocity = 3,
-                    Radius = 6,
-                };
-
-                this.pManager.AddParticleGenerator(this.pProjectile, emitter);
+                AddProjectileTrailSystem();
             }
+        }
+        private void AddExplosionSystem()
+        {
+            Vector3 position = new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10));
+            Vector3 velocity = Vector3.Up;
+            float duration = 0.5f;
+            float rate = 0.1f;
+
+            var emitter1 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate,
+                InfiniteDuration = false,
+            };
+            var emitter2 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate * 2f,
+                InfiniteDuration = false,
+            };
+
+            this.pManager.AddParticleGenerator(this.pExplosion, emitter1);
+            this.pManager.AddParticleGenerator(this.pSmokeExplosion, emitter2);
+        }
+        private void AddProjectileTrailSystem()
+        {
+            var emitter = new MovingEmitter()
+            {
+                EmissionRate = 0.005f,
+                AngularVelocity = this.rnd.NextFloat(3, 10),
+                Radius = this.rnd.NextFloat(5, 10),
+                Duration = 3,
+            };
+
+            this.pManager.AddParticleGenerator(this.pProjectile, emitter);
+        }
+        private void AddDustSystem()
+        {
+            var emitter = new MovingEmitter()
+            {
+                EmissionRate = 0.1f,
+                AngularVelocity = this.rnd.NextFloat(0, 1),
+                Radius = this.rnd.NextFloat(1, 10),
+                Duration = 5,
+            };
+
+            this.pManager.AddParticleGenerator(this.pDust, emitter);
+        }
+        private void AddSmokePlumeSystem()
+        {
+            Vector3 position = new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10));
+            Vector3 velocity = Vector3.Up;
+            float duration = this.rnd.NextFloat(10, 60);
+            float rate = this.rnd.NextFloat(0.1f, 1f);
+
+            var emitter1 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate,
+                InfiniteDuration = false,
+            };
+
+            var emitter2 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration + (duration * 0.1f),
+                EmissionRate = rate,
+                InfiniteDuration = false,
+            };
+
+            this.pManager.AddParticleGenerator(this.pFire, emitter1);
+            this.pManager.AddParticleGenerator(this.pPlume, emitter2);
         }
 
         public override void Draw(GameTime gameTime)
