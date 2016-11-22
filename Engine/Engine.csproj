@@ -167,6 +167,7 @@
     <Compile Include="CPUParticleSystemDescription.cs" />
     <Compile Include="CPUParticleSystemTypes.cs" />
     <Compile Include="Effects\EffectCPUParticles.cs" />
+    <Compile Include="ParticleEmitter.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

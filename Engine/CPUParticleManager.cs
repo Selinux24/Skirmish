@@ -99,13 +99,10 @@ namespace Engine
         /// Adds a new particle system to the collection
         /// </summary>
         /// <param name="description">Particle system description</param>
-        /// <param name="position">Initial position</param>
-        /// <param name="velocity">Initial velocity</param>
-        /// <param name="duration">Emission duration</param>
-        /// <param name="emissionRate">Emission rate</param>
-        public void AddParticleGenerator(CPUParticleSystemDescription description, Vector3 position, Vector3 velocity, float duration, float emissionRate)
+        /// <param name="emitter">Particle emitter</param>
+        public void AddParticleGenerator(CPUParticleSystemDescription description, ParticleEmitter emitter)
         {
-            this.particleSystems.Add(new CPUParticleSystem(this.Game, description, position, velocity, duration, emissionRate));
+            this.particleSystems.Add(new CPUParticleSystem(this.Game, description, emitter));
         }
 
         /// <summary>

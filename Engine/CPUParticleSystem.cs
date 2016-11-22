@@ -69,22 +69,9 @@ namespace Engine
         public float TimeToEnd { get; private set; }
 
         /// <summary>
-        /// Emitter position
+        /// Particle emitter
         /// </summary>
-        public Vector3 Position { get; set; }
-        /// <summary>
-        /// Emitter velocity vector
-        /// </summary>
-        public Vector3 Velocity { get; set; }
-        /// <summary>
-        /// Emitter duration
-        /// </summary>
-        public float Duration { get; private set; }
-        /// <summary>
-        /// Emitter rate interval
-        /// </summary>
-        /// <remarks>Particles per second</remarks>
-        public float EmissionRate { get; private set; }
+        public ParticleEmitter Emitter { get; private set; }
         /// <summary>
         /// Gets if the current particle system is active
         /// </summary>
@@ -92,7 +79,7 @@ namespace Engine
         {
             get
             {
-                return this.Duration <= 0 && this.TimeToEnd <= 0;
+                return this.Emitter.Duration <= 0 && this.TimeToEnd <= 0;
             }
         }
         /// <summary>
@@ -149,11 +136,8 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="description">Particle system description</param>
-        /// <param name="position">Initial position</param>
-        /// <param name="velocity">Initial velocity</param>
-        /// <param name="duration">Total duration</param>
-        /// <param name="emissionRate">Emission rate (particles per second)</param>
-        public CPUParticleSystem(Game game, CPUParticleSystemDescription description, Vector3 position, Vector3 velocity, float duration, float emissionRate)
+        /// <param name="emitter">Particle emitter</param>
+        public CPUParticleSystem(Game game, CPUParticleSystemDescription description, ParticleEmitter emitter)
         {
             this.Game = game;
 
@@ -177,12 +161,9 @@ namespace Engine
             this.Texture = game.ResourceManager.CreateResource(imgContent);
             this.TextureCount = (uint)imgContent.Count;
 
-            this.Duration = duration;
-            this.EmissionRate = emissionRate;
-            this.Position = position;
-            this.Velocity = velocity;
+            this.Emitter = emitter;
 
-            float maxActiveParticles = description.MaxDuration * (1f / this.EmissionRate);
+            float maxActiveParticles = description.MaxDuration * (1f / this.Emitter.EmissionRate);
             maxActiveParticles = maxActiveParticles != (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles;
             this.particles = new VertexCPUParticle[(int)maxActiveParticles];
 
@@ -206,16 +187,16 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Update(UpdateContext context)
         {
-            float elapsed = context.GameTime.ElapsedSeconds;
+            this.Emitter.Update(context);
 
-            this.Duration -= elapsed;
-
-            if (this.Duration > 0 && this.timeToNextParticle <= 0)
+            if (this.Emitter.Active && this.timeToNextParticle <= 0)
             {
-                this.timeToNextParticle = this.EmissionRate;
-
                 this.AddParticle();
+
+                this.timeToNextParticle = this.Emitter.EmissionRate;
             }
+
+            float elapsed = context.GameTime.ElapsedSeconds;
 
             this.timeToNextParticle -= elapsed;
 
@@ -285,7 +266,7 @@ namespace Engine
                 nextFreeParticle = 0;
             }
 
-            Vector3 velocity = this.Velocity * this.EmitterVelocitySensitivity;
+            Vector3 velocity = this.Emitter.Velocity * this.EmitterVelocitySensitivity;
 
             float horizontalVelocity = MathUtil.Lerp(
                 this.HorizontalVelocity.X,
@@ -304,7 +285,7 @@ namespace Engine
                 this.rnd.NextFloat(0, 1),
                 this.rnd.NextFloat(0, 1));
 
-            this.particles[this.currentParticleIndex].Position = this.Position;
+            this.particles[this.currentParticleIndex].Position = this.Emitter.Position;
             this.particles[this.currentParticleIndex].Velocity = velocity;
             this.particles[this.currentParticleIndex].Color = randomValues;
             this.particles[this.currentParticleIndex].MaxAge = this.TotalTime;
@@ -324,8 +305,8 @@ namespace Engine
             return string.Format("Index: {0}; Count: {1}; Total: {2:0.00}/{3:0.00}; ToEnd: {4:0.00};", 
                 this.currentParticleIndex, 
                 this.ActiveParticles, 
-                this.TotalTime, 
-                this.Duration,
+                this.TotalTime,
+                this.Emitter.Duration,
                 this.TimeToEnd);
         }
     }

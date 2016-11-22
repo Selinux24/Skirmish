@@ -4,6 +4,7 @@ using Engine.Content;
 using SharpDX;
 using SharpDX.Direct3D;
 using System;
+using System.Collections.Generic;
 
 namespace ModelDrawing
 {
@@ -14,6 +15,8 @@ namespace ModelDrawing
         private Model floor = null;
 
         private CPUParticleManager pManager = null;
+        private List<ParticleEmitter> pEmitters = new List<ParticleEmitter>();
+
         private CPUParticleSystemDescription pPlume = null;
         private CPUParticleSystemDescription pFire = null;
         private CPUParticleSystemDescription pDust = null;
@@ -137,29 +140,55 @@ namespace ModelDrawing
             if (percent <= 0.33f)
             {
                 Vector3 position = new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10));
-                float duration = this.rnd.NextFloat(1, 60);
-                float rate = this.rnd.NextFloat(0.1f, 2f);
+                Vector3 velocity = Vector3.Up;
+                float duration = this.rnd.NextFloat(10, 60);
+                float rate = this.rnd.NextFloat(0.1f, 1f);
 
-                this.pManager.AddParticleGenerator(this.pFire, position, Vector3.Up, duration, rate);
-                this.pManager.AddParticleGenerator(this.pPlume, position, Vector3.Up, duration + (duration * 0.1f), rate);
+                var emitter1 = new ParticleEmitter()
+                {
+                    Position = position,
+                    Velocity = velocity,
+                    Duration = duration,
+                    EmissionRate = rate,
+                    InfiniteDuration = false,
+                };
+
+                var emitter2 = new ParticleEmitter()
+                {
+                    Position = position,
+                    Velocity = velocity,
+                    Duration = duration + (duration * 0.1f),
+                    EmissionRate = rate,
+                    InfiniteDuration = false,
+                };
+
+                this.pManager.AddParticleGenerator(this.pFire, emitter1);
+                this.pManager.AddParticleGenerator(this.pPlume, emitter2);
             }
             else if (percent <= 0.66f)
             {
-                this.pManager.AddParticleGenerator(this.pDust, Vector3.Zero, Vector3.Up, 60, 0.05f);
+                var emitter = new MovingEmitter()
+                {
+                    EmissionRate = 0.1f,
+                    InfiniteDuration = true,
+                    AngularVelocity = 1,
+                    Radius = 3,
+                };
+
+                this.pManager.AddParticleGenerator(this.pDust, emitter);
             }
             else
             {
-                this.pManager.AddParticleGenerator(this.pProjectile, Vector3.Up, Vector3.Up, 60, 0.05f);
-            }
-        }
-        private Vector3 GetPosition(float d)
-        {
-            Vector3 position = Vector3.Zero;
-            position.X = 3.0f * d * (float)Math.Cos(0.4f * this.Game.GameTime.TotalSeconds);
-            position.Y = 1f;
-            position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
+                var emitter = new MovingEmitter()
+                {
+                    EmissionRate = 0.005f,
+                    InfiniteDuration = true,
+                    AngularVelocity = 3,
+                    Radius = 6,
+                };
 
-            return position;
+                this.pManager.AddParticleGenerator(this.pProjectile, emitter);
+            }
         }
 
         public override void Draw(GameTime gameTime)
