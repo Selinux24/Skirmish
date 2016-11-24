@@ -18,10 +18,12 @@ namespace Engine.Effects
     public class EffectCPUParticles : Drawer
     {
         /// <summary>
-        /// Forward drawing technique
+        /// Non rotation particles drawing technique
         /// </summary>
         public readonly EffectTechnique NonRotationDraw = null;
-
+        /// <summary>
+        /// Rotation particles drawing technique
+        /// </summary>
         public readonly EffectTechnique RotationDraw = null;
 
         /// <summary>
@@ -49,19 +51,42 @@ namespace Engine.Effects
         /// </summary>
         private EffectShaderResourceVariable textureArray = null;
 
-
-
-        private EffectScalarVariable viewportHeight = null;
+        /// <summary>
+        /// Maximum particle duration variable
+        /// </summary>
         private EffectScalarVariable maxDuration = null;
+        /// <summary>
+        /// Maximum particle duration randomness variable
+        /// </summary>
         private EffectScalarVariable maxDurationRandomness = null;
+        /// <summary>
+        /// End velocity variable
+        /// </summary>
         private EffectScalarVariable endVelocity = null;
+        /// <summary>
+        /// Gravity variable
+        /// </summary>
         private EffectVectorVariable gravity = null;
+        /// <summary>
+        /// Starting size variable
+        /// </summary>
         private EffectVectorVariable startSize = null;
+        /// <summary>
+        /// Ending size variable
+        /// </summary>
         private EffectVectorVariable endSize = null;
+        /// <summary>
+        /// Minimum color variable
+        /// </summary>
         private EffectVectorVariable minColor = null;
+        /// <summary>
+        /// Maximum color variable
+        /// </summary>
         private EffectVectorVariable maxColor = null;
+        /// <summary>
+        /// Rotation speed variable
+        /// </summary>
         private EffectVectorVariable rotateSpeed = null;
-
 
         /// <summary>
         /// World matrix
@@ -152,18 +177,9 @@ namespace Engine.Effects
             }
         }
 
-
-        protected float ViewportHeight
-        {
-            get
-            {
-                return this.viewportHeight.GetFloat();
-            }
-            set
-            {
-                this.viewportHeight.Set(value);
-            }
-        }
+        /// <summary>
+        /// Maximum particle duration
+        /// </summary>
         protected float MaxDuration
         {
             get
@@ -175,6 +191,9 @@ namespace Engine.Effects
                 this.maxDuration.Set(value);
             }
         }
+        /// <summary>
+        /// Maximum particle duration randomness
+        /// </summary>
         protected float MaxDurationRandomness
         {
             get
@@ -186,6 +205,9 @@ namespace Engine.Effects
                 this.maxDurationRandomness.Set(value);
             }
         }
+        /// <summary>
+        /// End velocity
+        /// </summary>
         protected float EndVelocity
         {
             get
@@ -197,6 +219,9 @@ namespace Engine.Effects
                 this.endVelocity.Set(value);
             }
         }
+        /// <summary>
+        /// Gravity
+        /// </summary>
         protected Vector3 Gravity
         {
             get
@@ -212,6 +237,9 @@ namespace Engine.Effects
                 this.gravity.Set(v4);
             }
         }
+        /// <summary>
+        /// Starting size
+        /// </summary>
         protected Vector2 StartSize
         {
             get
@@ -227,6 +255,9 @@ namespace Engine.Effects
                 this.startSize.Set(v4);
             }
         }
+        /// <summary>
+        /// Ending size
+        /// </summary>
         protected Vector2 EndSize
         {
             get
@@ -242,6 +273,9 @@ namespace Engine.Effects
                 this.endSize.Set(v4);
             }
         }
+        /// <summary>
+        /// Minimum color
+        /// </summary>
         protected Color4 MinColor
         {
             get
@@ -253,6 +287,9 @@ namespace Engine.Effects
                 this.minColor.Set(value);
             }
         }
+        /// <summary>
+        /// Maximum color
+        /// </summary>
         protected Color4 MaxColor
         {
             get
@@ -264,6 +301,9 @@ namespace Engine.Effects
                 this.maxColor.Set(value);
             }
         }
+        /// <summary>
+        /// Rotation speed
+        /// </summary>
         protected Vector2 RotateSpeed
         {
             get
@@ -279,8 +319,6 @@ namespace Engine.Effects
                 this.rotateSpeed.Set(v4);
             }
         }
-
-
 
         /// <summary>
         /// Constructor
@@ -304,7 +342,6 @@ namespace Engine.Effects
             this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
             this.textureArray = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
 
-            this.viewportHeight = this.Effect.GetVariableByName("gViewportHeight").AsScalar();
             this.maxDuration = this.Effect.GetVariableByName("gMaxDuration").AsScalar();
             this.maxDurationRandomness = this.Effect.GetVariableByName("gMaxDurationRandomness").AsScalar();
             this.endVelocity = this.Effect.GetVariableByName("gEndVelocity").AsScalar();
@@ -367,12 +404,20 @@ namespace Engine.Effects
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="totalTime">Total time</param>
+        /// <param name="maxDuration">Maximum particle duration</param>
+        /// <param name="maxDurationRandomness">Maximum particle duration randomness</param>
+        /// <param name="endVelocity">End particle velocity</param>
+        /// <param name="gravity">Gravity</param>
+        /// <param name="startSize">Start size</param>
+        /// <param name="endSize">End size</param>
+        /// <param name="minColor">Minimum color</param>
+        /// <param name="maxColor">Maximum color</param>
+        /// <param name="rotateSpeed">Rotation speed</param>
         /// <param name="textureCount">Texture count</param>
         /// <param name="textures">Texture</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
-            float vpHeight,
             Vector3 eyePositionWorld,
             float totalTime,
             float maxDuration,
@@ -389,7 +434,6 @@ namespace Engine.Effects
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
-            this.ViewportHeight = vpHeight;
             this.EyePositionWorld = eyePositionWorld;
             this.TotalTime = totalTime;
             this.MaxDuration = maxDuration;

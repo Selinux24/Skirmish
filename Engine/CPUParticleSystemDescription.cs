@@ -119,6 +119,8 @@ namespace Engine
             settings.MinEndSize = 5;
             settings.MaxEndSize = 20;
 
+            settings.Transparent = true;
+
             return settings;
         }
         /// <summary>
@@ -156,6 +158,8 @@ namespace Engine
 
             settings.MinEndSize = 0.5f;
             settings.MaxEndSize = 1.0f;
+
+            settings.Transparent = true;
 
             return settings;
         }
@@ -235,6 +239,8 @@ namespace Engine
 
             settings.MinEndSize = 10;
             settings.MaxEndSize = 20;
+
+            settings.Transparent = true;
 
             return settings;
         }

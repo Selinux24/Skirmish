@@ -130,6 +130,10 @@ namespace Engine
         /// Emitter velocity sensitivity
         /// </summary>
         public float EmitterVelocitySensitivity { get; private set; }
+        /// <summary>
+        /// Trasparent particles
+        /// </summary>
+        public bool Transparent { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -153,6 +157,7 @@ namespace Engine
             this.VerticalVelocity = new Vector2(description.MinVerticalVelocity, description.MaxVerticalVelocity);
             this.RotateSpeed = new Vector2(description.MinRotateSpeed, description.MaxRotateSpeed);
             this.EmitterVelocitySensitivity = description.EmitterVelocitySensitivity;
+            this.Transparent = description.Transparent;
 
             ImageContent imgContent = new ImageContent()
             {
@@ -224,12 +229,19 @@ namespace Engine
             Counters.IAPrimitiveTopologySets++;
 
             this.Game.Graphics.SetDepthStencilRDZEnabled();
-            this.Game.Graphics.SetBlendDefaultAlpha();
+
+            if (this.Transparent)
+            {
+                this.Game.Graphics.SetBlendDefaultAlpha();
+            }
+            else
+            {
+                this.Game.Graphics.SetBlendDefault();
+            }
 
             effect.UpdatePerFrame(
                 context.World,
                 context.ViewProjection,
-                this.Game.Graphics.Viewport.Height,
                 context.EyePosition,
                 this.TotalTime,
                 this.MaximumAge,

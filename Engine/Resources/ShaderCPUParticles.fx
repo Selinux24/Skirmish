@@ -5,7 +5,6 @@ cbuffer cbPerFrame : register (b0)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
-	float gViewportHeight;
 	float3 gEyePositionWorld;
 	float gTotalTime;
 	uint gTextureCount;
