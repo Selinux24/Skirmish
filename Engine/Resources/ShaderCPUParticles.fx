@@ -135,18 +135,40 @@ void GSParticle(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inou
 	}
 }
 
-float4 PSForwardParticle(PSCPUParticle input) : SV_Target
+float4 PSNonRotationParticle(PSCPUParticle input) : SV_Target
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
-	return gTextureArray.Sample(SamplerLinear, uvw) * input.color;
+	return gTextureArray.Sample(SamplerPointParticle, uvw) * input.color;
+}
+float4 PSRotationParticle(PSCPUParticle input) : SV_Target
+{
+	float2 tex = input.tex;
+	float4 rot = (input.rotationWorld * 2.0f) - 1.0f;
+
+	tex -= 0.5f;
+	tex = mul(tex, float2x2(rot));
+	tex *= sqrt(2.0f);
+	tex += 0.5f;
+
+	float3 uvw = float3(tex, input.primitiveID % gTextureCount);
+	return gTextureArray.Sample(SamplerPointParticle, uvw) * input.color;
 }
 
-technique11 ForwardParticle
+technique11 NonRotationParticle
 {
 	pass P0
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSParticle()));
 		SetGeometryShader(CompileShader(gs_5_0, GSParticle()));
-		SetPixelShader(CompileShader(ps_5_0, PSForwardParticle()));
+		SetPixelShader(CompileShader(ps_5_0, PSNonRotationParticle()));
+	}
+}
+technique11 RotationParticle
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSParticle()));
+		SetGeometryShader(CompileShader(gs_5_0, GSParticle()));
+		SetPixelShader(CompileShader(ps_5_0, PSRotationParticle()));
 	}
 }

@@ -3,6 +3,12 @@ SamplerState SamplerPoint
 {
 	Filter = MIN_MAG_MIP_POINT;
 };
+SamplerState SamplerPointParticle
+{
+	Filter = MIN_MAG_MIP_POINT;
+	AddressU = CLAMP;
+	AddressV = CLAMP;
+};
 SamplerState SamplerLinear
 {
 	Filter = MIN_MAG_MIP_LINEAR;

@@ -20,7 +20,9 @@ namespace Engine.Effects
         /// <summary>
         /// Forward drawing technique
         /// </summary>
-        public readonly EffectTechnique ForwardDraw = null;
+        public readonly EffectTechnique NonRotationDraw = null;
+
+        public readonly EffectTechnique RotationDraw = null;
 
         /// <summary>
         /// World effect variable
@@ -289,9 +291,11 @@ namespace Engine.Effects
         public EffectCPUParticles(Device device, byte[] effect, bool compile)
             : base(device, effect, compile)
         {
-            this.ForwardDraw = this.Effect.GetTechniqueByName("ForwardParticle");
+            this.NonRotationDraw = this.Effect.GetTechniqueByName("NonRotationParticle");
+            this.RotationDraw = this.Effect.GetTechniqueByName("RotationParticle");
 
-            this.AddInputLayout(this.ForwardDraw, VertexCPUParticle.GetInput());
+            this.AddInputLayout(this.NonRotationDraw, VertexCPUParticle.GetInput());
+            this.AddInputLayout(this.RotationDraw, VertexCPUParticle.GetInput());
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
@@ -321,6 +325,19 @@ namespace Engine.Effects
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
         public override EffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
+            throw new Exception("Use rotation GetTechnique override.");
+        }
+        /// <summary>
+        /// Get technique by vertex type
+        /// </summary>
+        /// <param name="vertexType">VertexType</param>
+        /// <param name="instanced">Use instancing data</param>
+        /// <param name="stage">Stage</param>
+        /// <param name="mode">Mode</param>
+        /// <param name="rotation">Rotation</param>
+        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
+        public virtual EffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode, bool rotation)
+        {
             if (stage == DrawingStages.Drawing)
             {
                 if (vertexType == VertexTypes.Particle)
@@ -328,7 +345,7 @@ namespace Engine.Effects
                     switch (mode)
                     {
                         case DrawerModesEnum.Forward:
-                            return this.ForwardDraw;
+                            return rotation ? this.RotationDraw : this.NonRotationDraw;
                         default:
                             throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }

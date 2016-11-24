@@ -1,11 +1,8 @@
-﻿using SharpDX;
-using System.Collections.Generic;
-using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
+﻿using System.Collections.Generic;
 
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// CPU particle manager
@@ -48,24 +45,25 @@ namespace Engine
         {
             if (this.particleSystems != null && this.particleSystems.Count > 0)
             {
-                toDelete.Clear();
-
-                foreach (var particleSystem in this.particleSystems)
+                this.particleSystems.ForEach(p =>
                 {
-                    particleSystem.Update(context);
+                    p.Update(context);
 
-                    if (particleSystem.Active)
+                    if (!p.Active)
                     {
-                        toDelete.Add(particleSystem);
+                        toDelete.Add(p);
                     }
-                }
+                });
 
                 if (toDelete.Count > 0)
                 {
-                    foreach (var particleSystem in toDelete)
+                    toDelete.ForEach(p =>
                     {
-                        this.particleSystems.Remove(particleSystem);
-                    }
+                        this.particleSystems.Remove(p);
+                        p.Dispose();
+                    });
+
+                    toDelete.Clear();
                 }
             }
         }
@@ -75,24 +73,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.particleSystems != null && this.particleSystems.Count > 0)
-            {
-                var effect = DrawerPool.EffectCPUParticles;
-                if (effect != null)
-                {
-                    var technique = effect.GetTechnique(VertexTypes.Particle, false, DrawingStages.Drawing, context.DrawerMode);
-
-                    this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                    Counters.IAInputLayoutSets++;
-                    this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
-                    Counters.IAPrimitiveTopologySets++;
-
-                    foreach (var particleSystem in this.particleSystems)
-                    {
-                        particleSystem.Draw(context, effect, technique);
-                    }
-                }
-            }
+            this.particleSystems.ForEach(p => p.Draw(context));
         }
 
         /// <summary>

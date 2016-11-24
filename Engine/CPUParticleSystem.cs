@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 using Buffer = SharpDX.Direct3D11.Buffer;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
@@ -79,7 +79,7 @@ namespace Engine
         {
             get
             {
-                return this.Emitter.Duration <= 0 && this.TimeToEnd <= 0;
+                return this.Emitter.Duration > 0 || this.TimeToEnd > 0;
             }
         }
         /// <summary>
@@ -207,10 +207,22 @@ namespace Engine
         /// Draw particles
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="effect">Effect</param>
-        /// <param name="technique">Technique</param>
-        public void Draw(DrawContext context, EffectCPUParticles effect, EffectTechnique technique)
+        public void Draw(DrawContext context)
         {
+            var effect = DrawerPool.EffectCPUParticles;
+             
+            var technique = effect.GetTechnique(
+                VertexTypes.Particle, 
+                false, 
+                DrawingStages.Drawing, 
+                context.DrawerMode,
+                this.RotateSpeed != Vector2.Zero);
+
+            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+            Counters.IAInputLayoutSets++;
+            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
+            Counters.IAPrimitiveTopologySets++;
+
             this.Game.Graphics.SetDepthStencilRDZEnabled();
             this.Game.Graphics.SetBlendDefaultAlpha();
 

@@ -236,7 +236,7 @@ namespace ModelDrawing
                 Position = position,
                 Velocity = velocity,
                 Duration = duration,
-                EmissionRate = rate,
+                EmissionRate = rate * 0.5f,
                 InfiniteDuration = false,
             };
 
