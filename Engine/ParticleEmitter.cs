@@ -59,5 +59,17 @@ namespace Engine
                 this.Duration -= context.GameTime.ElapsedSeconds;
             }
         }
+  
+        /// <summary>
+        /// Gets the maximum number of particles running at the same time
+        /// </summary>
+        /// <param name="maxParticleDuration">Maximum particle duration</param>
+        /// <returns>Returns the maximum number of particles running at the same time</returns>
+        public int GetMaximumConcurrentParticles(float maxParticleDuration)
+        {
+            float maxActiveParticles = maxParticleDuration * (1f / this.EmissionRate);
+
+            return (int)(maxActiveParticles != (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
+        }
     }
 }

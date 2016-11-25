@@ -19,6 +19,11 @@ namespace Engine
         private List<CPUParticleSystem> toDelete = new List<CPUParticleSystem>();
 
         /// <summary>
+        /// Current particle count
+        /// </summary>
+        public int AllocatedParticleCount { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
@@ -60,6 +65,7 @@ namespace Engine
                     toDelete.ForEach(p =>
                     {
                         this.particleSystems.Remove(p);
+                        this.AllocatedParticleCount -= p.MaxConcurrentParticles;
                         p.Dispose();
                     });
 
@@ -83,7 +89,11 @@ namespace Engine
         /// <param name="emitter">Particle emitter</param>
         public void AddParticleGenerator(CPUParticleSystemDescription description, ParticleEmitter emitter)
         {
-            this.particleSystems.Add(new CPUParticleSystem(this.Game, description, emitter));
+            var pSystem = new CPUParticleSystem(this.Game, description, emitter);
+
+            this.AllocatedParticleCount += pSystem.MaxConcurrentParticles;
+
+            this.particleSystems.Add(pSystem);
         }
 
         /// <summary>
@@ -92,7 +102,7 @@ namespace Engine
         /// <returns>Returns the text representation of the particle manager</returns>
         public override string ToString()
         {
-            return string.Format("Count: {0}", particleSystems.Count);
+            return string.Format("Particle systems: {0}; Allocated particles: {1}", particleSystems.Count, this.AllocatedParticleCount);
         }
     }
 }

@@ -10,11 +10,11 @@ namespace ModelDrawing
     public class TestScene : Scene
     {
         private TextDrawer text = null;
+        private TextDrawer statistics = null;
 
         private Model floor = null;
 
         private CPUParticleManager pManager = null;
-
         private CPUParticleSystemDescription pPlume = null;
         private CPUParticleSystemDescription pFire = null;
         private CPUParticleSystemDescription pDust = null;
@@ -36,21 +36,22 @@ namespace ModelDrawing
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            var textDesc = new TextDrawerDescription()
-            {
-                Font = "Arial",
-                FontSize = 20,
-                TextColor = Color.Yellow,
-            };
-            this.text = this.AddText(textDesc);
-            this.text.Position = Vector2.One;
-
-            this.InitializeFloor();
-
-            this.InitializeModels();
-
+            this.Camera.NearPlaneDistance = 0.1f;
+            this.Camera.FarPlaneDistance = 5000f;
             this.Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             this.Camera.LookTo(Vector3.Zero);
+
+            this.InitializeTexts();
+            this.InitializeFloor();
+            this.InitializeModels();
+        }
+        private void InitializeTexts()
+        {
+            this.text = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow });
+            this.statistics = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.DarkBlue, ShadowColor = Color.LightBlue });
+            this.text.Position = Vector2.One;
+            this.statistics.Position = Vector2.One;
+            this.statistics.Top = this.text.Top + this.text.Height + 5;
         }
         private void InitializeFloor()
         {
@@ -260,6 +261,7 @@ namespace ModelDrawing
             string particle = this.pManager.ToString();
 
             this.text.Text = "Model Drawing " + particle;
+            this.statistics.Text = this.Game.RuntimeText;
         }
     }
 }

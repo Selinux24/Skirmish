@@ -60,6 +60,10 @@ namespace Engine
         /// </summary>
         public int ActiveParticles { get; private set; }
         /// <summary>
+        /// Gets the maximum number of concurrent particles
+        /// </summary>
+        public int MaxConcurrentParticles { get; private set; }
+        /// <summary>
         /// Total particle system time
         /// </summary>
         public float TotalTime { get; private set; }
@@ -167,10 +171,9 @@ namespace Engine
             this.TextureCount = (uint)imgContent.Count;
 
             this.Emitter = emitter;
+            this.MaxConcurrentParticles = this.Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
 
-            float maxActiveParticles = description.MaxDuration * (1f / this.Emitter.EmissionRate);
-            maxActiveParticles = maxActiveParticles != (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles;
-            this.particles = new VertexCPUParticle[(int)maxActiveParticles];
+            this.particles = new VertexCPUParticle[this.MaxConcurrentParticles];
 
             this.vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(this.particles);
             this.vertexBufferBinding = new[]
