@@ -102,7 +102,7 @@ void GSStreamOut(point VSVertexGPUParticle input[1], inout PointStream<VSVertexG
 	}
 }
 
-GeometryShader gsStreamOut = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOut()), "TYPE.x; ENERGY.x; EMISSION_RATE.x; POSITION.xyz; VELOCITY.xyz; COLOR0.rgba");
+GeometryShader gsStreamOut = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOut()), "TYPE.x; EMISSION_TIME.x; EMISSION_RATE.x; ENERGY.x; POSITION.xyz; VELOCITY.xyz; COLOR0.rgba");
 
 technique11 ParticleStreamOut
 {

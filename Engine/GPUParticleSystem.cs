@@ -42,6 +42,10 @@ namespace Engine
         /// Stride
         /// </summary>
         private int inputStride;
+        /// <summary>
+        /// First run flag
+        /// </summary>
+        private bool firstRun = true;
 
         /// <summary>
         /// Game instance
@@ -72,10 +76,16 @@ namespace Engine
         /// Elapsed time
         /// </summary>
         public float ElapsedTime { get; private set; }
-
-        public bool Active = true;
-
-        public bool FirstRun = true;
+        /// <summary>
+        /// Gets if the current particle system is active
+        /// </summary>
+        public bool Active
+        {
+            get
+            {
+                return this.Emitter.Duration > 0;
+            }
+        }
 
         /// <summary>
         /// Particle emitter
@@ -198,6 +208,8 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Update(UpdateContext context)
         {
+            this.Emitter.Update(context);
+
             this.ElapsedTime = context.GameTime.ElapsedSeconds;
             this.TotalTime += this.ElapsedTime;
         }
@@ -227,7 +239,7 @@ namespace Engine
                     this.VelocitySensitivity,
                     this.HorizontalVelocity,
                     this.VerticalVelocity,
-                    new Color4(this.rnd.NextFloat(0,1),this.rnd.NextFloat(0,1),this.rnd.NextFloat(0,1),this.rnd.NextFloat(0,1)),
+                    new Color4(this.rnd.NextFloat(0, 1), this.rnd.NextFloat(0, 1), this.rnd.NextFloat(0, 1), this.rnd.NextFloat(0, 1)),
                     this.MaximumAge,
                     this.MaximumAgeVariation,
                     this.VelocityAtEnd,
@@ -246,12 +258,12 @@ namespace Engine
 
                 {
                     var techniqueForStreamOut = effect.GetTechniqueForStreamOut(VertexTypes.GPUParticle);
-                    
+
                     var inputLayout = effect.GetInputLayout(techniqueForStreamOut);
                     this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
                     Counters.IAInputLayoutSets++;
 
-                    var iaBinding = new VertexBufferBinding(this.FirstRun ? this.emittersBuffer : this.drawingBuffer, this.inputStride, 0);
+                    var iaBinding = new VertexBufferBinding(this.firstRun ? this.emittersBuffer : this.drawingBuffer, this.inputStride, 0);
                     this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, new[] { iaBinding });
                     Counters.IAVertexBuffersSets++;
 
@@ -262,11 +274,11 @@ namespace Engine
                     {
                         techniqueForStreamOut.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                        if (this.FirstRun)
+                        if (this.firstRun)
                         {
                             this.Game.Graphics.DeviceContext.Draw(1, 0);
 
-                            this.FirstRun = false;
+                            this.firstRun = false;
                         }
                         else
                         {
