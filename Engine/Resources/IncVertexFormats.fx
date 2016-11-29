@@ -17,18 +17,13 @@ struct VSVertexCPUParticle
 };
 struct VSVertexGPUParticle
 {
-	float3 position : POSITION;
-	float4 color: COLOR0;
-	float4 colorStart: COLOR_START;
-	float4 colorEnd: COLOR_END;
-	float3 velocity : VELOCITY;
-	float3 acceleration : ACCELERATION;
-	float2 size : SIZE;
-	float2 sizeStart : SIZE_START;
-	float2 sizeEnd : SIZE_END;
-	float energy : ENERGY;
-	float energyStart : ENERGY_START;
 	uint type : TYPE;
+	float emissionTime : EMISSION_TIME;
+	float emissionRate : EMISSION_RATE;
+	float energy : ENERGY;
+	float3 position : POSITION;
+	float3 velocity : VELOCITY;
+	float4 color : COLOR0;
 };
 struct VSVertexPosition
 {

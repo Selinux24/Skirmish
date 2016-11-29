@@ -131,9 +131,9 @@ namespace Engine
         /// </summary>
         public Vector2 RotateSpeed { get; private set; }
         /// <summary>
-        /// Emitter velocity sensitivity
+        /// Velocity sensitivity
         /// </summary>
-        public float EmitterVelocitySensitivity { get; private set; }
+        public float VelocitySensitivity { get; private set; }
         /// <summary>
         /// Trasparent particles
         /// </summary>
@@ -145,7 +145,7 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
-        public CPUParticleSystem(Game game, CPUParticleSystemDescription description, ParticleEmitter emitter)
+        public CPUParticleSystem(Game game, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             this.Game = game;
 
@@ -160,7 +160,7 @@ namespace Engine
             this.HorizontalVelocity = new Vector2(description.MinHorizontalVelocity, description.MaxHorizontalVelocity);
             this.VerticalVelocity = new Vector2(description.MinVerticalVelocity, description.MaxVerticalVelocity);
             this.RotateSpeed = new Vector2(description.MinRotateSpeed, description.MaxRotateSpeed);
-            this.EmitterVelocitySensitivity = description.EmitterVelocitySensitivity;
+            this.VelocitySensitivity = description.EmitterVelocitySensitivity;
             this.Transparent = description.Transparent;
 
             ImageContent imgContent = new ImageContent()
@@ -293,7 +293,7 @@ namespace Engine
                 nextFreeParticle = 0;
             }
 
-            Vector3 velocity = this.Emitter.Velocity * this.EmitterVelocitySensitivity;
+            Vector3 velocity = this.Emitter.Velocity * this.VelocitySensitivity;
 
             float horizontalVelocity = MathUtil.Lerp(
                 this.HorizontalVelocity.X,

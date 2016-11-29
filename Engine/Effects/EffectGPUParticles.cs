@@ -22,22 +22,22 @@ namespace Engine.Effects
         /// </summary>
         public readonly EffectTechnique ParticleStreamOut = null;
         /// <summary>
-        /// Solid drawing technique
+        /// Non rotation particles drawing technique
         /// </summary>
-        public readonly EffectTechnique SolidDraw = null;
+        public readonly EffectTechnique NonRotationDraw = null;
         /// <summary>
-        /// Line drawing technique
+        /// Rotation particles drawing technique
         /// </summary>
-        public readonly EffectTechnique LineDraw = null;
-        /// <summary>
-        /// Solid deferred drawing technique
-        /// </summary>
-        public readonly EffectTechnique DeferredSolidDraw = null;
-        /// <summary>
-        /// Line deferred drawing technique
-        /// </summary>
-        public readonly EffectTechnique DeferredLineDraw = null;
+        public readonly EffectTechnique RotationDraw = null;
 
+        /// <summary>
+        /// World effect variable
+        /// </summary>
+        private EffectMatrixVariable world = null;
+        /// <summary>
+        /// World view projection effect variable
+        /// </summary>
+        private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
@@ -47,25 +47,9 @@ namespace Engine.Effects
         /// </summary>
         private EffectScalarVariable totalTime = null;
         /// <summary>
-        /// Time step effect variable
+        /// Elapsed time effect variable
         /// </summary>
         private EffectScalarVariable elapsedTime = null;
-        /// <summary>
-        /// World view projection effect variable
-        /// </summary>
-        private EffectMatrixVariable viewProjection = null;
-        /// <summary>
-        /// Emit age effect variable
-        /// </summary>
-        private EffectScalarVariable emissionRate = null;
-        /// <summary>
-        /// Minium energy effect variable
-        /// </summary>
-        private EffectScalarVariable energyMin = null;
-        /// <summary>
-        /// Maximum energy effect variable
-        /// </summary>
-        private EffectScalarVariable energyMax = null;
         /// <summary>
         /// Texture count effect variable
         /// </summary>
@@ -74,42 +58,93 @@ namespace Engine.Effects
         /// Textures effect variable
         /// </summary>
         private EffectShaderResourceVariable textureArray = null;
+
         /// <summary>
-        /// Random texture effect variable
+        /// Emission age effect variable
         /// </summary>
-        private EffectShaderResourceVariable textureRandom = null;
+        private EffectScalarVariable emissionRate = null;
         /// <summary>
-        /// Fog start effect variable
+        /// Velocity sensitivity effect variable
         /// </summary>
-        private EffectScalarVariable fogStart = null;
+        private EffectScalarVariable velocitySensitivity = null;
         /// <summary>
-        /// Fog range effect variable
+        /// Horizontal velocity effect variable
         /// </summary>
-        private EffectScalarVariable fogRange = null;
+        private EffectVectorVariable horizontalVelocity = null;
         /// <summary>
-        /// Fog color effect variable
+        /// Vertical velocity effect variable
         /// </summary>
-        private EffectVectorVariable fogColor = null;
+        private EffectVectorVariable verticalVelocity = null;
+        /// <summary>
+        /// Random values effect variable
+        /// </summary>
+        private EffectVectorVariable randomValues = null;
 
-        private EffectVectorVariable particleOrbit = null;
+        /// <summary>
+        /// Maximum particle duration variable
+        /// </summary>
+        private EffectScalarVariable maxDuration = null;
+        /// <summary>
+        /// Maximum particle duration randomness variable
+        /// </summary>
+        private EffectScalarVariable maxDurationRandomness = null;
+        /// <summary>
+        /// End velocity variable
+        /// </summary>
+        private EffectScalarVariable endVelocity = null;
+        /// <summary>
+        /// Gravity variable
+        /// </summary>
+        private EffectVectorVariable gravity = null;
+        /// <summary>
+        /// Starting size variable
+        /// </summary>
+        private EffectVectorVariable startSize = null;
+        /// <summary>
+        /// Ending size variable
+        /// </summary>
+        private EffectVectorVariable endSize = null;
+        /// <summary>
+        /// Minimum color variable
+        /// </summary>
+        private EffectVectorVariable minColor = null;
+        /// <summary>
+        /// Maximum color variable
+        /// </summary>
+        private EffectVectorVariable maxColor = null;
+        /// <summary>
+        /// Rotation speed variable
+        /// </summary>
+        private EffectVectorVariable rotateSpeed = null;
 
-        private EffectVectorVariable particlePosition = null;
-        private EffectVectorVariable particlePositionVariance = null;
-        private EffectVectorVariable particleVelocity = null;
-        private EffectVectorVariable particleVelocityVariance = null;
-        private EffectVectorVariable particleAcceleration = null;
-        private EffectVectorVariable particleAccelerationVariance = null;
-
-        private EffectVectorVariable particleColorStart = null;
-        private EffectVectorVariable particleColorStartVariance = null;
-        private EffectVectorVariable particleColorEnd = null;
-        private EffectVectorVariable particleColorEndVariance = null;
-
-        private EffectScalarVariable particleSizeStartMin = null;
-        private EffectScalarVariable particleSizeStartMax = null;
-        private EffectScalarVariable particleSizeEndMin = null;
-        private EffectScalarVariable particleSizeEndMax = null;
-
+        /// <summary>
+        /// World matrix
+        /// </summary>
+        protected Matrix World
+        {
+            get
+            {
+                return this.world.GetMatrix();
+            }
+            set
+            {
+                this.world.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// World view projection matrix
+        /// </summary>
+        protected Matrix WorldViewProjection
+        {
+            get
+            {
+                return this.worldViewProjection.GetMatrix();
+            }
+            set
+            {
+                this.worldViewProjection.SetMatrix(value);
+            }
+        }
         /// <summary>
         /// Camera eye position
         /// </summary>
@@ -143,7 +178,7 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Time step
+        /// Elapsed time
         /// </summary>
         protected float ElapsedTime
         {
@@ -154,62 +189,6 @@ namespace Engine.Effects
             set
             {
                 this.elapsedTime.Set(value);
-            }
-        }
-        /// <summary>
-        /// Emit age
-        /// </summary>
-        protected float EmissionRate
-        {
-            get
-            {
-                return this.emissionRate.GetFloat();
-            }
-            set
-            {
-                this.emissionRate.Set(value);
-            }
-        }
-        /// <summary>
-        /// Minimum energy
-        /// </summary>
-        protected float EnergyMin
-        {
-            get
-            {
-                return this.energyMin.GetFloat();
-            }
-            set
-            {
-                this.energyMin.Set(value);
-            }
-        }
-        /// <summary>
-        /// Maximum energy
-        /// </summary>
-        protected float EnergyMax
-        {
-            get
-            {
-                return this.energyMax.GetFloat();
-            }
-            set
-            {
-                this.energyMax.Set(value);
-            }
-        }
-        /// <summary>
-        /// View projection matrix
-        /// </summary>
-        protected Matrix ViewProjection
-        {
-            get
-            {
-                return this.viewProjection.GetMatrix();
-            }
-            set
-            {
-                this.viewProjection.SetMatrix(value);
             }
         }
         /// <summary>
@@ -240,80 +219,136 @@ namespace Engine.Effects
                 this.textureArray.SetResource(value);
             }
         }
+
         /// <summary>
-        /// Random texture
+        /// Emission rate
         /// </summary>
-        protected ShaderResourceView TextureRandom
+        protected float EmissionRate
         {
             get
             {
-                return this.textureRandom.GetResource();
+                return this.emissionRate.GetFloat();
             }
             set
             {
-                this.textureRandom.SetResource(value);
-            }
-        }
-        /// <summary>
-        /// Fog start distance
-        /// </summary>
-        protected float FogStart
-        {
-            get
-            {
-                return this.fogStart.GetFloat();
-            }
-            set
-            {
-                this.fogStart.Set(value);
+                this.emissionRate.Set(value);
             }
         }
         /// <summary>
-        /// Fog range distance
+        /// Velocity sensitivity
         /// </summary>
-        protected float FogRange
+        protected float VelocitySensitivity
         {
             get
             {
-                return this.fogRange.GetFloat();
+                return this.velocitySensitivity.GetFloat();
             }
             set
             {
-                this.fogRange.Set(value);
+                this.velocitySensitivity.Set(value);
             }
         }
         /// <summary>
-        /// Fog color
+        /// Horizontal velocity
         /// </summary>
-        protected Color4 FogColor
+        protected Vector2 HorizontalVelocity
         {
             get
             {
-                return new Color4(this.fogColor.GetFloatVector());
+                var v4 = this.horizontalVelocity.GetFloatVector();
+
+                return new Vector2(v4.X, v4.Y);
             }
             set
             {
-                this.fogColor.Set(value);
+                var v4 = new Vector4(value.X, value.Y, 0, 0);
+
+                this.horizontalVelocity.Set(v4);
             }
         }
-
-        protected Vector4 ParticleOrbit
+        /// <summary>
+        /// Vertical velocity
+        /// </summary>
+        protected Vector2 VerticalVelocity
         {
             get
             {
-                return this.particleOrbit.GetFloatVector();
+                var v4 = this.verticalVelocity.GetFloatVector();
+
+                return new Vector2(v4.X, v4.Y);
             }
             set
             {
-                this.particleOrbit.Set(value);
+                var v4 = new Vector4(value.X, value.Y, 0, 0);
+
+                this.verticalVelocity.Set(v4);
             }
         }
-
-        protected Vector3 ParticlePosition
+        /// <summary>
+        /// Random values
+        /// </summary>
+        protected Color4 RandomValues
         {
             get
             {
-                Vector4 v = this.particlePosition.GetFloatVector();
+                return new Color4(this.randomValues.GetFloatVector());
+            }
+            set
+            {
+                this.randomValues.Set(value);
+            }
+        }
+
+        /// <summary>
+        /// Maximum particle duration
+        /// </summary>
+        protected float MaxDuration
+        {
+            get
+            {
+                return this.maxDuration.GetFloat();
+            }
+            set
+            {
+                this.maxDuration.Set(value);
+            }
+        }
+        /// <summary>
+        /// Maximum particle duration randomness
+        /// </summary>
+        protected float MaxDurationRandomness
+        {
+            get
+            {
+                return this.maxDurationRandomness.GetFloat();
+            }
+            set
+            {
+                this.maxDurationRandomness.Set(value);
+            }
+        }
+        /// <summary>
+        /// End velocity
+        /// </summary>
+        protected float EndVelocity
+        {
+            get
+            {
+                return this.endVelocity.GetFloat();
+            }
+            set
+            {
+                this.endVelocity.Set(value);
+            }
+        }
+        /// <summary>
+        /// Gravity
+        /// </summary>
+        protected Vector3 Gravity
+        {
+            get
+            {
+                Vector4 v = this.gravity.GetFloatVector();
 
                 return new Vector3(v.X, v.Y, v.Z);
             }
@@ -321,172 +356,89 @@ namespace Engine.Effects
             {
                 Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
 
-                this.particlePosition.Set(v4);
+                this.gravity.Set(v4);
             }
         }
-        protected Vector3 ParticlePositionVariance
+        /// <summary>
+        /// Starting size
+        /// </summary>
+        protected Vector2 StartSize
         {
             get
             {
-                Vector4 v = this.particlePositionVariance.GetFloatVector();
+                Vector4 v = this.startSize.GetFloatVector();
 
-                return new Vector3(v.X, v.Y, v.Z);
+                return new Vector2(v.X, v.Y);
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
+                Vector4 v4 = new Vector4(value.X, value.Y, 1f, 1f);
 
-                this.particlePositionVariance.Set(v4);
+                this.startSize.Set(v4);
             }
         }
-        protected Vector3 ParticleVelocity
+        /// <summary>
+        /// Ending size
+        /// </summary>
+        protected Vector2 EndSize
         {
             get
             {
-                Vector4 v = this.particleVelocity.GetFloatVector();
+                Vector4 v = this.endSize.GetFloatVector();
 
-                return new Vector3(v.X, v.Y, v.Z);
+                return new Vector2(v.X, v.Y);
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
+                Vector4 v4 = new Vector4(value.X, value.Y, 1f, 1f);
 
-                this.particleVelocity.Set(v4);
+                this.endSize.Set(v4);
             }
         }
-        protected Vector3 ParticleVelocityVariance
+        /// <summary>
+        /// Minimum color
+        /// </summary>
+        protected Color4 MinColor
         {
             get
             {
-                Vector4 v = this.particleVelocityVariance.GetFloatVector();
+                return new Color4(this.minColor.GetFloatVector());
+            }
+            set
+            {
+                this.minColor.Set(value);
+            }
+        }
+        /// <summary>
+        /// Maximum color
+        /// </summary>
+        protected Color4 MaxColor
+        {
+            get
+            {
+                return new Color4(this.maxColor.GetFloatVector());
+            }
+            set
+            {
+                this.maxColor.Set(value);
+            }
+        }
+        /// <summary>
+        /// Rotation speed
+        /// </summary>
+        protected Vector2 RotateSpeed
+        {
+            get
+            {
+                Vector4 v = this.rotateSpeed.GetFloatVector();
 
-                return new Vector3(v.X, v.Y, v.Z);
+                return new Vector2(v.X, v.Y);
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
+                Vector4 v4 = new Vector4(value.X, value.Y, 1f, 1f);
 
-                this.particleVelocityVariance.Set(v4);
-            }
-        }
-        protected Vector3 ParticleAcceleration
-        {
-            get
-            {
-                Vector4 v = this.particleAcceleration.GetFloatVector();
-
-                return new Vector3(v.X, v.Y, v.Z);
-            }
-            set
-            {
-                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
-
-                this.particleAcceleration.Set(v4);
-            }
-        }
-        protected Vector3 ParticleAccelerationVariance
-        {
-            get
-            {
-                Vector4 v = this.particleAccelerationVariance.GetFloatVector();
-
-                return new Vector3(v.X, v.Y, v.Z);
-            }
-            set
-            {
-                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
-
-                this.particleAccelerationVariance.Set(v4);
-            }
-        }
-
-        protected Color4 ParticleColorStart
-        {
-            get
-            {
-                return new Color4(this.particleColorStart.GetFloatVector());
-            }
-            set
-            {
-                this.particleColorStart.Set(value);
-            }
-        }
-        protected Color4 ParticleColorStartVariance
-        {
-            get
-            {
-                return new Color4(this.particleColorStartVariance.GetFloatVector());
-            }
-            set
-            {
-                this.particleColorStartVariance.Set(value);
-            }
-        }
-        protected Color4 ParticleColorEnd
-        {
-            get
-            {
-                return new Color4(this.particleColorEnd.GetFloatVector());
-            }
-            set
-            {
-                this.particleColorEnd.Set(value);
-            }
-        }
-        protected Color4 ParticleColorEndVariance
-        {
-            get
-            {
-                return new Color4(this.particleColorEndVariance.GetFloatVector());
-            }
-            set
-            {
-                this.particleColorEndVariance.Set(value);
-            }
-        }
-
-        protected float ParticleSizeStartMin
-        {
-            get
-            {
-                return this.particleSizeStartMin.GetFloat();
-            }
-            set
-            {
-                this.particleSizeStartMin.Set(value);
-            }
-        }
-        protected float ParticleSizeStartMax
-        {
-            get
-            {
-                return this.particleSizeStartMax.GetFloat();
-            }
-            set
-            {
-                this.particleSizeStartMax.Set(value);
-            }
-        }
-        protected float ParticleSizeEndMin
-        {
-            get
-            {
-                return this.particleSizeEndMin.GetFloat();
-            }
-            set
-            {
-                this.particleSizeEndMin.Set(value);
-            }
-        }
-        protected float ParticleSizeEndMax
-        {
-            get
-            {
-                return this.particleSizeEndMax.GetFloat();
-            }
-            set
-            {
-                this.particleSizeEndMax.Set(value);
+                this.rotateSpeed.Set(v4);
             }
         }
 
@@ -500,47 +452,36 @@ namespace Engine.Effects
             : base(device, effect, compile)
         {
             this.ParticleStreamOut = this.Effect.GetTechniqueByName("ParticleStreamOut");
-            this.SolidDraw = this.Effect.GetTechniqueByName("SolidDraw");
-            this.LineDraw = this.Effect.GetTechniqueByName("LineDraw");
-            this.DeferredSolidDraw = this.Effect.GetTechniqueByName("DeferredSolidDraw");
-            this.DeferredLineDraw = this.Effect.GetTechniqueByName("DeferredLineDraw");
+            this.NonRotationDraw = this.Effect.GetTechniqueByName("NonRotationParticle");
+            this.RotationDraw = this.Effect.GetTechniqueByName("RotationParticle");
 
             this.AddInputLayout(this.ParticleStreamOut, VertexGPUParticle.GetInput());
-            this.AddInputLayout(this.SolidDraw, VertexGPUParticle.GetInput());
-            this.AddInputLayout(this.LineDraw, VertexGPUParticle.GetInput());
+            this.AddInputLayout(this.NonRotationDraw, VertexGPUParticle.GetInput());
+            this.AddInputLayout(this.RotationDraw, VertexGPUParticle.GetInput());
 
-            this.emissionRate = this.Effect.GetVariableByName("gEmissionRate").AsScalar();
-            this.energyMin = this.Effect.GetVariableByName("gEnergyMin").AsScalar();
-            this.energyMax = this.Effect.GetVariableByName("gEnergyMax").AsScalar();
+            this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
+            this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
             this.totalTime = this.Effect.GetVariableByName("gTotalTime").AsScalar();
             this.elapsedTime = this.Effect.GetVariableByName("gElapsedTime").AsScalar();
-            this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
-            this.viewProjection = this.Effect.GetVariableByName("gViewProjection").AsMatrix();
             this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
             this.textureArray = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
-            this.textureRandom = this.Effect.GetVariableByName("gTextureRandom").AsShaderResource();
-            this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
-            this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
-            this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
 
-            this.particleOrbit = this.Effect.GetVariableByName("gParticleOrbit").AsVector();
+            this.emissionRate = this.Effect.GetVariableByName("gEmissionRate").AsScalar();
+            this.velocitySensitivity = this.Effect.GetVariableByName("gVelocitySensitivity").AsScalar();
+            this.horizontalVelocity = this.Effect.GetVariableByName("gHorizontalVelocity").AsVector();
+            this.verticalVelocity = this.Effect.GetVariableByName("gVerticalVelocity").AsVector();
+            this.randomValues = this.Effect.GetVariableByName("gRandomValues").AsVector();
 
-            this.particlePosition = this.Effect.GetVariableByName("gParticlePosition").AsVector();
-            this.particlePositionVariance = this.Effect.GetVariableByName("gParticlePositionVariance").AsVector();
-            this.particleVelocity = this.Effect.GetVariableByName("gParticleVelocity").AsVector();
-            this.particleVelocityVariance = this.Effect.GetVariableByName("gParticleVelocityVariance").AsVector();
-            this.particleAcceleration = this.Effect.GetVariableByName("gParticleAcceleration").AsVector();
-            this.particleAccelerationVariance = this.Effect.GetVariableByName("gParticleAccelerationVariance").AsVector();
-
-            this.particleColorStart = this.Effect.GetVariableByName("gParticleColorStart").AsVector();
-            this.particleColorStartVariance = this.Effect.GetVariableByName("gParticleColorStartVariance").AsVector();
-            this.particleColorEnd = this.Effect.GetVariableByName("gParticleColorEnd").AsVector();
-            this.particleColorEndVariance = this.Effect.GetVariableByName("gParticleColorEndVariance").AsVector();
-
-            this.particleSizeStartMin = this.Effect.GetVariableByName("gSizeStartMin").AsScalar();
-            this.particleSizeStartMax = this.Effect.GetVariableByName("gSizeStartMax").AsScalar();
-            this.particleSizeEndMin = this.Effect.GetVariableByName("gSizeEndMin").AsScalar();
-            this.particleSizeEndMax = this.Effect.GetVariableByName("gSizeEndMax").AsScalar();
+            this.maxDuration = this.Effect.GetVariableByName("gMaxDuration").AsScalar();
+            this.maxDurationRandomness = this.Effect.GetVariableByName("gMaxDurationRandomness").AsScalar();
+            this.endVelocity = this.Effect.GetVariableByName("gEndVelocity").AsScalar();
+            this.gravity = this.Effect.GetVariableByName("gGravity").AsVector();
+            this.startSize = this.Effect.GetVariableByName("gStartSize").AsVector();
+            this.endSize = this.Effect.GetVariableByName("gEndSize").AsVector();
+            this.minColor = this.Effect.GetVariableByName("gMinColor").AsVector();
+            this.maxColor = this.Effect.GetVariableByName("gMaxColor").AsVector();
+            this.rotateSpeed = this.Effect.GetVariableByName("gRotateSpeed").AsVector();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -574,122 +515,99 @@ namespace Engine.Effects
         /// Get technique by vertex type
         /// </summary>
         /// <param name="vertexType">VertexType</param>
-        /// <param name="drawerMode">Drawer mode</param>
+        /// <param name="instanced">Use instancing data</param>
+        /// <param name="stage">Stage</param>
+        /// <param name="mode">Mode</param>
+        /// <param name="rotation">Rotation</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public EffectTechnique GetTechniqueForDrawing(VertexTypes vertexType, DrawerModesEnum drawerMode)
+        public virtual EffectTechnique GetTechniqueForDrawing(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode, bool rotation)
         {
-            if (vertexType == VertexTypes.GPUParticle)
+            if (stage == DrawingStages.Drawing)
             {
-                if (drawerMode == DrawerModesEnum.Forward || drawerMode == DrawerModesEnum.ShadowMap)
+                if (vertexType == VertexTypes.GPUParticle)
                 {
-                    return this.SolidDraw;
-                }
-                else if (drawerMode == DrawerModesEnum.Deferred)
-                {
-                    return this.DeferredSolidDraw;
+                    switch (mode)
+                    {
+                        case DrawerModesEnum.Forward:
+                            return rotation ? this.RotationDraw : this.NonRotationDraw;
+                        default:
+                            throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    }
                 }
                 else
                 {
-                    throw new Exception(string.Format("Bad drawer mode for effect and stage: {0} - {1}", vertexType, DrawingStages.Drawing));
+                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                 }
             }
             else
             {
-                throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, DrawingStages.Drawing));
+                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
             }
         }
         /// <summary>
         /// Update per frame data
         /// </summary>
+        /// <param name="world">World matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
-        /// <param name="lights">Scene lights</param>
-        /// <param name="randomTexture">Random texture</param>
+        /// <param name="totalTime">Total time</param>
+        /// <param name="maxDuration">Maximum particle duration</param>
+        /// <param name="maxDurationRandomness">Maximum particle duration randomness</param>
+        /// <param name="endVelocity">End particle velocity</param>
+        /// <param name="gravity">Gravity</param>
+        /// <param name="startSize">Start size</param>
+        /// <param name="endSize">End size</param>
+        /// <param name="minColor">Minimum color</param>
+        /// <param name="maxColor">Maximum color</param>
+        /// <param name="rotateSpeed">Rotation speed</param>
+        /// <param name="textureCount">Texture count</param>
+        /// <param name="textures">Texture</param>
         public void UpdatePerFrame(
+            Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
-            SceneLights lights,
-            ShaderResourceView randomTexture)
-        {
-            this.ViewProjection = viewProjection;
-            this.EyePositionWorld = eyePositionWorld;
-
-            this.TextureRandom = randomTexture;
-
-            if (lights != null)
-            {
-                this.FogStart = lights.FogStart;
-                this.FogRange = lights.FogRange;
-                this.FogColor = lights.FogColor;
-            }
-            else
-            {
-                this.FogStart = 0;
-                this.FogRange = 0;
-                this.FogColor = Color.Transparent;
-            }
-        }
-
-        public void UpdatePerEmitter(
             float totalTime,
             float elapsedTime,
             float emissionRate,
+            float velocitySensitivity,
+            Vector2 horizontalVelocity,
+            Vector2 verticalVelocity,
+            Color4 randomValues,
+            float maxDuration,
+            float maxDurationRandomness,
+            float endVelocity,
+            Vector3 gravity,
+            Vector2 startSize,
+            Vector2 endSize,
+            Color4 minColor,
+            Color4 maxColor,
+            Vector2 rotateSpeed,
             uint textureCount,
-            ShaderResourceView textures,
-            float energyMin,
-            float energyMax,
-            bool ellipsoid,
-            bool orbitPosition,
-            bool orbitVelocity,
-            bool orbitAcceleration,
-            float sizeStartMin,
-            float sizeStartMax,
-            float sizeEndMin,
-            float sizeEndMax,
-            Color4 colorStart,
-            Color4 colorStartVar,
-            Color4 colorEnd,
-            Color4 colorEndVar,
-            Vector3 position,
-            Vector3 positionVar,
-            Vector3 velocity,
-            Vector3 velocityVar,
-            Vector3 acceleration,
-            Vector3 accelerationVar)
+            ShaderResourceView textures)
         {
+            this.World = world;
+            this.WorldViewProjection = world * viewProjection;
+            this.EyePositionWorld = eyePositionWorld;
             this.TotalTime = totalTime;
             this.ElapsedTime = elapsedTime;
 
             this.EmissionRate = emissionRate;
+            this.VelocitySensitivity = velocitySensitivity;
+            this.HorizontalVelocity = horizontalVelocity;
+            this.VerticalVelocity = verticalVelocity;
+            this.RandomValues = randomValues;
 
+            this.MaxDuration = maxDuration;
+            this.MaxDurationRandomness = maxDurationRandomness;
+            this.EndVelocity = endVelocity;
+            this.Gravity = gravity;
+            this.StartSize = startSize;
+            this.EndSize = endSize;
+            this.MinColor = minColor;
+            this.MaxColor = maxColor;
+            this.RotateSpeed = rotateSpeed;
             this.TextureCount = textureCount;
             this.TextureArray = textures;
-
-            this.EnergyMin = energyMin;
-            this.EnergyMin = energyMax;
-
-            this.ParticleOrbit = new Vector4(
-                orbitPosition ? 1 : 0,
-                orbitVelocity ? 1 : 0,
-                orbitAcceleration ? 1 : 0,
-                ellipsoid ? 1 : 0);
-
-            this.ParticleSizeStartMin = sizeStartMin;
-            this.ParticleSizeStartMax = sizeStartMax;
-            this.ParticleSizeEndMin = sizeEndMin;
-            this.ParticleSizeEndMax = sizeEndMax;
-
-            this.ParticleColorStart = colorStart;
-            this.ParticleColorStartVariance = colorStartVar;
-            this.ParticleColorEnd = colorEnd;
-            this.ParticleColorEndVariance = colorEndVar;
-
-            this.ParticlePosition = position;
-            this.ParticlePositionVariance = positionVar;
-            this.ParticleVelocity = velocity;
-            this.ParticleVelocityVariance = velocityVar;
-            this.ParticleAcceleration = acceleration;
-            this.ParticleAccelerationVariance = accelerationVar;
         }
     }
 }

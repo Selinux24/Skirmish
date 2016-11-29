@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Particle system description
     /// </summary>
-    public class CPUParticleSystemDescription
+    public class ParticleSystemDescription
     {
         /// <summary>
         /// Initializes dust particle systems
@@ -13,9 +13,9 @@ namespace Engine
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static CPUParticleSystemDescription InitializeDust(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeDust(string contentPath, string texture)
         {
-            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
@@ -54,9 +54,9 @@ namespace Engine
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static CPUParticleSystemDescription InitializeFire(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeFire(string contentPath, string texture)
         {
-            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
@@ -91,9 +91,9 @@ namespace Engine
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static CPUParticleSystemDescription InitializeSmokePlume(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeSmokePlume(string contentPath, string texture)
         {
-            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
@@ -129,9 +129,9 @@ namespace Engine
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static CPUParticleSystemDescription InitializeProjectileTrail(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeProjectileTrail(string contentPath, string texture)
         {
-            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
@@ -169,9 +169,9 @@ namespace Engine
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static CPUParticleSystemDescription InitializeExplosion(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeExplosion(string contentPath, string texture)
         {
-            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
@@ -209,9 +209,9 @@ namespace Engine
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static CPUParticleSystemDescription InitializeSmokeExplosion(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeSmokeExplosion(string contentPath, string texture)
         {
-            CPUParticleSystemDescription settings = new CPUParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription();
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
@@ -248,7 +248,7 @@ namespace Engine
         /// <summary>
         /// Particle type
         /// </summary>
-        public CPUParticleSystemTypes ParticleType { get; set; }
+        public ParticleSystemTypes ParticleType { get; set; }
 
         /// <summary>
         /// Content path
@@ -344,9 +344,9 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public CPUParticleSystemDescription()
+        public ParticleSystemDescription()
         {
-            this.ParticleType = CPUParticleSystemTypes.None;
+            this.ParticleType = ParticleSystemTypes.None;
             this.ContentPath = "Resources";
             this.TextureName = null;
             this.MaxDuration = 0;

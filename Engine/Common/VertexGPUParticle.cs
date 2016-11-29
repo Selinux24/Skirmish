@@ -19,69 +19,44 @@ namespace Engine.Common
         {
             return new InputElement[]
             {
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
-                new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 12, 0, InputClassification.PerVertexData, 0),
-                new InputElement("COLOR_START", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 28, 0, InputClassification.PerVertexData, 0),
-                new InputElement("COLOR_END", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 44, 0, InputClassification.PerVertexData, 0),
-                new InputElement("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 60, 0, InputClassification.PerVertexData, 0),
-                new InputElement("ACCELERATION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 72, 0, InputClassification.PerVertexData, 0),
-                new InputElement("SIZE", 0, SharpDX.DXGI.Format.R32G32_Float, 84, 0, InputClassification.PerVertexData, 0),
-                new InputElement("SIZE_START", 0, SharpDX.DXGI.Format.R32G32_Float, 92, 0, InputClassification.PerVertexData, 0),
-                new InputElement("SIZE_END", 0, SharpDX.DXGI.Format.R32G32_Float, 100, 0, InputClassification.PerVertexData, 0),
-                new InputElement("ENERGY", 0, SharpDX.DXGI.Format.R32_Float, 108, 0, InputClassification.PerVertexData, 0),
-                new InputElement("ENERGY_START", 0, SharpDX.DXGI.Format.R32_Float, 112, 0, InputClassification.PerVertexData, 0),
-                new InputElement("TYPE", 0, SharpDX.DXGI.Format.R32_UInt, 116, 0, InputClassification.PerVertexData, 0),
+                new InputElement("TYPE", 0, SharpDX.DXGI.Format.R32_UInt, 0, 0, InputClassification.PerVertexData, 0),
+                new InputElement("EMISSION_TIME", 0, SharpDX.DXGI.Format.R32_Float, 4, 0, InputClassification.PerVertexData, 0),
+                new InputElement("EMISSION_RATE", 0, SharpDX.DXGI.Format.R32_Float, 8, 0, InputClassification.PerVertexData, 0),
+                new InputElement("ENERGY", 0, SharpDX.DXGI.Format.R32_Float, 12, 0, InputClassification.PerVertexData, 0),
+                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 16, 0, InputClassification.PerVertexData, 0),
+                new InputElement("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 28, 0, InputClassification.PerVertexData, 0),
+                new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 40, 0, InputClassification.PerVertexData, 0),
             };
         }
 
         /// <summary>
-        /// Initial position
+        /// Particle type
         /// </summary>
-        public Vector3 Position;
+        public uint Type;
         /// <summary>
-        /// Particle color
+        /// Total emission time
         /// </summary>
-        public Color4 Color;
+        public float EmissionTime;
         /// <summary>
-        /// Particle starting color
+        /// Emission rate
         /// </summary>
-        public Color4 ColorStart;
-        /// <summary>
-        /// Particle ending color
-        /// </summary>
-        public Color4 ColorEnd;
-        /// <summary>
-        /// Initial velocity
-        /// </summary>
-        public Vector3 Velocity;
-        /// <summary>
-        /// Acceleration
-        /// </summary>
-        public Vector3 Acceleration;
-        /// <summary>
-        /// Size
-        /// </summary>
-        public Vector2 Size;
-        /// <summary>
-        /// Starting size
-        /// </summary>
-        public Vector2 SizeStart;
-        /// <summary>
-        /// Ending size
-        /// </summary>
-        public Vector2 SizeEnd;
+        public float EmissionRate;
         /// <summary>
         /// Particle energy
         /// </summary>
         public float Energy;
         /// <summary>
-        /// Staring particle energy
+        /// Position
         /// </summary>
-        public float EnergyStart;
+        public Vector3 Position;
         /// <summary>
-        /// Particle type
+        /// Velocity
         /// </summary>
-        public uint Type;
+        public Vector3 Velocity;
+        /// <summary>
+        /// Particle color
+        /// </summary>
+        public Color4 Color;
         /// <summary>
         /// Vertex type
         /// </summary>
@@ -125,7 +100,6 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
             else if (channel == VertexDataChannels.Color) return this.Color.Cast<T>();
-            else if (channel == VertexDataChannels.Size) return this.Size.Cast<T>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
         /// <summary>
@@ -138,7 +112,6 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
             else if (channel == VertexDataChannels.Color) this.Color = value.Cast<Color4>();
-            else if (channel == VertexDataChannels.Size) this.Size = value.Cast<Vector2>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
 
@@ -148,7 +121,7 @@ namespace Engine.Common
         /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
-            return string.Format("Position: {0}; Color: {1}; Size: {2}", this.Position, this.Color, this.Size);
+            return string.Format("Position: {0}; Color: {1}", this.Position, this.Color);
         }
     }
 }

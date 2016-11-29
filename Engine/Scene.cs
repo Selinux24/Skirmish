@@ -679,14 +679,14 @@ namespace Engine
             return newModel;
         }
         /// <summary>
-        /// Adds a new GPU particle system
+        /// Adds a new GPU particle manager
         /// </summary>
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
-        /// <returns>Returns new particle system</returns>
-        public GPUParticleSystem AddParticleSystem(GPUParticleSystemDescription description, int order = 0)
+        /// <returns>Returns new particle manager</returns>
+        public GPUParticleManager AddParticleManager(GPUParticleManagerDescription description, int order = 0)
         {
-            GPUParticleSystem newModel = new GPUParticleSystem(this.Game, description);
+            GPUParticleManager newModel = new GPUParticleManager(this.Game, description);
 
             this.AddComponent(newModel, order);
 

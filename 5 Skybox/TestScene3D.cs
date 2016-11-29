@@ -44,7 +44,7 @@ namespace Skybox
         private ModelInstanced torchs = null;
         private SceneLightPoint[] torchLights = null;
 
-        private GPUParticleEmitter movingFireEmitter = null;
+        private ParticleEmitter movingFireEmitter = null;
         private SceneLightPoint movingFireLight = null;
 
         private int directionalLightCount = 0;

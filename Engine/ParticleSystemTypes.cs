@@ -1,7 +1,7 @@
 ﻿
 namespace Engine
 {
-    public enum CPUParticleSystemTypes
+    public enum ParticleSystemTypes
     {
         /// <summary>
         /// None

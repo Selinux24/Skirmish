@@ -14,13 +14,15 @@ namespace ModelDrawing
 
         private Model floor = null;
 
+        private ParticleSystemDescription pPlume = null;
+        private ParticleSystemDescription pFire = null;
+        private ParticleSystemDescription pDust = null;
+        private ParticleSystemDescription pProjectile = null;
+        private ParticleSystemDescription pExplosion = null;
+        private ParticleSystemDescription pSmokeExplosion = null;
+
         private CPUParticleManager pManager = null;
-        private CPUParticleSystemDescription pPlume = null;
-        private CPUParticleSystemDescription pFire = null;
-        private CPUParticleSystemDescription pDust = null;
-        private CPUParticleSystemDescription pProjectile = null;
-        private CPUParticleSystemDescription pExplosion = null;
-        private CPUParticleSystemDescription pSmokeExplosion = null;
+        private GPUParticleManager pManagerGPU = null;
 
         private Random rnd = new Random();
 
@@ -81,13 +83,15 @@ namespace ModelDrawing
         }
         private void InitializeModels()
         {
+            this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png");
+            this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png");
+            this.pDust = ParticleSystemDescription.InitializeDust("resources", "smoke.png");
+            this.pProjectile = ParticleSystemDescription.InitializeProjectileTrail("resources", "smoke.png");
+            this.pExplosion = ParticleSystemDescription.InitializeExplosion("resources", "fire.png");
+            this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources", "smoke.png");
+
             this.pManager = this.AddParticleManager(new CPUParticleManagerDescription());
-            this.pPlume = CPUParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png");
-            this.pFire = CPUParticleSystemDescription.InitializeFire("resources", "fire.png");
-            this.pDust = CPUParticleSystemDescription.InitializeDust("resources", "smoke.png");
-            this.pProjectile = CPUParticleSystemDescription.InitializeProjectileTrail("resources", "smoke.png");
-            this.pExplosion = CPUParticleSystemDescription.InitializeExplosion("resources", "fire.png");
-            this.pSmokeExplosion = CPUParticleSystemDescription.InitializeExplosion("resources", "smoke.png");
+            this.pManagerGPU = this.AddParticleManager(new GPUParticleManagerDescription());
         }
 
         public override void Update(GameTime gameTime)
@@ -147,6 +151,10 @@ namespace ModelDrawing
             if (this.Game.Input.KeyJustPressed(Keys.D4))
             {
                 this.AddExplosionSystem();
+            }
+            if (this.Game.Input.KeyJustPressed(Keys.D6))
+            {
+                this.AddSmokePlumeSystemGPU();
             }
 
             if (this.Game.Input.KeyJustPressed(Keys.P))
@@ -252,6 +260,34 @@ namespace ModelDrawing
 
             this.pManager.AddParticleGenerator(this.pFire, emitter1);
             this.pManager.AddParticleGenerator(this.pPlume, emitter2);
+        }
+        private void AddSmokePlumeSystemGPU()
+        {
+            Vector3 position = new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10));
+            Vector3 velocity = Vector3.Up;
+            float duration = this.rnd.NextFloat(10, 60);
+            float rate = this.rnd.NextFloat(0.1f, 1f);
+
+            var emitter1 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate * 0.5f,
+                InfiniteDuration = false,
+            };
+
+            var emitter2 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration + (duration * 0.1f),
+                EmissionRate = rate,
+                InfiniteDuration = false,
+            };
+
+            this.pManagerGPU.AddParticleGenerator(this.pFire, emitter1);
+            this.pManagerGPU.AddParticleGenerator(this.pPlume, emitter2);
         }
 
         public override void Draw(GameTime gameTime)

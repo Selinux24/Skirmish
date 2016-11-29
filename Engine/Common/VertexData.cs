@@ -361,7 +361,6 @@ namespace Engine.Common
             {
                 Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
                 Velocity = Vector3.Zero,
-                Size = v.Size.HasValue ? v.Size.Value : Vector2.One,
             };
         }
         /// <summary>

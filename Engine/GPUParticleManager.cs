@@ -7,16 +7,16 @@ namespace Engine
     /// <summary>
     /// CPU particle manager
     /// </summary>
-    public class CPUParticleManager : Drawable
+    public class GPUParticleManager : Drawable
     {
         /// <summary>
         /// Particle systems list
         /// </summary>
-        private List<CPUParticleSystem> particleSystems = new List<CPUParticleSystem>();
+        private List<GPUParticleSystem> particleSystems = new List<GPUParticleSystem>();
         /// <summary>
         /// Collection for particle system disposition
         /// </summary>
-        private List<CPUParticleSystem> toDelete = new List<CPUParticleSystem>();
+        private List<GPUParticleSystem> toDelete = new List<GPUParticleSystem>();
 
         /// <summary>
         /// Current particle count
@@ -28,7 +28,7 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="description">Particle manager description</param>
-        public CPUParticleManager(Game game, CPUParticleManagerDescription description)
+        public GPUParticleManager(Game game, GPUParticleManagerDescription description)
             : base(game, description)
         {
 
@@ -89,7 +89,7 @@ namespace Engine
         /// <param name="emitter">Particle emitter</param>
         public void AddParticleGenerator(ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            var pSystem = new CPUParticleSystem(this.Game, description, emitter);
+            var pSystem = new GPUParticleSystem(this.Game, description, emitter);
 
             this.AllocatedParticleCount += pSystem.MaxConcurrentParticles;
 
