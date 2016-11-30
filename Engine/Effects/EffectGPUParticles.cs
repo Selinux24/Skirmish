@@ -287,11 +287,11 @@ namespace Engine.Effects
         /// <summary>
         /// Random values
         /// </summary>
-        protected Color4 RandomValues
+        protected Vector4 RandomValues
         {
             get
             {
-                return new Color4(this.randomValues.GetFloatVector());
+                return this.randomValues.GetFloatVector();
             }
             set
             {
@@ -572,7 +572,7 @@ namespace Engine.Effects
             float velocitySensitivity,
             Vector2 horizontalVelocity,
             Vector2 verticalVelocity,
-            Color4 randomValues,
+            Vector4 randomValues,
             float maxDuration,
             float maxDurationRandomness,
             float endVelocity,

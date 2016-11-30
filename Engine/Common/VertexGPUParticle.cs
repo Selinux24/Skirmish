@@ -19,32 +19,16 @@ namespace Engine.Common
         {
             return new InputElement[]
             {
-                new InputElement("TYPE", 0, SharpDX.DXGI.Format.R32_UInt, 0, 0, InputClassification.PerVertexData, 0),
-                new InputElement("EMISSION_TIME", 0, SharpDX.DXGI.Format.R32_Float, 4, 0, InputClassification.PerVertexData, 0),
-                new InputElement("EMISSION_RATE", 0, SharpDX.DXGI.Format.R32_Float, 8, 0, InputClassification.PerVertexData, 0),
-                new InputElement("ENERGY", 0, SharpDX.DXGI.Format.R32_Float, 12, 0, InputClassification.PerVertexData, 0),
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 16, 0, InputClassification.PerVertexData, 0),
-                new InputElement("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 28, 0, InputClassification.PerVertexData, 0),
-                new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 40, 0, InputClassification.PerVertexData, 0),
+                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
+                new InputElement("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, 0, InputClassification.PerVertexData, 0),
+                new InputElement("RANDOM", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 24, 0, InputClassification.PerVertexData, 0),
+                new InputElement("MAX_AGE", 0, SharpDX.DXGI.Format.R32_Float, 40, 0, InputClassification.PerVertexData, 0),
+
+                new InputElement("TYPE", 0, SharpDX.DXGI.Format.R32_UInt, 44, 0, InputClassification.PerVertexData, 0),
+                new InputElement("EMISSION_TIME", 0, SharpDX.DXGI.Format.R32_Float, 48, 0, InputClassification.PerVertexData, 0),
             };
         }
 
-        /// <summary>
-        /// Particle type
-        /// </summary>
-        public uint Type;
-        /// <summary>
-        /// Total emission time
-        /// </summary>
-        public float EmissionTime;
-        /// <summary>
-        /// Emission rate
-        /// </summary>
-        public float EmissionRate;
-        /// <summary>
-        /// Particle energy
-        /// </summary>
-        public float Energy;
         /// <summary>
         /// Position
         /// </summary>
@@ -54,9 +38,21 @@ namespace Engine.Common
         /// </summary>
         public Vector3 Velocity;
         /// <summary>
-        /// Particle color
+        /// Particle random values
         /// </summary>
-        public Color4 Color;
+        public Vector4 RandomValues;
+        /// <summary>
+        /// Particle maximum age
+        /// </summary>
+        public float MaxAge;
+        /// <summary>
+        /// Particle type
+        /// </summary>
+        public uint Type;
+        /// <summary>
+        /// Total emission time
+        /// </summary>
+        public float EmissionTime;
         /// <summary>
         /// Vertex type
         /// </summary>
@@ -99,7 +95,6 @@ namespace Engine.Common
         public T GetChannelValue<T>(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
-            else if (channel == VertexDataChannels.Color) return this.Color.Cast<T>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
         /// <summary>
@@ -111,7 +106,6 @@ namespace Engine.Common
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
             if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
-            else if (channel == VertexDataChannels.Color) this.Color = value.Cast<Color4>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
 
@@ -121,7 +115,7 @@ namespace Engine.Common
         /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
-            return string.Format("Position: {0}; Color: {1}", this.Position, this.Color);
+            return string.Format("Position: {0}", this.Position);
         }
     }
 }

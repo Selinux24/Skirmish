@@ -1,4 +1,5 @@
 static const float4x4 IDENTITY = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+static const float PI = 6.28319f;
 
 /*
 BASIC VS INPUTS
@@ -12,18 +13,18 @@ struct VSVertexCPUParticle
 {
 	float3 positionWorld : POSITION;
 	float3 velocityWorld : VELOCITY;
-	float4 color: COLOR0;
+	float4 random: RANDOM;
 	float maxAge : MAX_AGE;
 };
 struct VSVertexGPUParticle
 {
-	uint type : TYPE;
-	float emissionTime : EMISSION_TIME;
-	float emissionRate : EMISSION_RATE;
-	float energy : ENERGY;
 	float3 position : POSITION;
 	float3 velocity : VELOCITY;
-	float4 color : COLOR0;
+	float4 random: RANDOM;
+	float maxAge : MAX_AGE;
+
+	uint type : TYPE;
+	float emissionTime : EMISSION_TIME;
 };
 struct VSVertexPosition
 {

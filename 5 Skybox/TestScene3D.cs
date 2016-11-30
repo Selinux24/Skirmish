@@ -39,7 +39,10 @@ namespace Skybox
         private LineListDrawer volumesDrawer = null;
         private TriangleListDrawer graphDrawer = null;
 
-        private GPUParticleSystem fires = null;
+        private CPUParticleManager pManager = null;
+        private ParticleSystemDescription pPlume = null;
+        private ParticleSystemDescription pFire = null;
+        private ParticleSystemDescription pBigFire = null;
 
         private ModelInstanced torchs = null;
         private SceneLightPoint[] torchLights = null;
@@ -138,15 +141,21 @@ namespace Skybox
 
             #endregion
 
-            #region Particle System
+            #region Particle Systems
 
-            this.fires = this.AddParticleSystem(new GPUParticleSystemDescription() { Name = "Fires" });
+            this.pManager = this.AddParticleManager(new CPUParticleManagerDescription());
+
+            this.pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
+            this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
+            this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
 
             #endregion
 
             #region Moving fire
 
-            this.movingFireEmitter = this.fires.Add(GPUParticleEmitterDescription.GenerateFire(Vector3.Zero, "resources", "flare0.dds"));
+            this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
+
+            this.pManager.AddParticleGenerator(this.pBigFire, this.movingFireEmitter);
 
             #endregion
 
@@ -222,7 +231,8 @@ namespace Skybox
 
                 this.Lights.Add(this.torchLights[i]);
 
-                this.fires.Add(GPUParticleEmitterDescription.GenerateFire(firePositions3D[i], "resources", "flare0.dds"));
+                this.pManager.AddParticleGenerator(this.pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
+                this.pManager.AddParticleGenerator(this.pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
             this.ruins.AttachFullPickingFullPathFinding(this.torchs);
@@ -276,7 +286,7 @@ namespace Skybox
             position.Y = 1f;
             position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
 
-            this.movingFireEmitter.Description.Position = position;
+            this.movingFireEmitter.Position = position;
             this.movingFireLight.Position = position;
 
             this.DEBUGUpdateMovingVolumesDrawer();

@@ -50,11 +50,11 @@ namespace Engine
         /// <summary>
         /// Particle texture
         /// </summary>
-        public ShaderResourceView Texture;
+        public ShaderResourceView Texture { get; private set; }
         /// <summary>
         /// Texture count
         /// </summary>
-        public uint TextureCount;
+        public uint TextureCount { get; private set; }
         /// <summary>
         /// Active particle count
         /// </summary>
@@ -63,10 +63,6 @@ namespace Engine
         /// Gets the maximum number of concurrent particles
         /// </summary>
         public int MaxConcurrentParticles { get; private set; }
-        /// <summary>
-        /// Total particle system time
-        /// </summary>
-        public float TotalTime { get; private set; }
         /// <summary>
         /// Time to end
         /// </summary>
@@ -83,7 +79,7 @@ namespace Engine
         {
             get
             {
-                return this.Emitter.Duration > 0 || this.TimeToEnd > 0;
+                return this.Emitter.Active || this.TimeToEnd > 0;
             }
         }
         /// <summary>
@@ -180,6 +176,8 @@ namespace Engine
             {
                 new VertexBufferBinding(this.vertexBuffer, default(VertexCPUParticle).Stride, 0),
             };
+
+            this.TimeToEnd = this.Emitter.Duration + this.MaximumAge;
         }
         /// <summary>
         /// Resource disposal
@@ -204,12 +202,8 @@ namespace Engine
                 this.timeToNextParticle = this.Emitter.EmissionRate;
             }
 
-            float elapsed = context.GameTime.ElapsedSeconds;
-
-            this.timeToNextParticle -= elapsed;
-
-            this.TotalTime += elapsed;
-            this.TimeToEnd -= elapsed;
+            this.timeToNextParticle -= this.Emitter.ElapsedTime;
+            this.TimeToEnd -= this.Emitter.ElapsedTime;
         }
         /// <summary>
         /// Draw particles
@@ -246,7 +240,7 @@ namespace Engine
                 context.World,
                 context.ViewProjection,
                 context.EyePosition,
-                this.TotalTime,
+                this.Emitter.TotalTime,
                 this.MaximumAge,
                 this.MaximumAgeVariation,
                 this.VelocityAtEnd,
@@ -306,21 +300,16 @@ namespace Engine
             velocity.Z += horizontalVelocity * (float)Math.Sin(horizontalAngle);
             velocity.Y += MathUtil.Lerp(this.VerticalVelocity.X, this.VerticalVelocity.Y, this.rnd.NextFloat(0, 1));
 
-            Color randomValues = new Color(
-                this.rnd.NextFloat(0, 1),
-                this.rnd.NextFloat(0, 1),
-                this.rnd.NextFloat(0, 1),
-                this.rnd.NextFloat(0, 1));
+            Vector4 randomValues = this.rnd.NextVector4(Vector4.Zero, Vector4.One);
 
             this.particles[this.currentParticleIndex].Position = this.Emitter.Position;
             this.particles[this.currentParticleIndex].Velocity = velocity;
-            this.particles[this.currentParticleIndex].Color = randomValues;
-            this.particles[this.currentParticleIndex].MaxAge = this.TotalTime;
+            this.particles[this.currentParticleIndex].RandomValues = randomValues;
+            this.particles[this.currentParticleIndex].MaxAge = this.Emitter.TotalTime;
 
             this.Game.Graphics.DeviceContext.WriteBuffer(this.vertexBuffer, this.particles);
 
             this.currentParticleIndex = nextFreeParticle;
-            this.TimeToEnd = Math.Max(this.TimeToEnd, this.MaximumAge);
         }
 
         /// <summary>
@@ -329,10 +318,9 @@ namespace Engine
         /// <returns>Returns the text representation of the particle system</returns>
         public override string ToString()
         {
-            return string.Format("Index: {0}; Count: {1}; Total: {2:0.00}/{3:0.00}; ToEnd: {4:0.00};", 
-                this.currentParticleIndex, 
-                this.ActiveParticles, 
-                this.TotalTime,
+            return string.Format("Count: {0}; Total: {1:0.00}/{2:0.00}; ToEnd: {3:0.00};",
+                this.ActiveParticles,
+                this.Emitter.TotalTime,
                 this.Emitter.Duration,
                 this.TimeToEnd);
         }

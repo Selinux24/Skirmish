@@ -41,11 +41,24 @@ namespace Engine
         }
 
         /// <summary>
+        /// Total particle system time
+        /// </summary>
+        public float TotalTime { get; private set; }
+        /// <summary>
+        /// Elapsed time
+        /// </summary>
+        public float ElapsedTime { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public ParticleEmitter()
         {
-
+            this.Position = Vector3.Zero;
+            this.Velocity = Vector3.Up;
+            this.EmissionRate = 1f;
+            this.Duration = 0f;
+            this.InfiniteDuration = false;
         }
 
         /// <summary>
@@ -54,9 +67,13 @@ namespace Engine
         /// <param name="context">Updating context</param>
         public virtual void Update(UpdateContext context)
         {
+            this.ElapsedTime = context.GameTime.ElapsedSeconds;
+
+            this.TotalTime += this.ElapsedTime;
+
             if (!this.InfiniteDuration)
             {
-                this.Duration -= context.GameTime.ElapsedSeconds;
+                this.Duration -= this.ElapsedTime;
             }
         }
   

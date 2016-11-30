@@ -54,22 +54,20 @@ VSVertexGPUParticle VSStreamOut(VSVertexGPUParticle input)
 [maxvertexcount(2)]
 void GSStreamOut(point VSVertexGPUParticle input[1], inout PointStream<VSVertexGPUParticle> ptStream)
 {
-	input[0].energy -= gElapsedTime;
+	input[0].maxAge -= gElapsedTime;
 
 	if(input[0].type == PT_EMITTER)
 	{
-		input[0].emissionTime -= gElapsedTime;
-
 		if(input[0].emissionTime > 0)
 		{
-			if(input[0].energy <= 0)
+			if(input[0].maxAge <= 0)
 			{
-				input[0].energy = input[0].emissionRate;
+				input[0].maxAge = gEmissionRate;
 
 				//Adds a new particle
 				float3 velocity = input[0].velocity * gVelocitySensitivity;
 				float horizontalVelocity = lerp(gHorizontalVelocity.x, gHorizontalVelocity.y, gRandomValues.x);
-				float horizontalAngle = 6.28319f * gRandomValues.y;
+				float horizontalAngle = PI * gRandomValues.y;
 
 				velocity.x += horizontalVelocity * cos(horizontalAngle);
 				velocity.z += horizontalVelocity * sin(horizontalAngle);
@@ -77,16 +75,17 @@ void GSStreamOut(point VSVertexGPUParticle input[1], inout PointStream<VSVertexG
 
 				VSVertexGPUParticle p;
 			
-				p.type = PT_FLARE;
-				p.emissionTime = 0;
-				p.emissionRate = 0;
-				p.energy = gTotalTime;
 				p.position = input[0].position;
 				p.velocity = velocity;
-				p.color = gRandomValues;
+				p.random = gRandomValues;
+				p.maxAge = gTotalTime;
+				p.type = PT_FLARE;
+				p.emissionTime = 0;
 
 				ptStream.Append(p);
 			}
+
+			input[0].emissionTime -= gElapsedTime;
 	
 			//Emitter in
 			ptStream.Append(input[0]);
@@ -94,7 +93,7 @@ void GSStreamOut(point VSVertexGPUParticle input[1], inout PointStream<VSVertexG
 	}
 	else
 	{
-		if(input[0].energy > 0)
+		if(input[0].maxAge > 0)
 		{
 			//Flares only remains if have enougth energy
 			ptStream.Append(input[0]);
@@ -102,7 +101,7 @@ void GSStreamOut(point VSVertexGPUParticle input[1], inout PointStream<VSVertexG
 	}
 }
 
-GeometryShader gsStreamOut = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOut()), "TYPE.x; EMISSION_TIME.x; EMISSION_RATE.x; ENERGY.x; POSITION.xyz; VELOCITY.xyz; COLOR0.rgba");
+GeometryShader gsStreamOut = ConstructGSWithSO(CompileShader(gs_5_0, GSStreamOut()), "POSITION.xyz; VELOCITY.xyz; RANDOM.xyzw; MAX_AGE.x; TYPE.x; EMISSION_TIME.x");
 
 technique11 ParticleStreamOut
 {
@@ -166,14 +165,14 @@ GSCPUParticle VSParticle(VSVertexGPUParticle input)
 {
 	GSCPUParticle output;
 
-	float age = gTotalTime - input.energy;
-	age *= 1.0f + input.color.x * gMaxDurationRandomness;
+	float age = gTotalTime - input.maxAge;
+	age *= 1.0f + input.random.x * gMaxDurationRandomness;
 	float normalizedAge = saturate(age / gMaxDuration);
 
 	output.centerWorld = ComputeParticlePosition(input.position, input.velocity, age, normalizedAge);
-	output.sizeWorld = ComputeParticleSize(input.color.y, normalizedAge);
-	output.color = ComputeParticleColor(input.color.z, normalizedAge);
-	output.rotationWorld = ComputeParticleRotation(input.color.w, age);
+	output.sizeWorld = ComputeParticleSize(input.random.y, normalizedAge);
+	output.color = ComputeParticleColor(input.random.z, normalizedAge);
+	output.rotationWorld = ComputeParticleRotation(input.random.w, age);
 
 	output.centerWorld.y += (output.sizeWorld.y * 0.5f);
 

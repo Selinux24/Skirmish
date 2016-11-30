@@ -81,13 +81,13 @@ GSCPUParticle VSParticle(VSVertexCPUParticle input)
 	GSCPUParticle output;
 
 	float age = gTotalTime - input.maxAge;
-	age *= 1.0f + input.color.x * gMaxDurationRandomness;
+	age *= 1.0f + input.random.x * gMaxDurationRandomness;
 	float normalizedAge = saturate(age / gMaxDuration);
 
 	output.centerWorld = ComputeParticlePosition(input.positionWorld, input.velocityWorld, age, normalizedAge);
-	output.sizeWorld = ComputeParticleSize(input.color.y, normalizedAge);
-	output.color = ComputeParticleColor(input.color.z, normalizedAge);
-	output.rotationWorld = ComputeParticleRotation(input.color.w, age);
+	output.sizeWorld = ComputeParticleSize(input.random.y, normalizedAge);
+	output.color = ComputeParticleColor(input.random.z, normalizedAge);
+	output.rotationWorld = ComputeParticleRotation(input.random.w, age);
 
 	output.centerWorld.y += (output.sizeWorld.y * 0.5f);
 

@@ -110,6 +110,10 @@ namespace Engine
         /// </summary>
         public static int IAIndexBufferSets = 0;
         /// <summary>
+        /// Stream output targets sets
+        /// </summary>
+        public static int SOTargetsSet = 0;
+        /// <summary>
         /// Statistics keys
         /// </summary>
         /// <remarks>
@@ -176,6 +180,8 @@ namespace Engine
             IAVertexBuffersSets = 0;
             IAIndexBufferSets = 0;
 
+            SOTargetsSet = 0;
+
             gData.Clear();
             gGlobalDataKeys.Clear();
             gFrameDataKeys.Clear();
@@ -210,6 +216,8 @@ namespace Engine
             IAPrimitiveTopologySets = 0;
             IAVertexBuffersSets = 0;
             IAIndexBufferSets = 0;
+
+            SOTargetsSet = 0;
 
             foreach (var key in gFrameDataKeys)
             {

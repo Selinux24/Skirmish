@@ -12,8 +12,9 @@ namespace Engine
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
+        /// <param name="scale">System scale</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static ParticleSystemDescription InitializeDust(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeDust(string contentPath, string texture, float scale = 1f)
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
 
@@ -46,6 +47,8 @@ namespace Engine
 
             settings.Transparent = true;
 
+            settings.Scale(scale);
+
             return settings;
         }
         /// <summary>
@@ -53,8 +56,9 @@ namespace Engine
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
+        /// <param name="scale">System scale</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static ParticleSystemDescription InitializeFire(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeFire(string contentPath, string texture, float scale = 1f)
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
 
@@ -83,6 +87,8 @@ namespace Engine
 
             settings.Transparent = true;
 
+            settings.Scale(scale);
+
             return settings;
         }
         /// <summary>
@@ -90,8 +96,9 @@ namespace Engine
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
+        /// <param name="scale">System scale</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static ParticleSystemDescription InitializeSmokePlume(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeSmokePlume(string contentPath, string texture, float scale = 1f)
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
 
@@ -121,6 +128,8 @@ namespace Engine
 
             settings.Transparent = true;
 
+            settings.Scale(scale);
+
             return settings;
         }
         /// <summary>
@@ -128,8 +137,9 @@ namespace Engine
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
+        /// <param name="scale">System scale</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static ParticleSystemDescription InitializeProjectileTrail(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeProjectileTrail(string contentPath, string texture, float scale = 1f)
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
 
@@ -161,6 +171,8 @@ namespace Engine
 
             settings.Transparent = true;
 
+            settings.Scale(scale);
+
             return settings;
         }
         /// <summary>
@@ -168,8 +180,9 @@ namespace Engine
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
+        /// <param name="scale">System scale</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static ParticleSystemDescription InitializeExplosion(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeExplosion(string contentPath, string texture, float scale = 1f)
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
 
@@ -201,6 +214,8 @@ namespace Engine
 
             settings.Transparent = true;
 
+            settings.Scale(scale);
+
             return settings;
         }
         /// <summary>
@@ -208,8 +223,9 @@ namespace Engine
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="texture">Texture</param>
+        /// <param name="scale">System scale</param>
         /// <returns>Returns the new generated particle system description</returns>
-        public static ParticleSystemDescription InitializeSmokeExplosion(string contentPath, string texture)
+        public static ParticleSystemDescription InitializeSmokeExplosion(string contentPath, string texture, float scale = 1f)
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
 
@@ -241,6 +257,8 @@ namespace Engine
             settings.MaxEndSize = 20;
 
             settings.Transparent = true;
+
+            settings.Scale(scale);
 
             return settings;
         }
@@ -367,6 +385,29 @@ namespace Engine
             this.MaxEndSize = 1;
             this.Transparent = false;
             this.EmitterVelocitySensitivity = 0;
+        }
+
+        /// <summary>
+        /// Scales the particle system
+        /// </summary>
+        /// <param name="scale">Scale to apply</param>
+        public void Scale(float scale)
+        {
+            if (scale != 1f)
+            {
+                this.MaxHorizontalVelocity *= scale;
+                this.MinHorizontalVelocity *= scale;
+                this.MaxVerticalVelocity *= scale;
+                this.MinVerticalVelocity *= scale;
+
+                this.Gravity *= scale;
+                this.EndVelocity *= scale;
+
+                this.MinStartSize *= scale;
+                this.MaxStartSize *= scale;
+                this.MinEndSize *= scale;
+                this.MaxEndSize *= scale;
+            }
         }
     }
 }
