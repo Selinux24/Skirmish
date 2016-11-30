@@ -11,6 +11,8 @@ namespace ModelDrawing
     {
         private TextDrawer text = null;
         private TextDrawer statistics = null;
+        private TextDrawer text1 = null;
+        private TextDrawer text2 = null;
 
         private Model floor = null;
 
@@ -49,11 +51,19 @@ namespace ModelDrawing
         }
         private void InitializeTexts()
         {
-            this.text = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow });
-            this.statistics = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.DarkBlue, ShadowColor = Color.LightBlue });
+            this.text = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed });
+            this.statistics = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue });
+            this.text1 = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue });
+            this.text2 = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue });
+         
             this.text.Position = Vector2.One;
             this.statistics.Position = Vector2.One;
+            this.text1.Position = Vector2.One;
+            this.text2.Position = Vector2.One;
+            
             this.statistics.Top = this.text.Top + this.text.Height + 5;
+            this.text1.Top = this.statistics.Top + this.statistics.Height + 5;
+            this.text2.Top = this.text1.Top + this.text1.Height + 5;
         }
         private void InitializeFloor()
         {
@@ -154,7 +164,7 @@ namespace ModelDrawing
             }
             if (this.Game.Input.KeyJustPressed(Keys.D6))
             {
-                this.AddSmokePlumeSystemGPU();
+                this.AddSmokePlumeSystemGPU2();
             }
 
             if (this.Game.Input.KeyJustPressed(Keys.P))
@@ -206,8 +216,8 @@ namespace ModelDrawing
                 InfiniteDuration = false,
             };
 
-            this.pManager.AddParticleGenerator(this.pExplosion, emitter1);
-            this.pManager.AddParticleGenerator(this.pSmokeExplosion, emitter2);
+            this.pManager.AddParticleSystem(this.pExplosion, emitter1);
+            this.pManager.AddParticleSystem(this.pSmokeExplosion, emitter2);
         }
         private void AddProjectileTrailSystem()
         {
@@ -219,7 +229,7 @@ namespace ModelDrawing
                 Duration = 3,
             };
 
-            this.pManager.AddParticleGenerator(this.pProjectile, emitter);
+            this.pManager.AddParticleSystem(this.pProjectile, emitter);
         }
         private void AddDustSystem()
         {
@@ -231,7 +241,7 @@ namespace ModelDrawing
                 Duration = 5,
             };
 
-            this.pManager.AddParticleGenerator(this.pDust, emitter);
+            this.pManager.AddParticleSystem(this.pDust, emitter);
         }
         private void AddSmokePlumeSystem()
         {
@@ -258,8 +268,8 @@ namespace ModelDrawing
                 InfiniteDuration = false,
             };
 
-            this.pManager.AddParticleGenerator(this.pFire, emitter1);
-            this.pManager.AddParticleGenerator(this.pPlume, emitter2);
+            this.pManager.AddParticleSystem(this.pFire, emitter1);
+            this.pManager.AddParticleSystem(this.pPlume, emitter2);
         }
         private void AddSmokePlumeSystemGPU()
         {
@@ -286,18 +296,53 @@ namespace ModelDrawing
                 InfiniteDuration = false,
             };
 
-            this.pManagerGPU.AddParticleGenerator(this.pFire, emitter1);
-            this.pManagerGPU.AddParticleGenerator(this.pPlume, emitter2);
+            this.pManagerGPU.AddParticleSystem(this.pFire, emitter1);
+            this.pManagerGPU.AddParticleSystem(this.pPlume, emitter2);
+        }
+
+        private void AddSmokePlumeSystemGPU2()
+        {
+            Vector3 position = new Vector3(-5, 0, 0);
+            Vector3 velocity = Vector3.Up;
+            float duration = 60;
+            float rate = 1f;
+
+            var emitter1 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate,
+                InfiniteDuration = false,
+            };
+
+            this.pManager.AddParticleSystem(this.pFire, emitter1);
+
+            position = new Vector3(5, 0, 0);
+
+            var emitter12 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate,
+                InfiniteDuration = false,
+            };
+
+            this.pManagerGPU.AddParticleSystem(this.pFire, emitter12);
         }
 
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
 
-            string particle = this.pManager.ToString();
+            var particleCPU = this.pManager.GetParticleSystem(0);
+            var particleGPU = this.pManagerGPU.GetParticleSystem(0);
 
-            this.text.Text = "Model Drawing " + particle;
+            this.text.Text = string.Format("Model Drawing");
             this.statistics.Text = this.Game.RuntimeText;
+            this.text1.Text = string.Format("CPU - {0}", particleCPU);
+            this.text2.Text = string.Format("GPU - {0}", particleGPU);
         }
     }
 }

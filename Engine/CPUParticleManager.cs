@@ -87,13 +87,22 @@ namespace Engine
         /// </summary>
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
-        public void AddParticleGenerator(ParticleSystemDescription description, ParticleEmitter emitter)
+        public void AddParticleSystem(ParticleSystemDescription description, ParticleEmitter emitter)
         {
             var pSystem = new CPUParticleSystem(this.Game, description, emitter);
 
             this.AllocatedParticleCount += pSystem.MaxConcurrentParticles;
 
             this.particleSystems.Add(pSystem);
+        }
+        /// <summary>
+        /// Gets a particle systema by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Returns the particle system at specified index</returns>
+        public CPUParticleSystem GetParticleSystem(int index)
+        {
+            return index < this.particleSystems.Count ? this.particleSystems[index] : null;
         }
 
         /// <summary>

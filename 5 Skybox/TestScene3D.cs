@@ -155,7 +155,7 @@ namespace Skybox
 
             this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
-            this.pManager.AddParticleGenerator(this.pBigFire, this.movingFireEmitter);
+            this.pManager.AddParticleSystem(this.pBigFire, this.movingFireEmitter);
 
             #endregion
 
@@ -231,8 +231,8 @@ namespace Skybox
 
                 this.Lights.Add(this.torchLights[i]);
 
-                this.pManager.AddParticleGenerator(this.pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
-                this.pManager.AddParticleGenerator(this.pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
+                this.pManager.AddParticleSystem(this.pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
+                this.pManager.AddParticleSystem(this.pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
             this.ruins.AttachFullPickingFullPathFinding(this.torchs);

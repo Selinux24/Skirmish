@@ -54,12 +54,13 @@ VSVertexGPUParticle VSStreamOut(VSVertexGPUParticle input)
 [maxvertexcount(2)]
 void GSStreamOut(point VSVertexGPUParticle input[1], inout PointStream<VSVertexGPUParticle> ptStream)
 {
-	input[0].maxAge -= gElapsedTime;
-
 	if(input[0].type == PT_EMITTER)
 	{
 		if(input[0].emissionTime > 0)
 		{
+			input[0].maxAge -= gElapsedTime;
+			input[0].emissionTime -= gElapsedTime;
+
 			if(input[0].maxAge <= 0)
 			{
 				input[0].maxAge = gEmissionRate;
@@ -84,8 +85,6 @@ void GSStreamOut(point VSVertexGPUParticle input[1], inout PointStream<VSVertexG
 
 				ptStream.Append(p);
 			}
-
-			input[0].emissionTime -= gElapsedTime;
 	
 			//Emitter in
 			ptStream.Append(input[0]);

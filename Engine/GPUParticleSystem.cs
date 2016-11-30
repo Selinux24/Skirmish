@@ -47,6 +47,10 @@ namespace Engine
         /// </summary>
         private StreamOutputBufferBinding[] streamOutBinding;
         /// <summary>
+        /// Vertex input stride
+        /// </summary>
+        private int inputStride;
+        /// <summary>
         /// First run flag
         /// </summary>
         private bool firstRun = true;
@@ -197,10 +201,10 @@ namespace Engine
             this.emittersBuffer = game.Graphics.Device.CreateBuffer<VertexGPUParticle>(data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
             this.drawingBuffer = game.Graphics.Device.CreateBuffer<VertexGPUParticle>(this.MaxConcurrentParticles, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
             this.streamOutBuffer = game.Graphics.Device.CreateBuffer<VertexGPUParticle>(this.MaxConcurrentParticles, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            int inputStride = default(VertexGPUParticle).Stride;
+            this.inputStride = default(VertexGPUParticle).Stride;
 
-            this.emitterBinding = new[] { new VertexBufferBinding(this.emittersBuffer, inputStride, 0) };
-            this.drawingBinding = new[] { new VertexBufferBinding(this.drawingBuffer, inputStride, 0) };
+            this.emitterBinding = new[] { new VertexBufferBinding(this.emittersBuffer, this.inputStride, 0) };
+            this.drawingBinding = new[] { new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0) };
             this.streamOutBinding = new[] { new StreamOutputBufferBinding(this.streamOutBuffer, 0) };
         }
         /// <summary>
@@ -317,6 +321,9 @@ namespace Engine
             var temp = this.drawingBuffer;
             this.drawingBuffer = this.streamOutBuffer;
             this.streamOutBuffer = temp;
+
+            this.drawingBinding = new[] { new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0) };
+            this.streamOutBinding = new[] { new StreamOutputBufferBinding(this.streamOutBuffer, 0) };
         }
         /// <summary>
         /// Drawing
