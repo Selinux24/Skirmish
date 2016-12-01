@@ -305,7 +305,7 @@ namespace ModelDrawing
             Vector3 position = new Vector3(-5, 0, 0);
             Vector3 velocity = Vector3.Up;
             float duration = 60;
-            float rate = 1f;
+            float rate = 0.1f;
 
             var emitter1 = new ParticleEmitter()
             {
@@ -315,8 +315,17 @@ namespace ModelDrawing
                 EmissionRate = rate,
                 InfiniteDuration = false,
             };
+            var emitter2 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate,
+                InfiniteDuration = false,
+            };
 
             this.pManager.AddParticleSystem(this.pFire, emitter1);
+            this.pManager.AddParticleSystem(this.pPlume, emitter2);
 
             position = new Vector3(5, 0, 0);
 
@@ -328,8 +337,17 @@ namespace ModelDrawing
                 EmissionRate = rate,
                 InfiniteDuration = false,
             };
+            var emitter22 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate,
+                InfiniteDuration = false,
+            };
 
             this.pManagerGPU.AddParticleSystem(this.pFire, emitter12);
+            this.pManagerGPU.AddParticleSystem(this.pPlume, emitter22);
         }
 
         public override void Draw(GameTime gameTime)
