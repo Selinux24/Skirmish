@@ -299,14 +299,16 @@ namespace Engine
                                             ((EffectBasic)effect).UpdatePerObject(
                                                 mat.Material,
                                                 mat.DiffuseTexture,
-                                                mat.NormalMap, null, 0);
+                                                mat.NormalMap,
+                                                mat.SpecularTexture, null, 0);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
                                         {
                                             ((EffectBasicGBuffer)effect).UpdatePerObject(
                                                 mat.Material,
                                                 mat.DiffuseTexture,
-                                                mat.NormalMap, null, 0);
+                                                mat.NormalMap,
+                                                mat.SpecularTexture, null, 0);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                                         {

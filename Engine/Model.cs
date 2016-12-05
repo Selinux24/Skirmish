@@ -235,6 +235,7 @@ namespace Engine
                                     mat.Material,
                                     mat.DiffuseTexture,
                                     mat.NormalMap,
+                                    mat.SpecularTexture,
                                     this.animationData,
                                     this.TextureIndex);
                             }
@@ -244,6 +245,7 @@ namespace Engine
                                     mat.Material,
                                     mat.DiffuseTexture,
                                     mat.NormalMap,
+                                    mat.SpecularTexture,
                                     this.animationData,
                                     this.TextureIndex);
                             }

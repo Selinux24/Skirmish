@@ -160,7 +160,7 @@ namespace Engine
             Counters.IAIndexBufferSets++;
 
             this.effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-            this.effect.UpdatePerObject(Material.Default, this.Texture, null, null, 0);
+            this.effect.UpdatePerObject(Material.Default, this.Texture, null, null, null, 0);
 
             for (int p = 0; p < this.effectTechnique.Description.PassCount; p++)
             {

@@ -200,13 +200,17 @@ namespace Engine.Effects
         /// </summary>
         private EffectVariable material = null;
         /// <summary>
-        /// Texture effect variable
+        /// Diffuse map effect variable
         /// </summary>
-        private EffectShaderResourceVariable textures = null;
+        private EffectShaderResourceVariable diffuseMap = null;
         /// <summary>
         /// Normal map effect variable
         /// </summary>
         private EffectShaderResourceVariable normalMap = null;
+        /// <summary>
+        /// Specular map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable specularMap = null;
         /// <summary>
         /// Static shadow map effect variable
         /// </summary>
@@ -483,17 +487,17 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Texture
+        /// Diffuse map
         /// </summary>
-        protected ShaderResourceView Textures
+        protected ShaderResourceView DiffuseMap
         {
             get
             {
-                return this.textures.GetResource();
+                return this.diffuseMap.GetResource();
             }
             set
             {
-                this.textures.SetResource(value);
+                this.diffuseMap.SetResource(value);
             }
         }
         /// <summary>
@@ -508,6 +512,20 @@ namespace Engine.Effects
             set
             {
                 this.normalMap.SetResource(value);
+            }
+        }
+        /// <summary>
+        /// Specular map
+        /// </summary>
+        protected ShaderResourceView SpecularMap
+        {
+            get
+            {
+                return this.specularMap.GetResource();
+            }
+            set
+            {
+                this.specularMap.SetResource(value);
             }
         }
         /// <summary>
@@ -653,8 +671,9 @@ namespace Engine.Effects
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
             this.shadowMaps = this.Effect.GetVariableByName("gShadows").AsScalar();
-            this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
-            this.normalMap = this.Effect.GetVariableByName("gNormalMap").AsShaderResource();
+            this.diffuseMap = this.Effect.GetVariableByName("gDiffuseMapArray").AsShaderResource();
+            this.normalMap = this.Effect.GetVariableByName("gNormalMapArray").AsShaderResource();
+            this.specularMap = this.Effect.GetVariableByName("gSpecularMapArray").AsShaderResource();
             this.shadowMapStatic = this.Effect.GetVariableByName("gShadowMapStatic").AsShaderResource();
             this.shadowMapDynamic = this.Effect.GetVariableByName("gShadowMapDynamic").AsShaderResource();
             this.animationPaletteWidth = this.Effect.GetVariableByName("gPaletteWidth").AsScalar();
@@ -809,20 +828,23 @@ namespace Engine.Effects
         /// Update per model object data
         /// </summary>
         /// <param name="material">Material</param>
-        /// <param name="texture">Texture</param>
+        /// <param name="diffuseMap">Diffuse map</param>
         /// <param name="normalMap">Normal map</param>
+        /// <param name="specularMap">Specular map</param>
         /// <param name="animationData">Animation data</param>
         /// <param name="textureIndex">Texture index</param>
         public void UpdatePerObject(
             Material material,
-            ShaderResourceView texture,
+            ShaderResourceView diffuseMap,
             ShaderResourceView normalMap,
+            ShaderResourceView specularMap,
             uint[] animationData,
             int textureIndex)
         {
             this.Material = new BufferMaterials(material);
-            this.Textures = texture;
+            this.DiffuseMap = diffuseMap;
             this.NormalMap = normalMap;
+            this.SpecularMap = specularMap;
             this.AnimationData = animationData != null ? animationData : new uint[3];
             this.TextureIndex = textureIndex;
         }

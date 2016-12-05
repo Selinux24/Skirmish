@@ -154,6 +154,7 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		color.rgb,
 		input.positionWorld,
 		n == 0 ? bumpNormalWorld1 : bumpNormalWorld2,
+		float4(0,0,0,0),
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,

@@ -240,11 +240,11 @@ namespace Engine
 
                         if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                         {
-                            ((EffectBasic)sceneryEffect).UpdatePerObject(mat.Material, mat.DiffuseTexture, mat.NormalMap, null, 0);
+                            ((EffectBasic)sceneryEffect).UpdatePerObject(mat.Material, mat.DiffuseTexture, mat.NormalMap, mat.SpecularTexture, null, 0);
                         }
                         else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                         {
-                            ((EffectBasicGBuffer)sceneryEffect).UpdatePerObject(mat.Material, mat.DiffuseTexture, mat.NormalMap, null, 0);
+                            ((EffectBasicGBuffer)sceneryEffect).UpdatePerObject(mat.Material, mat.DiffuseTexture, mat.NormalMap, mat.SpecularTexture, null, 0);
                         }
                         else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                         {

@@ -33,8 +33,9 @@ cbuffer cbPerInstance : register (b3)
 	float gTextureIndex;
 };
 
-Texture2DArray gTextureArray;
-Texture2D gNormalMap;
+Texture2DArray gDiffuseMapArray;
+Texture2DArray gNormalMapArray;
+Texture2DArray gSpecularMapArray;
 Texture2D gAnimationPalette;
 Texture2D gShadowMapStatic;
 Texture2D gShadowMapDynamic;
@@ -224,6 +225,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 		matColor.rgb,
 		input.positionWorld,
 		input.normalWorld,
+		float4(0,0,0,0),
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
@@ -317,7 +319,7 @@ PSVertexPositionTexture VSPositionTextureSkinnedI(VSVertexPositionTextureSkinned
 
 float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 textureColor = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float4 textureColor = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 
     float3 litColor = textureColor.rgb;
 
@@ -333,35 +335,35 @@ float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 }
 float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 color = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
 	//Grayscale of red channel
 	return float4(color.rrr, 1);
 }
 float4 PSPositionTextureGREEN(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 color = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
 	//Grayscale of green channel
 	return float4(color.ggg, 1);
 }
 float4 PSPositionTextureBLUE(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float4 color = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
    	//Grayscale of blue channel
 	return float4(color.bbb, 1);
 }
 float4 PSPositionTextureALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 color = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
    	//Grayscale of alpha channel
 	return float4(color.aaa, 1);
 }
 float4 PSPositionTextureNOALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 color = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 
    	//Color channel
 	return float4(color.rgb, 1);
@@ -455,7 +457,7 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinnedI(VSVertexPositionNo
 
 float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 {
-    float4 textureColor = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 textureColor = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 
 	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 	float3 toEye = normalize(toEyeWorld);
@@ -470,6 +472,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		textureColor.rgb,
 		input.positionWorld,
 		input.normalWorld,
+		float4(0,0,0,0),
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
@@ -587,10 +590,11 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinnedI(VSVe
 
 float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input) : SV_TARGET
 {
-	float3 normalMapSample = gNormalMap.Sample(SamplerLinear, input.tex).rgb;
-	float3 normalWorld = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
+	float3 normalMap = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
+	float3 normalWorld = NormalSampleToWorldSpace(normalMap, input.normalWorld, input.tangentWorld);
 
-	float4 textureColor = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float4 diffuseMap = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float4 specularMap = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 
 	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 	float3 toEye = normalize(toEyeWorld);
@@ -602,9 +606,10 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 		gPointLights, 
 		gSpotLights,
 		toEye,
-		textureColor.rgb,
+		diffuseMap.rgb,
 		input.positionWorld,
 		normalWorld,
+		specularMap,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
@@ -619,7 +624,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return float4(litColor, textureColor.a);
+	return float4(litColor, diffuseMap.a);
 }
 
 /**********************************************************************************************************

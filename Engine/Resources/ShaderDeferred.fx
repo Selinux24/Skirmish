@@ -109,6 +109,7 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 			color.rgb,
 			position,
 			normal,
+			float4(0,0,0,0),
 			specIntensity,
 			specPower,
 			lPosition,
@@ -149,6 +150,7 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 		color.rgb,
 		position,
 		normal,
+		float4(0,0,0,0),
 		specIntensity,
 		specPower);
 
@@ -180,6 +182,7 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 		color.rgb,
 		position,
 		normal,
+		float4(0,0,0,0),
 		specIntensity,
 		specPower);
 
