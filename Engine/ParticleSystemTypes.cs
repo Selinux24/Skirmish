@@ -1,43 +1,22 @@
 ﻿
 namespace Engine
 {
+    /// <summary>
+    /// Particle system types
+    /// </summary>
     public enum ParticleSystemTypes
     {
         /// <summary>
-        /// None
+        /// Unknown type
         /// </summary>
-        None,
+        Unknown,
         /// <summary>
-        /// Dust
+        /// CPU particles
         /// </summary>
-        Dust,
+        CPU,
         /// <summary>
-        /// Explosion
+        /// GPU particles
         /// </summary>
-        Explosion,
-        /// <summary>
-        /// Explosion with smoke
-        /// </summary>
-        ExplosionSmoke,
-        /// <summary>
-        /// Fire
-        /// </summary>
-        Fire,
-        /// <summary>
-        /// Plasma
-        /// </summary>
-        PlasmaEngine,
-        /// <summary>
-        /// Trail
-        /// </summary>
-        ProjectileTrail,
-        /// <summary>
-        /// Engine smoke
-        /// </summary>
-        SmokeEngine,
-        /// <summary>
-        /// Smoke plume
-        /// </summary>
-        SmokePlume,
+        GPU,
     }
 }

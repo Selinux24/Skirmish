@@ -266,7 +266,7 @@ namespace Engine
         /// <summary>
         /// Particle type
         /// </summary>
-        public ParticleSystemTypes ParticleType { get; set; }
+        public ParticleTypes ParticleType { get; set; }
 
         /// <summary>
         /// Content path
@@ -364,7 +364,7 @@ namespace Engine
         /// </summary>
         public ParticleSystemDescription()
         {
-            this.ParticleType = ParticleSystemTypes.None;
+            this.ParticleType = ParticleTypes.None;
             this.ContentPath = "Resources";
             this.TextureName = null;
             this.MaxDuration = 0;

@@ -161,13 +161,13 @@
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
-    <Compile Include="GPUParticleManagerDescription.cs" />
-    <Compile Include="GPUParticleManager.cs" />
-    <Compile Include="CPUParticleManager.cs" />
-    <Compile Include="CPUParticleManagerDescription.cs" />
-    <Compile Include="CPUParticleSystem.cs" />
+    <Compile Include="IParticleSystem.cs" />
+    <Compile Include="ParticleManager.cs" />
+    <Compile Include="ParticleManagerDescription.cs" />
+    <Compile Include="ParticleSystemCPU.cs" />
     <Compile Include="ParticleSystemDescription.cs" />
     <Compile Include="ParticleSystemTypes.cs" />
+    <Compile Include="ParticleTypes.cs" />
     <Compile Include="Effects\EffectCPUParticles.cs" />
     <Compile Include="ParticleEmitter.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -367,7 +367,7 @@
     <Compile Include="Helper.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Manipulator2D.cs" />
-    <Compile Include="GPUParticleSystem.cs" />
+    <Compile Include="ParticleSystemGPU.cs" />
     <Compile Include="LineListDrawer.cs" />
     <Compile Include="Cubemap.cs" />
     <Compile Include="Effects\EffectBillboard.cs" />

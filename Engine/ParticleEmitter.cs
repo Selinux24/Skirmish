@@ -30,6 +30,14 @@ namespace Engine
         /// </summary>
         public bool InfiniteDuration { get; set; }
         /// <summary>
+        /// Gets or sets the maximum distance from camera
+        /// </summary>
+        public float MaximumDistance { get; set; }
+        /// <summary>
+        /// Distance from camera
+        /// </summary>
+        public float Distance { get; set; }
+        /// <summary>
         /// Gets wheter the emitter is active
         /// </summary>
         public bool Active
@@ -37,6 +45,16 @@ namespace Engine
             get
             {
                 return (this.InfiniteDuration || this.Duration > 0);
+            }
+        }
+        /// <summary>
+        /// Gets wheter the emitter particles is visible
+        /// </summary>
+        public bool Visible
+        {
+            get
+            {
+                return this.Distance <= this.MaximumDistance;
             }
         }
 
@@ -59,6 +77,8 @@ namespace Engine
             this.EmissionRate = 1f;
             this.Duration = 0f;
             this.InfiniteDuration = false;
+            this.MaximumDistance = 100f;
+            this.Distance = 0f;
         }
 
         /// <summary>
@@ -75,6 +95,8 @@ namespace Engine
             {
                 this.Duration -= this.ElapsedTime;
             }
+
+            this.Distance = Vector3.Distance(this.Position, context.EyePosition);
         }
   
         /// <summary>

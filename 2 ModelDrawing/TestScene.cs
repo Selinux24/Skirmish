@@ -23,8 +23,7 @@ namespace ModelDrawing
         private ParticleSystemDescription pExplosion = null;
         private ParticleSystemDescription pSmokeExplosion = null;
 
-        private CPUParticleManager pManager = null;
-        private GPUParticleManager pManagerGPU = null;
+        private ParticleManager pManager = null;
 
         private Random rnd = new Random();
 
@@ -100,8 +99,7 @@ namespace ModelDrawing
             this.pExplosion = ParticleSystemDescription.InitializeExplosion("resources", "fire.png");
             this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources", "smoke.png");
 
-            this.pManager = this.AddParticleManager(new CPUParticleManagerDescription());
-            this.pManagerGPU = this.AddParticleManager(new GPUParticleManagerDescription());
+            this.pManager = this.AddParticleManager(new ParticleManagerDescription());
         }
 
         public override void Update(GameTime gameTime)
@@ -206,6 +204,7 @@ namespace ModelDrawing
                 Duration = duration,
                 EmissionRate = rate,
                 InfiniteDuration = false,
+                MaximumDistance = 100f,
             };
             var emitter2 = new ParticleEmitter()
             {
@@ -214,10 +213,11 @@ namespace ModelDrawing
                 Duration = duration,
                 EmissionRate = rate * 2f,
                 InfiniteDuration = false,
+                MaximumDistance = 100f,
             };
 
-            this.pManager.AddParticleSystem(this.pExplosion, emitter1);
-            this.pManager.AddParticleSystem(this.pSmokeExplosion, emitter2);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
         }
         private void AddProjectileTrailSystem()
         {
@@ -227,9 +227,10 @@ namespace ModelDrawing
                 AngularVelocity = this.rnd.NextFloat(3, 10),
                 Radius = this.rnd.NextFloat(5, 10),
                 Duration = 3,
+                MaximumDistance = 100f,
             };
 
-            this.pManager.AddParticleSystem(this.pProjectile, emitter);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pProjectile, emitter);
         }
         private void AddDustSystem()
         {
@@ -239,9 +240,10 @@ namespace ModelDrawing
                 AngularVelocity = this.rnd.NextFloat(0, 1),
                 Radius = this.rnd.NextFloat(1, 10),
                 Duration = 5,
+                MaximumDistance = 250f,
             };
 
-            this.pManager.AddParticleSystem(this.pDust, emitter);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
         }
         private void AddSmokePlumeSystem()
         {
@@ -257,6 +259,7 @@ namespace ModelDrawing
                 Duration = duration,
                 EmissionRate = rate * 0.5f,
                 InfiniteDuration = false,
+                MaximumDistance = 100f,
             };
 
             var emitter2 = new ParticleEmitter()
@@ -266,10 +269,11 @@ namespace ModelDrawing
                 Duration = duration + (duration * 0.1f),
                 EmissionRate = rate,
                 InfiniteDuration = false,
+                MaximumDistance = 500f,
             };
 
-            this.pManager.AddParticleSystem(this.pFire, emitter1);
-            this.pManager.AddParticleSystem(this.pPlume, emitter2);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
         }
         private void AddSmokePlumeSystemGPU()
         {
@@ -285,6 +289,7 @@ namespace ModelDrawing
                 Duration = duration,
                 EmissionRate = rate * 0.5f,
                 InfiniteDuration = false,
+                MaximumDistance = 100f,
             };
 
             var emitter2 = new ParticleEmitter()
@@ -294,10 +299,11 @@ namespace ModelDrawing
                 Duration = duration + (duration * 0.1f),
                 EmissionRate = rate,
                 InfiniteDuration = false,
+                MaximumDistance = 500f,
             };
 
-            this.pManagerGPU.AddParticleSystem(this.pFire, emitter1);
-            this.pManagerGPU.AddParticleSystem(this.pPlume, emitter2);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.GPU, this.pFire, emitter1);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.GPU, this.pPlume, emitter2);
         }
 
         private void AddSmokePlumeSystemGPU2()
@@ -307,25 +313,24 @@ namespace ModelDrawing
             float duration = 60;
             float rate = 0.1f;
 
-            var emitter1 = new ParticleEmitter()
+            var emitter11 = new ParticleEmitter()
             {
                 Position = position,
                 Velocity = velocity,
                 Duration = duration,
                 EmissionRate = rate,
                 InfiniteDuration = false,
+                MaximumDistance = 100f,
             };
-            var emitter2 = new ParticleEmitter()
+            var emitter21 = new ParticleEmitter()
             {
                 Position = position,
                 Velocity = velocity,
                 Duration = duration,
                 EmissionRate = rate,
                 InfiniteDuration = false,
+                MaximumDistance = 500f,
             };
-
-            this.pManager.AddParticleSystem(this.pFire, emitter1);
-            this.pManager.AddParticleSystem(this.pPlume, emitter2);
 
             position = new Vector3(5, 0, 0);
 
@@ -336,6 +341,7 @@ namespace ModelDrawing
                 Duration = duration,
                 EmissionRate = rate,
                 InfiniteDuration = false,
+                MaximumDistance = 100f,
             };
             var emitter22 = new ParticleEmitter()
             {
@@ -344,23 +350,27 @@ namespace ModelDrawing
                 Duration = duration,
                 EmissionRate = rate,
                 InfiniteDuration = false,
+                MaximumDistance = 500f,
             };
 
-            this.pManagerGPU.AddParticleSystem(this.pFire, emitter12);
-            this.pManagerGPU.AddParticleSystem(this.pPlume, emitter22);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter11);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.GPU, this.pFire, emitter12);
+
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter21);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.GPU, this.pPlume, emitter22);
         }
 
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
 
-            var particleCPU = this.pManager.GetParticleSystem(0);
-            var particleGPU = this.pManagerGPU.GetParticleSystem(0);
+            var particle1 = this.pManager.GetParticleSystem(0);
+            var particle2 = this.pManager.GetParticleSystem(1);
 
             this.text.Text = string.Format("Model Drawing");
             this.statistics.Text = this.Game.RuntimeText;
-            this.text1.Text = string.Format("CPU - {0}", particleCPU);
-            this.text2.Text = string.Format("GPU - {0}", particleGPU);
+            this.text1.Text = string.Format("P1 - {0}", particle1);
+            this.text2.Text = string.Format("P2 - {0}", particle2);
         }
     }
 }

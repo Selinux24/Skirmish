@@ -15,7 +15,7 @@ namespace Engine
     /// <summary>
     /// CPU particle system
     /// </summary>
-    public class CPUParticleSystem : IDisposable
+    public class ParticleSystemCPU : IParticleSystem
     {
         /// <summary>
         /// Particle list
@@ -141,7 +141,7 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
-        public CPUParticleSystem(Game game, ParticleSystemDescription description, ParticleEmitter emitter)
+        public ParticleSystemCPU(Game game, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             this.Game = game;
 

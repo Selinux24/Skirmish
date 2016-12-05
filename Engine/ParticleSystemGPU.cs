@@ -20,7 +20,7 @@ namespace Engine
     /// <summary>
     /// Particle system
     /// </summary>
-    public class GPUParticleSystem : IDisposable
+    public class ParticleSystemGPU : IParticleSystem
     {
         /// <summary>
         /// Emitter initialization buffer
@@ -157,7 +157,7 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="description">Particle system description</param>
-        public GPUParticleSystem(Game game, ParticleSystemDescription description, ParticleEmitter emitter)
+        public ParticleSystemGPU(Game game, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             this.Game = game;
 

@@ -7,16 +7,16 @@ namespace Engine
     /// <summary>
     /// CPU particle manager
     /// </summary>
-    public class GPUParticleManager : Drawable
+    public class ParticleManager : Drawable
     {
         /// <summary>
         /// Particle systems list
         /// </summary>
-        private List<GPUParticleSystem> particleSystems = new List<GPUParticleSystem>();
+        private List<IParticleSystem> particleSystems = new List<IParticleSystem>();
         /// <summary>
         /// Collection for particle system disposition
         /// </summary>
-        private List<GPUParticleSystem> toDelete = new List<GPUParticleSystem>();
+        private List<IParticleSystem> toDelete = new List<IParticleSystem>();
 
         /// <summary>
         /// Current particle count
@@ -28,7 +28,7 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="description">Particle manager description</param>
-        public GPUParticleManager(Game game, GPUParticleManagerDescription description)
+        public ParticleManager(Game game, ParticleManagerDescription description)
             : base(game, description)
         {
 
@@ -71,6 +71,12 @@ namespace Engine
 
                     toDelete.Clear();
                 }
+
+                //Sort active particles (draw far away particles first)
+                this.particleSystems.Sort((p1, p2) =>
+                {
+                    return p2.Emitter.Distance.CompareTo(p1.Emitter.Distance);
+                });
             }
         }
         /// <summary>
@@ -79,17 +85,34 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            this.particleSystems.ForEach(p => p.Draw(context));
+            this.particleSystems.ForEach(p =>
+            {
+                if (p.Emitter.Visible) p.Draw(context);
+            });
         }
 
         /// <summary>
         /// Adds a new particle system to the collection
         /// </summary>
+        /// <param name="type">Particle system type</param>
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
-        public void AddParticleSystem(ParticleSystemDescription description, ParticleEmitter emitter)
+        public void AddParticleSystem(ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            var pSystem = new GPUParticleSystem(this.Game, description, emitter);
+            IParticleSystem pSystem = null;
+
+            if (type == ParticleSystemTypes.CPU)
+            {
+                pSystem = new ParticleSystemCPU(this.Game, description, emitter);
+            }
+            else if (type == ParticleSystemTypes.GPU)
+            {
+                pSystem = new ParticleSystemGPU(this.Game, description, emitter);
+            }
+            else
+            {
+                throw new EngineException("Bad particle system type");
+            }
 
             this.AllocatedParticleCount += pSystem.MaxConcurrentParticles;
 
@@ -100,7 +123,7 @@ namespace Engine
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns the particle system at specified index</returns>
-        public GPUParticleSystem GetParticleSystem(int index)
+        public IParticleSystem GetParticleSystem(int index)
         {
             return index < this.particleSystems.Count ? this.particleSystems[index] : null;
         }

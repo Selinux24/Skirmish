@@ -39,7 +39,7 @@ namespace Skybox
         private LineListDrawer volumesDrawer = null;
         private TriangleListDrawer graphDrawer = null;
 
-        private CPUParticleManager pManager = null;
+        private ParticleManager pManager = null;
         private ParticleSystemDescription pPlume = null;
         private ParticleSystemDescription pFire = null;
         private ParticleSystemDescription pBigFire = null;
@@ -143,7 +143,7 @@ namespace Skybox
 
             #region Particle Systems
 
-            this.pManager = this.AddParticleManager(new CPUParticleManagerDescription());
+            this.pManager = this.AddParticleManager(new ParticleManagerDescription());
 
             this.pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
             this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
@@ -155,7 +155,7 @@ namespace Skybox
 
             this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
-            this.pManager.AddParticleSystem(this.pBigFire, this.movingFireEmitter);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pBigFire, this.movingFireEmitter);
 
             #endregion
 
@@ -231,8 +231,8 @@ namespace Skybox
 
                 this.Lights.Add(this.torchLights[i]);
 
-                this.pManager.AddParticleSystem(this.pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
-                this.pManager.AddParticleSystem(this.pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
+                this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
+                this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
             this.ruins.AttachFullPickingFullPathFinding(this.torchs);

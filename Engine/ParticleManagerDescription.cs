@@ -1,9 +1,9 @@
 ﻿
 namespace Engine
 {
-    public class GPUParticleManagerDescription : DrawableDescription
+    public class ParticleManagerDescription : DrawableDescription
     {
-        public GPUParticleManagerDescription()
+        public ParticleManagerDescription()
             : base()
         {
             this.DeferredEnabled = false;
