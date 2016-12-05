@@ -25,9 +25,10 @@ cbuffer cbPerObject : register (b1)
 	Material gMaterial;
 };
 
-Texture2DArray gTextureLRArray;
-Texture2DArray gTextureHRArray;
+Texture2DArray gDiffuseMapLRArray;
+Texture2DArray gDiffuseMapHRArray;
 Texture2DArray gNormalMapArray;
+Texture2DArray gSpecularMapArray;
 Texture2D gShadowMapStatic;
 Texture2D gShadowMapDynamic;
 
@@ -71,6 +72,10 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 	float3 bumpNormalWorld1 = NormalSampleToWorldSpace(normalMapSample1, input.normalWorld, input.tangentWorld);
 	float3 normalMapSample2 = gNormalMapArray.Sample(SamplerLinear, float3(input.tex0, 1)).rgb;
 	float3 bumpNormalWorld2 = NormalSampleToWorldSpace(normalMapSample2, input.normalWorld, input.tangentWorld);
+
+	float3 specularMapSample1 = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex0, 0)).rgb;
+	float3 specularMapSample2 = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex0, 1)).rgb;
+
 	float n = 0;
 
 	float4 color1 = 0;
@@ -103,26 +108,26 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		if(slope < slope1)
 		{
 			color2 = lerp(
-				gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)), 
-				gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
+				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)), 
+				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
 				slope / slope1);
 		}
 		if((slope < slope2) && (slope >= slope1))
 		{
 			color2 = lerp(
-				gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
-				gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2)), 
+				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
+				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2)), 
 				(slope - slope1) * (1.0f / (slope2 - slope1)));
 		}
 		if(slope >= slope2) 
 		{
-			color2 = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
+			color2 = gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
 		}
 
 		float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
 		if(depthValue >= 0.05f)
 		{
-			color2 *= gTextureHRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)) * 1.8f;
+			color2 *= gDiffuseMapHRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)) * 1.8f;
 		}
 	}
 
@@ -154,7 +159,7 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		color.rgb,
 		input.positionWorld,
 		n == 0 ? bumpNormalWorld1 : bumpNormalWorld2,
-		float4(0,0,0,0),
+		n == 0 ? specularMapSample1 : specularMapSample2,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
@@ -215,26 +220,26 @@ GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 		if(slope < slope1)
 		{
 			color2 = lerp(
-				gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)), 
-				gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
+				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)), 
+				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
 				slope / slope1);
 		}
 		if((slope < slope2) && (slope >= slope1))
 		{
 			color2 = lerp(
-				gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
-				gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2)), 
+				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
+				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2)), 
 				(slope - slope1) * (1.0f / (slope2 - slope1)));
 		}
 		if(slope >= slope2) 
 		{
-			color2 = gTextureLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
+			color2 = gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
 		}
 
 		float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
 		if(depthValue >= 0.05f)
 		{
-			color2 *= gTextureHRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)) * 1.8f;
+			color2 *= gDiffuseMapHRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)) * 1.8f;
 		}
 	}
 

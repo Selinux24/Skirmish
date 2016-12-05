@@ -86,15 +86,19 @@ namespace Engine.Effects
         /// <summary>
         /// Low resolution textures effect variable
         /// </summary>
-        private EffectShaderResourceVariable texturesLR = null;
+        private EffectShaderResourceVariable diffuseMapLR = null;
         /// <summary>
         /// High resolution textures effect variable
         /// </summary>
-        private EffectShaderResourceVariable texturesHR = null;
+        private EffectShaderResourceVariable diffuseMapHR = null;
         /// <summary>
         /// Normal map effect variable
         /// </summary>
-        private EffectShaderResourceVariable normalMaps = null;
+        private EffectShaderResourceVariable normalMap = null;
+        /// <summary>
+        /// Specular map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable specularMap = null;
         /// <summary>
         /// Static shadow map effect variable
         /// </summary>
@@ -345,43 +349,57 @@ namespace Engine.Effects
         /// <summary>
         /// Low resolution textures
         /// </summary>
-        protected ShaderResourceView TexturesLR
+        protected ShaderResourceView DiffuseMapLR
         {
             get
             {
-                return this.texturesLR.GetResource();
+                return this.diffuseMapLR.GetResource();
             }
             set
             {
-                this.texturesLR.SetResource(value);
+                this.diffuseMapLR.SetResource(value);
             }
         }
         /// <summary>
         /// High resolution textures
         /// </summary>
-        protected ShaderResourceView TexturesHR
+        protected ShaderResourceView DiffuseMapHR
         {
             get
             {
-                return this.texturesHR.GetResource();
+                return this.diffuseMapHR.GetResource();
             }
             set
             {
-                this.texturesHR.SetResource(value);
+                this.diffuseMapHR.SetResource(value);
             }
         }
         /// <summary>
         /// Normal map
         /// </summary>
-        protected ShaderResourceView NormalMaps
+        protected ShaderResourceView NormalMap
         {
             get
             {
-                return this.normalMaps.GetResource();
+                return this.normalMap.GetResource();
             }
             set
             {
-                this.normalMaps.SetResource(value);
+                this.normalMap.SetResource(value);
+            }
+        }
+        /// <summary>
+        /// Scpecular map
+        /// </summary>
+        protected ShaderResourceView SpecularMap
+        {
+            get
+            {
+                return this.specularMap.GetResource();
+            }
+            set
+            {
+                this.specularMap.SetResource(value);
             }
         }
         /// <summary>
@@ -485,9 +503,10 @@ namespace Engine.Effects
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
             this.shadowMaps = this.Effect.GetVariableByName("gShadows").AsScalar();
-            this.texturesLR = this.Effect.GetVariableByName("gTextureLRArray").AsShaderResource();
-            this.texturesHR = this.Effect.GetVariableByName("gTextureHRArray").AsShaderResource();
-            this.normalMaps = this.Effect.GetVariableByName("gNormalMapArray").AsShaderResource();
+            this.diffuseMapLR = this.Effect.GetVariableByName("gDiffuseMapLRArray").AsShaderResource();
+            this.diffuseMapHR = this.Effect.GetVariableByName("gDiffuseMapHRArray").AsShaderResource();
+            this.normalMap = this.Effect.GetVariableByName("gNormalMapArray").AsShaderResource();
+            this.specularMap = this.Effect.GetVariableByName("gSpecularMapArray").AsShaderResource();
             this.shadowMapStatic = this.Effect.GetVariableByName("gShadowMapStatic").AsShaderResource();
             this.shadowMapDynamic = this.Effect.GetVariableByName("gShadowMapDynamic").AsShaderResource();
             this.colorTextures = this.Effect.GetVariableByName("gColorTextureArray").AsShaderResource();
@@ -617,35 +636,38 @@ namespace Engine.Effects
         /// Update per model object data
         /// </summary>
         /// <param name="material">Material</param>
-        /// <param name="normalMaps">Normal map</param>
+        /// <param name="normalMap">Normal map</param>
+        /// <param name="specularMap">Specular map</param>
         /// <param name="useAlphaMap">Use alpha mapping</param>
         /// <param name="alphaMap">Alpha map</param>
         /// <param name="colorTextures">Color textures</param>
         /// <param name="useSlopes">Use slope texturing</param>
-        /// <param name="texturesLR">Low resolution textures</param>
-        /// <param name="texturesHR">High resolution textures</param>
+        /// <param name="diffuseMapLR">Low resolution textures</param>
+        /// <param name="diffuseMapHR">High resolution textures</param>
         /// <param name="slopeRanges">Slope ranges</param>
         /// <param name="proportion">Lerping proportion</param>
         public void UpdatePerObject(
             Material material,
-            ShaderResourceView normalMaps,
+            ShaderResourceView normalMap,
+            ShaderResourceView specularMap,
             bool useAlphaMap,
             ShaderResourceView alphaMap,
             ShaderResourceView colorTextures,
             bool useSlopes,
             Vector2 slopeRanges,
-            ShaderResourceView texturesLR,
-            ShaderResourceView texturesHR,
+            ShaderResourceView diffuseMapLR,
+            ShaderResourceView diffuseMapHR,
             float proportion)
         {
             this.Material = new BufferMaterials(material);
-            this.NormalMaps = normalMaps;
+            this.NormalMap = normalMap;
+            this.SpecularMap = specularMap;
 
             this.AlphaMap = alphaMap;
             this.ColorTextures = colorTextures;
 
-            this.TexturesLR = texturesLR;
-            this.TexturesHR = texturesHR;
+            this.DiffuseMapLR = diffuseMapLR;
+            this.DiffuseMapHR = diffuseMapHR;
 
             float usage = 0f;
             if (useAlphaMap) usage += 1;

@@ -21,6 +21,10 @@ namespace Engine
             /// Normal maps
             /// </summary>
             public string[] NormalMaps = null;
+            /// <summary>
+            /// Specular maps
+            /// </summary>
+            public string[] SpecularMaps = null;
 
             /// <summary>
             /// Gets or sets if use alpha mapping or not

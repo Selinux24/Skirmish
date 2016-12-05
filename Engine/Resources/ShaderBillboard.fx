@@ -190,7 +190,7 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 		textureColor.rgb,
 		input.positionWorld,
 		input.normalWorld,
-		float4(0,0,0,0),
+		float3(0,0,0),
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,

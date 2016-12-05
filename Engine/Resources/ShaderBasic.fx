@@ -225,7 +225,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 		matColor.rgb,
 		input.positionWorld,
 		input.normalWorld,
-		float4(0,0,0,0),
+		float3(0,0,0),
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
@@ -457,7 +457,8 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinnedI(VSVertexPositionNo
 
 float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 {
-    float4 textureColor = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float4 diffuseMap = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float3 specularMap = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
 
 	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 	float3 toEye = normalize(toEyeWorld);
@@ -469,10 +470,10 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		gPointLights, 
 		gSpotLights,
 		toEye,
-		textureColor.rgb,
+		diffuseMap.rgb,
 		input.positionWorld,
 		input.normalWorld,
-		float4(0,0,0,0),
+		specularMap,
 		gMaterial.SpecularIntensity,
 		gMaterial.SpecularPower,
 		shadowPosition,
@@ -487,7 +488,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
 	}
 
-	return float4(litColor, textureColor.a);
+	return float4(litColor, diffuseMap.a);
 }
 
 /**********************************************************************************************************
@@ -590,11 +591,11 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinnedI(VSVe
 
 float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input) : SV_TARGET
 {
-	float3 normalMap = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
-	float3 normalWorld = NormalSampleToWorldSpace(normalMap, input.normalWorld, input.tangentWorld);
-
 	float4 diffuseMap = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
-	float4 specularMap = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float3 normalMap = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
+	float3 specularMap = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
+
+	float3 normalWorld = NormalSampleToWorldSpace(normalMap, input.normalWorld, input.tangentWorld);
 
 	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
 	float3 toEye = normalize(toEyeWorld);

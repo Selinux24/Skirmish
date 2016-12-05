@@ -55,6 +55,10 @@ namespace Engine
             /// </summary>
             public ShaderResourceView TerrainNormalMaps;
             /// <summary>
+            /// Specular map textures for terrain
+            /// </summary>
+            public ShaderResourceView TerrainSpecularMaps;
+            /// <summary>
             /// Gets or sets whether use alpha mapping or not
             /// </summary>
             public bool UseAlphaMap;
@@ -602,6 +606,7 @@ namespace Engine
                         effect.UpdatePerObject(
                             Material.Default,
                             context.TerrainNormalMaps,
+                            context.TerrainSpecularMaps,
                             context.UseAlphaMap,
                             context.AlphaMap,
                             context.ColorTextures,
@@ -616,6 +621,7 @@ namespace Engine
                         effect.UpdatePerObject(
                             Material.Default,
                             context.TerrainNormalMaps,
+                            context.TerrainSpecularMaps,
                             context.UseAlphaMap,
                             context.AlphaMap,
                             context.ColorTextures,
@@ -1232,6 +1238,10 @@ namespace Engine
         /// </summary>
         private ShaderResourceView terrainNormalMaps = null;
         /// <summary>
+        /// Terrain specular maps
+        /// </summary>
+        private ShaderResourceView terrainSpecularMaps = null;
+        /// <summary>
         /// Color textures for alpha map
         /// </summary>
         private ShaderResourceView colorTextures = null;
@@ -1304,8 +1314,13 @@ namespace Engine
                 {
                     Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.NormalMaps),
                 };
-
                 this.terrainNormalMaps = game.ResourceManager.CreateResource(normalMapTextures);
+
+                ImageContent specularMapTextures = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.SpecularMaps),
+                };
+                this.terrainSpecularMaps = game.ResourceManager.CreateResource(specularMapTextures);
 
                 if (this.HeightmapDescription.Textures.UseSlopes)
                 {
@@ -1379,6 +1394,7 @@ namespace Engine
             this.drawContext = new TerrainDrawContext()
             {
                 TerrainNormalMaps = this.terrainNormalMaps,
+                TerrainSpecularMaps = this.terrainSpecularMaps,
 
                 UseAlphaMap = this.HeightmapDescription.Textures.UseAlphaMapping,
                 AlphaMap = this.alphaMap,

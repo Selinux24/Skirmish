@@ -230,6 +230,12 @@ float3 ComputeFog(float3 litColor, float distToEye, float fogStart, float fogRan
 
 	return lerp(litColor, fogColor, fogLerp);
 }
+float3 Blinn(float3 N, float3 L, float3 V, float3 diffuseColor, float3 specularColor, float shininess)
+{
+	float3 H = normalize(V + L);
+	float4 lighting = lit(dot(L, N), dot(H, N), shininess);
+	return diffuseColor * lighting.y + specularColor * lighting.z;
+}
 
 float3 ComputeBaseLight(
 	float3 lightColor,
@@ -240,11 +246,17 @@ float3 ComputeBaseLight(
 	float3 modelColor,
 	float3 modelPosition,
 	float3 modelNormal,
-	float4 specularMap,
+	float3 specularColor,
 	float specIntensity,
 	float specPower,
 	float shadowFactor)
 {
+	/*float3 color = lightColor * lightAmbient * modelColor;
+
+	color += lightDiffuse * Blinn(modelNormal, -lightDirection, -toEye, lightColor * lightDiffuse * modelColor, specularColor, specPower);
+
+	return color * shadowFactor;*/
+
 	float lightIntensity = saturate(dot(modelNormal, -lightDirection));
 	[flatten]
     if (lightIntensity > 0) 
@@ -255,14 +267,12 @@ float3 ComputeBaseLight(
 		float specular = pow(saturate(dot(reflection, toEye)), specPower);
 
 		[flatten]
-		if(specularMap.r == 0 && specularMap.g == 0 && specularMap.b == 0 && specularMap.a == 0)
+		if(specularColor.r == 0 && specularColor.g == 0 && specularColor.b == 0)
 		{
 			return saturate(modelColor * lightColor * (lightAmbient + diffuse + specular));
 		}
 
-		float3 specularColor = specular * specularMap.rgb;
-
-		return saturate((modelColor * lightColor * (lightAmbient + diffuse)) + specularColor);
+		return saturate((modelColor * lightColor * (lightAmbient + diffuse)) + (specular * specularColor));
 	}
 
     return (modelColor * lightColor * lightAmbient);
@@ -274,7 +284,7 @@ float3 ComputeDirectionalLight(
 	float3 color,
 	float3 position,
 	float3 normal,
-	float4 specularMap,
+	float3 specularColor,
 	float specularIntensity,
 	float specularPower,
 	float4 lightPosition,
@@ -299,7 +309,7 @@ float3 ComputeDirectionalLight(
 		color,
 		position,
 		normal,
-		specularMap,
+		specularColor,
 		specularIntensity,
 		specularPower,
 		shadowFactor);
@@ -313,7 +323,7 @@ float3 ComputePointLight(
 	float3 color,
 	float3 position,
 	float3 normal, 
-	float4 specularMap,
+	float3 specularColor,
 	float specularIntensity,
 	float specularPower)
 {
@@ -330,7 +340,7 @@ float3 ComputePointLight(
 		color,
 		position,
 		normal,
-		specularMap,
+		specularColor,
 		specularIntensity,
 		specularPower,
 		1.0f);
@@ -346,7 +356,7 @@ float3 ComputeSpotLight(
 	float3 color,
 	float3 position,
 	float3 normal, 
-	float4 specularMap,
+	float3 specularColor,
 	float specularIntensity,
 	float specularPower)
 {
@@ -370,7 +380,7 @@ float3 ComputeSpotLight(
 			color,
 			position,
 			normal,
-			specularMap,
+			specularColor,
 			specularIntensity,
 			specularPower,
 			1.0f);
@@ -393,7 +403,7 @@ float3 ComputeAllLights(
 	float3 color,
 	float3 position,
 	float3 normal,
-	float4 specularMap,
+	float3 specularColor,
 	float specularIntensity,
 	float specularPower,
 	float4 lightPosition,
@@ -416,7 +426,7 @@ float3 ComputeAllLights(
 				color,
 				position,
 				normal,
-				specularMap,
+				specularColor,
 				specularIntensity,
 				specularPower,
 				lightPosition,
@@ -437,7 +447,7 @@ float3 ComputeAllLights(
 				color,
 				position,
 				normal,
-				specularMap,
+				specularColor,
 				specularIntensity,
 				specularPower);
 		}
@@ -454,7 +464,7 @@ float3 ComputeAllLights(
 				color,
 				position,
 				normal,
-				specularMap,
+				specularColor,
 				specularIntensity,
 				specularPower);
 		}
