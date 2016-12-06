@@ -42,7 +42,7 @@ namespace DeferredTest
         private Random rnd = new Random(0);
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.DeferredLightning)
+            : base(game, SceneModesEnum.ForwardLigthning)
         {
 
         }
@@ -360,8 +360,8 @@ namespace DeferredTest
             #region Lights
 
             this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = false;
-            this.Lights.DirectionalLights[2].Enabled = false;
+            this.Lights.DirectionalLights[1].Enabled = true;
+            this.Lights.DirectionalLights[2].Enabled = true;
 
             this.lineDrawer = this.AddLineListDrawer(1000);
 
@@ -691,14 +691,14 @@ namespace DeferredTest
 
                 if (this.Game.Input.KeyPressed(Keys.Add))
                 {
-                    this.spotLight.DiffuseIntensity += gameTime.ElapsedSeconds * 10f;
+                    this.spotLight.Intensity += gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.Subtract))
                 {
-                    this.spotLight.DiffuseIntensity -= gameTime.ElapsedSeconds * 10f;
+                    this.spotLight.Intensity -= gameTime.ElapsedSeconds * 10f;
 
-                    this.spotLight.DiffuseIntensity = Math.Max(0f, this.spotLight.DiffuseIntensity);
+                    this.spotLight.Intensity = Math.Max(0f, this.spotLight.Intensity);
                 }
 
                 this.lineDrawer.SetLines(Color.White, Line3D.CreateWiredFrustum(this.spotLight.BoundingFrustum));
@@ -732,7 +732,7 @@ namespace DeferredTest
                             l.State = -1;
                         }
 
-                        l.DiffuseIntensity = l.Radius * 0.1f;
+                        l.Intensity = l.Radius * 0.1f;
                     }
                 }
             }
@@ -795,9 +795,9 @@ namespace DeferredTest
                 this.spotLight = new SceneLightSpot(lightPosition, direction, 25, 25)
                 {
                     Name = "Spot the dog",
-                    LightColor = Color.Yellow,
-                    AmbientIntensity = 0.2f,
-                    DiffuseIntensity = 25f,
+                    DiffuseColor = Color.Yellow,
+                    SpecularColor = Color.Yellow,
+                    Intensity = 25f,
                     Enabled = true,
                     CastShadow = false,
                 };
@@ -843,13 +843,15 @@ namespace DeferredTest
                         lightPosition.Y += 1f;
                     }
 
+                    var color = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f);
+
                     SceneLightPoint pointLight = new SceneLightPoint()
                     {
                         Name = string.Format("Point {0}", this.Lights.PointLights.Length),
                         Enabled = true,
-                        LightColor = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f),
-                        AmbientIntensity = 0.1f,
-                        DiffuseIntensity = 5f,
+                        DiffuseColor = color,
+                        SpecularColor = color,
+                        Intensity = 500f,
                         Position = lightPosition,
                         Radius = 5f,
                         State = rnd.NextFloat(0, 1) >= 0.5f ? 1 : -1,

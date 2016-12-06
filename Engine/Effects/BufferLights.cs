@@ -18,10 +18,6 @@ namespace Engine.Effects
         public const int MAX = 3;
 
         /// <summary>
-        /// Light direction vector
-        /// </summary>
-        public Vector3 Direction;
-        /// <summary>
         /// Diffuse color
         /// </summary>
         public Color4 DiffuseColor;
@@ -29,6 +25,10 @@ namespace Engine.Effects
         /// Specular color
         /// </summary>
         public Color4 SpecularColor;
+        /// <summary>
+        /// Light direction vector
+        /// </summary>
+        public Vector3 Direction;
         /// <summary>
         /// Padding
         /// </summary>
@@ -77,10 +77,6 @@ namespace Engine.Effects
         public const int MAX = 16;
 
         /// <summary>
-        /// Light position
-        /// </summary>
-        public Vector3 Position;
-        /// <summary>
         /// Diffuse color
         /// </summary>
         public Color4 DiffuseColor;
@@ -88,6 +84,10 @@ namespace Engine.Effects
         /// Specular color
         /// </summary>
         public Color4 SpecularColor;
+        /// <summary>
+        /// Light position
+        /// </summary>
+        public Vector3 Position;
         /// <summary>
         /// Intensity
         /// </summary>
@@ -156,14 +156,6 @@ namespace Engine.Effects
         public const int MAX = 16;
 
         /// <summary>
-        /// Light position
-        /// </summary>
-        public Vector3 Position;
-        /// <summary>
-        /// Light direction vector
-        /// </summary>
-        public Vector3 Direction;
-        /// <summary>
         /// Diffuse color
         /// </summary>
         public Color4 DiffuseColor;
@@ -172,13 +164,21 @@ namespace Engine.Effects
         /// </summary>
         public Color4 SpecularColor;
         /// <summary>
-        /// Intensity
+        /// Light position
         /// </summary>
-        public float Intensity;
+        public Vector3 Position;
         /// <summary>
         /// Spot radius
         /// </summary>
         public float Angle;
+        /// <summary>
+        /// Light direction vector
+        /// </summary>
+        public Vector3 Direction;
+        /// <summary>
+        /// Intensity
+        /// </summary>
+        public float Intensity;
 
         /// <summary>
         /// Size in bytes

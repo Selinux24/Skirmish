@@ -14,6 +14,7 @@ cbuffer cbPerFrame : register (b0)
 	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
+	uint3 gLightCount;
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
@@ -23,6 +24,8 @@ cbuffer cbPerFrame : register (b0)
 cbuffer cbPerObject : register (b1)
 {
 	Material gMaterial;
+	bool gUseColorDiffuse;
+	bool gUseColorSpecular;
 };
 
 Texture2DArray gDiffuseMapLRArray;
@@ -73,8 +76,8 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 	float3 normalMapSample2 = gNormalMapArray.Sample(SamplerLinear, float3(input.tex0, 1)).rgb;
 	float3 bumpNormalWorld2 = NormalSampleToWorldSpace(normalMapSample2, input.normalWorld, input.tangentWorld);
 
-	float3 specularMapSample1 = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex0, 0)).rgb;
-	float3 specularMapSample2 = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex0, 1)).rgb;
+	float4 specularMapSample1 = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex0, 0));
+	float4 specularMapSample2 = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex0, 1));
 
 	float n = 0;
 
@@ -146,36 +149,27 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		color = saturate(((color1 * prop) + (color2 * (1.0f-prop))) * input.color * 2.0f);
 	}
 
-	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
-	float3 toEye = normalize(toEyeWorld);
-
-	float4 shadowPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
-
-	float4 litColor = color;
-	/*float3 litColor = ComputeAllLights(
-		gDirLights, 
+	float4 litColor = ComputeLights(
+		0.1f, 
+		gDirLights,
 		gPointLights, 
 		gSpotLights,
-		toEye,
-		color.rgb,
+		gLightCount.x,
+		gLightCount.y,
+		gLightCount.z,
+		gFogStart,
+		gFogRange,
+		gFogColor,
+		gMaterial,
 		input.positionWorld,
 		n == 0 ? bumpNormalWorld1 : bumpNormalWorld2,
+		color,
 		n == 0 ? specularMapSample1 : specularMapSample2,
-		gMaterial.SpecularIntensity,
-		gMaterial.SpecularPower,
-		shadowPosition,
-		gShadows,
-		gShadowMapStatic,
-		gShadowMapDynamic);*/
+		gUseColorDiffuse,
+		gUseColorSpecular,
+		gEyePositionWorld);
 
-	if(gFogRange > 0)
-	{
-		float distToEye = length(toEyeWorld);
-
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
-	}
-
-	return float4(litColor.rgb, color.a);
+	return litColor;
 }
 GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 {

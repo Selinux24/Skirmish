@@ -354,9 +354,9 @@ namespace HeightmapTest
                         this.spotLight1 = new SceneLightSpot(position, Vector3.Normalize(Vector3.One * -1f), 25, 25)
                         {
                             Name = "Spot",
-                            LightColor = Color.Red,
-                            AmbientIntensity = 0.2f,
-                            DiffuseIntensity = 10f,
+                            DiffuseColor = Color.Red,
+                            SpecularColor = Color.Red,
+                            Intensity = 10f,
                             Enabled = true,
                             CastShadow = false,
                         };
@@ -364,9 +364,9 @@ namespace HeightmapTest
                         this.spotLight2 = new SceneLightSpot(position, Vector3.Normalize(Vector3.One * -1f), 25, 25)
                         {
                             Name = "Spot",
-                            LightColor = Color.Blue,
-                            AmbientIntensity = 0.2f,
-                            DiffuseIntensity = 10f,
+                            DiffuseColor = Color.Blue,
+                            SpecularColor = Color.Blue,
+                            Intensity = 10f,
                             Enabled = true,
                             CastShadow = false,
                         };
@@ -403,9 +403,9 @@ namespace HeightmapTest
                     this.torchLights[i - 1] = new SceneLightPoint()
                     {
                         Name = string.Format("Torch {0}", i),
-                        LightColor = color,
-                        AmbientIntensity = 0.1f,
-                        DiffuseIntensity = 5f,
+                        DiffuseColor = color,
+                        SpecularColor = color,
+                        Intensity = 5f,
                         Position = pos,
                         Radius = 4f,
                         Enabled = true,

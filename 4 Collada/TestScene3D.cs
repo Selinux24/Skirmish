@@ -125,9 +125,9 @@ namespace Collada
             this.Lights.Add(new SceneLightPoint()
             {
                 Name = "Point light",
-                LightColor = Color.White,
-                AmbientIntensity = 0.3f,
-                DiffuseIntensity = 0.7f,
+                DiffuseColor = Color.White,
+                SpecularColor = Color.White,
+                Intensity = 0.7f,
                 Position = Vector3.Zero,
                 Radius = 5f,
                 Enabled = true,
@@ -137,9 +137,9 @@ namespace Collada
             this.Lights.Add(new SceneLightSpot(Vector3.Down, Vector3.Zero, MathUtil.DegreesToRadians(10f), 15f)
             {
                 Name = "Helilight",
-                LightColor = Color.White,
-                AmbientIntensity = 1.0f,
-                DiffuseIntensity = 1.0f,
+                DiffuseColor = Color.White,
+                SpecularColor = Color.White,
+                Intensity = 1.0f,
                 Enabled = true,
                 CastShadow = false,
             });

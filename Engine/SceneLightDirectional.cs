@@ -18,8 +18,8 @@ namespace Engine
                 {
                     Name = "Primary",
                     DiffuseColor = Color.White,
-                    SpecularColor = Color.CornflowerBlue,
-                    Direction = Vector3.Normalize(new Vector3(0.57735f, -0.57735f, 0.57735f)),
+                    SpecularColor = Color.White,
+                    Direction = Vector3.Normalize(new Vector3(1, -1, 1)),
                     Enabled = true,
                 };
             }
@@ -34,9 +34,9 @@ namespace Engine
                 return new SceneLightDirectional()
                 {
                     Name = "Secondary",
-                    DiffuseColor = Color.CornflowerBlue,
-                    SpecularColor = Color.CornflowerBlue,
-                    Direction = Vector3.Normalize(new Vector3(-0.57735f, -0.57735f, 0.57735f)),
+                    DiffuseColor = Color.White * 0.8f,
+                    SpecularColor = Color.Black,
+                    Direction = Vector3.Normalize(new Vector3(-1, -1, 1)),
                     Enabled = true,
                 };
             }
@@ -51,9 +51,9 @@ namespace Engine
                 return new SceneLightDirectional()
                 {
                     Name = "Tertiary",
-                    DiffuseColor = Color.Yellow,
-                    SpecularColor = Color.Yellow,
-                    Direction = Vector3.Normalize(new Vector3(-0.57735f, -0.57735f, -0.57735f)),
+                    DiffuseColor = Color.White * 0.25f,
+                    SpecularColor = Color.Black,
+                    Direction = Vector3.Normalize(new Vector3(-1, -1, -1)),
                     Enabled = true,
                 };
             }

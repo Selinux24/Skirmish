@@ -44,6 +44,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectVariable spotLights = null;
         /// <summary>
+        /// Light count effect variable
+        /// </summary>
+        private EffectVectorVariable lightCount = null;
+        /// <summary>
         /// Eye position effect variable
         /// </summary>
         private EffectVectorVariable eyePositionWorld = null;
@@ -194,6 +198,24 @@ namespace Engine.Effects
 
                     this.spotLights.SetRawValue(ds, default(BufferSpotLight).Stride * BufferSpotLight.MAX);
                 }
+            }
+        }
+        /// <summary>
+        /// Light count
+        /// </summary>
+        protected int[] LightCount
+        {
+            get
+            {
+                Int4 v = this.lightCount.GetIntVector();
+
+                return new int[] { v.X, v.Y, v.Z };
+            }
+            set
+            {
+                Int4 v4 = new Int4(value[0], value[1], value[2], 0);
+
+                this.lightCount.Set(v4);
             }
         }
         /// <summary>
@@ -519,6 +541,7 @@ namespace Engine.Effects
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
             this.pointLights = this.Effect.GetVariableByName("gPointLights");
             this.spotLights = this.Effect.GetVariableByName("gSpotLights");
+            this.lightCount = this.Effect.GetVariableByName("gLightCount").AsVector();
             this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
@@ -657,6 +680,7 @@ namespace Engine.Effects
             var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
             var bPointLights = new BufferPointLight[BufferPointLight.MAX];
             var bSpotLights = new BufferSpotLight[BufferSpotLight.MAX];
+            var lCount = new[] { 0, 0, 0 };
 
             if (lights != null)
             {
@@ -677,6 +701,10 @@ namespace Engine.Effects
                 {
                     bSpotLights[i] = new BufferSpotLight(spotLights[i]);
                 }
+
+                lCount[0] = dirLights.Length;
+                lCount[1] = pointLights.Length;
+                lCount[2] = spotLights.Length;
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;
@@ -702,6 +730,7 @@ namespace Engine.Effects
             this.DirLights = bDirLights;
             this.PointLights = bPointLights;
             this.SpotLights = bSpotLights;
+            this.LightCount = lCount;
 
             this.WindDirection = windDirection;
             this.WindStrength = windStrength;

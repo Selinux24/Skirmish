@@ -665,7 +665,7 @@ namespace Engine
                 if (context.DrawerMode == DrawerModesEnum.Forward)
                 {
                     ((EffectBasic)sceneryEffect).UpdatePerFrame(
-                        Matrix.Identity,
+                        context.World,
                         context.ViewProjection,
                         context.EyePosition,
                         context.Lights,
@@ -677,13 +677,13 @@ namespace Engine
                 else if (context.DrawerMode == DrawerModesEnum.Deferred)
                 {
                     ((EffectBasicGBuffer)sceneryEffect).UpdatePerFrame(
-                        Matrix.Identity,
+                        context.World,
                         context.ViewProjection);
                 }
                 else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                 {
                     ((EffectBasicShadow)sceneryEffect).UpdatePerFrame(
-                        Matrix.Identity,
+                        context.World,
                         context.ViewProjection);
                 }
 

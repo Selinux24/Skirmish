@@ -94,7 +94,7 @@ namespace GameLogic
         #endregion
 
         public SceneObjects(Game game)
-            : base(game, SceneModesEnum.DeferredLightning)
+            : base(game, SceneModesEnum.ForwardLigthning)
         {
 
         }

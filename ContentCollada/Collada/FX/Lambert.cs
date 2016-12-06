@@ -14,6 +14,10 @@ namespace Engine.Collada.FX
         public VarColorOrTexture Ambient { get; set; }
         [XmlElement("diffuse", typeof(VarColorOrTexture))]
         public VarColorOrTexture Diffuse { get; set; }
+        [XmlElement("specular", typeof(VarColorOrTexture))]
+        public VarColorOrTexture Specular { get; set; }
+        [XmlElement("shininess", typeof(VarFloatOrParam))]
+        public VarFloatOrParam Shininess { get; set; }
         [XmlElement("reflective", typeof(VarColorOrTexture))]
         public VarColorOrTexture Reflective { get; set; }
         [XmlElement("reflectivity", typeof(VarFloatOrParam))]

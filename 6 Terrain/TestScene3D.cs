@@ -77,7 +77,7 @@ namespace TerrainTest
         private LineListDrawer curveLineDrawer = null;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.DeferredLightning)
+            : base(game, SceneModesEnum.ForwardLigthning)
         {
 
         }
@@ -528,21 +528,21 @@ namespace TerrainTest
             {
                 Name = "One point",
                 Enabled = true,
-                LightColor = Color.Blue,
-                AmbientIntensity = 1,
-                DiffuseIntensity = 1,
+                DiffuseColor = Color.Blue,
+                SpecularColor = Color.Blue,
+                Intensity = 10f,
                 Position = Vector3.Zero,
-                Radius = 1f,
+                Radius = 2f,
             });
             this.Lights.Add(new SceneLightPoint()
             {
                 Name = "Another point",
                 Enabled = true,
-                LightColor = Color.Red,
-                AmbientIntensity = 1,
-                DiffuseIntensity = 1,
+                DiffuseColor = Color.Red,
+                SpecularColor = Color.Red,
+                Intensity = 10f,
                 Position = Vector3.Zero,
-                Radius = 1f,
+                Radius = 2f,
             });
 
             #endregion

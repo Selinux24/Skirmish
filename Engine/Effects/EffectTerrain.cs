@@ -44,6 +44,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectVariable spotLights = null;
         /// <summary>
+        /// Light count effect variable
+        /// </summary>
+        private EffectVectorVariable lightCount = null;
+        /// <summary>
         /// Eye position effect variable
         /// </summary>
         private EffectVectorVariable eyePositionWorld = null;
@@ -83,6 +87,14 @@ namespace Engine.Effects
         /// Material effect variable
         /// </summary>
         private EffectVariable material = null;
+        /// <summary>
+        /// Use diffuse map color variable
+        /// </summary>
+        private EffectScalarVariable useColorDiffuse = null;
+        /// <summary>
+        /// Use specular map color variable
+        /// </summary>
+        private EffectScalarVariable useColorSpecular = null;
         /// <summary>
         /// Low resolution textures effect variable
         /// </summary>
@@ -190,6 +202,24 @@ namespace Engine.Effects
 
                     this.spotLights.SetRawValue(ds, default(BufferSpotLight).Stride * BufferSpotLight.MAX);
                 }
+            }
+        }
+        /// <summary>
+        /// Light count
+        /// </summary>
+        protected int[] LightCount
+        {
+            get
+            {
+                Int4 v = this.lightCount.GetIntVector();
+
+                return new int[] { v.X, v.Y, v.Z };
+            }
+            set
+            {
+                Int4 v4 = new Int4(value[0], value[1], value[2], 0);
+
+                this.lightCount.Set(v4);
             }
         }
         /// <summary>
@@ -347,6 +377,34 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Use diffuse map color
+        /// </summary>
+        protected bool UseColorDiffuse
+        {
+            get
+            {
+                return this.useColorDiffuse.GetBool();
+            }
+            set
+            {
+                this.useColorDiffuse.Set(value);
+            }
+        }
+        /// <summary>
+        /// Use specular map color
+        /// </summary>
+        protected bool UseColorSpecular
+        {
+            get
+            {
+                return this.useColorSpecular.GetBool();
+            }
+            set
+            {
+                this.useColorSpecular.Set(value);
+            }
+        }
+        /// <summary>
         /// Low resolution textures
         /// </summary>
         protected ShaderResourceView DiffuseMapLR
@@ -495,9 +553,12 @@ namespace Engine.Effects
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.fromLightViewProjection = this.Effect.GetVariableByName("gLightViewProjection").AsMatrix();
             this.material = this.Effect.GetVariableByName("gMaterial");
+            this.useColorDiffuse = this.Effect.GetVariableByName("gUseColorDiffuse").AsScalar();
+            this.useColorSpecular = this.Effect.GetVariableByName("gUseColorSpecular").AsScalar();
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
             this.pointLights = this.Effect.GetVariableByName("gPointLights");
             this.spotLights = this.Effect.GetVariableByName("gSpotLights");
+            this.lightCount = this.Effect.GetVariableByName("gLightCount").AsVector();
             this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
             this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
@@ -582,6 +643,7 @@ namespace Engine.Effects
             var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
             var bPointLights = new BufferPointLight[BufferPointLight.MAX];
             var bSpotLights = new BufferSpotLight[BufferSpotLight.MAX];
+            var lCount = new[] { 0, 0, 0 };
 
             if (lights != null)
             {
@@ -604,6 +666,10 @@ namespace Engine.Effects
                 {
                     bSpotLights[i] = new BufferSpotLight(spotLights[i]);
                 }
+
+                lCount[0] = dirLights.Length;
+                lCount[1] = pointLights.Length;
+                lCount[2] = spotLights.Length;
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;
@@ -631,6 +697,7 @@ namespace Engine.Effects
             this.DirLights = bDirLights;
             this.PointLights = bPointLights;
             this.SpotLights = bSpotLights;
+            this.LightCount = lCount;
         }
         /// <summary>
         /// Update per model object data
@@ -662,9 +729,11 @@ namespace Engine.Effects
             this.Material = new BufferMaterials(material);
             this.NormalMap = normalMap;
             this.SpecularMap = specularMap;
+            this.UseColorSpecular = specularMap != null;
 
             this.AlphaMap = alphaMap;
             this.ColorTextures = colorTextures;
+            this.UseColorDiffuse = colorTextures != null;
 
             this.DiffuseMapLR = diffuseMapLR;
             this.DiffuseMapHR = diffuseMapHR;

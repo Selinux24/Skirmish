@@ -14,6 +14,7 @@ cbuffer cbPerFrame : register (b0)
 	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
+	uint3 gLightCount;
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
@@ -26,6 +27,8 @@ cbuffer cbPerGroup : register (b1)
 cbuffer cbPerObject : register (b2)
 {
 	Material gMaterial;
+	bool gUseColorDiffuse;
+	bool gUseColorSpecular;
 };
 cbuffer cbPerInstance : register (b3)
 {
@@ -213,9 +216,9 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 		gDirLights,
 		gPointLights, 
 		gSpotLights,
-		MAX_LIGHTS_DIRECTIONAL,
-		MAX_LIGHTS_POINT,
-		MAX_LIGHTS_SPOT,
+		gLightCount.x,
+		gLightCount.y,
+		gLightCount.z,
 		gFogStart,
 		gFogRange,
 		gFogColor,
@@ -224,6 +227,8 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 		input.normalWorld,
 		input.color,
 		0,
+		true,
+		false,
 		gEyePositionWorld);
 }
 
@@ -446,9 +451,9 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		gDirLights,
 		gPointLights, 
 		gSpotLights,
-		MAX_LIGHTS_DIRECTIONAL,
-		MAX_LIGHTS_POINT,
-		MAX_LIGHTS_SPOT,
+		gLightCount.x,
+		gLightCount.y,
+		gLightCount.z,
 		gFogStart,
 		gFogRange,
 		gFogColor,
@@ -457,6 +462,8 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		input.normalWorld,
 		diffuseMap,
 		specularMap,
+		gUseColorDiffuse,
+		gUseColorSpecular,
 		gEyePositionWorld);
 }
 
@@ -571,9 +578,9 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 		gDirLights,
 		gPointLights, 
 		gSpotLights,
-		MAX_LIGHTS_DIRECTIONAL,
-		MAX_LIGHTS_POINT,
-		MAX_LIGHTS_SPOT,
+		gLightCount.x,
+		gLightCount.y,
+		gLightCount.z,
 		gFogStart,
 		gFogRange,
 		gFogColor,
@@ -582,6 +589,8 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 		normalWorld,
 		diffuseMap,
 		specularMap,
+		gUseColorDiffuse,
+		gUseColorSpecular,
 		gEyePositionWorld);
 }
 

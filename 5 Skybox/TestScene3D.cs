@@ -186,9 +186,8 @@ namespace Skybox
             this.movingFireLight = new SceneLightPoint()
             {
                 Name = "Moving fire light",
-                LightColor = Color.Orange,
-                AmbientIntensity = 0.1f,
-                DiffuseIntensity = 1f,
+                DiffuseColor = Color.Orange,
+                Intensity = 1f,
                 Position = Vector3.Zero,
                 Radius = 5f,
                 Enabled = true,
@@ -220,9 +219,8 @@ namespace Skybox
                 this.torchLights[i] = new SceneLightPoint()
                 {
                     Name = string.Format("Torch {0}", i),
-                    LightColor = color,
-                    AmbientIntensity = 0.1f,
-                    DiffuseIntensity = 5f,
+                    DiffuseColor = color,
+                    Intensity = 5f,
                     Position = firePositions3D[i],
                     Radius = 4f,
                     Enabled = true,
@@ -436,7 +434,7 @@ namespace Skybox
                 var light = this.Lights.PointLights[i];
 
                 this.volumesDrawer.SetLines(
-                    light.LightColor,
+                    light.DiffuseColor,
                     Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
             }
         }
@@ -445,7 +443,7 @@ namespace Skybox
             var light = this.Lights.PointLights[0];
 
             this.volumesDrawer.SetLines(
-                light.LightColor,
+                light.DiffuseColor,
                 Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
         }
         private void DEBUGUpdateGraphDrawer()

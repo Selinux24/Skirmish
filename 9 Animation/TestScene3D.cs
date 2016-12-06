@@ -23,6 +23,8 @@ namespace AnimationTest
         private LineListDrawer soldierLines = null;
         private bool showSoldierDEBUG = false;
 
+        private LineListDrawer axis = null;
+
         private Random rnd = new Random();
 
         public TestScene3D(Game game)
@@ -36,8 +38,15 @@ namespace AnimationTest
             base.Initialize();
 
             this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = false;
-            this.Lights.DirectionalLights[2].Enabled = false;
+            this.Lights.DirectionalLights[1].Enabled = true;
+            this.Lights.DirectionalLights[2].Enabled = true;
+
+            Vector3 lDir = this.Lights.DirectionalLights[0].Direction;
+
+            float s = 100;
+            float hip = (float)Math.Sqrt((s * s) + (s * s));
+            Matrix ma = Matrix.LookAtLH(Vector3.Zero, -lDir, Vector3.Up) * Matrix.Translation(new Vector3(0, s, -(s + 20)));
+            this.axis = this.AddLineListDrawer(Line3D.CreateAxis(ma, hip), Color.Yellow);
 
             this.Camera.NearPlaneDistance = 1;
             this.Camera.FarPlaneDistance = 500;
@@ -159,61 +168,18 @@ namespace AnimationTest
                 this.Game.Exit();
             }
 
-            #region World
+            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
 
-            if (this.Game.Input.KeyPressed(Keys.A))
-            {
-                //Rotates the scene
-                this.World *= Matrix.RotationY(MathUtil.PiOverFour * gameTime.ElapsedSeconds);
-            }
-            if (this.Game.Input.KeyPressed(Keys.D))
-            {
-                //Rotates the scene
-                this.World *= Matrix.RotationY(-MathUtil.PiOverFour * gameTime.ElapsedSeconds);
-            }
-            if (this.Game.Input.KeyPressed(Keys.W))
-            {
-                //Rotates the scene
-                this.Camera.MoveForward(gameTime, false);
-            }
-            if (this.Game.Input.KeyPressed(Keys.S))
-            {
-                //Rotates the scene
-                this.Camera.MoveBackward(gameTime, false);
-            }
+            #region Camera
+
+            this.UpdateCamera(gameTime, shift, rightBtn);
 
             #endregion
 
             #region Animation control
 
-            if (this.Game.Input.KeyJustReleased(Keys.Left))
-            {
-                this.soldier.AnimationController.TimeDelta -= 0.1f;
-                this.soldier.AnimationController.TimeDelta = Math.Max(0, this.soldier.AnimationController.TimeDelta);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Right))
-            {
-                this.soldier.AnimationController.TimeDelta += 0.1f;
-                this.soldier.AnimationController.TimeDelta = Math.Min(5, this.soldier.AnimationController.TimeDelta);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Up))
-            {
-                if (this.Game.Input.KeyPressed(Keys.ShiftKey))
-                {
-                    this.soldier.AnimationController.Start(0);
-                }
-                else
-                {
-                    this.soldier.AnimationController.Resume();
-                }
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Down))
-            {
-                this.soldier.AnimationController.Pause();
-            }
+            this.UpdateAnimation();
 
             #endregion
 
@@ -275,6 +241,69 @@ namespace AnimationTest
                 this.soldier.AnimationController.CurrentPathItemClip,
                 this.soldier.AnimationController.CurrentPathTime,
                 this.soldier.AnimationController.CurrentPathItemTime);
+        }
+        private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
+        {
+#if DEBUG
+            if (rightBtn)
+#endif
+            {
+                this.Camera.RotateMouse(
+                    gameTime,
+                    this.Game.Input.MouseXDelta,
+                    this.Game.Input.MouseYDelta);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                this.Camera.MoveLeft(gameTime, shift);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                this.Camera.MoveRight(gameTime, shift);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.W))
+            {
+                this.Camera.MoveForward(gameTime, shift);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.S))
+            {
+                this.Camera.MoveBackward(gameTime, shift);
+            }
+        }
+        private void UpdateAnimation()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            {
+                this.soldier.AnimationController.TimeDelta -= 0.1f;
+                this.soldier.AnimationController.TimeDelta = Math.Max(0, this.soldier.AnimationController.TimeDelta);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Right))
+            {
+                this.soldier.AnimationController.TimeDelta += 0.1f;
+                this.soldier.AnimationController.TimeDelta = Math.Min(5, this.soldier.AnimationController.TimeDelta);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Up))
+            {
+                if (this.Game.Input.KeyPressed(Keys.ShiftKey))
+                {
+                    this.soldier.AnimationController.Start(0);
+                }
+                else
+                {
+                    this.soldier.AnimationController.Resume();
+                }
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Down))
+            {
+                this.soldier.AnimationController.Pause();
+            }
         }
 
         private void AnimationController_PathEnding(object sender, EventArgs e)

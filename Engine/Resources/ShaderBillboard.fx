@@ -10,6 +10,7 @@ cbuffer cbPerFrame : register (b0)
 	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
+	uint3 gLightCount;
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
@@ -177,34 +178,27 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
 	clip(textureColor.a - 0.05f);
 
-	float3 toEyeWorld = gEyePositionWorld - input.positionWorld;
-	float3 toEye = normalize(toEyeWorld);
+	float4 litColor = ComputeLights(
+		0.1f, 
+		gDirLights,
+		gPointLights, 
+		gSpotLights,
+		gLightCount.x,
+		gLightCount.y,
+		gLightCount.z,
+		gFogStart,
+		gFogRange,
+		gFogColor,
+		gMaterial,
+		input.positionWorld,
+		input.normalWorld,
+		textureColor,
+		0,
+		true,
+		true,
+		gEyePositionWorld);
 
-	float4 shadowPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
-
-	float4 litColor = textureColor;
-	//float3 litColor = ComputeAllLights(
-	//	gDirLights, 
-	//	gPointLights, 
-	//	gSpotLights,
-	//	toEye,
-	//	textureColor.rgb,
-	//	input.positionWorld,
-	//	input.normalWorld,
-	//	float3(0,0,0),
-	//	gMaterial.SpecularIntensity,
-	//	gMaterial.SpecularPower,
-	//	shadowPosition,
-	//	gShadows,
-	//	gShadowMapStatic,
-	//	gShadowMapDynamic);
-
-	float distToEye = length(toEyeWorld);
-
-	if(gFogRange > 0)
-	{
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
-	}
+	float distToEye = length(gEyePositionWorld - input.positionWorld);
 
 	return float4(litColor.rgb, textureColor.a * (1.0f - (distToEye / gEndRadius * 0.5f)));
 }

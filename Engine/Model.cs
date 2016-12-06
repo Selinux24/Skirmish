@@ -52,10 +52,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Local transform
-        /// </summary>
-        private Matrix local = Matrix.Identity;
-        /// <summary>
         /// Level of detail
         /// </summary>
         private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
@@ -149,8 +145,6 @@ namespace Engine
             this.ManipulatorChanged = false;
 
             this.Manipulator.Update(context.GameTime);
-
-            this.local = context.World * this.Manipulator.LocalTransform;
         }
         /// <summary>
         /// Draw
@@ -172,7 +166,7 @@ namespace Engine
                     if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
                         ((EffectBasic)effect).UpdatePerFrame(
-                            this.local,
+                            this.Manipulator.LocalTransform * context.World,
                             context.ViewProjection,
                             context.EyePosition,
                             context.Lights,
@@ -184,13 +178,13 @@ namespace Engine
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
                         ((EffectBasicGBuffer)effect).UpdatePerFrame(
-                            this.local,
+                            this.Manipulator.LocalTransform * context.World,
                             context.ViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
                         ((EffectBasicShadow)effect).UpdatePerFrame(
-                            this.local,
+                            this.Manipulator.LocalTransform * context.World,
                             context.ViewProjection);
                     }
 
