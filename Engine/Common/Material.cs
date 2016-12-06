@@ -1,5 +1,5 @@
-﻿using System.Runtime.InteropServices;
-using SharpDX;
+﻿using SharpDX;
+using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
@@ -17,17 +17,25 @@ namespace Engine.Common
         public static readonly Material Default = new Material(MaterialContent.Default);
 
         /// <summary>
+        /// Emissive color
+        /// </summary>
+        public Color4 EmissiveColor;
+        /// <summary>
+        /// Ambient color
+        /// </summary>
+        public Color4 AmbientColor;
+        /// <summary>
         /// Diffuse color
         /// </summary>
         public Color4 DiffuseColor;
         /// <summary>
-        /// Specular intensity
+        /// Specular color
         /// </summary>
-        public float SpecularIntensity;
+        public Color4 SpecularColor;
         /// <summary>
-        /// Specular power
+        /// Shininess
         /// </summary>
-        public float SpecularPower;
+        public float Shininess;
 
         /// <summary>
         /// Constructor
@@ -35,9 +43,11 @@ namespace Engine.Common
         /// <param name="effect">Effect content</param>
         public Material(MaterialContent effect)
         {
+            this.EmissiveColor = effect.EmissionColor;
+            this.AmbientColor = effect.AmbientColor;
             this.DiffuseColor = effect.DiffuseColor;
-            this.SpecularIntensity = effect.SpecularColor.ToVector3().Length() * 2f;
-            this.SpecularPower = effect.Shininess;
+            this.SpecularColor = effect.SpecularColor;
+            this.Shininess = effect.Shininess;
         }
     };
 }

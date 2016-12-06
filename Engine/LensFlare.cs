@@ -146,7 +146,7 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         private void DrawGlow(DrawContext context)
         {
-            Color4 color = this.Light.LightColor;
+            Color4 color = this.Light.DiffuseColor;
             color.Alpha = 0.25f;
 
             float scale = 50f / this.glowSprite.Width;

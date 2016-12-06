@@ -63,6 +63,10 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Intensity
+        /// </summary>
+        public float Intensity = 1f;
+        /// <summary>
         /// Gets the bounding sphere of the active light
         /// </summary>
         public BoundingFrustum BoundingFrustum { get; private set; }

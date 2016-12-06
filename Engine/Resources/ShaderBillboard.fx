@@ -182,30 +182,31 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 
 	float4 shadowPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
 
-	float3 litColor = ComputeAllLights(
-		gDirLights, 
-		gPointLights, 
-		gSpotLights,
-		toEye,
-		textureColor.rgb,
-		input.positionWorld,
-		input.normalWorld,
-		float3(0,0,0),
-		gMaterial.SpecularIntensity,
-		gMaterial.SpecularPower,
-		shadowPosition,
-		gShadows,
-		gShadowMapStatic,
-		gShadowMapDynamic);
+	float4 litColor = textureColor;
+	//float3 litColor = ComputeAllLights(
+	//	gDirLights, 
+	//	gPointLights, 
+	//	gSpotLights,
+	//	toEye,
+	//	textureColor.rgb,
+	//	input.positionWorld,
+	//	input.normalWorld,
+	//	float3(0,0,0),
+	//	gMaterial.SpecularIntensity,
+	//	gMaterial.SpecularPower,
+	//	shadowPosition,
+	//	gShadows,
+	//	gShadowMapStatic,
+	//	gShadowMapDynamic);
 
 	float distToEye = length(toEyeWorld);
 
 	if(gFogRange > 0)
 	{
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 
-	return float4(litColor, textureColor.a * (1.0f - (distToEye / gEndRadius * 0.5f)));
+	return float4(litColor.rgb, textureColor.a * (1.0f - (distToEye / gEndRadius * 0.5f)));
 }
 GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 {
@@ -219,8 +220,8 @@ GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 	float distToEye = length(toEyeWorld);
 
 	output.color = float4(textureColor.xyz, textureColor.a * (1.0f - (distToEye / gEndRadius * 0.5f)));
-	output.normal = float4(input.normalWorld, gMaterial.SpecularPower);
-	output.depth = float4(input.positionWorld, gMaterial.SpecularIntensity);
+	output.normal = float4(input.normalWorld, 0); //gMaterial.SpecularPower);
+	output.depth = float4(input.positionWorld, 0); //gMaterial.SpecularIntensity);
 
     return output;
 }

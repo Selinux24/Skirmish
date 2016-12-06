@@ -94,44 +94,34 @@ static const int MAX_LIGHTS_SPOT = 16;
 
 struct Material
 {
+	float4 Emissive;
+	float4 Ambient;
 	float4 Diffuse;
-	float SpecularIntensity;
-	float SpecularPower;
+	float4 Specular;
+	float Shininess;
 };
 struct DirectionalLight
 {
-	float3 Color;
-	float Ambient;
-	float Diffuse;
 	float3 Direction;
-	float CastShadow;
-	float Enabled;
-	float Pad1;
-	float Pad2;
+	float4 Diffuse;
+	float4 Specular;
 };
 struct PointLight
 {
-	float3 Color;
-	float Ambient;
-	float Diffuse;
 	float3 Position;
-    float Radius;
-	float CastShadow;
-	float Enabled;
-	float Pad1;
+	float4 Diffuse;
+	float4 Specular;
+	float Intensity;
+	float Radius;
 };
 struct SpotLight
 {
-	float3 Color;
-	float Ambient;
-	float Diffuse;
 	float3 Position;
 	float3 Direction;
+	float4 Diffuse;
+	float4 Specular;
+	float Intensity;
 	float Angle;
-    float Radius;
-	float CastShadow;
-	float Enabled;
-	float Pad1;
 };
 
 static const uint sampleCount = 16;
@@ -224,7 +214,7 @@ float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shadowMapSt
 
     return 1.0f - (shadow / sampleCount);
 }
-float3 ComputeFog(float3 litColor, float distToEye, float fogStart, float fogRange, float3 fogColor)
+float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRange, float4 fogColor)
 {
 	float fogLerp = saturate((distToEye - fogStart) / fogRange);
 
@@ -237,240 +227,113 @@ float3 Blinn(float3 N, float3 L, float3 V, float3 diffuseColor, float3 specularC
 	return diffuseColor * lighting.y + specularColor * lighting.z;
 }
 
-float3 ComputeBaseLight(
-	float3 lightColor,
-	float lightAmbient,
-	float lightDiffuse,
-	float3 lightDirection,
-	float3 toEye,
-	float3 modelColor,
-	float3 modelPosition,
-	float3 modelNormal,
-	float3 specularColor,
-	float specIntensity,
-	float specPower,
-	float shadowFactor)
+
+void Phong(float4 lDiffuse, float4 lSpecular, float4 cDiffuse, float4 cSpecular, float shininess, float3 L, float3 N, float3 V, float3 R, out float4 ambient, out float4 diffuse, out float4 specular)
 {
-	/*float3 color = lightColor * lightAmbient * modelColor;
-
-	color += lightDiffuse * Blinn(modelNormal, -lightDirection, -toEye, lightColor * lightDiffuse * modelColor, specularColor, specPower);
-
-	return color * shadowFactor;*/
-
-	float lightIntensity = saturate(dot(modelNormal, -lightDirection));
-	[flatten]
-    if (lightIntensity > 0) 
-	{
-		float diffuse = lightDiffuse * lightIntensity * shadowFactor;
-
-		float3 reflection = normalize(2 * lightIntensity * modelNormal - lightDirection);
-		float specular = pow(saturate(dot(reflection, toEye)), specPower);
-
-		[flatten]
-		if(specularColor.r == 0 && specularColor.g == 0 && specularColor.b == 0)
-		{
-			return saturate(modelColor * lightColor * (lightAmbient + diffuse + specular));
-		}
-
-		return saturate((modelColor * lightColor * (lightAmbient + diffuse)) + (specular * specularColor));
-	}
-
-    return (modelColor * lightColor * lightAmbient);
+	ambient = 0;
+	diffuse = (max(0, dot(L, N))) * lDiffuse * cDiffuse;
+	specular = (2 * pow(max(0, dot(R, V)), shininess)) * lSpecular * cSpecular;
 }
 
-float3 ComputeDirectionalLight(
-	DirectionalLight L,
-	float3 toEye,
-	float3 color,
-	float3 position,
-	float3 normal,
-	float3 specularColor,
-	float specularIntensity,
-	float specularPower,
-	float4 lightPosition,
-	uint shadows,
-	Texture2D shadowMapStatic,
-	Texture2D shadowMapDynamic)
+float4 ComputeLights(
+	float4 Ga, 
+	DirectionalLight dirLights[MAX_LIGHTS_DIRECTIONAL], 
+	PointLight pointLights[MAX_LIGHTS_POINT], 
+	SpotLight spotLights[MAX_LIGHTS_SPOT], 
+	uint dirLightsCount, 
+	uint pointLightsCount, 
+	uint spotLightsCount, 
+	float fogStart,
+	float fogRange,
+	float4 fogColor,
+	Material k, 
+	float3 P, 
+	float3 N, 
+	float4 ColorDiffuse,
+	float4 ColorSpecular,
+	float3 Ep)
 {
-	float shadowFactor = 1.0f;
+	float4 emissive = k.Emissive;
+	float4 ambient = k.Ambient * Ga;
 
-	[flatten]
-	if(L.CastShadow == 1)
-	{
-		shadowFactor = CalcShadowFactor(lightPosition, shadows, shadowMapStatic, shadowMapDynamic);
-	}
+	float4 mDiffuse = k.Diffuse * ColorDiffuse;
+	float4 mSpecular = k.Specular * ColorSpecular;
 
-	float3 litColor = ComputeBaseLight(
-		L.Color,
-		L.Ambient,
-		L.Diffuse,
-		L.Direction,
-		toEye,
-		color,
-		position,
-		normal,
-		specularColor,
-		specularIntensity,
-		specularPower,
-		shadowFactor);
+	float4 lAmbient = 0;
+	float4 lDiffuse = 0;
+	float4 lSpecular = 0;
 
-	return litColor;
-}
+	float3 L = 0;
+	float3 V = 0;
+	float3 R = 0;
 
-float3 ComputePointLight(
-	PointLight L, 
-	float3 toEye,
-	float3 color,
-	float3 position,
-	float3 normal, 
-	float3 specularColor,
-	float specularIntensity,
-	float specularPower)
-{
-    float3 lightDirection = position - L.Position;
-	float distance = length(lightDirection);
-	lightDirection /= distance;
+	float4 cAmbient = 0;
+	float4 cDiffuse = 0;
+	float4 cSpecular = 0;
 
-	float3 litColor = ComputeBaseLight(
-		L.Color,
-		L.Ambient,
-		L.Diffuse,
-		lightDirection,
-		toEye,
-		color,
-		position,
-		normal,
-		specularColor,
-		specularIntensity,
-		specularPower,
-		1.0f);
+	float D = 0;
+	float S = 0;
+	float attenuation = 0;
 
-    float attenuation = CalcSphericAttenuation(1, L.Diffuse, L.Radius, distance);
-
-	return litColor * attenuation;
-}
-
-float3 ComputeSpotLight(
-	SpotLight L,
-	float3 toEye,
-	float3 color,
-	float3 position,
-	float3 normal, 
-	float3 specularColor,
-	float specularIntensity,
-	float specularPower)
-{
-	float3 litColor = 0;
-
-	float3 lightDirection = position - L.Position;
-	float distance = length(lightDirection);
-	lightDirection /= distance;
-
-	float spotFactor = dot(lightDirection, L.Direction);
-	float lightToSurfaceAngle = degrees(acos(spotFactor));
-	[flatten]
-	if(lightToSurfaceAngle <= L.Angle)
-	{
-		litColor = ComputeBaseLight(
-			L.Color,
-			L.Ambient,
-			L.Diffuse,
-			lightDirection,
-			toEye,
-			color,
-			position,
-			normal,
-			specularColor,
-			specularIntensity,
-			specularPower,
-			1.0f);
-
-		float attenuationD = CalcSphericAttenuation(1, L.Diffuse, L.Radius, distance);
-
-		float attenuationS =  (1.0f - (1.0f - lightToSurfaceAngle) * 1.0f / (1.0f - L.Angle));
-
-		litColor *= attenuationD * attenuationS;
-	}
-	
-	return litColor;
-}
-
-float3 ComputeAllLights(
-	DirectionalLight dirLights[MAX_LIGHTS_DIRECTIONAL],
-	PointLight pointLights[MAX_LIGHTS_POINT],
-	SpotLight spotLights[MAX_LIGHTS_SPOT],
-	float3 toEye,
-	float3 color,
-	float3 position,
-	float3 normal,
-	float3 specularColor,
-	float specularIntensity,
-	float specularPower,
-	float4 lightPosition,
-	uint shadows,
-	Texture2D shadowMapStatic,
-	Texture2D shadowMapDynamic)
-{
-	float3 litColor = 0;
-
-	int i;
+	uint i = 0;
 
 	[unroll]
-	for(i = 0; i < MAX_LIGHTS_DIRECTIONAL; i++)
+	for(i = 0; i < dirLightsCount; i++)
 	{
-		if(dirLights[i].Enabled == 1.0f)
-		{
-			litColor += ComputeDirectionalLight(
-				dirLights[i],
-				toEye,
-				color,
-				position,
-				normal,
-				specularColor,
-				specularIntensity,
-				specularPower,
-				lightPosition,
-				shadows,
-				shadowMapStatic,
-				shadowMapDynamic);
-		}
+		L = normalize(dirLights[i].Direction);
+		V = normalize(Ep - P);
+		R = 2 * dot(L, N) * N - L;
+
+		Phong(dirLights[i].Diffuse, dirLights[i].Specular, mDiffuse, mSpecular, k.Shininess, L, N, V, R, cAmbient, cDiffuse, cSpecular);
+		lAmbient += cAmbient;
+		lDiffuse += cDiffuse;
+		lSpecular += cSpecular;
 	}
 
 	[unroll]
-	for(i = 0; i < MAX_LIGHTS_POINT; i++)
+	for(i = 0; i < pointLightsCount; i++)
 	{
-		if(pointLights[i].Enabled == 1.0f)
-		{
-			litColor += ComputePointLight(
-				pointLights[i],
-				toEye,
-				color,
-				position,
-				normal,
-				specularColor,
-				specularIntensity,
-				specularPower);
-		}
+		D = length(pointLights[i].Position - P);
+		L = normalize(pointLights[i].Position - P);
+		V = normalize(Ep - P);
+		R = 2 * dot(L, N) * N - L;
+
+		Phong(pointLights[i].Diffuse, pointLights[i].Specular, mDiffuse, mSpecular, k.Shininess, L, N, V, R, cAmbient, cDiffuse, cSpecular);
+
+		attenuation = CalcSphericAttenuation(1, pointLights[i].Intensity, pointLights[i].Radius, D);
+
+		lAmbient += (cAmbient * attenuation);
+		lDiffuse += (cDiffuse * attenuation);
+		lSpecular += (cSpecular * attenuation);
 	}
 
 	[unroll]
-	for(i = 0; i < MAX_LIGHTS_SPOT; i++)
+	for(i = 0; i < spotLightsCount; i++)
 	{
-		if(spotLights[i].Enabled == 1.0f)
-		{
-			litColor += ComputeSpotLight(
-				spotLights[i],
-				toEye,
-				color,
-				position,
-				normal,
-				specularColor,
-				specularIntensity,
-				specularPower);
-		}
+		D = length(spotLights[i].Position - P);
+		L = normalize(spotLights[i].Position - P);
+		V = normalize(Ep - P);
+		R = 2 * dot(L, N) * N - L;
+		S = acos(dot(L, spotLights[i].Direction));
+
+		Phong(spotLights[i].Diffuse, spotLights[i].Specular, mDiffuse, mSpecular, k.Shininess, L, N, V, R, cAmbient, cDiffuse, cSpecular);
+		
+		attenuation = CalcSphericAttenuation(1, spotLights[i].Intensity, pointLights[i].Radius, D);
+		attenuation *= (1.0f - (1.0f - S) * 1.0f / (1.0f - spotLights[i].Angle));
+
+		lAmbient += (cAmbient * attenuation);
+		lDiffuse += (cDiffuse * attenuation);
+		lSpecular += (cSpecular * attenuation);
 	}
 
-	return litColor;
+	float4 color = saturate(emissive + ambient + (lAmbient + lDiffuse + lSpecular));
+
+	if(fogRange > 0)
+	{
+		float distToEye = length(Ep - P);
+
+		color = ComputeFog(color, distToEye, fogStart, fogRange, fogColor);
+	}
+
+	return color;
 }
-
-

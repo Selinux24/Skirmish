@@ -114,10 +114,10 @@ namespace GameLogic
             {
                 Name = "Current soldier",
                 Enabled = true,
-                LightColor = Color.White,
+                DiffuseColor = Color.White,
+                SpecularColor = Color.White,
                 Position = Vector3.Zero,
-                AmbientIntensity = 0f,
-                DiffuseIntensity = 1f,
+                Intensity = 1f,
                 Radius = 3f,
             };
 

@@ -197,8 +197,8 @@ GBufferPSOutput PSPositionNormalColor(PSVertexPositionNormalColor input)
     GBufferPSOutput output = (GBufferPSOutput)0;
 
 	output.color = input.color * gMaterial.Diffuse;
-	output.normal = float4(input.normalWorld, gMaterial.SpecularPower);
-	output.depth = float4(input.positionWorld, gMaterial.SpecularIntensity);
+	output.normal = float4(input.normalWorld, 0); //gMaterial.SpecularPower);
+	output.depth = float4(input.positionWorld, 0); //gMaterial.SpecularIntensity);
 
     return output;
 }
@@ -379,8 +379,8 @@ GBufferPSOutput PSPositionNormalTexture(PSVertexPositionNormalTexture input)
     GBufferPSOutput output = (GBufferPSOutput)0;
 
 	output.color = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
-	output.normal = float4(input.normalWorld, gMaterial.SpecularPower);
-	output.depth = float4(input.positionWorld, gMaterial.SpecularIntensity);
+	output.normal = float4(input.normalWorld, 0); //gMaterial.SpecularPower);
+	output.depth = float4(input.positionWorld, 0); //gMaterial.SpecularIntensity);
 
     return output;
 }
@@ -492,8 +492,8 @@ GBufferPSOutput PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTang
 	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
 	output.color = color;
-	output.normal = float4(bumpedNormalW.xyz, gMaterial.SpecularPower);
-	output.depth = float4(input.positionWorld, gMaterial.SpecularIntensity);
+	output.normal = float4(bumpedNormalW.xyz, 0); //gMaterial.SpecularPower);
+	output.depth = float4(input.positionWorld, 0); //gMaterial.SpecularIntensity);
 
     return output;
 }

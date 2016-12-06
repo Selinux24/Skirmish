@@ -20,17 +20,13 @@ namespace Engine
         /// </summary>
         public bool CastShadow = false;
         /// <summary>
-        /// Light color
+        /// Diffuse color
         /// </summary>
-        public Color4 LightColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+        public Color4 DiffuseColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
-        /// Ambient intensity
+        /// Specular color
         /// </summary>
-        public float AmbientIntensity = 1f;
-        /// <summary>
-        /// Diffuse intensity
-        /// </summary>
-        public float DiffuseIntensity = 1f;
+        public Color4 SpecularColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
         /// Free use variable
         /// </summary>

@@ -103,7 +103,7 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 		float4 lPosition = mul(float4(position, 1), gLightViewProjection);
 		float3 toEye = normalize(gEyePositionWorld - position);
 
-		float3 litColor = ComputeDirectionalLight(
+		/*float3 litColor = ComputeDirectionalLight(
 			gDirLight,
 			toEye,
 			color.rgb,
@@ -117,7 +117,8 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 			gShadowMapStatic,
 			gShadowMapDynamic);
 
-		return float4(litColor, color.a);
+		return float4(litColor, color.a);*/
+		return color;
 	}
 	else
 	{
@@ -144,7 +145,7 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 
 	float3 toEye = normalize(gEyePositionWorld - position);
 
-	float3 litColor = ComputePointLight(
+	/*float3 litColor = ComputePointLight(
 		gPointLight,
 		toEye,
 		color.rgb,
@@ -154,7 +155,9 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 		specIntensity,
 		specPower);
 
-	return float4(litColor, color.a);
+	return float4(litColor, color.a);*/
+
+	return color;
 }
 float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 {
@@ -176,7 +179,7 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 
 	float3 toEye = normalize(gEyePositionWorld - position);
 
-	float3 litColor = ComputeSpotLight(
+	/*float3 litColor = ComputeSpotLight(
 		gSpotLight,
 		toEye,
 		color.rgb,
@@ -186,7 +189,9 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 		specIntensity,
 		specPower);
 
-	return float4(litColor, color.a);
+	return float4(litColor, color.a);*/
+
+	return color;
 }
 float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 {
@@ -196,7 +201,7 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 
 	float3 normal = tg2.xyz;
 	float3 position = tg3.xyz;
-	float3 color = lmap.rgb;
+	float4 color = lmap;
 
 	if(length(normal) != 0)
 	{
@@ -205,11 +210,11 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 			float3 toEyeWorld = gEyePositionWorld - position;
 			float distToEye = length(toEyeWorld);
 
-			color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor.rgb);
+			color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
 		}
 	}
 
-	return float4(color, 1);
+	return color;
 }
 
 technique11 DeferredDirectionalLight

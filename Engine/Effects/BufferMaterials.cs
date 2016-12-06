@@ -12,17 +12,25 @@ namespace Engine.Effects
     public struct BufferMaterials : IBufferData
     {
         /// <summary>
+        /// Emissive color
+        /// </summary>
+        public Color4 Emissive;
+        /// <summary>
+        /// Ambient color
+        /// </summary>
+        public Color4 Ambient;
+        /// <summary>
         /// Diffuse color
         /// </summary>
         public Color4 Diffuse;
         /// <summary>
-        /// Specular intensity
+        /// Specular color
         /// </summary>
-        public float SpecularIntensity;
+        public Color4 Specular;
         /// <summary>
-        /// Specular power
+        /// Shininess
         /// </summary>
-        public float SpecularPower;
+        public float Shininess;
         /// <summary>
         /// Padding
         /// </summary>
@@ -31,6 +39,10 @@ namespace Engine.Effects
         /// Padding
         /// </summary>
         public float Pad2;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad3;
 
         /// <summary>
         /// Size in bytes
@@ -55,12 +67,15 @@ namespace Engine.Effects
         /// <param name="material">Material</param>
         public BufferMaterials(Material material)
         {
+            this.Emissive = material.EmissiveColor;
+            this.Ambient = material.AmbientColor;
             this.Diffuse = material.DiffuseColor;
-            this.SpecularIntensity = material.SpecularIntensity;
-            this.SpecularPower = material.SpecularPower;
+            this.Specular = material.SpecularColor;
+            this.Shininess = material.Shininess;
 
             this.Pad1 = 1000;
             this.Pad2 = 2000;
+            this.Pad3 = 3000;
         }
     };
 }

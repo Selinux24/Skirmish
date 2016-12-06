@@ -151,7 +151,8 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 
 	float4 shadowPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
 
-	float3 litColor = ComputeAllLights(
+	float4 litColor = color;
+	/*float3 litColor = ComputeAllLights(
 		gDirLights, 
 		gPointLights, 
 		gSpotLights,
@@ -165,16 +166,16 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		shadowPosition,
 		gShadows,
 		gShadowMapStatic,
-		gShadowMapDynamic);
+		gShadowMapDynamic);*/
 
 	if(gFogRange > 0)
 	{
 		float distToEye = length(toEyeWorld);
 
-		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor.rgb);
+		litColor = ComputeFog(litColor, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 
-	return float4(litColor, color.a);
+	return float4(litColor.rgb, color.a);
 }
 GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 {
@@ -261,8 +262,8 @@ GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 	float3 normal = n == 0 ? bumpNormalWorld1 : bumpNormalWorld2;
 
 	output.color = color;
-	output.normal = float4(normal, gMaterial.SpecularPower);
-	output.depth = float4(input.positionWorld, gMaterial.SpecularIntensity);
+	output.normal = float4(normal, 0); //gMaterial.SpecularPower);
+	output.depth = float4(input.positionWorld, 0); //gMaterial.SpecularIntensity);
 
     return output;
 }

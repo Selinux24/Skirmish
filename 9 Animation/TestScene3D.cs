@@ -36,8 +36,8 @@ namespace AnimationTest
             base.Initialize();
 
             this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = true;
-            this.Lights.DirectionalLights[2].Enabled = true;
+            this.Lights.DirectionalLights[1].Enabled = false;
+            this.Lights.DirectionalLights[2].Enabled = false;
 
             this.Camera.NearPlaneDistance = 1;
             this.Camera.FarPlaneDistance = 500;

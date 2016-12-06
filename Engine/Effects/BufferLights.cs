@@ -18,37 +18,21 @@ namespace Engine.Effects
         public const int MAX = 3;
 
         /// <summary>
-        /// Light color
-        /// </summary>
-        public Color3 LightColor;
-        /// <summary>
-        /// Ambient intensity
-        /// </summary>
-        public float AmbientIntensity;
-        /// <summary>
-        /// Diffuse intensity
-        /// </summary>
-        public float DiffuseIntensity;
-        /// <summary>
         /// Light direction vector
         /// </summary>
         public Vector3 Direction;
         /// <summary>
-        /// Cast shadow
+        /// Diffuse color
         /// </summary>
-        public float CastShadow;
+        public Color4 DiffuseColor;
         /// <summary>
-        /// Is Enabled
+        /// Specular color
         /// </summary>
-        public float Enabled;
+        public Color4 SpecularColor;
         /// <summary>
         /// Padding
         /// </summary>
         public float Pad1;
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public float Pad2;
 
         /// <summary>
         /// Size in bytes
@@ -73,15 +57,11 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferDirectionalLight(SceneLightDirectional light)
         {
-            this.LightColor = light.LightColor.ToVector3();
-            this.AmbientIntensity = light.AmbientIntensity;
-            this.DiffuseIntensity = light.DiffuseIntensity;
             this.Direction = light.Direction;
-            this.CastShadow = light.CastShadow ? 1f : 0f;
-            this.Enabled = light.Enabled ? 1f : 0f;
+            this.DiffuseColor = light.DiffuseColor;
+            this.SpecularColor = light.SpecularColor;
 
             this.Pad1 = 1000;
-            this.Pad2 = 2000;
         }
     }
 
@@ -97,37 +77,37 @@ namespace Engine.Effects
         public const int MAX = 16;
 
         /// <summary>
-        /// Light color
-        /// </summary>
-        public Color3 LightColor;
-        /// <summary>
-        /// Ambient intensity
-        /// </summary>
-        public float AmbientIntensity;
-        /// <summary>
-        /// Diffuse intensity
-        /// </summary>
-        public float DiffuseIntensity;
-        /// <summary>
         /// Light position
         /// </summary>
         public Vector3 Position;
+        /// <summary>
+        /// Diffuse color
+        /// </summary>
+        public Color4 DiffuseColor;
+        /// <summary>
+        /// Specular color
+        /// </summary>
+        public Color4 SpecularColor;
+        /// <summary>
+        /// Intensity
+        /// </summary>
+        public float Intensity;
         /// <summary>
         /// Light radius
         /// </summary>
         public float Radius;
         /// <summary>
-        /// Cast shadow
-        /// </summary>
-        public float CastShadow;
-        /// <summary>
-        /// Is Enabled
-        /// </summary>
-        public float Enabled;
-        /// <summary>
         /// Padding
         /// </summary>
         public float Pad1;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad2;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad3;
 
         /// <summary>
         /// Size in bytes
@@ -152,15 +132,15 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferPointLight(SceneLightPoint light)
         {
-            this.LightColor = light.LightColor.ToVector3();
-            this.AmbientIntensity = light.AmbientIntensity;
-            this.DiffuseIntensity = light.DiffuseIntensity;
             this.Position = light.Position;
+            this.DiffuseColor = light.DiffuseColor;
+            this.SpecularColor = light.SpecularColor;
+            this.Intensity = light.Intensity;
             this.Radius = light.Radius;
-            this.CastShadow = light.CastShadow ? 1f : 0f;
-            this.Enabled = light.Enabled ? 1f : 0f;
 
             this.Pad1 = 1000;
+            this.Pad2 = 2000;
+            this.Pad3 = 3000;
         }
     }
 
@@ -176,45 +156,29 @@ namespace Engine.Effects
         public const int MAX = 16;
 
         /// <summary>
-        /// Light color
-        /// </summary>
-        public Color3 LightColor;
-        /// <summary>
-        /// Ambient intensity
-        /// </summary>
-        public float AmbientIntensity;
-        /// <summary>
-        /// Diffuse intensity
-        /// </summary>
-        public float DiffuseIntensity;
-        /// <summary>
         /// Light position
         /// </summary>
         public Vector3 Position;
         /// <summary>
-        /// Light direction
+        /// Light direction vector
         /// </summary>
         public Vector3 Direction;
+        /// <summary>
+        /// Diffuse color
+        /// </summary>
+        public Color4 DiffuseColor;
+        /// <summary>
+        /// Specular color
+        /// </summary>
+        public Color4 SpecularColor;
+        /// <summary>
+        /// Intensity
+        /// </summary>
+        public float Intensity;
         /// <summary>
         /// Spot radius
         /// </summary>
         public float Angle;
-        /// <summary>
-        /// Radius
-        /// </summary>
-        public float Radius;
-        /// <summary>
-        /// Cast shadow
-        /// </summary>
-        public float CastShadow;
-        /// <summary>
-        /// Is Enabled
-        /// </summary>
-        public float Enabled;
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public float Pad1;
 
         /// <summary>
         /// Size in bytes
@@ -239,17 +203,13 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferSpotLight(SceneLightSpot light)
         {
-            this.LightColor = light.LightColor.ToVector3();
-            this.AmbientIntensity = light.AmbientIntensity;
-            this.DiffuseIntensity = light.DiffuseIntensity;
             this.Position = light.Position;
             this.Direction = light.Direction;
+            this.DiffuseColor = light.DiffuseColor;
+            this.SpecularColor = light.SpecularColor;
+            this.Intensity = light.Intensity;
+            this.Intensity = light.Intensity;
             this.Angle = light.Angle;
-            this.Radius = light.Radius;
-            this.CastShadow = light.CastShadow ? 1f : 0f;
-            this.Enabled = light.Enabled ? 1f : 0f;
-
-            this.Pad1 = 1000;
         }
     }
 }
