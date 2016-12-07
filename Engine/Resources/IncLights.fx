@@ -105,7 +105,7 @@ struct DirectionalLight
 	float4 Diffuse;
 	float4 Specular;
 	float3 Direction;
-	float Pad1;
+	float CastShadow;
 };
 struct PointLight
 {
@@ -255,7 +255,11 @@ float4 ComputeLights(
 	float4 pColorSpecular,
 	bool useColorDiffuse,
 	bool useColorSpecular,
-	float3 ePosition)
+	float3 ePosition,
+	float4 sLightPosition,
+	uint shadows,
+	Texture2D shadowMapStatic,
+	Texture2D shadowMapDynamic)
 {
 	float4 lDiffuse = 0;
 	float4 lSpecular = 0;
@@ -266,6 +270,7 @@ float4 ComputeLights(
 
 	float4 cDiffuse = 0;
 	float4 cSpecular = 0;
+	float cShadowFactor = 0;
 
 	float D = 0;
 	float S = 0;
@@ -280,9 +285,16 @@ float4 ComputeLights(
 		V = normalize(ePosition - pPosition);
 		R = 2 * dot(L, pNormal) * pNormal - L;
 
+		cShadowFactor = 1;
+		[flatten]
+		if(dirLights[i].CastShadow == 1)
+		{
+			cShadowFactor = CalcShadowFactor(sLightPosition, shadows, shadowMapStatic, shadowMapDynamic);
+		}
+
 		Phong(dirLights[i].Diffuse, dirLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
-		lDiffuse += cDiffuse;
-		lSpecular += cSpecular;
+		lDiffuse += cDiffuse * cShadowFactor;
+		lSpecular += cSpecular * cShadowFactor;
 	}
 
 	[unroll]

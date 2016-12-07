@@ -23,8 +23,6 @@ namespace AnimationTest
         private LineListDrawer soldierLines = null;
         private bool showSoldierDEBUG = false;
 
-        private LineListDrawer axis = null;
-
         private Random rnd = new Random();
 
         public TestScene3D(Game game)
@@ -38,15 +36,11 @@ namespace AnimationTest
             base.Initialize();
 
             this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = true;
-            this.Lights.DirectionalLights[2].Enabled = true;
+            this.Lights.DirectionalLights[0].CastShadow = true;
+            this.Lights.DirectionalLights[1].Enabled = false;
+            this.Lights.DirectionalLights[2].Enabled = false;
 
             Vector3 lDir = this.Lights.DirectionalLights[0].Direction;
-
-            float s = 100;
-            float hip = (float)Math.Sqrt((s * s) + (s * s));
-            Matrix ma = Matrix.LookAtLH(Vector3.Zero, -lDir, Vector3.Up) * Matrix.Translation(new Vector3(0, s, -(s + 20)));
-            this.axis = this.AddLineListDrawer(Line3D.CreateAxis(ma, hip), Color.Yellow);
 
             this.Camera.NearPlaneDistance = 1;
             this.Camera.FarPlaneDistance = 500;
@@ -79,6 +73,7 @@ namespace AnimationTest
                 new ModelDescription()
                 {
                     TextureIndex = 1,
+                    CastShadow = true,
                 });
 
             #endregion
@@ -114,7 +109,7 @@ namespace AnimationTest
                 {
                     Static = true,
                     AlwaysVisible = false,
-                    CastShadow = false,
+                    CastShadow = true,
                     DeferredEnabled = true,
                     EnableDepthStencil = true,
                     EnableAlphaBlending = false,
@@ -190,6 +185,11 @@ namespace AnimationTest
                 this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
                     SceneModesEnum.DeferredLightning :
                     SceneModesEnum.ForwardLigthning;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.C))
+            {
+                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F1))

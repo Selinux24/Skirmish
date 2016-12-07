@@ -211,6 +211,8 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinnedI(VSVertexPositionNormal
 
 float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 {
+	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
+
 	return ComputeLights(
 		0.1f, 
 		gDirLights,
@@ -229,7 +231,11 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 		0,
 		true,
 		false,
-		gEyePositionWorld);
+		gEyePositionWorld,
+		lightPosition,
+		gShadows,
+		gShadowMapStatic,
+		gShadowMapDynamic);
 }
 
 /**********************************************************************************************************
@@ -446,6 +452,8 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	float4 diffuseMap = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	float4 specularMap = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 
+	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
+
 	return ComputeLights(
 		0.1f, 
 		gDirLights,
@@ -464,7 +472,11 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		specularMap,
 		gUseColorDiffuse,
 		gUseColorSpecular,
-		gEyePositionWorld);
+		gEyePositionWorld,
+		lightPosition,
+		gShadows,
+		gShadowMapStatic,
+		gShadowMapDynamic);
 }
 
 /**********************************************************************************************************
@@ -573,6 +585,8 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	float3 normalMap = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
 	float3 normalWorld = NormalSampleToWorldSpace(normalMap, input.normalWorld, input.tangentWorld);
 
+	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
+
 	return ComputeLights(
 		0.1f, 
 		gDirLights,
@@ -591,7 +605,11 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 		specularMap,
 		gUseColorDiffuse,
 		gUseColorSpecular,
-		gEyePositionWorld);
+		gEyePositionWorld,
+		lightPosition,
+		gShadows,
+		gShadowMapStatic,
+		gShadowMapDynamic);
 }
 
 /**********************************************************************************************************

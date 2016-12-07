@@ -149,6 +149,8 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		color = saturate(((color1 * prop) + (color2 * (1.0f-prop))) * input.color * 2.0f);
 	}
 
+	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
+
 	float4 litColor = ComputeLights(
 		0.1f, 
 		gDirLights,
@@ -167,7 +169,11 @@ float4 PSTerrainForward(PSVertexTerrain input) : SV_TARGET
 		n == 0 ? specularMapSample1 : specularMapSample2,
 		gUseColorDiffuse,
 		gUseColorSpecular,
-		gEyePositionWorld);
+		gEyePositionWorld,
+		lightPosition,
+		gShadows,
+		gShadowMapStatic,
+		gShadowMapDynamic);
 
 	return litColor;
 }

@@ -178,6 +178,8 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
 	clip(textureColor.a - 0.05f);
 
+	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
+
 	float4 litColor = ComputeLights(
 		0.1f, 
 		gDirLights,
@@ -196,7 +198,11 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 		0,
 		true,
 		true,
-		gEyePositionWorld);
+		gEyePositionWorld,
+		lightPosition,
+		gShadows,
+		gShadowMapStatic,
+		gShadowMapDynamic);
 
 	float distToEye = length(gEyePositionWorld - input.positionWorld);
 

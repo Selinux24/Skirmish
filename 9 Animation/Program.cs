@@ -7,7 +7,7 @@ namespace AnimationTest
         static void Main()
         {
 #if DEBUG
-            using (Game cl = new Game("9 Animation", false, 800, 450))
+            using (Game cl = new Game("9 Animation", false, 400, 250))
 #else
             using (Game cl = new Game("9 Animation"))
 #endif

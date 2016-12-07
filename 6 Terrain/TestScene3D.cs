@@ -952,6 +952,11 @@ namespace TerrainTest
                     SceneModesEnum.ForwardLigthning;
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.C))
+            {
+                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
+            }
+
             if (this.Game.Input.KeyJustReleased(Keys.D1))
             {
                 this.walkMode = !this.walkMode;

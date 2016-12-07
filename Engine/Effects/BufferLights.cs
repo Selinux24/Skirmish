@@ -30,9 +30,9 @@ namespace Engine.Effects
         /// </summary>
         public Vector3 Direction;
         /// <summary>
-        /// Padding
+        /// Light cast shadows
         /// </summary>
-        public float Pad1;
+        public float CastShadow;
 
         /// <summary>
         /// Size in bytes
@@ -60,8 +60,7 @@ namespace Engine.Effects
             this.Direction = light.Direction;
             this.DiffuseColor = light.DiffuseColor;
             this.SpecularColor = light.SpecularColor;
-
-            this.Pad1 = 1000;
+            this.CastShadow = light.CastShadow ? 1 : 0;
         }
     }
 

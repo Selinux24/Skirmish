@@ -20,6 +20,7 @@ namespace Engine
                     DiffuseColor = Color.White,
                     SpecularColor = Color.White,
                     Direction = Vector3.Normalize(new Vector3(1, -1, 1)),
+                    CastShadow = true,
                     Enabled = true,
                 };
             }
@@ -37,6 +38,7 @@ namespace Engine
                     DiffuseColor = Color.White * 0.8f,
                     SpecularColor = Color.Black,
                     Direction = Vector3.Normalize(new Vector3(-1, -1, 1)),
+                    CastShadow = false,
                     Enabled = true,
                 };
             }
@@ -54,6 +56,7 @@ namespace Engine
                     DiffuseColor = Color.White * 0.25f,
                     SpecularColor = Color.Black,
                     Direction = Vector3.Normalize(new Vector3(-1, -1, -1)),
+                    CastShadow = false,
                     Enabled = true,
                 };
             }
