@@ -194,7 +194,7 @@ namespace Engine.Animation
             }
             else
             {
-                return -1;
+                return 0;
             }
         }
         /// <summary>

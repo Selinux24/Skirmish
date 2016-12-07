@@ -12,9 +12,15 @@ namespace SceneTest
             using (Game cl = new Game("3 SceneTest"))
 #endif
             {
-                cl.AddScene(new TestScene3D(cl) { Active = true, Order = 1, });
-                cl.AddScene(new TestSceneHID(cl) { Active = true, Order = 2, });
-                cl.AddScene(new TestSceneBackground(cl) { Active = true, Order = 99, });
+#if DEBUG
+                cl.VisibleMouse = false;
+                cl.LockMouse = false;
+#else
+                cl.VisibleMouse = false;
+                cl.LockMouse = true;
+#endif
+
+                cl.AddScene(new TestScene(cl) { Active = true });
 
                 cl.Run();
             }

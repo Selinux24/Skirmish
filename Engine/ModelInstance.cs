@@ -62,7 +62,7 @@ namespace Engine
         /// <summary>
         /// Level of detail
         /// </summary>
-        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
+        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.High;
 
         /// <summary>
         /// Instance id

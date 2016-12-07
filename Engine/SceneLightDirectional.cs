@@ -35,8 +35,8 @@ namespace Engine
                 return new SceneLightDirectional()
                 {
                     Name = "Secondary",
-                    DiffuseColor = Color.White * 0.8f,
-                    SpecularColor = Color.Black,
+                    DiffuseColor = new Color4(0.2f, 0.2f, 0.0f, 1.0f),
+                    SpecularColor = new Color4(0.1f, 0.1f, 0.2f, 1.0f),
                     Direction = Vector3.Normalize(new Vector3(-1, -1, 1)),
                     CastShadow = false,
                     Enabled = true,
@@ -53,7 +53,7 @@ namespace Engine
                 return new SceneLightDirectional()
                 {
                     Name = "Tertiary",
-                    DiffuseColor = Color.White * 0.25f,
+                    DiffuseColor = Color.White * 0.20f,
                     SpecularColor = Color.Black,
                     Direction = Vector3.Normalize(new Vector3(-1, -1, -1)),
                     CastShadow = false,

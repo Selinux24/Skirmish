@@ -40,12 +40,12 @@ namespace AnimationTest
             this.Lights.DirectionalLights[1].Enabled = false;
             this.Lights.DirectionalLights[2].Enabled = false;
 
-            Vector3 lDir = this.Lights.DirectionalLights[0].Direction;
-
             this.Camera.NearPlaneDistance = 1;
             this.Camera.FarPlaneDistance = 500;
 
             GameEnvironment.Background = Color.CornflowerBlue;
+
+            this.SceneVolume = new BoundingSphere(Vector3.Zero, 100f);
 
             #region Texts
 
