@@ -22,5 +22,20 @@ namespace Engine.Animation
         /// Number of iterations
         /// </summary>
         public int Repeats = 1;
+
+        /// <summary>
+        /// Creates a copy of the current path item
+        /// </summary>
+        /// <returns>Returns the path item copy instance</returns>
+        public AnimationPathItem Clone()
+        {
+            return new AnimationPathItem()
+            {
+                ClipName = this.ClipName,
+                Loop = this.Loop,
+                Repeats = this.Repeats,
+                TimeDelta = this.TimeDelta,
+            };
+        }
     }
 }

@@ -9,7 +9,7 @@ namespace SceneTest
 {
     public class TestScene : Scene
     {
-        private float spaceSize = 20f;
+        private float spaceSize = 40;
 
         private TextDrawer title = null;
         private TextDrawer runtime = null;
@@ -22,6 +22,9 @@ namespace SceneTest
 
         private Model characterSoldier = null;
         private ModelInstanced characterSoldierI = null;
+
+        private Model vehicleLeopard = null;
+        private ModelInstanced vehicleLeopardI = null;
 
         public TestScene(Game game)
             : base(game)
@@ -49,8 +52,9 @@ namespace SceneTest
             this.InitializeFloorAsphalt();
             this.InitializeBuildingObelisk();
             this.InitializeCharacterSoldier();
+            this.InitializeVehiclesLeopard();
 
-            this.SceneVolume = new BoundingSphere(Vector3.Zero, 100f);
+            this.SceneVolume = new BoundingSphere(Vector3.Zero, 150f);
         }
 
         private void InitializeTextBoxes()
@@ -66,13 +70,10 @@ namespace SceneTest
         }
         private void InitializeFloorAsphalt()
         {
-            #region Floor
+            float l = spaceSize;
+            float h = 0f;
 
-            {
-                float l = spaceSize;
-                float h = 0f;
-
-                VertexData[] vertices = new VertexData[]
+            VertexData[] vertices = new VertexData[]
                 {
                     new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, 0.0f) },
                     new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, 1.0f) },
@@ -80,56 +81,53 @@ namespace SceneTest
                     new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture0 = new Vector2(1.0f, 1.0f) },
                 };
 
-                uint[] indices = new uint[]
+            uint[] indices = new uint[]
                 {
                     0, 1, 2,
                     1, 3, 2,
                 };
 
-                MaterialContent mat = MaterialContent.Default;
-                mat.DiffuseTexture = "resources/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
-                mat.NormalMapTexture = "resources/floors/asphalt/d_road_asphalt_stripes_normal.dds";
-                mat.SpecularTexture = "resources/floors/asphalt/d_road_asphalt_stripes_specular.dds";
+            MaterialContent mat = MaterialContent.Default;
+            mat.DiffuseTexture = "resources/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
+            mat.NormalMapTexture = "resources/floors/asphalt/d_road_asphalt_stripes_normal.dds";
+            mat.SpecularTexture = "resources/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
-                var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, mat);
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, mat);
 
-                var desc = new ModelDescription()
-                {
-                    Static = true,
-                    CastShadow = true,
-                    AlwaysVisible = false,
-                    DeferredEnabled = true,
-                    EnableDepthStencil = true,
-                    EnableAlphaBlending = false,
-                };
+            var desc = new ModelDescription()
+            {
+                Static = true,
+                CastShadow = true,
+                AlwaysVisible = false,
+                DeferredEnabled = true,
+                EnableDepthStencil = true,
+                EnableAlphaBlending = false,
+            };
 
-                var descI = new ModelInstancedDescription()
-                {
-                    Static = true,
-                    CastShadow = true,
-                    AlwaysVisible = false,
-                    DeferredEnabled = true,
-                    EnableDepthStencil = true,
-                    EnableAlphaBlending = false,
-                    Instances = 8,
-                };
+            var descI = new ModelInstancedDescription()
+            {
+                Static = true,
+                CastShadow = true,
+                AlwaysVisible = false,
+                DeferredEnabled = true,
+                EnableDepthStencil = true,
+                EnableAlphaBlending = false,
+                Instances = 8,
+            };
 
-                this.floorAsphalt = this.AddModel(content, desc);
+            this.floorAsphalt = this.AddModel(content, desc);
 
-                this.floorAsphaltI = this.AddInstancingModel(content, descI);
+            this.floorAsphaltI = this.AddInstancingModel(content, descI);
 
-                this.floorAsphaltI.Instances[0].Manipulator.SetPosition(-l * 2, 0, 0);
-                this.floorAsphaltI.Instances[1].Manipulator.SetPosition(l * 2, 0, 0);
-                this.floorAsphaltI.Instances[2].Manipulator.SetPosition(0, 0, -l * 2);
-                this.floorAsphaltI.Instances[3].Manipulator.SetPosition(0, 0, l * 2);
+            this.floorAsphaltI.Instances[0].Manipulator.SetPosition(-l * 2, 0, 0);
+            this.floorAsphaltI.Instances[1].Manipulator.SetPosition(l * 2, 0, 0);
+            this.floorAsphaltI.Instances[2].Manipulator.SetPosition(0, 0, -l * 2);
+            this.floorAsphaltI.Instances[3].Manipulator.SetPosition(0, 0, l * 2);
 
-                this.floorAsphaltI.Instances[4].Manipulator.SetPosition(-l * 2, 0, -l * 2);
-                this.floorAsphaltI.Instances[5].Manipulator.SetPosition(l * 2, 0, -l * 2);
-                this.floorAsphaltI.Instances[6].Manipulator.SetPosition(-l * 2, 0, l * 2);
-                this.floorAsphaltI.Instances[7].Manipulator.SetPosition(l * 2, 0, l * 2);
-            }
-
-            #endregion
+            this.floorAsphaltI.Instances[4].Manipulator.SetPosition(-l * 2, 0, -l * 2);
+            this.floorAsphaltI.Instances[5].Manipulator.SetPosition(l * 2, 0, -l * 2);
+            this.floorAsphaltI.Instances[6].Manipulator.SetPosition(-l * 2, 0, l * 2);
+            this.floorAsphaltI.Instances[7].Manipulator.SetPosition(l * 2, 0, l * 2);
         }
         private void InitializeBuildingObelisk()
         {
@@ -152,10 +150,18 @@ namespace SceneTest
                     Instances = 4,
                 });
 
+            this.buildingObelisk.Manipulator.SetPosition(0, 0, 0);
+            this.buildingObelisk.Manipulator.SetScale(10);
+
             this.buildingObeliskI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, 0, 0);
             this.buildingObeliskI.Instances[1].Manipulator.SetPosition(spaceSize * 2, 0, 0);
             this.buildingObeliskI.Instances[2].Manipulator.SetPosition(0, 0, -spaceSize * 2);
             this.buildingObeliskI.Instances[3].Manipulator.SetPosition(0, 0, spaceSize * 2);
+
+            this.buildingObeliskI.Instances[0].Manipulator.SetScale(10);
+            this.buildingObeliskI.Instances[1].Manipulator.SetScale(10);
+            this.buildingObeliskI.Instances[2].Manipulator.SetScale(10);
+            this.buildingObeliskI.Instances[3].Manipulator.SetScale(10);
         }
         private void InitializeCharacterSoldier()
         {
@@ -179,33 +185,65 @@ namespace SceneTest
                     Instances = 4,
                 });
 
-            float s = 4f;
+            float s = spaceSize / 2f;
 
             AnimationPath p1 = new AnimationPath();
             p1.AddLoop("idle1");
 
-            this.characterSoldier.Manipulator.SetPosition(s, 0, 0);
+            this.characterSoldier.Manipulator.SetPosition(s, 0, -s);
             this.characterSoldier.AnimationController.AddPath(p1);
             this.characterSoldier.AnimationController.Start(0);
 
-            this.characterSoldierI.Instances[0].Manipulator.SetPosition(-spaceSize * 2 + s, 0, 0);
-            this.characterSoldierI.Instances[1].Manipulator.SetPosition(spaceSize * 2 + s, 0, 0);
-            this.characterSoldierI.Instances[2].Manipulator.SetPosition(s, 0, -spaceSize * 2);
-            this.characterSoldierI.Instances[3].Manipulator.SetPosition(s, 0, spaceSize * 2);
+            this.characterSoldierI.Instances[0].Manipulator.SetPosition(-spaceSize * 2 + s, 0, -s);
+            this.characterSoldierI.Instances[1].Manipulator.SetPosition(spaceSize * 2 + s, 0, -s);
+            this.characterSoldierI.Instances[2].Manipulator.SetPosition(s, 0, -spaceSize * 2 - s);
+            this.characterSoldierI.Instances[3].Manipulator.SetPosition(s, 0, spaceSize * 2 - s);
 
-            //TODO: Same animation path for all - N updates per frame
-            AnimationPath p2 = new AnimationPath();
-            p2.AddLoop("idle1");
-
-            this.characterSoldierI.Instances[0].AnimationController.AddPath(p2);
-            this.characterSoldierI.Instances[1].AnimationController.AddPath(p2);
-            this.characterSoldierI.Instances[2].AnimationController.AddPath(p2);
-            this.characterSoldierI.Instances[3].AnimationController.AddPath(p2);
+            this.characterSoldierI.Instances[0].AnimationController.AddPath(p1);
+            this.characterSoldierI.Instances[1].AnimationController.AddPath(p1);
+            this.characterSoldierI.Instances[2].AnimationController.AddPath(p1);
+            this.characterSoldierI.Instances[3].AnimationController.AddPath(p1);
 
             this.characterSoldierI.Instances[0].AnimationController.Start(1);
             this.characterSoldierI.Instances[1].AnimationController.Start(2);
             this.characterSoldierI.Instances[2].AnimationController.Start(3);
             this.characterSoldierI.Instances[3].AnimationController.Start(4);
+        }
+        private void InitializeVehiclesLeopard()
+        {
+            this.vehicleLeopard = this.AddModel(
+                "resources/vehicles/leopard",
+                "Leopard.xml",
+                new ModelDescription()
+                {
+                    CastShadow = true,
+                    Static = false,
+                });
+
+            this.vehicleLeopardI = this.AddInstancingModel(
+                "resources/vehicles/leopard",
+                "Leopard.xml",
+                new ModelInstancedDescription()
+                {
+                    CastShadow = true,
+                    Static = false,
+                    Instances = 4,
+                });
+
+            float s = -spaceSize / 2f;
+
+            this.vehicleLeopard.Manipulator.SetPosition(s, 0, 0);
+            this.vehicleLeopard.Manipulator.SetScale(12);
+
+            this.vehicleLeopardI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, 0, -spaceSize * 2);
+            this.vehicleLeopardI.Instances[1].Manipulator.SetPosition(spaceSize * 2, 0, -spaceSize * 2);
+            this.vehicleLeopardI.Instances[2].Manipulator.SetPosition(-spaceSize * 2, 0, spaceSize * 2);
+            this.vehicleLeopardI.Instances[3].Manipulator.SetPosition(spaceSize * 2, 0, spaceSize * 2);
+
+            this.vehicleLeopardI.Instances[0].Manipulator.SetScale(12);
+            this.vehicleLeopardI.Instances[1].Manipulator.SetScale(12);
+            this.vehicleLeopardI.Instances[2].Manipulator.SetScale(12);
+            this.vehicleLeopardI.Instances[3].Manipulator.SetScale(12);
         }
 
         public override void Update(GameTime gameTime)

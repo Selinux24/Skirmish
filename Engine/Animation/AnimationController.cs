@@ -117,13 +117,20 @@ namespace Engine.Animation
         /// <param name="indices">Clip indices in the skinning data clip list</param>
         public void AddPath(params AnimationPath[] paths)
         {
+            var clonedPaths = new AnimationPath[paths.Length];
+
+            for (int i = 0; i < paths.Length; i++)
+            {
+                clonedPaths[i] = paths[i].Clone();
+            }
+
             if (this.animationPaths.Count > 0)
             {
                 //Adds transitions
-                this.animationPaths[this.animationPaths.Count - 1].ConnectTo(paths[0]);
+                this.animationPaths[this.animationPaths.Count - 1].ConnectTo(clonedPaths[0]);
             }
 
-            this.animationPaths.AddRange(paths);
+            this.animationPaths.AddRange(clonedPaths);
 
             if (this.currentIndex < 0)
             {
@@ -136,14 +143,21 @@ namespace Engine.Animation
         /// <param name="paths">Path list</param>
         public void SetPath(params AnimationPath[] paths)
         {
+            var clonedPaths = new AnimationPath[paths.Length];
+
+            for (int i = 0; i < paths.Length; i++)
+            {
+                clonedPaths[i] = paths[i].Clone();
+            }
+
             if (this.animationPaths.Count > 0)
             {
                 //Adds transitions
-                this.animationPaths[this.animationPaths.Count - 1].ConnectTo(paths[0]);
+                this.animationPaths[this.animationPaths.Count - 1].ConnectTo(clonedPaths[0]);
             }
 
             this.animationPaths.Clear();
-            this.animationPaths.AddRange(paths);
+            this.animationPaths.AddRange(clonedPaths);
 
             if (this.currentIndex < 0)
             {

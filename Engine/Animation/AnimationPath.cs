@@ -203,5 +203,28 @@ namespace Engine.Animation
         {
             return this.items[this.currentIndex];
         }
+
+        /// <summary>
+        /// Creates a copy of the current path
+        /// </summary>
+        /// <returns>Returns the path copy instance</returns>
+        public AnimationPath Clone()
+        {
+            List<AnimationPathItem> clonedItems = new List<AnimationPathItem>();
+
+            foreach (var item in this.items)
+            {
+                clonedItems.Add(item.Clone());
+            }
+
+            return new AnimationPath()
+            {
+                items = clonedItems,
+                currentIndex = this.currentIndex,
+                ItemTime = this.ItemTime,
+                Playing = this.Playing,
+                Time = this.Time,
+            };
+        }
     }
 }

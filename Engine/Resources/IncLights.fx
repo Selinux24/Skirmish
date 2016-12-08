@@ -128,8 +128,9 @@ struct SpotLight
 	float Intensity;
 };
 
-static const uint sampleCount = 16;
-static float2 poissonDisk[sampleCount] =
+static const uint MaxSampleCount = 16;
+
+static float2 poissonDisk[MaxSampleCount] =
 {
 	float2(0.2770745f, 0.6951455f),
 	float2(0.1874257f, -0.02561589f),
@@ -181,42 +182,51 @@ float CalcSphericAttenuation(float radius, float intensity, float maxDistance, f
 }
 float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shadowMapStatic, Texture2D shadowMapDynamic)
 {
-	float shadow = 0.0f;
+	uint samples = 4;
+	float factor = 0.8f;
+	float bias = 0.0001f;
+	float poissonFactor = 700.0f;
 
     float2 tex = 0.0f;
     tex.x = (+lightPosition.x / lightPosition.w * 0.5f) + 0.5f;
     tex.y = (-lightPosition.y / lightPosition.w * 0.5f) + 0.5f;
-	float z = (lightPosition.z / lightPosition.w) -  0.001f;
+	float z = (lightPosition.z / lightPosition.w) -  bias;
 
-	for (uint i = 0; i < sampleCount; i++)
+	float shadow = 0.0f;
+
+	[unroll]
+	for (uint i = 0; i < samples; i++)
 	{
-		float2 stc = tex + poissonDisk[i] / 700.0f;
+		float2 stc = tex + poissonDisk[i] / poissonFactor;
 
+		[flatten]
 		if(shadows == 1)
 		{
 			if (!shadowMapStatic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
 			{
-				shadow += 0.8f;
+				shadow += factor;
 			}
 		}
+		[flatten]
 		if(shadows == 2)
 		{
 			if (!shadowMapDynamic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
 			{
-				shadow += 0.8f;
+				shadow += factor;
 			}
 		}
+		[flatten]
 		if(shadows == 3)
 		{
 			if (!shadowMapStatic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z) ||
 				!shadowMapDynamic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
 			{
-				shadow += 0.8f;
+				shadow += factor;
 			}
 		}
 	}
 
-    return 1.0f - (shadow / sampleCount);
+    return 1.0f - (shadow / samples);
 }
 float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRange, float4 fogColor)
 {
