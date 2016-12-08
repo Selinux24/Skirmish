@@ -151,12 +151,18 @@ namespace SceneTest
                 });
 
             this.buildingObelisk.Manipulator.SetPosition(0, 0, 0);
+            this.buildingObelisk.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.buildingObelisk.Manipulator.SetScale(10);
 
             this.buildingObeliskI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, 0, 0);
             this.buildingObeliskI.Instances[1].Manipulator.SetPosition(spaceSize * 2, 0, 0);
             this.buildingObeliskI.Instances[2].Manipulator.SetPosition(0, 0, -spaceSize * 2);
             this.buildingObeliskI.Instances[3].Manipulator.SetPosition(0, 0, spaceSize * 2);
+
+            this.buildingObeliskI.Instances[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
+            this.buildingObeliskI.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
+            this.buildingObeliskI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
+            this.buildingObeliskI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
             this.buildingObeliskI.Instances[0].Manipulator.SetScale(10);
             this.buildingObeliskI.Instances[1].Manipulator.SetScale(10);
@@ -191,6 +197,7 @@ namespace SceneTest
             p1.AddLoop("idle1");
 
             this.characterSoldier.Manipulator.SetPosition(s, 0, -s);
+            this.characterSoldier.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.characterSoldier.AnimationController.AddPath(p1);
             this.characterSoldier.AnimationController.Start(0);
 
@@ -198,6 +205,11 @@ namespace SceneTest
             this.characterSoldierI.Instances[1].Manipulator.SetPosition(spaceSize * 2 + s, 0, -s);
             this.characterSoldierI.Instances[2].Manipulator.SetPosition(s, 0, -spaceSize * 2 - s);
             this.characterSoldierI.Instances[3].Manipulator.SetPosition(s, 0, spaceSize * 2 - s);
+
+            this.characterSoldierI.Instances[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
+            this.characterSoldierI.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
+            this.characterSoldierI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
+            this.characterSoldierI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
             this.characterSoldierI.Instances[0].AnimationController.AddPath(p1);
             this.characterSoldierI.Instances[1].AnimationController.AddPath(p1);
@@ -233,12 +245,18 @@ namespace SceneTest
             float s = -spaceSize / 2f;
 
             this.vehicleLeopard.Manipulator.SetPosition(s, 0, 0);
+            this.vehicleLeopard.Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             this.vehicleLeopard.Manipulator.SetScale(12);
 
             this.vehicleLeopardI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, 0, -spaceSize * 2);
             this.vehicleLeopardI.Instances[1].Manipulator.SetPosition(spaceSize * 2, 0, -spaceSize * 2);
             this.vehicleLeopardI.Instances[2].Manipulator.SetPosition(-spaceSize * 2, 0, spaceSize * 2);
             this.vehicleLeopardI.Instances[3].Manipulator.SetPosition(spaceSize * 2, 0, spaceSize * 2);
+
+            this.vehicleLeopardI.Instances[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
+            this.vehicleLeopardI.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
+            this.vehicleLeopardI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
+            this.vehicleLeopardI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
             this.vehicleLeopardI.Instances[0].Manipulator.SetScale(12);
             this.vehicleLeopardI.Instances[1].Manipulator.SetScale(12);

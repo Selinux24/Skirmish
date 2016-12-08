@@ -370,7 +370,7 @@ PSVertexPositionNormalTexture VSPositionNormalTexture(VSVertexPositionNormalText
 
     output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
     output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
-	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
+	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorld));
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
     
@@ -411,7 +411,7 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNor
 	
 	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
 	output.positionWorld = mul(positionL, gWorld).xyz;
-	output.normalWorld = normalize(mul(normalL.xyz, (float3x3)gWorldInverse));
+	output.normalWorld = normalize(mul(normalL.xyz, (float3x3)gWorld));
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
 	
@@ -488,7 +488,7 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangent(VSVertexPosi
 
     output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
     output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
-	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorldInverse));
+	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorld));
 	output.tangentWorld = mul(float4(input.tangentLocal, 0), gWorld).xyz;
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
@@ -535,7 +535,7 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinned(VSVer
 
 	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
 	output.positionWorld = mul(positionL, gWorld).xyz;
-	output.normalWorld = normalize(mul(normalL.xyz, (float3x3)gWorldInverse));
+	output.normalWorld = normalize(mul(normalL.xyz, (float3x3)gWorld));
 	output.tangentWorld = mul(tangentL, gWorld).xyz;
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
