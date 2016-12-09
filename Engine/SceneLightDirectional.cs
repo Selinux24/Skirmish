@@ -16,10 +16,10 @@ namespace Engine
             {
                 return new SceneLightDirectional()
                 {
-                    Name = "Primary",
-                    DiffuseColor = Color.White,
-                    SpecularColor = Color.White,
-                    Direction = Vector3.Normalize(new Vector3(1, -1, 1)),
+                    Name = "Key light",
+                    Direction = new Vector3(-0.5265408f, -0.5735765f, -0.6275069f),
+                    DiffuseColor = new Color4(1, 0.9607844f, 0.8078432f, 1f),
+                    SpecularColor = new Color4(1, 0.9607844f, 0.8078432f, 1f),
                     CastShadow = true,
                     Enabled = true,
                 };
@@ -34,10 +34,10 @@ namespace Engine
             {
                 return new SceneLightDirectional()
                 {
-                    Name = "Secondary",
-                    DiffuseColor = new Color4(0.2f, 0.2f, 0.0f, 1.0f),
-                    SpecularColor = new Color4(0.1f, 0.1f, 0.2f, 1.0f),
-                    Direction = Vector3.Normalize(new Vector3(-1, -1, 1)),
+                    Name = "Fill light",
+                    Direction = new Vector3(0.7198464f, 0.3420201f, 0.6040227f),
+                    DiffuseColor = new Color4(0.9647059f, 0.7607844f, 0.4078432f, 1f),
+                    SpecularColor = new Color4(0, 0, 0, 0),
                     CastShadow = false,
                     Enabled = true,
                 };
@@ -52,10 +52,10 @@ namespace Engine
             {
                 return new SceneLightDirectional()
                 {
-                    Name = "Tertiary",
-                    DiffuseColor = Color.White * 0.20f,
-                    SpecularColor = Color.Black,
-                    Direction = Vector3.Normalize(new Vector3(-1, -1, -1)),
+                    Name = "Back light",
+                    Direction = new Vector3(0.4545195f, -0.7660444f, 0.4545195f),
+                    DiffuseColor = new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
+                    SpecularColor = new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
                     CastShadow = false,
                     Enabled = true,
                 };

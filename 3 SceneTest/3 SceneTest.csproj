@@ -139,28 +139,32 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="TestScene.cs" />
+    <Compile Include="SceneMaterials.cs" />
+    <Compile Include="SceneTextures.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Content Include="Resources\Buildings\Obelisk\obelisk.xml">
+    <Content Include="SceneMaterials\floor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Buildings\Obelisk\specular.dds">
+    <Content Include="SceneTextures\Buildings\Obelisk\obelisk.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Character\Soldier\soldier0.jpg">
+    <Content Include="SceneTextures\Buildings\Obelisk\specular.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Character\Soldier\Soldier1.jpg">
+    <Content Include="SceneTextures\Character\Soldier\soldier0.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Character\Soldier\soldier_anim2.xml">
+    <Content Include="SceneTextures\Character\Soldier\Soldier1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Vehicles\Leopard\Leopard.bmp">
+    <Content Include="SceneTextures\Character\Soldier\soldier_anim2.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Vehicles\Leopard\Leopard.xml">
+    <Content Include="SceneTextures\Vehicles\Leopard\Leopard.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTextures\Vehicles\Leopard\Leopard.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -184,25 +188,25 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Content Include="Resources\Buildings\Obelisk\obelisk.dae">
+    <Content Include="SceneTextures\Buildings\Obelisk\obelisk.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Character\Soldier\soldier_anim2.dae">
+    <Content Include="SceneTextures\Character\Soldier\soldier_anim2.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Vehicles\Leopard\Leopard_1.dae">
+    <Content Include="SceneTextures\Vehicles\Leopard\Leopard_1.dae">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Vehicles\Leopard\Leopard_2.dae">
+    <Content Include="SceneTextures\Vehicles\Leopard\Leopard_2.dae">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Vehicles\Leopard\Leopard_3.dae">
+    <Content Include="SceneTextures\Vehicles\Leopard\Leopard_3.dae">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Vehicles\Leopard\Leopard_4.dae">
+    <Content Include="SceneTextures\Vehicles\Leopard\Leopard_4.dae">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -215,19 +219,19 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <Content Include="Resources\Buildings\Obelisk\diffus.dds">
+    <Content Include="SceneTextures\Buildings\Obelisk\diffus.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Buildings\Obelisk\normal.dds">
+    <Content Include="SceneTextures\Buildings\Obelisk\normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds">
+    <Content Include="SceneTextures\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Floors\Asphalt\d_road_asphalt_stripes_normal.dds">
+    <Content Include="SceneTextures\Floors\Asphalt\d_road_asphalt_stripes_normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
+    <Content Include="SceneTextures\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

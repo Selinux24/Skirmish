@@ -234,17 +234,16 @@ float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRan
 
 	return lerp(litColor, fogColor, fogLerp);
 }
-float3 Blinn(float3 N, float3 L, float3 V, float3 diffuseColor, float3 specularColor, float shininess)
-{
-	float3 H = normalize(V + L);
-	float4 lighting = lit(dot(L, N), dot(H, N), shininess);
-	return diffuseColor * lighting.y + specularColor * lighting.z;
-}
 
 void Phong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, float3 N, float3 V, float3 R, out float4 diffuse, out float4 specular)
 {
 	diffuse = (max(0, dot(L, N))) * lDiffuse;
-	specular = (2 * pow(max(0, dot(R, V)), lShininess)) * lSpecular;
+	specular = (pow(max(0, dot(R, V)), lShininess)) * lSpecular;
+}
+void BlinnPhong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, float3 N, float3 V, float3 R, out float4 diffuse, out float4 specular)
+{
+	diffuse = (max(0, dot(L, N))) * lDiffuse;
+	specular = (pow(max(0, dot(N, normalize(L + V))), lShininess)) * lSpecular;
 }
 
 float4 ComputeLights(
@@ -302,7 +301,7 @@ float4 ComputeLights(
 			cShadowFactor = CalcShadowFactor(sLightPosition, shadows, shadowMapStatic, shadowMapDynamic);
 		}
 
-		Phong(dirLights[i].Diffuse, dirLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
+		BlinnPhong(dirLights[i].Diffuse, dirLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
 		lDiffuse += cDiffuse * cShadowFactor;
 		lSpecular += cSpecular * cShadowFactor;
 	}
@@ -315,7 +314,7 @@ float4 ComputeLights(
 		V = normalize(ePosition - pPosition);
 		R = 2 * dot(L, pNormal) * pNormal - L;
 
-		Phong(pointLights[i].Diffuse, pointLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
+		BlinnPhong(pointLights[i].Diffuse, pointLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
 
 		attenuation = CalcSphericAttenuation(1, pointLights[i].Intensity, pointLights[i].Radius, D);
 
@@ -332,7 +331,7 @@ float4 ComputeLights(
 		R = 2 * dot(L, pNormal) * pNormal - L;
 		S = acos(dot(L, spotLights[i].Direction));
 
-		Phong(spotLights[i].Diffuse, spotLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
+		BlinnPhong(spotLights[i].Diffuse, spotLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
 		
 		attenuation = CalcSphericAttenuation(1, spotLights[i].Intensity, pointLights[i].Radius, D);
 		attenuation *= (1.0f - (1.0f - S) * 1.0f / (1.0f - spotLights[i].Angle));
