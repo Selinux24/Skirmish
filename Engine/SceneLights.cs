@@ -28,6 +28,7 @@ namespace Engine
         {
             return new SceneLights()
             {
+                GlobalAmbientLight = 0.1f,
                 DirectionalLights = new[]
                 {
                     SceneLightDirectional.Primary,
@@ -121,6 +122,10 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Global ambient light
+        /// </summary>
+        public float GlobalAmbientLight { get; set; }
         /// <summary>
         /// Fog start value
         /// </summary>

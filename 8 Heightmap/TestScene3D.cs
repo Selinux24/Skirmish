@@ -644,6 +644,15 @@ namespace HeightmapTest
                 this.spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
             }
 
+            if (this.Game.Input.KeyPressed(Keys.J))
+            {
+                this.Lights.GlobalAmbientLight = Math.Min(10, this.Lights.GlobalAmbientLight + gameTime.ElapsedSeconds);
+            }
+            if (this.Game.Input.KeyPressed(Keys.K))
+            {
+                this.Lights.GlobalAmbientLight = Math.Max(0, this.Lights.GlobalAmbientLight - gameTime.ElapsedSeconds);
+            }
+
             #endregion
 
             #region Debug

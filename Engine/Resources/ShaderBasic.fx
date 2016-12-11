@@ -11,6 +11,7 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorldViewProjection;
 	float4x4 gLightViewProjection;
 	float3 gEyePositionWorld;
+	float gGlobalAmbient;
 	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
@@ -214,7 +215,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
 
 	return ComputeLights(
-		0.1f, 
+		gGlobalAmbient, 
 		gDirLights,
 		gPointLights, 
 		gSpotLights,
@@ -455,7 +456,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
 
 	return ComputeLights(
-		0.1f, 
+		gGlobalAmbient, 
 		gDirLights,
 		gPointLights, 
 		gSpotLights,
@@ -588,7 +589,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
 
 	return ComputeLights(
-		0.1f, 
+		gGlobalAmbient, 
 		gDirLights,
 		gPointLights, 
 		gSpotLights,

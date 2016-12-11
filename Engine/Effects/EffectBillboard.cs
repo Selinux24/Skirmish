@@ -44,6 +44,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectVariable spotLights = null;
         /// <summary>
+        /// Global ambient light effect variable;
+        /// </summary>
+        private EffectScalarVariable globalAmbient;
+        /// <summary>
         /// Light count effect variable
         /// </summary>
         private EffectVectorVariable lightCount = null;
@@ -198,6 +202,20 @@ namespace Engine.Effects
 
                     this.spotLights.SetRawValue(ds, default(BufferSpotLight).Stride * BufferSpotLight.MAX);
                 }
+            }
+        }
+        /// <summary>
+        /// Global almbient light intensity
+        /// </summary>
+        protected float GlobalAmbient
+        {
+            get
+            {
+                return this.globalAmbient.GetFloat();
+            }
+            set
+            {
+                this.globalAmbient.Set(value);
             }
         }
         /// <summary>
@@ -541,6 +559,7 @@ namespace Engine.Effects
             this.dirLights = this.Effect.GetVariableByName("gDirLights");
             this.pointLights = this.Effect.GetVariableByName("gPointLights");
             this.spotLights = this.Effect.GetVariableByName("gSpotLights");
+            this.globalAmbient = this.Effect.GetVariableByName("gGlobalAmbient").AsScalar();
             this.lightCount = this.Effect.GetVariableByName("gLightCount").AsVector();
             this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
             this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
@@ -677,6 +696,7 @@ namespace Engine.Effects
             this.WorldViewProjection = world * viewProjection;
             this.EyePositionWorld = eyePositionWorld;
 
+            var globalAmbient = 0f;
             var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
             var bPointLights = new BufferPointLight[BufferPointLight.MAX];
             var bSpotLights = new BufferSpotLight[BufferSpotLight.MAX];
@@ -684,6 +704,8 @@ namespace Engine.Effects
 
             if (lights != null)
             {
+                globalAmbient = lights.GlobalAmbientLight;
+
                 var dirLights = lights.GetVisibleDirectionalLights();
                 for (int i = 0; i < Math.Min(dirLights.Length, BufferDirectionalLight.MAX); i++)
                 {
@@ -727,6 +749,7 @@ namespace Engine.Effects
                 this.ShadowMaps = 0;
             }
 
+            this.GlobalAmbient = globalAmbient;
             this.DirLights = bDirLights;
             this.PointLights = bPointLights;
             this.SpotLights = bSpotLights;

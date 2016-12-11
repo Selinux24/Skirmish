@@ -7,6 +7,7 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorldViewProjection;
 	float4x4 gLightViewProjection;
 	float3 gEyePositionWorld;
+	float gGlobalAmbient;
 	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
@@ -181,7 +182,7 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
 
 	float4 litColor = ComputeLights(
-		0.1f, 
+		gGlobalAmbient, 
 		gDirLights,
 		gPointLights, 
 		gSpotLights,
