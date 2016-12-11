@@ -2,6 +2,8 @@
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Heightmap description
     /// </summary>
@@ -61,6 +63,66 @@ namespace Engine
             /// </summary>
             public float Proportion = 0f;
         }
+        /// <summary>
+        /// Material description
+        /// </summary>
+        public class MaterialDescription
+        {
+            /// <summary>
+            /// Deafault terrain material
+            /// </summary>
+            public static MaterialDescription Default
+            {
+                get
+                {
+                    return new MaterialDescription()
+                    {
+                        EmissionColor = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
+                        AmbientColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                        DiffuseColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                        SpecularColor = new Color4(0.1f, 0.1f, 0.1f, 1.0f),
+                        Shininess = 10.0f,
+                    };
+                }
+            }
+
+            /// <summary>
+            /// Emission color
+            /// </summary>
+            public Color4 EmissionColor { get; set; }
+            /// <summary>
+            /// Ambient color
+            /// </summary>
+            public Color4 AmbientColor { get; set; }
+            /// <summary>
+            /// Diffuse color
+            /// </summary>
+            public Color4 DiffuseColor { get; set; }
+            /// <summary>
+            /// Specular color
+            /// </summary>
+            public Color4 SpecularColor { get; set; }
+            /// <summary>
+            /// Shininess factor
+            /// </summary>
+            public float Shininess { get; set; }
+
+            /// <summary>
+            /// Get material from description
+            /// </summary>
+            /// <returns>Returns the generated material from the description</returns>
+            public Material GetMaterial()
+            {
+                return new Material()
+                {
+                    EmissiveColor = this.EmissionColor,
+                    AmbientColor = this.AmbientColor,
+                    DiffuseColor = this.DiffuseColor,
+                    SpecularColor = this.SpecularColor,
+                    Shininess = this.Shininess,
+                };
+            }
+        }
 
         /// <summary>
         /// Content path
@@ -85,6 +147,10 @@ namespace Engine
         /// <summary>
         /// Textures
         /// </summary>
-        public TexturesDescription Textures = null;
+        public TexturesDescription Textures = new TexturesDescription();
+        /// <summary>
+        /// Terrain material
+        /// </summary>
+        public MaterialDescription Material = MaterialDescription.Default;
     }
 }

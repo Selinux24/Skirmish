@@ -93,23 +93,13 @@ namespace Engine
         {
             if (this.Light != null)
             {
-                this.glowSprite.Update(context);
-
-                if (this.flares != null && this.flares.Length > 0)
-                {
-                    for (int i = 0; i < this.flares.Length; i++)
-                    {
-                        this.flares[i].FlareSprite.Update(context);
-                    }
-                }
-
                 // Set view translation to Zero to simulate infinite
                 Matrix infiniteView = context.View;
                 infiniteView.TranslationVector = Vector3.Zero;
 
                 // Project the light position into 2D screen space.
                 Vector3 projectedPosition = this.Game.Graphics.Viewport.Project(
-                    -this.Light.Direction,
+                    -this.Light.Direction * (1f + context.NearPlaneDistance), //Move position into near and far plane projection bounds
                     context.Projection,
                     infiniteView,
                     Matrix.Identity);
@@ -123,6 +113,16 @@ namespace Engine
                 {
                     this.lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
                     this.lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
+
+                    this.glowSprite.Update(context);
+
+                    if (this.flares != null && this.flares.Length > 0)
+                    {
+                        for (int i = 0; i < this.flares.Length; i++)
+                        {
+                            this.flares[i].FlareSprite.Update(context);
+                        }
+                    }
 
                     this.drawFlares = true;
                 }

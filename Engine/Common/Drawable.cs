@@ -164,6 +164,14 @@ namespace Engine.Common
         /// </summary>
         public Matrix Projection;
         /// <summary>
+        /// Projection near plane distance
+        /// </summary>
+        public float NearPlaneDistance;
+        /// <summary>
+        /// Projection far plane distance
+        /// </summary>
+        public float FarPlaneDistance;
+        /// <summary>
         /// View * projection matrix
         /// </summary>
         public Matrix ViewProjection;

@@ -621,7 +621,6 @@ namespace Engine.PathFinding.NavMesh
         private void BuildPolyDetail(Vector3[] polyMeshVerts, int numMeshVerts, float sampleDist, float sampleMaxError, CompactHeightField compactField, HeightFieldPatch hp, List<Vector3> verts, List<TriangleData> tris, List<EdgeInfo> edges, List<SamplingData> samples)
         {
             const int MAX_VERTS = 127;
-            const int MAX_TRIS = 255;
             const int MAX_VERTS_PER_EDGE = 32;
             Vector3[] edge = new Vector3[MAX_VERTS_PER_EDGE + 1];
             List<int> hull = new List<int>(MAX_VERTS);

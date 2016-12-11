@@ -16,6 +16,8 @@ namespace SceneTest
         private TextDrawer title = null;
         private TextDrawer runtime = null;
 
+        private LensFlare lensFlare = null;
+
         private Model floor = null;
 
         public SceneMaterials(Game game)
@@ -38,6 +40,7 @@ namespace SceneTest
             GameEnvironment.Background = Color.CornflowerBlue;
 
             this.InitializeTextBoxes();
+            this.InitializeSkyEffects();
             this.InitializeFloor();
             this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10));
             this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10));
@@ -55,6 +58,31 @@ namespace SceneTest
 
             this.title.Position = Vector2.Zero;
             this.runtime.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
+        }
+        private void InitializeSkyEffects()
+        {
+            this.lensFlare = this.AddLensFlare(new LensFlareDescription()
+            {
+                ContentPath = @"Common/lensFlare",
+                GlowTexture = "lfGlow.png",
+                Flares = new[]
+                {
+                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
+
+                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
+                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
+                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
+
+                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
+                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
+                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
+                }
+            });
+
+            this.lensFlare.Light = this.Lights.DirectionalLights[0];
         }
         private void InitializeFloor()
         {

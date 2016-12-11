@@ -252,6 +252,8 @@ namespace Engine
             this.UpdateContext.World = scene.World;
             this.UpdateContext.View = scene.Camera.View;
             this.UpdateContext.Projection = scene.Camera.Projection;
+            this.UpdateContext.NearPlaneDistance = scene.Camera.NearPlaneDistance;
+            this.UpdateContext.FarPlaneDistance = scene.Camera.FarPlaneDistance;
             this.UpdateContext.ViewProjection = viewProj;
             this.UpdateContext.Frustum = new BoundingFrustum(viewProj);
             this.UpdateContext.EyePosition = scene.Camera.Position;

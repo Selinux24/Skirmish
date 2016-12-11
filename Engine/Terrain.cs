@@ -51,6 +51,10 @@ namespace Engine
             public DrawContext BaseContext;
 
             /// <summary>
+            /// Material
+            /// </summary>
+            public Material Material;
+            /// <summary>
             /// Normal map textures for terrain
             /// </summary>
             public ShaderResourceView TerrainNormalMaps;
@@ -604,7 +608,7 @@ namespace Engine
                     if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
                     {
                         effect.UpdatePerObject(
-                            Material.Default,
+                            context.Material,
                             context.TerrainNormalMaps,
                             context.TerrainSpecularMaps,
                             context.UseAlphaMap,
@@ -619,7 +623,7 @@ namespace Engine
                     else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
                     {
                         effect.UpdatePerObject(
-                            Material.Default,
+                            context.Material,
                             context.TerrainNormalMaps,
                             context.TerrainSpecularMaps,
                             context.UseAlphaMap,
@@ -1226,6 +1230,10 @@ namespace Engine
         /// </summary>
         private TerrainDrawContext drawContext = null;
         /// <summary>
+        /// Terrain material
+        /// </summary>
+        private Material terrainMaterial;
+        /// <summary>
         /// Terrain low res textures
         /// </summary>
         private ShaderResourceView terrainTexturesLR = null;
@@ -1310,6 +1318,8 @@ namespace Engine
             {
                 string contentPath = Path.Combine(this.HeightmapDescription.ContentPath, this.HeightmapDescription.Textures.ContentPath);
 
+                this.terrainMaterial = this.HeightmapDescription.Material != null ? this.HeightmapDescription.Material.GetMaterial() : Material.Default;
+
                 ImageContent normalMapTextures = new ImageContent()
                 {
                     Streams = ContentManager.FindContent(contentPath, this.HeightmapDescription.Textures.NormalMaps),
@@ -1393,6 +1403,8 @@ namespace Engine
             //Initialize draw context
             this.drawContext = new TerrainDrawContext()
             {
+                Material = this.terrainMaterial,
+
                 TerrainNormalMaps = this.terrainNormalMaps,
                 TerrainSpecularMaps = this.terrainSpecularMaps,
 

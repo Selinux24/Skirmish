@@ -69,10 +69,6 @@ namespace HeightmapTest
             this.Lights.FogStart = 0;
             this.Lights.FogRange = 0;
 
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = true;
-            this.Lights.DirectionalLights[2].Enabled = true;
-
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
 
@@ -254,6 +250,7 @@ namespace HeightmapTest
 
                         Proportion = 0.25f,
                     },
+                    Material = HeightmapDescription.MaterialDescription.Default,
                 },
                 new GroundDescription()
                 {
