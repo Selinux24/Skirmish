@@ -7,10 +7,11 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorldViewProjection;
 	float4x4 gLightViewProjection;
 	float3 gEyePositionWorld;
-	float gLightCount;
+	float gGlobalAmbient;
 	DirectionalLight gDirLight;
 	PointLight gPointLight;
 	SpotLight gSpotLight;
+	float gLightCount;
 	float gFogStart;
 	float gFogRange;
 	float4 gFogColor;
@@ -88,42 +89,37 @@ PSCombineLightsInput VSCombineLights(VSVertexPositionTexture input)
 
 float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 {
-    float4 tg1 = gTG1Map.SampleLevel(SamplerPoint, input.tex, 0);
     float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, input.tex, 0);
     float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, input.tex, 0);
 
-	float4 color = tg1;
 	float3 normal = tg2.xyz;
 	float3 position = tg3.xyz;
-	float specPower = tg2.w;
-	float specIntensity = tg3.w;
+	float shininess = tg2.w;
 
-	if(length(normal) != 0)
-	{
-		float4 lPosition = mul(float4(position, 1), gLightViewProjection);
-		float3 toEye = normalize(gEyePositionWorld - position);
+	float4 lightPosition = mul(float4(position, 1), gLightViewProjection);
 
-		/*float3 litColor = ComputeDirectionalLight(
-			gDirLight,
-			toEye,
-			color.rgb,
-			position,
-			normal,
-			float3(0,0,0),
-			specIntensity,
-			specPower,
-			lPosition,
-			gShadows,
-			gShadowMapStatic,
-			gShadowMapDynamic);
+	float4 diffuse = 0;
+	float4 specular = 0;
 
-		return float4(litColor, color.a);*/
-		return color;
-	}
-	else
-	{
-		return color / gLightCount;
-	}
+	ComputeDirectionalLight(
+		gDirLight, 
+		shininess,
+		position,
+		normal,
+		gEyePositionWorld,
+		lightPosition,
+		gShadows,
+		gShadowMapStatic,
+		gShadowMapDynamic,
+		diffuse,
+		specular);
+
+	Material k = MaterialDefault();
+
+	diffuse = k.Diffuse * diffuse;
+	specular = k.Specular * specular;
+
+	return diffuse + specular;
 }
 float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 {
@@ -133,31 +129,37 @@ float4 PSPointLight(PSPointLightInput input) : SV_TARGET
 	float4 lPosition = input.positionScreen;
 	float2 tex = 0.5f * (float2(lPosition.x, -lPosition.y) + 1);
 
-    float4 tg1 = gTG1Map.SampleLevel(SamplerPoint, tex, 0);
     float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, tex, 0);
     float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
 
-	float4 color = tg1;
 	float3 normal = tg2.xyz;
 	float3 position = tg3.xyz;
-	float specPower = tg2.w;
-	float specIntensity = tg3.w;
+	float shininess = tg2.w;
 
-	float3 toEye = normalize(gEyePositionWorld - position);
+	float4 lightPosition = mul(float4(position, 1), gLightViewProjection);
 
-	/*float3 litColor = ComputePointLight(
-		gPointLight,
-		toEye,
-		color.rgb,
+	float4 diffuse = 0;
+	float4 specular = 0;
+
+	ComputePointLight(
+		gPointLight, 
+		shininess,
 		position,
 		normal,
-		float3(0,0,0),
-		specIntensity,
-		specPower);
+		gEyePositionWorld,
+		lightPosition,
+		gShadows,
+		gShadowMapStatic,
+		gShadowMapDynamic,
+		diffuse,
+		specular);
 
-	return float4(litColor, color.a);*/
+	Material k = MaterialDefault();
 
-	return color;
+	diffuse = k.Diffuse * diffuse;
+	specular = k.Specular * specular;
+
+	return diffuse + specular;
 }
 float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 {
@@ -167,54 +169,64 @@ float4 PSSpotLight(PSSpotLightInput input) : SV_TARGET
 	float4 lPosition = input.positionScreen;
 	float2 tex = 0.5f * (float2(lPosition.x, -lPosition.y) + 1);
 
-    float4 tg1 = gTG1Map.SampleLevel(SamplerPoint, tex, 0);
     float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, tex, 0);
     float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
 	
-	float4 color = tg1;
 	float3 normal = tg2.xyz;
 	float3 position = tg3.xyz;
-	float specPower = tg2.w;
-	float specIntensity = tg3.w;
+	float shininess = tg2.w;
 
-	float3 toEye = normalize(gEyePositionWorld - position);
+	float4 lightPosition = mul(float4(position, 1), gLightViewProjection);
 
-	/*float3 litColor = ComputeSpotLight(
-		gSpotLight,
-		toEye,
-		color.rgb,
+	float4 diffuse = 0;
+	float4 specular = 0;
+
+	ComputeSpotLight(
+		gSpotLight, 
+		shininess,
 		position,
 		normal,
-		float3(0,0,0),
-		specIntensity,
-		specPower);
+		gEyePositionWorld,
+		lightPosition,
+		gShadows,
+		gShadowMapStatic,
+		gShadowMapDynamic,
+		diffuse,
+		specular);
 
-	return float4(litColor, color.a);*/
+	Material k = MaterialDefault();
 
-	return color;
+	diffuse = k.Diffuse * diffuse;
+	specular = k.Specular * specular;
+
+	return diffuse + specular;
 }
 float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 {
-    float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, input.tex, 0);
-    float4 tg3 = gTG3Map.Sample(SamplerPoint, input.tex);
+    float4 tg1 = gTG1Map.SampleLevel(SamplerPoint, input.tex, 0);
 	float4 lmap = gLightMap.Sample(SamplerPoint, input.tex);
 
-	float3 normal = tg2.xyz;
-	float3 position = tg3.xyz;
-	float4 color = lmap;
+	float4 color = tg1;
+	float4 light = saturate(lmap);
 
-	if(length(normal) != 0)
+	Material k = MaterialDefault();
+
+	float4 emissive = k.Emissive;
+	float4 ambient = k.Ambient * gGlobalAmbient;
+
+	float4 c = (emissive + ambient + light) * color;
+
+	if(gFogRange > 0)
 	{
-		if(gFogRange > 0)
-		{
-			float3 toEyeWorld = gEyePositionWorld - position;
-			float distToEye = length(toEyeWorld);
+		float4 tg3 = gTG3Map.Sample(SamplerPoint, input.tex);
+		float3 position = tg3.xyz;
 
-			color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
-		}
+		float distToEye = length(gEyePositionWorld - position);
+
+		c = ComputeFog(c, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 
-	return color;
+	return c;
 }
 
 technique11 DeferredDirectionalLight

@@ -263,8 +263,8 @@ GBufferPSOutput PSTerrainDeferred(PSVertexTerrain input)
 	float3 normal = n == 0 ? bumpNormalWorld1 : bumpNormalWorld2;
 
 	output.color = color;
-	output.normal = float4(normal, 0); //gMaterial.SpecularPower);
-	output.depth = float4(input.positionWorld, 0); //gMaterial.SpecularIntensity);
+	output.normal = float4(normal, gMaterial.Shininess);
+	output.depth = float4(input.positionWorld, 0);
 
     return output;
 }

@@ -128,6 +128,19 @@ struct SpotLight
 	float Intensity;
 };
 
+Material MaterialDefault()
+{
+	Material mat;
+
+	mat.Emissive = float4(0,0,0,0);
+	mat.Ambient = float4(1,1,1,1);
+	mat.Diffuse = float4(1,1,1,1);
+	mat.Specular = float4(1,1,1,1);
+	mat.Shininess = 10;
+
+	return mat;
+}
+
 static const uint MaxSampleCount = 16;
 
 static float2 poissonDisk[MaxSampleCount] =
@@ -246,6 +259,90 @@ void BlinnPhong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, f
 	specular = (pow(max(0, dot(N, normalize(L + V))), lShininess)) * lSpecular;
 }
 
+void ComputeDirectionalLight(
+	DirectionalLight dirLight,
+	float shininess,
+	float3 pPosition, 
+	float3 pNormal,
+	float3 ePosition,
+	float4 sLightPosition,
+	uint shadows,
+	Texture2D shadowMapStatic,
+	Texture2D shadowMapDynamic, 
+	out float4 diffuse, 
+	out float4 specular)
+{
+	float3 L = normalize(-dirLight.Direction);
+	float3 V = normalize(ePosition - pPosition);
+	float3 R = 2 * dot(L, pNormal) * pNormal - L;
+
+	float cShadowFactor = 1;
+	[flatten]
+	if(dirLight.CastShadow == 1)
+	{
+		cShadowFactor = CalcShadowFactor(sLightPosition, shadows, shadowMapStatic, shadowMapDynamic);
+	}
+
+	BlinnPhong(dirLight.Diffuse, dirLight.Specular, shininess, L, pNormal, V, R, diffuse, specular);
+
+	diffuse *= cShadowFactor;
+	specular *= cShadowFactor;
+}
+
+void ComputePointLight(
+	PointLight pointLight,
+	float shininess,
+	float3 pPosition, 
+	float3 pNormal,
+	float3 ePosition,
+	float4 sLightPosition,
+	uint shadows,
+	Texture2D shadowMapStatic,
+	Texture2D shadowMapDynamic, 
+	out float4 diffuse, 
+	out float4 specular)
+{
+	float D = length(pointLight.Position - pPosition);
+	float3 L = normalize(pointLight.Position - pPosition);
+	float3 V = normalize(ePosition - pPosition);
+	float3 R = 2 * dot(L, pNormal) * pNormal - L;
+
+	BlinnPhong(pointLight.Diffuse, pointLight.Specular, shininess, L, pNormal, V, R, diffuse, specular);
+
+	float attenuation = CalcSphericAttenuation(1, pointLight.Intensity, pointLight.Radius, D);
+
+	diffuse *= attenuation;
+	specular *= attenuation;
+}
+
+void ComputeSpotLight(
+	SpotLight spotLight,
+	float shininess,
+	float3 pPosition, 
+	float3 pNormal,
+	float3 ePosition,
+	float4 sLightPosition,
+	uint shadows,
+	Texture2D shadowMapStatic,
+	Texture2D shadowMapDynamic, 
+	out float4 diffuse, 
+	out float4 specular)
+{
+	float D = length(spotLight.Position - pPosition);
+	float3 L = normalize(spotLight.Position - pPosition);
+	float3 V = normalize(ePosition - pPosition);
+	float3 R = 2 * dot(L, pNormal) * pNormal - L;
+	float S = acos(dot(L, spotLight.Direction));
+
+	BlinnPhong(spotLight.Diffuse, spotLight.Specular, shininess, L, pNormal, V, R, diffuse, specular);
+		
+	float attenuation = CalcSphericAttenuation(1, spotLight.Intensity, spotLight.Intensity, D);
+	attenuation *= (1.0f - (1.0f - S) * 1.0f / (1.0f - spotLight.Angle));
+
+	diffuse *= attenuation;
+	specular *= attenuation;
+}
+
 float4 ComputeLights(
 	float4 Ga, 
 	DirectionalLight dirLights[MAX_LIGHTS_DIRECTIONAL], 
@@ -333,7 +430,7 @@ float4 ComputeLights(
 
 		BlinnPhong(spotLights[i].Diffuse, spotLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
 		
-		attenuation = CalcSphericAttenuation(1, spotLights[i].Intensity, pointLights[i].Radius, D);
+		attenuation = CalcSphericAttenuation(1, spotLights[i].Intensity, spotLights[i].Intensity, D);
 		attenuation *= (1.0f - (1.0f - S) * 1.0f / (1.0f - spotLights[i].Angle));
 
 		lDiffuse += (cDiffuse * attenuation);

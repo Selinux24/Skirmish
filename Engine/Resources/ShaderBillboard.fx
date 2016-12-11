@@ -221,8 +221,8 @@ GBufferPSOutput PSDeferredBillboard(PSVertexBillboard input)
 	float distToEye = length(toEyeWorld);
 
 	output.color = float4(textureColor.xyz, textureColor.a * (1.0f - (distToEye / gEndRadius * 0.5f)));
-	output.normal = float4(input.normalWorld, 0); //gMaterial.SpecularPower);
-	output.depth = float4(input.positionWorld, 0); //gMaterial.SpecularIntensity);
+	output.normal = float4(input.normalWorld, gMaterial.Shininess);
+	output.depth = float4(input.positionWorld, 0);
 
     return output;
 }
