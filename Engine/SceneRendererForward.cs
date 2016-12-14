@@ -274,7 +274,7 @@ namespace Engine
 
                             #endregion
 
-                            this.UpdateShadowMapStatic = false;
+                            this.UpdateShadowMapStatic = true;
                         }
 
                         #region Dynamic shadow map

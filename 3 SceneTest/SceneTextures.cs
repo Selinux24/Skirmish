@@ -28,6 +28,8 @@ namespace SceneTest
         private Model vehicleLeopard = null;
         private ModelInstanced vehicleLeopardI = null;
 
+        private Sun sun = null;
+
         public SceneTextures(Game game)
             : base(game)
         {
@@ -54,7 +56,11 @@ namespace SceneTest
             this.InitializeCharacterSoldier();
             this.InitializeVehiclesLeopard();
 
-            this.SceneVolume = new BoundingSphere(Vector3.Zero, 100f);
+            this.SceneVolume = new BoundingSphere(Vector3.Zero, 150f);
+
+            this.sun = new Sun(this.Game);
+            this.sun.Light = this.Lights.DirectionalLights[0];
+            this.sun.TimeOfDayController.BeginAnimation(360, 10);
         }
 
         private void InitializeTextBoxes()
@@ -304,6 +310,10 @@ namespace SceneTest
             this.UpdateCamera(gameTime, shift, rightBtn);
 
             #endregion
+
+            this.sun.Update(gameTime);
+
+            GameEnvironment.Background = this.sun.TimeOfDayController.SunBandColor;
 
             base.Update(gameTime);
 
