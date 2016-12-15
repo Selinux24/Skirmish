@@ -175,6 +175,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SkyScattering.cs" />
     <Compile Include="Sun.cs" />
     <Compile Include="TimeOfDay.cs" />
     <Compile Include="TransitionDescription.cs" />

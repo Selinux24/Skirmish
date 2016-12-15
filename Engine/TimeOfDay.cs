@@ -114,6 +114,17 @@ namespace Engine
         {
             return (float)(Math.Atan2(Math.Sin(meridianAngle), Math.Cos(meridianAngle) * Math.Sin(lattitude) - Math.Tan(decline) * Math.Cos(lattitude))) + MathUtil.Pi;
         }
+        /// <summary>
+        /// Gets the sun light direction based upon elevation and azimuth angles
+        /// </summary>
+        /// <param name="elevation">Elevation in radians</param>
+        /// <param name="azimuth">Azimuth in radians</param>
+        public static Vector3 CalcLightDirection(float elevation, float azimuth)
+        {
+            Matrix rot = Matrix.RotationYawPitchRoll(azimuth, elevation, 0);
+
+            return Vector3.TransformNormal(Vector3.ForwardLH, rot);
+        }
 
         /// <summary>
         /// Current sun color
@@ -123,6 +134,10 @@ namespace Engine
         /// Current band color
         /// </summary>
         private Color currentBandColor;
+        /// <summary>
+        /// Current light direction
+        /// </summary>
+        private Vector3 currentLightDirection;
 
         /// <summary>
         /// The 0-360 normalized elevation for the previous update.                                            
@@ -250,6 +265,17 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets the ligth direction base upon elevation and azimuth angles
+        /// </summary>
+        public Vector3 LightDirection
+        {
+            get
+            {
+                return this.currentLightDirection;
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public TimeOfDay()
@@ -344,6 +370,8 @@ namespace Engine
 
                 this.NextElevation = normElevation;
             }
+
+            this.currentLightDirection = CalcLightDirection(this.Elevation, this.Azimuth);
         }
         /// <summary>
         /// Updates current sun and band colors with elevation and azimuth states

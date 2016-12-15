@@ -47,12 +47,7 @@ namespace Engine
         /// </summary>
         private void UpdateLight()
         {
-            float yaw = this.TimeOfDayController.Azimuth;
-            float pitch = this.TimeOfDayController.Elevation;
-
-            Matrix rot = Matrix.RotationYawPitchRoll(yaw, pitch, 0);
-
-            Vector3 lightDirection = Vector3.TransformNormal(Vector3.ForwardLH, rot);
+            Vector3 lightDirection = this.TimeOfDayController.LightDirection;
 
             this.Light.Direction = -lightDirection;
             this.Light.DiffuseColor = this.TimeOfDayController.SunColor;
