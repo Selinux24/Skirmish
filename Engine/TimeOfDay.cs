@@ -445,7 +445,11 @@ namespace Engine
                 this.UpdateColors();
             }
         }
-
+        /// <summary>
+        /// Sets time of day
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <param name="update">Sets wheter update internal state or not</param>
         public void SetTimeOfDay(TimeSpan time, bool update = false)
         {
             this.SetTimeOfDay((float)time.TotalDays % 1.0f, update);
@@ -463,14 +467,18 @@ namespace Engine
 
             this.SetTimeOfDay(this.AnimateTime / 360.0f, true);
         }
-
-        public void BeginAnimation(TimeSpan time, float speed)
+        /// <summary>
+        /// Begins animation cycle
+        /// </summary>
+        /// <param name="startTime">Start time</param>
+        /// <param name="speed">Animation speed</param>
+        public void BeginAnimation(TimeSpan startTime, float speed)
         {
-            this.AnimateTime = ((float)time.TotalDays % 1.0f) * 360.0f;
+            this.AnimateTime = ((float)startTime.TotalDays % 1.0f) * 360.0f;
             this.AnimateSpeed = speed;
             this.Animate = true;
 
-            this.SetTimeOfDay(time, true);
+            this.SetTimeOfDay(startTime, true);
         }
     }
 }
