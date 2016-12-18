@@ -355,6 +355,14 @@ struct PSVertexTerrain
     float2 tex1 : TEXCOORD1;
     float4 color : COLOR0;
 };
+struct PSVertexSkyScattering
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float3 direction : DIRECTION;
+	float4 colorR : COLOR0;
+	float4 colorM : COLOR1;
+};
 
 /*
 SHADOW MAPPING

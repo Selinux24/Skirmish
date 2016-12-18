@@ -293,6 +293,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        internal static byte[] ShaderSkyScatteringFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderSkyScatteringFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderSkyScatteringFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderSkyScatteringFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         internal static byte[] ShaderSpriteFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderSpriteFx", resourceCulture);

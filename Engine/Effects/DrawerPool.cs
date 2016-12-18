@@ -57,6 +57,10 @@ namespace Engine.Effects
         /// Deferred lightning effect
         /// </summary>
         public static EffectDeferred EffectDeferred { get; private set; }
+        /// <summary>
+        /// Sky scattering effect
+        /// </summary>
+        public static EffectSkyScattering EffectSkyScattering { get; private set; }
 
         /// <summary>
         /// Initializes pool
@@ -171,6 +175,15 @@ namespace Engine.Effects
             {
                 EffectDeferred = new EffectDeferred(device, Resources.ShaderDeferredFx, true);
             }
+
+            if (Resources.ShaderSkyScatteringFxo != null)
+            {
+                EffectSkyScattering = new EffectSkyScattering(device, Resources.ShaderSkyScatteringFxo, false);
+            }
+            else
+            {
+                EffectSkyScattering = new EffectSkyScattering(device, Resources.ShaderSkyScatteringFx, true);
+            }
         }
         /// <summary>
         /// Dispose of used resources
@@ -188,6 +201,7 @@ namespace Engine.Effects
             Helper.Dispose(EffectShadow);
             Helper.Dispose(EffectGBuffer);
             Helper.Dispose(EffectDeferred);
+            Helper.Dispose(EffectSkyScattering);
         }
     }
 }

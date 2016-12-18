@@ -123,7 +123,7 @@ namespace Engine
         {
             Matrix rot = Matrix.RotationYawPitchRoll(azimuth, elevation, 0);
 
-            return Vector3.TransformNormal(Vector3.ForwardLH, rot);
+            return Vector3.TransformNormal(Vector3.Up, rot);
         }
 
         /// <summary>
@@ -445,6 +445,11 @@ namespace Engine
                 this.UpdateColors();
             }
         }
+
+        public void SetTimeOfDay(TimeSpan time, bool update = false)
+        {
+            this.SetTimeOfDay((float)time.TotalDays % 1.0f, update);
+        }
         /// <summary>
         /// Begins animation cycle
         /// </summary>
@@ -452,22 +457,20 @@ namespace Engine
         /// <param name="speed">Animation speed</param>
         public void BeginAnimation(float startTime, float speed)
         {
-            this.Animate = false;
-
             this.AnimateTime = MathUtil.Clamp(startTime, 0.0f, 360.0f);
+            this.AnimateSpeed = speed;
+            this.Animate = true;
 
-            float current = this.TimeOfDayValue * 360.0f;
-            float target = this.AnimateTime;
-            if (target < current)
-            {
-                target += 360.0f;
-            }
+            this.SetTimeOfDay(this.AnimateTime / 360.0f, true);
+        }
 
-            if (!MathUtil.IsZero(target - current))
-            {
-                this.AnimateSpeed = speed;
-                this.Animate = true;
-            }
+        public void BeginAnimation(TimeSpan time, float speed)
+        {
+            this.AnimateTime = ((float)time.TotalDays % 1.0f) * 360.0f;
+            this.AnimateSpeed = speed;
+            this.Animate = true;
+
+            this.SetTimeOfDay(time, true);
         }
     }
 }

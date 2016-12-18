@@ -423,6 +423,11 @@ namespace Engine
                 MathUtil.WithinEpsilon(a.Y, b.Y, epsilon) &&
                 MathUtil.WithinEpsilon(a.Z, b.Z, epsilon);
         }
+
+        public static Vector3 XYZ(this Vector4 vector)
+        {
+            return new Vector3(vector.X, vector.Y, vector.Z);
+        }
         /// <summary>
         /// Gets next pair of even number, if even
         /// </summary>
@@ -925,7 +930,61 @@ namespace Engine
         {
             return (((i * PRIMEY) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
         }
-
+        /// <summary>
+        /// Gets wheter almost one of the instance attributes is not a number
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <returns>Returns true if almost one of the instance attributes is not a number</returns>
+        public static bool IsNaN(this Vector3 vector)
+        {
+            return float.IsNaN(vector.X) || float.IsNaN(vector.Y) || float.IsNaN(vector.Z);
+        }
+        /// <summary>
+        /// Gets wheter almost one of the instance attributes is not a number
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <returns>Returns true if almost one of the instance attributes is not a number</returns>
+        public static bool IsNaN(this Vector4 vector)
+        {
+            return float.IsNaN(vector.X) || float.IsNaN(vector.Y) || float.IsNaN(vector.Z) || float.IsNaN(vector.W);
+        }
+        /// <summary>
+        /// Gets wheter almost one of the instance attributes is not a number
+        /// </summary>
+        /// <param name="color">Color</param>
+        /// <returns>Returns true if almost one of the instance attributes is not a number</returns>
+        public static bool IsNaN(this Color4 color)
+        {
+            return float.IsNaN(color.Red) || float.IsNaN(color.Green) || float.IsNaN(color.Blue) || float.IsNaN(color.Alpha);
+        }
+        /// <summary>
+        /// Gets wheter almost one of the instance attributes is infinity
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <returns>Returns true if almost one of the instance attributes is infinity</returns>
+        public static bool IsInfinity(this Vector3 vector)
+        {
+            return float.IsInfinity(vector.X) || float.IsInfinity(vector.Y) || float.IsInfinity(vector.Z);
+        }
+        /// <summary>
+        /// Gets wheter almost one of the instance attributes is infinity
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <returns>Returns true if almost one of the instance attributes is infinity</returns>
+        public static bool IsInfinity(this Vector4 vector)
+        {
+            return float.IsInfinity(vector.X) || float.IsInfinity(vector.Y) || float.IsInfinity(vector.Z) || float.IsInfinity(vector.W);
+        }
+        /// <summary>
+        /// Gets wheter almost one of the instance attributes is infinity
+        /// </summary>
+        /// <param name="color">Color</param>
+        /// <returns>Returns true if almost one of the instance attributes is infinity</returns>
+        public static bool IsInfinity(this Color4 color)
+        {
+            return float.IsInfinity(color.Red) || float.IsInfinity(color.Green) || float.IsInfinity(color.Blue) || float.IsInfinity(color.Alpha);
+        }
+        
         /// <summary>
         /// Gets matrix description
         /// </summary>

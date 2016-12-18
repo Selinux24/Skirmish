@@ -161,6 +161,7 @@
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
+    <Compile Include="Effects\EffectSkyScattering.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />
@@ -176,6 +177,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="SkyScattering.cs" />
+    <Compile Include="SkyScatteringDescription.cs" />
     <Compile Include="Sun.cs" />
     <Compile Include="TimeOfDay.cs" />
     <Compile Include="TransitionDescription.cs" />
@@ -436,6 +438,7 @@
     <None Include="app.config" />
     <None Include="Engine.snk" />
     <None Include="packages.config" />
+    <None Include="Resources\ShaderSkyScattering.fx" />
     <None Include="Resources\ShaderCPUParticles.fx" />
     <None Include="Resources\ShaderBasic.fxo" />
     <None Include="Resources\ShaderCPUParticles.fxo" />
@@ -455,6 +458,7 @@
     <None Include="Resources\ShaderCubemap.fx" />
     <None Include="Resources\ShaderGPUParticles.fx" />
     <None Include="Resources\ShaderShadow.fxo" />
+    <None Include="Resources\ShaderSkyScattering.fxo" />
     <None Include="Resources\ShaderSprite.fxo" />
     <None Include="Resources\ShaderTerrain.fxo" />
   </ItemGroup>
