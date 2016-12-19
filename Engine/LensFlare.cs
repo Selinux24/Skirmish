@@ -31,11 +31,6 @@ namespace Engine
         private Vector2 lightProjectedDirection;
 
         /// <summary>
-        /// Directional light who flares
-        /// </summary>
-        public SceneLightDirectional Light { get; set; }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game instance</param>
@@ -91,7 +86,8 @@ namespace Engine
         /// <param name="context">Updating context</param>
         public override void Update(UpdateContext context)
         {
-            if (this.Light != null)
+            var keyLight = context.Lights.KeyLight;
+            if (keyLight != null)
             {
                 // Set view translation to Zero to simulate infinite
                 Matrix infiniteView = context.View;
@@ -99,7 +95,7 @@ namespace Engine
 
                 // Project the light position into 2D screen space.
                 Vector3 projectedPosition = this.Game.Graphics.Viewport.Project(
-                    -this.Light.Direction * (1f + context.NearPlaneDistance), //Move position into near and far plane projection bounds
+                    -keyLight.Direction * (1f + context.NearPlaneDistance), //Move position into near and far plane projection bounds
                     context.Projection,
                     infiniteView,
                     Matrix.Identity);
@@ -146,18 +142,22 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         private void DrawGlow(DrawContext context)
         {
-            Color4 color = this.Light.DiffuseColor;
-            color.Alpha = 0.25f;
+            var keyLight = context.Lights.KeyLight;
+            if (keyLight != null)
+            {
+                Color4 color = keyLight.DiffuseColor;
+                color.Alpha = 0.25f;
 
-            float scale = 50f / this.glowSprite.Width;
+                float scale = 50f / this.glowSprite.Width;
 
-            this.glowSprite.Color = color;
-            this.glowSprite.Manipulator.SetPosition(this.lightProjectedPosition - (this.glowSprite.RelativeCenter * scale));
-            this.glowSprite.Manipulator.SetScale(scale);
+                this.glowSprite.Color = color;
+                this.glowSprite.Manipulator.SetPosition(this.lightProjectedPosition - (this.glowSprite.RelativeCenter * scale));
+                this.glowSprite.Manipulator.SetScale(scale);
 
-            //Draw sprite with alpha
-            this.Game.Graphics.SetBlendAdditive();
-            this.glowSprite.Draw(context);
+                //Draw sprite with alpha
+                this.Game.Graphics.SetBlendAdditive();
+                this.glowSprite.Draw(context);
+            }
         }
         /// <summary>
         /// Draws the flare list sprites

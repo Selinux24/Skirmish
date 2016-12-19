@@ -160,10 +160,6 @@ namespace Engine
         /// </summary>
         protected bool Animate;
         /// <summary>
-        /// Animation time
-        /// </summary>
-        protected float AnimateTime;
-        /// <summary>
         /// Animation speed
         /// </summary>
         protected float AnimateSpeed;
@@ -290,8 +286,7 @@ namespace Engine
             this.Azimuth = 0.0f;
 
             this.Animate = false;
-            this.AnimateTime = 0.0f;
-            this.AnimateSpeed = 0.0f;
+            this.AnimateSpeed = 1.0f;
 
             this.ColorTargets.AddRange(ColorTarget.GetElevationTargets());
         }
@@ -299,36 +294,18 @@ namespace Engine
         /// <summary>
         /// Updates internal state
         /// </summary>
-        /// <param name="elapsedSeconds">Elapsed seconds</param>
-        public void Update(float elapsedSeconds)
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
         {
             if (this.Animate)
             {
-                this.UpdateAnimation(elapsedSeconds);
+                this.TimeOfDayValue += this.AnimateSpeed * gameTime.ElapsedSeconds;
+                this.TimeOfDayValue %= 1f;
             }
 
             this.UpdatePosition();
 
             this.UpdateColors();
-        }
-        /// <summary>
-        /// Updates animation data
-        /// </summary>
-        /// <param name="elapsedSeconds">Elapsed seconds</param>
-        private void UpdateAnimation(float elapsedSeconds)
-        {
-            float current = this.TimeOfDayValue * 360.0f;
-            float next = (current + (this.AnimateSpeed * elapsedSeconds)) % 360.0f;
-
-            // Clamp to make sure we don't pass the target time.
-            if (next >= this.AnimateTime)
-            {
-                next = this.AnimateTime;
-                this.Animate = false;
-            }
-
-            // Set the new time of day.
-            this.TimeOfDayValue = next / 360.0f;
         }
         /// <summary>
         /// Updates elevation and azimuth states
@@ -461,11 +438,10 @@ namespace Engine
         /// <param name="speed">Animation speed</param>
         public void BeginAnimation(float startTime, float speed)
         {
-            this.AnimateTime = MathUtil.Clamp(startTime, 0.0f, 360.0f);
-            this.AnimateSpeed = speed;
+            this.AnimateSpeed = speed * 0.001f;
             this.Animate = true;
 
-            this.SetTimeOfDay(this.AnimateTime / 360.0f, true);
+            this.SetTimeOfDay(startTime / 360.0f, true);
         }
         /// <summary>
         /// Begins animation cycle
@@ -474,11 +450,18 @@ namespace Engine
         /// <param name="speed">Animation speed</param>
         public void BeginAnimation(TimeSpan startTime, float speed)
         {
-            this.AnimateTime = ((float)startTime.TotalDays % 1.0f) * 360.0f;
-            this.AnimateSpeed = speed;
+            this.AnimateSpeed = speed * 0.001f;
             this.Animate = true;
 
             this.SetTimeOfDay(startTime, true);
+        }
+
+        /// <summary>
+        /// Gets the text representation of the internal state
+        /// </summary>
+        public override string ToString()
+        {
+            return string.Format("Azimuth: {0:0.00}; Elevation: {1:0.00}; Sun decline: {2:0.00};", this.AzimuthDegrees, this.ElevationDegrees, this.SunDeclineDegrees);
         }
     }
 }

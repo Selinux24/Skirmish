@@ -187,6 +187,10 @@ namespace Engine.Common
         /// Eye target
         /// </summary>
         public Vector3 EyeTarget;
+        /// <summary>
+        /// Lights
+        /// </summary>
+        public SceneLights Lights;
     }
 
     /// <summary>

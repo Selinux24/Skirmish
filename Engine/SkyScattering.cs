@@ -57,14 +57,6 @@ namespace Engine
         private float sphereOuterRadius;
 
         /// <summary>
-        /// Time of day controller
-        /// </summary>
-        protected TimeOfDay TimeOfDayController = null;
-        /// <summary>
-        /// Scene directional light (the sun light)
-        /// </summary>
-        protected SceneLightDirectional Light;
-        /// <summary>
         /// Rayleigh scattering * 4 * PI
         /// </summary>
         protected float RayleighScattering4PI { get; private set; }
@@ -197,8 +189,6 @@ namespace Engine
         {
             this.Cull = false;
 
-            this.TimeOfDayController = new TimeOfDay();
-
             this.PlanetRadius = description.PlanetRadius;
             this.PlanetAtmosphereRadius = description.PlanetAtmosphereRadius;
 
@@ -232,9 +222,7 @@ namespace Engine
         /// <param name="context">Updating context</param>
         public override void Update(UpdateContext context)
         {
-            this.TimeOfDayController.Update(context.GameTime.ElapsedSeconds);
-
-            this.Light.Direction = this.TimeOfDayController.LightDirection;
+            
         }
         /// <summary>
         /// Draws content
@@ -242,69 +230,48 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            EffectSkyScattering effect = DrawerPool.EffectSkyScattering;
-            EffectTechnique technique = effect.SkyScattering;
-
-            effect.UpdatePerFrame(
-                Matrix.Translation(context.EyePosition),
-                context.ViewProjection,
-                this.PlanetRadius,
-                this.PlanetAtmosphereRadius,
-                this.SphereOuterRadius,
-                this.SphereInnerRadius,
-                this.Brightness,
-                this.RayleighScattering,
-                this.RayleighScattering4PI,
-                this.MieScattering,
-                this.MieScattering4PI,
-                this.InvWaveLength4,
-                this.ScatteringScale,
-                this.RayleighScaleDepth,
-                this.Light.Direction);
-
-            //Sets vertex and index buffer
-            this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-            Counters.IAVertexBuffersSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            Counters.IAPrimitiveTopologySets++;
-
-            for (int p = 0; p < technique.Description.PassCount; p++)
+            var keyLight = context.Lights.KeyLight;
+            if (keyLight != null)
             {
-                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                EffectSkyScattering effect = DrawerPool.EffectSkyScattering;
+                EffectTechnique technique = effect.SkyScattering;
 
-                this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+                effect.UpdatePerFrame(
+                    Matrix.Translation(context.EyePosition),
+                    context.ViewProjection,
+                    this.PlanetRadius,
+                    this.PlanetAtmosphereRadius,
+                    this.SphereOuterRadius,
+                    this.SphereInnerRadius,
+                    this.Brightness,
+                    this.RayleighScattering,
+                    this.RayleighScattering4PI,
+                    this.MieScattering,
+                    this.MieScattering4PI,
+                    this.InvWaveLength4,
+                    this.ScatteringScale,
+                    this.RayleighScaleDepth,
+                    keyLight.Direction);
 
-                Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
-                Counters.TrianglesPerFrame += this.indexCount / 3;
+                //Sets vertex and index buffer
+                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+                Counters.IAVertexBuffersSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
+                Counters.IAIndexBufferSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
+
+                for (int p = 0; p < technique.Description.PassCount; p++)
+                {
+                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+
+                    Counters.DrawCallsPerFrame++;
+                    Counters.InstancesPerFrame++;
+                    Counters.TrianglesPerFrame += this.indexCount / 3;
+                }
             }
-        }
-
-        /// <summary>
-        /// Begins sky animation
-        /// </summary>
-        /// <param name="light">Light used as sun light</param>
-        /// <param name="startTime">Start time</param>
-        /// <param name="speed">Animation speed</param>
-        public void BeginAnimation(SceneLightDirectional light, float startTime, float speed)
-        {
-            this.Light = light;
-
-            this.TimeOfDayController.BeginAnimation(startTime, speed);
-        }
-        /// <summary>
-        /// Begins sky animation
-        /// </summary>
-        /// <param name="light">Light used as sun light</param>
-        /// <param name="startTime">Start time</param>
-        /// <param name="speed">Animation speed</param>
-        public void BeginAnimation(SceneLightDirectional light, TimeSpan startTime, float speed)
-        {
-            this.Light = light;
-
-            this.TimeOfDayController.BeginAnimation(startTime, speed);
         }
 
         /// <summary>

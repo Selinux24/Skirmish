@@ -258,6 +258,7 @@ namespace Engine
             this.UpdateContext.Frustum = new BoundingFrustum(viewProj);
             this.UpdateContext.EyePosition = scene.Camera.Position;
             this.UpdateContext.EyeTarget = scene.Camera.Direction;
+            this.UpdateContext.Lights = scene.Lights;
 
             //Cull lights
             scene.Lights.Cull(this.UpdateContext.Frustum, this.UpdateContext.EyePosition);

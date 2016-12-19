@@ -178,7 +178,6 @@
     </Compile>
     <Compile Include="SkyScattering.cs" />
     <Compile Include="SkyScatteringDescription.cs" />
-    <Compile Include="Sun.cs" />
     <Compile Include="TimeOfDay.cs" />
     <Compile Include="TransitionDescription.cs" />
     <Compile Include="AttachedModelUsesEnum.cs" />

@@ -10,7 +10,7 @@ namespace HeightmapTest
 {
     public class TestScene3D : Scene
     {
-        private const float near = 1f;
+        private const float near = 0.5f;
         private const float far = 1000f;
         private const float fogStart = 0.01f;
         private const float fogRange = 0.50f;
@@ -33,7 +33,7 @@ namespace HeightmapTest
 
         private Cursor cursor;
         private LensFlare lensFlare = null;
-        private Skydom skydom = null;
+        private SkyScattering skydom = null;
         private Terrain terrain = null;
         private LineListDrawer bboxesDrawer = null;
 
@@ -109,47 +109,6 @@ namespace HeightmapTest
             Stopwatch sw = Stopwatch.StartNew();
 
             string loadingText = null;
-
-            #region Lens flare
-
-            this.lensFlare = this.AddLensFlare(new LensFlareDescription()
-            {
-                ContentPath = @"Resources/Scenery/Flare",
-                GlowTexture = "lfGlow.png",
-                Flares = new[]
-                {
-                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
-                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
-
-                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
-                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
-
-                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
-                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
-                }
-            });
-
-            this.lensFlare.Light = this.Lights.DirectionalLights[0];
-
-            #endregion
-
-            #region Skydom
-
-            sw.Restart();
-            this.skydom = this.AddSkydom(new SkydomDescription()
-            {
-                ContentPath = @"Resources/Scenery/Skydom",
-                Radius = far,
-                Texture = "sunset.dds",
-            });
-            sw.Stop();
-            loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
-
-            #endregion
 
             #region Rocks
 
@@ -278,6 +237,40 @@ namespace HeightmapTest
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
+
+            #endregion
+
+            #region Lens flare
+
+            this.lensFlare = this.AddLensFlare(new LensFlareDescription()
+            {
+                ContentPath = @"Resources/Scenery/Flare",
+                GlowTexture = "lfGlow.png",
+                Flares = new[]
+                {
+                    new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
+                    new LensFlareDescription.Flare( 1.5f, 1.5f, new Color( 50, 100,  50), "lfFlare1.png"),
+
+                    new LensFlareDescription.Flare(-0.3f, 0.7f, new Color(200,  50,  50), "lfFlare2.png"),
+                    new LensFlareDescription.Flare( 0.6f, 0.9f, new Color( 50, 100,  50), "lfFlare2.png"),
+                    new LensFlareDescription.Flare( 0.7f, 0.4f, new Color( 50, 200, 200), "lfFlare2.png"),
+
+                    new LensFlareDescription.Flare(-0.7f, 0.7f, new Color( 50, 100,  25), "lfFlare3.png"),
+                    new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
+                    new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
+                }
+            });
+
+            #endregion
+
+            #region Skydom
+
+            sw.Restart();
+            this.skydom = this.AddSkyScattering(new SkyScatteringDescription());
+            sw.Stop();
+            loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
@@ -466,6 +459,8 @@ namespace HeightmapTest
 
             this.Camera.Position = new Vector3(-10, 10, -20);
             this.Camera.Interest = new Vector3(0, 4, 0);
+          
+            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 30, 00), 0.75f);
 
             if (this.playerFlying)
             {
@@ -727,9 +722,10 @@ namespace HeightmapTest
             base.Update(gameTime);
 
             this.help.Text = string.Format(
-                "{0}. Wind {1} {2} - Next {3}",
+                "{0}. Wind {1} {2} - Next {3}; Sun {4}",
                 this.Renderer,
-                this.windDirection, this.windStrength, this.windNextStrength);
+                this.windDirection, this.windStrength, this.windNextStrength,
+                this.TimeOfDay);
 
             this.help2.Text = this.Game.RuntimeText;
         }

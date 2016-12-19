@@ -123,6 +123,36 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Key light
+        /// </summary>
+        public SceneLightDirectional KeyLight
+        {
+            get
+            {
+                return this.DirectionalLights.Length > 0 ? this.DirectionalLights[0] : null;
+            }
+        }
+        /// <summary>
+        /// Back light
+        /// </summary>
+        public SceneLightDirectional BackLight
+        {
+            get
+            {
+                return this.DirectionalLights.Length > 1 ? this.DirectionalLights[1] : null;
+            }
+        }
+        /// <summary>
+        /// Fill light
+        /// </summary>
+        public SceneLightDirectional FillLight
+        {
+            get
+            {
+                return this.DirectionalLights.Length > 2 ? this.DirectionalLights[2] : null;
+            }
+        }
+        /// <summary>
         /// Global ambient light
         /// </summary>
         public float GlobalAmbientLight { get; set; }
@@ -325,6 +355,29 @@ namespace Engine
         public SceneLightSpot[] GetVisibleSpotLights()
         {
             return this.visibleSpots;
+        }
+
+        /// <summary>
+        /// Update directional lights with time of day controller
+        /// </summary>
+        /// <param name="timeOfDay">Time of day</param>
+        public void UpdateLights(TimeOfDay timeOfDay)
+        {
+            var keyLight = this.KeyLight;
+            if (keyLight != null)
+            {
+                //keyLight.DiffuseColor = timeOfDay.SunColor;
+                //keyLight.SpecularColor = timeOfDay.SunBandColor;
+
+                keyLight.Direction = timeOfDay.LightDirection;
+            }
+
+            //var backLight = this.BackLight;
+            //if (backLight != null)
+            //{
+            //    backLight.Direction = -timeOfDay.LightDirection;
+            //    backLight.Direction.Y = -backLight.Direction.Y;
+            //}
         }
     }
 }

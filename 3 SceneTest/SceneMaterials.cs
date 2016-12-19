@@ -81,8 +81,6 @@ namespace SceneTest
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             });
-
-            this.lensFlare.Light = this.Lights.DirectionalLights[0];
         }
         private void InitializeFloor()
         {

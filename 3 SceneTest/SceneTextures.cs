@@ -48,8 +48,6 @@ namespace SceneTest
 
             this.Lights.DirectionalLights[0].CastShadow = true;
 
-            GameEnvironment.Background = Color.CornflowerBlue;
-
             this.InitializeTextBoxes();
             this.InitializeSkyEffects();
             this.InitializeFloorAsphalt();
@@ -57,8 +55,7 @@ namespace SceneTest
             this.InitializeCharacterSoldier();
             this.InitializeVehiclesLeopard();
 
-            this.sky = this.AddSkyScattering(new SkyScatteringDescription());
-            this.sky.BeginAnimation(this.Lights.DirectionalLights[0], new TimeSpan(7, 30, 00), 1);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(7, 30, 00), 5f);
 
             this.SceneVolume = new BoundingSphere(Vector3.Zero, 150f);
         }
@@ -97,7 +94,7 @@ namespace SceneTest
                 }
             });
 
-            this.lensFlare.Light = this.Lights.DirectionalLights[0];
+            this.sky = this.AddSkyScattering(new SkyScatteringDescription());
         }
         private void InitializeFloorAsphalt()
         {

@@ -98,6 +98,10 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Time of day controller
+        /// </summary>
+        public TimeOfDay TimeOfDay { get; set; }
+        /// <summary>
         /// Indicates whether the current scene is active
         /// </summary>
         public bool Active { get; set; }
@@ -157,6 +161,8 @@ namespace Engine
 
             this.Game.Graphics.Resized += new EventHandler(Resized);
 
+            this.TimeOfDay = new TimeOfDay();
+
             this.camera = Camera.CreateFree(
                 new Vector3(0.0f, 0.0f, -10.0f),
                 Vector3.Zero);
@@ -188,6 +194,10 @@ namespace Engine
         public virtual void Update(GameTime gameTime)
         {
             this.camera.Update(gameTime);
+
+            this.TimeOfDay.Update(gameTime);
+
+            this.Lights.UpdateLights(this.TimeOfDay);
 
             this.Renderer.Update(gameTime, this);
 
