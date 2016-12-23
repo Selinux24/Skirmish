@@ -2,7 +2,6 @@
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
-using System.Collections.Generic;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
@@ -233,8 +232,8 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null)
             {
-                EffectSkyScattering effect = DrawerPool.EffectSkyScattering;
-                EffectTechnique technique = effect.SkyScattering;
+                var effect = DrawerPool.EffectSkyScattering;
+                var technique = effect.SkyScattering;
 
                 effect.UpdatePerFrame(
                     Matrix.Translation(context.EyePosition),
@@ -254,6 +253,8 @@ namespace Engine
                     keyLight.Direction);
 
                 //Sets vertex and index buffer
+                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                Counters.IAInputLayoutSets++;
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
                 Counters.IAVertexBuffersSets++;
                 this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
@@ -279,16 +280,15 @@ namespace Engine
         /// </summary>
         private void InitializeBuffers()
         {
-            VertexData[] vData;
+            Vector3[] vData;
             uint[] iData;
-            VertexData.CreateSphere(1, 10, 10, out vData, out iData);
+            GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
 
-            List<VertexPosition> vertices = new List<VertexPosition>();
-            Array.ForEach(vData, v => { vertices.Add(VertexData.CreateVertexPosition(v)); });
+            VertexPosition[] vertices = VertexPosition.Generate(vData);
 
             var indices = Helper.ChangeCoordinate(iData);
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(vertices.ToArray());
+            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(vertices);
             this.vertexBufferBinding = new[]
             {
                 new VertexBufferBinding(this.vertexBuffer, vertices[0].Stride, 0),

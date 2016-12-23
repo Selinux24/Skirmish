@@ -1,14 +1,9 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using Device = SharpDX.Direct3D11.Device;
-using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 
 namespace Engine.Common
 {
-    using Engine.Helpers;
-
     /// <summary>
     /// Vertex helper
     /// </summary>
@@ -342,7 +337,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="v">Helper</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexCPUParticle CreateVertexParticle(VertexData v)
+        public static VertexCPUParticle CreateVertexCPUParticle(VertexData v)
         {
             return new VertexCPUParticle
             {
@@ -924,86 +919,6 @@ namespace Engine.Common
             v = vertList.ToArray();
             i = indexList.ToArray();
         }
-        /// <summary>
-        /// Creates a cone of VertexPositionNormalTextureTangent VertexData
-        /// </summary>
-        /// <param name="radius">The base radius</param>
-        /// <param name="sliceCount">The base slice count</param>
-        /// <param name="height">Cone height</param>
-        /// <param name="v">Result vertices</param>
-        /// <param name="i">Result indices</param>
-        public static void CreateCone(float radius, uint sliceCount, float height, out VertexData[] v, out uint[] i)
-        {
-            List<VertexData> vertList = new List<VertexData>();
-            List<uint> indexList = new List<uint>();
-
-            vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
-                new Vector3(0.0f, 0.0f, 0.0f),
-                new Vector3(0.0f, +1.0f, 0.0f),
-                new Vector3(1.0f, 0.0f, 0.0f),
-                new Vector3(1.0f, 0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f)));
-
-            vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
-                new Vector3(0.0f, -height, 0.0f),
-                new Vector3(0.0f, -1.0f, 0.0f),
-                new Vector3(1.0f, 0.0f, 0.0f),
-                new Vector3(1.0f, 0.0f, 0.0f),
-                new Vector2(0.0f, 0.0f)));
-
-            float thetaStep = MathUtil.TwoPi / (float)sliceCount;
-
-            for (int sl = 0; sl < sliceCount; sl++)
-            {
-                float theta = sl * thetaStep;
-
-                Vector3 position;
-                Vector3 normal;
-                Vector3 tangent;
-                Vector3 binormal;
-                Vector2 texture;
-
-                // spherical to cartesian
-                position.X = radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta);
-                position.Y = -height;
-                position.Z = radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta);
-
-                normal = position;
-                normal.Normalize();
-
-                // Partial derivative of P with respect to theta
-                tangent.X = -radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta);
-                tangent.Y = 0.0f;
-                tangent.Z = +radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta);
-                tangent.Normalize();
-
-                binormal = tangent;
-
-                texture.X = theta / MathUtil.TwoPi;
-                texture.Y = 1f;
-
-                vertList.Add(VertexData.CreateVertexPositionNormalTextureTangent(
-                    position,
-                    normal,
-                    tangent,
-                    binormal,
-                    texture));
-            }
-
-            for (uint index = 0; index < sliceCount; index++)
-            {
-                indexList.Add(0);
-                indexList.Add(index + 2);
-                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
-
-                indexList.Add(1);
-                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
-                indexList.Add(index + 2);
-            }
-
-            v = vertList.ToArray();
-            i = indexList.ToArray();
-        }
 
         /// <summary>
         /// Gets whether specified vertex type is skinned or not
@@ -1079,181 +994,6 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Create vertex buffer from vertices
-        /// </summary>
-        /// <param name="device">Device</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        /// <returns>Returns new buffer</returns>
-        public static Buffer CreateVertexBuffer(Device device, IVertexData[] vertices, bool dynamic)
-        {
-            Buffer buffer = null;
-
-            if (vertices != null && vertices.Length > 0)
-            {
-                if (vertices[0].VertexType == VertexTypes.Billboard)
-                {
-                    buffer = CreateVertexBuffer<VertexBillboard>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.Particle)
-                {
-                    buffer = CreateVertexBuffer<VertexCPUParticle>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.GPUParticle)
-                {
-                    buffer = CreateVertexBuffer<VertexGPUParticle>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.Position)
-                {
-                    buffer = CreateVertexBuffer<VertexPosition>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionColor)
-                {
-                    buffer = CreateVertexBuffer<VertexPositionColor>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
-                {
-                    buffer = CreateVertexBuffer<VertexPositionNormalColor>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionTexture)
-                {
-                    buffer = CreateVertexBuffer<VertexPositionTexture>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
-                {
-                    buffer = CreateVertexBuffer<VertexPositionNormalTexture>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
-                {
-                    buffer = CreateVertexBuffer<VertexPositionNormalTextureTangent>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.Terrain)
-                {
-                    buffer = CreateVertexBuffer<VertexTerrain>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
-                {
-                    buffer = CreateVertexBuffer<VertexSkinnedPosition>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
-                {
-                    buffer = CreateVertexBuffer<VertexSkinnedPositionColor>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
-                {
-                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalColor>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
-                {
-                    buffer = CreateVertexBuffer<VertexSkinnedPositionTexture>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
-                {
-                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalTexture>(device, vertices, dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
-                {
-                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalTextureTangent>(device, vertices, dynamic);
-                }
-                else
-                {
-                    throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
-                }
-            }
-
-            return buffer;
-        }
-        /// <summary>
-        /// Creates a vertex buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Device</param>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="dynamic">Dynamic or Inmutable</param>
-        /// <returns>Returns new buffer</returns>
-        public static Buffer CreateVertexBuffer<T>(Device device, IVertexData[] vertices, bool dynamic) where T : struct, IVertexData
-        {
-            T[] data = Array.ConvertAll((IVertexData[])vertices, v => (T)v);
-
-            if (dynamic)
-            {
-                return device.CreateVertexBufferWrite(data);
-            }
-            else
-            {
-                return device.CreateVertexBufferImmutable(data);
-            }
-        }
-        /// <summary>
-        /// Writes vertex buffer data
-        /// </summary>
-        /// <param name="deviceContext">Graphics context</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="vertices">Vertices</param>
-        public static void WriteVertexBuffer(DeviceContext deviceContext, Buffer buffer, IVertexData[] vertices)
-        {
-            if (vertices[0].VertexType == VertexTypes.Billboard)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexBillboard)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.Position)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPosition)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionColor)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionColor)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalColor)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionTexture)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionTexture)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTexture)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTextureTangent)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.Terrain)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexTerrain)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPosition)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionColor)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalColor)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionTexture)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
-            }
-            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
-            {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
-            }
-            else
-            {
-                throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
-            }
-        }
-        /// <summary>
         /// Converts helpers to vertices
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
@@ -1276,6 +1016,14 @@ namespace Engine.Common
             if (vertexType == VertexTypes.Billboard)
             {
                 Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexBillboard(v)); });
+            }
+            else if (vertexType == VertexTypes.Particle)
+            {
+                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexCPUParticle(v)); });
+            }
+            else if (vertexType == VertexTypes.GPUParticle)
+            {
+                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexGPUParticle(v)); });
             }
             else if (vertexType == VertexTypes.Position)
             {

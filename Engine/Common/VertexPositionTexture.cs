@@ -23,6 +23,25 @@ namespace Engine.Common
                 new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 12, 0, InputClassification.PerVertexData, 0),
             };
         }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="uvs">Uv texture coordinates</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static VertexPositionTexture[] Generate(Vector3[] vertices, Vector2[] uvs)
+        {
+            if (vertices.Length != uvs.Length) throw new ArgumentException("Vertices and uvs must have the same length"); 
+
+            VertexPositionTexture[] res = new VertexPositionTexture[vertices.Length];
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                res[i] = new VertexPositionTexture() { Position = vertices[i], Texture = uvs[i] };
+            }
+
+            return res;
+        }
 
         /// <summary>
         /// Position

@@ -387,7 +387,7 @@ namespace Engine.PathFinding.NavMesh
                         if (i == 0)
                         {
                             float t;
-                            if (GeometryUtil.PointToSegment2DSquared(ref portalApex, ref left, ref right, out t) < 0.001 * 0.001)
+                            if (Intersection.PointToSegment2DSquared(ref portalApex, ref left, ref right, out t) < 0.001 * 0.001)
                             {
                                 continue;
                             }
@@ -600,7 +600,7 @@ namespace Engine.PathFinding.NavMesh
 
                 //append intersection
                 float s, t;
-                if (GeometryUtil.SegmentSegment2D(ref startPos, ref endPos, ref left, ref right, out s, out t))
+                if (Intersection.SegmentSegment2D(ref startPos, ref endPos, ref left, ref right, out s, out t))
                 {
                     Vector3 pt = Vector3.Lerp(left, right, t);
 
@@ -801,7 +801,7 @@ namespace Engine.PathFinding.NavMesh
             }
 
             closest = pos;
-            if (!GeometryUtil.PointToPolygonEdgeSquared(pos, verts, numPolyVerts, edgeDistance, edgeT))
+            if (!Intersection.PointToPolygonEdgeSquared(pos, verts, numPolyVerts, edgeDistance, edgeT))
             {
                 //Point is outside the polygon
                 //Clamp to nearest edge
@@ -865,7 +865,7 @@ namespace Engine.PathFinding.NavMesh
                 }
 
                 float h;
-                if (GeometryUtil.PointToTriangle(pos, va, vb, vc, out h))
+                if (Intersection.PointToTriangle(pos, va, vb, vc, out h))
                 {
                     closest.Y = h;
                     break;

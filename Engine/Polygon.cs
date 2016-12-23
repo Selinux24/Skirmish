@@ -98,7 +98,7 @@ namespace Engine
                 int i12 = i11 == 0 ? points.Length - 1 : i11 - 1;
                 int i13 = i11 == (points.Length - 1) ? 0 : i11 + 1;
 
-                if (GeometryUtil.IsReflex(points[i12], points[i11], points[i13]))
+                if (Intersection.IsReflex(points[i12], points[i11], points[i13]))
                 {
                     numreflex = 1;
                     break;

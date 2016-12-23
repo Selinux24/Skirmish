@@ -27,6 +27,8 @@ using Texture2DDescription = SharpDX.Direct3D11.Texture2DDescription;
 
 namespace Engine.Helpers
 {
+    using Engine.Common;
+
     /// <summary>
     /// Helper methods for graphic resources
     /// </summary>
@@ -718,6 +720,183 @@ namespace Engine.Helpers
             };
 
             return new Texture2D(device, description);
+        }
+
+
+        /// <summary>
+        /// Create vertex buffer from vertices
+        /// </summary>
+        /// <param name="device">Device</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        /// <returns>Returns new buffer</returns>
+        public static Buffer CreateVertexBuffer(this Device device, IVertexData[] vertices, bool dynamic)
+        {
+            Buffer buffer = null;
+
+            if (vertices != null && vertices.Length > 0)
+            {
+                if (vertices[0].VertexType == VertexTypes.Billboard)
+                {
+                    buffer = CreateVertexBuffer<VertexBillboard>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.Particle)
+                {
+                    buffer = CreateVertexBuffer<VertexCPUParticle>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.GPUParticle)
+                {
+                    buffer = CreateVertexBuffer<VertexGPUParticle>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.Position)
+                {
+                    buffer = CreateVertexBuffer<VertexPosition>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionColor)
+                {
+                    buffer = CreateVertexBuffer<VertexPositionColor>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
+                {
+                    buffer = CreateVertexBuffer<VertexPositionNormalColor>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionTexture)
+                {
+                    buffer = CreateVertexBuffer<VertexPositionTexture>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
+                {
+                    buffer = CreateVertexBuffer<VertexPositionNormalTexture>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
+                {
+                    buffer = CreateVertexBuffer<VertexPositionNormalTextureTangent>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.Terrain)
+                {
+                    buffer = CreateVertexBuffer<VertexTerrain>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
+                {
+                    buffer = CreateVertexBuffer<VertexSkinnedPosition>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
+                {
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionColor>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
+                {
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalColor>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
+                {
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionTexture>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
+                {
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalTexture>(device, vertices, dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
+                {
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalTextureTangent>(device, vertices, dynamic);
+                }
+                else
+                {
+                    throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
+                }
+            }
+
+            return buffer;
+        }
+        /// <summary>
+        /// Creates a vertex buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Device</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns new buffer</returns>
+        public static Buffer CreateVertexBuffer<T>(this Device device, IVertexData[] vertices, bool dynamic) where T : struct, IVertexData
+        {
+            T[] data = Array.ConvertAll((IVertexData[])vertices, v => (T)v);
+
+            if (dynamic)
+            {
+                return device.CreateVertexBufferWrite(data);
+            }
+            else
+            {
+                return device.CreateVertexBufferImmutable(data);
+            }
+        }
+        /// <summary>
+        /// Writes vertex buffer data
+        /// </summary>
+        /// <param name="deviceContext">Graphics context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="vertices">Vertices</param>
+        public static void WriteVertexBuffer(this DeviceContext deviceContext, Buffer buffer, IVertexData[] vertices)
+        {
+            if (vertices[0].VertexType == VertexTypes.Billboard)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexBillboard)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.Position)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPosition)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionColor)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionTexture)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTextureTangent)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.Terrain)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexTerrain)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPosition)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
+            {
+                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
+            }
+            else
+            {
+                throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
+            }
         }
     }
 }

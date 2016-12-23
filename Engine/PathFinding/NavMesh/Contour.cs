@@ -174,7 +174,7 @@ namespace Engine.PathFinding.NavMesh
                     //find the maximum deviation
                     while (ci != endi)
                     {
-                        float deviation = GeometryUtil.PointToSegment2DSquared(rawVerts[ci].X, rawVerts[ci].Z, ax, az, bx, bz);
+                        float deviation = Intersection.PointToSegment2DSquared(rawVerts[ci].X, rawVerts[ci].Z, ax, az, bx, bz);
 
                         if (deviation > maxDeviation)
                         {

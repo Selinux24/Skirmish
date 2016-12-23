@@ -750,7 +750,7 @@ namespace Engine.PathFinding.NavMesh
                 verts[i] = this.Verts[poly.Vertices[i]];
             }
 
-            bool inside = GeometryUtil.PointToPolygonEdgeSquared(pos, verts, numPolyVerts, edgeDistance, edgeT);
+            bool inside = Intersection.PointToPolygonEdgeSquared(pos, verts, numPolyVerts, edgeDistance, edgeT);
             if (inside)
             {
                 //Point is inside the polygon
@@ -806,7 +806,7 @@ namespace Engine.PathFinding.NavMesh
                     }
                 }
 
-                if (GeometryUtil.PointToTriangle(pos, v[0], v[1], v[2], out h))
+                if (Intersection.PointToTriangle(pos, v[0], v[1], v[2], out h))
                 {
                     return true;
                 }

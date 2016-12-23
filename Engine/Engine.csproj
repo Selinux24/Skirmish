@@ -160,7 +160,9 @@
     <Compile Include="AnimationClipDescription.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
+    <Compile Include="Common\Intersection.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
+    <Compile Include="Common\VertexData2.cs" />
     <Compile Include="Effects\EffectSkyScattering.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="ParticleManager.cs" />

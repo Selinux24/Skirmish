@@ -855,7 +855,7 @@ namespace Engine
         {
             VertexData[] cv;
             uint[] ci;
-            VertexData.CreateCone(
+            VertexData.CreateSphere(
                 1, 12, 1,
                 out cv,
                 out ci);

@@ -476,16 +476,6 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="textures">Texture list</param>
-        /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateSprite(string contentFolder, string[] textures)
-        {
-            return GenerateSprite(contentFolder, textures, 1, 1, 0, 0);
-        }
-        /// <summary>
-        /// Generate model content for sprite
-        /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="textures">Texture list</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="formWidth">Render form width</param>
@@ -512,92 +502,6 @@ namespace Engine.Content
             {
                 Topology = PrimitiveTopology.TriangleList,
                 VertexType = VertexTypes.PositionTexture,
-                Vertices = verts,
-                Indices = indices,
-                Material = materialName,
-            };
-
-            modelContent.Images.Add(imageName, image);
-            modelContent.Materials.Add(materialName, material);
-            modelContent.Geometry.Add(geoName, materialName, geo);
-
-            return modelContent;
-        }
-        /// <summary>
-        /// Generate model content for cubemap
-        /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="texture">Texture</param>
-        /// <param name="radius">cubemap radius</param>
-        /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateSphere(string contentFolder, string texture, float radius)
-        {
-            ModelContent modelContent = new ModelContent();
-
-            string imageName = "cubeTexture";
-            string materialName = "sphereMaterial";
-            string geoName = "sphereGeometry";
-
-            ImageContent image = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(contentFolder, texture),
-            };
-
-            MaterialContent material = MaterialContent.Default;
-            material.DiffuseTexture = imageName;
-
-            VertexData[] verts = null;
-            uint[] indices = null;
-            VertexData.CreateSphere(radius, 20, 20, out verts, out indices);
-
-            SubMeshContent geo = new SubMeshContent()
-            {
-                Topology = PrimitiveTopology.TriangleList,
-                VertexType = VertexTypes.Position,
-                Vertices = verts,
-                Indices = indices,
-                Material = materialName,
-            };
-
-            modelContent.Images.Add(imageName, image);
-            modelContent.Materials.Add(materialName, material);
-            modelContent.Geometry.Add(geoName, materialName, geo);
-
-            return modelContent;
-        }
-        /// <summary>
-        /// Generate model content for sky dom
-        /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="texture">Texture</param>
-        /// <param name="radius">Sky dom radius</param>
-        /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateSkydom(string contentFolder, string texture, float radius)
-        {
-            ModelContent modelContent = new ModelContent();
-
-            string imageName = "cubeTexture";
-            string materialName = "sphereMaterial";
-            string geoName = "sphereGeometry";
-
-            ImageContent image = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(contentFolder, texture),
-            };
-
-            MaterialContent material = MaterialContent.Default;
-            material.DiffuseTexture = imageName;
-
-            VertexData[] verts = null;
-            uint[] indices = null;
-            VertexData.CreateSphere(radius, 20, 20, out verts, out indices);
-
-            indices = Helper.ChangeCoordinate(indices);
-
-            SubMeshContent geo = new SubMeshContent()
-            {
-                Topology = PrimitiveTopology.TriangleList,
-                VertexType = VertexTypes.Position,
                 Vertices = verts,
                 Indices = indices,
                 Material = materialName,

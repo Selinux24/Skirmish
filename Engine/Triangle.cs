@@ -563,7 +563,7 @@ namespace Engine
         public bool Intersects(ref Ray ray)
         {
             float distance;
-            return GeometryUtil.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out distance);
+            return Intersection.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -573,7 +573,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray, out float distance)
         {
-            return GeometryUtil.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out distance);
+            return Intersection.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -584,7 +584,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray, out Vector3 point, out float distance)
         {
-            return GeometryUtil.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out point, out distance);
+            return Intersection.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out point, out distance);
         }
         /// <summary>
         /// Retrieves the three corners of the triangle.

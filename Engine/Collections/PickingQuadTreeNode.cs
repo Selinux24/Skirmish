@@ -40,7 +40,7 @@ namespace Engine.Collections
                 {
                     BoundingBox tbox = BoundingBox.FromPoints(t.GetCorners());
 
-                    return Collision.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
+                    return Intersection.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
                 });
 
                 if (nodeTriangles.Length > 0)
@@ -497,7 +497,7 @@ namespace Engine.Collections
                     #region Per bound test
 
                     float d;
-                    if (Collision.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
                     {
                         #region Per triangle test
 
@@ -527,7 +527,7 @@ namespace Engine.Collections
                 foreach (var node in this.Children)
                 {
                     float d;
-                    if (Collision.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
                     {
                         while (boxHitsByDistance.ContainsKey(d))
                         {
@@ -632,7 +632,7 @@ namespace Engine.Collections
                     #region Per bound test
 
                     float d;
-                    if (Collision.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
                     {
                         #region Per triangle test
 
@@ -660,7 +660,7 @@ namespace Engine.Collections
                 foreach (var node in this.Children)
                 {
                     float d;
-                    if (Collision.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
                     {
                         Vector3 thisHit;
                         Triangle thisTri;
@@ -728,7 +728,7 @@ namespace Engine.Collections
                     #region Per bound test
 
                     float d;
-                    if (Collision.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
                     {
                         #region Per triangle test
 
@@ -763,7 +763,7 @@ namespace Engine.Collections
                 foreach (var node in this.Children)
                 {
                     float d;
-                    if (Collision.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
                     {
                         Vector3[] thisHits;
                         Triangle[] thisTris;

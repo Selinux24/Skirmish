@@ -958,10 +958,7 @@ namespace Engine
                             //    Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(1f, 0.5f, 0.5f, 1f)));
                             //}
 
-                            VertexData.WriteVertexBuffer(
-                                this.Game.Graphics.DeviceContext,
-                                this.vertexBuffer,
-                                data);
+                            this.Game.Graphics.DeviceContext.WriteVertexBuffer(this.vertexBuffer, data);
                         }
                     }
                 }
@@ -1172,10 +1169,7 @@ namespace Engine
                     if (this.foliagePlanted && this.foliageData != null && this.foliageData.Length > 0)
                     {
                         //Attach data
-                        VertexData.WriteVertexBuffer(
-                            this.Game.Graphics.DeviceContext,
-                            this.foliageBuffer,
-                            this.foliageData);
+                        this.Game.Graphics.DeviceContext.WriteVertexBuffer(this.foliageBuffer, this.foliageData);
                     }
 
                     this.foliageAttached = true;

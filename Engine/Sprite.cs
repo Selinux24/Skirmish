@@ -1,10 +1,16 @@
 ﻿using SharpDX;
+using SharpDX.Direct3D;
+using SharpDX.DXGI;
+using Buffer = SharpDX.Direct3D11.Buffer;
+using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
+using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
+    using Engine.Helpers;
 
     /// <summary>
     /// Sprite drawer
@@ -69,9 +75,25 @@ namespace Engine
         private Matrix viewProjection;
 
         /// <summary>
-        /// Datos renderización
+        /// Index buffer
         /// </summary>
-        protected DrawingData DrawingData { get; private set; }
+        private Buffer indexBuffer = null;
+        /// <summary>
+        /// Index count
+        /// </summary>
+        private int indexCount = 0;
+        /// <summary>
+        /// Vertex buffer
+        /// </summary>
+        private Buffer vertexBuffer = null;
+        /// <summary>
+        /// Vertex buffer binding
+        /// </summary>
+        private VertexBufferBinding[] vertexBufferBinding = null;
+        /// <summary>
+        /// Sprite texture
+        /// </summary>
+        private ShaderResourceView spriteTexture = null;
 
         /// <summary>
         /// Gets or sets text left position in 2D screen
@@ -158,10 +180,9 @@ namespace Engine
         public Sprite(Game game, SpriteDescription description)
             : base(game, description)
         {
-            this.DrawingData = DrawingData.Build(
-                game,
-                ModelContent.GenerateSprite(description.ContentPath, description.Textures), 
-                new DrawingDataDescription());
+            this.InitializeBuffers();
+
+            this.InitializeTexture(description.ContentPath, description.Textures);
 
             this.renderWidth = game.Form.RenderWidth.NextPair();
             this.renderHeight = game.Form.RenderHeight.NextPair();
@@ -178,6 +199,15 @@ namespace Engine
             this.Manipulator = new Manipulator2D();
         }
         /// <summary>
+        /// Internal resources disposition
+        /// </summary>
+        public override void Dispose()
+        {
+            Helper.Dispose(this.vertexBuffer);
+            Helper.Dispose(this.indexBuffer);
+            Helper.Dispose(this.spriteTexture);
+        }
+        /// <summary>
         /// Update
         /// </summary>
         /// <param name="context">Context</param>
@@ -191,43 +221,74 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.DrawingData != null)
+            var effect = DrawerPool.EffectSprite;
+            var technique = effect.PositionTexture;
+
+            #region Per frame update
+
+            effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
+
+            #endregion
+
+            #region Per object update
+
+            effect.UpdatePerObject(this.Color, this.spriteTexture, this.TextureIndex);
+
+            #endregion
+
+            //Sets vertex and index buffer
+            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+            Counters.IAInputLayoutSets++;
+            this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+            Counters.IAVertexBuffersSets++;
+            this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
+            Counters.IAIndexBufferSets++;
+            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+            Counters.IAPrimitiveTopologySets++;
+
+            for (int p = 0; p < technique.Description.PassCount; p++)
             {
-                var effect = DrawerPool.EffectSprite;
+                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                #region Per frame update
+                this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
 
-                effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-
-                #endregion
-
-                foreach (string meshName in this.DrawingData.Meshes.Keys)
-                {
-                    MeshMaterialsDictionary dictionary = this.DrawingData.Meshes[meshName];
-
-                    foreach (string material in dictionary.Keys)
-                    {
-                        #region Per object update
-
-                        var mat = this.DrawingData.Materials[material];
-
-                        effect.UpdatePerObject(this.Color, mat.DiffuseTexture, this.TextureIndex);
-
-                        #endregion
-
-                        var mesh = dictionary[material];
-                        var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                        mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
-
-                        for (int p = 0; p < technique.Description.PassCount; p++)
-                        {
-                            technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
-
-                            mesh.Draw(this.DeviceContext);
-                        }
-                    }
-                }
+                Counters.DrawCallsPerFrame++;
+                Counters.InstancesPerFrame++;
+                Counters.TrianglesPerFrame += this.indexCount / 3;
             }
+        }
+        /// <summary>
+        /// Initialize buffers
+        /// </summary>
+        /// <param name="width">Sprite width</param>
+        /// <param name="height">Sprite height</param>
+        private void InitializeBuffers()
+        {
+            Vector3[] vData;
+            Vector2[] uvs;
+            uint[] iData;
+            GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, out vData, out uvs, out iData);
+
+            VertexPositionTexture[] vertices = VertexPositionTexture.Generate(vData, uvs);
+
+            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(vertices);
+            this.vertexBufferBinding = new[]
+            {
+                new VertexBufferBinding(this.vertexBuffer, vertices[0].Stride, 0),
+            };
+
+            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(iData);
+            this.indexCount = iData.Length;
+        }
+        /// <summary>
+        /// Initialize textures
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="textures">Texture names</param>
+        private void InitializeTexture(string contentPath, string[] textures)
+        {
+            ImageContent image = ImageContent.Array(contentPath, textures);
+            this.spriteTexture = this.Game.ResourceManager.CreateResource(image);
         }
         /// <summary>
         /// Resize
@@ -247,11 +308,6 @@ namespace Engine
                 this.Width = ((int)(this.sourceWidth * w)).NextPair();
                 this.Height = ((int)(this.sourceHeight * h)).NextPair();
             }
-        }
-
-        public override void Dispose()
-        {
-            Helper.Dispose(this.DrawingData);
         }
     }
 }

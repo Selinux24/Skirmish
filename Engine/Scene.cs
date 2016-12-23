@@ -555,9 +555,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Cubemap AddCubemap(CubemapDescription description, int order = 0)
         {
-            ModelContent cubemap = ModelContent.GenerateSphere(description.ContentPath, description.Texture, description.Radius);
-
-            Cubemap newModel = new Cubemap(this.Game, cubemap, description);
+            Cubemap newModel = new Cubemap(this.Game, description);
 
             this.AddComponent(newModel, order);
 
@@ -571,9 +569,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Skydom AddSkydom(SkydomDescription description)
         {
-            ModelContent skydom = ModelContent.GenerateSkydom(description.ContentPath, description.Texture, description.Radius);
-
-            Skydom newModel = new Skydom(this.Game, skydom, description);
+            Skydom newModel = new Skydom(this.Game, description);
 
             this.AddComponent(newModel, -1);
 

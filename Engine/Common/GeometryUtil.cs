@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.Common
 {
@@ -134,396 +135,498 @@ namespace Engine.Common
             return indices;
         }
 
-        public static bool IsReflex(Vector3 p1, Vector3 p2, Vector3 p3)
-        {
-            return OP(p1, p2, p3) < 0;
-        }
-        public static bool IsConvex(Vector3 p1, Vector3 p2, Vector3 p3)
-        {
-            return OP(p1, p2, p3) > 0;
-        }
-        private static float OP(Vector3 p1, Vector3 p2, Vector3 p3)
-        {
-            return ((p3.Z - p1.Z) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Z - p1.Z));
-        }
-
         /// <summary>
-        /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
+        /// Creates a line list
         /// </summary>
-        /// <param name="ray">The ray to test.</param>
-        /// <param name="vertex1">The first vertex of the triangle to test.</param>
-        /// <param name="vertex2">The second vertex of the triangle to test.</param>
-        /// <param name="vertex3">The third vertex of the triangle to test.</param>
-        /// <param name="distance">Distance to point</param>
-        /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
+        /// <param name="lines">Line list</param>
+        /// <param name="vertices">Result vertices</param>
+        public static void CreateLineList(Line3D[] lines, out Vector3[] vertices)
         {
-            float d;
-            if (!Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out d))
+            List<Vector3> data = new List<Vector3>();
+
+            for (int i = 0; i < lines.Length; i++)
             {
-                distance = float.MaxValue;
-                return false;
+                data.Add(lines[i].Point1);
+                data.Add(lines[i].Point2);
             }
 
-            distance = d;
-            return true;
+            vertices = data.ToArray();
         }
         /// <summary>
-        /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
+        /// Creates a line list
         /// </summary>
-        /// <param name="ray">The ray to test.</param>
-        /// <param name="vertex1">The first vertex of the triangle to test.</param>
-        /// <param name="vertex2">The second vertex of the triangle to test.</param>
-        /// <param name="vertex3">The third vertex of the triangle to test.</param>
-        /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
-        /// <param name="distance">Distance to point</param>
-        /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out Vector3 point, out float distance)
+        /// <param name="lines">Line list</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="indices">Result indices</param>
+        public static void CreateLineList(Line3D[] lines, out Vector3[] vertices, out uint[] indices)
         {
-            float d;
-            if (!Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out d))
+            List<Vector3> vData = new List<Vector3>();
+            List<uint> iData = new List<uint>();
+
+            for (int i = 0; i < lines.Length; i++)
             {
-                point = Vector3.Zero;
-                distance = float.MaxValue;
-                return false;
-            }
+                var p1 = lines[i].Point1;
+                var p2 = lines[i].Point2;
 
-            point = ray.Position + (ray.Direction * d);
-            distance = d;
-            return true;
-        }
-        /// <summary>
-        /// Find the 3D distance between a point (x, y, z) and a segment PQ
-        /// </summary>
-        /// <param name="pt">The coordinate of the point.</param>
-        /// <param name="p">The coordinate of point P in the segment PQ.</param>
-        /// <param name="q">The coordinate of point Q in the segment PQ.</param>
-        /// <returns>The distance between the point and the segment.</returns>
-        public static float PointToSegmentSquared(ref Vector3 pt, ref Vector3 p, ref Vector3 q)
-        {
-            //distance from P to Q
-            Vector3 pq = q - p;
+                var i1 = vData.IndexOf(p1);
+                var i2 = vData.IndexOf(p2);
 
-            //disance from P to the lone point
-            float dx = pt.X - p.X;
-            float dy = pt.Y - p.Y;
-            float dz = pt.Z - p.Z;
-
-            float segmentMagnitudeSquared = pq.LengthSquared();
-            float t = pq.X * dx + pq.Y * dy + pq.Z * dz;
-
-            if (segmentMagnitudeSquared > 0)
-                t /= segmentMagnitudeSquared;
-
-            //keep t between 0 and 1
-            if (t < 0)
-                t = 0;
-            else if (t > 1)
-                t = 1;
-
-            dx = p.X + t * pq.X - pt.X;
-            dy = p.Y + t * pq.Y - pt.Y;
-            dz = p.Z + t * pq.Z - pt.Z;
-
-            return dx * dx + dy * dy + dz * dz;
-        }
-        /// <summary>
-        /// Find the 2d distance between a point (x, z) and a segment PQ, where P is (px, pz) and Q is (qx, qz).
-        /// </summary>
-        /// <param name="x">The X coordinate of the point.</param>
-        /// <param name="z">The Z coordinate of the point.</param>
-        /// <param name="px">The X coordinate of point P in the segment PQ.</param>
-        /// <param name="pz">The Z coordinate of point P in the segment PQ.</param>
-        /// <param name="qx">The X coordinate of point Q in the segment PQ.</param>
-        /// <param name="qz">The Z coordinate of point Q in the segment PQ.</param>
-        /// <returns>The distance between the point and the segment.</returns>
-        public static float PointToSegment2DSquared(int x, int z, int px, int pz, int qx, int qz)
-        {
-            float segmentDeltaX = qx - px;
-            float segmentDeltaZ = qz - pz;
-            float dx = x - px;
-            float dz = z - pz;
-            float segmentMagnitudeSquared = segmentDeltaX * segmentDeltaX + segmentDeltaZ * segmentDeltaZ;
-            float t = segmentDeltaX * dx + segmentDeltaZ * dz;
-
-            //normalize?
-            if (segmentMagnitudeSquared > 0)
-                t /= segmentMagnitudeSquared;
-
-            //0 < t < 1
-            if (t < 0)
-                t = 0;
-            else if (t > 1)
-                t = 1;
-
-            dx = px + t * segmentDeltaX - x;
-            dz = pz + t * segmentDeltaZ - z;
-
-            return dx * dx + dz * dz;
-        }
-        /// <summary>
-        /// Find the 2d distance between a point and a segment PQ
-        /// </summary>
-        /// <param name="pt">The coordinate of the point.</param>
-        /// <param name="p">The coordinate of point P in the segment PQ.</param>
-        /// <param name="q">The coordinate of point Q in the segment PQ.</param>
-        /// <returns>The distance between the point and the segment.</returns>
-        public static float PointToSegment2DSquared(ref Vector3 pt, ref Vector3 p, ref Vector3 q)
-        {
-            float t = 0;
-            return PointToSegment2DSquared(ref pt, ref p, ref q, out t);
-        }
-        /// <summary>
-        /// Find the 2d distance between a point and a segment PQ
-        /// </summary>
-        /// <param name="pt">The coordinate of the point.</param>
-        /// <param name="p">The coordinate of point P in the segment PQ.</param>
-        /// <param name="q">The coordinate of point Q in the segment PQ.</param>
-        /// <param name="t">Parameterization ratio t</param>
-        /// <returns>The distance between the point and the segment.</returns>
-        public static float PointToSegment2DSquared(ref Vector3 pt, ref Vector3 p, ref Vector3 q, out float t)
-        {
-            //distance from P to Q in the xz plane
-            float segmentDeltaX = q.X - p.X;
-            float segmentDeltaZ = q.Z - p.Z;
-
-            //distance from P to lone point in xz plane
-            float dx = pt.X - p.X;
-            float dz = pt.Z - p.Z;
-
-            float segmentMagnitudeSquared = segmentDeltaX * segmentDeltaX + segmentDeltaZ * segmentDeltaZ;
-            t = segmentDeltaX * dx + segmentDeltaZ * dz;
-
-            if (segmentMagnitudeSquared > 0)
-                t /= segmentMagnitudeSquared;
-
-            //keep t between 0 and 1
-            if (t < 0)
-                t = 0;
-            else if (t > 1)
-                t = 1;
-
-            dx = p.X + t * segmentDeltaX - pt.X;
-            dz = p.Z + t * segmentDeltaZ - pt.Z;
-
-            return dx * dx + dz * dz;
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="point"></param>
-        /// <param name="verts"></param>
-        /// <param name="vertCount"></param>
-        /// <returns></returns>
-        public static float PointToPolygonSquared(Vector3 point, Vector3[] verts, int vertCount)
-        {
-            float dmin = float.MaxValue;
-            bool c = false;
-
-            for (int i = 0, j = vertCount - 1; i < vertCount; j = i++)
-            {
-                Vector3 vi = verts[i];
-                Vector3 vj = verts[j];
-
-                if (((vi.Z > point.Z) != (vj.Z > point.Z)) && (point.X < (vj.X - vi.X) * (point.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
-                    c = !c;
-
-                dmin = Math.Min(dmin, PointToSegment2DSquared(ref point, ref vj, ref vi));
-            }
-
-            return c ? -dmin : dmin;
-        }
-        /// <summary>
-        /// Finds the squared distance between a point and the nearest edge of a polygon.
-        /// </summary>
-        /// <param name="pt">A point.</param>
-        /// <param name="verts">A set of vertices that define a polygon.</param>
-        /// <param name="nverts">The number of vertices to use from <c>verts</c>.</param>
-        /// <returns>The squared distance between a point and the nearest edge of a polygon.</returns>
-        public static float PointToPolygonEdgeSquared(Vector3 pt, Vector3[] verts, int nverts)
-        {
-            float dmin = float.MaxValue;
-            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
-            {
-                dmin = Math.Min(dmin, PointToSegment2DSquared(ref pt, ref verts[j], ref verts[i]));
-            }
-
-            return PointInPoly(pt, verts, nverts) ? -dmin : dmin;
-        }
-        /// <summary>
-        /// Finds the distance between a point and the nearest edge of a polygon.
-        /// </summary>
-        /// <param name="pt">A point.</param>
-        /// <param name="verts">A set of vertices that define a polygon.</param>
-        /// <param name="nverts">The number of vertices to use from <c>verts</c>.</param>
-        /// <param name="edgeDist">A buffer for edge distances to be stored in.</param>
-        /// <param name="edgeT">A buffer for parametrization ratios to be stored in.</param>
-        /// <returns>A value indicating whether the point is contained in the polygon.</returns>
-        public static bool PointToPolygonEdgeSquared(Vector3 pt, Vector3[] verts, int nverts, float[] edgeDist, float[] edgeT)
-        {
-            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
-            {
-                edgeDist[j] = PointToSegment2DSquared(ref pt, ref verts[j], ref verts[i], out edgeT[j]);
-            }
-
-            return PointInPoly(pt, verts, nverts);
-        }
-        /// <summary>
-        /// Finds the distance between a point and triangle ABC.
-        /// </summary>
-        /// <param name="p">A point.</param>
-        /// <param name="a">The first vertex of the triangle.</param>
-        /// <param name="b">The second vertex of the triangle.</param>
-        /// <param name="c">The third vertex of the triangle.</param>
-        /// <returns>The distnace between the point and the triangle.</returns>
-        public static float PointToTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c)
-        {
-            //If the point lies inside the triangle, return the interpolated y-coordinate
-            float h;
-            if (PointToTriangle(p, a, b, c, out h))
-            {
-                return Math.Abs(h - p.Y);
-            }
-
-            return float.MaxValue;
-        }
-        /// <summary>
-        /// Finds the distance between a point and triangle ABC.
-        /// </summary>
-        /// <param name="p">A point.</param>
-        /// <param name="a">The first vertex of the triangle.</param>
-        /// <param name="b">The second vertex of the triangle.</param>
-        /// <param name="c">The third vertex of the triangle.</param>
-        /// <param name="height">The height between the point and the triangle.</param>
-        /// <returns>A value indicating whether the point is contained within the triangle.</returns>
-        public static bool PointToTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out float height)
-        {
-            Vector3 v0 = c - a;
-            Vector3 v1 = b - a;
-            Vector3 v2 = p - a;
-
-            Vector2 v20 = new Vector2(v0.X, v0.Z);
-            Vector2 v21 = new Vector2(v1.X, v1.Z);
-            Vector2 v22 = new Vector2(v2.X, v2.Z);
-
-            float dot00, dot01, dot02, dot11, dot12;
-
-            Vector2.Dot(ref v20, ref v20, out dot00);
-            Vector2.Dot(ref v20, ref v21, out dot01);
-            Vector2.Dot(ref v20, ref v22, out dot02);
-            Vector2.Dot(ref v21, ref v21, out dot11);
-            Vector2.Dot(ref v21, ref v22, out dot12);
-
-            //compute barycentric coordinates
-            float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-            float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-            float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-            const float EPS = 1E-4f;
-
-            //if point lies inside triangle, return interpolated y-coordinate
-            if (u >= -EPS && v >= -EPS && (u + v) <= 1 + EPS)
-            {
-                height = a.Y + v0.Y * u + v1.Y * v;
-                return true;
-            }
-
-            height = float.MaxValue;
-            return false;
-        }
-        /// <summary>
-        /// Determines whether a point is inside a polygon.
-        /// </summary>
-        /// <param name="pt">A point.</param>
-        /// <param name="verts">A set of vertices that define a polygon.</param>
-        /// <param name="nverts">The number of vertices to use from <c>verts</c>.</param>
-        /// <returns>A value indicating whether the point is contained within the polygon.</returns>
-        public static bool PointInPoly(Vector3 pt, Vector3[] verts, int nverts)
-        {
-            bool c = false;
-
-            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
-            {
-                Vector3 vi = verts[i];
-                Vector3 vj = verts[j];
-
-                if (((vi.Z > pt.Z) != (vj.Z > pt.Z)) &&
-                    (pt.X < (vj.X - vi.X) * (pt.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+                if (i1 >= 0)
                 {
-                    c = !c;
+                    iData.Add((uint)i1);
+                }
+                else
+                {
+                    vData.Add(p1);
+                    iData.Add((uint)vData.Count - 1);
+                }
+
+                if (i2 >= 0)
+                {
+                    iData.Add((uint)i2);
+                }
+                else
+                {
+                    vData.Add(p2);
+                    iData.Add((uint)vData.Count - 1);
                 }
             }
 
-            return c;
+            vertices = vData.ToArray();
+            indices = iData.ToArray();
         }
         /// <summary>
-        /// Determines whether two 2D segments AB and CD are intersecting.
+        /// Creates a triangle list
         /// </summary>
-        /// <param name="a">The endpoint A of segment AB.</param>
-        /// <param name="b">The endpoint B of segment AB.</param>
-        /// <param name="c">The endpoint C of segment CD.</param>
-        /// <param name="d">The endpoint D of segment CD.</param>
-        /// <returns>A value indicating whether the two segments are intersecting.</returns>
-        public static bool SegmentSegment2D(ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d)
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="vertices">Result vertices</param>
+        public static void CreateTriangleList(Triangle[] triangles, out Vector3[] vertices)
         {
-            float a1, a2, a3;
+            List<Vector3> vData = new List<Vector3>();
 
-            Helper.Cross2D(ref a, ref b, ref d, out a1);
-            Helper.Cross2D(ref a, ref b, ref c, out a2);
-
-            if (a1 * a2 < 0.0f)
+            for (int i = 0; i < triangles.Length; i++)
             {
-                Helper.Cross2D(ref c, ref d, ref a, out a3);
-                float a4 = a3 + a2 - a1;
-
-                if (a3 * a4 < 0.0f)
-                    return true;
+                vData.Add(triangles[i].Point1);
+                vData.Add(triangles[i].Point2);
+                vData.Add(triangles[i].Point3);
             }
 
-            return false;
+            vertices = vData.ToArray();
         }
         /// <summary>
-        /// Determines whether two 2D segments AB and CD are intersecting.
+        /// Creates a triangle list
         /// </summary>
-        /// <param name="a">The endpoint A of segment AB.</param>
-        /// <param name="b">The endpoint B of segment AB.</param>
-        /// <param name="c">The endpoint C of segment CD.</param>
-        /// <param name="d">The endpoint D of segment CD.</param>
-        /// <param name="s">The normalized dot product between CD and AC on the XZ plane.</param>
-        /// <param name="t">The normalized dot product between AB and AC on the XZ plane.</param>
-        /// <returns>A value indicating whether the two segments are intersecting.</returns>
-        public static bool SegmentSegment2D(ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d, out float s, out float t)
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="indices">Result indices</param>
+        public static void CreateTriangleList(Triangle[] triangles, out Vector3[] vertices, out uint[] indices)
         {
-            Vector3 u = b - a;
-            Vector3 v = d - c;
-            Vector3 w = a - c;
+            List<Vector3> vData = new List<Vector3>();
+            List<uint> iData = new List<uint>();
 
-            float magnitude;
-            GeometryUtil.PerpendicularDotXZ(ref u, ref v, out magnitude);
-
-            if (Math.Abs(magnitude) < 1e-6f)
+            for (int i = 0; i < triangles.Length; i++)
             {
-                s = float.NaN;
-                t = float.NaN;
-                return false;
+                var p1 = triangles[i].Point1;
+                var p2 = triangles[i].Point2;
+                var p3 = triangles[i].Point3;
+
+                var i1 = vData.IndexOf(p1);
+                var i2 = vData.IndexOf(p2);
+                var i3 = vData.IndexOf(p3);
+
+                if (i1 >= 0)
+                {
+                    iData.Add((uint)i1);
+                }
+                else
+                {
+                    vData.Add(p1);
+                    iData.Add((uint)vData.Count - 1);
+                }
+
+                if (i2 >= 0)
+                {
+                    iData.Add((uint)i2);
+                }
+                else
+                {
+                    vData.Add(p2);
+                    iData.Add((uint)vData.Count - 1);
+                }
+
+                if (i3 >= 0)
+                {
+                    iData.Add((uint)i3);
+                }
+                else
+                {
+                    vData.Add(p3);
+                    iData.Add((uint)vData.Count - 1);
+                }
             }
 
-            GeometryUtil.PerpendicularDotXZ(ref v, ref w, out s);
-            GeometryUtil.PerpendicularDotXZ(ref u, ref w, out t);
-            s /= magnitude;
-            t /= magnitude;
-
-            return true;
+            vertices = vData.ToArray();
+            indices = iData.ToArray();
         }
         /// <summary>
-        /// Calculates the perpendicular dot product of two vectors projected onto the XZ plane.
+        /// Creates a sprite of VertexPositionTexture VertexData
         /// </summary>
-        /// <param name="a">A vector.</param>
-        /// <param name="b">Another vector.</param>
-        /// <param name="result">The perpendicular dot product on the XZ plane.</param>
-        private static void PerpendicularDotXZ(ref Vector3 a, ref Vector3 b, out float result)
+        /// <param name="position">Sprite position</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="formWidth">Render form width</param>
+        /// <param name="formHeight">Render form height</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="indices">Result indices</param>
+        public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out Vector3[] vertices, out uint[] indices)
         {
-            result = a.X * b.Z - a.Z * b.X;
+            Vector2[] uvs;
+            CreateSprite(position, width, height, formWidth, formHeight, out vertices, out uvs, out indices);
+        }
+        /// <summary>
+        /// Creates a sprite of VertexPositionTexture VertexData
+        /// </summary>
+        /// <param name="position">Sprite position</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="formWidth">Render form width</param>
+        /// <param name="formHeight">Render form height</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="indices">Result indices</param>
+        /// <param name="uvs">Result texture uvs</param>
+        public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
+        {
+            vertices = new Vector3[4];
+            uvs = new Vector2[4];
+
+            float left = (formWidth * 0.5f * -1f) + position.X;
+            float right = left + width;
+            float top = (formHeight * 0.5f) - position.Y;
+            float bottom = top - height;
+
+            vertices[0] = new Vector3(left, top, 0.0f);
+            uvs[0] = Vector2.Zero;
+
+            vertices[1] = new Vector3(right, bottom, 0.0f);
+            uvs[1] = Vector2.One;
+
+            vertices[2] = new Vector3(left, bottom, 0.0f);
+            uvs[2] = Vector2.UnitY;
+
+            vertices[3] = new Vector3(right, top, 0.0f);
+            uvs[3] = Vector2.UnitX;
+
+            indices = new uint[6];
+
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 2;
+
+            indices[3] = 0;
+            indices[4] = 3;
+            indices[5] = 1;
+        }
+        /// <summary>
+        /// Creates a box of VertexPosition VertexData
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="depth">Depth</param>
+        /// <param name="v">Result vertices</param>
+        /// <param name="i">Result indices</param>
+        public static void CreateBox(float width, float height, float depth, out Vector3[] vertices, out uint[] indices)
+        {
+            vertices = new Vector3[24];
+            indices = new uint[36];
+
+            float w2 = 0.5f * width;
+            float h2 = 0.5f * height;
+            float d2 = 0.5f * depth;
+
+            // Fill in the front face vertex data.
+            vertices[0] = new Vector3(-w2, -h2, -d2);
+            vertices[1] = new Vector3(-w2, +h2, -d2);
+            vertices[2] = new Vector3(+w2, +h2, -d2);
+            vertices[3] = new Vector3(+w2, -h2, -d2);
+
+            // Fill in the back face vertex data.
+            vertices[4] = new Vector3(-w2, -h2, +d2);
+            vertices[5] = new Vector3(+w2, -h2, +d2);
+            vertices[6] = new Vector3(+w2, +h2, +d2);
+            vertices[7] = new Vector3(-w2, +h2, +d2);
+
+            // Fill in the top face vertex data.
+            vertices[8] = new Vector3(-w2, +h2, -d2);
+            vertices[9] = new Vector3(-w2, +h2, +d2);
+            vertices[10] = new Vector3(+w2, +h2, +d2);
+            vertices[11] = new Vector3(+w2, +h2, -d2);
+
+            // Fill in the bottom face vertex data.
+            vertices[12] = new Vector3(-w2, -h2, -d2);
+            vertices[13] = new Vector3(+w2, -h2, -d2);
+            vertices[14] = new Vector3(+w2, -h2, +d2);
+            vertices[15] = new Vector3(-w2, -h2, +d2);
+
+            // Fill in the left face vertex data.
+            vertices[16] = new Vector3(-w2, -h2, +d2);
+            vertices[17] = new Vector3(-w2, +h2, +d2);
+            vertices[18] = new Vector3(-w2, +h2, -d2);
+            vertices[19] = new Vector3(-w2, -h2, -d2);
+
+            // Fill in the right face vertex data.
+            vertices[20] = new Vector3(+w2, -h2, -d2);
+            vertices[21] = new Vector3(+w2, +h2, -d2);
+            vertices[22] = new Vector3(+w2, +h2, +d2);
+            vertices[23] = new Vector3(+w2, -h2, +d2);
+
+            // Fill in the front face index data
+            indices[0] = 0; indices[1] = 1; indices[2] = 2;
+            indices[3] = 0; indices[4] = 2; indices[5] = 3;
+
+            // Fill in the back face index data
+            indices[6] = 4; indices[7] = 5; indices[8] = 6;
+            indices[9] = 4; indices[10] = 6; indices[11] = 7;
+
+            // Fill in the top face index data
+            indices[12] = 8; indices[13] = 9; indices[14] = 10;
+            indices[15] = 8; indices[16] = 10; indices[17] = 11;
+
+            // Fill in the bottom face index data
+            indices[18] = 12; indices[19] = 13; indices[20] = 14;
+            indices[21] = 12; indices[22] = 14; indices[23] = 15;
+
+            // Fill in the left face index data
+            indices[24] = 16; indices[25] = 17; indices[26] = 18;
+            indices[27] = 16; indices[28] = 18; indices[29] = 19;
+
+            // Fill in the right face index data
+            indices[30] = 20; indices[31] = 21; indices[32] = 22;
+            indices[33] = 20; indices[34] = 22; indices[35] = 23;
+        }
+        /// <summary>
+        /// Creates a cone of VertexPositionNormalTextureTangent VertexData
+        /// </summary>
+        /// <param name="radius">The base radius</param>
+        /// <param name="sliceCount">The base slice count</param>
+        /// <param name="height">Cone height</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="indices">Result indices</param>
+        public static void CreateCone(float radius, uint sliceCount, float height, out Vector3[] vertices, out uint[] indices)
+        {
+            List<Vector3> vertList = new List<Vector3>();
+            List<uint> indexList = new List<uint>();
+
+            vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
+
+            vertList.Add(new Vector3(0.0f, -height, 0.0f));
+
+            float thetaStep = MathUtil.TwoPi / (float)sliceCount;
+
+            for (int sl = 0; sl < sliceCount; sl++)
+            {
+                float theta = sl * thetaStep;
+
+                Vector3 position;
+                Vector3 normal;
+                Vector3 tangent;
+                Vector3 binormal;
+                Vector2 texture;
+
+                // spherical to cartesian
+                position.X = radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta);
+                position.Y = -height;
+                position.Z = radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta);
+
+                normal = position;
+                normal.Normalize();
+
+                // Partial derivative of P with respect to theta
+                tangent.X = -radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta);
+                tangent.Y = 0.0f;
+                tangent.Z = +radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta);
+                tangent.Normalize();
+
+                binormal = tangent;
+
+                texture.X = theta / MathUtil.TwoPi;
+                texture.Y = 1f;
+
+                vertList.Add(position);
+            }
+
+            for (uint index = 0; index < sliceCount; index++)
+            {
+                indexList.Add(0);
+                indexList.Add(index + 2);
+                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
+
+                indexList.Add(1);
+                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
+                indexList.Add(index + 2);
+            }
+
+            vertices = vertList.ToArray();
+            indices = indexList.ToArray();
+        }
+        /// <summary>
+        /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
+        /// </summary>
+        /// <param name="radius">Radius</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="indices">Result indices</param>
+        public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out Vector3[] vertices, out uint[] indices)
+        {
+            Vector3[] normals;
+            Vector3[] tangents;
+            Vector3[] binormals;
+            Vector2[] uvs;
+            CreateSphere(radius, sliceCount, stackCount, out vertices, out normals, out uvs, out tangents, out binormals, out indices);
+        }
+        /// <summary>
+        /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
+        /// </summary>
+        /// <param name="radius">Radius</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="normals">Result normals</param>
+        /// <param name="tangents">Result tangents</param>
+        /// <param name="binormals">Result binormals</param>
+        /// <param name="uvs">Result texture uvs</param>
+        /// <param name="indices">Result indices</param>
+        public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out Vector3[] vertices, out Vector3[] normals, out Vector2[] uvs, out Vector3[] tangents, out Vector3[] binormals, out uint[] indices)
+        {
+            List<Vector3> vertList = new List<Vector3>();
+            List<Vector3> normList = new List<Vector3>();
+            List<Vector3> tangList = new List<Vector3>();
+            List<Vector3> binmList = new List<Vector3>();
+            List<Vector2> uvList = new List<Vector2>();
+            List<uint> ixList = new List<uint>();
+
+            //
+            // Compute the vertices stating at the top pole and moving down the stacks.
+            //
+
+            // Poles: note that there will be texture coordinate distortion as there is
+            // not a unique point on the texture map to assign to the pole when mapping
+            // a rectangular texture onto a sphere.
+
+            vertList.Add(new Vector3(0.0f, +radius, 0.0f));
+            normList.Add(new Vector3(0.0f, +1.0f, 0.0f));
+            tangList.Add(new Vector3(1.0f, 0.0f, 0.0f));
+            binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
+            uvList.Add(new Vector2(0.0f, 0.0f));
+
+            float phiStep = MathUtil.Pi / stackCount;
+            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
+
+            // Compute vertices for each stack ring (do not count the poles as rings).
+            for (int st = 1; st <= stackCount - 1; ++st)
+            {
+                float phi = st * phiStep;
+
+                // Vertices of ring.
+                for (int sl = 0; sl <= sliceCount; ++sl)
+                {
+                    float theta = sl * thetaStep;
+
+                    Vector3 position;
+                    Vector3 normal;
+                    Vector3 tangent;
+                    Vector3 binormal;
+                    Vector2 texture;
+
+                    // spherical to cartesian
+                    position.X = radius * (float)Math.Sin(phi) * (float)Math.Cos(theta);
+                    position.Y = radius * (float)Math.Cos(phi);
+                    position.Z = radius * (float)Math.Sin(phi) * (float)Math.Sin(theta);
+
+                    normal = position;
+                    normal.Normalize();
+
+                    // Partial derivative of P with respect to theta
+                    tangent.X = -radius * (float)Math.Sin(phi) * (float)Math.Sin(theta);
+                    tangent.Y = 0.0f;
+                    tangent.Z = +radius * (float)Math.Sin(phi) * (float)Math.Cos(theta);
+                    //tangent.W = 0.0f;
+                    tangent.Normalize();
+
+                    binormal = tangent;
+
+                    texture.X = theta / MathUtil.Pi * 2f;
+                    texture.Y = phi / MathUtil.Pi;
+
+                    vertList.Add(position);
+                    normList.Add(normal);
+                    tangList.Add(tangent);
+                    binmList.Add(binormal);
+                    uvList.Add(texture);
+                }
+            }
+
+            vertList.Add(new Vector3(0.0f, -radius, 0.0f));
+            normList.Add(new Vector3(0.0f, -1.0f, 0.0f));
+            tangList.Add(new Vector3(1.0f, 0.0f, 0.0f));
+            binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
+            uvList.Add(new Vector2(0.0f, 1.0f));
+
+            List<uint> indexList = new List<uint>();
+
+            for (uint index = 1; index <= sliceCount; ++index)
+            {
+                indexList.Add(0);
+                indexList.Add(index + 1);
+                indexList.Add(index);
+            }
+
+            //
+            // Compute indices for inner stacks (not connected to poles).
+            //
+
+            // Offset the indices to the index of the first vertex in the first ring.
+            // This is just skipping the top pole vertex.
+            uint baseIndex = 1;
+            uint ringVertexCount = sliceCount + 1;
+            for (uint st = 0; st < stackCount - 2; ++st)
+            {
+                for (uint sl = 0; sl < sliceCount; ++sl)
+                {
+                    indexList.Add(baseIndex + st * ringVertexCount + sl);
+                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
+                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
+
+                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
+                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
+                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl + 1);
+                }
+            }
+
+            //
+            // Compute indices for bottom stack.  The bottom stack was written last to the vertex buffer
+            // and connects the bottom pole to the bottom ring.
+            //
+
+            // South pole vertex was added last.
+            uint southPoleIndex = (uint)vertList.Count - 1;
+
+            // Offset the indices to the index of the first vertex in the last ring.
+            baseIndex = southPoleIndex - ringVertexCount;
+
+            for (uint index = 0; index < sliceCount; ++index)
+            {
+                indexList.Add(southPoleIndex);
+                indexList.Add(baseIndex + index);
+                indexList.Add(baseIndex + index + 1);
+            }
+
+            vertices = vertList.ToArray();
+            normals = normList.ToArray();
+            tangents = tangList.ToArray();
+            binormals = binmList.ToArray();
+            uvs = uvList.ToArray();
+            indices = indexList.ToArray();
         }
     }
 

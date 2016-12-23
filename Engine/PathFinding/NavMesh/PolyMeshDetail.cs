@@ -59,8 +59,8 @@ namespace Engine.PathFinding.NavMesh
                 Vector3 pt2 = vb;
 
                 //the vertices pt1 (va) and pt2 (vb) are extremely close to the polygon edge
-                if (GeometryUtil.PointToSegment2DSquared(ref pt1, ref vpoly[j], ref vpoly[i]) < thrSqr &&
-                    GeometryUtil.PointToSegment2DSquared(ref pt2, ref vpoly[j], ref vpoly[i]) < thrSqr)
+                if (Intersection.PointToSegment2DSquared(ref pt1, ref vpoly[j], ref vpoly[i]) < thrSqr &&
+                    Intersection.PointToSegment2DSquared(ref pt2, ref vpoly[j], ref vpoly[i]) < thrSqr)
                 {
                     return 1;
                 }
@@ -91,7 +91,7 @@ namespace Engine.PathFinding.NavMesh
                         continue;
                     }
 
-                    float d = GeometryUtil.PointToSegment2DSquared(ref verts[j], ref p0, ref p1);
+                    float d = Intersection.PointToSegment2DSquared(ref verts[j], ref p0, ref p1);
                     maxEdgeDist = Math.Max(maxEdgeDist, d);
                 }
 
@@ -712,7 +712,7 @@ namespace Engine.PathFinding.NavMesh
                         int maxi = -1;
                         for (int m = a + 1; m < b; m++)
                         {
-                            float dev = GeometryUtil.PointToSegmentSquared(ref edge[m], ref va, ref vb);
+                            float dev = Intersection.PointToSegmentSquared(ref edge[m], ref va, ref vb);
                             if (dev > maxd)
                             {
                                 maxd = dev;
@@ -805,7 +805,7 @@ namespace Engine.PathFinding.NavMesh
                         Vector3 pt = new Vector3(x * sampleDist, (bounds.Maximum.Y + bounds.Minimum.Y) * 0.5f, z * sampleDist);
 
                         //make sure samples aren't too close to edge
-                        if (GeometryUtil.PointToPolygonSquared(pt, polyMeshVerts, numMeshVerts) > -sampleDist * 0.5f)
+                        if (Intersection.PointToPolygonSquared(pt, polyMeshVerts, numMeshVerts) > -sampleDist * 0.5f)
                         {
                             continue;
                         }
@@ -1289,7 +1289,7 @@ namespace Engine.PathFinding.NavMesh
                 }
 
                 Vector3 ps0 = pts[s0], pt0 = pts[t0];
-                if (GeometryUtil.SegmentSegment2D(ref ps0, ref pt0, ref ps1, ref pt1))
+                if (Intersection.SegmentSegment2D(ref ps0, ref pt0, ref ps1, ref pt1))
                 {
                     return true;
                 }
@@ -1354,7 +1354,7 @@ namespace Engine.PathFinding.NavMesh
                 Vector3 va = verts[tris[i].VertexHash0];
                 Vector3 vb = verts[tris[i].VertexHash1];
                 Vector3 vc = verts[tris[i].VertexHash2];
-                float d = GeometryUtil.PointToTriangle(p, va, vb, vc);
+                float d = Intersection.PointToTriangle(p, va, vb, vc);
                 if (d < dmin)
                 {
                     dmin = d;

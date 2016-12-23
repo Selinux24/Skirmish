@@ -22,6 +22,22 @@ namespace Engine.Common
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
             };
         }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static VertexPosition[] Generate(Vector3[] vertices)
+        {
+            VertexPosition[] res = new VertexPosition[vertices.Length];
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                res[i] = new VertexPosition() { Position = vertices[i] };
+            }
+
+            return res;
+        }
 
         /// <summary>
         /// Position

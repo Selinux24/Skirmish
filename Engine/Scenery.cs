@@ -471,10 +471,7 @@ namespace Engine
                     if (this.foliagePlanted && this.foliageData != null && this.foliageData.Length > 0)
                     {
                         //Attach data
-                        VertexData.WriteVertexBuffer(
-                            this.Game.Graphics.DeviceContext,
-                            this.foliageBuffer,
-                            this.foliageData);
+                        this.Game.Graphics.DeviceContext.WriteVertexBuffer(this.foliageBuffer, this.foliageData);
 
                         this.foliageAttached = true;
                     }

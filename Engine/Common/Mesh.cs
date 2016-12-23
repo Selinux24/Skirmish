@@ -124,7 +124,7 @@ namespace Engine.Common
         {
             if (this.Vertices != null && this.Vertices.Length > 0)
             {
-                this.VertexBuffer = VertexData.CreateVertexBuffer(device, this.Vertices, this.dynamicBuffers);
+                this.VertexBuffer = device.CreateVertexBuffer(this.Vertices, this.dynamicBuffers);
                 this.VertexBufferStride = this.Vertices[0].Stride;
                 this.VertexCount = this.Vertices.Length;
 
@@ -274,7 +274,7 @@ namespace Engine.Common
 
                     if (this.VertexBuffer != null)
                     {
-                        VertexData.WriteVertexBuffer(deviceContext, this.VertexBuffer, this.Vertices);
+                        deviceContext.WriteVertexBuffer(this.VertexBuffer, this.Vertices);
                     }
                 }
                 else
