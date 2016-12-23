@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
+using System;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
@@ -9,6 +10,7 @@ using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Content;
     using Engine.Effects;
     using Engine.Helpers;
 
@@ -59,7 +61,8 @@ namespace Engine
         {
             this.Manipulator = new Manipulator3D();
 
-            this.InitializeBuffers();
+            this.InitializeBuffers(description.Geometry, description.ReverseFaces);
+            this.InitializeTexture(description.ContentPath, description.Texture);
         }
         /// <summary>
         /// Resource releasing
@@ -144,13 +147,20 @@ namespace Engine
         /// <summary>
         /// Initialize buffers
         /// </summary>
-        protected virtual void InitializeBuffers()
+        /// <param name="geometry">Geometry to use</param>
+        /// <param name="reverse">Reverse faces</param>
+        protected virtual void InitializeBuffers(CubemapDescription.CubeMapGeometryEnum geometry, bool reverse)
         {
             Vector3[] vData;
             uint[] iData;
-            GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
+            if (geometry == CubemapDescription.CubeMapGeometryEnum.Box) GeometryUtil.CreateBox(1, 10, 10, out vData, out iData);
+            else if (geometry == CubemapDescription.CubeMapGeometryEnum.Sphere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
+            else if (geometry == CubemapDescription.CubeMapGeometryEnum.Semispehere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
+            else throw new ArgumentException("Bad geometry enum type");
 
             VertexPosition[] vertices = VertexPosition.Generate(vData);
+
+            if (reverse) iData = GeometryUtil.ChangeCoordinate(iData);
 
             this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(vertices);
             this.vertexBufferBinding = new[]
@@ -160,6 +170,16 @@ namespace Engine
 
             this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(iData);
             this.indexCount = iData.Length;
+        }
+        /// <summary>
+        /// Initialize textures
+        /// </summary>
+        /// <param name="contentPath">Content path</param>
+        /// <param name="textures">Texture names</param>
+        protected virtual void InitializeTexture(string contentPath, params string[] textures)
+        {
+            ImageContent image = ImageContent.Array(contentPath, textures);
+            this.cubeMapTexture = this.Game.ResourceManager.CreateResource(image);
         }
     }
 }

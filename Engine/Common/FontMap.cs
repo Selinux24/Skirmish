@@ -242,15 +242,17 @@ namespace Engine.Common
                 {
                     FontMapChar chr = this.map[c];
 
-                    VertexData[] cv;
+                    Vector3[] cv;
+                    Vector2[] cuv;
                     uint[] ci;
-                    VertexData.CreateSprite(
+                    GeometryUtil.CreateSprite(
                         pos,
                         chr.Width,
                         chr.Height,
                         0,
                         0,
                         out cv,
+                        out cuv,
                         out ci);
 
                     //Remap texture
@@ -259,13 +261,14 @@ namespace Engine.Common
                     float u1 = (chr.X + chr.Width) / (float)FontMap.TEXTURESIZE;
                     float v1 = (chr.Y + chr.Height) / (float)FontMap.TEXTURESIZE;
 
-                    cv[0].Texture0 = new Vector2(u0, v0);
-                    cv[1].Texture0 = new Vector2(u1, v1);
-                    cv[2].Texture0 = new Vector2(u0, v1);
-                    cv[3].Texture0 = new Vector2(u1, v0);
+                    cuv[0] = new Vector2(u0, v0);
+                    cuv[1] = new Vector2(u1, v1);
+                    cuv[2] = new Vector2(u0, v1);
+                    cuv[3] = new Vector2(u1, v0);
 
                     Array.ForEach(ci, (i) => { indexList.Add(i + (uint)vertList.Count); });
-                    Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPositionTexture(v)); });
+
+                    vertList.AddRange(VertexPositionTexture.Generate(cv, cuv));
 
                     pos.X += chr.Width - (int)(this.Size / 6);
                     if (chr.Height > height) height = chr.Height;

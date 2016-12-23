@@ -1,8 +1,6 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
-using System;
-using System.Collections.Generic;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
@@ -92,21 +90,21 @@ namespace Engine
         public SpriteTexture(Game game, SpriteTextureDescription description)
             : base(game, description)
         {
-            VertexData[] cv;
+            Vector3[] cv;
+            Vector2[] cuv;
             uint[] ci;
-            VertexData.CreateSprite(
+            GeometryUtil.CreateSprite(
                 Vector2.Zero,
                 1, 1,
                 0, 0,
                 out cv,
+                out cuv,
                 out ci);
 
-            List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
+            VertexPositionTexture[] vertices = VertexPositionTexture.Generate(cv, cuv);
 
-            Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPositionTexture(v)); });
-
-            this.vertexBuffer = this.Device.CreateVertexBufferImmutable(vertList.ToArray());
-            this.vertexBufferBinding = new VertexBufferBinding(this.vertexBuffer, vertList[0].Stride, 0);
+            this.vertexBuffer = this.Device.CreateVertexBufferImmutable(vertices);
+            this.vertexBufferBinding = new VertexBufferBinding(this.vertexBuffer, vertices[0].Stride, 0);
             this.indexBuffer = this.Device.CreateIndexBufferImmutable(ci);
 
             this.effect = DrawerPool.EffectBasic;

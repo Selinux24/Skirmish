@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 #if DEBUG
 using System.Diagnostics;
@@ -785,25 +784,25 @@ namespace Engine
         /// <param name="geometry">Geometry</param>
         private void UpdateDirectionalLightGeometry(ref LightGeometry geometry)
         {
-            VertexData[] cv;
+            Vector3[] cv;
+            Vector2[] cuv;
             uint[] ci;
-            VertexData.CreateScreen(
+            GeometryUtil.CreateScreen(
                 Game.Form,
                 out cv,
+                out cuv,
                 out ci);
 
-            List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
-
-            Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPositionTexture(v)); });
+            VertexPositionTexture[] vertices = VertexPositionTexture.Generate(cv, cuv);
 
             if (geometry.VertexBuffer == null)
             {
-                geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertList.ToArray());
-                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertList[0].Stride, 0);
+                geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertices);
+                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].Stride, 0);
             }
             else
             {
-                this.Game.Graphics.DeviceContext.WriteBuffer(geometry.VertexBuffer, vertList.ToArray());
+                this.Game.Graphics.DeviceContext.WriteBuffer(geometry.VertexBuffer, vertices);
             }
 
             if (geometry.IndexBuffer == null)
@@ -819,25 +818,23 @@ namespace Engine
         /// <param name="geometry">Geometry</param>
         private void UpdatePointLightGeometry(ref LightGeometry geometry)
         {
-            VertexData[] cv;
+            Vector3[] cv;
             uint[] ci;
-            VertexData.CreateSphere(
+            GeometryUtil.CreateSphere(
                 1, 12, 12,
                 out cv,
                 out ci);
 
-            List<VertexPosition> vertList = new List<VertexPosition>();
-
-            Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPosition(v)); });
+            VertexPosition[] vertices = VertexPosition.Generate(cv);
 
             if (geometry.VertexBuffer == null)
             {
-                geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertList.ToArray());
-                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertList[0].Stride, 0);
+                geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertices);
+                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].Stride, 0);
             }
             else
             {
-                this.Game.Graphics.DeviceContext.WriteBuffer(geometry.VertexBuffer, vertList.ToArray());
+                this.Game.Graphics.DeviceContext.WriteBuffer(geometry.VertexBuffer, vertices);
             }
 
             if (geometry.IndexBuffer == null)
@@ -853,25 +850,23 @@ namespace Engine
         /// <param name="geometry">Geometry</param>
         private void UpdateSpotLightGeometry(ref LightGeometry geometry)
         {
-            VertexData[] cv;
+            Vector3[] cv;
             uint[] ci;
-            VertexData.CreateSphere(
-                1, 12, 1,
+            GeometryUtil.CreateSphere(
+                1, 12, 12,
                 out cv,
                 out ci);
 
-            List<VertexPosition> vertList = new List<VertexPosition>();
-
-            Array.ForEach(cv, (v) => { vertList.Add(VertexData.CreateVertexPosition(v)); });
+            VertexPosition[] vertices = VertexPosition.Generate(cv);
 
             if (geometry.VertexBuffer == null)
             {
-                geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertList.ToArray());
-                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertList[0].Stride, 0);
+                geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertices);
+                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].Stride, 0);
             }
             else
             {
-                this.Game.Graphics.DeviceContext.WriteBuffer(geometry.VertexBuffer, vertList.ToArray());
+                this.Game.Graphics.DeviceContext.WriteBuffer(geometry.VertexBuffer, vertices);
             }
 
             if (geometry.IndexBuffer == null)

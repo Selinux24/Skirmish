@@ -286,7 +286,7 @@ namespace Engine
 
             VertexPosition[] vertices = VertexPosition.Generate(vData);
 
-            var indices = Helper.ChangeCoordinate(iData);
+            var indices = GeometryUtil.ChangeCoordinate(iData);
 
             this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(vertices);
             this.vertexBufferBinding = new[]

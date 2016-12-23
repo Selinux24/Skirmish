@@ -6,6 +6,9 @@ namespace Engine
     /// </summary>
     public class SkydomDescription : CubemapDescription
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public SkydomDescription()
             : base()
         {
@@ -15,6 +18,9 @@ namespace Engine
             this.DeferredEnabled = true;
             this.EnableDepthStencil = false;
             this.EnableAlphaBlending = false;
+
+            this.Geometry = CubeMapGeometryEnum.Semispehere;
+            this.ReverseFaces = true;
         }
     }
 }

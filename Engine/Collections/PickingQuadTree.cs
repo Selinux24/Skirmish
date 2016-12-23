@@ -31,8 +31,8 @@ namespace Engine.Collections
         /// <param name="maxDepth">Maximum depth</param>
         public PickingQuadTree(Triangle[] triangles, int maxDepth)
         {
-            BoundingBox bbox = Helper.CreateBoundingBox(triangles);
-            BoundingSphere bsph = Helper.CreateBoundingSphere(triangles);
+            BoundingBox bbox = GeometryUtil.CreateBoundingBox(triangles);
+            BoundingSphere bsph = GeometryUtil.CreateBoundingSphere(triangles);
 
             this.BoundingBox = bbox;
             this.BoundingSphere = bsph;

@@ -6,9 +6,11 @@ using System.Runtime.Serialization;
 
 namespace Engine.Content
 {
-    using Engine.Animation;
     using Engine.Common;
 
+    /// <summary>
+    /// Model content
+    /// </summary>
     public class ModelContent
     {
         /// <summary>
@@ -472,48 +474,6 @@ namespace Engine.Content
             return modelContent;
         }
         /// <summary>
-        /// Generate model content for sprite
-        /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="textures">Texture list</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="formWidth">Render form width</param>
-        /// <param name="formHeight">Render form height</param>
-        /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateSprite(string contentFolder, string[] textures, float width, float height, float formWidth, float formHeight)
-        {
-            ModelContent modelContent = new ModelContent();
-
-            string imageName = "spriteTexture";
-            string materialName = "spriteMaterial";
-            string geoName = "spriteGeometry";
-
-            ImageContent image = ImageContent.Array(contentFolder, textures);
-
-            MaterialContent material = MaterialContent.Default;
-            material.DiffuseTexture = imageName;
-
-            VertexData[] verts = null;
-            uint[] indices = null;
-            VertexData.CreateSprite(Vector2.Zero, width, height, formWidth, formHeight, out verts, out indices);
-
-            SubMeshContent geo = new SubMeshContent()
-            {
-                Topology = PrimitiveTopology.TriangleList,
-                VertexType = VertexTypes.PositionTexture,
-                Vertices = verts,
-                Indices = indices,
-                Material = materialName,
-            };
-
-            modelContent.Images.Add(imageName, image);
-            modelContent.Materials.Add(materialName, material);
-            modelContent.Geometry.Add(geoName, materialName, geo);
-
-            return modelContent;
-        }
-        /// <summary>
         /// Generates a new model content from an height map
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
@@ -666,7 +626,7 @@ namespace Engine.Content
             {
                 foreach (var mesh in meshDict.Values)
                 {
-                     triangles.AddRange(mesh.GetTriangles());
+                    triangles.AddRange(mesh.GetTriangles());
                 }
             }
 

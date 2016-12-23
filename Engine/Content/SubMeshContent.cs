@@ -178,13 +178,18 @@ namespace Engine.Content
                         Vector3 tangent;
                         Vector3 binormal;
                         Vector3 normal;
-                        VertexData.ComputeNormals(
-                            v0, v1, v2,
+                        GeometryUtil.ComputeNormals(
+                            v0.Position.Value, v1.Position.Value, v2.Position.Value,
+                            v0.Texture0.Value, v1.Texture0.Value, v2.Texture0.Value,
                             out tangent, out binormal, out normal);
 
                         v0.Tangent = tangent;
                         v1.Tangent = tangent;
                         v2.Tangent = tangent;
+
+                        v0.BiNormal = binormal;
+                        v1.BiNormal = binormal;
+                        v2.BiNormal = binormal;
 
                         this.vertices[(int)this.indices[i + 0]] = v0;
                         this.vertices[(int)this.indices[i + 1]] = v1;
@@ -202,13 +207,18 @@ namespace Engine.Content
                         Vector3 tangent;
                         Vector3 binormal;
                         Vector3 normal;
-                        VertexData.ComputeNormals(
-                            v0, v1, v2,
+                        GeometryUtil.ComputeNormals(
+                            v0.Position.Value, v1.Position.Value, v2.Position.Value,
+                            v0.Texture0.Value, v1.Texture0.Value, v2.Texture0.Value,
                             out tangent, out binormal, out normal);
 
                         v0.Tangent = tangent;
                         v1.Tangent = tangent;
                         v2.Tangent = tangent;
+
+                        v0.BiNormal = binormal;
+                        v1.BiNormal = binormal;
+                        v2.BiNormal = binormal;
 
                         this.vertices[i + 0] = v0;
                         this.vertices[i + 1] = v1;

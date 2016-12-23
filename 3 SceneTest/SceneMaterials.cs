@@ -1,5 +1,4 @@
 ﻿using Engine;
-using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
@@ -130,11 +129,19 @@ namespace SceneTest
         }
         private Model InitializeSphere(MaterialContent material)
         {
-            VertexData[] vertices = null;
-            uint[] indices = null;
-            VertexData.CreateSphere(radius, (uint)stacks, (uint)stacks, out vertices, out indices);
+            Vector3[] v = null;
+            Vector3[] n = null;
+            Vector2[] uv = null;
+            uint[] ix = null;
+            GeometryUtil.CreateSphere(radius, (uint)stacks, (uint)stacks, out v, out n, out uv, out ix);
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, material);
+            VertexData[] vertices = new VertexData[v.Length];
+            for (int i = 0; i < v.Length; i++)
+            {
+                vertices[i] = VertexData.CreateVertexPositionNormalTexture(v[i], n[i], uv[i]);
+            }
+
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, ix, material);
 
             var desc = new ModelDescription()
             {

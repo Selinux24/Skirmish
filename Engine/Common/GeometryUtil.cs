@@ -4,11 +4,20 @@ using System.Collections.Generic;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Geometry utilities
+    /// </summary>
     public static class GeometryUtil
     {
-        public static uint[] GenerateIndices(IndexBufferShapeEnum bufferShape, int trianglesPerNode)
+        /// <summary>
+        /// Generates a index for a triangle soup quad with the specified shape
+        /// </summary>
+        /// <param name="bufferShape">Buffer shape</param>
+        /// <param name="triangles">Triangle count</param>
+        /// <returns>Returns the generated index list</returns>
+        public static uint[] GenerateIndices(IndexBufferShapeEnum bufferShape, int triangles)
         {
-            int nodes = trianglesPerNode / 2;
+            int nodes = triangles / 2;
             uint side = (uint)Math.Sqrt(nodes);
             uint sideLoss = side / 2;
 
@@ -32,7 +41,7 @@ namespace Engine.Common
                 bufferShape == IndexBufferShapeEnum.CornerTopRight ||
                 bufferShape == IndexBufferShapeEnum.SideRight;
 
-            uint totalTriangles = (uint)trianglesPerNode;
+            uint totalTriangles = (uint)triangles;
             if (topSide) totalTriangles -= sideLoss;
             if (bottomSide) totalTriangles -= sideLoss;
             if (leftSide) totalTriangles -= sideLoss;
@@ -133,6 +142,25 @@ namespace Engine.Common
             }
 
             return indices;
+        }
+        /// <summary>
+        /// Toggle coordinates from left-handed to right-handed and vice versa
+        /// </summary>
+        /// <typeparam name="T">Index type</typeparam>
+        /// <param name="indices">Indices in a triangle list topology</param>
+        /// <returns>Returns a new array</returns>
+        public static T[] ChangeCoordinate<T>(T[] indices)
+        {
+            T[] res = new T[indices.Length];
+
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                res[i + 0] = indices[i + 0];
+                res[i + 1] = indices[i + 2];
+                res[i + 2] = indices[i + 1];
+            }
+
+            return res;
         }
 
         /// <summary>
@@ -327,6 +355,47 @@ namespace Engine.Common
             indices[5] = 1;
         }
         /// <summary>
+        /// Creates a screen of VertexPositionTexture VertexData
+        /// </summary>
+        /// <param name="form">Form</param>
+        /// <param name="vertices">Resulting positions</param>
+        /// <param name="uvs">Resulting uv coordinates</param>
+        /// <param name="indices">Resulting indices</param>
+        public static void CreateScreen(EngineForm form, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
+        {
+            vertices = new Vector3[4];
+            uvs = new Vector2[4];
+            indices = new uint[6];
+
+            float width = form.RenderWidth;
+            float height = form.RenderHeight;
+
+            float left = (float)((width / 2) * -1);
+            float right = left + (float)width;
+            float top = (float)(height / 2);
+            float bottom = top - (float)height;
+
+            vertices[0] = new Vector3(left, top, 0.0f);
+            uvs[0] = new Vector2(0.0f, 0.0f);
+
+            vertices[1] = new Vector3(right, bottom, 0.0f);
+            uvs[1] = new Vector2(1.0f, 1.0f);
+
+            vertices[2] = new Vector3(left, bottom, 0.0f);
+            uvs[2] = new Vector2(0.0f, 1.0f);
+
+            vertices[3] = new Vector3(right, top, 0.0f);
+            uvs[3] = new Vector2(1.0f, 0.0f);
+
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 2;
+
+            indices[3] = 0;
+            indices[4] = 3;
+            indices[5] = 1;
+        }
+        /// <summary>
         /// Creates a box of VertexPosition VertexData
         /// </summary>
         /// <param name="width">Width</param>
@@ -492,6 +561,22 @@ namespace Engine.Common
         /// <param name="stackCount">Stack count</param>
         /// <param name="vertices">Result vertices</param>
         /// <param name="normals">Result normals</param>
+        /// <param name="uvs">Result texture uvs</param>
+        /// <param name="indices">Result indices</param>
+        public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out Vector3[] vertices, out Vector3[] normals, out Vector2[] uvs, out uint[] indices)
+        {
+            Vector3[] tangents;
+            Vector3[] binormals;
+            CreateSphere(radius, sliceCount, stackCount, out vertices, out normals, out uvs, out tangents, out binormals, out indices);
+        }
+        /// <summary>
+        /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
+        /// </summary>
+        /// <param name="radius">Radius</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="normals">Result normals</param>
         /// <param name="tangents">Result tangents</param>
         /// <param name="binormals">Result binormals</param>
         /// <param name="uvs">Result texture uvs</param>
@@ -503,31 +588,23 @@ namespace Engine.Common
             List<Vector3> tangList = new List<Vector3>();
             List<Vector3> binmList = new List<Vector3>();
             List<Vector2> uvList = new List<Vector2>();
-            List<uint> ixList = new List<uint>();
 
-            //
-            // Compute the vertices stating at the top pole and moving down the stacks.
-            //
+            #region Positions
 
-            // Poles: note that there will be texture coordinate distortion as there is
-            // not a unique point on the texture map to assign to the pole when mapping
-            // a rectangular texture onto a sphere.
-
-            vertList.Add(new Vector3(0.0f, +radius, 0.0f));
-            normList.Add(new Vector3(0.0f, +1.0f, 0.0f));
-            tangList.Add(new Vector3(1.0f, 0.0f, 0.0f));
+            //North pole
+            vertList.Add(new Vector3(0.0f, radius, 0.0f));
+            normList.Add(new Vector3(0.0f, 1.0f, 0.0f));
+            tangList.Add(new Vector3(0.0f, 0.0f, 1.0f));
             binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
             uvList.Add(new Vector2(0.0f, 0.0f));
 
             float phiStep = MathUtil.Pi / stackCount;
             float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
 
-            // Compute vertices for each stack ring (do not count the poles as rings).
             for (int st = 1; st <= stackCount - 1; ++st)
             {
                 float phi = st * phiStep;
 
-                // Vertices of ring.
                 for (int sl = 0; sl <= sliceCount; ++sl)
                 {
                     float theta = sl * thetaStep;
@@ -538,7 +615,6 @@ namespace Engine.Common
                     Vector3 binormal;
                     Vector2 texture;
 
-                    // spherical to cartesian
                     position.X = radius * (float)Math.Sin(phi) * (float)Math.Cos(theta);
                     position.Y = radius * (float)Math.Cos(phi);
                     position.Z = radius * (float)Math.Sin(phi) * (float)Math.Sin(theta);
@@ -546,14 +622,12 @@ namespace Engine.Common
                     normal = position;
                     normal.Normalize();
 
-                    // Partial derivative of P with respect to theta
                     tangent.X = -radius * (float)Math.Sin(phi) * (float)Math.Sin(theta);
                     tangent.Y = 0.0f;
                     tangent.Z = +radius * (float)Math.Sin(phi) * (float)Math.Cos(theta);
-                    //tangent.W = 0.0f;
                     tangent.Normalize();
 
-                    binormal = tangent;
+                    binormal = Vector3.Cross(normal, tangent);
 
                     texture.X = theta / MathUtil.Pi * 2f;
                     texture.Y = phi / MathUtil.Pi;
@@ -566,13 +640,18 @@ namespace Engine.Common
                 }
             }
 
+            //South pole
             vertList.Add(new Vector3(0.0f, -radius, 0.0f));
             normList.Add(new Vector3(0.0f, -1.0f, 0.0f));
-            tangList.Add(new Vector3(1.0f, 0.0f, 0.0f));
-            binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
+            tangList.Add(new Vector3(0.0f, 0.0f, -1.0f));
+            binmList.Add(new Vector3(-1.0f, 0.0f, 0.0f));
             uvList.Add(new Vector2(0.0f, 1.0f));
 
+            #endregion
+
             List<uint> indexList = new List<uint>();
+
+            #region Indexes
 
             for (uint index = 1; index <= sliceCount; ++index)
             {
@@ -581,12 +660,6 @@ namespace Engine.Common
                 indexList.Add(index);
             }
 
-            //
-            // Compute indices for inner stacks (not connected to poles).
-            //
-
-            // Offset the indices to the index of the first vertex in the first ring.
-            // This is just skipping the top pole vertex.
             uint baseIndex = 1;
             uint ringVertexCount = sliceCount + 1;
             for (uint st = 0; st < stackCount - 2; ++st)
@@ -603,15 +676,8 @@ namespace Engine.Common
                 }
             }
 
-            //
-            // Compute indices for bottom stack.  The bottom stack was written last to the vertex buffer
-            // and connects the bottom pole to the bottom ring.
-            //
-
-            // South pole vertex was added last.
             uint southPoleIndex = (uint)vertList.Count - 1;
 
-            // Offset the indices to the index of the first vertex in the last ring.
             baseIndex = southPoleIndex - ringVertexCount;
 
             for (uint index = 0; index < sliceCount; ++index)
@@ -621,6 +687,8 @@ namespace Engine.Common
                 indexList.Add(baseIndex + index + 1);
             }
 
+            #endregion
+
             vertices = vertList.ToArray();
             normals = normList.ToArray();
             tangents = tangList.ToArray();
@@ -628,19 +696,110 @@ namespace Engine.Common
             uvs = uvList.ToArray();
             indices = indexList.ToArray();
         }
-    }
 
-    public enum IndexBufferShapeEnum : int
-    {
-        None = -1,
-        Full = 0,
-        SideTop = 1,
-        SideBottom = 2,
-        SideLeft = 3,
-        SideRight = 4,
-        CornerTopLeft = 5,
-        CornerBottomLeft = 6,
-        CornerTopRight = 7,
-        CornerBottomRight = 8,
+        /// <summary>
+        /// Compute normal of three points in the same plane
+        /// </summary>
+        /// <param name="p1">Point 1</param>
+        /// <param name="p2">point 2</param>
+        /// <param name="p3">point 3</param>
+        /// <param name="normal">Resulting normal</param>
+        public static void ComputeNormal(Vector3 p1, Vector3 p2, Vector3 p3, out Vector3 normal)
+        {
+            var p = new Plane(p1, p2, p3);
+
+            normal = p.Normal;
+        }
+        /// <summary>
+        /// Calculate tangent, normal and binormals of triangle vertices
+        /// </summary>
+        /// <param name="p1">Point 1</param>
+        /// <param name="p2">Point 2</param>
+        /// <param name="p3">Point 3</param>
+        /// <param name="uv1">Texture uv 1</param>
+        /// <param name="uv2">Texture uv 2</param>
+        /// <param name="uv3">Texture uv 3</param>
+        /// <param name="tangent">Tangen result</param>
+        /// <param name="binormal">Binormal result</param>
+        /// <param name="normal">Normal result</param>
+        public static void ComputeNormals(Vector3 p1, Vector3 p2, Vector3 p3, Vector2 uv1, Vector2 uv2, Vector2 uv3, out Vector3 tangent, out Vector3 binormal, out Vector3 normal)
+        {
+            // Calculate the two vectors for the face.
+            Vector3 vector1 = p2 - p1;
+            Vector3 vector2 = p3 - p1;
+
+            // Calculate the tu and tv texture space vectors.
+            Vector2 tuVector = new Vector2(uv2.X - uv1.X, uv3.X - uv1.X);
+            Vector2 tvVector = new Vector2(uv2.Y - uv1.Y, uv3.Y - uv1.Y);
+
+            // Calculate the denominator of the tangent / binormal equation.
+            var den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
+
+            // Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
+            tangent.X = (tvVector[1] * vector1.X - tvVector[0] * vector2.X) * den;
+            tangent.Y = (tvVector[1] * vector1.Y - tvVector[0] * vector2.Y) * den;
+            tangent.Z = (tvVector[1] * vector1.Z - tvVector[0] * vector2.Z) * den;
+
+            binormal.X = (tuVector[0] * vector2.X - tuVector[1] * vector1.X) * den;
+            binormal.Y = (tuVector[0] * vector2.Y - tuVector[1] * vector1.Y) * den;
+            binormal.Z = (tuVector[0] * vector2.Z - tuVector[1] * vector1.Z) * den;
+
+            tangent.Normalize();
+            binormal.Normalize();
+
+            // Calculate the cross product of the tangent and binormal which will give the normal vector.
+            normal = Vector3.Cross(binormal, tangent);
+        }
+
+        /// <summary>
+        /// Generates a bounding box from a triangle list
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Returns the minimum bounding box that contains all the specified triangles</returns>
+        public static BoundingBox CreateBoundingBox(Triangle[] triangles)
+        {
+            BoundingBox bbox = new BoundingBox();
+
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                BoundingBox tbox = BoundingBox.FromPoints(triangles[i].GetCorners());
+
+                if (i == 0)
+                {
+                    bbox = tbox;
+                }
+                else
+                {
+                    bbox = BoundingBox.Merge(bbox, tbox);
+                }
+            }
+
+            return bbox;
+        }
+        /// <summary>
+        /// Generates a bounding sphere from a triangle list
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Returns the minimum bounding sphere that contains all the specified triangles</returns>
+        public static BoundingSphere CreateBoundingSphere(Triangle[] triangles)
+        {
+            BoundingSphere bsph = new BoundingSphere();
+
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                BoundingSphere tsph = BoundingSphere.FromPoints(triangles[i].GetCorners());
+
+                if (i == 0)
+                {
+                    bsph = tsph;
+                }
+                else
+                {
+                    bsph = BoundingSphere.Merge(bsph, tsph);
+                }
+            }
+
+            return bsph;
+        }
     }
 }

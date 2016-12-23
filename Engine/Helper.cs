@@ -785,31 +785,6 @@ namespace Engine
             return view * projection * ndcTransform;
         }
         /// <summary>
-        /// Generates a bounding box from a triangle list
-        /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <returns>Returns the minimum bounding box that contains all the specified triangles</returns>
-        public static BoundingBox CreateBoundingBox(Triangle[] triangles)
-        {
-            BoundingBox bbox = new BoundingBox();
-
-            for (int i = 0; i < triangles.Length; i++)
-            {
-                BoundingBox tbox = BoundingBox.FromPoints(triangles[i].GetCorners());
-
-                if (i == 0)
-                {
-                    bbox = tbox;
-                }
-                else
-                {
-                    bbox = BoundingBox.Merge(bbox, tbox);
-                }
-            }
-
-            return bbox;
-        }
-        /// <summary>
         /// Gets the x maganitude of the current bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
@@ -835,82 +810,6 @@ namespace Engine
         public static float GetZ(this BoundingBox bbox)
         {
             return bbox.Maximum.Z - bbox.Minimum.Z;
-        }
-        /// <summary>
-        /// Containment test between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.
-        /// </summary>
-        /// <param name="instance">Instance</param>
-        /// <param name="frustum">A <see cref="BoundingFrustum"/> for testing.</param>
-        /// <returns>Result of testing for containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.</returns>
-        public static ContainmentType Contains(this BoundingFrustum instance, BoundingFrustum frustum)
-        {
-            if (instance == frustum)
-            {
-                return ContainmentType.Contains;
-            }
-
-            var intersects = false;
-            for (var i = 0; i < 6; ++i)
-            {
-                var plane = instance.GetPlane(i);
-                PlaneIntersectionType planeIntersectionType;
-                frustum.Intersects(ref plane, out planeIntersectionType);
-                if (planeIntersectionType == PlaneIntersectionType.Back)
-                {
-                    return ContainmentType.Disjoint;
-                }
-                else if (planeIntersectionType == PlaneIntersectionType.Intersecting)
-                {
-                    intersects = true;
-                    break;
-                }
-            }
-
-            return intersects ? ContainmentType.Intersects : ContainmentType.Contains;
-        }
-        /// <summary>
-        /// Generates a bounding sphere from a triangle list
-        /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <returns>Returns the minimum bounding sphere that contains all the specified triangles</returns>
-        public static BoundingSphere CreateBoundingSphere(Triangle[] triangles)
-        {
-            BoundingSphere bsph = new BoundingSphere();
-
-            for (int i = 0; i < triangles.Length; i++)
-            {
-                BoundingSphere tsph = BoundingSphere.FromPoints(triangles[i].GetCorners());
-
-                if (i == 0)
-                {
-                    bsph = tsph;
-                }
-                else
-                {
-                    bsph = BoundingSphere.Merge(bsph, tsph);
-                }
-            }
-
-            return bsph;
-        }
-        /// <summary>
-        /// Toggle coordinates from left-handed to right-handed and vice versa
-        /// </summary>
-        /// <typeparam name="T">Index type</typeparam>
-        /// <param name="indices">Indices in a triangle list topology</param>
-        /// <returns>Returns a new array</returns>
-        public static T[] ChangeCoordinate<T>(T[] indices)
-        {
-            T[] res = new T[indices.Length];
-
-            for (int i = 0; i < indices.Length; i += 3)
-            {
-                res[i + 0] = indices[i + 0];
-                res[i + 1] = indices[i + 2];
-                res[i + 2] = indices[i + 1];
-            }
-
-            return res;
         }
         /// <summary>
         /// Offset for the x-coordinate

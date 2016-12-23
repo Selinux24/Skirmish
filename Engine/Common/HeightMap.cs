@@ -218,7 +218,7 @@ namespace Engine.Common
                 {
                     long index1 = (y * width) + x;
 
-                    Vector3 normal = Vector3.Up;
+                    Vector3 normal;
 
                     if (x == 0 || y == 0 || x == (depth - 1) || y == (width - 1))
                     {
@@ -227,9 +227,6 @@ namespace Engine.Common
                     }
                     else
                     {
-                        Vector3 tangent;
-                        Vector3 binormal;
-
                         Vector3 norm1;
                         Vector3 norm2;
                         Vector3 norm3;
@@ -247,41 +244,41 @@ namespace Engine.Common
                         index3 = (y * width) + (x - 1);
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        VertexData.ComputeNormals(pos1, pos3, pos2, out tangent, out binormal, out norm1);
+                        GeometryUtil.ComputeNormal(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, out norm1);
 
                         index2 = (y * width) + (x - 1);
                         index3 = ((y + 1) * width) + (x - 1);
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        VertexData.ComputeNormals(pos1, pos2, pos3, out tangent, out binormal, out norm2);
+                        GeometryUtil.ComputeNormal(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, out norm2);
 
                         index2 = ((y + 1) * width) + (x - 1);
                         index3 = ((y + 1) * width) + x;
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        VertexData.ComputeNormals(pos1, pos2, pos3, out tangent, out binormal, out norm3);
+                        GeometryUtil.ComputeNormal(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, out norm3);
 
                         index2 = ((y + 1) * width) + x;
                         index3 = (y * width) + (x + 1);
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        VertexData.ComputeNormals(pos1, pos2, pos3, out tangent, out binormal, out norm4);
+                        GeometryUtil.ComputeNormal(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, out norm4);
 
                         index2 = (y * width) + (x + 1);
                         index3 = ((y - 1) * width) + (x + 1);
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        VertexData.ComputeNormals(pos1, pos2, pos3, out tangent, out binormal, out norm5);
+                        GeometryUtil.ComputeNormal(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, out norm5);
 
                         index2 = ((y - 1) * width) + (x + 1);
                         index3 = ((y - 1) * width) + x;
                         pos2 = vertList[index2];
                         pos3 = vertList[index3];
-                        VertexData.ComputeNormals(pos1, pos2, pos3, out tangent, out binormal, out norm6);
+                        GeometryUtil.ComputeNormal(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, out norm6);
 
                         Vector3 norm = (norm1 + norm2 + norm3 + norm4 + norm5 + norm6) / 6.0f;
 
-                        normal = -Vector3.Normalize(norm);
+                        normal = Vector3.Normalize(norm);
                     }
 
                     vertList[index1].Normal = normal;
