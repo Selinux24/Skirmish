@@ -29,6 +29,9 @@ namespace SceneTest
         private Model vehicleLeopard = null;
         private ModelInstanced vehicleLeopardI = null;
 
+        private Model lamp = null;
+        private ModelInstanced lampI = null;
+
         private SkyScattering sky = null;
 
         public SceneTextures(Game game)
@@ -47,6 +50,9 @@ namespace SceneTest
             this.Camera.LookTo(0, 0, 0);
 
             this.Lights.DirectionalLights[0].CastShadow = true;
+            this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[1].Enabled = false;
+            this.Lights.DirectionalLights[2].Enabled = false;
 
             this.InitializeTextBoxes();
             this.InitializeSkyEffects();
@@ -54,8 +60,9 @@ namespace SceneTest
             this.InitializeBuildingObelisk();
             this.InitializeCharacterSoldier();
             this.InitializeVehiclesLeopard();
+            this.InitializeLamps();
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(7, 30, 00), 5f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(21, 30, 00), 5f);
 
             this.SceneVolume = new BoundingSphere(Vector3.Zero, 150f);
         }
@@ -224,7 +231,7 @@ namespace SceneTest
             AnimationPath p1 = new AnimationPath();
             p1.AddLoop("idle1");
 
-            this.characterSoldier.Manipulator.SetPosition(s, 0, -s);
+            this.characterSoldier.Manipulator.SetPosition(s - 10, 0, -s);
             this.characterSoldier.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.characterSoldier.AnimationController.AddPath(p1);
             this.characterSoldier.AnimationController.Start(0);
@@ -290,6 +297,60 @@ namespace SceneTest
             this.vehicleLeopardI.Instances[1].Manipulator.SetScale(12);
             this.vehicleLeopardI.Instances[2].Manipulator.SetScale(12);
             this.vehicleLeopardI.Instances[3].Manipulator.SetScale(12);
+        }
+        private void InitializeLamps()
+        {
+            this.lamp = this.AddModel(
+                "SceneTextures/lamps",
+                "lamp.xml",
+                new ModelDescription()
+                {
+                    CastShadow = true,
+                    Static = true,
+                });
+
+            this.lampI = this.AddInstancingModel(
+                "SceneTextures/lamps",
+                "lamp.xml",
+                new ModelInstancedDescription()
+                {
+                    CastShadow = true,
+                    Static = true,
+                    Instances = 4,
+                });
+
+            float lAngle = 20f;
+            float lRadius = 50f;
+            float lIntensity = 200f;
+            Color lColor = Color.LightYellow;
+
+            float dist = 0.23f;
+            float pitch = MathUtil.DegreesToRadians(165) * -1;
+
+            this.lamp.Manipulator.SetPosition(0, spaceSize, -spaceSize * dist, true);
+            this.lamp.Manipulator.SetRotation(0, pitch, 0, true);
+            var spot = new SceneLightSpot("spot", false, lColor, lColor, true, this.lamp.Manipulator.Position, this.lamp.Manipulator.Up, lAngle, lRadius, lIntensity);
+
+            this.lampI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, spaceSize, -spaceSize * dist, true);
+            this.lampI.Instances[1].Manipulator.SetPosition(spaceSize * 2, spaceSize, -spaceSize * dist, true);
+            this.lampI.Instances[2].Manipulator.SetPosition(-spaceSize * dist, spaceSize, -spaceSize * 2, true);
+            this.lampI.Instances[3].Manipulator.SetPosition(-spaceSize * dist, spaceSize, spaceSize * 2, true);
+
+            this.lampI.Instances[0].Manipulator.SetRotation(0, pitch, 0, true);
+            this.lampI.Instances[1].Manipulator.SetRotation(0, pitch, 0, true);
+            this.lampI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0, true);
+            this.lampI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0, true);
+
+            var spot0 = new SceneLightSpot("spot0", false, lColor, lColor, true, this.lampI.Instances[0].Manipulator.Position, this.lampI.Instances[0].Manipulator.Up, lAngle, lRadius, lIntensity);
+            var spot1 = new SceneLightSpot("spot1", false, lColor, lColor, true, this.lampI.Instances[1].Manipulator.Position, this.lampI.Instances[1].Manipulator.Up, lAngle, lRadius, lIntensity);
+            var spot2 = new SceneLightSpot("spot2", false, lColor, lColor, true, this.lampI.Instances[2].Manipulator.Position, this.lampI.Instances[2].Manipulator.Up, lAngle, lRadius, lIntensity);
+            var spot3 = new SceneLightSpot("spot3", false, lColor, lColor, true, this.lampI.Instances[3].Manipulator.Position, this.lampI.Instances[3].Manipulator.Up, lAngle, lRadius, lIntensity);
+
+            this.Lights.Add(spot);
+            this.Lights.Add(spot0);
+            this.Lights.Add(spot1);
+            this.Lights.Add(spot2);
+            this.Lights.Add(spot3);
         }
 
         public override void Update(GameTime gameTime)

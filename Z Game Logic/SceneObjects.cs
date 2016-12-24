@@ -31,7 +31,7 @@ namespace GameLogic
 
         private Model cursor3D = null;
 
-        private SceneLightPoint pointLight = null;
+        private SceneLightSpot spotLight = null;
 
         private ModelInstanced soldier = null;
         private GridAgent soldierAgent = null;
@@ -110,18 +110,19 @@ namespace GameLogic
 
             this.NewGame();
 
-            this.pointLight = new SceneLightPoint()
-            {
-                Name = "Current soldier",
-                Enabled = true,
-                DiffuseColor = Color.White,
-                SpecularColor = Color.White,
-                Position = Vector3.Zero,
-                Intensity = 1f,
-                Radius = 3f,
-            };
+            this.spotLight = new SceneLightSpot(
+                "Current soldier",
+                false,
+                Color.White,
+                Color.White,
+                true,
+                Vector3.Zero,
+                Vector3.Down,
+                15f,
+                15f,
+                100f);
 
-            this.Lights.Add(this.pointLight);
+            this.Lights.Add(this.spotLight);
 
             #region 3D models
 
@@ -442,7 +443,7 @@ namespace GameLogic
                     this.GoToSoldier(this.skirmishGame.CurrentSoldier);
                 }
 
-                this.pointLight.Position = this.soldierModels[this.skirmishGame.CurrentSoldier].Manipulator.Position;
+                this.spotLight.Position = this.soldierModels[this.skirmishGame.CurrentSoldier].Manipulator.Position + (Vector3.UnitY * 10f);
 
                 #endregion
 

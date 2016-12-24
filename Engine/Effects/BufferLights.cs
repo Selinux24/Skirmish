@@ -178,6 +178,22 @@ namespace Engine.Effects
         /// Intensity
         /// </summary>
         public float Intensity;
+        /// <summary>
+        /// Light radius
+        /// </summary>
+        public float Radius;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad1;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad2;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public float Pad3;
 
         /// <summary>
         /// Size in bytes
@@ -208,7 +224,12 @@ namespace Engine.Effects
             this.SpecularColor = light.SpecularColor;
             this.Intensity = light.Intensity;
             this.Intensity = light.Intensity;
-            this.Angle = light.Angle;
+            this.Angle = light.AngleRadians;
+            this.Radius = light.Radius;
+
+            this.Pad1 = 1000;
+            this.Pad2 = 2000;
+            this.Pad3 = 3000;
         }
     }
 }

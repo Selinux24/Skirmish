@@ -523,26 +523,24 @@ namespace TerrainTest
             this.Lights.DirectionalLights[0].Enabled = true;
             this.Lights.DirectionalLights[1].Enabled = true;
             this.Lights.DirectionalLights[2].Enabled = true;
-            this.Lights.Add(new SceneLightPoint()
-            {
-                Name = "One point",
-                Enabled = true,
-                DiffuseColor = Color.Blue,
-                SpecularColor = Color.Blue,
-                Intensity = 10f,
-                Position = Vector3.Zero,
-                Radius = 2f,
-            });
-            this.Lights.Add(new SceneLightPoint()
-            {
-                Name = "Another point",
-                Enabled = true,
-                DiffuseColor = Color.Red,
-                SpecularColor = Color.Red,
-                Intensity = 10f,
-                Position = Vector3.Zero,
-                Radius = 2f,
-            });
+            this.Lights.Add(new SceneLightPoint(
+                "Blue point",
+                false,
+                Color.Blue,
+                Color.Blue,
+                true,
+                Vector3.Zero,
+                2f,
+                5f));
+            this.Lights.Add(new SceneLightPoint(
+                "Red point",
+                false,
+                Color.Red,
+                Color.Red,
+                true,
+                Vector3.Zero,
+                2f,
+                5f));
 
             #endregion
 

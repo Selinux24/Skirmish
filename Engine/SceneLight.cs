@@ -33,6 +33,23 @@ namespace Engine
         public object State = null;
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Light name</param>
+        /// <param name="castShadow">Light casts shadow</param>
+        /// <param name="diffuse">Diffuse color contribution</param>
+        /// <param name="specular">Specular color contribution</param>
+        /// <param name="enabled">Lights is enabled</param>
+        public SceneLight(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled)
+        {
+            this.Name = name;
+            this.CastShadow = castShadow;
+            this.DiffuseColor = diffuse;
+            this.SpecularColor = specular;
+            this.Enabled = enabled;
+        }
+
+        /// <summary>
         /// Gets the text representation of the light
         /// </summary>
         /// <returns>Returns the text representation of the light</returns>

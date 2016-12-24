@@ -341,25 +341,29 @@ namespace HeightmapTest
 
                         position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
 
-                        this.spotLight1 = new SceneLightSpot(position, Vector3.Normalize(Vector3.One * -1f), 25, 25)
-                        {
-                            Name = "Spot",
-                            DiffuseColor = Color.Red,
-                            SpecularColor = Color.Red,
-                            Intensity = 10f,
-                            Enabled = true,
-                            CastShadow = false,
-                        };
+                        this.spotLight1 = new SceneLightSpot(
+                            "Red Spot",
+                            false,
+                            Color.Red,
+                            Color.Red,
+                            true,
+                            position, 
+                            Vector3.Normalize(Vector3.One * -1f), 
+                            25, 
+                            25,
+                            100);
 
-                        this.spotLight2 = new SceneLightSpot(position, Vector3.Normalize(Vector3.One * -1f), 25, 25)
-                        {
-                            Name = "Spot",
-                            DiffuseColor = Color.Blue,
-                            SpecularColor = Color.Blue,
-                            Intensity = 10f,
-                            Enabled = true,
-                            CastShadow = false,
-                        };
+                        this.spotLight2 = new SceneLightSpot(
+                            "Blue Spot",
+                            false,
+                            Color.Blue,
+                            Color.Blue,
+                            true,
+                            position,
+                            Vector3.Normalize(Vector3.One * -1f),
+                            25,
+                            25,
+                            100);
 
                         this.Lights.Add(this.spotLight1);
                         this.Lights.Add(this.spotLight2);
@@ -390,17 +394,15 @@ namespace HeightmapTest
 
                     pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
 
-                    this.torchLights[i - 1] = new SceneLightPoint()
-                    {
-                        Name = string.Format("Torch {0}", i),
-                        DiffuseColor = color,
-                        SpecularColor = color,
-                        Intensity = 5f,
-                        Position = pos,
-                        Radius = 4f,
-                        Enabled = true,
-                        CastShadow = false,
-                    };
+                    this.torchLights[i - 1] = new SceneLightPoint(
+                        string.Format("Torch {0}", i),
+                        false,
+                        color,
+                        color,
+                        true,
+                        pos,
+                        4f,
+                        5f);
 
                     this.Lights.Add(this.torchLights[i - 1]);
                 }

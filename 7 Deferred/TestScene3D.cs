@@ -792,15 +792,17 @@ namespace DeferredTest
 
                 Vector3 direction = -Vector3.Normalize(lightPosition);
 
-                this.spotLight = new SceneLightSpot(lightPosition, direction, 25, 25)
-                {
-                    Name = "Spot the dog",
-                    DiffuseColor = Color.Yellow,
-                    SpecularColor = Color.Yellow,
-                    Intensity = 25f,
-                    Enabled = true,
-                    CastShadow = false,
-                };
+                this.spotLight = new SceneLightSpot(
+                    "Spot the dog",
+                    false,
+                    Color.Yellow,
+                    Color.Yellow,
+                    true,
+                    lightPosition, 
+                    direction, 
+                    25, 
+                    25,
+                    25f);
 
                 this.Lights.Add(this.spotLight);
 
@@ -845,17 +847,17 @@ namespace DeferredTest
 
                     var color = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f);
 
-                    SceneLightPoint pointLight = new SceneLightPoint()
-                    {
-                        Name = string.Format("Point {0}", this.Lights.PointLights.Length),
-                        Enabled = true,
-                        DiffuseColor = color,
-                        SpecularColor = color,
-                        Intensity = 500f,
-                        Position = lightPosition,
-                        Radius = 5f,
-                        State = rnd.NextFloat(0, 1) >= 0.5f ? 1 : -1,
-                    };
+                    SceneLightPoint pointLight = new SceneLightPoint(
+                        string.Format("Point {0}", this.Lights.PointLights.Length),
+                        false,
+                        color,
+                        color,
+                        true,
+                        lightPosition,
+                        5f,
+                        500f);
+
+                    pointLight.State = rnd.NextFloat(0, 1) >= 0.5f ? 1 : -1;
 
                     this.Lights.Add(pointLight);
                 }

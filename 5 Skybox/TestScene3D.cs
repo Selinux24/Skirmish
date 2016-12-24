@@ -183,16 +183,16 @@ namespace Skybox
             this.Lights.DirectionalLights[2].Enabled = false;
             this.directionalLightCount = this.Lights.DirectionalLights.Length;
 
-            this.movingFireLight = new SceneLightPoint()
-            {
-                Name = "Moving fire light",
-                DiffuseColor = Color.Orange,
-                Intensity = 1f,
-                Position = Vector3.Zero,
-                Radius = 5f,
-                Enabled = true,
-                CastShadow = false,
-            };
+            this.movingFireLight = new SceneLightPoint(
+                "Moving fire light",
+                false,
+                Color.Orange,
+                Color.Orange,
+                true,
+                Vector3.Zero,
+                5f,
+                10f);
+
             this.Lights.Add(this.movingFireLight);
 
             Vector3[] firePositions3D = new Vector3[this.firePositions.Length];
@@ -216,16 +216,15 @@ namespace Skybox
 
                 firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
 
-                this.torchLights[i] = new SceneLightPoint()
-                {
-                    Name = string.Format("Torch {0}", i),
-                    DiffuseColor = color,
-                    Intensity = 5f,
-                    Position = firePositions3D[i],
-                    Radius = 4f,
-                    Enabled = true,
-                    CastShadow = false,
-                };
+                this.torchLights[i] = new SceneLightPoint(
+                    string.Format("Torch {0}", i),
+                    false,
+                    color,
+                    color,
+                    true,
+                    firePositions3D[i],
+                    4f,
+                    5f);
 
                 this.Lights.Add(this.torchLights[i]);
 

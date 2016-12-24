@@ -14,15 +14,13 @@ namespace Engine
         {
             get
             {
-                return new SceneLightDirectional()
-                {
-                    Name = "Key light",
-                    Direction = new Vector3(-0.5265408f, -0.5735765f, -0.6275069f),
-                    DiffuseColor = new Color4(1, 0.9607844f, 0.8078432f, 1f),
-                    SpecularColor = new Color4(1, 0.9607844f, 0.8078432f, 1f),
-                    CastShadow = true,
-                    Enabled = true,
-                };
+                return new SceneLightDirectional(
+                    "Key light", 
+                    true,
+                    new Color4(1, 0.9607844f, 0.8078432f, 1f),
+                    new Color4(1, 0.9607844f, 0.8078432f, 1f),
+                    true,
+                    new Vector3(-0.5265408f, -0.5735765f, -0.6275069f));
             }
         }
         /// <summary>
@@ -32,15 +30,13 @@ namespace Engine
         {
             get
             {
-                return new SceneLightDirectional()
-                {
-                    Name = "Fill light",
-                    Direction = new Vector3(0.7198464f, 0.3420201f, 0.6040227f),
-                    DiffuseColor = new Color4(0.9647059f, 0.7607844f, 0.4078432f, 1f),
-                    SpecularColor = new Color4(0, 0, 0, 0),
-                    CastShadow = false,
-                    Enabled = true,
-                };
+                return new SceneLightDirectional(
+                    "Fill light", 
+                    false,
+                    new Color4(0.9647059f, 0.7607844f, 0.4078432f, 1f),
+                    new Color4(0, 0, 0, 0),
+                    true,
+                    new Vector3(0.7198464f, 0.3420201f, 0.6040227f));
             }
         }
         /// <summary>
@@ -50,15 +46,13 @@ namespace Engine
         {
             get
             {
-                return new SceneLightDirectional()
-                {
-                    Name = "Back light",
-                    Direction = new Vector3(0.4545195f, -0.7660444f, 0.4545195f),
-                    DiffuseColor = new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
-                    SpecularColor = new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
-                    CastShadow = false,
-                    Enabled = true,
-                };
+                return new SceneLightDirectional(
+                    "Back light", 
+                    false,
+                    new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
+                    new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
+                    true,
+                    new Vector3(0.4545195f, -0.7660444f, 0.4545195f));
             }
         }
 
@@ -66,6 +60,21 @@ namespace Engine
         /// Light direction
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Light name</param>
+        /// <param name="castShadow">Light casts shadow</param>
+        /// <param name="diffuse">Diffuse color contribution</param>
+        /// <param name="specular">Specular color contribution</param>
+        /// <param name="enabled">Lights is enabled</param>
+        /// <param name="direction">Direction</param>
+        public SceneLightDirectional(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled, Vector3 direction)
+            : base(name, castShadow, diffuse, specular, enabled)
+        {
+            this.Direction = direction;
+        }
 
         /// <summary>
         /// Gets light position at specified distance

@@ -68,6 +68,29 @@ namespace Engine
         public Matrix Transform { get; private set; }
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Light name</param>
+        /// <param name="castShadow">Light casts shadow</param>
+        /// <param name="diffuse">Diffuse color contribution</param>
+        /// <param name="specular">Specular color contribution</param>
+        /// <param name="enabled">Lights is enabled</param>
+        /// <param name="position">Position</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="intensity">Intensity</param>
+        public SceneLightPoint(
+            string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled,
+            Vector3 position, float radius, float intensity)
+            : base(name, castShadow, diffuse, specular, enabled)
+        {
+            this.position = position;
+            this.radius = radius;
+            this.Intensity = intensity;
+
+            this.Update();
+        }
+
+        /// <summary>
         /// Updates internal state
         /// </summary>
         private void Update()

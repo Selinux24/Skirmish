@@ -88,7 +88,7 @@ namespace Collada
             this.ground = this.AddScenery("resources", "ground.xml", terrainDescription);
 
             this.helicoptersModel = this.AddInstancingModel(
-                "resources", 
+                "resources",
                 "Helicopter.xml",
                 new ModelInstancedDescription()
                 {
@@ -122,27 +122,27 @@ namespace Collada
             this.Lights.FogRange = this.Camera.FarPlaneDistance * fogRangeRel;
             this.Lights.FogColor = Color.WhiteSmoke;
 
-            this.Lights.Add(new SceneLightPoint()
-            {
-                Name = "Point light",
-                DiffuseColor = Color.White,
-                SpecularColor = Color.White,
-                Intensity = 0.7f,
-                Position = Vector3.Zero,
-                Radius = 5f,
-                Enabled = true,
-                CastShadow = false,
-            });
+            this.Lights.Add(new SceneLightPoint(
+                "Point light",
+                false,
+                Color.White,
+                Color.White,
+                true,
+                Vector3.Zero,
+                5f,
+                0.7f));
 
-            this.Lights.Add(new SceneLightSpot(Vector3.Down, Vector3.Zero, MathUtil.DegreesToRadians(10f), 15f)
-            {
-                Name = "Helilight",
-                DiffuseColor = Color.White,
-                SpecularColor = Color.White,
-                Intensity = 1.0f,
-                Enabled = true,
-                CastShadow = false,
-            });
+            this.Lights.Add(new SceneLightSpot(
+                "Helilight",
+                false,
+                Color.White,
+                Color.White,
+                true,
+                Vector3.Zero,
+                Vector3.Down,
+                10f,
+                15f,
+                1f));
 
             this.ground.UpdateInternals();
 

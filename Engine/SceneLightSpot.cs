@@ -15,6 +15,10 @@ namespace Engine
         /// Radius
         /// </summary>
         private float radius = 1f;
+        /// <summary>
+        /// Cone angle
+        /// </summary>
+        private float angle = 0f;
 
         /// <summary>
         /// Ligth position
@@ -40,9 +44,33 @@ namespace Engine
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
         /// <summary>
-        /// Spot exponent used in the spotlight calculation to control the cone
+        /// Cone angle in degrees
         /// </summary>
-        public float Angle = 0.0f;
+        public float Angle
+        {
+            get
+            {
+                return this.angle;
+            }
+            set
+            {
+                this.angle = value;
+            }
+        }
+        /// <summary>
+        /// Cone angle in radians
+        /// </summary>
+        public float AngleRadians
+        {
+            get
+            {
+                return MathUtil.DegreesToRadians(this.angle);
+            }
+            set
+            {
+                this.angle = MathUtil.RadiansToDegrees(value);
+            }
+        }
         /// <summary>
         /// Light radius
         /// </summary>
@@ -69,7 +97,7 @@ namespace Engine
         /// <summary>
         /// Gets the bounding sphere of the active light
         /// </summary>
-        public BoundingFrustum BoundingFrustum { get; private set; }
+        public BoundingSphere BoundingSphere { get; private set; }
         /// <summary>
         /// Transform matrix
         /// </summary>
@@ -78,16 +106,26 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Light name</param>
+        /// <param name="castShadow">Light casts shadow</param>
+        /// <param name="diffuse">Diffuse color contribution</param>
+        /// <param name="specular">Specular color contribution</param>
+        /// <param name="enabled">Lights is enabled</param>
         /// <param name="position">Position</param>
         /// <param name="direction">Direction</param>
-        /// <param name="angle">Angle</param>
+        /// <param name="angle">Angle in degrees</param>
         /// <param name="radius">Radius</param>
-        public SceneLightSpot(Vector3 position, Vector3 direction, float angle, float radius)
+        /// <param name="intensity">Intensity</param>
+        public SceneLightSpot(
+            string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled,
+            Vector3 position, Vector3 direction, float angle, float radius, float intensity)
+            : base(name, castShadow, diffuse, specular, enabled)
         {
             this.position = position;
             this.Direction = direction;
-            this.Angle = angle;
+            this.angle = angle;
             this.radius = radius;
+            this.Intensity = intensity;
 
             this.Update();
         }
@@ -97,18 +135,7 @@ namespace Engine
         /// </summary>
         private void Update()
         {
-            //TODO: apply direction to spot light transform
-            this.Transform = Matrix.Scaling(this.radius) * Matrix.Translation(this.position);
-
-            Vector3 direction = Vector3.Normalize(this.Transform.Down);
-            Vector3 up = Vector3.Normalize(direction == Vector3.Down ? this.Transform.Left : this.Transform.Up);
-
-            this.BoundingFrustum = BoundingFrustum.FromCamera(
-                this.position,
-                direction,
-                up,
-                MathUtil.DegreesToRadians(this.Angle),
-                0.1f, 100f, 1f);
+            this.BoundingSphere = new BoundingSphere(this.position, this.radius);
         }
     }
 }

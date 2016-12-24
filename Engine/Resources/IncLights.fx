@@ -126,6 +126,10 @@ struct SpotLight
 	float Angle;
 	float3 Direction;
 	float Intensity;
+	float Radius;
+	float Pad1;
+	float Pad2;
+	float Pad3;
 };
 
 Material MaterialDefault()
@@ -176,22 +180,6 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, floa
 	
 	// Transform from tangent space to world space.
 	return normalize(mul(normalT, TBN));
-}
-float CalcSphericAttenuation(float radius, float intensity, float maxDistance, float distance)
-{
-    float f = distance / maxDistance;
-    float denom = 1.0f - (f * f);
-    if (denom > 0.0f)
-    {
-        float d = distance / (1.0f - (f * f));
-        float dn = (d / radius) + 1.0f;
-        
-		return intensity / (dn * dn);
-    }
-    else
-    {
-        return 0.0f;
-    }
 }
 float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shadowMapStatic, Texture2D shadowMapDynamic)
 {
@@ -259,6 +247,30 @@ void BlinnPhong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, f
 	specular = (pow(max(0, dot(N, normalize(L + V))), lShininess)) * lSpecular;
 }
 
+float CalcSphericAttenuation(float intensity, float radius, float distance)
+{
+    float attenuation = 0.0f;
+
+    float f = distance / radius;
+    float denom = max(1.0f - (f * f), 0.0f);
+    if (denom > 0.0f)
+    {
+        float d = distance / (1.0f - (f * f));
+        float dn = (d / intensity) + 1.0f;
+
+        attenuation = 1.0f / (dn * dn);
+    }
+
+    return attenuation;
+}
+float CalcSpotCone(float3 lightDirection, float spotAngle, float3 L)
+{
+    float minCos = cos(spotAngle);
+    float maxCos = (minCos + 1.0f) * 0.5f;
+    float cosAngle = dot(lightDirection, -L);
+    return smoothstep(minCos, maxCos, cosAngle); 
+}
+
 void ComputeDirectionalLight(
 	DirectionalLight dirLight,
 	float shininess,
@@ -309,7 +321,7 @@ void ComputePointLight(
 
 	BlinnPhong(pointLight.Diffuse, pointLight.Specular, shininess, L, pNormal, V, R, diffuse, specular);
 
-	float attenuation = CalcSphericAttenuation(1, pointLight.Intensity, pointLight.Radius, D);
+	float attenuation = CalcSphericAttenuation(pointLight.Intensity, pointLight.Radius, D);
 
 	diffuse *= attenuation;
 	specular *= attenuation;
@@ -328,16 +340,16 @@ void ComputeSpotLight(
 	out float4 diffuse, 
 	out float4 specular)
 {
-	float D = length(spotLight.Position - pPosition);
-	float3 L = normalize(spotLight.Position - pPosition);
+	float3 L = spotLight.Position - pPosition;
+	float D = length(L);
+	L /= D;
 	float3 V = normalize(ePosition - pPosition);
 	float3 R = 2 * dot(L, pNormal) * pNormal - L;
-	float S = acos(dot(L, spotLight.Direction));
 
 	BlinnPhong(spotLight.Diffuse, spotLight.Specular, shininess, L, pNormal, V, R, diffuse, specular);
 		
-	float attenuation = CalcSphericAttenuation(1, spotLight.Intensity, spotLight.Intensity, D);
-	attenuation *= (1.0f - (1.0f - S) * 1.0f / (1.0f - spotLight.Angle));
+	float attenuation = CalcSphericAttenuation(spotLight.Intensity, spotLight.Radius, D);
+	attenuation *= CalcSpotCone(spotLight.Direction, spotLight.Angle, L);
 
 	diffuse *= attenuation;
 	specular *= attenuation;
@@ -413,7 +425,7 @@ float4 ComputeLights(
 
 		BlinnPhong(pointLights[i].Diffuse, pointLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
 
-		attenuation = CalcSphericAttenuation(1, pointLights[i].Intensity, pointLights[i].Radius, D);
+		attenuation = CalcSphericAttenuation(pointLights[i].Intensity, pointLights[i].Radius, D);
 
 		lDiffuse += (cDiffuse * attenuation);
 		lSpecular += (cSpecular * attenuation);
@@ -426,12 +438,11 @@ float4 ComputeLights(
 		L = normalize(spotLights[i].Position - pPosition);
 		V = normalize(ePosition - pPosition);
 		R = 2 * dot(L, pNormal) * pNormal - L;
-		S = acos(dot(L, spotLights[i].Direction));
 
 		BlinnPhong(spotLights[i].Diffuse, spotLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
 		
-		attenuation = CalcSphericAttenuation(1, spotLights[i].Intensity, spotLights[i].Intensity, D);
-		attenuation *= (1.0f - (1.0f - S) * 1.0f / (1.0f - spotLights[i].Angle));
+		attenuation = CalcSphericAttenuation(spotLights[i].Intensity, spotLights[i].Radius, D);
+		attenuation *= CalcSpotCone(spotLights[i].Direction, spotLights[i].Angle, L);
 
 		lDiffuse += (cDiffuse * attenuation);
 		lSpecular += (cSpecular * attenuation);
