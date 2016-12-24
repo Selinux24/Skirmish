@@ -701,7 +701,7 @@ namespace DeferredTest
                     this.spotLight.Intensity = Math.Max(0f, this.spotLight.Intensity);
                 }
 
-                this.lineDrawer.SetLines(Color.White, Line3D.CreateWiredFrustum(this.spotLight.BoundingFrustum));
+                this.lineDrawer.SetLines(Color.White, Line3D.CreateWiredSphere(this.spotLight.BoundingSphere, 10, 10));
                 this.lineDrawer.SetLines(Color.Red, Line3D.CreateAxis(this.spotLight.Transform, 1f));
             }
             else

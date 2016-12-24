@@ -626,15 +626,26 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            this.visibleNodes = this.pickingQuadtree.GetNodesInVolume(ref context.Frustum);
-
             this.updateContext.BaseContext = context;
 
-            for (int i = 0; i < this.visibleNodes.Length; i++)
+            this.visibleNodes = this.pickingQuadtree.GetNodesInVolume(ref context.Frustum);
+            if (this.visibleNodes != null && this.visibleNodes.Length > 0)
             {
-                var current = this.visibleNodes[i];
+                //Sort nodes - draw far nodes first
+                Array.Sort(this.visibleNodes, (n1, n2) =>
+                {
+                    var d1 = (n1.Center - context.EyePosition).LengthSquared();
+                    var d2 = (n2.Center - context.EyePosition).LengthSquared();
 
-                this.patchDictionary[current.Id].Update(this.updateContext, current);
+                    return -d1.CompareTo(d2);
+                });
+
+                for (int i = 0; i < this.visibleNodes.Length; i++)
+                {
+                    var current = this.visibleNodes[i];
+
+                    this.patchDictionary[current.Id].Update(this.updateContext, current);
+                }
             }
         }
         /// <summary>
