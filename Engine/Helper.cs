@@ -423,10 +423,32 @@ namespace Engine
                 MathUtil.WithinEpsilon(a.Y, b.Y, epsilon) &&
                 MathUtil.WithinEpsilon(a.Z, b.Z, epsilon);
         }
-
+        /// <summary>
+        /// Returns xyz components from Vector4
+        /// </summary>
+        /// <param name="vector">Vector4</param>
+        /// <returns>Returns xyz components from Vector4</returns>
         public static Vector3 XYZ(this Vector4 vector)
         {
             return new Vector3(vector.X, vector.Y, vector.Z);
+        }
+        /// <summary>
+        /// Returns rgb components from Color4
+        /// </summary>
+        /// <param name="color">Color4</param>
+        /// <returns>Returns rgb components from Color4</returns>
+        public static Color3 RGB(this Color4 color)
+        {
+            return new Color3(color.Red, color.Green, color.Blue);
+        }
+        /// <summary>
+        /// Returns rgb components from Color
+        /// </summary>
+        /// <param name="color">Color</param>
+        /// <returns>Returns rgb components from Color</returns>
+        public static Color3 RGB(this Color color)
+        {
+            return color.ToColor4().RGB();
         }
         /// <summary>
         /// Gets next pair of even number, if even
@@ -785,6 +807,32 @@ namespace Engine
             return view * projection * ndcTransform;
         }
         /// <summary>
+        /// Creates a new world Matrix
+        /// </summary>
+        /// <param name="position">The position vector.</param>
+        /// <param name="forward">The forward direction vector.</param>
+        /// <param name="up">The upward direction vector. Usually <see cref="Vector3.Up"/>.</param>
+        /// <returns>The world Matrix</returns>
+        public static Matrix CreateWorld(Vector3 position, Vector3 forward, Vector3 up)
+        {
+            Matrix result = new Matrix();
+
+            Vector3 x, y, z;
+            Vector3.Normalize(ref forward, out z);
+            Vector3.Cross(ref forward, ref up, out x);
+            Vector3.Cross(ref x, ref forward, out y);
+            x.Normalize();
+            y.Normalize();
+
+            result.Right = x;
+            result.Up = y;
+            result.Forward = z;
+            result.TranslationVector = position;
+            result.M44 = 1f;
+
+            return result;
+        }
+        /// <summary>
         /// Gets the x maganitude of the current bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
@@ -883,7 +931,7 @@ namespace Engine
         {
             return float.IsInfinity(color.Red) || float.IsInfinity(color.Green) || float.IsInfinity(color.Blue) || float.IsInfinity(color.Alpha);
         }
-        
+
         /// <summary>
         /// Gets matrix description
         /// </summary>

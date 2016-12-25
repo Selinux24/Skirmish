@@ -34,6 +34,8 @@ namespace SceneTest
 
         private SkyScattering sky = null;
 
+        private LineListDrawer lightsVolumeDrawer = null;
+
         public SceneTextures(Game game)
             : base(game)
         {
@@ -61,6 +63,8 @@ namespace SceneTest
             this.InitializeCharacterSoldier();
             this.InitializeVehiclesLeopard();
             this.InitializeLamps();
+
+            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { }, 1000);
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(21, 30, 00), 5f);
 
@@ -329,7 +333,7 @@ namespace SceneTest
 
             this.lamp.Manipulator.SetPosition(0, spaceSize, -spaceSize * dist, true);
             this.lamp.Manipulator.SetRotation(0, pitch, 0, true);
-            var spot = new SceneLightSpot("spot", false, lColor, lColor, true, this.lamp.Manipulator.Position, this.lamp.Manipulator.Up, lAngle, lRadius, lIntensity);
+            var spot = new SceneLightSpot("spot", false, Color.LightYellow, Color.LightYellow, true, this.lamp.Manipulator.Position, this.lamp.Manipulator.Up, lAngle, lRadius, lIntensity);
 
             this.lampI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, spaceSize, -spaceSize * dist, true);
             this.lampI.Instances[1].Manipulator.SetPosition(spaceSize * 2, spaceSize, -spaceSize * dist, true);
@@ -341,10 +345,10 @@ namespace SceneTest
             this.lampI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0, true);
             this.lampI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0, true);
 
-            var spot0 = new SceneLightSpot("spot0", false, lColor, lColor, true, this.lampI.Instances[0].Manipulator.Position, this.lampI.Instances[0].Manipulator.Up, lAngle, lRadius, lIntensity);
-            var spot1 = new SceneLightSpot("spot1", false, lColor, lColor, true, this.lampI.Instances[1].Manipulator.Position, this.lampI.Instances[1].Manipulator.Up, lAngle, lRadius, lIntensity);
-            var spot2 = new SceneLightSpot("spot2", false, lColor, lColor, true, this.lampI.Instances[2].Manipulator.Position, this.lampI.Instances[2].Manipulator.Up, lAngle, lRadius, lIntensity);
-            var spot3 = new SceneLightSpot("spot3", false, lColor, lColor, true, this.lampI.Instances[3].Manipulator.Position, this.lampI.Instances[3].Manipulator.Up, lAngle, lRadius, lIntensity);
+            var spot0 = new SceneLightSpot("spot0", false, Color.Red, Color.Red, true, this.lampI.Instances[0].Manipulator.Position, this.lampI.Instances[0].Manipulator.Up, lAngle, lRadius, lIntensity);
+            var spot1 = new SceneLightSpot("spot1", false, Color.Green, Color.Green, true, this.lampI.Instances[1].Manipulator.Position, this.lampI.Instances[1].Manipulator.Up, lAngle, lRadius, lIntensity);
+            var spot2 = new SceneLightSpot("spot2", false, Color.Blue, Color.Blue, true, this.lampI.Instances[2].Manipulator.Position, this.lampI.Instances[2].Manipulator.Up, lAngle, lRadius, lIntensity);
+            var spot3 = new SceneLightSpot("spot3", false, Color.Violet, Color.Violet, true, this.lampI.Instances[3].Manipulator.Position, this.lampI.Instances[3].Manipulator.Up, lAngle, lRadius, lIntensity);
 
             this.Lights.Add(spot);
             this.Lights.Add(spot0);
@@ -366,6 +370,29 @@ namespace SceneTest
             #region Camera
 
             this.UpdateCamera(gameTime, shift, rightBtn);
+
+            #endregion
+
+            #region Debug
+
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.lightsVolumeDrawer.Clear();
+
+                foreach (var spot in this.Lights.SpotLights)
+                {
+                    var lines = spot.GetVolume();
+
+                    this.lightsVolumeDrawer.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                }
+
+                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
+            }
 
             #endregion
 

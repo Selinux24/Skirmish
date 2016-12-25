@@ -131,6 +131,23 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets the light volume
+        /// </summary>
+        /// <returns>Returns a line list representing the light volume</returns>
+        public Line3D[] GetVolume()
+        {
+            var lines = Line3D.CreateWiredConeAngle(this.AngleRadians, this.Radius, 10);
+
+            //The wired cone has his basin on XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
+            Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
+
+            //Then move and rotate the cone to light position and direction
+            Matrix trn = Helper.CreateWorld(this.Position, this.Direction, Vector3.Up);
+
+            return Line3D.Transform(lines, rot * trn);
+        }
+
+        /// <summary>
         /// Updates internal state
         /// </summary>
         private void Update()

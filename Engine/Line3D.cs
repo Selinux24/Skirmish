@@ -236,13 +236,19 @@ namespace Engine
 
             return CreateFromVertices(vertList.ToArray(), indexList.ToArray());
         }
-        public static Line3D[] CreateWiredCone(Vector3 center, float radius, int sliceCount, float height)
+        public static Line3D[] CreateWiredConeAngle(float cupAngle, float height, int sliceCount)
+        {
+            float baseRadius = (float)Math.Tan(cupAngle) * height;
+
+            return CreateWiredConeBaseRadius(baseRadius, height, sliceCount);
+        }
+        public static Line3D[] CreateWiredConeBaseRadius(float baseRadius, float height, int sliceCount)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<int> indexList = new List<int>();
 
-            vertList.Add(new Vector3(0.0f, height, 0.0f) + center);
-            vertList.Add(new Vector3(0.0f, 0.0f, 0.0f) + center);
+            vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
+            vertList.Add(new Vector3(0.0f, -height, 0.0f));
 
             float thetaStep = MathUtil.TwoPi / (float)sliceCount;
 
@@ -251,11 +257,11 @@ namespace Engine
                 float theta = sl * thetaStep;
 
                 Vector3 position = new Vector3(
-                    radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta),
-                    0.0f,
-                    radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta));
+                    baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta),
+                    -height,
+                    baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta));
 
-                vertList.Add(position + center);
+                vertList.Add(position);
             }
 
             for (int index = 0; index < sliceCount; index++)

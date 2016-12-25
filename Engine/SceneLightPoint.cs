@@ -91,6 +91,15 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets the light volume
+        /// </summary>
+        /// <returns>Returns a line list representing the light volume</returns>
+        public Line3D[] GetVolume()
+        {
+            return Line3D.CreateWiredSphere(this.BoundingSphere, 10, 10);
+        }
+
+        /// <summary>
         /// Updates internal state
         /// </summary>
         private void Update()
