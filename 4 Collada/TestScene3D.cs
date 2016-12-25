@@ -209,10 +209,8 @@ namespace Collada
             BoundingBox[] bboxes = this.ground.GetBoundingBoxes(5);
             Line3D[] listBoxes = Line3D.CreateWiredBox(bboxes);
 
-            this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
+            this.bboxesDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), listBoxes, Color.Red);
             this.bboxesDrawer.Visible = false;
-            this.bboxesDrawer.CastShadow = false;
-            this.bboxesDrawer.EnableAlphaBlending = true;
 
             List<Line3D> squares = new List<Line3D>();
 
@@ -225,10 +223,8 @@ namespace Collada
                 squares.AddRange(Line3D.CreateWiredSquare(node.GetPoints()));
             }
 
-            this.terrainGridDrawer = this.AddLineListDrawer(squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));
+            this.terrainGridDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), squares.ToArray(), new Color4(Color.Gainsboro.ToColor3(), 0.5f));
             this.terrainGridDrawer.Visible = false;
-            this.terrainGridDrawer.CastShadow = false;
-            this.terrainGridDrawer.EnableAlphaBlending = true;
         }
 
         public override void Update(GameTime gameTime)

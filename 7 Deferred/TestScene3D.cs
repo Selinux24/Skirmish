@@ -363,7 +363,7 @@ namespace DeferredTest
             this.Lights.DirectionalLights[1].Enabled = true;
             this.Lights.DirectionalLights[2].Enabled = true;
 
-            this.lineDrawer = this.AddLineListDrawer(1000);
+            this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 1000);
 
             #endregion
         }

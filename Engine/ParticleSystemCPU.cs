@@ -266,7 +266,7 @@ namespace Engine
 
                 Counters.DrawCallsPerFrame++;
                 Counters.InstancesPerFrame++;
-                Counters.TrianglesPerFrame += 2 * 1;
+                Counters.PrimitivesPerFrame += this.ActiveParticles;
             }
         }
 

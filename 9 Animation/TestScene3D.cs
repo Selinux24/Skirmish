@@ -35,17 +35,12 @@ namespace AnimationTest
         {
             base.Initialize();
 
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[0].CastShadow = true;
-            this.Lights.DirectionalLights[1].Enabled = false;
-            this.Lights.DirectionalLights[2].Enabled = false;
-
-            this.Camera.NearPlaneDistance = 1;
+            this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = 500;
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            this.SceneVolume = new BoundingSphere(Vector3.Zero, 100f);
+            this.SceneVolume = new BoundingSphere(Vector3.Zero, 25f);
 
             #region Texts
 
@@ -210,8 +205,7 @@ namespace AnimationTest
 
                 if (this.soldierTris == null)
                 {
-                    this.soldierTris = this.AddTriangleListDrawer(tris, color);
-                    this.soldierTris.EnableDepthStencil = false;
+                    this.soldierTris = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), tris, color);
                 }
                 else
                 {
@@ -220,12 +214,26 @@ namespace AnimationTest
 
                 if (this.soldierLines == null)
                 {
-                    this.soldierLines = this.AddLineListDrawer(Line3D.CreateWiredBox(bbox), color);
-                    this.soldierLines.EnableDepthStencil = false;
+                    this.soldierLines = this.AddLineListDrawer(new LineListDrawerDescription(), Line3D.CreateWiredBox(bbox), color);
                 }
                 else
                 {
                     this.soldierLines.SetLines(color, Line3D.CreateWiredBox(bbox));
+                }
+
+                this.soldierTris.Active = this.soldierTris.Visible = true;
+                this.soldierLines.Active = this.soldierLines.Visible = true;
+            }
+            else
+            {
+                if (this.soldierTris != null)
+                {
+                    this.soldierTris.Active = this.soldierTris.Visible = false;
+                }
+
+                if (this.soldierLines != null)
+                {
+                    this.soldierLines.Active = this.soldierLines.Visible = false;
                 }
             }
 

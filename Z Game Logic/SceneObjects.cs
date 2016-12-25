@@ -304,7 +304,7 @@ namespace GameLogic
 
             #region DEBUG
 
-            this.lineDrawer = this.AddLineListDrawer(5000);
+            this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 5000);
             this.lineDrawer.Visible = false;
 
             #endregion

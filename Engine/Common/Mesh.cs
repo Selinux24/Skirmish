@@ -185,7 +185,7 @@ namespace Engine.Common
 
                     Counters.DrawCallsPerFrame++;
                     Counters.InstancesPerFrame++;
-                    Counters.TrianglesPerFrame += this.IndexCount / 3;
+                    Counters.PrimitivesPerFrame += this.IndexCount / 3;
                 }
             }
             else
@@ -196,7 +196,7 @@ namespace Engine.Common
 
                     Counters.DrawCallsPerFrame++;
                     Counters.InstancesPerFrame++;
-                    Counters.TrianglesPerFrame += this.VertexCount / 3;
+                    Counters.PrimitivesPerFrame += this.VertexCount / 3;
                 }
             }
         }
@@ -222,7 +222,7 @@ namespace Engine.Common
 
                         Counters.DrawCallsPerFrame++;
                         Counters.InstancesPerFrame += count;
-                        Counters.TrianglesPerFrame += (this.IndexCount / 3) * count;
+                        Counters.PrimitivesPerFrame += (this.IndexCount / 3) * count;
                     }
                 }
                 else
@@ -236,7 +236,7 @@ namespace Engine.Common
 
                         Counters.DrawCallsPerFrame++;
                         Counters.InstancesPerFrame += count;
-                        Counters.TrianglesPerFrame += (this.VertexCount / 3) * count;
+                        Counters.PrimitivesPerFrame += (this.VertexCount / 3) * count;
                     }
                 }
             }

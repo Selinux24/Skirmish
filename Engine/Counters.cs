@@ -40,7 +40,7 @@ namespace Engine
         /// <summary>
         /// Sum of primitives drawn per frame
         /// </summary>
-        public static int TrianglesPerFrame = 0;
+        public static int PrimitivesPerFrame = 0;
         /// <summary>
         /// Updates per frame
         /// </summary>
@@ -155,7 +155,7 @@ namespace Engine
             DrawCallsPerFrame = 0;
 
             InstancesPerFrame = 0;
-            TrianglesPerFrame = 0;
+            PrimitivesPerFrame = 0;
 
             UpdatesPerFrame = 0;
             UpdatesPerObject = 0;
@@ -194,7 +194,7 @@ namespace Engine
             DrawCallsPerFrame = 0;
 
             InstancesPerFrame = 0;
-            TrianglesPerFrame = 0;
+            PrimitivesPerFrame = 0;
 
             UpdatesPerFrame = 0;
             UpdatesPerObject = 0;

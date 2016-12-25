@@ -254,14 +254,12 @@ namespace Engine
 
                 Counters.DrawCallsPerFrame++;
                 Counters.InstancesPerFrame++;
-                Counters.TrianglesPerFrame += this.indexCount / 3;
+                Counters.PrimitivesPerFrame += this.indexCount / 3;
             }
         }
         /// <summary>
         /// Initialize buffers
         /// </summary>
-        /// <param name="width">Sprite width</param>
-        /// <param name="height">Sprite height</param>
         private void InitializeBuffers()
         {
             Vector3[] vData;

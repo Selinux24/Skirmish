@@ -4,12 +4,12 @@ namespace Engine
     /// <summary>
     /// Triangle drawer description
     /// </summary>
-    public class TriangleDrawerDescription : ModelDescription
+    public class TriangleListDrawerDescription : ModelDescription
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public TriangleDrawerDescription()
+        public TriangleListDrawerDescription()
             : base()
         {
             this.Static = true;

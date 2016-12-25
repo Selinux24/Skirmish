@@ -347,9 +347,9 @@ namespace HeightmapTest
                             Color.Red,
                             Color.Red,
                             true,
-                            position, 
-                            Vector3.Normalize(Vector3.One * -1f), 
-                            25, 
+                            position,
+                            Vector3.Normalize(Vector3.One * -1f),
+                            25,
                             25,
                             100);
 
@@ -461,7 +461,7 @@ namespace HeightmapTest
 
             this.Camera.Position = new Vector3(-10, 10, -20);
             this.Camera.Interest = new Vector3(0, 4, 0);
-          
+
             this.TimeOfDay.BeginAnimation(new TimeSpan(5, 30, 00), 0.75f);
 
             if (this.playerFlying)
@@ -478,10 +478,13 @@ namespace HeightmapTest
             var bboxes = this.terrain.GetBoundingBoxes(5);
             var listBoxes = Line3D.CreateWiredBox(bboxes);
 
-            this.bboxesDrawer = this.AddLineListDrawer(listBoxes, Color.Red);
+            var bboxesDrawerDesc = new LineListDrawerDescription()
+            {
+                AlwaysVisible = false,
+                EnableDepthStencil = true,
+            };
+            this.bboxesDrawer = this.AddLineListDrawer(bboxesDrawerDesc, listBoxes, new Color(1.0f, 0.0f, 0.0f, 0.5f));
             this.bboxesDrawer.Visible = false;
-            this.bboxesDrawer.CastShadow = false;
-            this.bboxesDrawer.EnableAlphaBlending = true;
 
             #endregion
         }
@@ -692,8 +695,7 @@ namespace HeightmapTest
                 Triangle[] tris = this.soldier.GetTriangles(true);
                 if (this.soldierTris == null)
                 {
-                    this.soldierTris = this.AddTriangleListDrawer(tris, color);
-                    this.soldierTris.EnableDepthStencil = false;
+                    this.soldierTris = this.AddTriangleListDrawer(new TriangleListDrawerDescription() { EnableDepthStencil = false }, tris, color);
                 }
                 else
                 {
@@ -710,8 +712,7 @@ namespace HeightmapTest
                 };
                 if (this.soldierLines == null)
                 {
-                    this.soldierLines = this.AddLineListDrawer(Line3D.CreateWiredBox(bboxes), color);
-                    this.soldierLines.EnableDepthStencil = false;
+                    this.soldierLines = this.AddLineListDrawer(new LineListDrawerDescription(), Line3D.CreateWiredBox(bboxes), color);
                 }
                 else
                 {

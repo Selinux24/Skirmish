@@ -283,7 +283,7 @@
     <Compile Include="SpriteTextureChannelsEnum.cs" />
     <Compile Include="SpriteTextureDescription.cs" />
     <Compile Include="TextDrawerDescription.cs" />
-    <Compile Include="TriangleDrawerDescription.cs" />
+    <Compile Include="TriangleListDrawerDescription.cs" />
     <Compile Include="Vertexi.cs" />
     <Compile Include="PathFinding\NavMesh\Region.cs" />
     <Compile Include="PathFinding\NavMesh\RegionFlags.cs" />

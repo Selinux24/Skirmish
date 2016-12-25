@@ -701,12 +701,13 @@ namespace Engine
         /// <summary>
         /// Adds a line list drawer
         /// </summary>
+        /// <param name="description">Line drawer description</param>
         /// <param name="count">Line count</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(int count, int order = 0)
+        public LineListDrawer AddLineListDrawer(LineListDrawerDescription description, int count, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, new LineListDrawerDescription(), count);
+            LineListDrawer newModel = new LineListDrawer(this.Game, description, count);
 
             this.AddComponent(newModel, order);
 
@@ -715,13 +716,14 @@ namespace Engine
         /// <summary>
         /// Adds a line list drawer
         /// </summary>
+        /// <param name="description">Line drawer description</param>
         /// <param name="lines">Line list</param>
         /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(Line3D[] lines, Color4 color, int order = 0)
+        public LineListDrawer AddLineListDrawer(LineListDrawerDescription description, Line3D[] lines, Color4 color, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, new LineListDrawerDescription(), lines, color);
+            LineListDrawer newModel = new LineListDrawer(this.Game, description, lines, color);
 
             this.AddComponent(newModel, order);
 
@@ -730,13 +732,14 @@ namespace Engine
         /// <summary>
         /// Adds a line list drawer
         /// </summary>
+        /// <param name="description">Line drawer description</param>
         /// <param name="triangles">Triangles list</param>
         /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(Triangle[] triangles, Color4 color, int order = 0)
+        public LineListDrawer AddLineListDrawer(LineListDrawerDescription description, Triangle[] triangles, Color4 color, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, new LineListDrawerDescription(), triangles, color);
+            LineListDrawer newModel = new LineListDrawer(this.Game, description, triangles, color);
 
             this.AddComponent(newModel, order);
 
@@ -745,12 +748,13 @@ namespace Engine
         /// <summary>
         /// Adds a triangle list drawer
         /// </summary>
+        /// <param name="description">Triangle drawer description</param>
         /// <param name="count">Triangle count</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new triangle list drawer</returns>
-        public TriangleListDrawer AddTriangleListDrawer(int count, int order = 0)
+        public TriangleListDrawer AddTriangleListDrawer(TriangleListDrawerDescription description, int count, int order = 0)
         {
-            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, new TriangleDrawerDescription(), count);
+            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, description, count);
 
             this.AddComponent(newModel, order);
 
@@ -759,13 +763,14 @@ namespace Engine
         /// <summary>
         /// Adds a triangle list drawer
         /// </summary>
+        /// <param name="description">Triangle drawer description</param>
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new triangle list drawer</returns>
-        public TriangleListDrawer AddTriangleListDrawer(Triangle[] triangles, Color4 color, int order = 0)
+        public TriangleListDrawer AddTriangleListDrawer(TriangleListDrawerDescription description, Triangle[] triangles, Color4 color, int order = 0)
         {
-            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, new TriangleDrawerDescription(), triangles, color);
+            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, description, triangles, color);
 
             this.AddComponent(newModel, order);
 

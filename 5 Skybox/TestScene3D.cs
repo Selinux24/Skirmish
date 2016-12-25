@@ -161,18 +161,11 @@ namespace Skybox
 
             #region DEBUG drawers
 
-            this.volumesDrawer = this.AddLineListDrawer(10000);
+            this.volumesDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 10000);
             this.volumesDrawer.Visible = false;
-            this.volumesDrawer.DeferredEnabled = false;
-            this.volumesDrawer.EnableDepthStencil = false;
-            this.volumesDrawer.EnableAlphaBlending = true;
-            this.volumesDrawer.CastShadow = false;
 
-            this.graphDrawer = this.AddTriangleListDrawer(10000);
-            this.graphDrawer.EnableDepthStencil = false;
-            this.graphDrawer.EnableAlphaBlending = true;
+            this.graphDrawer = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), 10000);
             this.graphDrawer.Visible = false;
-            this.graphDrawer.DeferredEnabled = false;
 
             #endregion
 

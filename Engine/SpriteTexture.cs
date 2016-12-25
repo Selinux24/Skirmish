@@ -168,7 +168,7 @@ namespace Engine
 
                 Counters.DrawCallsPerFrame++;
                 Counters.InstancesPerFrame++;
-                Counters.TrianglesPerFrame += 2;
+                Counters.PrimitivesPerFrame += 2;
             }
         }
         /// <summary>

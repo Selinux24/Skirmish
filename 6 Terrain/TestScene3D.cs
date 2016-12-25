@@ -488,7 +488,7 @@ namespace TerrainTest
                 lines.AddRange(Line3D.CreateWiredTriangle(this.tree2.Instances[i].GetVolume()));
             }
 
-            this.objLineDrawer = this.AddLineListDrawer(lines.ToArray(), this.objColor);
+            this.objLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), lines.ToArray(), this.objColor);
             this.objLineDrawer.Visible = false;
 
             this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helipod, this.garage, this.obelisk, this.rocks }, false);
@@ -577,11 +577,8 @@ namespace TerrainTest
 
             #region DEBUG Path finding Graph
 
-            this.terrainGraphDrawer = this.AddTriangleListDrawer(MaxGridDrawer);
-            this.terrainGraphDrawer.EnableDepthStencil = false;
-            this.terrainGraphDrawer.EnableAlphaBlending = true;
+            this.terrainGraphDrawer = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), MaxGridDrawer);
             this.terrainGraphDrawer.Visible = false;
-            this.terrainGraphDrawer.DeferredEnabled = false;
 
             #endregion
 
@@ -608,11 +605,8 @@ namespace TerrainTest
                 }
             }
 
-            this.terrainLineDrawer = this.AddLineListDrawer(oks.Count + errs.Count);
+            this.terrainLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), oks.Count + errs.Count);
             this.terrainLineDrawer.Visible = false;
-            this.terrainLineDrawer.DeferredEnabled = false;
-            this.terrainLineDrawer.EnableAlphaBlending = true;
-            this.terrainLineDrawer.EnableDepthStencil = false;
 
             if (this.oks.Count > 0)
             {
@@ -627,31 +621,22 @@ namespace TerrainTest
 
             #region DEBUG Picking test
 
-            this.terrainPointDrawer = this.AddLineListDrawer(MaxPickingTest);
+            this.terrainPointDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), MaxPickingTest);
             this.terrainPointDrawer.Visible = false;
-            this.terrainPointDrawer.DeferredEnabled = false;
-            this.terrainPointDrawer.EnableAlphaBlending = true;
-            this.terrainPointDrawer.EnableDepthStencil = false;
 
             #endregion
 
             #region DEBUG Helicopter manipulator
 
-            this.helicopterLineDrawer = this.AddLineListDrawer(1000);
+            this.helicopterLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 1000);
             this.helicopterLineDrawer.Visible = false;
-            this.helicopterLineDrawer.DeferredEnabled = false;
-            this.helicopterLineDrawer.EnableAlphaBlending = true;
-            this.helicopterLineDrawer.EnableDepthStencil = false;
 
             #endregion
 
             #region DEBUG Trajectory
 
-            this.curveLineDrawer = this.AddLineListDrawer(20000);
+            this.curveLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 20000);
             this.curveLineDrawer.Visible = false;
-            this.curveLineDrawer.DeferredEnabled = false;
-            this.curveLineDrawer.EnableAlphaBlending = true;
-            this.curveLineDrawer.EnableDepthStencil = false;
             this.curveLineDrawer.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
 
             #endregion
@@ -984,7 +969,7 @@ namespace TerrainTest
 
             #region Texts
 
-            string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Triangles: {6}", Counters.Buffers, Counters.AllocatedMemoryInBuffers, Counters.BufferReads, Counters.BufferWrites, this.RenderMode, this.shadowResult, Counters.TrianglesPerFrame);
+            string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Primitives: {6}", Counters.Buffers, Counters.AllocatedMemoryInBuffers, Counters.BufferReads, Counters.BufferWrites, this.RenderMode, this.shadowResult, Counters.PrimitivesPerFrame);
             string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets, this.terrain.VisiblePatchesCount);
             this.counters1.Text = txt1;
             this.counters2.Text = txt2;

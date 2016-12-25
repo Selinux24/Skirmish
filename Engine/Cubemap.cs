@@ -130,7 +130,7 @@ namespace Engine
 
                     Counters.DrawCallsPerFrame++;
                     Counters.InstancesPerFrame++;
-                    Counters.TrianglesPerFrame += this.indexCount / 3;
+                    Counters.PrimitivesPerFrame += this.indexCount / 3;
                 }
             }
         }
