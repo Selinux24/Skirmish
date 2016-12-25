@@ -1036,7 +1036,7 @@ namespace Engine
                     //Draw Pass
                     effect.UpdatePerLight(
                         light,
-                        context.World * light.Transform,
+                        context.World,
                         context.ViewProjection);
 
                     for (int p = 0; p < effectTechnique.Description.PassCount; p++)

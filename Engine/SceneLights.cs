@@ -324,7 +324,7 @@ namespace Engine
             });
             this.visiblePoints = pLights.ToArray();
 
-            var sLights = this.spotLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
+            var sLights = this.spotLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingBox) != ContainmentType.Disjoint);
             sLights.Sort((l1, l2) =>
             {
                 int i = -frustum.Contains(l1.Position).CompareTo(frustum.Contains(l2.Position));

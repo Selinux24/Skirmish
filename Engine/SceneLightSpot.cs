@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -95,13 +96,9 @@ namespace Engine
         /// </summary>
         public float Intensity = 1f;
         /// <summary>
-        /// Gets the bounding sphere of the active light
+        /// Gets the bounding box of the active light
         /// </summary>
-        public BoundingSphere BoundingSphere { get; private set; }
-        /// <summary>
-        /// Transform matrix
-        /// </summary>
-        public Matrix Transform { get; private set; }
+        public BoundingBox BoundingBox { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -136,7 +133,7 @@ namespace Engine
         /// <returns>Returns a line list representing the light volume</returns>
         public Line3D[] GetVolume()
         {
-            var lines = Line3D.CreateWiredConeAngle(this.AngleRadians, this.Radius, 10);
+            var coneLines = Line3D.CreateWiredConeAngle(this.AngleRadians, this.Radius, 10);
 
             //The wired cone has his basin on XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
             Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
@@ -144,7 +141,7 @@ namespace Engine
             //Then move and rotate the cone to light position and direction
             Matrix trn = Helper.CreateWorld(this.Position, this.Direction, Vector3.Up);
 
-            return Line3D.Transform(lines, rot * trn);
+            return Line3D.Transform(coneLines, rot * trn);
         }
 
         /// <summary>
@@ -152,7 +149,16 @@ namespace Engine
         /// </summary>
         private void Update()
         {
-            this.BoundingSphere = new BoundingSphere(this.position, this.radius);
+            var lines = GetVolume();
+
+            List<Vector3> points = new List<Vector3>();
+            for (int i = 0; i < lines.Length; i++)
+			{
+                points.Add(lines[i].Point1);
+                points.Add(lines[i].Point2);
+			}
+
+            this.BoundingBox = BoundingBox.FromPoints(points.ToArray());
         }
     }
 }
