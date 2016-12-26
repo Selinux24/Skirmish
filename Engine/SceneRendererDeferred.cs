@@ -256,7 +256,7 @@ namespace Engine
             this.UpdateContext.ViewProjection = viewProj;
             this.UpdateContext.Frustum = new BoundingFrustum(viewProj);
             this.UpdateContext.EyePosition = scene.Camera.Position;
-            this.UpdateContext.EyeTarget = scene.Camera.Direction;
+            this.UpdateContext.EyeDirection = scene.Camera.Direction;
             this.UpdateContext.Lights = scene.Lights;
 
             //Cull lights
@@ -327,7 +327,7 @@ namespace Engine
                     this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
                     this.DrawContext.Frustum = this.UpdateContext.Frustum;
                     this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
-                    this.DrawContext.EyeTarget = this.UpdateContext.EyeTarget;
+                    this.DrawContext.EyeTarget = this.UpdateContext.EyeDirection;
                     //Initialize context data from scene
                     this.DrawContext.Lights = scene.Lights;
                     this.DrawContext.ShadowMaps = 0;

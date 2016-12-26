@@ -589,6 +589,9 @@ namespace Engine.Common
             List<Vector3> binmList = new List<Vector3>();
             List<Vector2> uvList = new List<Vector2>();
 
+            sliceCount--;
+            stackCount++;
+
             #region Positions
 
             //North pole
@@ -609,28 +612,23 @@ namespace Engine.Common
                 {
                     float theta = sl * thetaStep;
 
-                    Vector3 position;
-                    Vector3 normal;
-                    Vector3 tangent;
-                    Vector3 binormal;
-                    Vector2 texture;
+                    float x = (float)Math.Sin(phi) * (float)Math.Cos(theta);
+                    float y = (float)Math.Cos(phi);
+                    float z = (float)Math.Sin(phi) * (float)Math.Sin(theta);
 
-                    position.X = radius * (float)Math.Sin(phi) * (float)Math.Cos(theta);
-                    position.Y = radius * (float)Math.Cos(phi);
-                    position.Z = radius * (float)Math.Sin(phi) * (float)Math.Sin(theta);
+                    float tX = -(float)Math.Sin(phi) * (float)Math.Sin(theta);
+                    float tY = 0.0f;
+                    float tZ = +(float)Math.Sin(phi) * (float)Math.Cos(theta);
 
-                    normal = position;
-                    normal.Normalize();
+                    Vector3 position = radius * new Vector3(x, y, z);
+                    Vector3 normal = new Vector3(x, y, z);
+                    Vector3 tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
+                    Vector3 binormal = Vector3.Cross(normal, tangent);
 
-                    tangent.X = -radius * (float)Math.Sin(phi) * (float)Math.Sin(theta);
-                    tangent.Y = 0.0f;
-                    tangent.Z = +radius * (float)Math.Sin(phi) * (float)Math.Cos(theta);
-                    tangent.Normalize();
+                    float u = theta / MathUtil.Pi * 2f;
+                    float v = phi / MathUtil.Pi;
 
-                    binormal = Vector3.Cross(normal, tangent);
-
-                    texture.X = theta / MathUtil.Pi * 2f;
-                    texture.Y = phi / MathUtil.Pi;
+                    Vector2 texture = new Vector2(u, v);
 
                     vertList.Add(position);
                     normList.Add(normal);

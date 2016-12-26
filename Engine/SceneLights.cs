@@ -66,6 +66,10 @@ namespace Engine
         /// Visible spot lights
         /// </summary>
         private SceneLightSpot[] visibleSpots = null;
+        /// <summary>
+        /// Fog color
+        /// </summary>
+        private Color4 fogColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
 
         /// <summary>
         /// Gets or sets directional lights
@@ -169,7 +173,17 @@ namespace Engine
         /// <summary>
         /// Fog color
         /// </summary>
-        public Color4 FogColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+        public Color4 FogColor
+        {
+            get
+            {
+                return this.fogColor * (this.KeyLight != null ? this.KeyLight.Brightness : 1f);
+            }
+            set
+            {
+                this.fogColor = value;
+            }
+        }
         /// <summary>
         /// Gets light by name
         /// </summary>
@@ -365,21 +379,39 @@ namespace Engine
         /// <param name="timeOfDay">Time of day</param>
         public void UpdateLights(TimeOfDay timeOfDay)
         {
+            float e = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation));
+            float b = Math.Min(e + (8f * e), 1);
+            float ga = MathUtil.Clamp(e, 0.2f, 0.8f);
+
+            Vector3 keyDir = timeOfDay.LightDirection;
+            Vector3 backDir = new Vector3(keyDir.Y, keyDir.X, keyDir.Z);
+            Vector3 fillDir = Vector3.Cross(keyDir, backDir);
+
+            this.GlobalAmbientLight = ga;
+
             var keyLight = this.KeyLight;
             if (keyLight != null)
             {
-                //keyLight.DiffuseColor = timeOfDay.SunColor;
-                //keyLight.SpecularColor = timeOfDay.SunBandColor;
+                keyLight.Brightness = b;
 
-                keyLight.Direction = timeOfDay.LightDirection;
+                keyLight.Direction = keyDir;
             }
 
-            //var backLight = this.BackLight;
-            //if (backLight != null)
-            //{
-            //    backLight.Direction = -timeOfDay.LightDirection;
-            //    backLight.Direction.Y = -backLight.Direction.Y;
-            //}
+            var backLight = this.BackLight;
+            if (backLight != null)
+            {
+                backLight.Brightness = b;
+
+                backLight.Direction = backDir;
+            }
+
+            var fillLight = this.FillLight;
+            if (fillLight != null)
+            {
+                fillLight.Brightness = b;
+
+                fillLight.Direction = fillDir;
+            }
         }
     }
 }

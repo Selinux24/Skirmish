@@ -44,6 +44,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectVectorVariable misc = null;
         /// <summary>
+        /// Back color variable
+        /// </summary>
+        private EffectVectorVariable backColor = null;
+        /// <summary>
         /// Light direction effect variable
         /// </summary>
         private EffectVectorVariable lightDirectionWorld = null;
@@ -133,6 +137,22 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Back color
+        /// </summary>
+        protected Color4 BackColor
+        {
+            get
+            {
+                Vector4 v = this.backColor.GetFloatVector();
+
+                return new Color4(v.X, v.Y, v.Z, v.W);
+            }
+            set
+            {
+                this.backColor.Set(value);
+            }
+        }
+        /// <summary>
         /// Light direction
         /// </summary>
         protected Vector3 LightDirectionWorld
@@ -170,6 +190,7 @@ namespace Engine.Effects
             this.scatteringCoefficients = this.Effect.GetVariableByName("gScatteringCoeffs").AsVector();
             this.inverseWaveLength = this.Effect.GetVariableByName("gInvWaveLength").AsVector();
             this.misc = this.Effect.GetVariableByName("gMisc").AsVector();
+            this.backColor = this.Effect.GetVariableByName("gBackColor").AsVector();
             this.lightDirectionWorld = this.Effect.GetVariableByName("gLightDirection").AsVector();
         }
         /// <summary>
@@ -215,6 +236,7 @@ namespace Engine.Effects
         /// <param name="invWaveLength4">Inverse light wave length</param>
         /// <param name="scale">Scale</param>
         /// <param name="rayleighScaleDepth">Rayleigh scale depth</param>
+        /// <param name="backColor">Back color</param>
         /// <param name="lightDirection">Light direction</param>
         public void UpdatePerFrame(
             Matrix world,
@@ -231,6 +253,7 @@ namespace Engine.Effects
             Color4 invWaveLength4,
             float scale,
             float rayleighScaleDepth,
+            Color4 backColor,
             Vector3 lightDirection)
         {
             this.World = world;
@@ -247,6 +270,8 @@ namespace Engine.Effects
             this.InverseWaveLength = invWaveLength4;
 
             this.Misc = new Vector4(planetRadius, planetAtmosphereRadius, scale, scale / rayleighScaleDepth);
+
+            this.BackColor = backColor;
 
             this.LightDirectionWorld = -lightDirection;
         }

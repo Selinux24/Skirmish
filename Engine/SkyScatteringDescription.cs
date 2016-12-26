@@ -38,7 +38,7 @@ namespace Engine
         /// <summary>
         /// Earth sky brightness
         /// </summary>
-        public const float EarthSkyBrightness = 50.0f;
+        public const float EarthSkyBrightness = 25.0f;
         /// <summary>
         /// Sun light wave length
         /// </summary>

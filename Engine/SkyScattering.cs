@@ -250,6 +250,7 @@ namespace Engine
                     this.InvWaveLength4,
                     this.ScatteringScale,
                     this.RayleighScaleDepth,
+                    context.Lights.FogColor,
                     keyLight.Direction);
 
                 //Sets vertex and index buffer
@@ -282,7 +283,7 @@ namespace Engine
         {
             Vector3[] vData;
             uint[] iData;
-            GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
+            GeometryUtil.CreateSphere(1, 10, 75, out vData, out iData);
 
             VertexPosition[] vertices = VertexPosition.Generate(vData);
 

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -29,6 +30,14 @@ namespace Engine
         /// Light projected direction
         /// </summary>
         private Vector2 lightProjectedDirection;
+        /// <summary>
+        /// Flare scale
+        /// </summary>
+        private float scale = 1f;
+        /// <summary>
+        /// Flare transparency
+        /// </summary>
+        private float transparency = 1f;
 
         /// <summary>
         /// Constructor
@@ -89,6 +98,11 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null)
             {
+                float dot = Math.Max(0, Vector3.Dot(context.EyeDirection, -keyLight.Direction));
+
+                this.transparency = dot;
+                this.scale = dot * keyLight.Brightness;
+
                 // Set view translation to Zero to simulate infinite
                 Matrix infiniteView = context.View;
                 infiniteView.TranslationVector = Vector3.Zero;
@@ -148,15 +162,18 @@ namespace Engine
                 Color4 color = keyLight.DiffuseColor;
                 color.Alpha = 0.25f;
 
-                float scale = 50f / this.glowSprite.Width;
+                if (this.scale > 0)
+                {
+                    float gScale = 50f / this.glowSprite.Width;
 
-                this.glowSprite.Color = color;
-                this.glowSprite.Manipulator.SetPosition(this.lightProjectedPosition - (this.glowSprite.RelativeCenter * scale));
-                this.glowSprite.Manipulator.SetScale(scale);
+                    this.glowSprite.Color = color;
+                    this.glowSprite.Manipulator.SetPosition(this.lightProjectedPosition - (this.glowSprite.RelativeCenter * gScale * this.scale));
+                    this.glowSprite.Manipulator.SetScale(gScale * this.scale);
 
-                //Draw sprite with alpha
-                this.Game.Graphics.SetBlendAdditive();
-                this.glowSprite.Draw(context);
+                    // Draw the sprite using additive blending.
+                    this.Game.Graphics.SetBlendAdditive();
+                    this.glowSprite.Draw(context);
+                }
             }
         }
         /// <summary>
@@ -165,27 +182,29 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         private void DrawFlares(DrawContext context)
         {
-            if (this.flares != null && this.flares.Length > 0)
+            if (this.scale > 0)
             {
-                this.Game.Graphics.SetBlendAdditive();
-
-                for (int i = 0; i < this.flares.Length; i++)
+                if (this.flares != null && this.flares.Length > 0)
                 {
-                    Flare flare = this.flares[i];
+                    for (int i = 0; i < this.flares.Length; i++)
+                    {
+                        Flare flare = this.flares[i];
 
-                    // Set the flare alpha based on the previous occlusion query result.
-                    Color4 flareColor = flare.Color;
-                    flareColor.Alpha *= 0.5f;
+                        // Set the flare alpha based on the previous occlusion query result.
+                        Color4 flareColor = flare.Color;
+                        flareColor.Alpha *= 0.5f * this.transparency;
 
-                    // Compute the position of this flare sprite.
-                    Vector2 flarePosition = (this.lightProjectedPosition + this.lightProjectedDirection * flare.Position);
+                        // Compute the position of this flare sprite.
+                        Vector2 flarePosition = (this.lightProjectedPosition + this.lightProjectedDirection * flare.Position);
 
-                    flare.FlareSprite.Color = flareColor;
-                    flare.FlareSprite.Manipulator.SetScale(flare.Scale);
-                    flare.FlareSprite.Manipulator.SetPosition(flarePosition - (flare.FlareSprite.RelativeCenter * flare.Scale));
+                        flare.FlareSprite.Color = flareColor;
+                        flare.FlareSprite.Manipulator.SetPosition(flarePosition - (flare.FlareSprite.RelativeCenter * flare.Scale * this.scale));
+                        flare.FlareSprite.Manipulator.SetScale(flare.Scale * this.scale);
 
-                    // Draw the flare sprite using additive blending.
-                    flare.FlareSprite.Draw(context);
+                        // Draw the flare sprite using additive blending.
+                        this.Game.Graphics.SetBlendAdditive();
+                        flare.FlareSprite.Draw(context);
+                    }
                 }
             }
         }

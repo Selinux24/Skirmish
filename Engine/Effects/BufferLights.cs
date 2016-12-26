@@ -58,8 +58,8 @@ namespace Engine.Effects
         public BufferDirectionalLight(SceneLightDirectional light)
         {
             this.Direction = light.Direction;
-            this.DiffuseColor = light.DiffuseColor;
-            this.SpecularColor = light.SpecularColor;
+            this.DiffuseColor = light.DiffuseColor * light.Brightness;
+            this.SpecularColor = light.SpecularColor * light.Brightness;
             this.CastShadow = light.CastShadow ? 1 : 0;
         }
     }

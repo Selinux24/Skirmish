@@ -462,7 +462,7 @@ namespace HeightmapTest
             this.Camera.Position = new Vector3(-10, 10, -20);
             this.Camera.Interest = new Vector3(0, 4, 0);
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 30, 00), 0.75f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 45, 00), 0.25f);
 
             if (this.playerFlying)
             {
@@ -725,10 +725,11 @@ namespace HeightmapTest
             base.Update(gameTime);
 
             this.help.Text = string.Format(
-                "{0}. Wind {1} {2} - Next {3}; Sun {4}",
+                "{0}. Wind {1} {2} - Next {3}; Sun {4} Light brightness: {5:0.00};",
                 this.Renderer,
                 this.windDirection, this.windStrength, this.windNextStrength,
-                this.TimeOfDay);
+                this.TimeOfDay,
+                this.Lights.KeyLight.Brightness);
 
             this.help2.Text = this.Game.RuntimeText;
         }

@@ -60,6 +60,10 @@ namespace Engine
         /// Light direction
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
+        /// <summary>
+        /// Light brightness
+        /// </summary>
+        public float Brightness = 1f;
 
         /// <summary>
         /// Constructor

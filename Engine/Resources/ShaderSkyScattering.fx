@@ -11,6 +11,7 @@ cbuffer cbPerFrame : register (b0)
 	float4 gScatteringCoeffs;
 	float4 gInvWaveLength;
 	float4 gMisc;
+	float4 gBackColor;
 	float3 gLightDirection;
 };
 
@@ -63,7 +64,9 @@ PSVertexSkyScattering VSScattering(VSVertexPosition input)
 	float3 rayPos = -rayDir * rayLen;
 	float3 rayStart = float3(0, 1, 0);
 
-	float3 color = 0;
+	float3 color = gBackColor.rgb;
+	float4 colorM = gBackColor;
+	float4 colorR = gBackColor;
 
 	if(input.positionLocal.y >= 0)
 	{
@@ -99,14 +102,16 @@ PSVertexSkyScattering VSScattering(VSVertexPosition input)
 		}
 
 		color = saturate(color);
+		colorM = float4(color * mieBrightness, 1.0f);
+		colorR = float4(color * (gInvWaveLength.xyz * rayleighBrightness), 1.0f);
 	}
 
     PSVertexSkyScattering output = (PSVertexSkyScattering)0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
     output.positionWorld = positionLocal;
-	output.colorM = float4(color * mieBrightness, 1.0f);
-	output.colorR = float4(color * (gInvWaveLength.xyz * rayleighBrightness), 1.0f);
+	output.colorM = colorM;
+	output.colorR = colorR;
 	output.direction = rayPos;
 
 	return output;

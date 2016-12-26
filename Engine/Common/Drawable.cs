@@ -184,9 +184,9 @@ namespace Engine.Common
         /// </summary>
         public Vector3 EyePosition;
         /// <summary>
-        /// Eye target
+        /// Eye view direction
         /// </summary>
-        public Vector3 EyeTarget;
+        public Vector3 EyeDirection;
         /// <summary>
         /// Lights
         /// </summary>
