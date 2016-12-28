@@ -209,7 +209,11 @@ namespace HeightmapTest
 
                         Proportion = 0.25f,
                     },
-                    Material = HeightmapDescription.MaterialDescription.Default,
+                    Material = new HeightmapDescription.MaterialDescription
+                    {
+                        Shininess = 10f,
+                        SpecularColor = new Color4(0.1f, 0.1f, 0.1f, 1f),
+                    },
                 },
                 new GroundDescription()
                 {

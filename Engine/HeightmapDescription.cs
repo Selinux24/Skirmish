@@ -69,24 +69,6 @@ namespace Engine
         public class MaterialDescription
         {
             /// <summary>
-            /// Deafault terrain material
-            /// </summary>
-            public static MaterialDescription Default
-            {
-                get
-                {
-                    return new MaterialDescription()
-                    {
-                        EmissionColor = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
-                        AmbientColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                        DiffuseColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                        SpecularColor = new Color4(0.1f, 0.1f, 0.1f, 1.0f),
-                        Shininess = 10.0f,
-                    };
-                }
-            }
-
-            /// <summary>
             /// Emission color
             /// </summary>
             public Color4 EmissionColor { get; set; }
@@ -122,6 +104,20 @@ namespace Engine
                     Shininess = this.Shininess,
                 };
             }
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public MaterialDescription()
+            {
+                var m = Common.Material.Default;
+
+                this.EmissionColor = m.EmissiveColor;
+                this.AmbientColor = m.AmbientColor;
+                this.DiffuseColor = m.DiffuseColor;
+                this.SpecularColor = m.SpecularColor;
+                this.Shininess = m.Shininess;
+            }
         }
 
         /// <summary>
@@ -151,6 +147,6 @@ namespace Engine
         /// <summary>
         /// Terrain material
         /// </summary>
-        public MaterialDescription Material = MaterialDescription.Default;
+        public MaterialDescription Material = new MaterialDescription();
     }
 }

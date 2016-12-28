@@ -16,16 +16,16 @@ namespace Engine.Content
             {
                 return new MaterialContent()
                 {
-                    AmbientColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                    AmbientColor = new Color4(0.02f, 0.02f, 0.02f, 0.02f),
                     DiffuseColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
-                    SpecularColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
+                    SpecularColor = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
                     EmissionColor = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
                     ReflectiveColor = new Color4(0.0f, 0.0f, 0.0f, 1.0f),
                     Transparent = new Color4(0.0f, 0.0f, 0.0f, 0.0f),
 
                     IndexOfRefraction = 0.0f,
                     Reflectivity = 0.0f,
-                    Shininess = 1.0f,
+                    Shininess = 50.0f,
                     Transparency = 0.0f,
                 };
             }

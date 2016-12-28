@@ -51,11 +51,6 @@ namespace SceneTest
             this.Camera.Goto(-20, 10, -40f);
             this.Camera.LookTo(0, 0, 0);
 
-            this.Lights.DirectionalLights[0].CastShadow = true;
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = false;
-            this.Lights.DirectionalLights[2].Enabled = false;
-
             this.InitializeTextBoxes();
             this.InitializeSkyEffects();
             this.InitializeFloorAsphalt();
@@ -113,18 +108,18 @@ namespace SceneTest
             float h = 0f;
 
             VertexData[] vertices = new VertexData[]
-                {
-                    new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, 0.0f) },
-                    new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, 1.0f) },
-                    new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture0 = new Vector2(1.0f, 0.0f) },
-                    new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture0 = new Vector2(1.0f, 1.0f) },
-                };
+            {
+                new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, 0.0f) },
+                new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture0 = new Vector2(0.0f, 1.0f) },
+                new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture0 = new Vector2(1.0f, 0.0f) },
+                new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture0 = new Vector2(1.0f, 1.0f) },
+            };
 
             uint[] indices = new uint[]
-                {
-                    0, 1, 2,
-                    1, 3, 2,
-                };
+            {
+                0, 1, 2,
+                1, 3, 2,
+            };
 
             MaterialContent mat = MaterialContent.Default;
             mat.DiffuseTexture = "SceneTextures/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";

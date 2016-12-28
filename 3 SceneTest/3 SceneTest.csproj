@@ -212,25 +212,13 @@
     <Content Include="SceneTextures\Character\Soldier\soldier_anim2.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneTextures\Vehicles\Leopard\Leopard_1.dae">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTextures\Vehicles\Leopard\Leopard_2.dae">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTextures\Vehicles\Leopard\Leopard_3.dae">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTextures\Vehicles\Leopard\Leopard_4.dae">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="SceneTextures\Lamps\Lamp.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
+      <SubType>
+      </SubType>
+    </Content>
+    <Content Include="SceneTextures\Vehicles\Leopard\Leopard.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
