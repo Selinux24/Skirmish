@@ -412,8 +412,8 @@ namespace HeightmapTest
                 }
             }
 
-            this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helicopter, this.rocks }, false);
-            this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.torchs }, false);
+            this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helicopter }, false);
+            this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.torchs, this.rocks }, false);
             this.terrain.UpdateInternals();
 
             //Player soldier

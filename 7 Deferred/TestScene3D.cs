@@ -359,11 +359,7 @@ namespace DeferredTest
 
             #region Lights
 
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[1].Enabled = true;
-            this.Lights.DirectionalLights[2].Enabled = true;
-
-            this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 1000);
+            this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { EnableDepthStencil = true }, 1000);
 
             #endregion
         }
@@ -797,9 +793,9 @@ namespace DeferredTest
                     Color.Yellow,
                     Color.Yellow,
                     true,
-                    lightPosition, 
-                    direction, 
-                    25, 
+                    lightPosition,
+                    direction,
+                    25,
                     25,
                     25f);
 
@@ -854,7 +850,7 @@ namespace DeferredTest
                         true,
                         lightPosition,
                         5f,
-                        500f);
+                        10f);
 
                     pointLight.State = rnd.NextFloat(0, 1) >= 0.5f ? 1 : -1;
 

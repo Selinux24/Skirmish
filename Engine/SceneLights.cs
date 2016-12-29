@@ -379,38 +379,41 @@ namespace Engine
         /// <param name="timeOfDay">Time of day</param>
         public void UpdateLights(TimeOfDay timeOfDay)
         {
-            float e = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation));
-            float b = Math.Min(e + (8f * e), 1);
-            float ga = MathUtil.Clamp(e, 0.2f, 0.8f);
-
-            Vector3 keyDir = timeOfDay.LightDirection;
-            Vector3 backDir = new Vector3(keyDir.Y, keyDir.X, keyDir.Z);
-            Vector3 fillDir = Vector3.Cross(keyDir, backDir);
-
-            this.GlobalAmbientLight = ga;
-
-            var keyLight = this.KeyLight;
-            if (keyLight != null)
+            if (timeOfDay.Running)
             {
-                keyLight.Brightness = b;
+                float e = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation));
+                float b = Math.Min(e + (8f * e), 1);
+                float ga = MathUtil.Clamp(e, 0.2f, 0.8f);
 
-                keyLight.Direction = keyDir;
-            }
+                Vector3 keyDir = timeOfDay.LightDirection;
+                Vector3 backDir = new Vector3(keyDir.Y, keyDir.X, keyDir.Z);
+                Vector3 fillDir = Vector3.Cross(keyDir, backDir);
 
-            var backLight = this.BackLight;
-            if (backLight != null)
-            {
-                backLight.Brightness = b;
+                this.GlobalAmbientLight = ga;
 
-                backLight.Direction = backDir;
-            }
+                var keyLight = this.KeyLight;
+                if (keyLight != null)
+                {
+                    keyLight.Brightness = b;
 
-            var fillLight = this.FillLight;
-            if (fillLight != null)
-            {
-                fillLight.Brightness = b;
+                    keyLight.Direction = keyDir;
+                }
 
-                fillLight.Direction = fillDir;
+                var backLight = this.BackLight;
+                if (backLight != null)
+                {
+                    backLight.Brightness = b;
+
+                    backLight.Direction = backDir;
+                }
+
+                var fillLight = this.FillLight;
+                if (fillLight != null)
+                {
+                    fillLight.Brightness = b;
+
+                    fillLight.Direction = fillDir;
+                }
             }
         }
     }

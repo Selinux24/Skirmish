@@ -256,6 +256,7 @@ namespace Engine.Common
                         if (vertexList.Length > 0)
                         {
                             Mesh nMesh = new Mesh(
+                                meshName,
                                 geometry.Material,
                                 geometry.Topology,
                                 vertexList,

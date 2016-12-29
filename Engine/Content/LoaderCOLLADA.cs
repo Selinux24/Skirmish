@@ -327,7 +327,7 @@ namespace Engine.Content
                     bool isVolume = false;
                     if (volumes != null && volumes.Length > 0)
                     {
-                        if (Array.Exists(volumes, v => v == geometry.Name))
+                        if (Array.Exists(volumes, v => string.Equals(v, geometry.Name, StringComparison.OrdinalIgnoreCase)))
                         {
                             isVolume = true;
                         }

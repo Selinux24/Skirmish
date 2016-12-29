@@ -160,6 +160,16 @@ namespace Engine
                 return TimeSpan.FromDays(this.TimeOfDayValue);
             }
         }
+        /// <summary>
+        /// Gets whether the instance is animating the day cycle
+        /// </summary>
+        public bool Running
+        {
+            get
+            {
+                return this.Animate && this.AnimateSpeed > 0f;
+            }
+        }
 
         /// <summary>
         /// Gets the ligth direction base upon elevation and azimuth angles

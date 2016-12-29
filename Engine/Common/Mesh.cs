@@ -57,6 +57,10 @@ namespace Engine.Common
         protected uint[] Indices = null;
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+        /// <summary>
         /// Material name
         /// </summary>
         public string Material { get; private set; }
@@ -96,16 +100,18 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Mesh name</param>
         /// <param name="material">Material name</param>
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         /// <param name="instanced">Instanced</param>
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        public Mesh(string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced, bool dynamic = false)
+        public Mesh(string name, string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced, bool dynamic = false)
         {
             this.dynamicBuffers = dynamic;
 
+            this.Name = name;
             this.Material = material;
             this.Topology = topology;
             this.Vertices = vertices;

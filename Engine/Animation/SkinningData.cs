@@ -196,7 +196,7 @@ namespace Engine.Animation
 
             if (clipIndex < 0)
             {
-                return new Matrix[this.skeleton.JointCount];
+                return Helper.CreateArray<Matrix>(this.skeleton.JointCount, Matrix.Identity);
             }
             else if (clipIndex < this.animations.Count)
             {

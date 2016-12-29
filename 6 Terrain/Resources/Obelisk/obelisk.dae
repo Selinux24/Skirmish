@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-09-26, commit time:12:42, hash:4bb1e22</authoring_tool>
     </contributor>
-    <created>2016-10-08T12:57:21</created>
-    <modified>2016-10-08T12:57:21</modified>
+    <created>2016-12-28T12:28:33</created>
+    <modified>2016-12-28T12:28:33</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -151,7 +151,7 @@
               <color sid="emission">0 0 0 1</color>
             </emission>
             <ambient>
-              <color sid="ambient">0 0 0 1</color>
+              <color sid="ambient">0.02 0.02 0.02 1</color>
             </ambient>
             <diffuse>
               <texture texture="diffus_dds-sampler" texcoord="UVMap"/>
