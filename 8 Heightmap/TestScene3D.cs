@@ -65,20 +65,13 @@ namespace HeightmapTest
 
             Random rnd = new Random(1);
 
-            this.Lights.FogColor = new Color((byte)54, (byte)56, (byte)68);
-            this.Lights.FogStart = 0;
-            this.Lights.FogRange = 0;
-
-            this.Camera.NearPlaneDistance = near;
-            this.Camera.FarPlaneDistance = far;
-
             #region Cursor
 
             SpriteDescription cursorDesc = new SpriteDescription()
             {
                 Textures = new[] { "target.png" },
-                Width = 16,
-                Height = 16,
+                Width = 20,
+                Height = 20,
             };
 
             this.cursor = this.AddCursor(cursorDesc);
@@ -463,19 +456,20 @@ namespace HeightmapTest
 
             #endregion
 
-            this.Camera.Position = new Vector3(-10, 10, -20);
-            this.Camera.Interest = new Vector3(0, 4, 0);
+            this.Camera.NearPlaneDistance = near;
+            this.Camera.FarPlaneDistance = far;
+            this.Camera.Position = new Vector3(12, 8, 7);
+            this.Camera.Interest = new Vector3(0, 7, 0);
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 45, 00), 0.25f);
+            this.skydom.RayleighScattering *= 0.8f;
+            this.skydom.MieScattering *= 0.1f;
+            
+            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 45, 00), 0.75f);
 
-            if (this.playerFlying)
-            {
-                this.Fly();
-            }
-            else
-            {
-                this.Walk();
-            }
+            this.Lights.FogColor = new Color((byte)54, (byte)56, (byte)68);
+            this.Lights.FogStart = 0;
+            this.Lights.FogRange = 0;
+            this.ToggleFog();
 
             #region Debug
 
@@ -648,13 +642,21 @@ namespace HeightmapTest
                 this.spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
             }
 
-            if (this.Game.Input.KeyPressed(Keys.J))
+            if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.Lights.GlobalAmbientLight = Math.Min(10, this.Lights.GlobalAmbientLight + gameTime.ElapsedSeconds);
+                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning;
             }
-            if (this.Game.Input.KeyPressed(Keys.K))
+
+            if (this.Game.Input.KeyJustReleased(Keys.F))
             {
-                this.Lights.GlobalAmbientLight = Math.Max(0, this.Lights.GlobalAmbientLight - gameTime.ElapsedSeconds);
+                this.ToggleFog();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.G))
+            {
+                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
             }
 
             #endregion
@@ -672,24 +674,6 @@ namespace HeightmapTest
 
                 if (this.soldierTris != null) this.soldierTris.Visible = this.showSoldierDEBUG;
                 if (this.soldierLines != null) this.soldierLines.Visible = this.showSoldierDEBUG;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.R))
-            {
-                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F))
-            {
-                this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
-                this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.G))
-            {
-                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
             }
 
             if (this.showSoldierDEBUG)
@@ -747,6 +731,11 @@ namespace HeightmapTest
             var offset = (this.playerHeight * 1.2f) + (Vector3.ForwardLH * 10f) + (Vector3.Left * 3f);
             var view = (Vector3.BackwardLH * 4f) + Vector3.Down;
             this.Camera.Following = new CameraFollower(this.soldier.Manipulator, offset, view);
+        }
+        private void ToggleFog()
+        {
+            this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
+            this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
         }
 
         private Vector3 GetRandomPoint(Random rnd, Vector3 offset)
