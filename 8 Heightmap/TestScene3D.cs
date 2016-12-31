@@ -713,7 +713,7 @@ namespace HeightmapTest
             base.Update(gameTime);
 
             this.help.Text = string.Format(
-                "{0}. Wind {1} {2} - Next {3}; Sun {4} Light brightness: {5:0.00};",
+                "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00};",
                 this.Renderer,
                 this.windDirection, this.windStrength, this.windNextStrength,
                 this.TimeOfDay,

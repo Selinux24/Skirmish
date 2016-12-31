@@ -311,7 +311,7 @@ namespace Engine
         /// </summary>
         public override string ToString()
         {
-            return string.Format("Azimuth: {0:0.00}; Sun decline: {2:0.00}; Elevation: {1:0.00}; Hour: {3};", this.AzimuthDegrees, this.ElevationDegrees, this.SunDeclineDegrees, this.HourOfDay);
+            return string.Format("Azimuth: {0:0.00}; Sun decline: {2:0.00}; Elevation: {1:0.00}; Hour: {3:hh\\:mm\\:ss};", this.AzimuthDegrees, this.ElevationDegrees, this.SunDeclineDegrees, this.HourOfDay);
         }
     }
 }

@@ -136,11 +136,11 @@ Material MaterialDefault()
 {
 	Material mat;
 
-	mat.Emissive = float4(0,0,0,0);
-	mat.Ambient = float4(1,1,1,1);
-	mat.Diffuse = float4(1,1,1,1);
-	mat.Specular = float4(1,1,1,1);
-	mat.Shininess = 10;
+	mat.Emissive = float4(0.0f,0.0f,0.0f,0.0f);
+	mat.Ambient =  float4(0.2f,0.2f,0.2f,1.0f);
+	mat.Diffuse =  float4(1.0f,1.0f,1.0f,1.0f);
+	mat.Specular = float4(0.5f,0.5f,0.5f,1.0f);
+	mat.Shininess = 10.0f;
 
 	return mat;
 }
@@ -167,19 +167,14 @@ static float2 poissonDisk[MaxSampleCount] =
 	float2(-0.687256f, 0.6711345f)
 };
 
-float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, float3 tangentW)
+float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normalW, float3 tangentW)
 {
 	//Uncompress each component from [0,1] to [-1,1].
-	float3 normalT = 2.0f * normalMapSample - 1.0f;
+	float3 normalT = (2.0f * normalMapSample) - 1.0f;
 	
-	//Build orthonormal basis.
-	float3 N = unitNormalW;
-	float3 T = normalize(tangentW - dot(tangentW, N) * N);
-	float3 B = cross(N, T);
-	float3x3 TBN = float3x3(T, B, N);
-	
-	// Transform from tangent space to world space.
-	return normalize(mul(normalT, TBN));
+	float3 binormalW = cross(normalW, tangentW);
+
+	return normalize((normalT.x * tangentW) + (normalT.y * binormalW) + (normalT.z * normalW));
 }
 float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shadowMapStatic, Texture2D shadowMapDynamic)
 {

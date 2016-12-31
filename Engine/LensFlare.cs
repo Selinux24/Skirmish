@@ -30,14 +30,6 @@ namespace Engine
         /// Light projected direction
         /// </summary>
         private Vector2 lightProjectedDirection;
-        /// <summary>
-        /// Flare scale
-        /// </summary>
-        private float scale = 1f;
-        /// <summary>
-        /// Flare transparency
-        /// </summary>
-        private float transparency = 1f;
 
         /// <summary>
         /// Constructor
@@ -95,46 +87,62 @@ namespace Engine
         /// <param name="context">Updating context</param>
         public override void Update(UpdateContext context)
         {
+            // Don't draw any flares by default
+            this.drawFlares = false;
+
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null)
             {
                 float dot = Math.Max(0, Vector3.Dot(context.EyeDirection, -keyLight.Direction));
 
-                this.transparency = dot;
-                this.scale = dot * keyLight.Brightness;
-
-                // Set view translation to Zero to simulate infinite
-                Matrix infiniteView = context.View;
-                infiniteView.TranslationVector = Vector3.Zero;
-
-                // Project the light position into 2D screen space.
-                Vector3 projectedPosition = this.Game.Graphics.Viewport.Project(
-                    -keyLight.Direction * (1f + context.NearPlaneDistance), //Move position into near and far plane projection bounds
-                    context.Projection,
-                    infiniteView,
-                    Matrix.Identity);
-
-                // Don't draw any flares if the light is behind the camera.
-                if ((projectedPosition.Z < 0) || (projectedPosition.Z > 1))
+                float transparency = dot;
+                float scale = dot * keyLight.Brightness;
+                if (scale > 0)
                 {
-                    this.drawFlares = false;
-                }
-                else
-                {
-                    this.lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
-                    this.lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
+                    // Set view translation to Zero to simulate infinite
+                    Matrix infiniteView = context.View;
+                    infiniteView.TranslationVector = Vector3.Zero;
 
-                    this.glowSprite.Update(context);
+                    // Project the light position into 2D screen space.
+                    Vector3 projectedPosition = this.Game.Graphics.Viewport.Project(
+                        -keyLight.Direction * (1f + context.NearPlaneDistance), //Move position into near and far plane projection bounds
+                        context.Projection,
+                        infiniteView,
+                        Matrix.Identity);
 
-                    if (this.flares != null && this.flares.Length > 0)
+                    if (projectedPosition.Z >= 0 && projectedPosition.Z <= 1)
                     {
-                        for (int i = 0; i < this.flares.Length; i++)
+                        //The light is in front of the camera.
+                        this.drawFlares = true;
+
+                        this.lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
+                        this.lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
+
+                        //Update glow sprite
+                        float glowScale = 50f / this.glowSprite.Width;
+                        this.glowSprite.Color = new Color4(keyLight.DiffuseColor.RGB(), 0.25f);
+                        this.glowSprite.Manipulator.SetPosition(this.lightProjectedPosition - (this.glowSprite.RelativeCenter * glowScale * scale));
+                        this.glowSprite.Manipulator.SetScale(glowScale * scale);
+                        this.glowSprite.Update(context);
+
+                        //Update flares
+                        if (this.flares != null && this.flares.Length > 0)
                         {
-                            this.flares[i].FlareSprite.Update(context);
+                            for (int i = 0; i < this.flares.Length; i++)
+                            {
+                                Flare flare = this.flares[i];
+
+                                // Compute the position of this flare sprite.
+                                Vector2 flarePosition = (this.lightProjectedPosition + this.lightProjectedDirection * flare.Position);
+
+                                // Set the flare alpha based on the angle with view and light directions.
+                                flare.FlareSprite.Color = new Color4(flare.Color.RGB(), 0.5f * transparency);
+                                flare.FlareSprite.Manipulator.SetPosition(flarePosition - (flare.FlareSprite.RelativeCenter * flare.Scale * scale));
+                                flare.FlareSprite.Manipulator.SetScale(flare.Scale * scale);
+                                flare.FlareSprite.Update(context);
+                            }
                         }
                     }
-
-                    this.drawFlares = true;
                 }
             }
         }
@@ -146,64 +154,18 @@ namespace Engine
         {
             if (this.drawFlares)
             {
-                this.DrawGlow(context);
-                this.DrawFlares(context);
-            }
-        }
-        /// <summary>
-        /// Draws the glowing sprite
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        private void DrawGlow(DrawContext context)
-        {
-            var keyLight = context.Lights.KeyLight;
-            if (keyLight != null)
-            {
-                Color4 color = keyLight.DiffuseColor;
-                color.Alpha = 0.25f;
+                // Draw the sprite using additive blending.
+                this.Game.Graphics.SetBlendAdditive();
 
-                if (this.scale > 0)
-                {
-                    float gScale = 50f / this.glowSprite.Width;
+                // Draw glow
+                this.glowSprite.Draw(context);
 
-                    this.glowSprite.Color = color;
-                    this.glowSprite.Manipulator.SetPosition(this.lightProjectedPosition - (this.glowSprite.RelativeCenter * gScale * this.scale));
-                    this.glowSprite.Manipulator.SetScale(gScale * this.scale);
-
-                    // Draw the sprite using additive blending.
-                    this.Game.Graphics.SetBlendAdditive();
-                    this.glowSprite.Draw(context);
-                }
-            }
-        }
-        /// <summary>
-        /// Draws the flare list sprites
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        private void DrawFlares(DrawContext context)
-        {
-            if (this.scale > 0)
-            {
+                //Draw flares if any
                 if (this.flares != null && this.flares.Length > 0)
                 {
                     for (int i = 0; i < this.flares.Length; i++)
                     {
-                        Flare flare = this.flares[i];
-
-                        // Set the flare alpha based on the previous occlusion query result.
-                        Color4 flareColor = flare.Color;
-                        flareColor.Alpha *= 0.5f * this.transparency;
-
-                        // Compute the position of this flare sprite.
-                        Vector2 flarePosition = (this.lightProjectedPosition + this.lightProjectedDirection * flare.Position);
-
-                        flare.FlareSprite.Color = flareColor;
-                        flare.FlareSprite.Manipulator.SetPosition(flarePosition - (flare.FlareSprite.RelativeCenter * flare.Scale * this.scale));
-                        flare.FlareSprite.Manipulator.SetScale(flare.Scale * this.scale);
-
-                        // Draw the flare sprite using additive blending.
-                        this.Game.Graphics.SetBlendAdditive();
-                        flare.FlareSprite.Draw(context);
+                        this.flares[i].FlareSprite.Draw(context);
                     }
                 }
             }
