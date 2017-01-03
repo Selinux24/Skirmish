@@ -162,8 +162,12 @@
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Common\IndexBufferShapeEnum.cs" />
     <Compile Include="Common\Intersection.cs" />
+    <Compile Include="Common\UseMaterials.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
-    <Compile Include="Effects\EffectSkyScattering.cs" />
+    <Compile Include="Effects\EffectShadowBillboard.cs" />
+    <Compile Include="Effects\EffectDeferredTerrain.cs" />
+    <Compile Include="Effects\EffectShadowTerrain.cs" />
+    <Compile Include="Effects\EffectDefaultSkyScattering.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />
@@ -171,7 +175,7 @@
     <Compile Include="ParticleSystemDescription.cs" />
     <Compile Include="ParticleSystemTypes.cs" />
     <Compile Include="ParticleTypes.cs" />
-    <Compile Include="Effects\EffectCPUParticles.cs" />
+    <Compile Include="Effects\EffectDefaultCPUParticles.cs" />
     <Compile Include="ParticleEmitter.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -300,8 +304,8 @@
     <Compile Include="Collections\PriorityQueue.cs" />
     <Compile Include="Collections\PriorityDictionaryItem.cs" />
     <Compile Include="Content\LightContent.cs" />
-    <Compile Include="Effects\EffectTerrain.cs" />
-    <Compile Include="Effects\EffectSprite.cs" />
+    <Compile Include="Effects\EffectDefaultTerrain.cs" />
+    <Compile Include="Effects\EffectDefaultSprite.cs" />
     <Compile Include="Effects\EffectNull.cs" />
     <Compile Include="LensFlare.cs" />
     <Compile Include="LevelOfDetailEnum.cs" />
@@ -318,10 +322,10 @@
     <Compile Include="PathFinding\PathFinderSettings.cs" />
     <Compile Include="Polygon.cs" />
     <Compile Include="SceneRendererResultEnum.cs" />
-    <Compile Include="Effects\EffectDeferred.cs" />
+    <Compile Include="Effects\EffectDeferredComposer.cs" />
     <Compile Include="EngineException.cs" />
     <Compile Include="GBuffer.cs" />
-    <Compile Include="Effects\EffectBasicGBuffer.cs" />
+    <Compile Include="Effects\EffectDeferredBasic.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LightBuffer.cs" />
     <Compile Include="SceneLight.cs" />
@@ -332,7 +336,7 @@
     <Compile Include="SpriteTexture.cs" />
     <Compile Include="Curve.cs" />
     <Compile Include="Effects\DrawerPool.cs" />
-    <Compile Include="Effects\EffectBasicShadow.cs" />
+    <Compile Include="Effects\EffectShadowBasic.cs" />
     <Compile Include="Headings.cs" />
     <Compile Include="Line3D.cs" />
     <Compile Include="Common\VertexGPUParticle.cs" />
@@ -368,7 +372,7 @@
     <Compile Include="GroundDescription.cs" />
     <Compile Include="TriangleListDrawer.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
-    <Compile Include="Effects\EffectGPUParticles.cs" />
+    <Compile Include="Effects\EffectDefaultGPUParticles.cs" />
     <Compile Include="Effects\IDrawer.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
@@ -376,9 +380,9 @@
     <Compile Include="ParticleSystemGPU.cs" />
     <Compile Include="LineListDrawer.cs" />
     <Compile Include="Cubemap.cs" />
-    <Compile Include="Effects\EffectBillboard.cs" />
-    <Compile Include="Effects\EffectBasic.cs" />
-    <Compile Include="Effects\EffectCubemap.cs" />
+    <Compile Include="Effects\EffectDefaultBillboard.cs" />
+    <Compile Include="Effects\EffectDefaultBasic.cs" />
+    <Compile Include="Effects\EffectDefaultCubemap.cs" />
     <Compile Include="EngineForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -391,7 +395,7 @@
     <Compile Include="Animation\JointAnimation.cs" />
     <Compile Include="Common\VertexPositionNormalTextureTangent.cs" />
     <Compile Include="Counters.cs" />
-    <Compile Include="Effects\EffectFont.cs" />
+    <Compile Include="Effects\EffectDefaultFont.cs" />
     <Compile Include="Effects\Drawer.cs" />
     <Compile Include="GameTime.cs" />
     <Compile Include="Model.cs" />
@@ -439,39 +443,46 @@
     <None Include="app.config" />
     <None Include="Engine.snk" />
     <None Include="packages.config" />
-    <None Include="Resources\ShaderSkyScattering.fx" />
-    <None Include="Resources\ShaderCPUParticles.fx" />
-    <None Include="Resources\ShaderBasic.fxo" />
-    <None Include="Resources\ShaderCPUParticles.fxo" />
-    <None Include="Resources\ShaderDeferred.fxo" />
-    <None Include="Resources\ShaderGBuffer.fx" />
-    <None Include="Resources\ShaderBillboard.fxo" />
-    <None Include="Resources\ShaderCubemap.fxo" />
-    <None Include="Resources\ShaderFont.fxo" />
-    <None Include="Resources\ShaderGBuffer.fxo" />
+    <None Include="Resources\IncScattering.fx" />
+    <None Include="Resources\ShaderShadowBillboard.fx" />
+    <None Include="Resources\ShaderShadowBillboard.fxo" />
+    <None Include="Resources\ShaderShadowTerrain.fxo" />
+    <None Include="Resources\ShaderDeferredTerrain.fxo" />
+    <None Include="Resources\ShaderShadowTerrain.fx" />
+    <None Include="Resources\ShaderDeferredTerrain.fx" />
+    <None Include="Resources\ShaderDefaultSkyScattering.fx" />
+    <None Include="Resources\ShaderDefaultCPUParticles.fx" />
+    <None Include="Resources\ShaderDefaultBasic.fxo" />
+    <None Include="Resources\ShaderDefaultCPUParticles.fxo" />
+    <None Include="Resources\ShaderDeferredComposer.fxo" />
+    <None Include="Resources\ShaderDeferredBasic.fx" />
+    <None Include="Resources\ShaderDefaultBillboard.fxo" />
+    <None Include="Resources\ShaderDefaultCubemap.fxo" />
+    <None Include="Resources\ShaderDefaultFont.fxo" />
+    <None Include="Resources\ShaderDeferredBasic.fxo" />
     <None Include="Resources\ShaderNull.fxo" />
-    <None Include="Resources\ShaderGPUParticles.fxo" />
-    <None Include="Resources\ShaderShadow.fx" />
+    <None Include="Resources\ShaderDefaultGPUParticles.fxo" />
+    <None Include="Resources\ShaderShadowBasic.fx" />
     <None Include="Resources\IncVertexFormats.fx" />
-    <None Include="Resources\ShaderBasic.fx" />
-    <None Include="Resources\ShaderBillboard.fx" />
-    <None Include="Resources\ShaderFont.fx" />
-    <None Include="Resources\ShaderCubemap.fx" />
-    <None Include="Resources\ShaderGPUParticles.fx" />
-    <None Include="Resources\ShaderShadow.fxo" />
-    <None Include="Resources\ShaderSkyScattering.fxo" />
-    <None Include="Resources\ShaderSprite.fxo" />
-    <None Include="Resources\ShaderTerrain.fxo" />
+    <None Include="Resources\ShaderDefaultBasic.fx" />
+    <None Include="Resources\ShaderDefaultBillboard.fx" />
+    <None Include="Resources\ShaderDefaultFont.fx" />
+    <None Include="Resources\ShaderDefaultCubemap.fx" />
+    <None Include="Resources\ShaderDefaultGPUParticles.fx" />
+    <None Include="Resources\ShaderShadowBasic.fxo" />
+    <None Include="Resources\ShaderDefaultSkyScattering.fxo" />
+    <None Include="Resources\ShaderDefaultSprite.fxo" />
+    <None Include="Resources\ShaderDefaultTerrain.fxo" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\IncLights.fx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="engine.ico" />
-    <None Include="Resources\ShaderDeferred.fx" />
+    <None Include="Resources\ShaderDeferredComposer.fx" />
     <None Include="Resources\ShaderNull.fx" />
-    <None Include="Resources\ShaderSprite.fx" />
-    <None Include="Resources\ShaderTerrain.fx" />
+    <None Include="Resources\ShaderDefaultSprite.fx" />
+    <None Include="Resources\ShaderDefaultTerrain.fx" />
     <Content Include="sharpdx_direct3d11_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

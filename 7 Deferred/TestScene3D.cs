@@ -361,6 +361,10 @@ namespace DeferredTest
 
             this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { EnableDepthStencil = true }, 1000);
 
+            this.Lights.KeyLight.Enabled = true;
+            this.Lights.BackLight.Enabled = true;
+            this.Lights.FillLight.Enabled = true;
+
             #endregion
         }
         public override void Update(GameTime gameTime)

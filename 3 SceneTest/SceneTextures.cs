@@ -389,6 +389,13 @@ namespace SceneTest
                 this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning;
+            }
+
             #endregion
 
             base.Update(gameTime);

@@ -91,8 +91,8 @@ namespace Engine
                 this.WriteDataInBuffer();
             }
 
-            var effect = DrawerPool.EffectBasic;
-            var technique = effect.PositionColor;
+            var effect = DrawerPool.EffectDefaultBasic;
+            var technique = effect.GetTechnique(VertexTypes.PositionColor, false, DrawingStages.Drawing, context.DrawerMode);
 
             #region Per frame update
 
@@ -102,7 +102,7 @@ namespace Engine
 
             #region Per object update
 
-            effect.UpdatePerObject(Material.Default, null, null, null, null, 0);
+            effect.UpdatePerObject(null, null, null, null, 0, 0);
 
             #endregion
 

@@ -132,17 +132,26 @@ struct SpotLight
 	float Pad3;
 };
 
-Material MaterialDefault()
+Material GetMaterialData(Texture2D materialsTexture, uint materialIndex, uint paletteWidth)
 {
+    uint baseIndex = 4 * materialIndex;
+    uint baseU = baseIndex % paletteWidth;
+    uint baseV = baseIndex / paletteWidth;
+	
+    float4 mat1 = materialsTexture.Load(uint3(baseU,baseV,0));
+    float4 mat2 = materialsTexture.Load(uint3(baseU+1,baseV,0));
+    float4 mat3 = materialsTexture.Load(uint3(baseU+2,baseV,0));
+    float4 mat4 = materialsTexture.Load(uint3(baseU+3,baseV,0));
+
 	Material mat;
 
-	mat.Emissive = float4(0.0f,0.0f,0.0f,0.0f);
-	mat.Ambient =  float4(0.2f,0.2f,0.2f,1.0f);
-	mat.Diffuse =  float4(1.0f,1.0f,1.0f,1.0f);
-	mat.Specular = float4(0.5f,0.5f,0.5f,1.0f);
-	mat.Shininess = 10.0f;
+	mat.Emissive = mat1;
+	mat.Ambient =  mat2;
+	mat.Diffuse =  mat3;
+	mat.Specular = float4(mat4.xyz, 1.0f);
+	mat.Shininess = mat4.w;
 
-	return mat;
+    return mat;
 }
 
 static const uint MaxSampleCount = 16;
@@ -302,10 +311,6 @@ void ComputePointLight(
 	float3 pPosition, 
 	float3 pNormal,
 	float3 ePosition,
-	float4 sLightPosition,
-	uint shadows,
-	Texture2D shadowMapStatic,
-	Texture2D shadowMapDynamic, 
 	out float4 diffuse, 
 	out float4 specular)
 {
@@ -328,10 +333,6 @@ void ComputeSpotLight(
 	float3 pPosition, 
 	float3 pNormal,
 	float3 ePosition,
-	float4 sLightPosition,
-	uint shadows,
-	Texture2D shadowMapStatic,
-	Texture2D shadowMapDynamic, 
 	out float4 diffuse, 
 	out float4 specular)
 {

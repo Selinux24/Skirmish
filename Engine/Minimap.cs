@@ -116,7 +116,10 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            
+            for (int i = 0; i < this.Drawables.Length; i++)
+            {
+                this.Drawables[i].SetCulling(false);
+            }
         }
         /// <summary>
         /// Draw objects
@@ -127,6 +130,7 @@ namespace Engine
             if (this.Drawables != null && this.Drawables.Length > 0)
             {
                 this.drawContext.GameTime = context.GameTime;
+                this.drawContext.Materials = context.Materials;
 
                 this.Game.Graphics.SetViewport(this.viewport);
                 this.Game.Graphics.SetRenderTarget(this.renderTarget, true, Color.Silver, null, false);

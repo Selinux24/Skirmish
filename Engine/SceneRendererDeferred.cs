@@ -334,6 +334,7 @@ namespace Engine
                     this.DrawContext.ShadowMapStatic = null;
                     this.DrawContext.ShadowMapDynamic = null;
                     this.DrawContext.FromLightViewProjection = Matrix.Identity;
+                    this.DrawContext.Materials = scene.Materials;
 #if DEBUG
                     swStartup.Stop();
 
@@ -399,7 +400,7 @@ namespace Engine
 
                             #endregion
 
-                            this.UpdateShadowMapStatic = false;
+                            this.UpdateShadowMapStatic = scene.TimeOfDay.Running;
                         }
 
                         #region Dynamic shadow map
@@ -469,13 +470,11 @@ namespace Engine
 
                     #endregion
 
-                    #region Render
-
                     #region Deferred rendering
 
                     //Render to G-Buffer only opaque objects
-                    List<Drawable> solidComponents = visibleComponents.FindAll(c => c.DeferredEnabled);
-                    if (solidComponents.Count > 0)
+                    var deferredEnabledComponents = visibleComponents.FindAll(c => c.DeferredEnabled);
+                    if (deferredEnabledComponents.Count > 0)
                     {
                         #region Cull
 #if DEBUG
@@ -485,7 +484,7 @@ namespace Engine
                         if (scene.PerformFrustumCulling)
                         {
                             //Frustum culling
-                            draw = scene.CullTest(this.DrawContext.Frustum, solidComponents);
+                            draw = scene.CullTest(this.DrawContext.Frustum, deferredEnabledComponents);
                         }
                         else
                         {
@@ -515,7 +514,7 @@ namespace Engine
                             Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
                             //Draw scene on g-buffer render targets
-                            this.DrawResultComponents(gameTime, this.DrawContext, solidComponents);
+                            this.DrawResultComponents(gameTime, this.DrawContext, deferredEnabledComponents);
 #if DEBUG
                             swGeometryBufferDraw.Stop();
 #endif
@@ -571,6 +570,7 @@ namespace Engine
 
                     //Draw scene result on screen using g-buffer and light buffer
                     this.DrawResult(this.DrawContext);
+
 #if DEBUG
                     swComponsition.Stop();
 
@@ -583,13 +583,18 @@ namespace Engine
                         deferred_composeDraw = deferredCompositionCounters[1];
                     }
 #endif
+
                     #endregion
 
-                    //Render to screen the rest of objects
-                    List<Drawable> otherComponents = visibleComponents.FindAll(c => !c.DeferredEnabled);
-                    if (otherComponents.Count > 0)
+                    #endregion
+
+                    #region Forward rendering
+
+                    //Render to screen deferred disabled components
+                    var deferredDisabledComponents = visibleComponents.FindAll(c => !c.DeferredEnabled);
+                    if (deferredDisabledComponents.Count > 0)
                     {
-                        #region Draw other
+                        #region Draw deferred disabled components
 #if DEBUG
                         Stopwatch swDraw = Stopwatch.StartNew();
 #endif
@@ -597,7 +602,7 @@ namespace Engine
                         this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
 
                         //Draw scene
-                        this.DrawResultComponents(gameTime, this.DrawContext, otherComponents);
+                        this.DrawResultComponents(gameTime, this.DrawContext, deferredDisabledComponents);
 
                         //Set deferred mode
                         this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
@@ -608,8 +613,6 @@ namespace Engine
 #endif
                         #endregion
                     }
-
-                    #endregion
 
                     #endregion
                 }
@@ -942,7 +945,7 @@ namespace Engine
             Stopwatch swPrepare = Stopwatch.StartNew();
 #endif
             var deviceContext = this.Game.Graphics.DeviceContext;
-            var effect = DrawerPool.EffectDeferred;
+            var effect = DrawerPool.EffectDeferredComposer;
 
             var directionalLights = context.Lights.GetVisibleDirectionalLights();
             var spotLights = context.Lights.GetVisibleSpotLights();
@@ -952,16 +955,9 @@ namespace Engine
                 context.World,
                 this.ViewProjection,
                 context.EyePosition,
-                directionalLights.Length,
-                context.Lights.FogStart,
-                context.Lights.FogRange,
-                context.Lights.FogColor,
                 this.GeometryMap[0],
                 this.GeometryMap[1],
-                this.GeometryMap[2],
-                context.ShadowMaps,
-                context.ShadowMapStatic,
-                context.ShadowMapDynamic);
+                this.GeometryMap[2]);
 
             this.Game.Graphics.SetDepthStencilRDZDisabled();
             this.Game.Graphics.SetBlendDeferredLighting();
@@ -990,7 +986,12 @@ namespace Engine
 
                 for (int i = 0; i < directionalLights.Length; i++)
                 {
-                    effect.UpdatePerLight(directionalLights[i], context.FromLightViewProjection);
+                    effect.UpdatePerLight(
+                        directionalLights[i],
+                        context.FromLightViewProjection,
+                        context.ShadowMaps,
+                        context.ShadowMapStatic,
+                        context.ShadowMapDynamic);
 
                     for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                     {
@@ -1036,7 +1037,7 @@ namespace Engine
                     //Draw Pass
                     effect.UpdatePerLight(
                         light,
-                        context.World,
+                        context.World * light.Transform,
                         context.ViewProjection);
 
                     for (int p = 0; p < effectTechnique.Description.PassCount; p++)
@@ -1188,13 +1189,17 @@ namespace Engine
 #if DEBUG
                 Stopwatch swInit = Stopwatch.StartNew();
 #endif
-                var effect = DrawerPool.EffectDeferred;
+                var effect = DrawerPool.EffectDeferredComposer;
                 var effectTechnique = effect.DeferredCombineLights;
 
                 effect.UpdateComposer(
                     context.World,
                     this.ViewProjection,
                     context.EyePosition,
+                    context.Lights.GlobalAmbientLight,
+                    context.Lights.FogStart,
+                    context.Lights.FogRange,
+                    context.Lights.FogColor,
                     this.GeometryMap[2],
                     this.LightMap);
 

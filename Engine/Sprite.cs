@@ -221,8 +221,8 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            var effect = DrawerPool.EffectSprite;
-            var technique = effect.PositionTexture;
+            var effect = DrawerPool.EffectDefaultSprite;
+            var technique = effect.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode);
 
             #region Per frame update
 

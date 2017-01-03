@@ -19,7 +19,7 @@ namespace Engine
             this.EnableDepthStencil = false;
             this.EnableAlphaBlending = false;
 
-            this.Geometry = CubeMapGeometryEnum.Semispehere;
+            this.Geometry = CubeMapGeometryEnum.Sphere;
             this.ReverseFaces = true;
         }
     }

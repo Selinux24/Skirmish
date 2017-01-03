@@ -99,6 +99,10 @@ namespace Engine
         /// Gets the bounding box of the active light
         /// </summary>
         public BoundingBox BoundingBox { get; private set; }
+        /// <summary>
+        /// Transform matrix
+        /// </summary>
+        public Matrix Transform { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -159,6 +163,8 @@ namespace Engine
 			}
 
             this.BoundingBox = BoundingBox.FromPoints(points.ToArray());
+
+            this.Transform = Matrix.Scaling(this.radius) * Matrix.Translation(this.position);
         }
     }
 }

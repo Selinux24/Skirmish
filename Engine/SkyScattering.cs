@@ -3,7 +3,6 @@ using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
 using Buffer = SharpDX.Direct3D11.Buffer;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
@@ -232,8 +231,8 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null)
             {
-                var effect = DrawerPool.EffectSkyScattering;
-                var technique = effect.SkyScattering;
+                var effect = DrawerPool.EffectDefaultSkyScattering;
+                var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
 
                 effect.UpdatePerFrame(
                     Matrix.Translation(context.EyePosition),

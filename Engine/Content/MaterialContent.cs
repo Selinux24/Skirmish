@@ -16,7 +16,7 @@ namespace Engine.Content
             {
                 return new MaterialContent()
                 {
-                    AmbientColor = new Color4(0.02f, 0.02f, 0.02f, 0.02f),
+                    AmbientColor = new Color4(0.02f, 0.02f, 0.02f, 1f),
                     DiffuseColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f),
                     SpecularColor = new Color4(0.5f, 0.5f, 0.5f, 1.0f),
                     EmissionColor = new Color4(0.0f, 0.0f, 0.0f, 1.0f),

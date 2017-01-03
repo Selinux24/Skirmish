@@ -3,7 +3,6 @@ using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
 using Buffer = SharpDX.Direct3D11.Buffer;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
@@ -89,49 +88,40 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            EffectCubemap effect = DrawerPool.EffectCubemap;
-            EffectTechnique technique = null;
-            if (context.DrawerMode == DrawerModesEnum.Forward) { technique = effect.ForwardCubemap; }
-            else if (context.DrawerMode == DrawerModesEnum.Deferred) { technique = effect.DeferredCubemap; }
+            var effect = DrawerPool.EffectDefaultCubemap;
+            var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
 
-            if (technique != null)
+            #region Per frame update
+
+            effect.UpdatePerFrame(this.local, context.ViewProjection);
+
+            #endregion
+
+            #region Per object update
+
+            effect.UpdatePerObject(this.cubeMapTexture);
+
+            #endregion
+
+            //Sets vertex and index buffer
+            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+            Counters.IAInputLayoutSets++;
+            this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+            Counters.IAVertexBuffersSets++;
+            this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
+            Counters.IAIndexBufferSets++;
+            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+            Counters.IAPrimitiveTopologySets++;
+
+            for (int p = 0; p < technique.Description.PassCount; p++)
             {
-                #region Per frame update
+                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                effect.UpdatePerFrame(
-                    this.local,
-                    context.ViewProjection,
-                    context.EyePosition,
-                    context.Lights);
+                this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
 
-                #endregion
-
-                #region Per object update
-
-                effect.UpdatePerObject(this.cubeMapTexture);
-
-                #endregion
-
-                //Sets vertex and index buffer
-                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                Counters.IAInputLayoutSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-
-                for (int p = 0; p < technique.Description.PassCount; p++)
-                {
-                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
-
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
-
-                    Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexCount / 3;
-                }
+                Counters.DrawCallsPerFrame++;
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += this.indexCount / 3;
             }
         }
 
@@ -155,7 +145,6 @@ namespace Engine
             uint[] iData;
             if (geometry == CubemapDescription.CubeMapGeometryEnum.Box) GeometryUtil.CreateBox(1, 10, 10, out vData, out iData);
             else if (geometry == CubemapDescription.CubeMapGeometryEnum.Sphere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
-            else if (geometry == CubemapDescription.CubeMapGeometryEnum.Semispehere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
             else throw new ArgumentException("Bad geometry enum type");
 
             VertexPosition[] vertices = VertexPosition.Generate(vData);

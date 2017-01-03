@@ -1,8 +1,10 @@
 ﻿using SharpDX.Direct3D11;
+using System;
 
 namespace Engine.Effects
 {
-    using Properties;
+    using Engine.Common;
+    using Engine.Properties;
 
     /// <summary>
     /// Pool of drawers
@@ -13,54 +15,69 @@ namespace Engine.Effects
         /// Null effect
         /// </summary>
         public static EffectNull EffectNull { get; private set; }
+
         /// <summary>
         /// Sprite effect
         /// </summary>
-        public static EffectSprite EffectSprite { get; private set; }
-        /// <summary>
-        /// Basic effect
-        /// </summary>
-        public static EffectBasic EffectBasic { get; private set; }
-        /// <summary>
-        /// Billboards effect
-        /// </summary>
-        public static EffectBillboard EffectBillboard { get; private set; }
-        /// <summary>
-        /// Cube map effect
-        /// </summary>
-        public static EffectCubemap EffectCubemap { get; private set; }
+        public static EffectDefaultSprite EffectDefaultSprite { get; private set; }
         /// <summary>
         /// Font drawing effect
         /// </summary>
-        public static EffectFont EffectFont { get; private set; }
+        public static EffectDefaultFont EffectDefaultFont { get; private set; }
         /// <summary>
-        /// CPU Particles drawing effect
+        /// Cube map effect
         /// </summary>
-        public static EffectCPUParticles EffectCPUParticles { get; private set; }
+        public static EffectDefaultCubemap EffectDefaultCubemap { get; private set; }
         /// <summary>
-        /// GPU Particles drawing effect
+        /// Billboards effect
         /// </summary>
-        public static EffectGPUParticles EffectGPUParticles { get; private set; }
+        public static EffectDefaultBillboard EffectDefaultBillboard { get; private set; }
+        /// <summary>
+        /// Basic effect
+        /// </summary>
+        public static EffectDefaultBasic EffectDefaultBasic { get; private set; }
         /// <summary>
         /// Terrain drawing effect
         /// </summary>
-        public static EffectTerrain EffectTerrain { get; private set; }
-        /// <summary>
-        /// Shadows effect
-        /// </summary>
-        public static EffectBasicShadow EffectShadow { get; private set; }
-        /// <summary>
-        /// Geometry Buffer effect
-        /// </summary>
-        public static EffectBasicGBuffer EffectGBuffer { get; private set; }
-        /// <summary>
-        /// Deferred lightning effect
-        /// </summary>
-        public static EffectDeferred EffectDeferred { get; private set; }
+        public static EffectDefaultTerrain EffectDefaultTerrain { get; private set; }
         /// <summary>
         /// Sky scattering effect
         /// </summary>
-        public static EffectSkyScattering EffectSkyScattering { get; private set; }
+        public static EffectDefaultSkyScattering EffectDefaultSkyScattering { get; private set; }
+        /// <summary>
+        /// CPU Particles drawing effect
+        /// </summary>
+        public static EffectDefaultCPUParticles EffectDefaultCPUParticles { get; private set; }
+        /// <summary>
+        /// GPU Particles drawing effect
+        /// </summary>
+        public static EffectDefaultGPUParticles EffectDefaultGPUParticles { get; private set; }
+
+        /// <summary>
+        /// Deferred lightning effect
+        /// </summary>
+        public static EffectDeferredComposer EffectDeferredComposer { get; private set; }
+        /// <summary>
+        /// Geometry Buffer effect
+        /// </summary>
+        public static EffectDeferredBasic EffectDeferredBasic { get; private set; }
+        /// <summary>
+        /// Terrain drawing effect
+        /// </summary>
+        public static EffectDeferredTerrain EffectDeferredTerrain { get; private set; }
+
+        /// <summary>
+        /// Billboards effect
+        /// </summary>
+        public static EffectShadowBillboard EffectShadowBillboard { get; private set; }
+        /// <summary>
+        /// Shadows effect
+        /// </summary>
+        public static EffectShadowBasic EffectShadowBasic { get; private set; }
+        /// <summary>
+        /// Terrain drawing effect
+        /// </summary>
+        public static EffectShadowTerrain EffectShadowTerrain { get; private set; }
 
         /// <summary>
         /// Initializes pool
@@ -68,122 +85,25 @@ namespace Engine.Effects
         /// <param name="device">Device</param>
         public static void Initialize(Device device)
         {
-            if (Resources.ShaderNullFxo != null)
-            {
-                EffectNull = new EffectNull(device, Resources.ShaderNullFxo, false);
-            }
-            else
-            {
-                EffectNull = new EffectNull(device, Resources.ShaderNullFx, true);
-            }
+            EffectNull = CreateEffect<EffectNull>(device, Resources.ShaderNullFxo, Resources.ShaderNullFx);
 
-            if (Resources.ShaderSpriteFxo != null)
-            {
-                EffectSprite = new EffectSprite(device, Resources.ShaderSpriteFxo, false);
-            }
-            else
-            {
-                EffectSprite = new EffectSprite(device, Resources.ShaderSpriteFx, true);
-            }
+            EffectDefaultSprite = CreateEffect<EffectDefaultSprite>(device, Resources.ShaderDefaultSpriteFxo, Resources.ShaderDefaultSpriteFxo);
+            EffectDefaultFont = CreateEffect<EffectDefaultFont>(device, Resources.ShaderDefaultFontFxo, Resources.ShaderDefaultFontFxo);
+            EffectDefaultCubemap = CreateEffect<EffectDefaultCubemap>(device, Resources.ShaderDefaultCubemapFxo, Resources.ShaderDefaultCubemapFx);
+            EffectDefaultBillboard = CreateEffect<EffectDefaultBillboard>(device, Resources.ShaderDefaultBillboardFxo, Resources.ShaderDefaultBillboardFx);
+            EffectDefaultBasic = CreateEffect<EffectDefaultBasic>(device, Resources.ShaderDefaultBasicFxo, Resources.ShaderDefaultBasicFx);
+            EffectDefaultTerrain = CreateEffect<EffectDefaultTerrain>(device, Resources.ShaderDefaultTerrainFxo, Resources.ShaderDefaultTerrainFx);
+            EffectDefaultSkyScattering = CreateEffect<EffectDefaultSkyScattering>(device, Resources.ShaderDefaultSkyScatteringFxo, Resources.ShaderDefaultSkyScatteringFx);
+            EffectDefaultCPUParticles = CreateEffect<EffectDefaultCPUParticles>(device, Resources.ShaderDefaultCPUParticlesFxo, Resources.ShaderDefaultCPUParticlesFx);
+            EffectDefaultGPUParticles = CreateEffect<EffectDefaultGPUParticles>(device, Resources.ShaderDefaultGPUParticlesFxo, Resources.ShaderDefaultGPUParticlesFx);
 
-            if (Resources.ShaderBasicFxo != null)
-            {
-                EffectBasic = new EffectBasic(device, Resources.ShaderBasicFxo, false);
-            }
-            else
-            {
-                EffectBasic = new EffectBasic(device, Resources.ShaderBasicFx, true);
-            }
+            EffectDeferredComposer = CreateEffect<EffectDeferredComposer>(device, Resources.ShaderDeferredComposerFxo, Resources.ShaderDeferredComposerFx);
+            EffectDeferredBasic = CreateEffect<EffectDeferredBasic>(device, Resources.ShaderDeferredBasicFxo, Resources.ShaderDeferredBasicFxo);
+            EffectDeferredTerrain = CreateEffect<EffectDeferredTerrain>(device, Resources.ShaderDeferredTerrainFxo, Resources.ShaderDeferredTerrainFx);
 
-            if (Resources.ShaderShadowFxo != null)
-            {
-                EffectShadow = new EffectBasicShadow(device, Resources.ShaderShadowFxo, false);
-            }
-            else
-            {
-                EffectShadow = new EffectBasicShadow(device, Resources.ShaderShadowFx, true);
-            }
-
-            if (Resources.ShaderGBufferFxo != null)
-            {
-                EffectGBuffer = new EffectBasicGBuffer(device, Resources.ShaderGBufferFxo, false);
-            }
-            else
-            {
-                EffectGBuffer = new EffectBasicGBuffer(device, Resources.ShaderGBufferFx, true);
-            }
-
-            if (Resources.ShaderFontFxo != null)
-            {
-                EffectFont = new EffectFont(device, Resources.ShaderFontFxo, false);
-            }
-            else
-            {
-                EffectFont = new EffectFont(device, Resources.ShaderFontFx, true);
-            }
-
-            if (Resources.ShaderCubemapFxo != null)
-            {
-                EffectCubemap = new EffectCubemap(device, Resources.ShaderCubemapFxo, false);
-            }
-            else
-            {
-                EffectCubemap = new EffectCubemap(device, Resources.ShaderCubemapFx, true);
-            }
-
-            if (Resources.ShaderBillboardFxo != null)
-            {
-                EffectBillboard = new EffectBillboard(device, Resources.ShaderBillboardFxo, false);
-            }
-            else
-            {
-                EffectBillboard = new EffectBillboard(device, Resources.ShaderBillboardFx, true);
-            }
-
-            if (Resources.ShaderCPUParticlesFxo != null)
-            {
-                EffectCPUParticles = new EffectCPUParticles(device, Resources.ShaderCPUParticlesFxo, false);
-            }
-            else
-            {
-                EffectCPUParticles = new EffectCPUParticles(device, Resources.ShaderCPUParticlesFx, true);
-            }
-
-            if (Resources.ShaderGPUParticlesFxo != null)
-            {
-                EffectGPUParticles = new EffectGPUParticles(device, Resources.ShaderGPUParticlesFxo, false);
-            }
-            else
-            {
-                EffectGPUParticles = new EffectGPUParticles(device, Resources.ShaderGPUParticlesFx, true);
-            }
-
-            if (Resources.ShaderTerrainFxo != null)
-            {
-                EffectTerrain = new EffectTerrain(device, Resources.ShaderTerrainFxo, false);
-            }
-            else
-            {
-                EffectTerrain = new EffectTerrain(device, Resources.ShaderTerrainFx, true);
-            }
-
-            if (Resources.ShaderDeferredFxo != null)
-            {
-                EffectDeferred = new EffectDeferred(device, Resources.ShaderDeferredFxo, false);
-            }
-            else
-            {
-                EffectDeferred = new EffectDeferred(device, Resources.ShaderDeferredFx, true);
-            }
-
-            if (Resources.ShaderSkyScatteringFxo != null)
-            {
-                EffectSkyScattering = new EffectSkyScattering(device, Resources.ShaderSkyScatteringFxo, false);
-            }
-            else
-            {
-                EffectSkyScattering = new EffectSkyScattering(device, Resources.ShaderSkyScatteringFx, true);
-            }
+            EffectShadowBillboard = CreateEffect<EffectShadowBillboard>(device, Resources.ShaderShadowBillboardFxo, Resources.ShaderShadowBillboardFx);
+            EffectShadowBasic = CreateEffect<EffectShadowBasic>(device, Resources.ShaderShadowBasicFxo, Resources.ShaderShadowBasicFx);
+            EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(device, Resources.ShaderShadowTerrainFxo, Resources.ShaderShadowTerrainFx);
         }
         /// <summary>
         /// Dispose of used resources
@@ -191,17 +111,53 @@ namespace Engine.Effects
         public static void Dispose()
         {
             Helper.Dispose(EffectNull);
-            Helper.Dispose(EffectBasic);
-            Helper.Dispose(EffectBillboard);
-            Helper.Dispose(EffectCubemap);
-            Helper.Dispose(EffectFont);
-            Helper.Dispose(EffectCPUParticles);
-            Helper.Dispose(EffectGPUParticles);
-            Helper.Dispose(EffectTerrain);
-            Helper.Dispose(EffectShadow);
-            Helper.Dispose(EffectGBuffer);
-            Helper.Dispose(EffectDeferred);
-            Helper.Dispose(EffectSkyScattering);
+
+            Helper.Dispose(EffectDefaultSprite);
+            Helper.Dispose(EffectDefaultFont);
+            Helper.Dispose(EffectDefaultCubemap);
+            Helper.Dispose(EffectDefaultBillboard);
+            Helper.Dispose(EffectDefaultBasic);
+            Helper.Dispose(EffectDefaultTerrain);
+            Helper.Dispose(EffectDefaultSkyScattering);
+            Helper.Dispose(EffectDefaultCPUParticles);
+            Helper.Dispose(EffectDefaultGPUParticles);
+
+            Helper.Dispose(EffectDeferredComposer);
+            Helper.Dispose(EffectDeferredBasic);
+            Helper.Dispose(EffectDeferredTerrain);
+
+            Helper.Dispose(EffectShadowBillboard);
+            Helper.Dispose(EffectShadowBasic);
+            Helper.Dispose(EffectShadowTerrain);
+        }
+
+        /// <summary>
+        /// Creates a new effect from resources
+        /// </summary>
+        /// <typeparam name="T">Effect type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="resFxo">Compiled resource</param>
+        /// <param name="resFx">Source code resource</param>
+        /// <returns>Returns the new generated effect instance</returns>
+        private static T CreateEffect<T>(Device device, byte[] resFxo, byte[] resFx) where T : Drawer
+        {
+            var res = resFxo != null ? resFxo : resFx;
+
+            return (T)Activator.CreateInstance(typeof(T), device, res, false);
+        }
+
+        /// <summary>
+        /// Update scene globals
+        /// </summary>
+        /// <param name="materialPalette">Material palette</param>
+        /// <param name="materialPaletteWidth">Material palette width</param>
+        public static void UpdateSceneGlobals(ShaderResourceView materialPalette, uint materialPaletteWidth)
+        {
+            EffectDefaultBillboard.UpdateGlobals(materialPalette, materialPaletteWidth);
+            EffectDefaultBasic.UpdateGlobals(materialPalette, materialPaletteWidth);
+            EffectDefaultTerrain.UpdateGlobals(materialPalette, materialPaletteWidth);
+            
+            EffectDeferredComposer.UpdateGlobals(materialPalette, materialPaletteWidth);
         }
     }
 }

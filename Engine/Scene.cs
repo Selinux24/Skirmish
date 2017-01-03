@@ -8,6 +8,7 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
+    using Engine.Effects;
 
     /// <summary>
     /// Render scene
@@ -35,6 +36,10 @@ namespace Engine
         /// Scene mode
         /// </summary>
         private SceneModesEnum sceneMode = SceneModesEnum.Unknown;
+        /// <summary>
+        /// Material palette texture
+        /// </summary>
+        private ShaderResourceView materialPalette = null;
 
         /// <summary>
         /// Game class
@@ -68,6 +73,26 @@ namespace Engine
         /// Gets or sets whether the scene was handling control captures
         /// </summary>
         protected bool CapturedControl { get; private set; }
+        /// <summary>
+        /// Material palette texture width
+        /// </summary>
+        protected uint MaterialPaletteWidth { get; set; }
+        /// <summary>
+        /// Material palette texture
+        /// </summary>
+        protected ShaderResourceView MaterialPalette
+        {
+            get
+            {
+                return this.materialPalette;
+            }
+            set
+            {
+                Helper.Dispose(this.materialPalette);
+
+                this.materialPalette = value;
+            }
+        }
 
         /// <summary>
         /// Gets the scen world matrix
@@ -150,6 +175,10 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Materials list in the palette
+        /// </summary>
+        public Material[] Materials { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -286,6 +315,7 @@ namespace Engine
             Helper.Dispose(this.Renderer);
             Helper.Dispose(this.camera);
             Helper.Dispose(this.components);
+            Helper.Dispose(this.materialPalette);
         }
         /// <summary>
         /// Change renderer mode
@@ -812,7 +842,7 @@ namespace Engine
                 this.components.Add(component);
                 this.components.Sort((p1, p2) =>
                 {
-                    //First transparents
+                    //First always visible objects
                     int i = p1.AlwaysVisible.CompareTo(p2.AlwaysVisible);
                     if (i != 0) return i;
 
@@ -861,6 +891,74 @@ namespace Engine
             Vector3 fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
 
             return new Ray(nPoint, Vector3.Normalize(fPoint - nPoint));
+        }
+
+        /// <summary>
+        /// Update internals
+        /// </summary>
+        public virtual void UpdateInternals()
+        {
+            this.UpdateMaterialPalette();
+            this.UpdateAnimationPalette();
+
+            DrawerPool.UpdateSceneGlobals(this.MaterialPalette, this.MaterialPaletteWidth);
+        }
+        /// <summary>
+        /// Updates the global material palette
+        /// </summary>
+        private void UpdateMaterialPalette()
+        {
+            List<Material> mats = new List<Material>();
+
+            mats.Add(Material.Default);
+
+            var matComponents = this.components.FindAll(c => c is UseMaterials);
+
+            foreach (UseMaterials component in matComponents)
+            {
+                var matList = component.Materials;
+                if (matList != null && matList.Length > 0)
+                {
+                    Tuple<Material, int>[] indices = new Tuple<Material, int>[matList.Length];
+
+                    for (int i = 0; i < matList.Length; i++)
+                    {
+                        Material mat = matList[i];
+
+                        if (!mats.Contains(mat))
+                        {
+                            mats.Add(mat);
+                        }
+                    }
+                }
+            }
+
+            List<Vector4> values = new List<Vector4>();
+
+            for (int i = 0; i < mats.Count; i++)
+            {
+                values.AddRange(mats[i].Pack());
+            }
+
+            int pixelCount = values.Count;
+            int texWidth = (int)Math.Sqrt((float)pixelCount) + 1;
+            int texHeight = 1;
+            while (texHeight < texWidth)
+            {
+                texHeight = texHeight << 1;
+            }
+            texWidth = texHeight;
+
+            this.MaterialPalette = this.Game.ResourceManager.CreateTexture2D(Guid.NewGuid(), values.ToArray(), texWidth);
+            this.MaterialPaletteWidth = (uint)texWidth;
+            this.Materials = mats.ToArray();
+        }
+        /// <summary>
+        /// Updates the global animation palette
+        /// </summary>
+        private void UpdateAnimationPalette()
+        {
+
         }
     }
 }

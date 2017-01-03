@@ -211,7 +211,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Draw(DrawContext context)
         {
-            var effect = DrawerPool.EffectCPUParticles;
+            var effect = DrawerPool.EffectDefaultCPUParticles;
              
             var technique = effect.GetTechnique(
                 VertexTypes.Particle, 

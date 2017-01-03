@@ -17,7 +17,7 @@ namespace Engine
     using Engine.Helpers;
     using Engine.PathFinding;
 
-    public class Terrain : Ground
+    public class Terrain : Ground, UseMaterials
     {
         #region Update and Draw context for terrain
 
@@ -569,189 +569,266 @@ namespace Engine
             /// <param name="context">Drawing context</param>
             public void Draw(TerrainDrawContext context)
             {
+                var terrainTechnique = this.SetTechniqueTerrain(context);
+                if (terrainTechnique != null)
                 {
-                    EffectTerrain effect = DrawerPool.EffectTerrain;
-
-                    this.game.Graphics.SetBlendDefault();
-
-                    #region Per frame update
-
-                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        effect.UpdatePerFrame(
-                            context.BaseContext.World,
-                            context.BaseContext.ViewProjection,
-                            context.BaseContext.EyePosition,
-                            context.BaseContext.Lights,
-                            context.BaseContext.ShadowMaps,
-                            context.BaseContext.ShadowMapStatic,
-                            context.BaseContext.ShadowMapDynamic,
-                            context.BaseContext.FromLightViewProjection);
-                    }
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        effect.UpdatePerFrame(
-                            context.BaseContext.World,
-                            context.BaseContext.ViewProjection);
-                    }
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        effect.UpdatePerFrame(
-                            context.BaseContext.World,
-                            context.BaseContext.ViewProjection);
-                    }
-
-                    #endregion
-
-                    #region Per object update
-
-                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        effect.UpdatePerObject(
-                            context.Material,
-                            context.TerrainNormalMaps,
-                            context.TerrainSpecularMaps,
-                            context.UseAlphaMap,
-                            context.AlphaMap,
-                            context.ColorTextures,
-                            context.UseSlopes,
-                            context.SlopeRanges,
-                            context.TerraintexturesLR,
-                            context.TerraintexturesHR,
-                            context.Proportion);
-                    }
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        effect.UpdatePerObject(
-                            context.Material,
-                            context.TerrainNormalMaps,
-                            context.TerrainSpecularMaps,
-                            context.UseAlphaMap,
-                            context.AlphaMap,
-                            context.ColorTextures,
-                            context.UseSlopes,
-                            context.SlopeRanges,
-                            context.TerraintexturesLR,
-                            context.TerraintexturesHR,
-                            context.Proportion);
-                    }
-
-                    #endregion
-
-                    var technique = effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
-
-                    this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                    Counters.IAInputLayoutSets++;
-                    this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
-                    Counters.IAPrimitiveTopologySets++;
-
                     foreach (var lod in this.patches.Keys)
                     {
                         foreach (var item in this.patches[lod])
                         {
                             if (item.Visible)
                             {
-                                item.DrawTerrain(context.BaseContext, technique);
+                                item.DrawTerrain(context.BaseContext, terrainTechnique);
                             }
                         }
                     }
                 }
 
+                var vegetationTechnique = this.SetTechniqueVegetation(context);
+                if (vegetationTechnique != null)
                 {
-                    EffectBillboard effect = DrawerPool.EffectBillboard;
-
-                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward) this.game.Graphics.SetBlendTransparent();
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred) this.game.Graphics.SetBlendDeferredComposerTransparent();
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap) this.game.Graphics.SetBlendTransparent();
-
-                    #region Per frame update
-
-                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        effect.UpdatePerFrame(
-                            context.BaseContext.World,
-                            context.BaseContext.ViewProjection,
-                            context.BaseContext.EyePosition,
-                            context.BaseContext.Lights,
-                            context.BaseContext.ShadowMaps,
-                            context.BaseContext.ShadowMapStatic,
-                            context.BaseContext.ShadowMapDynamic,
-                            context.BaseContext.FromLightViewProjection,
-                            context.WindDirection,
-                            context.WindStrength,
-                            context.Time,
-                            context.RandomTexture);
-                    }
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        effect.UpdatePerFrame(
-                            context.BaseContext.World,
-                            context.BaseContext.ViewProjection,
-                            context.BaseContext.EyePosition,
-                            context.BaseContext.Lights,
-                            context.BaseContext.ShadowMaps,
-                            context.BaseContext.ShadowMapStatic,
-                            context.BaseContext.ShadowMapDynamic,
-                            context.BaseContext.FromLightViewProjection,
-                            context.WindDirection,
-                            context.WindStrength,
-                            context.Time,
-                            context.RandomTexture);
-                    }
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        effect.UpdatePerFrame(
-                            context.BaseContext.World,
-                            context.BaseContext.ViewProjection,
-                            context.BaseContext.EyePosition,
-                            null,
-                            0,
-                            null,
-                            null,
-                            Matrix.Identity,
-                            context.WindDirection,
-                            context.WindStrength,
-                            context.Time,
-                            context.RandomTexture);
-                    }
-
-                    #endregion
-
-                    #region Per object update
-
-                    if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        effect.UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageToggleUV, context.FoliageTextures);
-                    }
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        effect.UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageToggleUV, context.FoliageTextures);
-                    }
-                    else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        effect.UpdatePerObject(Material.Default, 0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageToggleUV, context.FoliageTextures);
-                    }
-
-                    #endregion
-
-                    var technique = effect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
-
-                    this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                    Counters.IAInputLayoutSets++;
-                    this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.PointList;
-                    Counters.IAPrimitiveTopologySets++;
-
                     foreach (var lod in this.patches.Keys)
                     {
                         foreach (var item in this.patches[lod])
                         {
                             if (item.Visible)
                             {
-                                item.DrawFoliage(context.BaseContext, technique);
+                                item.DrawFoliage(context.BaseContext, vegetationTechnique);
                             }
                         }
                     }
                 }
+            }
+
+            /// <summary>
+            /// Sets thecnique for terrain drawing
+            /// </summary>
+            /// <param name="context">Drawing context</param>
+            /// <returns>Returns the selected technique</returns>
+            private EffectTechnique SetTechniqueTerrain(TerrainDrawContext context)
+            {
+                if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward) return this.SetTechniqueTerrainDefault(context);
+                if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred) return this.SetTechniqueTerrainDeferred(context);
+                if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap) return this.SetTechniqueTerrainShadowMap(context);
+                else return null;
+            }
+            /// <summary>
+            /// Sets thecnique for terrain drawing with forward renderer
+            /// </summary>
+            /// <param name="context">Drawing context</param>
+            /// <returns>Returns the selected technique</returns>
+            private EffectTechnique SetTechniqueTerrainDefault(TerrainDrawContext context)
+            {
+                EffectDefaultTerrain effect = DrawerPool.EffectDefaultTerrain;
+
+                this.game.Graphics.SetBlendDefault();
+
+                #region Per frame update
+
+                effect.UpdatePerFrame(
+                    context.BaseContext.World,
+                    context.BaseContext.ViewProjection,
+                    context.BaseContext.EyePosition,
+                    context.BaseContext.Lights,
+                    context.BaseContext.ShadowMaps,
+                    context.BaseContext.ShadowMapStatic,
+                    context.BaseContext.ShadowMapDynamic,
+                    context.BaseContext.FromLightViewProjection);
+
+                #endregion
+
+                #region Per object update
+
+                effect.UpdatePerObject(
+                    context.TerrainNormalMaps,
+                    context.TerrainSpecularMaps,
+                    context.UseAlphaMap,
+                    context.AlphaMap,
+                    context.ColorTextures,
+                    context.UseSlopes,
+                    context.SlopeRanges,
+                    context.TerraintexturesLR,
+                    context.TerraintexturesHR,
+                    context.Proportion,
+                    context.BaseContext.GetMaterialIndex(context.Material));
+
+                #endregion
+
+                var technique = effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
+
+                this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                Counters.IAInputLayoutSets++;
+                this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
+
+                return technique;
+            }
+            /// <summary>
+            /// Sets thecnique for terrain drawing with deferred renderer
+            /// </summary>
+            /// <param name="context">Drawing context</param>
+            /// <returns>Returns the selected technique</returns>
+            private EffectTechnique SetTechniqueTerrainDeferred(TerrainDrawContext context)
+            {
+                EffectDeferredTerrain effect = DrawerPool.EffectDeferredTerrain;
+
+                this.game.Graphics.SetBlendDefault();
+
+                #region Per frame update
+
+                effect.UpdatePerFrame(
+                    context.BaseContext.World,
+                    context.BaseContext.ViewProjection);
+
+                #endregion
+
+                #region Per object update
+
+                effect.UpdatePerObject(
+                    context.BaseContext.GetMaterialIndex(context.Material),
+                    context.TerrainNormalMaps,
+                    context.TerrainSpecularMaps,
+                    context.UseAlphaMap,
+                    context.AlphaMap,
+                    context.ColorTextures,
+                    context.UseSlopes,
+                    context.SlopeRanges,
+                    context.TerraintexturesLR,
+                    context.TerraintexturesHR,
+                    context.Proportion);
+
+                #endregion
+
+                var technique = effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
+
+                this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                Counters.IAInputLayoutSets++;
+                this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
+
+                return technique;
+            }
+            /// <summary>
+            /// Sets thecnique for terrain drawing in shadow mapping
+            /// </summary>
+            /// <param name="context">Drawing context</param>
+            /// <returns>Returns the selected technique</returns>
+            private EffectTechnique SetTechniqueTerrainShadowMap(TerrainDrawContext context)
+            {
+                EffectShadowTerrain effect = DrawerPool.EffectShadowTerrain;
+
+                this.game.Graphics.SetBlendDefault();
+
+                #region Per frame update
+
+                effect.UpdatePerFrame(
+                    context.BaseContext.World,
+                    context.BaseContext.ViewProjection);
+
+                #endregion
+
+                var technique = effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
+
+                this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                Counters.IAInputLayoutSets++;
+                this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
+
+                return technique;
+            }
+            /// <summary>
+            /// Sets thecnique for vegetation drawing
+            /// </summary>
+            /// <param name="context">Drawing context</param>
+            /// <returns>Returns the selected technique</returns>
+            private EffectTechnique SetTechniqueVegetation(TerrainDrawContext context)
+            {
+                if (context.BaseContext.DrawerMode == DrawerModesEnum.Forward) return this.SetTechniqueVegetationDefault(context);
+                if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap) return this.SetTechniqueVegetationShadowMap(context);
+                else return null;
+            }
+            /// <summary>
+            /// Sets thecnique for vegetation drawing with forward renderer
+            /// </summary>
+            /// <param name="context">Drawing context</param>
+            /// <returns>Returns the selected technique</returns>
+            private EffectTechnique SetTechniqueVegetationDefault(TerrainDrawContext context)
+            {
+                EffectDefaultBillboard effect = DrawerPool.EffectDefaultBillboard;
+
+                this.game.Graphics.SetBlendTransparent();
+
+                #region Per frame update
+
+                effect.UpdatePerFrame(
+                    context.BaseContext.World,
+                    context.BaseContext.ViewProjection,
+                    context.BaseContext.EyePosition,
+                    context.BaseContext.Lights,
+                    context.BaseContext.ShadowMaps,
+                    context.BaseContext.ShadowMapStatic,
+                    context.BaseContext.ShadowMapDynamic,
+                    context.BaseContext.FromLightViewProjection,
+                    context.WindDirection,
+                    context.WindStrength,
+                    context.Time,
+                    context.RandomTexture,
+                    0,
+                    context.FoliageEndRadius,
+                    context.FoliageTextureCount,
+                    0,
+                    context.FoliageToggleUV,
+                    context.FoliageTextures);
+
+                #endregion
+
+                var technique = effect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
+
+                this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                Counters.IAInputLayoutSets++;
+                this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.PointList;
+                Counters.IAPrimitiveTopologySets++;
+
+                return technique;
+            }
+            /// <summary>
+            /// Sets thecnique for vegetation drawing in shadow mapping
+            /// </summary>
+            /// <param name="context">Drawing context</param>
+            /// <returns>Returns the selected technique</returns>
+            private EffectTechnique SetTechniqueVegetationShadowMap(TerrainDrawContext context)
+            {
+                EffectShadowBillboard effect = DrawerPool.EffectShadowBillboard;
+
+                this.game.Graphics.SetBlendTransparent();
+
+                #region Per frame update
+
+                effect.UpdatePerFrame(
+                    context.BaseContext.World,
+                    context.BaseContext.ViewProjection,
+                    context.BaseContext.EyePosition,
+                    context.WindDirection,
+                    context.WindStrength,
+                    context.Time,
+                    context.RandomTexture);
+
+                #endregion
+
+                #region Per object update
+
+                effect.UpdatePerObject(0, context.FoliageEndRadius, context.FoliageTextureCount, context.FoliageToggleUV, context.FoliageTextures);
+
+                #endregion
+
+                var technique = effect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.BaseContext.DrawerMode);
+
+                this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                Counters.IAInputLayoutSets++;
+                this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.PointList;
+                Counters.IAPrimitiveTopologySets++;
+
+                return technique;
             }
         }
         /// <summary>
@@ -1276,6 +1353,16 @@ namespace Engine
         /// Heightmap description
         /// </summary>
         public readonly HeightmapDescription HeightmapDescription = null;
+        /// <summary>
+        /// Gets the used material list
+        /// </summary>
+        public virtual Material[] Materials
+        {
+            get
+            {
+                return new[] { this.terrainMaterial };
+            }
+        }
 
         /// <summary>
         /// Constructor

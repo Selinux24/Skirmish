@@ -127,41 +127,8 @@
   <data name="IncVertexFormatsFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\incvertexformats.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderBasicFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\ShaderBasic.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderBasicFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderbasic.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderBillboardFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\ShaderBillboard.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderBillboardFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderbillboard.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderCubemapFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\ShaderCubemap.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderCubemapFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadercubemap.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderDeferredFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderdeferred.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderDeferredFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderdeferred.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderFontFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\ShaderFont.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderFontFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderfont.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderGBufferFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadergbuffer.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderGBufferFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadergbuffer.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="IncScatteringFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\IncScattering.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="ShaderNullFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shadernull.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -169,40 +136,94 @@
   <data name="ShaderNullFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ShaderNull.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderGPUParticlesFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadergpuparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultSpriteFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdefaultsprite.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderGPUParticlesFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadergpuparticles.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultSpriteFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdefaultsprite.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderShadowFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadershadow.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultFontFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\ShaderDefaultFont.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderShadowFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadershadow.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultFontFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderDefaultfont.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderSpriteFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadersprite.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultCubemapFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\ShaderDefaultCubemap.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderSpriteFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadersprite.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultCubemapFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderDefaultcubemap.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderTerrainFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultBillboardFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\ShaderDefaultBillboard.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderTerrainFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderterrain.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultBillboardFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderDefaultbillboard.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderCPUParticlesFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadercpuparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultBasicFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ShaderDefaultBasic.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderCPUParticlesFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shadercpuparticles.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultBasicFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdefaultbasic.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderSkyScatteringFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderskyscattering.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultTerrainFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdefaultterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderSkyScatteringFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderskyscattering.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderDefaultTerrainFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdefaultterrain.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDefaultSkyScatteringFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdefaultskyscattering.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDefaultSkyScatteringFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdefaultskyscattering.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDefaultCPUParticlesFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderDefaultcpuparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDefaultCPUParticlesFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderDefaultcpuparticles.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDefaultGPUParticlesFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderDefaultgpuparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDefaultGPUParticlesFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderDefaultgpuparticles.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDeferredComposerFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdeferredComposer.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDeferredComposerFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdeferredComposer.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDeferredBasicFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdeferredbasic.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDeferredBasicFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdeferredbasic.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDeferredTerrainFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdeferredterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDeferredTerrainFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderdeferredterrain.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderShadowBillboardFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\ShaderShadowBillboard.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderShadowBillboardFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderShadowbillboard.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderShadowBasicFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadershadowbasic.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderShadowBasicFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadershadowbasic.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderShadowTerrainFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadershadowterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderShadowTerrainFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadershadowterrain.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

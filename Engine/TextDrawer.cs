@@ -175,7 +175,7 @@ namespace Engine
         /// Gets text height
         /// </summary>
         public int Height { get; private set; }
-
+      
         /// <summary>
         /// Constructor
         /// </summary>
@@ -186,8 +186,8 @@ namespace Engine
         {
             this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
 
-            this.technique = DrawerPool.EffectFont.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, DrawerModesEnum.Forward);
-            this.inputLayout = DrawerPool.EffectFont.GetInputLayout(this.technique);
+            this.technique = DrawerPool.EffectDefaultFont.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, DrawerModesEnum.Forward);
+            this.inputLayout = DrawerPool.EffectDefaultFont.GetInputLayout(this.technique);
 
             this.viewProjection = Sprite.CreateViewOrthoProjection(
                 game.Form.RenderWidth.NextPair(),
@@ -282,7 +282,7 @@ namespace Engine
 
             Matrix world = Matrix.Translation(x, y, 0f);
 
-            DrawerPool.EffectFont.UpdatePerFrame(
+            DrawerPool.EffectDefaultFont.UpdatePerFrame(
                 world,
                 this.viewProjection,
                 color,

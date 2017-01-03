@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -211,6 +211,7 @@ namespace Engine
                     this.DrawContext.ShadowMapStatic = null;
                     this.DrawContext.ShadowMapDynamic = null;
                     this.DrawContext.FromLightViewProjection = Matrix.Identity;
+                    this.DrawContext.Materials = scene.Materials;
 #if DEBUG
                     swStartup.Stop();
 
@@ -275,7 +276,7 @@ namespace Engine
 
                             #endregion
 
-                            this.UpdateShadowMapStatic = true;
+                            this.UpdateShadowMapStatic = scene.TimeOfDay.Running;
                         }
 
                         #region Dynamic shadow map

@@ -80,7 +80,7 @@ namespace Engine
         /// <summary>
         /// Texture index
         /// </summary>
-        public int TextureIndex { get; set; }
+        public uint TextureIndex { get; set; }
         /// <summary>
         /// Level of detail
         /// </summary>
@@ -155,9 +155,9 @@ namespace Engine
             if (this.DrawingData != null)
             {
                 Drawer effect = null;
-                if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectBasic;
-                else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectGBuffer;
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadow;
+                if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectDefaultBasic;
+                else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectDeferredBasic;
+                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadowBasic;
 
                 if (effect != null)
                 {
@@ -165,7 +165,7 @@ namespace Engine
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        ((EffectBasic)effect).UpdatePerFrame(
+                        ((EffectDefaultBasic)effect).UpdatePerFrame(
                             this.Manipulator.LocalTransform * context.World,
                             context.ViewProjection,
                             context.EyePosition,
@@ -177,13 +177,13 @@ namespace Engine
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        ((EffectBasicGBuffer)effect).UpdatePerFrame(
+                        ((EffectDeferredBasic)effect).UpdatePerFrame(
                             this.Manipulator.LocalTransform * context.World,
                             context.ViewProjection);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        ((EffectBasicShadow)effect).UpdatePerFrame(
+                        ((EffectShadowBasic)effect).UpdatePerFrame(
                             this.Manipulator.LocalTransform * context.World,
                             context.ViewProjection);
                     }
@@ -194,19 +194,19 @@ namespace Engine
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)
                     {
-                        ((EffectBasic)effect).UpdatePerGroup(
+                        ((EffectDefaultBasic)effect).UpdatePerGroup(
                             this.DrawingData.AnimationPalette,
                             this.DrawingData.AnimationPaletteWidth);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
-                        ((EffectBasicGBuffer)effect).UpdatePerGroup(
+                        ((EffectDeferredBasic)effect).UpdatePerGroup(
                             this.DrawingData.AnimationPalette,
                             this.DrawingData.AnimationPaletteWidth);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                     {
-                        ((EffectBasicShadow)effect).UpdatePerGroup(
+                        ((EffectShadowBasic)effect).UpdatePerGroup(
                             this.DrawingData.AnimationPalette,
                             this.DrawingData.AnimationPaletteWidth);
                     }
@@ -225,27 +225,27 @@ namespace Engine
 
                             if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
-                                ((EffectBasic)effect).UpdatePerObject(
-                                    mat.Material,
+                                ((EffectDefaultBasic)effect).UpdatePerObject(
                                     mat.DiffuseTexture,
                                     mat.NormalMap,
                                     mat.SpecularTexture,
                                     this.animationData,
+                                    context.GetMaterialIndex(mat.Material),
                                     this.TextureIndex);
                             }
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
-                                ((EffectBasicGBuffer)effect).UpdatePerObject(
-                                    mat.Material,
+                                ((EffectDeferredBasic)effect).UpdatePerObject(
                                     mat.DiffuseTexture,
                                     mat.NormalMap,
                                     mat.SpecularTexture,
                                     this.animationData,
+                                    context.GetMaterialIndex(mat.Material),
                                     this.TextureIndex);
                             }
                             else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                             {
-                                ((EffectBasicShadow)effect).UpdatePerObject(
+                                ((EffectShadowBasic)effect).UpdatePerObject(
                                     this.animationData,
                                     this.TextureIndex);
                             }

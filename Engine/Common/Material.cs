@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -9,7 +10,7 @@ namespace Engine.Common
     /// Material description
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Material
+    public struct Material : IEquatable<Material>
     {
         /// <summary>
         /// Default material
@@ -48,6 +49,38 @@ namespace Engine.Common
             this.DiffuseColor = effect.DiffuseColor;
             this.SpecularColor = effect.SpecularColor;
             this.Shininess = effect.Shininess;
+        }
+
+        /// <summary>
+        /// Packs current instance into a Vector4 array
+        /// </summary>
+        /// <returns>Returns the packed material</returns>
+        internal Vector4[] Pack()
+        {
+            Vector4[] res = new Vector4[4];
+
+            res[0] = this.EmissiveColor;
+            res[1] = this.AmbientColor;
+            res[2] = this.DiffuseColor;
+            res[3] = this.SpecularColor;
+            res[3].W = this.Shininess;
+
+            return res;
+        }
+
+        /// <summary>
+        /// Gets whether the current instance is equal to the other instance
+        /// </summary>
+        /// <param name="other">The other instance</param>
+        /// <returns>Returns true if both instances are equal</returns>
+        public bool Equals(Material other)
+        {
+            return
+                this.EmissiveColor == other.EmissiveColor &&
+                this.AmbientColor == other.AmbientColor &&
+                this.DiffuseColor == other.DiffuseColor &&
+                this.SpecularColor == other.SpecularColor &&
+                this.Shininess == other.Shininess;
         }
     };
 }

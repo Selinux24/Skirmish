@@ -237,7 +237,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Draw(DrawContext context)
         {
-            var effect = DrawerPool.EffectGPUParticles;
+            var effect = DrawerPool.EffectDefaultGPUParticles;
 
             #region Per frame update
 
@@ -277,7 +277,7 @@ namespace Engine
         /// Stream output
         /// </summary>
         /// <param name="effect">Effect for stream out</param>
-        private void StreamOut(EffectGPUParticles effect)
+        private void StreamOut(EffectDefaultGPUParticles effect)
         {
             var techniqueForStreamOut = effect.GetTechniqueForStreamOut(VertexTypes.GPUParticle);
 
@@ -334,7 +334,7 @@ namespace Engine
         /// </summary>
         /// <param name="effect">Effect for drawing</param>
         /// <param name="drawerMode">Drawe mode</param>
-        private void Draw(EffectGPUParticles effect, DrawerModesEnum drawerMode)
+        private void Draw(EffectDefaultGPUParticles effect, DrawerModesEnum drawerMode)
         {
             var techniqueForDrawing = effect.GetTechniqueForDrawing(
                 VertexTypes.GPUParticle,

@@ -19,10 +19,6 @@ namespace Engine
             /// Sphere
             /// </summary>
             Sphere,
-            /// <summary>
-            /// Semisphere
-            /// </summary>
-            Semispehere
         }
 
         /// <summary>

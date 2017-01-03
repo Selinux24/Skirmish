@@ -1,4 +1,5 @@
-﻿using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
+﻿using System.Collections.Generic;
+using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine.Common
 {
@@ -7,7 +8,7 @@ namespace Engine.Common
     /// <summary>
     /// Model basic implementation
     /// </summary>
-    public abstract class ModelBase : Drawable
+    public abstract class ModelBase : Drawable, UseMaterials
     {
         /// <summary>
         /// Meshes by level of detail dictionary
@@ -25,6 +26,27 @@ namespace Engine.Common
         /// Gets the texture count for texture index
         /// </summary>
         public int TextureCount { get; private set; }
+        /// <summary>
+        /// Gets the material list used by the current drawing data
+        /// </summary>
+        public virtual Material[] Materials
+        {
+            get
+            {
+                List<Material> matList = new List<Material>();
+
+                var drawingData = this.GetDrawingData(LevelOfDetailEnum.High);
+                if (drawingData != null)
+                {
+                    foreach (var meshMaterial in drawingData.Materials.Keys)
+                    {
+                        matList.Add(drawingData.Materials[meshMaterial].Material);
+                    }
+                }
+
+                return matList.ToArray();
+            }
+        }
 
         /// <summary>
         /// Base model

@@ -2,7 +2,6 @@
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using Buffer = SharpDX.Direct3D11.Buffer;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
@@ -32,11 +31,7 @@ namespace Engine
         /// <summary>
         /// Drawer
         /// </summary>
-        private EffectBasic effect;
-        /// <summary>
-        /// Technique
-        /// </summary>
-        private EffectTechnique effectTechnique;
+        private EffectDefaultSprite effect;
         /// <summary>
         /// View * projection for 2D projection
         /// </summary>
@@ -68,16 +63,6 @@ namespace Engine
                 if (this.channels != value)
                 {
                     this.channels = value;
-
-                    if (this.effect != null)
-                    {
-                        if (value == SpriteTextureChannelsEnum.All) this.effectTechnique = this.effect.PositionTexture;
-                        else if (value == SpriteTextureChannelsEnum.Red) this.effectTechnique = this.effect.PositionTextureRED;
-                        else if (value == SpriteTextureChannelsEnum.Green) this.effectTechnique = this.effect.PositionTextureGREEN;
-                        else if (value == SpriteTextureChannelsEnum.Blue) this.effectTechnique = this.effect.PositionTextureBLUE;
-                        else if (value == SpriteTextureChannelsEnum.Alpha) this.effectTechnique = this.effect.PositionTextureALPHA;
-                        else if (value == SpriteTextureChannelsEnum.NoAlpha) this.effectTechnique = this.effect.PositionTextureNOALPHA;
-                    }
                 }
             }
         }
@@ -107,7 +92,7 @@ namespace Engine
             this.vertexBufferBinding = new VertexBufferBinding(this.vertexBuffer, vertices[0].Stride, 0);
             this.indexBuffer = this.Device.CreateIndexBufferImmutable(ci);
 
-            this.effect = DrawerPool.EffectBasic;
+            this.effect = DrawerPool.EffectDefaultSprite;
             this.Channels = description.Channel;
 
             this.InitializeContext(description.Left, description.Top, description.Width, description.Height);
@@ -148,7 +133,9 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            this.DeviceContext.InputAssembler.InputLayout = this.effect.GetInputLayout(effectTechnique);
+            var technique = effect.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode, this.Channels);
+
+            this.DeviceContext.InputAssembler.InputLayout = this.effect.GetInputLayout(technique);
             Counters.IAInputLayoutSets++;
             this.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
             Counters.IAPrimitiveTopologySets++;
@@ -158,11 +145,11 @@ namespace Engine
             Counters.IAIndexBufferSets++;
 
             this.effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-            this.effect.UpdatePerObject(Material.Default, this.Texture, null, null, null, 0);
+            this.effect.UpdatePerObject(Color.White, this.Texture, 0);
 
-            for (int p = 0; p < this.effectTechnique.Description.PassCount; p++)
+            for (int p = 0; p < technique.Description.PassCount; p++)
             {
-                this.effectTechnique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+                technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
                 this.DeviceContext.DrawIndexed(6, 0, 0);
 
