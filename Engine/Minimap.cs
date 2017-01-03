@@ -130,7 +130,6 @@ namespace Engine
             if (this.Drawables != null && this.Drawables.Length > 0)
             {
                 this.drawContext.GameTime = context.GameTime;
-                this.drawContext.Materials = context.Materials;
 
                 this.Game.Graphics.SetViewport(this.viewport);
                 this.Game.Graphics.SetRenderTarget(this.renderTarget, true, Color.Silver, null, false);

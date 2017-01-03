@@ -163,6 +163,7 @@
     <Compile Include="Common\IndexBufferShapeEnum.cs" />
     <Compile Include="Common\Intersection.cs" />
     <Compile Include="Common\UseMaterials.cs" />
+    <Compile Include="Common\UseSkinningData.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
     <Compile Include="Effects\EffectShadowBillboard.cs" />
     <Compile Include="Effects\EffectDeferredTerrain.cs" />

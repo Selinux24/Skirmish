@@ -102,7 +102,7 @@ namespace Engine
 
             #region Per object update
 
-            effect.UpdatePerObject(null, null, null, null, 0, 0);
+            effect.UpdatePerObject(null, null, null, 0, 0, 0);
 
             #endregion
 

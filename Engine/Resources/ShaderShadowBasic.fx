@@ -1,13 +1,13 @@
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
-cbuffer cbPerFrame : register (b0)
+cbuffer cbGlobals : register (b0)
+{
+    uint gAnimationPaletteWidth;
+};
+cbuffer cbPerFrame : register (b1)
 {
 	float4x4 gWorldViewProjection;
-};
-cbuffer cbPerGroup : register (b1)
-{
-    uint gPaletteWidth;
 };
 cbuffer cbPerInstance : register (b2)
 {
@@ -44,7 +44,7 @@ ShadowMapOutput VSSMPositionColorSkinned(VSVertexPositionColorSkinned input)
 	ComputePositionWeights(
 		gAnimationPalette,
 		gAnimationData,
-		gPaletteWidth,
+		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -63,7 +63,7 @@ ShadowMapOutput VSSMPositionColorSkinnedI(VSVertexPositionColorSkinnedI input)
 	ComputePositionWeights(
 		gAnimationPalette,
 		input.animationData,
-		gPaletteWidth,
+		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -103,7 +103,7 @@ ShadowMapOutput VSSMPositionNormalColorSkinned(VSVertexPositionNormalColorSkinne
 	ComputePositionWeights(
 		gAnimationPalette,
 		gAnimationData,
-		gPaletteWidth,
+		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -122,7 +122,7 @@ ShadowMapOutput VSSMPositionNormalColorSkinnedI(VSVertexPositionNormalColorSkinn
 	ComputePositionWeights(
 		gAnimationPalette,
 		input.animationData,
-		gPaletteWidth,
+		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -162,7 +162,7 @@ ShadowMapOutput VSSMPositionTextureSkinned(VSVertexPositionTextureSkinned input)
 	ComputePositionWeights(
 		gAnimationPalette,
 		gAnimationData,
-		gPaletteWidth,
+		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -181,7 +181,7 @@ ShadowMapOutput VSSMPositionTextureSkinnedI(VSVertexPositionTextureSkinnedI inpu
 	ComputePositionWeights(
 		gAnimationPalette,
 		input.animationData,
-		gPaletteWidth,
+		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -221,7 +221,7 @@ ShadowMapOutput VSSMPositionNormalTextureSkinned(VSVertexPositionNormalTextureSk
 	ComputePositionWeights(
 		gAnimationPalette,
 		gAnimationData,
-		gPaletteWidth,
+		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -240,7 +240,7 @@ ShadowMapOutput VSSMPositionNormalTextureSkinnedI(VSVertexPositionNormalTextureS
 	ComputePositionWeights(
 		gAnimationPalette,
 		input.animationData,
-		gPaletteWidth,
+		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -280,7 +280,7 @@ ShadowMapOutput VSSMPositionNormalTextureTangentSkinned(VSVertexPositionNormalTe
 	ComputePositionWeights(
 		gAnimationPalette,
 		gAnimationData,
-		gPaletteWidth,
+		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -299,7 +299,7 @@ ShadowMapOutput VSSMPositionNormalTextureTangentSkinnedI(VSVertexPositionNormalT
 	ComputePositionWeights(
 		gAnimationPalette,
 		input.animationData,
-		gPaletteWidth,
+		gAnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,

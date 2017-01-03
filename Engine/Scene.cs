@@ -6,6 +6,7 @@ using System.IO;
 
 namespace Engine
 {
+    using Engine.Animation;
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
@@ -36,10 +37,6 @@ namespace Engine
         /// Scene mode
         /// </summary>
         private SceneModesEnum sceneMode = SceneModesEnum.Unknown;
-        /// <summary>
-        /// Material palette texture
-        /// </summary>
-        private ShaderResourceView materialPalette = null;
 
         /// <summary>
         /// Game class
@@ -74,25 +71,9 @@ namespace Engine
         /// </summary>
         protected bool CapturedControl { get; private set; }
         /// <summary>
-        /// Material palette texture width
+        /// Flag to update the scene global resources
         /// </summary>
-        protected uint MaterialPaletteWidth { get; set; }
-        /// <summary>
-        /// Material palette texture
-        /// </summary>
-        protected ShaderResourceView MaterialPalette
-        {
-            get
-            {
-                return this.materialPalette;
-            }
-            set
-            {
-                Helper.Dispose(this.materialPalette);
-
-                this.materialPalette = value;
-            }
-        }
+        protected bool UpdateGlobalResources { get; set; }
 
         /// <summary>
         /// Gets the scen world matrix
@@ -175,10 +156,6 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Materials list in the palette
-        /// </summary>
-        public Material[] Materials { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -207,6 +184,8 @@ namespace Engine
             this.PerformFrustumCulling = true;
 
             this.RenderMode = sceneMode;
+
+            this.UpdateGlobalResources = true;
         }
 
         /// <summary>
@@ -222,6 +201,13 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Update(GameTime gameTime)
         {
+            if (this.UpdateGlobalResources)
+            {
+                this.UpdateGlobals();
+
+                this.UpdateGlobalResources = false;
+            }
+
             this.camera.Update(gameTime);
 
             this.TimeOfDay.Update(gameTime);
@@ -315,7 +301,6 @@ namespace Engine
             Helper.Dispose(this.Renderer);
             Helper.Dispose(this.camera);
             Helper.Dispose(this.components);
-            Helper.Dispose(this.materialPalette);
         }
         /// <summary>
         /// Change renderer mode
@@ -854,6 +839,8 @@ namespace Engine
                     i = p1.Order.CompareTo(p2.Order);
                     return i;
                 });
+
+                this.UpdateGlobalResources = true;
             }
         }
         /// <summary>
@@ -868,6 +855,8 @@ namespace Engine
 
                 component.Dispose();
                 component = null;
+
+                this.UpdateGlobalResources = true;
             }
         }
 
@@ -894,23 +883,30 @@ namespace Engine
         }
 
         /// <summary>
-        /// Update internals
+        /// Update global resources
         /// </summary>
-        public virtual void UpdateInternals()
+        protected virtual void UpdateGlobals()
         {
-            this.UpdateMaterialPalette();
-            this.UpdateAnimationPalette();
+            ShaderResourceView materialPalette;
+            uint materialPaletteWidth;
+            this.UpdateMaterialPalette(out materialPalette, out materialPaletteWidth);
 
-            DrawerPool.UpdateSceneGlobals(this.MaterialPalette, this.MaterialPaletteWidth);
+            ShaderResourceView animationPalette;
+            uint animationPaletteWidth;
+            this.UpdateAnimationPalette(out animationPalette, out animationPaletteWidth);
+
+            DrawerPool.UpdateSceneGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
         }
         /// <summary>
         /// Updates the global material palette
         /// </summary>
-        private void UpdateMaterialPalette()
+        /// <param name="materialPalette">Material palette</param>
+        /// <param name="materialPaletteWidth">Material palette width</param>
+        private void UpdateMaterialPalette(out ShaderResourceView materialPalette, out uint materialPaletteWidth)
         {
-            List<Material> mats = new List<Material>();
+            List<MeshMaterial> mats = new List<MeshMaterial>();
 
-            mats.Add(Material.Default);
+            mats.Add(MeshMaterial.Default);
 
             var matComponents = this.components.FindAll(c => c is UseMaterials);
 
@@ -919,46 +915,98 @@ namespace Engine
                 var matList = component.Materials;
                 if (matList != null && matList.Length > 0)
                 {
-                    Tuple<Material, int>[] indices = new Tuple<Material, int>[matList.Length];
-
-                    for (int i = 0; i < matList.Length; i++)
-                    {
-                        Material mat = matList[i];
-
-                        if (!mats.Contains(mat))
-                        {
-                            mats.Add(mat);
-                        }
-                    }
+                    mats.AddRange(matList);
                 }
             }
+
+            List<MeshMaterial> addedMats = new List<MeshMaterial>();
 
             List<Vector4> values = new List<Vector4>();
 
             for (int i = 0; i < mats.Count; i++)
             {
-                values.AddRange(mats[i].Pack());
+                var mat = mats[i];
+                if (!addedMats.Contains(mat))
+                {
+                    var matV = mat.Pack();
+
+                    mat.ResourceIndex = (uint)addedMats.Count;
+                    mat.ResourceOffset = (uint)values.Count;
+                    mat.ResourceSize = (uint)matV.Length;
+
+                    values.AddRange(matV);
+
+                    addedMats.Add(mat);
+                }
+                else
+                {
+                    var cMat = addedMats.Find(m => m.Equals(mat));
+
+                    mat.ResourceIndex = cMat.ResourceIndex;
+                    mat.ResourceOffset = cMat.ResourceOffset;
+                    mat.ResourceSize = cMat.ResourceSize;
+                }
             }
 
-            int pixelCount = values.Count;
-            int texWidth = (int)Math.Sqrt((float)pixelCount) + 1;
-            int texHeight = 1;
-            while (texHeight < texWidth)
-            {
-                texHeight = texHeight << 1;
-            }
-            texWidth = texHeight;
+            int texWidth = Helper.GetTextureSize(values.Count);
 
-            this.MaterialPalette = this.Game.ResourceManager.CreateTexture2D(Guid.NewGuid(), values.ToArray(), texWidth);
-            this.MaterialPaletteWidth = (uint)texWidth;
-            this.Materials = mats.ToArray();
+            materialPalette = this.Game.ResourceManager.CreateGlobalResource("MaterialPalette", values.ToArray(), texWidth);
+            materialPaletteWidth = (uint)texWidth;
         }
         /// <summary>
         /// Updates the global animation palette
         /// </summary>
-        private void UpdateAnimationPalette()
+        /// <param name="animationPalette">Animation palette</param>
+        /// <param name="animationPaletteWidth">Animation palette width</param>
+        private void UpdateAnimationPalette(out ShaderResourceView animationPalette, out uint animationPaletteWidth)
         {
+            List<SkinningData> skData = new List<SkinningData>();
 
+            var skComponents = this.components.FindAll(c => c is UseSkinningData);
+
+            foreach (UseSkinningData component in skComponents)
+            {
+                var skList = component.SkinningData;
+                if (skList != null && skList.Length > 0)
+                {
+                    skData.AddRange(skList);
+                }
+            }
+
+            List<SkinningData> addedSks = new List<SkinningData>();
+
+            List<Vector4> values = new List<Vector4>();
+
+            for (int i = 0; i < skData.Count; i++)
+            {
+                var sk = skData[i];
+
+                if (!addedSks.Contains(sk))
+                {
+                    var skV = sk.Pack();
+
+                    sk.ResourceIndex = (uint)addedSks.Count;
+                    sk.ResourceOffset = (uint)values.Count;
+                    sk.ResourceSize = (uint)skV.Length;
+
+                    values.AddRange(skV);
+
+                    addedSks.Add(sk);
+                }
+                else
+                {
+                    var cMat = addedSks.Find(m => m.Equals(sk));
+
+                    sk.ResourceIndex = cMat.ResourceIndex;
+                    sk.ResourceOffset = cMat.ResourceOffset;
+                    sk.ResourceSize = cMat.ResourceSize;
+                }
+            }
+
+            int texWidth = Helper.GetTextureSize(values.Count);
+
+            animationPalette = this.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
+            animationPaletteWidth = (uint)texWidth;
         }
     }
 }

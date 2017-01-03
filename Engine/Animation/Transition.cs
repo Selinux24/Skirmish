@@ -1,10 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.Animation
 {
     /// <summary>
     /// Transition manager between two animation clips
     /// </summary>
-    public class Transition
+    public class Transition : IEquatable<Transition>
     {
         /// <summary>
         /// From clip
@@ -48,6 +49,22 @@ namespace Engine.Animation
             this.StartTo = toStart;
             this.TotalDuration = totalDuration;
             this.InterpolationDuration = interpolationDuration;
+        }
+
+        /// <summary>
+        /// Gets whether the current instance is equal to the other instance
+        /// </summary>
+        /// <param name="other">The other instance</param>
+        /// <returns>Returns true if both instances are equal</returns>
+        public bool Equals(Transition other)
+        {
+            return
+                this.ClipFrom == other.ClipFrom &&
+                this.ClipTo == other.ClipTo &&
+                this.StartFrom == other.StartFrom &&
+                this.StartTo == other.StartTo &&
+                this.TotalDuration == other.TotalDuration &&
+                this.InterpolationDuration == other.InterpolationDuration;
         }
     }
 }

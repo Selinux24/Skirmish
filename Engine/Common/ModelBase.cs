@@ -3,12 +3,13 @@ using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine.Common
 {
+    using Engine.Animation;
     using Engine.Content;
 
     /// <summary>
     /// Model basic implementation
     /// </summary>
-    public abstract class ModelBase : Drawable, UseMaterials
+    public abstract class ModelBase : Drawable, UseMaterials, UseSkinningData
     {
         /// <summary>
         /// Meshes by level of detail dictionary
@@ -29,22 +30,46 @@ namespace Engine.Common
         /// <summary>
         /// Gets the material list used by the current drawing data
         /// </summary>
-        public virtual Material[] Materials
+        public virtual MeshMaterial[] Materials
         {
             get
             {
-                List<Material> matList = new List<Material>();
+                List<MeshMaterial> matList = new List<MeshMaterial>();
 
                 var drawingData = this.GetDrawingData(LevelOfDetailEnum.High);
                 if (drawingData != null)
                 {
                     foreach (var meshMaterial in drawingData.Materials.Keys)
                     {
-                        matList.Add(drawingData.Materials[meshMaterial].Material);
+                        matList.Add(drawingData.Materials[meshMaterial]);
                     }
                 }
 
                 return matList.ToArray();
+            }
+        }
+        /// <summary>
+        /// Gets the skinning list used by the current drawing data
+        /// </summary>
+        public virtual SkinningData[] SkinningData
+        {
+            get
+            {
+                List<SkinningData> skList = new List<SkinningData>();
+
+                var drawingData = this.GetDrawingData(LevelOfDetailEnum.High);
+                if (drawingData != null)
+                {
+                    foreach (var meshMaterial in drawingData.Materials.Keys)
+                    {
+                        if (drawingData.SkinningData != null)
+                        {
+                            skList.Add(drawingData.SkinningData);
+                        }
+                    }
+                }
+
+                return skList.ToArray();
             }
         }
 

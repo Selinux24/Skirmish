@@ -249,8 +249,8 @@ namespace Engine
                                 mat.DiffuseTexture,
                                 mat.NormalMap,
                                 mat.SpecularTexture,
-                                null,
-                                context.BaseContext.GetMaterialIndex(mat.Material),
+                                mat.ResourceIndex,
+                                0,
                                 0);
                         }
                         else if (context.BaseContext.DrawerMode == DrawerModesEnum.Deferred)
@@ -259,13 +259,15 @@ namespace Engine
                                 mat.DiffuseTexture,
                                 mat.NormalMap,
                                 mat.SpecularTexture,
-                                null,
-                                context.BaseContext.GetMaterialIndex(mat.Material),
+                                mat.ResourceIndex,
+                                0,
                                 0);
                         }
                         else if (context.BaseContext.DrawerMode == DrawerModesEnum.ShadowMap)
                         {
-                            ((EffectShadowBasic)sceneryEffect).UpdatePerObject(null, 0);
+                            ((EffectShadowBasic)sceneryEffect).UpdatePerObject(
+                                0,
+                                0);
                         }
 
                         #endregion
@@ -416,9 +418,9 @@ namespace Engine
             /// Gets all the used materials
             /// </summary>
             /// <returns>Returns the used materials array</returns>
-            public Material[] GetMaterials()
+            public MeshMaterial[] GetMaterials()
             {
-                List<Material> matList = new List<Material>();
+                List<MeshMaterial> matList = new List<MeshMaterial>();
 
                 foreach (string meshName in this.DrawingData.Meshes.Keys)
                 {
@@ -426,7 +428,7 @@ namespace Engine
 
                     foreach (string material in dictionary.Keys)
                     {
-                        matList.Add(this.DrawingData.Materials[material].Material);
+                        matList.Add(this.DrawingData.Materials[material]);
                     }
                 }
 
@@ -504,11 +506,11 @@ namespace Engine
         /// <summary>
         /// Gets the used material list
         /// </summary>
-        public virtual Material[] Materials
+        public virtual MeshMaterial[] Materials
         {
             get
             {
-                List<Material> matList = new List<Material>();
+                List<MeshMaterial> matList = new List<MeshMaterial>();
 
                 var nodes = this.pickingQuadtree.GetTailNodes();
 
@@ -567,7 +569,7 @@ namespace Engine
 
             #region Random texture generation
 
-            this.textureRandom = game.ResourceManager.CreateRandomTexture(Guid.NewGuid(), 1024, -1, 1, 24);
+            this.textureRandom = game.ResourceManager.CreateResource(Guid.NewGuid(), 1024, -1, 1, 24);
 
             #endregion
 

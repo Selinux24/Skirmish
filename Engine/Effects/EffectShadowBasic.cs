@@ -248,7 +248,7 @@ namespace Engine.Effects
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.animationData = this.Effect.GetVariableByName("gAnimationData").AsVector();
             this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
-            this.animationPaletteWidth = this.Effect.GetVariableByName("gPaletteWidth").AsScalar();
+            this.animationPaletteWidth = this.Effect.GetVariableByName("gAnimationPaletteWidth").AsScalar();
             this.animationPalette = this.Effect.GetVariableByName("gAnimationPalette").AsShaderResource();
         }
         /// <summary>
@@ -301,7 +301,19 @@ namespace Engine.Effects
                 throw new Exception(string.Format("Bad stage for effect: {0}", stage));
             }
         }
-   
+
+        /// <summary>
+        /// Update effect globals
+        /// </summary>
+        /// <param name="animationPalette">Animation palette texture</param>
+        /// <param name="animationPaletteWith">Animation palette texture width</param>
+        public void UpdateGlobals(
+            ShaderResourceView animationPalette,
+            uint animationPaletteWidth)
+        {
+            this.AnimationPalette = animationPalette;
+            this.AnimationPaletteWidth = animationPaletteWidth;
+        }
         /// <summary>
         /// Update per frame data
         /// </summary>
@@ -314,28 +326,17 @@ namespace Engine.Effects
             this.WorldViewProjection = world * viewProjection;
         }
         /// <summary>
-        /// Update per group data
-        /// </summary>
-        /// <param name="animationPalette">Animation palette texture</param>
-        /// <param name="animationPaletteWith">Animation palette texture width</param>
-        public void UpdatePerGroup(
-            ShaderResourceView animationPalette,
-            uint animationPaletteWidth)
-        {
-            this.AnimationPalette = animationPalette;
-            this.AnimationPaletteWidth = animationPaletteWidth;
-        }
-        /// <summary>
         /// Update per model object data
         /// </summary>
-        /// <param name="animationData">Animation data</param>
         /// <param name="textureIndex">Texture index</param>
+        /// <param name="animationIndex">Animation index</param>
         public void UpdatePerObject(
-            uint[] animationData,
-            uint textureIndex)
+            uint textureIndex,
+            uint animationIndex)
         {
-            this.AnimationData = animationData != null ? animationData : new uint[3];
             this.TextureIndex = textureIndex;
+
+            this.AnimationData = new uint[] { 0, animationIndex, 0 };
         }
     }
 }

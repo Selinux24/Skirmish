@@ -1,11 +1,12 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.Animation
 {
     /// <summary>
     /// Skeleton's Joint
     /// </summary>
-    public class Joint
+    public class Joint : IEquatable<Joint>
     {
         /// <summary>
         /// Name
@@ -54,6 +55,18 @@ namespace Engine.Animation
         public override string ToString()
         {
             return string.Format("Name: {0}; Root: {1}", this.Name, this.Parent == null);
+        }
+        /// <summary>
+        /// Gets whether the current instance is equal to the other instance
+        /// </summary>
+        /// <param name="other">The other instance</param>
+        /// <returns>Returns true if both instances are equal</returns>
+        public bool Equals(Joint other)
+        {
+            return
+                this.Name == other.Name &&
+                Helper.ListIsEqual(this.Childs, other.Childs) &&
+                this.Offset == other.Offset;
         }
     }
 }

@@ -55,16 +55,16 @@ namespace Engine
         /// Level of detail
         /// </summary>
         private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
-        /// <summary>
-        /// Animation data
-        /// </summary>
-        private uint[] animationData = new uint[] { 0, 0, 0 };
-      
+
         /// <summary>
         /// Datos renderización
         /// </summary>
         protected DrawingData DrawingData { get; private set; }
-      
+        /// <summary>
+        /// Animation index
+        /// </summary>
+        protected uint AnimationIndex = 0;
+
         /// <summary>
         /// Model manipulator
         /// </summary>
@@ -137,8 +137,7 @@ namespace Engine
             {
                 this.AnimationController.Update(context.GameTime.ElapsedSeconds, this.DrawingData.SkinningData);
 
-                this.animationData[0] = (uint)this.AnimationController.GetAnimationIndex();
-                this.animationData[1] = (uint)this.AnimationController.GetAnimationOffset(this.DrawingData.SkinningData);
+                this.AnimationIndex = this.AnimationController.GetAnimationOffset(this.DrawingData.SkinningData);
                 this.InvalidateCache();
             }
 
@@ -190,29 +189,6 @@ namespace Engine
 
                     #endregion
 
-                    #region Per Group update
-
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        ((EffectDefaultBasic)effect).UpdatePerGroup(
-                            this.DrawingData.AnimationPalette,
-                            this.DrawingData.AnimationPaletteWidth);
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        ((EffectDeferredBasic)effect).UpdatePerGroup(
-                            this.DrawingData.AnimationPalette,
-                            this.DrawingData.AnimationPaletteWidth);
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        ((EffectShadowBasic)effect).UpdatePerGroup(
-                            this.DrawingData.AnimationPalette,
-                            this.DrawingData.AnimationPaletteWidth);
-                    }
-
-                    #endregion
-
                     foreach (string meshName in this.DrawingData.Meshes.Keys)
                     {
                         var dictionary = this.DrawingData.Meshes[meshName];
@@ -229,9 +205,9 @@ namespace Engine
                                     mat.DiffuseTexture,
                                     mat.NormalMap,
                                     mat.SpecularTexture,
-                                    this.animationData,
-                                    context.GetMaterialIndex(mat.Material),
-                                    this.TextureIndex);
+                                    mat.ResourceIndex,
+                                    this.TextureIndex,
+                                    this.AnimationIndex);
                             }
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
@@ -239,15 +215,15 @@ namespace Engine
                                     mat.DiffuseTexture,
                                     mat.NormalMap,
                                     mat.SpecularTexture,
-                                    this.animationData,
-                                    context.GetMaterialIndex(mat.Material),
-                                    this.TextureIndex);
+                                    mat.ResourceIndex,
+                                    this.TextureIndex,
+                                    this.AnimationIndex);
                             }
                             else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                             {
                                 ((EffectShadowBasic)effect).UpdatePerObject(
-                                    this.animationData,
-                                    this.TextureIndex);
+                                    this.TextureIndex,
+                                    this.AnimationIndex);
                             }
 
                             #endregion

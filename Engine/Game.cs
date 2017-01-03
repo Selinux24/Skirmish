@@ -192,8 +192,6 @@ namespace Engine
                 });
 
             scene.Initialize();
-
-            scene.UpdateInternals();
         }
         /// <summary>
         /// Remove scene from collection

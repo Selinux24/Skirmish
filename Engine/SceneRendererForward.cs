@@ -211,7 +211,6 @@ namespace Engine
                     this.DrawContext.ShadowMapStatic = null;
                     this.DrawContext.ShadowMapDynamic = null;
                     this.DrawContext.FromLightViewProjection = Matrix.Identity;
-                    this.DrawContext.Materials = scene.Materials;
 #if DEBUG
                     swStartup.Stop();
 

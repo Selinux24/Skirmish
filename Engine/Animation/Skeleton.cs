@@ -7,7 +7,7 @@ namespace Engine.Animation
     /// <summary>
     /// Skeleton class
     /// </summary>
-    public class Skeleton
+    public class Skeleton : IEquatable<Skeleton>
     {
         /// <summary>
         /// Joint names list
@@ -76,7 +76,15 @@ namespace Engine.Animation
                 }
             }
         }
-
+        /// <summary>
+        /// Built skeleton transforms interpolated between two times with specified factor
+        /// </summary>
+        /// <param name="joint">Joint</param>
+        /// <param name="time1">Time 1</param>
+        /// <param name="animations1">Animation list 1</param>
+        /// <param name="time2">Time 2</param>
+        /// <param name="animations2">Animation list 2</param>
+        /// <param name="factor">Interpolation factor</param>
         private static void BuildTransforms(Joint joint, float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor)
         {
             Vector3 pos1; Quaternion rot1; Vector3 sca1;
@@ -209,6 +217,17 @@ namespace Engine.Animation
             }
 
             return null;
+        }
+        /// <summary>
+        /// Gets whether the current instance is equal to the other instance
+        /// </summary>
+        /// <param name="other">The other instance</param>
+        /// <returns>Returns true if both instances are equal</returns>
+        public bool Equals(Skeleton other)
+        {
+            return
+                Helper.ListIsEqual(this.jointNames, other.jointNames) &&
+                this.Root.Equals(other.Root);
         }
     }
 }

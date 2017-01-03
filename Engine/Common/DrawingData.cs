@@ -33,14 +33,6 @@ namespace Engine.Common
         /// Datos de animación
         /// </summary>
         public SkinningData SkinningData = null;
-        /// <summary>
-        /// Animation palette texture width
-        /// </summary>
-        public uint AnimationPaletteWidth;
-        /// <summary>
-        /// Animation palette texture
-        /// </summary>
-        public ShaderResourceView AnimationPalette;
 
         /// <summary>
         /// Model initialization
@@ -287,48 +279,10 @@ namespace Engine.Common
 
                 InitializeJoints(modelContent, modelContent.SkinningInfo.Skeleton.Root, animations);
 
-                if (modelContent.Animations.Definition != null)
-                {
-                    Dictionary<string, JointAnimation[]> dict = new Dictionary<string, JointAnimation[]>();
-
-                    foreach (var clip in modelContent.Animations.Definition.Clips)
-                    {
-                        JointAnimation[] ja = new JointAnimation[animations.Count];
-                        for (int c = 0; c < ja.Length; c++)
-                        {
-                            Keyframe[] kfs = new Keyframe[clip.To - clip.From + 1];
-                            Array.Copy(animations[c].Keyframes, clip.From, kfs, 0, kfs.Length);
-
-                            float dTime = kfs[0].Time;
-                            for (int k = 0; k < kfs.Length; k++)
-                            {
-                                kfs[k].Time -= dTime;
-                            }
-
-                            ja[c] = new JointAnimation(animations[c].Joint, kfs);
-                        }
-
-                        dict.Add(clip.Name, ja);
-                    }
-
-                    drw.SkinningData = new SkinningData(modelContent.SkinningInfo.Skeleton, dict);
-
-                    foreach (var transition in modelContent.Animations.Definition.Transitions)
-                    {
-                        drw.SkinningData.AddTransition(
-                            transition.ClipFrom,
-                            transition.ClipTo,
-                            transition.StartFrom,
-                            transition.StartTo);
-                    }
-                }
-                else
-                {
-                    //Read the animation into one unique clip
-                    drw.SkinningData = new SkinningData(modelContent.SkinningInfo.Skeleton, animations.ToArray());
-                }
-
-                drw.SkinningData.CreateAnimationTexture(game, out drw.AnimationPalette, out drw.AnimationPaletteWidth);
+                drw.SkinningData = new SkinningData(
+                    modelContent.SkinningInfo.Skeleton, 
+                    animations.ToArray(),
+                    modelContent.Animations.Definition);
             }
         }
         /// <summary>

@@ -52,6 +52,7 @@ namespace HeightmapTest
         private ModelInstanced troops = null;
 
         private Model helicopter = null;
+        private Model helicopter2 = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -147,12 +148,26 @@ namespace HeightmapTest
 
             #endregion
 
-            #region Helicopter
+            #region M24
 
             this.helicopter = this.AddModel(
                 @"Resources/m24",
                 @"m24.xml",
                 new ModelDescription() { });
+
+            #endregion
+
+            #region Helicopter
+
+            this.helicopter2 = this.AddModel(
+                "resources/Helicopter",
+                "Helicopter.xml",
+                new ModelDescription()
+                {
+                    CastShadow = true,
+                    Static = false,
+                    TextureIndex = 2,
+                });
 
             #endregion
 
@@ -277,17 +292,6 @@ namespace HeightmapTest
 
             #region Positioning
 
-            //Helicopter
-            {
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.terrain.FindTopGroundPosition(100, 100, out position, out triangle, out distance))
-                {
-                    this.helicopter.Manipulator.SetPosition(position, true);
-                }
-            }
-
             //Rocks
             {
                 Random posRnd = new Random(1);
@@ -409,6 +413,35 @@ namespace HeightmapTest
             this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.torchs, this.rocks }, false);
             this.terrain.UpdateInternals();
 
+            //M24
+            {
+                Vector3 position;
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(100, 100, out position, out triangle, out distance))
+                {
+                    this.helicopter.Manipulator.SetPosition(position, true);
+                }
+            }
+
+            //Helicopter
+            {
+                Vector3 position;
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(-100, -100, out position, out triangle, out distance))
+                {
+                    this.helicopter2.Manipulator.SetPosition(position, true);
+                    this.helicopter2.Manipulator.SetScale(5, true);
+                }
+
+                AnimationPath p = new AnimationPath();
+                p.AddLoop("roll");
+                this.helicopter2.AnimationController.TimeDelta = 2f;
+                this.helicopter2.AnimationController.AddPath(p);
+                this.helicopter2.AnimationController.Start();
+            }
+
             //Player soldier
             {
                 Vector3 position;
@@ -448,6 +481,7 @@ namespace HeightmapTest
 
                         AnimationPath p = new AnimationPath();
                         p.AddLoop("idle1");
+                        this.troops.Instances[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
                         this.troops.Instances[i].AnimationController.AddPath(p);
                         this.troops.Instances[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
                     }
@@ -463,8 +497,8 @@ namespace HeightmapTest
 
             this.skydom.RayleighScattering *= 0.8f;
             this.skydom.MieScattering *= 0.1f;
-            
-            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 45, 00), 0.75f);
+
+            this.TimeOfDay.BeginAnimation(new TimeSpan(6, 00, 00), 0.75f);
 
             this.Lights.FogColor = new Color((byte)54, (byte)56, (byte)68);
             this.Lights.FogStart = 0;

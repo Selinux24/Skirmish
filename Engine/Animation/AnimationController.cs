@@ -195,30 +195,13 @@ namespace Engine.Animation
             }
         }
         /// <summary>
-        /// Gets the current animation clip index from skinning animation data
-        /// </summary>
-        /// <returns>Returns the current animation clip index in skinning animation data</returns>
-        public int GetAnimationIndex()
-        {
-            if (this.currentIndex >= 0)
-            {
-                //TODO: Only one animation set for now, with all clips in one line. Return always 0
-                //return this.clips[this.currentIndex].Index;
-                return 0;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-        /// <summary>
         /// Gets the current animation offset from skinning animation data
         /// </summary>
         /// <param name="skData"></param>
         /// <returns>Returns the current animation offset in skinning animation data</returns>
-        public int GetAnimationOffset(SkinningData skData)
+        public uint GetAnimationOffset(SkinningData skData)
         {
-            int offset = 0;
+            uint offset = 0;
             if (this.currentIndex >= 0)
             {
                 //Get the path
@@ -244,8 +227,6 @@ namespace Engine.Animation
         /// <returns>Returns the transformation matrix list at current time</returns>
         public Matrix[] GetCurrentPose(SkinningData skData)
         {
-            var clipIndex = this.GetAnimationIndex();
-
             if (this.currentIndex >= 0)
             {
                 //Get the path

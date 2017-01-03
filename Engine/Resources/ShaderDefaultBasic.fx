@@ -7,6 +7,7 @@ BUFFERS & VARIABLES
 cbuffer cbGlobals : register (b0)
 {
 	uint gMaterialPaletteWidth;
+    uint gAnimationPaletteWidth;
 };
 cbuffer cbPerFrame : register (b1)
 {
@@ -24,27 +25,25 @@ cbuffer cbPerFrame : register (b1)
 	float4 gFogColor;
 	uint gShadows;
 };
-cbuffer cbPerGroup : register (b2)
-{
-    uint gAnimationPaletteWidth;
-};
-cbuffer cbPerObject : register (b3)
+cbuffer cbPerObject : register (b2)
 {
 	bool gUseColorDiffuse;
 	bool gUseColorSpecular;
 };
-cbuffer cbPerInstance : register (b4)
+cbuffer cbPerInstance : register (b3)
 {
 	uint3 gAnimationData;
 	uint gMaterialIndex;
 	uint gTextureIndex;
 };
 
+Texture2D gMaterialPalette;
+Texture2D gAnimationPalette;
+
 Texture2DArray gDiffuseMapArray;
 Texture2DArray gNormalMapArray;
 Texture2DArray gSpecularMapArray;
-Texture2D gAnimationPalette;
-Texture2D gMaterialPalette;
+
 Texture2D gShadowMapStatic;
 Texture2D gShadowMapDynamic;
 

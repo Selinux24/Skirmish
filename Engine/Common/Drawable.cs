@@ -258,22 +258,6 @@ namespace Engine.Common
         /// Dynamic shadow map
         /// </summary>
         public ShaderResourceView ShadowMapDynamic;
-        /// <summary>
-        /// Material list
-        /// </summary>
-        public Material[] Materials;
-        
-        /// <summary>
-        /// Gets the specified material index
-        /// </summary>
-        /// <param name="material">Material</param>
-        /// <returns>Returns the specified material index</returns>
-        public uint GetMaterialIndex(Material material)
-        {
-            int index = Array.IndexOf(this.Materials, material);
-
-            return (uint)(index < 0 ? 0 : index);
-        }
     }
 
     /// <summary>

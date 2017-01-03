@@ -53,7 +53,7 @@ namespace Engine
             /// <summary>
             /// Material
             /// </summary>
-            public Material Material;
+            public MeshMaterial Material;
             /// <summary>
             /// Normal map textures for terrain
             /// </summary>
@@ -650,7 +650,7 @@ namespace Engine
                     context.TerraintexturesLR,
                     context.TerraintexturesHR,
                     context.Proportion,
-                    context.BaseContext.GetMaterialIndex(context.Material));
+                    (uint)context.Material.ResourceIndex);
 
                 #endregion
 
@@ -685,7 +685,7 @@ namespace Engine
                 #region Per object update
 
                 effect.UpdatePerObject(
-                    context.BaseContext.GetMaterialIndex(context.Material),
+                    (uint)context.Material.ResourceIndex,
                     context.TerrainNormalMaps,
                     context.TerrainSpecularMaps,
                     context.UseAlphaMap,
@@ -1303,7 +1303,7 @@ namespace Engine
         /// <summary>
         /// Terrain material
         /// </summary>
-        private Material terrainMaterial;
+        private MeshMaterial terrainMaterial;
         /// <summary>
         /// Terrain low res textures
         /// </summary>
@@ -1356,7 +1356,7 @@ namespace Engine
         /// <summary>
         /// Gets the used material list
         /// </summary>
-        public virtual Material[] Materials
+        public virtual MeshMaterial[] Materials
         {
             get
             {
@@ -1399,7 +1399,10 @@ namespace Engine
             {
                 string contentPath = Path.Combine(this.HeightmapDescription.ContentPath, this.HeightmapDescription.Textures.ContentPath);
 
-                this.terrainMaterial = this.HeightmapDescription.Material != null ? this.HeightmapDescription.Material.GetMaterial() : Material.Default;
+                this.terrainMaterial = new MeshMaterial()
+                {
+                    Material = this.HeightmapDescription.Material != null ? this.HeightmapDescription.Material.GetMaterial() : Material.Default
+                };
 
                 ImageContent normalMapTextures = new ImageContent()
                 {
@@ -1467,7 +1470,7 @@ namespace Engine
 
             #region Random texture generation
 
-            this.textureRandom = game.ResourceManager.CreateRandomTexture(Guid.NewGuid(), 1024, -1, 1, 24);
+            this.textureRandom = game.ResourceManager.CreateResource(Guid.NewGuid(), 1024, -1, 1, 24);
 
             #endregion
 

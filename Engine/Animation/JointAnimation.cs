@@ -1,11 +1,12 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.Animation
 {
     /// <summary>
     /// Bone animation
     /// </summary>
-    public struct JointAnimation
+    public struct JointAnimation : IEquatable<JointAnimation>
     {
         /// <summary>
         /// Joint name
@@ -134,6 +135,19 @@ namespace Engine.Animation
         public override string ToString()
         {
             return string.Format("Start: {0:0.00000}; End: {1:0.00000}; Keyframes: {2}", this.StartTime, this.EndTime, this.Keyframes.Length);
+        }
+        /// <summary>
+        /// Gets whether the current instance is equal to the other instance
+        /// </summary>
+        /// <param name="other">The other instance</param>
+        /// <returns>Returns true if both instances are equal</returns>
+        public bool Equals(JointAnimation other)
+        {
+            return
+                this.Joint == other.Joint &&
+                Helper.ListIsEqual(this.Keyframes, other.Keyframes) &&
+                this.StartTime == other.StartTime &&
+                this.EndTime == other.EndTime;
         }
     }
 }

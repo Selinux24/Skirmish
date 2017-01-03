@@ -9,6 +9,6 @@ namespace Engine.Common
         /// <summary>
         /// Gets the instance materials list
         /// </summary>
-        Material[] Materials { get; }
+        MeshMaterial[] Materials { get; }
     }
 }

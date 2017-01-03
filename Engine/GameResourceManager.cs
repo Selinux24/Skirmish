@@ -22,6 +22,10 @@ namespace Engine
         /// Resource dictionary
         /// </summary>
         private Dictionary<string, ShaderResourceView> resources = new Dictionary<string, ShaderResourceView>();
+        /// <summary>
+        /// Global resources dictionary
+        /// </summary>
+        private Dictionary<string, ShaderResourceView> globalResources = new Dictionary<string, ShaderResourceView>();
 
         /// <summary>
         /// Constructor
@@ -37,6 +41,7 @@ namespace Engine
         public void Dispose()
         {
             Helper.Dispose(this.resources);
+            Helper.Dispose(this.globalResources);
         }
 
         /// <summary>
@@ -111,7 +116,7 @@ namespace Engine
         /// <param name="values">Values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateTexture2D(Guid identifier, Vector4[] values, int size)
+        public ShaderResourceView CreateResource(Guid identifier, Vector4[] values, int size)
         {
             string md5 = identifier.ToByteArray().GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -131,7 +136,7 @@ namespace Engine
         /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateRandomTexture(Guid identifier, int size, float min, float max, int seed = 0)
+        public ShaderResourceView CreateResource(Guid identifier, int size, float min, float max, int seed = 0)
         {
             string md5 = identifier.ToByteArray().GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -141,6 +146,53 @@ namespace Engine
             }
 
             return this.resources[md5];
+        }
+
+        /// <summary>
+        /// Creates a new global resource by name
+        /// </summary>
+        /// <param name="name">Resource name</param>
+        /// <param name="values">Values</param>
+        /// <param name="size">Texture size (total pixels = size * size)</param>
+        /// <returns>Returns the created resource view</returns>
+        public ShaderResourceView CreateGlobalResource(string name, Vector4[] values, int size)
+        {
+            var view = this.game.Graphics.Device.CreateTexture2D(size, values);
+            this.SetGlobalResource(name, view);
+            return view;
+        }
+        /// <summary>
+        /// Creates a new global resource by name
+        /// </summary>
+        /// <param name="identifier">Identifier</param>
+        /// <param name="size">Texture size</param>
+        /// <param name="min">Minimum value</param>
+        /// <param name="max">Maximum value</param>
+        /// <param name="seed">Random seed</param>
+        /// <returns>Returns the created resource view</returns>
+        public ShaderResourceView CreateGlobalResource(string name, int size, float min, float max, int seed = 0)
+        {
+            var view = this.game.Graphics.Device.CreateRandomTexture(size, min, max, seed);
+            this.SetGlobalResource(name, view);
+            return view;
+        }
+        /// <summary>
+        /// Set global resource by name
+        /// </summary>
+        /// <param name="name">Resource name</param>
+        /// <param name="resource">Resource content</param>
+        public void SetGlobalResource(string name, ShaderResourceView resource)
+        {
+            if (this.globalResources.ContainsKey(name))
+            {
+                var cRes = this.globalResources[name];
+                Helper.Dispose(cRes);
+                this.globalResources[name] = resource;
+            }
+            else
+            {
+                this.globalResources.Add(name, resource);
+            }
         }
 
         /// <summary>

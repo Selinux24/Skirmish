@@ -1,14 +1,13 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Animation
 {
     /// <summary>
     /// Skinning data
     /// </summary>
-    public class SkinningData
+    public class SkinningData : IEquatable<SkinningData>
     {
         /// <summary>
         /// Default clip name
@@ -41,27 +40,25 @@ namespace Engine.Animation
         private Skeleton skeleton = null;
 
         /// <summary>
-        /// Constructor
+        /// Resource index
         /// </summary>
-        /// <param name="skeleton">Skeleton</param>
-        /// <param name="animations">Animation list</param>
-        public SkinningData(Skeleton skeleton, JointAnimation[] animations)
-        {
-            this.animations = new List<AnimationClip>();
-            this.transitions = new List<Transition>();
-            this.clips = new List<string>();
-            this.offsets = new List<int>();
-            this.skeleton = skeleton;
+        public uint ResourceIndex = 0;
+        /// <summary>
+        /// Resource offset
+        /// </summary>
+        public uint ResourceOffset = 0;
+        /// <summary>
+        /// Resource size
+        /// </summary>
+        public uint ResourceSize = 0;
 
-            this.animations.Add(new AnimationClip(SkinningData.DefaultClip, animations));
-            this.clips.Add(SkinningData.DefaultClip);
-        }
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="skeleton">Skeleton</param>
-        /// <param name="animations">Animation dictionary</param>
-        public SkinningData(Skeleton skeleton, Dictionary<string, JointAnimation[]> animations)
+        /// <param name="jointAnimations">Animation list</param>
+        /// <param name="animationDescription">Animation description</param>
+        public SkinningData(Skeleton skeleton, JointAnimation[] jointAnimations, AnimationDescription animationDescription)
         {
             this.animations = new List<AnimationClip>();
             this.transitions = new List<Transition>();
@@ -69,11 +66,56 @@ namespace Engine.Animation
             this.offsets = new List<int>();
             this.skeleton = skeleton;
 
-            foreach (var key in animations.Keys)
+            if (animationDescription != null)
             {
-                this.animations.Add(new AnimationClip(key, animations[key]));
-                this.clips.Add(key);
+                Dictionary<string, JointAnimation[]> dictAnimations = new Dictionary<string, JointAnimation[]>();
+
+                foreach (var clip in animationDescription.Clips)
+                {
+                    JointAnimation[] ja = new JointAnimation[jointAnimations.Length];
+                    for (int c = 0; c < ja.Length; c++)
+                    {
+                        Keyframe[] kfs = new Keyframe[clip.To - clip.From + 1];
+                        Array.Copy(jointAnimations[c].Keyframes, clip.From, kfs, 0, kfs.Length);
+
+                        float dTime = kfs[0].Time;
+                        for (int k = 0; k < kfs.Length; k++)
+                        {
+                            kfs[k].Time -= dTime;
+                        }
+
+                        ja[c] = new JointAnimation(jointAnimations[c].Joint, kfs);
+                    }
+
+                    dictAnimations.Add(clip.Name, ja);
+                }
+
+                if (dictAnimations != null)
+                {
+                    foreach (var key in dictAnimations.Keys)
+                    {
+                        this.animations.Add(new AnimationClip(key, dictAnimations[key]));
+                        this.clips.Add(key);
+                    }
+                }
+
+                foreach (var transition in animationDescription.Transitions)
+                {
+                    this.AddTransition(
+                        transition.ClipFrom,
+                        transition.ClipTo,
+                        transition.StartFrom,
+                        transition.StartTo);
+                }
             }
+            else
+            {
+                this.animations.Add(new AnimationClip(SkinningData.DefaultClip, jointAnimations));
+                this.clips.Add(SkinningData.DefaultClip);
+            }
+
+            //Initialize offsets for animation process with animation palette
+            this.InitializeOffsets();
         }
 
         /// <summary>
@@ -83,7 +125,7 @@ namespace Engine.Animation
         /// <param name="clipTo">Clip to</param>
         /// <param name="startTimeFrom">Starting time in clipFrom to begin to interpolate</param>
         /// <param name="startTimeTo">Starting time in clipTo to begin to interpolate</param>
-        public void AddTransition(string clipFrom, string clipTo, float startTimeFrom, float startTimeTo)
+        private void AddTransition(string clipFrom, string clipTo, float startTimeFrom, float startTimeTo)
         {
             int indexFrom = this.animations.FindIndex(c => c.Name == clipFrom);
             int indexTo = this.animations.FindIndex(c => c.Name == clipTo);
@@ -119,6 +161,52 @@ namespace Engine.Animation
 
             this.clips.Add(clipFrom + clipTo);
         }
+        /// <summary>
+        /// Initialize animation offsets
+        /// </summary>
+        private void InitializeOffsets()
+        {
+            int offset = 0;
+
+            for (int i = 0; i < this.animations.Count; i++)
+            {
+                this.offsets.Add(offset);
+
+                float duration = this.animations[i].Duration;
+                int clipLength = (int)(duration / TimeStep);
+
+                for (int t = 0; t < clipLength; t++)
+                {
+                    var mat = this.GetPoseAtTime(t * TimeStep, i);
+
+                    offset += mat.Length * 4;
+                }
+            }
+
+            foreach (var transition in this.transitions)
+            {
+                this.offsets.Add(offset);
+
+                float totalDuration = transition.TotalDuration;
+                float interDuration = transition.InterpolationDuration;
+
+                int clipLength = (int)(totalDuration / TimeStep);
+
+                for (int t = 0; t < clipLength; t++)
+                {
+                    float time = (float)t * TimeStep;
+                    float factor = Math.Min(time / interDuration, 1f);
+
+                    var mat = this.GetPoseAtTime(
+                        time,
+                        transition.ClipFrom, transition.ClipTo,
+                        transition.StartFrom, transition.StartTo,
+                        factor);
+
+                    offset += mat.Length * 4;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the specified animation offset
@@ -126,10 +214,10 @@ namespace Engine.Animation
         /// <param name="time">Time</param>
         /// <param name="clipName">Clip name</param>
         /// <param name="animationOffset">Animation offset</param>
-        public void GetAnimationOffset(float time, string clipName, out int animationOffset)
+        public void GetAnimationOffset(float time, string clipName, out uint animationOffset)
         {
             int clipIndex = this.GetClipIndex(clipName);
-            int offset = this.GetClipOffset(clipIndex);
+            uint offset = this.GetClipOffset(clipIndex);
             float duration = this.GetClipDuration(clipIndex);
             int clipLength = (int)(duration / TimeStep);
 
@@ -138,7 +226,7 @@ namespace Engine.Animation
             percent -= (float)percentINT;
             int index = (int)((float)clipLength * percent);
 
-            animationOffset = offset + (4 * this.skeleton.JointCount * index);
+            animationOffset = offset + (uint)(4 * this.skeleton.JointCount * index) + this.ResourceOffset;
         }
         /// <summary>
         /// Gets the index of the specified clip in the animation collection
@@ -154,11 +242,11 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="clipIndex">Clip index</param>
         /// <returns>Returns the clip offset in animation palette</returns>
-        public int GetClipOffset(int clipIndex)
+        public uint GetClipOffset(int clipIndex)
         {
             if (clipIndex >= 0)
             {
-                return this.offsets[clipIndex];
+                return (uint)this.offsets[clipIndex];
             }
 
             return 0;
@@ -269,19 +357,16 @@ namespace Engine.Animation
         }
 
         /// <summary>
-        /// Creates the animation palette
+        /// Packs current instance into a Vector4 array
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="palette">Gets the generated palette</param>
-        /// <param name="width">Gets the palette width</param>
-        public void CreateAnimationTexture(Game game, out ShaderResourceView palette, out uint width)
+        /// <returns>Returns the packed skinning data</returns>
+        /// <remarks>This method must stay synchronized with InitializeOffsets</remarks>
+        public Vector4[] Pack()
         {
             List<Vector4> values = new List<Vector4>();
 
             for (int i = 0; i < this.animations.Count; i++)
             {
-                this.offsets.Add(values.Count);
-
                 float duration = this.animations[i].Duration;
                 int clipLength = (int)(duration / TimeStep);
 
@@ -303,8 +388,6 @@ namespace Engine.Animation
 
             foreach (var transition in this.transitions)
             {
-                this.offsets.Add(values.Count);
-
                 float totalDuration = transition.TotalDuration;
                 float interDuration = transition.InterpolationDuration;
 
@@ -333,17 +416,22 @@ namespace Engine.Animation
                 }
             }
 
-            int pixelCount = values.Count;
-            int texWidth = (int)Math.Sqrt((float)pixelCount) + 1;
-            int texHeight = 1;
-            while (texHeight < texWidth)
-            {
-                texHeight = texHeight << 1;
-            }
-            texWidth = texHeight;
+            return values.ToArray();
+        }
 
-            palette = game.ResourceManager.CreateTexture2D(Guid.NewGuid(), values.ToArray(), texWidth);
-            width = (uint)texWidth;
+        /// <summary>
+        /// Gets whether the current instance is equal to the other instance
+        /// </summary>
+        /// <param name="other">The other instance</param>
+        /// <returns>Returns true if both instances are equal</returns>
+        public bool Equals(SkinningData other)
+        {
+            return
+                this.animations.ListIsEqual(other.animations) &&
+                this.transitions.ListIsEqual(other.transitions) &&
+                this.clips.ListIsEqual(other.clips) &&
+                this.offsets.ListIsEqual(other.offsets) &&
+                this.skeleton.Equals(other.skeleton);
         }
     }
 }

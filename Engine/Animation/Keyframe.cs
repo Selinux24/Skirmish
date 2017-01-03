@@ -6,7 +6,7 @@ namespace Engine.Animation
     /// <summary>
     /// Animation keyframe
     /// </summary>
-    public struct Keyframe
+    public struct Keyframe : IEquatable<Keyframe>
     {
         /// <summary>
         /// Frame transformation
@@ -70,6 +70,20 @@ namespace Engine.Animation
         public override string ToString()
         {
             return string.Format("Time: {0:0.00000}: {1}", this.Time, this.Transform.GetDescription());
+        }
+        /// <summary>
+        /// Gets whether the current instance is equal to the other instance
+        /// </summary>
+        /// <param name="other">The other instance</param>
+        /// <returns>Returns true if both instances are equal</returns>
+        public bool Equals(Keyframe other)
+        {
+            return
+                this.Time == other.Time &&
+                this.Translation == other.Translation &&
+                this.Rotation == other.Rotation &&
+                this.Scale == other.Scale &&
+                this.Interpolation == other.Interpolation;
         }
     }
 }

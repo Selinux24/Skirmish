@@ -824,12 +824,19 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="materialPalette">Material palette texture</param>
         /// <param name="materialPaletteWidth">Material palette texture width</param>
+        /// <param name="animationPalette">Animation palette texture</param>
+        /// <param name="animationPaletteWith">Animation palette texture width</param>
         public void UpdateGlobals(
             ShaderResourceView materialPalette,
-            uint materialPaletteWidth)
+            uint materialPaletteWidth,
+            ShaderResourceView animationPalette,
+            uint animationPaletteWidth)
         {
             this.MaterialPalette = materialPalette;
             this.MaterialPaletteWidth = materialPaletteWidth;
+
+            this.AnimationPalette = animationPalette;
+            this.AnimationPaletteWidth = animationPaletteWidth;
         }
         /// <summary>
         /// Update per frame data
@@ -930,42 +937,31 @@ namespace Engine.Effects
             this.LightCount = lCount;
         }
         /// <summary>
-        /// Update per group data
-        /// </summary>
-        /// <param name="animationPalette">Animation palette texture</param>
-        /// <param name="animationPaletteWith">Animation palette texture width</param>
-        public void UpdatePerGroup(
-            ShaderResourceView animationPalette,
-            uint animationPaletteWidth)
-        {
-            this.AnimationPalette = animationPalette;
-            this.AnimationPaletteWidth = animationPaletteWidth;
-        }
-        /// <summary>
         /// Update per model object data
         /// </summary>
         /// <param name="diffuseMap">Diffuse map</param>
         /// <param name="normalMap">Normal map</param>
         /// <param name="specularMap">Specular map</param>
-        /// <param name="animationData">Animation data</param>
         /// <param name="materialIndex">Material index</param>
         /// <param name="textureIndex">Texture index</param>
+        /// <param name="animationIndex">Animation index</param>
         public void UpdatePerObject(
             ShaderResourceView diffuseMap,
             ShaderResourceView normalMap,
             ShaderResourceView specularMap,
-            uint[] animationData,
             uint materialIndex,
-            uint textureIndex)
+            uint textureIndex,
+            uint animationIndex)
         {
             this.DiffuseMap = diffuseMap;
             this.NormalMap = normalMap;
             this.SpecularMap = specularMap;
             this.UseColorDiffuse = diffuseMap != null;
             this.UseColorSpecular = specularMap != null;
-            this.AnimationData = animationData != null ? animationData : new uint[3];
-            this.TextureIndex = textureIndex;
             this.MaterialIndex = materialIndex;
+            this.TextureIndex = textureIndex;
+
+            this.AnimationData = new uint[] { 0, animationIndex, 0 };
         }
     }
 }

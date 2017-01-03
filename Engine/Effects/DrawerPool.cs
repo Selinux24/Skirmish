@@ -151,13 +151,18 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="materialPalette">Material palette</param>
         /// <param name="materialPaletteWidth">Material palette width</param>
-        public static void UpdateSceneGlobals(ShaderResourceView materialPalette, uint materialPaletteWidth)
+        public static void UpdateSceneGlobals(
+            ShaderResourceView materialPalette, uint materialPaletteWidth,
+            ShaderResourceView animationPalette, uint animationPaletteWidth)
         {
             EffectDefaultBillboard.UpdateGlobals(materialPalette, materialPaletteWidth);
-            EffectDefaultBasic.UpdateGlobals(materialPalette, materialPaletteWidth);
+            EffectDefaultBasic.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
             EffectDefaultTerrain.UpdateGlobals(materialPalette, materialPaletteWidth);
-            
+
+            EffectDeferredBasic.UpdateGlobals(animationPalette, animationPaletteWidth);
             EffectDeferredComposer.UpdateGlobals(materialPalette, materialPaletteWidth);
+
+            EffectShadowBasic.UpdateGlobals(animationPalette, animationPaletteWidth);
         }
     }
 }

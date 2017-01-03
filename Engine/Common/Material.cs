@@ -52,23 +52,6 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Packs current instance into a Vector4 array
-        /// </summary>
-        /// <returns>Returns the packed material</returns>
-        internal Vector4[] Pack()
-        {
-            Vector4[] res = new Vector4[4];
-
-            res[0] = this.EmissiveColor;
-            res[1] = this.AmbientColor;
-            res[2] = this.DiffuseColor;
-            res[3] = this.SpecularColor;
-            res[3].W = this.Shininess;
-
-            return res;
-        }
-
-        /// <summary>
         /// Gets whether the current instance is equal to the other instance
         /// </summary>
         /// <param name="other">The other instance</param>
@@ -81,6 +64,19 @@ namespace Engine.Common
                 this.DiffuseColor == other.DiffuseColor &&
                 this.SpecularColor == other.SpecularColor &&
                 this.Shininess == other.Shininess;
+        }
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("EmissiveColor: {0}; AmbientColor: {1}; DiffuseColor: {2}; SpecularColor: {3}; Shininess: {4};",
+                this.EmissiveColor,
+                this.AmbientColor,
+                this.DiffuseColor,
+                this.SpecularColor,
+                this.Shininess);
         }
     };
 }

@@ -184,8 +184,8 @@ namespace Engine
                             {
                                 current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
 
-                                this.instancingData[instanceIndex].ClipIndex = (uint)current.AnimationController.GetAnimationIndex();
-                                this.instancingData[instanceIndex].AnimationOffset = (uint)current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
+                                this.instancingData[instanceIndex].ClipIndex = 0;
+                                this.instancingData[instanceIndex].AnimationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
 
                                 current.InvalidateCache();
                             }
@@ -261,29 +261,6 @@ namespace Engine
                                 var index = Array.IndexOf(this.instancesTmp, ins[0]);
                                 var length = ins.Length;
 
-                                #region Per Group update
-
-                                if (context.DrawerMode == DrawerModesEnum.Forward)
-                                {
-                                    ((EffectDefaultBasic)effect).UpdatePerGroup(
-                                        drawingData.AnimationPalette,
-                                        drawingData.AnimationPaletteWidth);
-                                }
-                                else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                                {
-                                    ((EffectDeferredBasic)effect).UpdatePerGroup(
-                                        drawingData.AnimationPalette,
-                                        drawingData.AnimationPaletteWidth);
-                                }
-                                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                                {
-                                    ((EffectShadowBasic)effect).UpdatePerGroup(
-                                        drawingData.AnimationPalette,
-                                        drawingData.AnimationPaletteWidth);
-                                }
-
-                                #endregion
-
                                 foreach (string meshName in drawingData.Meshes.Keys)
                                 {
                                     var dictionary = drawingData.Meshes[meshName];
@@ -299,9 +276,9 @@ namespace Engine
                                             ((EffectDefaultBasic)effect).UpdatePerObject(
                                                 mat.DiffuseTexture,
                                                 mat.NormalMap,
-                                                mat.SpecularTexture, 
-                                                null,
-                                                context.GetMaterialIndex(mat.Material),
+                                                mat.SpecularTexture,
+                                                mat.ResourceIndex,
+                                                0,
                                                 0);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
@@ -310,14 +287,14 @@ namespace Engine
                                                 mat.DiffuseTexture,
                                                 mat.NormalMap,
                                                 mat.SpecularTexture,
-                                                null,
-                                                context.GetMaterialIndex(mat.Material),
+                                                mat.ResourceIndex,
+                                                0,
                                                 0);
                                         }
                                         else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                                         {
                                             ((EffectShadowBasic)effect).UpdatePerObject(
-                                                null,
+                                                0,
                                                 0);
                                         }
 

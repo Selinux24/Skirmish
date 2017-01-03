@@ -167,6 +167,53 @@ namespace Engine
             return res;
         }
         /// <summary>
+        /// Compares two enumerable lists, element by element
+        /// </summary>
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="enum1">First list</param>
+        /// <param name="enum2">Second list</param>
+        /// <returns>Returns true if both list are equal</returns>
+        public static bool ListIsEqual<T>(this IEnumerable<T> enum1, IEnumerable<T> enum2)
+        {
+            if (enum1 == null && enum2 == null)
+            {
+                return true;
+            }
+            else if (enum1 != null && enum2 != null)
+            {
+                var list1 = enum1.ToList();
+                var list2 = enum2.ToList();
+
+                if (list1.Count == list2.Count)
+                {
+                    if (list1.Count > 0)
+                    {
+                        bool equatable = list1[0] is IEquatable<T>;
+
+                        for (int i = 0; i < list1.Count; i++)
+                        {
+                            bool equal = false;
+
+                            if (equatable)
+                            {
+                                equal = ((IEquatable<T>)list1[i]).Equals(list2[i]);
+                            }
+                            else
+                            {
+                                equal = list1[i].Equals(list2[i]);
+                            }
+
+                            if (!equal) return false;
+                        }
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        /// <summary>
         /// Gets the internal items of the KeyCollection into an array
         /// </summary>
         /// <typeparam name="TKey">Key type</typeparam>
@@ -930,6 +977,22 @@ namespace Engine
         public static bool IsInfinity(this Color4 color)
         {
             return float.IsInfinity(color.Red) || float.IsInfinity(color.Green) || float.IsInfinity(color.Blue) || float.IsInfinity(color.Alpha);
+        }
+        /// <summary>
+        /// Gets first normal texture size for the specified pixel count
+        /// </summary>
+        /// <param name="pixelCount">Pixel count</param>
+        /// <returns>Returns the texture size</returns>
+        public static int GetTextureSize(int pixelCount)
+        {
+            int texWidth = (int)Math.Sqrt((float)pixelCount) + 1;
+            int texHeight = 1;
+            while (texHeight < texWidth)
+            {
+                texHeight = texHeight << 1;
+            }
+
+            return texHeight;
         }
 
         /// <summary>
