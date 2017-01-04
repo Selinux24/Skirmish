@@ -81,6 +81,7 @@ namespace SceneTest
         {
             this.lensFlare = this.AddLensFlare(new LensFlareDescription()
             {
+                Name = "Flares",
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
                 Flares = new[]
@@ -100,7 +101,7 @@ namespace SceneTest
                 }
             });
 
-            this.sky = this.AddSkyScattering(new SkyScatteringDescription());
+            this.sky = this.AddSkyScattering(new SkyScatteringDescription() { Name = "Sky" });
         }
         private void InitializeFloorAsphalt()
         {
@@ -130,6 +131,7 @@ namespace SceneTest
 
             var desc = new ModelDescription()
             {
+                Name = "Floor",
                 Static = true,
                 CastShadow = true,
                 AlwaysVisible = false,
@@ -140,6 +142,7 @@ namespace SceneTest
 
             var descI = new ModelInstancedDescription()
             {
+                Name = "FloorI",
                 Static = true,
                 CastShadow = true,
                 AlwaysVisible = false,
@@ -170,6 +173,7 @@ namespace SceneTest
                 "Obelisk.xml",
                 new ModelDescription()
                 {
+                    Name = "Obelisk",
                     CastShadow = true,
                     Static = true,
                 });
@@ -179,6 +183,7 @@ namespace SceneTest
                 "Obelisk.xml",
                 new ModelInstancedDescription()
                 {
+                    Name = "ObeliskI",
                     CastShadow = true,
                     Static = true,
                     Instances = 4,
@@ -210,6 +215,7 @@ namespace SceneTest
                 @"soldier_anim2.xml",
                 new ModelDescription()
                 {
+                    Name = "Soldier",
                     TextureIndex = 1,
                     CastShadow = true,
                     Static = false,
@@ -220,6 +226,7 @@ namespace SceneTest
                 @"soldier_anim2.xml",
                 new ModelInstancedDescription()
                 {
+                    Name = "SoldierI",
                     CastShadow = true,
                     Static = false,
                     Instances = 4,
@@ -262,6 +269,7 @@ namespace SceneTest
                 "Leopard.xml",
                 new ModelDescription()
                 {
+                    Name = "Leopard",
                     CastShadow = true,
                     Static = false,
                 });
@@ -271,6 +279,7 @@ namespace SceneTest
                 "Leopard.xml",
                 new ModelInstancedDescription()
                 {
+                    Name = "LeopardI",
                     CastShadow = true,
                     Static = false,
                     Instances = 4,
@@ -304,6 +313,7 @@ namespace SceneTest
                 "lamp.xml",
                 new ModelDescription()
                 {
+                    Name = "Lamp",
                     CastShadow = true,
                     Static = true,
                 });
@@ -313,6 +323,7 @@ namespace SceneTest
                 "lamp.xml",
                 new ModelInstancedDescription()
                 {
+                    Name = "LampI",
                     CastShadow = true,
                     Static = true,
                     Instances = 4,

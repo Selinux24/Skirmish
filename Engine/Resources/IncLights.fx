@@ -31,36 +31,75 @@ SamplerComparisonState SamplerComparisonLessEqual
 	ComparisonFunc = LESS_EQUAL;
 };
 
-float roll(float rnd, float min, float max)
+float2 EncodeColor(float3 rgb24)
+{
+	// scale up to 8-bit
+	rgb24 *= 255.0f;
+
+	// remove the 3 LSB of red and blue, and the 2 LSB of green
+	int3 rgb16 = rgb24 / int3(8, 4, 8);
+
+	// split the green at bit 3 (we'll keep the 6 bits around the split)
+	float greenSplit = rgb16.g / 8.0f;
+
+	// pack it up (capital G's are MSB, the rest are LSB)
+	float2 packed;
+	packed.x = rgb16.r * 8 + floor(greenSplit);		// rrrrrGGG
+	packed.y = frac(greenSplit) * 256 + rgb16.b;		// gggbbbbb
+
+	// scale down and return
+	packed /= 255.0f;
+	return packed;
+}
+float3 DecodeColor(float2 packed) {
+	// scale up to 8-bit
+	packed *= 255.0f;
+
+	// round and split the packed bits
+	float2 split = round(packed) / 8;	// first component at bit 3
+	split.y /= 4;				// second component at bit 5
+
+	// unpack (obfuscated yet optimized crap follows)
+	float3 rgb16 = 0.0f.rrr;
+	rgb16.gb = frac(split) * 256;
+	rgb16.rg += floor(split) * 4;
+	rgb16.r *= 2;
+
+	// scale down and return
+	rgb16 /= 255.0f;
+	return rgb16;
+}
+
+inline float roll(float rnd, float min, float max)
 {
    return min + (rnd * (max - min));
 }
 
-float RandomScalar(float seed, Texture1D rndTex)
+inline float RandomScalar(float seed, Texture1D rndTex)
 {
 	return rndTex.SampleLevel(SamplerLinear, seed, 0).x;
 }
-float2 RandomVector2(float seed, Texture1D rndTex)
+inline float2 RandomVector2(float seed, Texture1D rndTex)
 {
 	return rndTex.SampleLevel(SamplerLinear, seed, 0).xy;
 }
-float3 RandomVector3(float seed, Texture1D rndTex)
+inline float3 RandomVector3(float seed, Texture1D rndTex)
 {
 	return rndTex.SampleLevel(SamplerLinear, seed, 0).xyz;
 }
-float4 RandomVector4(float seed, Texture1D rndTex)
+inline float4 RandomVector4(float seed, Texture1D rndTex)
 {
 	return rndTex.SampleLevel(SamplerLinear, seed, 0);
 }
 
-float RandomScalar(float min, float max, float seed, Texture1D rndTex)
+inline float RandomScalar(float min, float max, float seed, Texture1D rndTex)
 {
 	float r = rndTex.SampleLevel(SamplerLinear, seed, 0).x;
 	r = roll(r, min, max);
 
 	return r;
 }
-float2 RandomVector2(float min, float max, float seed, Texture1D rndTex)
+inline float2 RandomVector2(float min, float max, float seed, Texture1D rndTex)
 {
 	float2 r = rndTex.SampleLevel(SamplerLinear, seed, 0).xy;
 	r.x = roll(r.x, min, max);
@@ -68,7 +107,7 @@ float2 RandomVector2(float min, float max, float seed, Texture1D rndTex)
 
 	return r;
 }
-float3 RandomVector3(float min, float max, float seed, Texture1D rndTex)
+inline float3 RandomVector3(float min, float max, float seed, Texture1D rndTex)
 {
 	float3 r = rndTex.SampleLevel(SamplerLinear, seed, 0).xyz;
 	r.x = roll(r.x, min, max);
@@ -77,7 +116,7 @@ float3 RandomVector3(float min, float max, float seed, Texture1D rndTex)
 
 	return r;
 }
-float4 RandomVector4(float min, float max, float seed, Texture1D rndTex)
+inline float4 RandomVector4(float min, float max, float seed, Texture1D rndTex)
 {
 	float4 r = rndTex.SampleLevel(SamplerLinear, seed, 0);
 	r.x = roll(r.x, min, max);
@@ -132,7 +171,7 @@ struct SpotLight
 	float Pad3;
 };
 
-Material GetMaterialData(Texture2D materialsTexture, uint materialIndex, uint paletteWidth)
+inline Material GetMaterialData(Texture2D materialsTexture, uint materialIndex, uint paletteWidth)
 {
     uint baseIndex = 4 * materialIndex;
     uint baseU = baseIndex % paletteWidth;
@@ -176,7 +215,7 @@ static float2 poissonDisk[MaxSampleCount] =
 	float2(-0.687256f, 0.6711345f)
 };
 
-float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normalW, float3 tangentW)
+inline float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normalW, float3 tangentW)
 {
 	//Uncompress each component from [0,1] to [-1,1].
 	float3 normalT = (2.0f * normalMapSample) - 1.0f;
@@ -185,7 +224,7 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normalW, float3 t
 
 	return normalize((normalT.x * tangentW) + (normalT.y * binormalW) + (normalT.z * normalW));
 }
-float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shadowMapStatic, Texture2D shadowMapDynamic)
+inline float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shadowMapStatic, Texture2D shadowMapDynamic)
 {
 	uint samples = 4;
 	float factor = 0.8f;
@@ -233,25 +272,25 @@ float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shadowMapSt
 
     return 1.0f - (shadow / samples);
 }
-float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRange, float4 fogColor)
+inline float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRange, float4 fogColor)
 {
 	float fogLerp = saturate((distToEye - fogStart) / fogRange);
 
 	return lerp(litColor, fogColor, fogLerp);
 }
 
-void Phong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, float3 N, float3 V, float3 R, out float4 diffuse, out float4 specular)
+inline void Phong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, float3 N, float3 V, float3 R, out float4 diffuse, out float4 specular)
 {
 	diffuse = (max(0, dot(L, N))) * lDiffuse;
 	specular = (pow(max(0, dot(R, V)), lShininess)) * lSpecular;
 }
-void BlinnPhong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, float3 N, float3 V, float3 R, out float4 diffuse, out float4 specular)
+inline void BlinnPhong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, float3 N, float3 V, float3 R, out float4 diffuse, out float4 specular)
 {
 	diffuse = (max(0, dot(L, N))) * lDiffuse;
 	specular = (pow(max(0, dot(N, normalize(L + V))), lShininess)) * lSpecular;
 }
 
-float CalcSphericAttenuation(float intensity, float radius, float distance)
+inline float CalcSphericAttenuation(float intensity, float radius, float distance)
 {
     float attenuation = 0.0f;
 
@@ -267,7 +306,7 @@ float CalcSphericAttenuation(float intensity, float radius, float distance)
 
     return attenuation;
 }
-float CalcSpotCone(float3 lightDirection, float spotAngle, float3 L)
+inline float CalcSpotCone(float3 lightDirection, float spotAngle, float3 L)
 {
     float minCos = cos(spotAngle);
     float maxCos = (minCos + 1.0f) * 0.5f;
@@ -275,7 +314,7 @@ float CalcSpotCone(float3 lightDirection, float spotAngle, float3 L)
     return smoothstep(minCos, maxCos, cosAngle); 
 }
 
-void ComputeDirectionalLight(
+inline void ComputeDirectionalLight(
 	DirectionalLight dirLight,
 	float shininess,
 	float3 pPosition, 
@@ -305,7 +344,7 @@ void ComputeDirectionalLight(
 	specular *= cShadowFactor;
 }
 
-void ComputePointLight(
+inline void ComputePointLight(
 	PointLight pointLight,
 	float shininess,
 	float3 pPosition, 
@@ -327,7 +366,7 @@ void ComputePointLight(
 	specular *= attenuation;
 }
 
-void ComputeSpotLight(
+inline void ComputeSpotLight(
 	SpotLight spotLight,
 	float shininess,
 	float3 pPosition, 
@@ -351,7 +390,7 @@ void ComputeSpotLight(
 	specular *= attenuation;
 }
 
-float4 ComputeLights(
+inline float4 ComputeLights(
 	float4 Ga, 
 	DirectionalLight dirLights[MAX_LIGHTS_DIRECTIONAL], 
 	PointLight pointLights[MAX_LIGHTS_POINT], 
