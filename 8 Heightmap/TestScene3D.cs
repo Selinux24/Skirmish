@@ -211,8 +211,7 @@ namespace HeightmapTest
 
                         UseSlopes = false,
                         SlopeRanges = new Vector2(0.005f, 0.25f),
-                        //TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
-                        TexturesLR = new[] { "am01.jpg", "am02.jpg", "am04.jpg" },
+                        TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
                         TexturesHR = new[] { "dirt0hr.dds" },
 
                         Proportion = 0.25f,
@@ -233,16 +232,44 @@ namespace HeightmapTest
                     //{
                     //    Settings = pfSettings,
                     //},
-                    //Vegetation = new GroundDescription.VegetationDescription()
-                    //{
-                    //    ContentPath = "Resources/Scenery/Foliage/Billboard",
-                    //    VegetarionTextures = new[] { "grass.png" },
-                    //    Saturation = 0.3f,
-                    //    StartRadius = 0f,
-                    //    EndRadius = 200f,
-                    //    MinSize = new Vector2(1f, 1f),
-                    //    MaxSize = new Vector2(1.5f, 2f),
-                    //}
+                    Vegetation = new GroundDescription.VegetationDescription()
+                    {
+                        ContentPath = "Resources/Scenery/Foliage/Billboard",
+                        VegetationMap = "map.png",
+                        ChannelRed = new GroundDescription.VegetationDescription.Channel()
+                        {
+                            VegetarionTextures = new[] { "grass0.png" },
+                            Saturation = 0.5f,
+                            StartRadius = 0f,
+                            EndRadius = 150f,
+                            MinSize = new Vector2(1f, 1f),
+                            MaxSize = new Vector2(1.5f, 2f),
+                            Seed = 1,
+                            WindEffect = 0.8f,
+                        },
+                        ChannelGreen = new GroundDescription.VegetationDescription.Channel()
+                        {
+                            VegetarionTextures = new[] { "grass1.png" },
+                            Saturation = 0.25f,
+                            StartRadius = 0f,
+                            EndRadius = 150f,
+                            MinSize = new Vector2(2f, 2f),
+                            MaxSize = new Vector2(2.5f, 3f),
+                            Seed = 2,
+                            WindEffect = 0.3f,
+                        },
+                        ChannelBlue = new GroundDescription.VegetationDescription.Channel()
+                        {
+                            VegetarionTextures = new[] { "grass2.png" },
+                            Saturation = 1f,
+                            StartRadius = 0f,
+                            EndRadius = 140f,
+                            MinSize = new Vector2(1f, 0.5f),
+                            MaxSize = new Vector2(2f, 1f),
+                            Seed = 3,
+                            WindEffect = 1.2f,
+                        },
+                    }
                 });
             this.terrain.SetWind(this.windDirection, this.windStrength);
             sw.Stop();
@@ -498,7 +525,7 @@ namespace HeightmapTest
             this.skydom.RayleighScattering *= 0.8f;
             this.skydom.MieScattering *= 0.1f;
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(6, 00, 00), 0.75f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 55, 00), 0.1f);
 
             this.Lights.FogColor = new Color((byte)54, (byte)56, (byte)68);
             this.Lights.FogStart = 0;

@@ -633,6 +633,49 @@ namespace Engine
 
             return r;
         }
+        /// <summary>
+        /// Converts specified number relative to a total size and min/max magnitudes
+        /// </summary>
+        /// <param name="n">Number</param>
+        /// <param name="size">Total size</param>
+        /// <param name="min">Minimum</param>
+        /// <param name="max">Maximum</param>
+        /// <returns>Returns the relative value</returns>
+        public static float GetRelative(this float n, float size, float min, float max)
+        {
+            float f = size / (max - min);
+
+            return (n + (max - min) - max) * f;
+        }
+        /// <summary>
+        /// Converts specified vector relative to a total size and min/max magnitudes
+        /// </summary>
+        /// <param name="v">Vector</param>
+        /// <param name="size">Total size</param>
+        /// <param name="min">Minimum</param>
+        /// <param name="max">Maximum</param>
+        /// <returns>Returns the relative value</returns>
+        public static Vector2 GetRelative(this Vector2 v, Vector2 size, Vector2 min, Vector2 max)
+        {
+            return new Vector2(
+                v.X.GetRelative(size.X, min.X, max.X),
+                v.Y.GetRelative(size.Y, min.Y, max.Y));
+        }
+        /// <summary>
+        /// Converts specified vector relative to a total size and min/max magnitudes
+        /// </summary>
+        /// <param name="v">Vector</param>
+        /// <param name="size">Total size</param>
+        /// <param name="min">Minimum</param>
+        /// <param name="max">Maximum</param>
+        /// <returns>Returns the relative value</returns>
+        public static Vector3 GetRelative(this Vector3 v, Vector3 size, Vector3 min, Vector3 max)
+        {
+            return new Vector3(
+                v.X.GetRelative(size.X, min.X, max.X),
+                v.Y.GetRelative(size.Y, min.Y, max.Y),
+                v.Z.GetRelative(size.Z, min.Z, max.Z));
+        }
 
         /// <summary>
         /// Gets angle between two vectors

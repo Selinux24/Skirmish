@@ -169,6 +169,7 @@
     <Compile Include="Effects\EffectDeferredTerrain.cs" />
     <Compile Include="Effects\EffectShadowTerrain.cs" />
     <Compile Include="Effects\EffectDefaultSkyScattering.cs" />
+    <Compile Include="FoliageMap.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />
@@ -296,7 +297,7 @@
     <Compile Include="PathFinding\NavMesh\HeightFieldSpan.cs" />
     <Compile Include="PathFinding\NavMesh\HeightFieldSpanReference.cs" />
     <Compile Include="PathFinding\AStar\GridNodeStates.cs" />
-    <Compile Include="Common\HeightMap.cs" />
+    <Compile Include="HeightMap.cs" />
     <Compile Include="IBufferData.cs" />
     <Compile Include="IControl.cs" />
     <Compile Include="ICurve.cs" />

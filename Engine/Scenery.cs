@@ -346,10 +346,11 @@ namespace Engine
 
                 if (node != null)
                 {
-                    Random rnd = new Random(description.Seed);
+                    //TODO fix that
+                    Random rnd = new Random(description.ChannelRed.Seed);
                     BoundingBox bbox = node.BoundingBox;
                     float area = bbox.GetX() * bbox.GetZ();
-                    float density = description.Saturation;
+                    float density = description.ChannelRed.Saturation;
                     int count = (int)(area * density);
                     if (count > MAX) count = MAX;
 
@@ -369,12 +370,13 @@ namespace Engine
                         {
                             if (t.Normal.Y > 0.5f)
                             {
+                                //TODO: Fix that
                                 vertexData.Add(new VertexData()
                                 {
                                     Position = intersectionPoint,
                                     Size = new Vector2(
-                                        rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                                        rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
+                                        rnd.NextFloat(description.ChannelRed.MinSize.X, description.ChannelRed.MaxSize.X),
+                                        rnd.NextFloat(description.ChannelRed.MinSize.Y, description.ChannelRed.MaxSize.Y)),
                                 });
                             }
                         }
@@ -558,7 +560,8 @@ namespace Engine
 
                 ImageContent foliageTextures = new ImageContent()
                 {
-                    Streams = ContentManager.FindContent(contentPath, this.Description.Vegetation.VegetarionTextures),
+                    //TODO: Fix that
+                    Streams = ContentManager.FindContent(contentPath, this.Description.Vegetation.ChannelRed.VegetarionTextures),
                 };
 
                 this.foliageTextures = game.ResourceManager.CreateResource(foliageTextures);
@@ -585,7 +588,8 @@ namespace Engine
                 FoliageToggleUV = true,
                 FoliageTextureCount = this.foliageTextureCount,
                 FoliageTextures = this.foliageTextures,
-                FoliageEndRadius = this.Description.Vegetation != null ? this.Description.Vegetation.EndRadius : 0,
+                //TODO: fix that
+                FoliageEndRadius = this.Description.Vegetation != null ? this.Description.Vegetation.ChannelRed.EndRadius : 0,
                 RandomTexture = this.textureRandom,
             };
 

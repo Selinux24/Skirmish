@@ -67,13 +67,16 @@ namespace Collada
                 Vegetation = new GroundDescription.VegetationDescription()
                 {
                     ContentPath = "Resources/Vegetation",
-                    VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
-                    Saturation = 5f,
-                    StartRadius = 0f,
-                    EndRadius = 300f,
-                    MinSize = new Vector2(0.10f, 0.20f),
-                    MaxSize = new Vector2(0.15f, 0.25f),
-                    Seed = 24,
+                    ChannelRed=new GroundDescription.VegetationDescription.Channel()
+                    {
+                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
+                        Saturation = 5f,
+                        StartRadius = 0f,
+                        EndRadius = 300f,
+                        MinSize = new Vector2(0.10f, 0.20f),
+                        MaxSize = new Vector2(0.15f, 0.25f),
+                        Seed = 24,
+                    },
                     CastShadow = false,
                 },
                 PathFinder = new GroundDescription.PathFinderDescription()

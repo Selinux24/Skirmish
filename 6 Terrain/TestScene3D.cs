@@ -344,12 +344,15 @@ namespace TerrainTest
                 Vegetation = new GroundDescription.VegetationDescription()
                 {
                     ContentPath = "resources/Terrain/Foliage/Billboard",
-                    VegetarionTextures = new[] { "grass.png" },
-                    Saturation = 2f,
-                    StartRadius = 0f,
-                    EndRadius = 50f,
-                    MinSize = new Vector2(0.25f, 0.25f),
-                    MaxSize = new Vector2(0.5f, 0.75f),
+                    ChannelRed = new GroundDescription.VegetationDescription.Channel()
+                    {
+                        VegetarionTextures = new[] { "grass.png" },
+                        Saturation = 2f,
+                        StartRadius = 0f,
+                        EndRadius = 50f,
+                        MinSize = new Vector2(0.25f, 0.25f),
+                        MaxSize = new Vector2(0.5f, 0.75f),
+                    }
                 },
                 Quadtree = new GroundDescription.QuadtreeDescription()
                 {

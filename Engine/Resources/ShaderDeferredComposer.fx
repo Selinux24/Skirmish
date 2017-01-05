@@ -142,7 +142,7 @@ float4 PSDirectionalLight(PSDirectionalLightInput input) : SV_TARGET
 	}
 	else
 	{
-		return gTG1Map.SampleLevel(SamplerPoint, input.tex, 0);
+		return 0;
 	}
 }
 float4 PSPointLight(PSPointLightInput input) : SV_TARGET
@@ -234,13 +234,14 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
     float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, input.tex, 0);
 	float4 lmap = gLightMap.Sample(SamplerPoint, input.tex);
 
-	float4 color = tg1;
 	float doLighting = tg2.w;
-	float materialIndex = tg3.w;
-	float4 light = saturate(lmap);
-
 	if(doLighting == 0)
 	{
+		float4 color = tg1;
+		float3 position = tg3.xyz;
+		float materialIndex = tg3.w;
+		float4 light = saturate(lmap);
+
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
 		float4 emissive = k.Emissive;
@@ -250,9 +251,6 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 
 		if(gFogRange > 0)
 		{
-			float4 tg3 = gTG3Map.Sample(SamplerPoint, input.tex);
-			float3 position = tg3.xyz;
-
 			float distToEye = length(gEyePositionWorld - position);
 
 			color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
@@ -262,7 +260,7 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 	}
 	else
 	{
-		return color;
+		return tg1;
 	}
 }
 

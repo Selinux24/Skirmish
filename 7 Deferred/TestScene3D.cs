@@ -158,12 +158,15 @@ namespace DeferredTest
                     Vegetation = new GroundDescription.VegetationDescription()
                     {
                         ContentPath = "Resources/Vegetation",
-                        VegetarionTextures = new[] { "grass.png" },
-                        Saturation = 20f,
-                        StartRadius = 0f,
-                        EndRadius = 50f,
-                        MinSize = Vector2.One * 0.20f,
-                        MaxSize = Vector2.One * 0.25f,
+                        ChannelRed = new GroundDescription.VegetationDescription.Channel()
+                        {
+                            VegetarionTextures = new[] { "grass.png" },
+                            Saturation = 20f,
+                            StartRadius = 0f,
+                            EndRadius = 50f,
+                            MinSize = Vector2.One * 0.20f,
+                            MaxSize = Vector2.One * 0.25f,
+                        }
                     },
                     Quadtree = new GroundDescription.QuadtreeDescription()
                     {
