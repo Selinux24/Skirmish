@@ -165,6 +165,7 @@
     <Compile Include="Common\UseMaterials.cs" />
     <Compile Include="Common\UseSkinningData.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
+    <Compile Include="Effects\EffectPostBlur.cs" />
     <Compile Include="Effects\EffectShadowBillboard.cs" />
     <Compile Include="Effects\EffectDeferredTerrain.cs" />
     <Compile Include="Effects\EffectShadowTerrain.cs" />
@@ -445,6 +446,8 @@
     <None Include="app.config" />
     <None Include="Engine.snk" />
     <None Include="packages.config" />
+    <None Include="Resources\ShaderPostBlur.fx" />
+    <None Include="Resources\ShaderPostBlur.fxo" />
     <None Include="Resources\IncScattering.fx" />
     <None Include="Resources\ShaderShadowBillboard.fx" />
     <None Include="Resources\ShaderShadowBillboard.fxo" />

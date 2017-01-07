@@ -80,6 +80,11 @@ namespace Engine.Effects
         public static EffectShadowTerrain EffectShadowTerrain { get; private set; }
 
         /// <summary>
+        /// Blur effect
+        /// </summary>
+        public static EffectPostBlur EffectPostBlur { get; private set; }
+
+        /// <summary>
         /// Initializes pool
         /// </summary>
         /// <param name="device">Device</param>
@@ -104,6 +109,8 @@ namespace Engine.Effects
             EffectShadowBillboard = CreateEffect<EffectShadowBillboard>(device, Resources.ShaderShadowBillboardFxo, Resources.ShaderShadowBillboardFx);
             EffectShadowBasic = CreateEffect<EffectShadowBasic>(device, Resources.ShaderShadowBasicFxo, Resources.ShaderShadowBasicFx);
             EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(device, Resources.ShaderShadowTerrainFxo, Resources.ShaderShadowTerrainFx);
+
+            EffectPostBlur = CreateEffect<EffectPostBlur>(device, Resources.ShaderPostBlurFxo, Resources.ShaderPostBlurFx);
         }
         /// <summary>
         /// Dispose of used resources
@@ -129,6 +136,8 @@ namespace Engine.Effects
             Helper.Dispose(EffectShadowBillboard);
             Helper.Dispose(EffectShadowBasic);
             Helper.Dispose(EffectShadowTerrain);
+
+            Helper.Dispose(EffectPostBlur);
         }
 
         /// <summary>

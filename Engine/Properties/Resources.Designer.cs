@@ -363,6 +363,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        internal static byte[] ShaderPostBlurFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderPostBlurFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderPostBlurFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderPostBlurFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         internal static byte[] ShaderShadowBasicFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderShadowBasicFx", resourceCulture);
