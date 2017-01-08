@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine
@@ -212,7 +213,8 @@ namespace Engine
             Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
 
             //Then move and rotate the cone to light position and direction
-            Matrix trn = Helper.CreateWorld(this.Position, this.Direction, Vector3.Up);
+            float f = Math.Abs(Vector3.Dot(this.Direction, Vector3.Up));
+            Matrix trn = Helper.CreateWorld(this.Position, this.Direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
 
             return Line3D.Transform(coneLines, rot * trn);
         }

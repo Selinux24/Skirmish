@@ -32,6 +32,9 @@ namespace SceneTest
         private Model lamp = null;
         private ModelInstanced lampI = null;
 
+        private Model streetlamp = null;
+        private ModelInstanced streetlampI = null;
+
         private SkyScattering sky = null;
 
         private LineListDrawer lightsVolumeDrawer = null;
@@ -58,10 +61,11 @@ namespace SceneTest
             this.InitializeCharacterSoldier();
             this.InitializeVehiclesLeopard();
             this.InitializeLamps();
+            this.InitializeStreetLamps();
 
-            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { }, 1000);
+            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { AlwaysVisible = false, EnableDepthStencil = true }, 5000);
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 30, 00), 0.015f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 30, 00), 5f);
 
             this.SceneVolume = new BoundingSphere(Vector3.Zero, 150f);
         }
@@ -356,6 +360,58 @@ namespace SceneTest
             this.Lights.AddRange(this.lampI.Instances[1].Lights);
             this.Lights.AddRange(this.lampI.Instances[2].Lights);
             this.Lights.AddRange(this.lampI.Instances[3].Lights);
+        }
+        private void InitializeStreetLamps()
+        {
+            this.streetlamp = this.AddModel(
+                "SceneTextures/lamps",
+                "streetlamp.xml",
+                new ModelDescription()
+                {
+                    Name = "Street Lamp",
+                    CastShadow = true,
+                    Static = true,
+                });
+
+            this.streetlampI = this.AddInstancingModel(
+                "SceneTextures/lamps",
+                "streetlamp.xml",
+                new ModelInstancedDescription()
+                {
+                    Name = "Street LampI",
+                    CastShadow = true,
+                    Static = true,
+                    Instances = 9,
+                });
+
+            this.streetlamp.Manipulator.SetPosition(-spaceSize, 0, -spaceSize * -2f, true);
+            this.streetlampI.Instances[0].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * -1f, true);
+            this.streetlampI.Instances[1].Manipulator.SetPosition(-spaceSize, 0, 0, true);
+            this.streetlampI.Instances[2].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 1f, true);
+            this.streetlampI.Instances[3].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 2f, true);
+
+            this.streetlampI.Instances[4].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -2f, true);
+            this.streetlampI.Instances[5].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -1f, true);
+            this.streetlampI.Instances[6].Manipulator.SetPosition(+spaceSize, 0, 0, true);
+            this.streetlampI.Instances[7].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 1f, true);
+            this.streetlampI.Instances[8].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 2f, true);
+
+            this.streetlampI.Instances[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
+            this.streetlampI.Instances[5].Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
+            this.streetlampI.Instances[6].Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
+            this.streetlampI.Instances[7].Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
+            this.streetlampI.Instances[8].Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
+
+            this.Lights.AddRange(this.streetlamp.Lights);
+            this.Lights.AddRange(this.streetlampI.Instances[0].Lights);
+            this.Lights.AddRange(this.streetlampI.Instances[1].Lights);
+            this.Lights.AddRange(this.streetlampI.Instances[2].Lights);
+            this.Lights.AddRange(this.streetlampI.Instances[3].Lights);
+            this.Lights.AddRange(this.streetlampI.Instances[4].Lights);
+            this.Lights.AddRange(this.streetlampI.Instances[5].Lights);
+            this.Lights.AddRange(this.streetlampI.Instances[6].Lights);
+            this.Lights.AddRange(this.streetlampI.Instances[7].Lights);
+            this.Lights.AddRange(this.streetlampI.Instances[8].Lights);
         }
 
         public override void Update(GameTime gameTime)
