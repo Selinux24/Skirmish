@@ -102,6 +102,14 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        protected SceneLightPoint()
+            : base()
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="name">Light name</param>
         /// <param name="castShadow">Light casts shadow</param>
         /// <param name="diffuse">Diffuse color contribution</param>
@@ -153,6 +161,33 @@ namespace Engine
         public Line3D[] GetVolume()
         {
             return Line3D.CreateWiredSphere(this.BoundingSphere, 10, 10);
+        }
+        /// <summary>
+        /// Gets the text representation of the light
+        /// </summary>
+        /// <returns>Returns the text representation of the light</returns>
+        public override SceneLight Clone()
+        {
+            var l = new SceneLightPoint()
+            {
+                Name = this.Name,
+                Enabled = this.Enabled,
+                CastShadow = this.CastShadow,
+                DiffuseColor = this.DiffuseColor,
+                SpecularColor = this.SpecularColor,
+                State = this.State,
+
+                position = this.position,
+                radius = this.radius,
+                local = this.local,
+                Intensity = this.Intensity,
+                BoundingSphere = this.BoundingSphere,
+                Transform = this.Transform,
+
+                offsetTransform = this.offsetTransform,
+            };
+
+            return l;
         }
 
         /// <summary>

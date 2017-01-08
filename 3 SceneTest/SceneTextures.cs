@@ -307,6 +307,10 @@ namespace SceneTest
             this.vehicleLeopardI.Instances[3].Manipulator.SetScale(12);
 
             this.Lights.AddRange(this.vehicleLeopard.Lights);
+            this.Lights.AddRange(this.vehicleLeopardI.Instances[0].Lights);
+            this.Lights.AddRange(this.vehicleLeopardI.Instances[1].Lights);
+            this.Lights.AddRange(this.vehicleLeopardI.Instances[2].Lights);
+            this.Lights.AddRange(this.vehicleLeopardI.Instances[3].Lights);
         }
         private void InitializeLamps()
         {
@@ -337,8 +341,6 @@ namespace SceneTest
             this.lamp.Manipulator.SetPosition(0, spaceSize, -spaceSize * dist, true);
             this.lamp.Manipulator.SetRotation(0, pitch, 0, true);
 
-            this.Lights.AddRange(this.lamp.Lights);
-
             this.lampI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, spaceSize, -spaceSize * dist, true);
             this.lampI.Instances[1].Manipulator.SetPosition(spaceSize * 2, spaceSize, -spaceSize * dist, true);
             this.lampI.Instances[2].Manipulator.SetPosition(-spaceSize * dist, spaceSize, -spaceSize * 2, true);
@@ -348,6 +350,12 @@ namespace SceneTest
             this.lampI.Instances[1].Manipulator.SetRotation(0, pitch, 0, true);
             this.lampI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0, true);
             this.lampI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0, true);
+
+            this.Lights.AddRange(this.lamp.Lights);
+            this.Lights.AddRange(this.lampI.Instances[0].Lights);
+            this.Lights.AddRange(this.lampI.Instances[1].Lights);
+            this.Lights.AddRange(this.lampI.Instances[2].Lights);
+            this.Lights.AddRange(this.lampI.Instances[3].Lights);
         }
 
         public override void Update(GameTime gameTime)

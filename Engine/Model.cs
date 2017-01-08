@@ -96,6 +96,10 @@ namespace Engine
                 this.DrawingData = this.GetDrawingData(this.levelOfDetail);
             }
         }
+        /// <summary>
+        /// Gets the current model lights collection
+        /// </summary>
+        public SceneLight[] Lights { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -111,6 +115,12 @@ namespace Engine
 
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+
+            var drawData = this.GetDrawingData(LevelOfDetailEnum.High);
+            if (drawData != null)
+            {
+                this.Lights = drawData.Lights;
+            }
         }
         /// <summary>
         /// Constructor
@@ -126,6 +136,12 @@ namespace Engine
 
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+
+            var drawData = this.GetDrawingData(LevelOfDetailEnum.High);
+            if (drawData != null)
+            {
+                this.Lights = drawData.Lights;
+            }
         }
         /// <summary>
         /// Update

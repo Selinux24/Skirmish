@@ -10,32 +10,39 @@ namespace Engine
         /// <summary>
         /// Light name
         /// </summary>
-        public string Name = null;
+        public string Name { get; set; }
         /// <summary>
         /// Enables or disables the light
         /// </summary>
-        public bool Enabled = false;
+        public bool Enabled { get; set; }
         /// <summary>
         /// Gets or stes wheter the light casts shadow
         /// </summary>
-        public bool CastShadow = false;
+        public bool CastShadow { get; set; }
         /// <summary>
         /// Diffuse color
         /// </summary>
-        public Color4 DiffuseColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+        public Color4 DiffuseColor { get; set; }
         /// <summary>
         /// Specular color
         /// </summary>
-        public Color4 SpecularColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
+        public Color4 SpecularColor { get; set; }
         /// <summary>
         /// Free use variable
         /// </summary>
-        public object State = null;
+        public object State { get; set; }
         /// <summary>
         /// Local transform matrix
         /// </summary>
         public abstract Matrix Local { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        protected SceneLight()
+        {
+
+        }
         /// <summary>
         /// Constructor
         /// </summary>
@@ -47,11 +54,19 @@ namespace Engine
         public SceneLight(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled)
         {
             this.Name = name;
+            this.Enabled = enabled;
             this.CastShadow = castShadow;
             this.DiffuseColor = diffuse;
             this.SpecularColor = specular;
-            this.Enabled = enabled;
+            this.State = null;
+            this.Local = Matrix.Identity;
         }
+
+        /// <summary>
+        /// Clones current light
+        /// </summary>
+        /// <returns>Returns a new instante with same data</returns>
+        public abstract SceneLight Clone();
 
         /// <summary>
         /// Gets the text representation of the light

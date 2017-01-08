@@ -140,6 +140,14 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        protected SceneLightSpot()
+            : base()
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="name">Light name</param>
         /// <param name="castShadow">Light casts shadow</param>
         /// <param name="diffuse">Diffuse color contribution</param>
@@ -207,6 +215,35 @@ namespace Engine
             Matrix trn = Helper.CreateWorld(this.Position, this.Direction, Vector3.Up);
 
             return Line3D.Transform(coneLines, rot * trn);
+        }
+        /// <summary>
+        /// Gets the text representation of the light
+        /// </summary>
+        /// <returns>Returns the text representation of the light</returns>
+        public override SceneLight Clone()
+        {
+            var l = new SceneLightSpot()
+            {
+                Name = this.Name,
+                Enabled = this.Enabled,
+                CastShadow = this.CastShadow,
+                DiffuseColor = this.DiffuseColor,
+                SpecularColor = this.SpecularColor,
+                State = this.State,
+
+                position = this.position,
+                radius = this.radius,
+                angle = this.angle,
+                local = this.local,
+                Direction = this.Direction,
+                Intensity = this.Intensity,
+                BoundingBox = this.BoundingBox,
+                Transform = this.Transform,
+
+                offsetTransform = this.offsetTransform,
+            };
+
+            return l;
         }
 
         /// <summary>

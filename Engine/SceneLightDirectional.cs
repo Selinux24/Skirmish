@@ -99,6 +99,14 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        protected SceneLightDirectional()
+            : base()
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="name">Light name</param>
         /// <param name="castShadow">Light casts shadow</param>
         /// <param name="diffuse">Diffuse color contribution</param>
@@ -119,6 +127,29 @@ namespace Engine
         public Vector3 GetPosition(float distance)
         {
             return distance * -2f * this.Direction;
+        }
+
+        /// <summary>
+        /// Gets the text representation of the light
+        /// </summary>
+        /// <returns>Returns the text representation of the light</returns>
+        public override SceneLight Clone()
+        {
+            return new SceneLightDirectional()
+            {
+                Name = this.Name,
+                Enabled = this.Enabled,
+                CastShadow = this.CastShadow,
+                DiffuseColor = this.DiffuseColor,
+                SpecularColor = this.SpecularColor,
+                State = this.State,
+                local = this.local,
+
+                Direction = this.Direction,
+                Brightness = this.Brightness,
+
+                offsetTransform = this.offsetTransform,
+            };
         }
     }
 }

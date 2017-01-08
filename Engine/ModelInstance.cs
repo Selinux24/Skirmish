@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -110,6 +109,10 @@ namespace Engine
         /// Animation controller
         /// </summary>
         public AnimationController AnimationController = new AnimationController();
+        /// <summary>
+        /// Gets the current instance lights collection
+        /// </summary>
+        public SceneLight[] Lights { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -122,6 +125,17 @@ namespace Engine
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
             this.Cull = false;
+
+            var drawData = model.GetDrawingData(LevelOfDetailEnum.High);
+            if (drawData != null && drawData.Lights != null && drawData.Lights.Length > 0)
+            {
+                this.Lights = new SceneLight[drawData.Lights.Length];
+
+                for (int l = 0; l < drawData.Lights.Length; l++)
+                {
+                    this.Lights[l] = drawData.Lights[l].Clone();
+                }
+            }
         }
 
         /// <summary>
@@ -133,6 +147,14 @@ namespace Engine
             this.ManipulatorChanged = false;
 
             this.Manipulator.Update(context.GameTime);
+
+            if (this.Lights != null)
+            {
+                for (int i = 0; i < this.Lights.Length; i++)
+                {
+                    this.Lights[i].Local = this.Manipulator.LocalTransform;
+                }
+            }
         }
 
         /// <summary>
