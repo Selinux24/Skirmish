@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.78.0 commit date:2016-09-26, commit time:12:42, hash:4bb1e22</authoring_tool>
     </contributor>
-    <created>2016-12-28T12:28:33</created>
-    <modified>2016-12-28T12:28:33</modified>
+    <created>2017-01-08T20:21:32</created>
+    <modified>2017-01-08T20:21:32</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -32,14 +32,11 @@
     </camera>
   </library_cameras>
   <library_lights>
-    <light id="Lamp-light" name="Lamp">
+    <light id="Sun-light" name="Lamp">
       <technique_common>
-        <point>
+        <directional>
           <color sid="color">1 1 1</color>
-          <constant_attenuation>1</constant_attenuation>
-          <linear_attenuation>0</linear_attenuation>
-          <quadratic_attenuation>0.00111109</quadratic_attenuation>
-        </point>
+        </directional>
       </technique_common>
       <extra>
         <technique profile="blender">
@@ -96,7 +93,7 @@
           <sun_effect_type>0</sun_effect_type>
           <sun_intensity>1</sun_intensity>
           <sun_size>1</sun_size>
-          <type>0</type>
+          <type>1</type>
         </technique>
       </extra>
     </light>
@@ -245,9 +242,9 @@
           </bind_material>
         </instance_geometry>
       </node>
-      <node id="Lamp" name="Lamp" type="NODE">
+      <node id="Sun" name="Sun" type="NODE">
         <matrix sid="transform">-0.2908646 -0.7711008 0.5663932 0.9490092 0.9551712 -0.1998834 0.2183912 -2.447292 -0.05518906 0.6045247 0.7946723 15.30145 0 0 0 1</matrix>
-        <instance_light url="#Lamp-light"/>
+        <instance_light url="#Sun-light"/>
       </node>
     </visual_scene>
   </library_visual_scenes>

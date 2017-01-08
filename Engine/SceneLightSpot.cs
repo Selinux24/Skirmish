@@ -10,63 +10,34 @@ namespace Engine
     public class SceneLightSpot : SceneLight
     {
         /// <summary>
-        /// Position
-        /// </summary>
-        private Vector3 position = Vector3.Zero;
-        /// <summary>
-        /// Radius
-        /// </summary>
-        private float radius = 1f;
-        /// <summary>
-        /// Cone angle
-        /// </summary>
-        private float angle = 0f;
-        /// <summary>
         /// Initial transform
         /// </summary>
-        private Matrix offsetTransform = Matrix.Identity;
+        private Matrix initialTransform = Matrix.Identity;
         /// <summary>
-        /// Local transform
+        /// Initial radius
         /// </summary>
-        private Matrix local = Matrix.Identity;
+        private float initialRadius = 1f;
+        /// <summary>
+        /// Initial intensity
+        /// </summary>
+        private float initialIntensity = 1f;
+        /// <summary>
+        /// Parent local transform
+        /// </summary>
+        private Matrix parentTransform = Matrix.Identity;
 
         /// <summary>
         /// Ligth position
         /// </summary>
-        public Vector3 Position
-        {
-            get
-            {
-                return this.position;
-            }
-            set
-            {
-                if (this.position != value)
-                {
-                    this.position = value;
-
-                    this.Update();
-                }
-            }
-        }
+        public Vector3 Position { get; set; }
         /// <summary>
         /// Ligth direction
         /// </summary>
-        public Vector3 Direction = Vector3.Zero;
+        public Vector3 Direction { get; set; }
         /// <summary>
         /// Cone angle in degrees
         /// </summary>
-        public float Angle
-        {
-            get
-            {
-                return this.angle;
-            }
-            set
-            {
-                this.angle = value;
-            }
-        }
+        public float Angle { get; set; }
         /// <summary>
         /// Cone angle in radians
         /// </summary>
@@ -74,67 +45,73 @@ namespace Engine
         {
             get
             {
-                return MathUtil.DegreesToRadians(this.angle);
+                return MathUtil.DegreesToRadians(this.Angle);
             }
             set
             {
-                this.angle = MathUtil.RadiansToDegrees(value);
+                this.Angle = MathUtil.RadiansToDegrees(value);
             }
         }
         /// <summary>
         /// Light radius
         /// </summary>
-        public float Radius
-        {
-            get
-            {
-                return this.radius;
-            }
-            set
-            {
-                if (this.radius != value)
-                {
-                    this.radius = value;
-
-                    this.Update();
-                }
-            }
-        }
+        public float Radius { get; set; }
         /// <summary>
         /// Intensity
         /// </summary>
-        public float Intensity = 1f;
+        public float Intensity { get; set; }
         /// <summary>
         /// Gets the bounding box of the active light
         /// </summary>
-        public BoundingBox BoundingBox { get; private set; }
-        /// <summary>
-        /// Transform matrix
-        /// </summary>
-        public Matrix Transform { get; protected set; }
-        /// <summary>
-        /// Local transform
-        /// </summary>
-        public override Matrix Local
+        public BoundingBox BoundingBox
         {
             get
             {
-                return this.local;
+                var lines = GetVolume();
+
+                List<Vector3> points = new List<Vector3>();
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    points.Add(lines[i].Point1);
+                    points.Add(lines[i].Point2);
+                }
+
+                return BoundingBox.FromPoints(points.ToArray());
+            }
+        }
+        /// <summary>
+        /// Parent local transform matrix
+        /// </summary>
+        public override Matrix ParentTransform
+        {
+            get
+            {
+                return this.parentTransform;
             }
             set
             {
-                this.local = value;
+                this.parentTransform = value;
 
-                var trn = this.offsetTransform * this.local;
+                var trn = this.initialTransform * this.parentTransform;
 
                 Vector3 scale;
                 Quaternion rotation;
                 Vector3 translation;
                 trn.Decompose(out scale, out rotation, out translation);
-                this.position = translation;
+                this.Radius = this.initialRadius * scale.X;
+                this.Intensity = this.initialIntensity * scale.X;
                 this.Direction = Matrix.RotationQuaternion(rotation).Down;
-
-                this.Update();
+                this.Position = translation;
+            }
+        }
+        /// <summary>
+        /// Local matrix
+        /// </summary>
+        public Matrix Local
+        {
+            get
+            {
+                return Matrix.Scaling(this.Radius) * Matrix.Translation(this.Position);
             }
         }
 
@@ -164,13 +141,12 @@ namespace Engine
             Vector3 position, Vector3 direction, float angle, float radius, float intensity)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.position = position;
-            this.Direction = direction;
-            this.angle = angle;
-            this.radius = radius;
-            this.Intensity = intensity;
+            this.initialTransform = Helper.CreateWorld(position, direction, Vector3.Up);
+            this.initialRadius = radius;
+            this.initialIntensity = intensity;
 
-            this.Update();
+            this.Angle = angle;
+            this.ParentTransform = Matrix.Identity;
         }
         /// <summary>
         /// Constructor
@@ -189,16 +165,12 @@ namespace Engine
             Matrix transform, float angle, float radius, float intensity)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.offsetTransform = transform;
-            this.Local = Matrix.Identity;
-
-            this.angle = angle;
-            this.radius = radius;
-            this.Intensity = intensity;
-
-            this.Local = Matrix.Identity;
-
-            this.Update();
+            this.initialTransform = transform;
+            this.initialRadius = radius;
+            this.initialIntensity = intensity;
+            
+            this.Angle = angle;
+            this.ParentTransform = Matrix.Identity;
         }
 
         /// <summary>
@@ -233,38 +205,20 @@ namespace Engine
                 SpecularColor = this.SpecularColor,
                 State = this.State,
 
-                position = this.position,
-                radius = this.radius,
-                angle = this.angle,
-                local = this.local,
+                Position = this.Position,
+                Radius = this.Radius,
+                Angle = this.Angle,
                 Direction = this.Direction,
                 Intensity = this.Intensity,
-                BoundingBox = this.BoundingBox,
-                Transform = this.Transform,
 
-                offsetTransform = this.offsetTransform,
+                parentTransform = this.parentTransform,
+
+                initialTransform = this.initialTransform,
+                initialRadius = this.initialRadius,
+                initialIntensity = this.initialIntensity,
             };
 
             return l;
-        }
-
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        private void Update()
-        {
-            var lines = GetVolume();
-
-            List<Vector3> points = new List<Vector3>();
-            for (int i = 0; i < lines.Length; i++)
-            {
-                points.Add(lines[i].Point1);
-                points.Add(lines[i].Point2);
-            }
-
-            this.BoundingBox = BoundingBox.FromPoints(points.ToArray());
-
-            this.Transform = Matrix.Scaling(this.radius) * Matrix.Translation(this.position);
         }
     }
 }

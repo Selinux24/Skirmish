@@ -59,11 +59,11 @@ namespace Engine
         /// <summary>
         /// Initial transform
         /// </summary>
-        private Matrix offsetTransform = Matrix.Identity;
+        private Matrix initialTransform = Matrix.Identity;
         /// <summary>
-        /// Local transform
+        /// Parent local transform
         /// </summary>
-        private Matrix local = Matrix.Identity;
+        private Matrix parentTransform = Matrix.Identity;
 
         /// <summary>
         /// Light direction
@@ -74,19 +74,19 @@ namespace Engine
         /// </summary>
         public float Brightness = 1f;
         /// <summary>
-        /// Local transform
+        /// Parent local transform matrix
         /// </summary>
-        public override Matrix Local
+        public override Matrix ParentTransform
         {
             get
             {
-                return this.local;
+                return this.parentTransform;
             }
             set
             {
-                this.local = value;
+                this.parentTransform = value;
 
-                var trn = this.offsetTransform * this.local;
+                var trn = this.initialTransform * this.parentTransform;
 
                 Vector3 scale;
                 Quaternion rotation;
@@ -143,12 +143,13 @@ namespace Engine
                 DiffuseColor = this.DiffuseColor,
                 SpecularColor = this.SpecularColor,
                 State = this.State,
-                local = this.local,
 
                 Direction = this.Direction,
                 Brightness = this.Brightness,
 
-                offsetTransform = this.offsetTransform,
+                parentTransform = this.parentTransform,
+
+                initialTransform = this.initialTransform,
             };
         }
     }

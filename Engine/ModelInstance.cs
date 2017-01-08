@@ -152,7 +152,7 @@ namespace Engine
             {
                 for (int i = 0; i < this.Lights.Length; i++)
                 {
-                    this.Lights[i].Local = this.Manipulator.LocalTransform;
+                    this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
                 }
             }
         }

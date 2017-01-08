@@ -128,7 +128,7 @@ namespace DeferredTest
                     Name = "Tank",
                     CastShadow = true,
                 });
-            this.tank.Manipulator.SetScale(2);
+            this.tank.Manipulator.SetScale(0.2f);
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
 

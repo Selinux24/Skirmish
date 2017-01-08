@@ -32,9 +32,9 @@ namespace Engine
         /// </summary>
         public object State { get; set; }
         /// <summary>
-        /// Local transform matrix
+        /// Parent local transform matrix
         /// </summary>
-        public abstract Matrix Local { get; set; }
+        public abstract Matrix ParentTransform { get; set; }
 
         /// <summary>
         /// Constructor
@@ -59,7 +59,7 @@ namespace Engine
             this.DiffuseColor = diffuse;
             this.SpecularColor = specular;
             this.State = null;
-            this.Local = Matrix.Identity;
+            this.ParentTransform = Matrix.Identity;
         }
 
         /// <summary>

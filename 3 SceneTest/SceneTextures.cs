@@ -293,7 +293,6 @@ namespace SceneTest
 
             this.vehicleLeopard.Manipulator.SetPosition(s, 0, 0);
             this.vehicleLeopard.Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
-            this.vehicleLeopard.Manipulator.SetScale(12);
 
             this.vehicleLeopardI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, 0, -spaceSize * 2);
             this.vehicleLeopardI.Instances[1].Manipulator.SetPosition(spaceSize * 2, 0, -spaceSize * 2);
@@ -304,11 +303,6 @@ namespace SceneTest
             this.vehicleLeopardI.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.vehicleLeopardI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             this.vehicleLeopardI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
-
-            this.vehicleLeopardI.Instances[0].Manipulator.SetScale(12);
-            this.vehicleLeopardI.Instances[1].Manipulator.SetScale(12);
-            this.vehicleLeopardI.Instances[2].Manipulator.SetScale(12);
-            this.vehicleLeopardI.Instances[3].Manipulator.SetScale(12);
 
             this.Lights.AddRange(this.vehicleLeopard.Lights);
             this.Lights.AddRange(this.vehicleLeopardI.Instances[0].Lights);
@@ -447,6 +441,20 @@ namespace SceneTest
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.lightsVolumeDrawer.Clear();
+
+                foreach (var point in this.Lights.PointLights)
+                {
+                    var lines = point.GetVolume();
+
+                    this.lightsVolumeDrawer.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                }
+
+                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F3))
             {
                 this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
             }

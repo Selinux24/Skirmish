@@ -208,7 +208,7 @@ namespace TerrainTest
                     CastShadow = true,
                     Static = false,
                 });
-            this.tank.Manipulator.SetScale(2, true);
+            this.tank.Manipulator.SetScale(0.2f, true);
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
 

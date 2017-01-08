@@ -8,94 +8,76 @@ namespace Engine
     public class SceneLightPoint : SceneLight
     {
         /// <summary>
-        /// Position
-        /// </summary>
-        private Vector3 position = Vector3.Zero;
-        /// <summary>
-        /// Radius
-        /// </summary>
-        private float radius = 1f;
-        /// <summary>
         /// Initial transform
         /// </summary>
-        private Matrix offsetTransform = Matrix.Identity;
+        private Matrix initialTransform = Matrix.Identity;
         /// <summary>
-        /// Local transform
+        /// Initial radius
         /// </summary>
-        private Matrix local = Matrix.Identity;
+        private float initialRadius = 1f;
+        /// <summary>
+        /// Initial intensity
+        /// </summary>
+        private float initialIntensity = 1f;
+        /// <summary>
+        /// Parent local transform
+        /// </summary>
+        private Matrix parentTransform = Matrix.Identity;
 
         /// <summary>
         /// Ligth position
         /// </summary>
-        public Vector3 Position
-        {
-            get
-            {
-                return this.position;
-            }
-            set
-            {
-                if (this.position != value)
-                {
-                    this.position = value;
-
-                    this.Update();
-                }
-            }
-        }
+        public Vector3 Position { get; set; }
         /// <summary>
         /// Light radius
         /// </summary>
-        public float Radius
-        {
-            get
-            {
-                return this.radius;
-            }
-            set
-            {
-                if (this.radius != value)
-                {
-                    this.radius = value;
-
-                    this.Update();
-                }
-            }
-        }
+        public float Radius { get; set; }
         /// <summary>
         /// Intensity
         /// </summary>
-        public float Intensity = 1f;
+        public float Intensity { get; set; }
         /// <summary>
         /// Gets the bounding sphere of the active light
         /// </summary>
-        public BoundingSphere BoundingSphere { get; private set; }
-        /// <summary>
-        /// Transform matrix
-        /// </summary>
-        public Matrix Transform { get; protected set; }
-        /// <summary>
-        /// Local transform
-        /// </summary>
-        public override Matrix Local
+        public BoundingSphere BoundingSphere
         {
             get
             {
-                return this.local;
+                return new BoundingSphere(this.Position, this.Radius);
+            }
+        }
+        /// <summary>
+        /// Parent local transform matrix
+        /// </summary>
+        public override Matrix ParentTransform
+        {
+            get
+            {
+                return this.parentTransform;
             }
             set
             {
-                this.local = value;
+                this.parentTransform = value;
 
-                var trn = this.offsetTransform * this.local;
+                var trn = this.initialTransform * this.parentTransform;
 
                 Vector3 scale;
                 Quaternion rotation;
                 Vector3 translation;
                 trn.Decompose(out scale, out rotation, out translation);
-                this.position = translation;
-
-                this.Update();
+                this.Radius = initialRadius * scale.X;
+                this.Intensity = initialIntensity * scale.X;
+                this.Position = translation;
+            }
+        }
+        /// <summary>
+        /// Local matrix
+        /// </summary>
+        public Matrix Local
+        {
+            get
+            {
+                return Matrix.Scaling(this.Radius) * Matrix.Translation(this.Position);
             }
         }
 
@@ -123,11 +105,11 @@ namespace Engine
             Vector3 position, float radius, float intensity)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.position = position;
-            this.radius = radius;
-            this.Intensity = intensity;
+            this.initialTransform = Matrix.Translation(position);
+            this.initialRadius = radius;
+            this.initialIntensity = intensity;
 
-            this.Update();
+            this.ParentTransform = Matrix.Identity;
         }
         /// <summary>
         /// Constructor
@@ -145,13 +127,11 @@ namespace Engine
             Matrix transform, float radius, float intensity)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.offsetTransform = transform;
-            this.Local = Matrix.Identity;
+            this.initialTransform = transform;
+            this.initialRadius = radius;
+            this.initialIntensity = intensity;
 
-            this.radius = radius;
-            this.Intensity = intensity;
-
-            this.Update();
+            this.ParentTransform = Matrix.Identity;
         }
 
         /// <summary>
@@ -177,26 +157,18 @@ namespace Engine
                 SpecularColor = this.SpecularColor,
                 State = this.State,
 
-                position = this.position,
-                radius = this.radius,
-                local = this.local,
+                Position = this.Position,
+                Radius = this.Radius,
                 Intensity = this.Intensity,
-                BoundingSphere = this.BoundingSphere,
-                Transform = this.Transform,
 
-                offsetTransform = this.offsetTransform,
+                parentTransform = this.parentTransform,
+
+                initialTransform = this.initialTransform,
+                initialRadius = this.initialRadius,
+                initialIntensity = this.initialIntensity,
             };
 
             return l;
-        }
-
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        private void Update()
-        {
-            this.BoundingSphere = new BoundingSphere(this.position, this.radius);
-            this.Transform = Matrix.Scaling(this.radius) * Matrix.Translation(this.position);
         }
     }
 }
