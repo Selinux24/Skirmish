@@ -289,6 +289,7 @@ namespace TerrainTest
                 "birch_a.xml",
                 new ModelInstancedDescription()
                 {
+                    Name = "birch_a",
                     CastShadow = true,
                     Static = true,
                     EnableAlphaBlending = true,
@@ -299,6 +300,7 @@ namespace TerrainTest
                 "birch_b.xml",
                 new ModelInstancedDescription()
                 {
+                    Name = "birch_b",
                     CastShadow = true,
                     Static = true,
                     EnableAlphaBlending = true,
@@ -524,8 +526,11 @@ namespace TerrainTest
             #region Lights
 
             this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[0].Brightness = 0.2f;
             this.Lights.DirectionalLights[1].Enabled = true;
+            this.Lights.DirectionalLights[1].Brightness = 0.2f;
             this.Lights.DirectionalLights[2].Enabled = true;
+            this.Lights.DirectionalLights[2].Brightness = 0.2f;
             this.Lights.Add(new SceneLightPoint(
                 "Blue point",
                 false,
@@ -544,6 +549,11 @@ namespace TerrainTest
                 Vector3.Zero,
                 2f,
                 5f));
+
+            this.Lights.AddRange(this.helicopter.Lights);
+            this.Lights.AddRange(this.tank.Lights);
+            this.Lights.AddRange(this.helipod.Lights);
+            this.Lights.AddRange(this.garage.Lights);
 
             #endregion
 

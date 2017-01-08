@@ -15,7 +15,7 @@ namespace Engine
             get
             {
                 return new SceneLightDirectional(
-                    "Key light", 
+                    "Key light",
                     true,
                     new Color4(1, 0.9607844f, 0.8078432f, 1f),
                     new Color4(1, 0.9607844f, 0.8078432f, 1f),
@@ -31,7 +31,7 @@ namespace Engine
             get
             {
                 return new SceneLightDirectional(
-                    "Fill light", 
+                    "Fill light",
                     false,
                     new Color4(0.9647059f, 0.7607844f, 0.4078432f, 1f),
                     new Color4(0, 0, 0, 0),
@@ -47,7 +47,7 @@ namespace Engine
             get
             {
                 return new SceneLightDirectional(
-                    "Back light", 
+                    "Back light",
                     false,
                     new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
                     new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
@@ -57,6 +57,15 @@ namespace Engine
         }
 
         /// <summary>
+        /// Initial transform
+        /// </summary>
+        private Matrix offsetTransform = Matrix.Identity;
+        /// <summary>
+        /// Local transform
+        /// </summary>
+        private Matrix local = Matrix.Identity;
+
+        /// <summary>
         /// Light direction
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
@@ -64,6 +73,28 @@ namespace Engine
         /// Light brightness
         /// </summary>
         public float Brightness = 1f;
+        /// <summary>
+        /// Local transform
+        /// </summary>
+        public override Matrix Local
+        {
+            get
+            {
+                return this.local;
+            }
+            set
+            {
+                this.local = value;
+
+                var trn = this.offsetTransform * this.local;
+
+                Vector3 scale;
+                Quaternion rotation;
+                Vector3 translation;
+                trn.Decompose(out scale, out rotation, out translation);
+                this.Direction = Matrix.RotationQuaternion(rotation).Down;
+            }
+        }
 
         /// <summary>
         /// Constructor

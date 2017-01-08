@@ -257,6 +257,22 @@ namespace Engine
             this.spotLights.Add(light);
         }
         /// <summary>
+        /// Adds the specified light list to colection
+        /// </summary>
+        /// <param name="sceneLights">Lights</param>
+        public void AddRange(IEnumerable<SceneLight> sceneLights)
+        {
+            if (sceneLights != null)
+            {
+                foreach (var light in sceneLights)
+                {
+                    if (light is SceneLightDirectional) this.directionalLights.Add((SceneLightDirectional)light);
+                    else if (light is SceneLightPoint) this.pointLights.Add((SceneLightPoint)light);
+                    else if (light is SceneLightSpot) this.spotLights.Add((SceneLightSpot)light);
+                }
+            }
+        }
+        /// <summary>
         /// Removes the specified light
         /// </summary>
         /// <param name="light">Directional light</param>

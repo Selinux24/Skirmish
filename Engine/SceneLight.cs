@@ -6,7 +6,7 @@ namespace Engine
     /// Scene ligth
     /// </summary>
     public abstract class SceneLight
-    {
+    { 
         /// <summary>
         /// Light name
         /// </summary>
@@ -31,6 +31,10 @@ namespace Engine
         /// Free use variable
         /// </summary>
         public object State = null;
+        /// <summary>
+        /// Local transform matrix
+        /// </summary>
+        public abstract Matrix Local { get; set; }
 
         /// <summary>
         /// Constructor

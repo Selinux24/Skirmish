@@ -81,6 +81,22 @@ namespace Engine.Content
                                     if (node.IsLight)
                                     {
                                         Matrix trn = node.ReadMatrix();
+
+                                        if (!trn.IsIdentity)
+                                        {
+                                            if (node.InstanceLight != null && node.InstanceLight.Length > 0)
+                                            {
+                                                foreach (InstanceWithExtra il in node.InstanceLight)
+                                                {
+                                                    string lightName = il.Url.Replace("#", "");
+
+                                                    var light = modelContent.Lights[lightName];
+
+                                                    light.Name = lightName;
+                                                    light.Transform = trn;
+                                                }
+                                            }
+                                        }
                                     }
 
                                     #endregion

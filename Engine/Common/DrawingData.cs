@@ -33,6 +33,10 @@ namespace Engine.Common
         /// Datos de animación
         /// </summary>
         public SkinningData SkinningData = null;
+        /// <summary>
+        /// Lights collection
+        /// </summary>
+        public SceneLight[] Lights = null;
 
         /// <summary>
         /// Model initialization
@@ -62,6 +66,9 @@ namespace Engine.Common
 
             //Update meshes into device
             InitializeMeshes(ref res, game);
+
+            //Lights
+            InitializeLights(ref res, game, modelContent);
 
             return res;
         }
@@ -366,6 +373,32 @@ namespace Engine.Common
             }
 
             return null;
+        }
+        /// <summary>
+        /// Initialize lights
+        /// </summary>
+        /// <param name="drw">Drawing data</param>
+        /// <param name="game">Game</param>
+        /// <param name="modelContent">Model content</param>
+        private static void InitializeLights(ref DrawingData drw, Game game, ModelContent modelContent)
+        {
+            List<SceneLight> lights = new List<SceneLight>();
+
+            foreach (var key in modelContent.Lights.Keys)
+            {
+                var l = modelContent.Lights[key];
+
+                if (l.LightType == LightContentTypeEnum.Point)
+                {
+                    lights.Add(l.CreatePointLight());
+                }
+                else if (l.LightType == LightContentTypeEnum.Spot)
+                {
+                    lights.Add(l.CreateSpotLight());
+                }
+            }
+
+            drw.Lights = lights.ToArray();
         }
 
         /// <summary>

@@ -144,6 +144,14 @@ namespace Engine
             this.ManipulatorChanged = false;
 
             this.Manipulator.Update(context.GameTime);
+
+            if (this.Lights != null)
+            {
+                for (int i = 0; i < this.Lights.Length; i++)
+                {
+                    this.Lights[i].Local = this.Manipulator.LocalTransform;
+                }
+            }
         }
         /// <summary>
         /// Draw

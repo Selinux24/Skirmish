@@ -19,6 +19,7 @@ namespace HeightmapTest
 
         private Vector3 playerHeight = Vector3.UnitY * 5f;
         private bool playerFlying = true;
+        private SceneLightSpot lantern = null;
 
         private Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
@@ -532,6 +533,9 @@ namespace HeightmapTest
             this.Lights.FogRange = 0;
             this.ToggleFog();
 
+            this.lantern = new SceneLightSpot("lantern", false, Color.White, Color.White, true, this.Camera.Position, this.Camera.Forward, 25f, 100, 50);
+            this.Lights.Add(this.lantern);
+
             #region Debug
 
             var bboxes = this.terrain.GetBoundingBoxes(5);
@@ -718,6 +722,17 @@ namespace HeightmapTest
             if (this.Game.Input.KeyJustReleased(Keys.G))
             {
                 this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.L))
+            {
+                this.lantern.Enabled = !this.lantern.Enabled;
+            }
+
+            if (this.lantern.Enabled)
+            {
+                this.lantern.Position = this.Camera.Position;
+                this.lantern.Direction = this.Camera.Forward;
             }
 
             #endregion

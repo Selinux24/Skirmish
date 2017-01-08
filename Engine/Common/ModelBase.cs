@@ -72,6 +72,22 @@ namespace Engine.Common
                 return skList.ToArray();
             }
         }
+        /// <summary>
+        /// Gets the current model lights collection
+        /// </summary>
+        public virtual SceneLight[] Lights
+        {
+            get
+            {
+                var drawingData = this.GetDrawingData(LevelOfDetailEnum.High);
+                if (drawingData != null)
+                {
+                    return drawingData.Lights;
+                }
+
+                return null;
+            }
+        }
 
         /// <summary>
         /// Base model

@@ -17,7 +17,7 @@ namespace Engine
     /// </summary>
     public class SceneRendererForward : ISceneRenderer
     {
-        private const int ShadowMapSize = 2048;
+        private const int ShadowMapSize = 1024 * 4;
 
         /// <summary>
         /// Shadow mapper

@@ -23,7 +23,7 @@ namespace Engine
     /// </summary>
     public class SceneRendererDeferred : ISceneRenderer
     {
-        private const int ShadowMapSize = 2048;
+        private const int ShadowMapSize = 1024 * 4;
 
         /// <summary>
         /// Light geometry

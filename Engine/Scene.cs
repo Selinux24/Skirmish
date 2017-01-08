@@ -831,7 +831,11 @@ namespace Engine
                     int i = p1.AlwaysVisible.CompareTo(p2.AlwaysVisible);
                     if (i != 0) return i;
 
-                    //First transparents
+                    //Then opaques
+                    i = p1.EnableAlphaBlending.CompareTo(p2.EnableAlphaBlending);
+                    if (i != 0) return i;
+
+                    //Then z-buffer writers
                     i = p1.EnableDepthStencil.CompareTo(p2.EnableDepthStencil);
                     if (i != 0) return i;
 

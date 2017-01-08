@@ -368,6 +368,8 @@ namespace DeferredTest
             this.Lights.BackLight.Enabled = true;
             this.Lights.FillLight.Enabled = true;
 
+            this.Lights.AddRange(this.tank.Lights);
+
             #endregion
         }
         public override void Update(GameTime gameTime)
