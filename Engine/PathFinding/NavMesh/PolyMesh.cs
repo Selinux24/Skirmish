@@ -1363,7 +1363,7 @@ namespace Engine.PathFinding.NavMesh
             {
                 if (temp.Length < this.Vertices.Length)
                 {
-                    throw new ArgumentException(string.Format("Buffer not large enough. Must be at least numVertsPerPoly ({0})", "temp", this.Vertices.Length));
+                    throw new ArgumentException(string.Format("Buffer not large enough. Must be at least numVertsPerPoly ({0})", this.Vertices.Length), "temp");
                 }
 
                 int thisCount = this.VertexCount;

@@ -197,7 +197,7 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.directionalLight.GetRawValue(default(BufferDirectionalLight).Stride))
+                using (DataStream ds = this.directionalLight.GetRawValue(default(BufferDirectionalLight).GetStride()))
                 {
                     ds.Position = 0;
 
@@ -210,7 +210,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.directionalLight.SetRawValue(ds, default(BufferDirectionalLight).Stride);
+                    this.directionalLight.SetRawValue(ds, default(BufferDirectionalLight).GetStride());
                 }
             }
         }
@@ -221,7 +221,7 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.pointLight.GetRawValue(default(BufferPointLight).Stride))
+                using (DataStream ds = this.pointLight.GetRawValue(default(BufferPointLight).GetStride()))
                 {
                     ds.Position = 0;
 
@@ -234,7 +234,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.pointLight.SetRawValue(ds, default(BufferPointLight).Stride);
+                    this.pointLight.SetRawValue(ds, default(BufferPointLight).GetStride());
                 }
             }
         }
@@ -245,7 +245,7 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.spotLight.GetRawValue(default(BufferSpotLight).Stride))
+                using (DataStream ds = this.spotLight.GetRawValue(default(BufferSpotLight).GetStride()))
                 {
                     ds.Position = 0;
 
@@ -258,7 +258,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.spotLight.SetRawValue(ds, default(BufferSpotLight).Stride);
+                    this.spotLight.SetRawValue(ds, default(BufferSpotLight).GetStride());
                 }
             }
         }

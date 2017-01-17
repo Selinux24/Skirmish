@@ -48,17 +48,7 @@ namespace Engine.Common
         /// Texture index
         /// </summary>
         public float TextureIndex;
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
-        public int Stride
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexInstancingData));
-            }
-        }
-        
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -73,6 +63,14 @@ namespace Engine.Common
             this.AnimationOffset = animationOffset;
             this.Padding = 0;
             this.TextureIndex = textureIndex;
+        }
+
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(VertexInstancingData));
         }
     };
 }

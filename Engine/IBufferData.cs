@@ -9,6 +9,6 @@ namespace Engine
         /// <summary>
         /// Stride
         /// </summary>
-        int Stride { get; }
+        int GetStride();
     }
 }

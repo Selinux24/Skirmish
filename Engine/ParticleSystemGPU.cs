@@ -205,7 +205,7 @@ namespace Engine
             this.emittersBuffer = game.Graphics.Device.CreateBuffer<VertexGPUParticle>(data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
             this.drawingBuffer = game.Graphics.Device.CreateBuffer<VertexGPUParticle>(size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
             this.streamOutBuffer = game.Graphics.Device.CreateBuffer<VertexGPUParticle>(size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            this.inputStride = default(VertexGPUParticle).Stride;
+            this.inputStride = default(VertexGPUParticle).GetStride();
 
             this.emitterBinding = new[] { new VertexBufferBinding(this.emittersBuffer, this.inputStride, 0) };
             this.drawingBinding = new[] { new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0) };

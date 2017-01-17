@@ -131,7 +131,7 @@ namespace Engine.Common
             if (this.Vertices != null && this.Vertices.Length > 0)
             {
                 this.VertexBuffer = device.CreateVertexBuffer(this.Vertices, this.dynamicBuffers);
-                this.VertexBufferStride = this.Vertices[0].Stride;
+                this.VertexBufferStride = this.Vertices[0].GetStride();
                 this.VertexCount = this.Vertices.Length;
 
                 this.AddVertexBufferBinding(new VertexBufferBinding(this.VertexBuffer, this.VertexBufferStride, 0));

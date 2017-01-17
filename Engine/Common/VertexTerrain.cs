@@ -62,16 +62,6 @@ namespace Engine.Common
                 return VertexTypes.Terrain;
             }
         }
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
-        public int Stride
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexTerrain));
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel
@@ -122,16 +112,24 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(VertexTerrain));
+        }
+
+        /// <summary>
         /// Text representation of vertex
         /// </summary>
         /// <returns>Returns the text representation of vertex</returns>
         public override string ToString()
         {
             return string.Format(
-                "Position: {0}; Normal: {1}; Texture0: {2}; Texture1: {3}; Tangent: {4}", 
-                this.Position, 
+                "Position: {0}; Normal: {1}; Texture0: {2}; Texture1: {3}; Tangent: {4}",
+                this.Position,
                 this.Normal,
-                this.Texture0, this.Texture1, 
+                this.Texture0, this.Texture1,
                 this.Tangent);
         }
     };

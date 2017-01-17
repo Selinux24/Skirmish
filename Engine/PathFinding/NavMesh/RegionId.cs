@@ -323,7 +323,7 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>A string representing this instance.</returns>
         public override string ToString()
         {
-            return string.Format("Id: {0}; Flags: {0}", this.Id, this.Flags);
+            return string.Format("Id: {0}; Flags: {1}", this.Id, this.Flags);
         }
     }
 }

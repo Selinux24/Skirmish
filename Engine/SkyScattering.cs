@@ -291,7 +291,7 @@ namespace Engine
             this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(vertices);
             this.vertexBufferBinding = new[]
             {
-                new VertexBufferBinding(this.vertexBuffer, vertices[0].Stride, 0),
+                new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),
             };
 
             this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(indices);

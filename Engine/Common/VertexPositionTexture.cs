@@ -31,7 +31,7 @@ namespace Engine.Common
         /// <returns>Returns the new generated vertex array</returns>
         public static VertexPositionTexture[] Generate(Vector3[] vertices, Vector2[] uvs)
         {
-            if (vertices.Length != uvs.Length) throw new ArgumentException("Vertices and uvs must have the same length"); 
+            if (vertices.Length != uvs.Length) throw new ArgumentException("Vertices and uvs must have the same length");
 
             VertexPositionTexture[] res = new VertexPositionTexture[vertices.Length];
 
@@ -59,16 +59,6 @@ namespace Engine.Common
             get
             {
                 return VertexTypes.PositionTexture;
-            }
-        }
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
-        public int Stride
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexPositionTexture));
             }
         }
 
@@ -106,6 +96,14 @@ namespace Engine.Common
             if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
             else if (channel == VertexDataChannels.Texture) this.Texture = value.Cast<Vector2>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
+        }
+
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(VertexPositionTexture));
         }
 
         /// <summary>

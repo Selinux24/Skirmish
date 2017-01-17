@@ -139,7 +139,7 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.dirLights.GetRawValue(default(BufferDirectionalLight).Stride * BufferDirectionalLight.MAX))
+                using (DataStream ds = this.dirLights.GetRawValue(default(BufferDirectionalLight).GetStride() * BufferDirectionalLight.MAX))
                 {
                     ds.Position = 0;
 
@@ -152,7 +152,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.dirLights.SetRawValue(ds, default(BufferDirectionalLight).Stride * BufferDirectionalLight.MAX);
+                    this.dirLights.SetRawValue(ds, default(BufferDirectionalLight).GetStride() * BufferDirectionalLight.MAX);
                 }
             }
         }
@@ -163,7 +163,7 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.pointLights.GetRawValue(default(BufferPointLight).Stride * BufferPointLight.MAX))
+                using (DataStream ds = this.pointLights.GetRawValue(default(BufferPointLight).GetStride() * BufferPointLight.MAX))
                 {
                     ds.Position = 0;
 
@@ -176,7 +176,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.pointLights.SetRawValue(ds, default(BufferPointLight).Stride * BufferPointLight.MAX);
+                    this.pointLights.SetRawValue(ds, default(BufferPointLight).GetStride() * BufferPointLight.MAX);
                 }
             }
         }
@@ -187,7 +187,7 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.spotLights.GetRawValue(default(BufferSpotLight).Stride * BufferSpotLight.MAX))
+                using (DataStream ds = this.spotLights.GetRawValue(default(BufferSpotLight).GetStride() * BufferSpotLight.MAX))
                 {
                     ds.Position = 0;
 
@@ -200,7 +200,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.spotLights.SetRawValue(ds, default(BufferSpotLight).Stride * BufferSpotLight.MAX);
+                    this.spotLights.SetRawValue(ds, default(BufferSpotLight).GetStride() * BufferSpotLight.MAX);
                 }
             }
         }
@@ -722,9 +722,9 @@ namespace Engine.Effects
                     bSpotLights[i] = new BufferSpotLight(spotLights[i]);
                 }
 
-                lCount[0] = dirLights.Length;
-                lCount[1] = pointLights.Length;
-                lCount[2] = spotLights.Length;
+                lCount[0] = Math.Min(dirLights.Length, BufferDirectionalLight.MAX);
+                lCount[1] = Math.Min(pointLights.Length, BufferPointLight.MAX);
+                lCount[2] = Math.Min(spotLights.Length, BufferSpotLight.MAX);
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;

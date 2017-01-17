@@ -93,7 +93,7 @@ namespace Engine
             this.instancingData = new VertexInstancingData[this.InstanceCount];
 
             this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.instancingData);
-            this.InstancingBufferStride = instancingData[0].Stride;
+            this.InstancingBufferStride = instancingData[0].GetStride();
 
             this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
         }
@@ -116,7 +116,7 @@ namespace Engine
             this.instancingData = new VertexInstancingData[this.InstanceCount];
 
             this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.instancingData);
-            this.InstancingBufferStride = instancingData[0].Stride;
+            this.InstancingBufferStride = instancingData[0].GetStride();
 
             this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
         }

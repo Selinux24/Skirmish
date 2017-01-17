@@ -5,45 +5,19 @@ cbuffer cbGlobal : register (b0)
 {
 	uint gMaterialPaletteWidth;
 };
-cbuffer cbPerFrame : register (b1)
-{
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
+Texture2D gMaterialPalette;
+Texture1D gTextureRandom;
 
-	float3 gEyePositionWorld;
-	float gGlobalAmbient;
-	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
-	PointLight gPointLights[MAX_LIGHTS_POINT];
-	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
-	uint3 gLightCount;
-	
-	float gFogStart;
-	float gFogRange;
-	float4 gFogColor;
-	
-	float4x4 gLightViewProjection;
-	uint gShadows;
-	
-	float gStartRadius;
-	float gEndRadius;
-	float3 gWindDirection;
-	float gWindStrength;
-	float gTotalTime;
-	
-	uint gMaterialIndex;
-	uint gTextureCount;
-	uint gUVToggleByPID;
-};
-cbuffer cbFixed : register (b2)
+cbuffer cbFixed : register (b1)
 {
-	float2 gQuadTexCL[4] = 
+	float2 gQuadTexCL[4] =
 	{
 		float2(0.0f, 1.0f),
 		float2(0.0f, 0.0f),
 		float2(1.0f, 1.0f),
 		float2(1.0f, 0.0f)
 	};
-	float2 gQuadTexCR[4] = 
+	float2 gQuadTexCR[4] =
 	{
 		float2(1.0f, 1.0f),
 		float2(1.0f, 0.0f),
@@ -52,15 +26,37 @@ cbuffer cbFixed : register (b2)
 	};
 };
 
+cbuffer cbPerFrame : register (b2)
+{
+	float4x4 gWorld;
+	float4x4 gWorldViewProjection;
+	float4x4 gLightViewProjection;
+	float3 gEyePositionWorld;
+	float gGlobalAmbient;
+	uint3 gLightCount;
+	uint gShadows;
+	float4 gFogColor;
+	float gFogStart;
+	float gFogRange;
+	float gStartRadius;
+	float gEndRadius;
+	float3 gWindDirection;
+	float gWindStrength;
+	float gTotalTime;
+	uint gMaterialIndex;
+	uint gTextureCount;
+	uint gUVToggleByPID;
+	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
+	PointLight gPointLights[MAX_LIGHTS_POINT];
+	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
+};
 Texture2DArray gTextureArray;
-Texture2D gMaterialPalette;
 Texture2D gShadowMapStatic;
 Texture2D gShadowMapDynamic;
-Texture1D gTextureRandom;
 
-float3 CalcWindTranslation(uint primID, float3 pos)
+float3 CalcWindTranslation(uint primID, float3 pos, float3 windDirection, float windStrength)
 {
-	float3 vWind = sin(gTotalTime + (pos.x + pos.y + pos.z) * 0.1f) + (gWindDirection * gWindStrength);
+	float3 vWind = sin(gTotalTime + (pos.x + pos.y + pos.z) * 0.1f) + (windDirection * windStrength);
 
 	float sRandom = gTextureRandom.SampleLevel(SamplerLinear, primID, 0).x;
 
@@ -101,8 +97,8 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 
 		if(gWindStrength > 0)
 		{
-			v[1].xyz = CalcWindTranslation(primID, v[1].xyz);
-			v[3].xyz = CalcWindTranslation(primID, v[3].xyz);
+			v[1].xyz = CalcWindTranslation(primID, v[1].xyz, gWindDirection, gWindStrength);
+			v[3].xyz = CalcWindTranslation(primID, v[3].xyz, gWindDirection, gWindStrength);
 		}
 
 		//Transform quad vertices to world space and output them as a triangle strip.
