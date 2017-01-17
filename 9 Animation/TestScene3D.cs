@@ -40,7 +40,9 @@ namespace AnimationTest
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            this.SceneVolume = new BoundingSphere(Vector3.Zero, 25f);
+            this.SceneVolume = new BoundingSphere(Vector3.Zero, 10f);
+
+            this.Lights.KeyLight.CastShadow = false;
 
             #region Texts
 

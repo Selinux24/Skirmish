@@ -77,16 +77,6 @@ namespace Engine.Common
                 return VertexTypes.PositionNormalTextureSkinned;
             }
         }
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
-        public int Stride
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexSkinnedPositionNormalTexture));
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel
@@ -146,6 +136,14 @@ namespace Engine.Common
                 this.BoneIndex4 = boneIndices[3];
             }
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
+        }
+
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(VertexSkinnedPositionNormalTexture));
         }
 
         /// <summary>

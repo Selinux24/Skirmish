@@ -135,7 +135,7 @@ namespace Engine
                     patch.foliageBuffer = game.Graphics.Device.CreateVertexBufferWrite(vertexData);
                     patch.foliageBufferBinding = new[]
                     {
-                        new VertexBufferBinding(patch.foliageBuffer, default(VertexBillboard).Stride, 0),
+                        new VertexBufferBinding(patch.foliageBuffer, default(VertexBillboard).GetStride(), 0),
                     };
                 }
 

@@ -139,7 +139,7 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.dirLights.GetRawValue(default(BufferDirectionalLight).Stride * BufferDirectionalLight.MAX))
+                using (DataStream ds = this.dirLights.GetRawValue(default(BufferDirectionalLight).GetStride() * BufferDirectionalLight.MAX))
                 {
                     ds.Position = 0;
 
@@ -152,7 +152,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.dirLights.SetRawValue(ds, default(BufferDirectionalLight).Stride * BufferDirectionalLight.MAX);
+                    this.dirLights.SetRawValue(ds, default(BufferDirectionalLight).GetStride() * BufferDirectionalLight.MAX);
                 }
             }
         }
@@ -163,7 +163,7 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.pointLights.GetRawValue(default(BufferPointLight).Stride * BufferPointLight.MAX))
+                using (DataStream ds = this.pointLights.GetRawValue(default(BufferPointLight).GetStride() * BufferPointLight.MAX))
                 {
                     ds.Position = 0;
 
@@ -176,7 +176,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.pointLights.SetRawValue(ds, default(BufferPointLight).Stride * BufferPointLight.MAX);
+                    this.pointLights.SetRawValue(ds, default(BufferPointLight).GetStride() * BufferPointLight.MAX);
                 }
             }
         }
@@ -187,7 +187,7 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.spotLights.GetRawValue(default(BufferSpotLight).Stride * BufferSpotLight.MAX))
+                using (DataStream ds = this.spotLights.GetRawValue(default(BufferSpotLight).GetStride() * BufferSpotLight.MAX))
                 {
                     ds.Position = 0;
 
@@ -200,7 +200,7 @@ namespace Engine.Effects
                 {
                     ds.Position = 0;
 
-                    this.spotLights.SetRawValue(ds, default(BufferSpotLight).Stride * BufferSpotLight.MAX);
+                    this.spotLights.SetRawValue(ds, default(BufferSpotLight).GetStride() * BufferSpotLight.MAX);
                 }
             }
         }
@@ -562,33 +562,39 @@ namespace Engine.Effects
 
             this.AddInputLayout(this.TerrainForward, VertexTerrain.GetInput());
 
-            this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
-            this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.fromLightViewProjection = this.Effect.GetVariableByName("gLightViewProjection").AsMatrix();
-            this.useColorDiffuse = this.Effect.GetVariableByName("gUseColorDiffuse").AsScalar();
-            this.useColorSpecular = this.Effect.GetVariableByName("gUseColorSpecular").AsScalar();
-            this.materialIndex = this.Effect.GetVariableByName("gMaterialIndex").AsScalar();
-            this.dirLights = this.Effect.GetVariableByName("gDirLights");
-            this.pointLights = this.Effect.GetVariableByName("gPointLights");
-            this.spotLights = this.Effect.GetVariableByName("gSpotLights");
-            this.globalAmbient = this.Effect.GetVariableByName("gGlobalAmbient").AsScalar();
-            this.lightCount = this.Effect.GetVariableByName("gLightCount").AsVector();
-            this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
-            this.fogStart = this.Effect.GetVariableByName("gFogStart").AsScalar();
-            this.fogRange = this.Effect.GetVariableByName("gFogRange").AsScalar();
-            this.fogColor = this.Effect.GetVariableByName("gFogColor").AsVector();
-            this.shadowMaps = this.Effect.GetVariableByName("gShadows").AsScalar();
-            this.diffuseMapLR = this.Effect.GetVariableByName("gDiffuseMapLRArray").AsShaderResource();
-            this.diffuseMapHR = this.Effect.GetVariableByName("gDiffuseMapHRArray").AsShaderResource();
-            this.normalMap = this.Effect.GetVariableByName("gNormalMapArray").AsShaderResource();
-            this.specularMap = this.Effect.GetVariableByName("gSpecularMapArray").AsShaderResource();
-            this.shadowMapStatic = this.Effect.GetVariableByName("gShadowMapStatic").AsShaderResource();
-            this.shadowMapDynamic = this.Effect.GetVariableByName("gShadowMapDynamic").AsShaderResource();
-            this.colorTextures = this.Effect.GetVariableByName("gColorTextureArray").AsShaderResource();
-            this.alphaMap = this.Effect.GetVariableByName("gAlphaTexture").AsShaderResource();
-            this.parameters = this.Effect.GetVariableByName("gParams").AsVector();
+            //Globals
             this.materialPaletteWidth = this.Effect.GetVariableByName("gMaterialPaletteWidth").AsScalar();
             this.materialPalette = this.Effect.GetVariableByName("gMaterialPalette").AsShaderResource();
+
+            //Per frame
+            this.world = this.Effect.GetVariableByName("gVSWorld").AsMatrix();
+            this.worldViewProjection = this.Effect.GetVariableByName("gVSWorldViewProjection").AsMatrix();
+
+            this.fromLightViewProjection = this.Effect.GetVariableByName("gPSLightViewProjection").AsMatrix();
+            this.eyePositionWorld = this.Effect.GetVariableByName("gPSEyePositionWorld").AsVector();
+            this.globalAmbient = this.Effect.GetVariableByName("gPSGlobalAmbient").AsScalar();
+            this.lightCount = this.Effect.GetVariableByName("gPSLightCount").AsVector();
+            this.shadowMaps = this.Effect.GetVariableByName("gPSShadows").AsScalar();
+            this.fogColor = this.Effect.GetVariableByName("gPSFogColor").AsVector();
+            this.fogStart = this.Effect.GetVariableByName("gPSFogStart").AsScalar();
+            this.fogRange = this.Effect.GetVariableByName("gPSFogRange").AsScalar();
+            this.dirLights = this.Effect.GetVariableByName("gPSDirLights");
+            this.pointLights = this.Effect.GetVariableByName("gPSPointLights");
+            this.spotLights = this.Effect.GetVariableByName("gPSSpotLights");
+            this.shadowMapStatic = this.Effect.GetVariableByName("gPSShadowMapStatic").AsShaderResource();
+            this.shadowMapDynamic = this.Effect.GetVariableByName("gPSShadowMapDynamic").AsShaderResource();
+
+            //Per object
+            this.parameters = this.Effect.GetVariableByName("gPSParams").AsVector();
+            this.useColorDiffuse = this.Effect.GetVariableByName("gPSUseColorDiffuse").AsScalar();
+            this.useColorSpecular = this.Effect.GetVariableByName("gPSUseColorSpecular").AsScalar();
+            this.materialIndex = this.Effect.GetVariableByName("gPSMaterialIndex").AsScalar();
+            this.normalMap = this.Effect.GetVariableByName("gPSNormalMapArray").AsShaderResource();
+            this.specularMap = this.Effect.GetVariableByName("gPSSpecularMapArray").AsShaderResource();
+            this.colorTextures = this.Effect.GetVariableByName("gPSColorTextureArray").AsShaderResource();
+            this.alphaMap = this.Effect.GetVariableByName("gPSAlphaTexture").AsShaderResource();
+            this.diffuseMapLR = this.Effect.GetVariableByName("gPSDiffuseMapLRArray").AsShaderResource();
+            this.diffuseMapHR = this.Effect.GetVariableByName("gPSDiffuseMapHRArray").AsShaderResource();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -684,9 +690,9 @@ namespace Engine.Effects
                     bSpotLights[i] = new BufferSpotLight(spotLights[i]);
                 }
 
-                lCount[0] = dirLights.Length;
-                lCount[1] = pointLights.Length;
-                lCount[2] = spotLights.Length;
+                lCount[0] = Math.Min(dirLights.Length, BufferDirectionalLight.MAX);
+                lCount[1] = Math.Min(pointLights.Length, BufferPointLight.MAX);
+                lCount[2] = Math.Min(spotLights.Length, BufferSpotLight.MAX);
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;

@@ -800,7 +800,7 @@ namespace Engine
             if (geometry.VertexBuffer == null)
             {
                 geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertices);
-                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].Stride, 0);
+                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].GetStride(), 0);
             }
             else
             {
@@ -832,7 +832,7 @@ namespace Engine
             if (geometry.VertexBuffer == null)
             {
                 geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertices);
-                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].Stride, 0);
+                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].GetStride(), 0);
             }
             else
             {
@@ -864,7 +864,7 @@ namespace Engine
             if (geometry.VertexBuffer == null)
             {
                 geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertices);
-                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].Stride, 0);
+                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].GetStride(), 0);
             }
             else
             {

@@ -52,16 +52,6 @@ namespace Engine.Common
                 return VertexTypes.PositionNormalTextureTangent;
             }
         }
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
-        public int Stride
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexPositionNormalTextureTangent));
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel
@@ -103,6 +93,14 @@ namespace Engine.Common
             else if (channel == VertexDataChannels.Texture) this.Texture = value.Cast<Vector2>();
             else if (channel == VertexDataChannels.Tangent) this.Tangent = value.Cast<Vector3>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
+        }
+
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(VertexPositionNormalTextureTangent));
         }
 
         /// <summary>

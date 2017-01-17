@@ -35,23 +35,6 @@ namespace Engine.Effects
         public float CastShadow;
 
         /// <summary>
-        /// Size in bytes
-        /// </summary>
-        public int Stride
-        {
-            get
-            {
-#if DEBUG
-                int size = Marshal.SizeOf(typeof(BufferDirectionalLight));
-                if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
-                return size;
-#else
-                return Marshal.SizeOf(typeof(BufferDirectionalLight));
-#endif
-            }
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="light">Light</param>
@@ -61,6 +44,20 @@ namespace Engine.Effects
             this.DiffuseColor = light.DiffuseColor * light.Brightness;
             this.SpecularColor = light.SpecularColor * light.Brightness;
             this.CastShadow = light.CastShadow ? 1 : 0;
+        }
+
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public int GetStride()
+        {
+#if DEBUG
+            int size = Marshal.SizeOf(typeof(BufferDirectionalLight));
+            if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+            return size;
+#else
+            return Marshal.SizeOf(typeof(BufferDirectionalLight));
+#endif
         }
     }
 
@@ -109,23 +106,6 @@ namespace Engine.Effects
         public float Pad3;
 
         /// <summary>
-        /// Size in bytes
-        /// </summary>
-        public int Stride
-        {
-            get
-            {
-#if DEBUG
-                int size = Marshal.SizeOf(typeof(BufferPointLight));
-                if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
-                return size;
-#else
-                return Marshal.SizeOf(typeof(BufferPointLight));
-#endif
-            }
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="light">Light</param>
@@ -140,6 +120,20 @@ namespace Engine.Effects
             this.Pad1 = 1000;
             this.Pad2 = 2000;
             this.Pad3 = 3000;
+        }
+
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public int GetStride()
+        {
+#if DEBUG
+            int size = Marshal.SizeOf(typeof(BufferPointLight));
+            if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+            return size;
+#else
+            return Marshal.SizeOf(typeof(BufferPointLight));
+#endif
         }
     }
 
@@ -196,23 +190,6 @@ namespace Engine.Effects
         public float Pad3;
 
         /// <summary>
-        /// Size in bytes
-        /// </summary>
-        public int Stride
-        {
-            get
-            {
-#if DEBUG
-                int size = Marshal.SizeOf(typeof(BufferSpotLight));
-                if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
-                return size;
-#else
-                return Marshal.SizeOf(typeof(BufferSpotLight));
-#endif
-            }
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="light">Light</param>
@@ -230,6 +207,20 @@ namespace Engine.Effects
             this.Pad1 = 1000;
             this.Pad2 = 2000;
             this.Pad3 = 3000;
+        }
+
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public int GetStride()
+        {
+#if DEBUG
+            int size = Marshal.SizeOf(typeof(BufferSpotLight));
+            if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+            return size;
+#else
+            return Marshal.SizeOf(typeof(BufferSpotLight));
+#endif
         }
     }
 }

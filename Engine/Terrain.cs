@@ -1150,7 +1150,7 @@ namespace Engine
                     patch.vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(vertexData);
                     patch.vertexBufferBinding = new[]
                     {
-                        new VertexBufferBinding(patch.vertexBuffer, default(VertexTerrain).Stride, 0),
+                        new VertexBufferBinding(patch.vertexBuffer, default(VertexTerrain).GetStride(), 0),
                     };
 
                     return patch;
@@ -1642,7 +1642,7 @@ namespace Engine
                 this.buffer = this.Game.Graphics.Device.CreateVertexBufferWrite(vertexData);
                 this.bufferBinding = new[]
                 {
-                    new VertexBufferBinding(this.buffer, default(VertexBillboard).Stride, 0),
+                    new VertexBufferBinding(this.buffer, default(VertexBillboard).GetStride(), 0),
                 };
             }
             /// <summary>

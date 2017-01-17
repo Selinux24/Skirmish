@@ -42,16 +42,6 @@ namespace Engine.Common
                 return VertexTypes.PositionColor;
             }
         }
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
-        public int Stride
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexPositionColor));
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel
@@ -87,6 +77,14 @@ namespace Engine.Common
             if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
             else if (channel == VertexDataChannels.Color) this.Color = value.Cast<Color4>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
+        }
+
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(VertexPositionColor));
         }
 
         /// <summary>

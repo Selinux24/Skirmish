@@ -198,7 +198,7 @@ namespace Engine
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
 
             this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(vertices);
-            this.vertexBufferStride = vertices[0].Stride;
+            this.vertexBufferStride = vertices[0].GetStride();
             this.vertexBufferOffset = 0;
             this.vertexCount = 0;
             this.vertexBufferBinding = new VertexBufferBinding[]

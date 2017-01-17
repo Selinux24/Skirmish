@@ -174,7 +174,7 @@ namespace Engine
             this.vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(this.particles);
             this.vertexBufferBinding = new[]
             {
-                new VertexBufferBinding(this.vertexBuffer, default(VertexCPUParticle).Stride, 0),
+                new VertexBufferBinding(this.vertexBuffer, default(VertexCPUParticle).GetStride(), 0),
             };
 
             this.TimeToEnd = this.Emitter.Duration + this.MaximumAge;

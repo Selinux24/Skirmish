@@ -52,16 +52,6 @@ namespace Engine.Common
                 return VertexTypes.Particle;
             }
         }
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
-        public int Stride
-        {
-            get
-            {
-                return Marshal.SizeOf(typeof(VertexCPUParticle));
-            }
-        }
 
         /// <summary>
         /// Gets if structure contains data for the specified channel
@@ -95,6 +85,14 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
+        }
+
+        /// <summary>
+        /// Size in bytes
+        /// </summary>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(VertexCPUParticle));
         }
 
         /// <summary>

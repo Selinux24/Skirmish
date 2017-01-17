@@ -240,7 +240,7 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 		float4 color = tg1;
 		float3 position = tg3.xyz;
 		float materialIndex = tg3.w;
-		float4 light = saturate(lmap);
+		float4 light = lmap;
 
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
@@ -256,7 +256,7 @@ float4 PSCombineLights(PSCombineLightsInput input) : SV_TARGET
 			color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
 		}
 
-		return color;
+		return saturate(color);
 	}
 	else
 	{

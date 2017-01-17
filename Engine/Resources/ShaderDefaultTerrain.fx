@@ -8,40 +8,46 @@ cbuffer cbGlobals : register (b0)
 {
     uint gMaterialPaletteWidth;
 };
-cbuffer cbPerFrame : register (b1)
-{
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
-	float4x4 gLightViewProjection;
-	float3 gEyePositionWorld;
-	float gGlobalAmbient;
-	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
-	PointLight gPointLights[MAX_LIGHTS_POINT];
-	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
-	uint3 gLightCount;
-	float gFogStart;
-	float gFogRange;
-	float4 gFogColor;
-	uint gShadows;
-	float4 gParams;
-};
-cbuffer cbPerObject : register (b2)
-{
-	bool gUseColorDiffuse;
-	bool gUseColorSpecular;
-	uint gMaterialIndex;
-};
-
-Texture2DArray gDiffuseMapLRArray;
-Texture2DArray gDiffuseMapHRArray;
-Texture2DArray gNormalMapArray;
-Texture2DArray gSpecularMapArray;
 Texture2D gMaterialPalette;
-Texture2D gShadowMapStatic;
-Texture2D gShadowMapDynamic;
 
-Texture2DArray gColorTextureArray;
-Texture2D gAlphaTexture;
+cbuffer cbVSPerFrame : register (b1)
+{
+	float4x4 gVSWorld;
+	float4x4 gVSWorldViewProjection;
+};
+
+cbuffer cbPSPerFrame : register (b3)
+{
+	float4x4 gPSLightViewProjection;
+	float3 gPSEyePositionWorld;
+	float gPSGlobalAmbient;
+	uint3 gPSLightCount;
+	uint gPSShadows;
+	float4 gPSFogColor;
+	float gPSFogStart;
+	float gPSFogRange;
+	float PAD1;
+	float PAD2;
+	DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
+	PointLight gPSPointLights[MAX_LIGHTS_POINT];
+	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
+};
+Texture2D gPSShadowMapStatic;
+Texture2D gPSShadowMapDynamic;
+
+cbuffer cbPSPerObject : register (b4)
+{
+	float4 gPSParams;
+	bool gPSUseColorDiffuse;
+	bool gPSUseColorSpecular;
+	uint gPSMaterialIndex;
+};
+Texture2DArray gPSNormalMapArray;
+Texture2DArray gPSSpecularMapArray;
+Texture2DArray gPSColorTextureArray;
+Texture2D gPSAlphaTexture;
+Texture2DArray gPSDiffuseMapLRArray;
+Texture2DArray gPSDiffuseMapHRArray;
 
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE TANGENT
@@ -50,10 +56,10 @@ PSVertexTerrain VSTerrain(VSVertexTerrain input)
 {
     PSVertexTerrain output = (PSVertexTerrain)0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-    output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
-	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorld));
-	output.tangentWorld = normalize(mul(input.tangentLocal, (float3x3)gWorld));
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gVSWorldViewProjection);
+    output.positionWorld = mul(float4(input.positionLocal, 1), gVSWorld).xyz;
+	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gVSWorld));
+	output.tangentWorld = normalize(mul(input.tangentLocal, (float3x3)gVSWorld));
 	output.tex0 = input.tex0;
 	output.tex1 = input.tex1;
 	output.color = input.color;
@@ -63,18 +69,18 @@ PSVertexTerrain VSTerrain(VSVertexTerrain input)
 
 float4 PSTerrain(PSVertexTerrain input) : SV_TARGET
 {
-	float usage = gParams.x;
-	float prop = gParams.y;
-	float slope1 = gParams.z;
-	float slope2 = gParams.w;
+	float usage = gPSParams.x;
+	float prop = gPSParams.y;
+	float slope1 = gPSParams.z;
+	float slope2 = gPSParams.w;
 
-	float3 normalMapSample1 = gNormalMapArray.Sample(SamplerLinear, float3(input.tex0, 0)).rgb;
+	float3 normalMapSample1 = gPSNormalMapArray.Sample(SamplerLinear, float3(input.tex0, 0)).rgb;
 	float3 bumpNormalWorld1 = NormalSampleToWorldSpace(normalMapSample1, input.normalWorld, input.tangentWorld);
-	float3 normalMapSample2 = gNormalMapArray.Sample(SamplerLinear, float3(input.tex0, 1)).rgb;
+	float3 normalMapSample2 = gPSNormalMapArray.Sample(SamplerLinear, float3(input.tex0, 1)).rgb;
 	float3 bumpNormalWorld2 = NormalSampleToWorldSpace(normalMapSample2, input.normalWorld, input.tangentWorld);
 
-	float4 specularMapSample1 = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex0, 0));
-	float4 specularMapSample2 = gSpecularMapArray.Sample(SamplerLinear, float3(input.tex0, 1));
+	float4 specularMapSample1 = gPSSpecularMapArray.Sample(SamplerLinear, float3(input.tex0, 0));
+	float4 specularMapSample2 = gPSSpecularMapArray.Sample(SamplerLinear, float3(input.tex0, 1));
 
 	float n = 0;
 
@@ -84,12 +90,12 @@ float4 PSTerrain(PSVertexTerrain input) : SV_TARGET
 	if (usage == 1.0f || usage == 3.0f)
 	{
 		// BY ALPHA MAP
-		float4 textureColor1 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 0));
-		float4 textureColor2 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 1));
-		float4 textureColor3 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
-		float4 textureColor4 = gColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 3));
+		float4 textureColor1 = gPSColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 0));
+		float4 textureColor2 = gPSColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 1));
+		float4 textureColor3 = gPSColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
+		float4 textureColor4 = gPSColorTextureArray.Sample(SamplerAnisotropic, float3(input.tex0, 3));
 
-		float4 alphaMap1 = gAlphaTexture.Sample(SamplerLinear, input.tex1);
+		float4 alphaMap1 = gPSAlphaTexture.Sample(SamplerLinear, input.tex1);
 
 		color1 = lerp(textureColor1, textureColor2, alphaMap1.r);
 		color1 = lerp(color1, textureColor3, alphaMap1.g);
@@ -108,26 +114,26 @@ float4 PSTerrain(PSVertexTerrain input) : SV_TARGET
 		if(slope < slope1)
 		{
 			color2 = lerp(
-				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)), 
-				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
+				gPSDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)),
+				gPSDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)),
 				slope / slope1);
 		}
 		if((slope < slope2) && (slope >= slope1))
 		{
 			color2 = lerp(
-				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)), 
-				gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2)), 
+				gPSDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 1)),
+				gPSDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2)),
 				(slope - slope1) * (1.0f / (slope2 - slope1)));
 		}
 		if(slope >= slope2) 
 		{
-			color2 = gDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
+			color2 = gPSDiffuseMapLRArray.Sample(SamplerAnisotropic, float3(input.tex0, 2));
 		}
 
 		float depthValue = input.positionHomogeneous.z / input.positionHomogeneous.w;
 		if(depthValue >= 0.05f)
 		{
-			color2 *= gDiffuseMapHRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)) * 1.8f;
+			color2 *= gPSDiffuseMapHRArray.Sample(SamplerAnisotropic, float3(input.tex0, 0)) * 1.8f;
 		}
 	}
 
@@ -146,33 +152,33 @@ float4 PSTerrain(PSVertexTerrain input) : SV_TARGET
 		color = saturate(((color1 * prop) + (color2 * (1.0f-prop))) * input.color * 2.0f);
 	}
 
-	Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gMaterialPaletteWidth);
+	Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex, gMaterialPaletteWidth);
 
-	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
+	float4 lightPosition = mul(float4(input.positionWorld, 1), gPSLightViewProjection);
 
 	float4 litColor = ComputeLights(
-		gGlobalAmbient, 
-		gDirLights,
-		gPointLights, 
-		gSpotLights,
-		gLightCount.x,
-		gLightCount.y,
-		gLightCount.z,
-		gFogStart,
-		gFogRange,
-		gFogColor,
+		gPSGlobalAmbient,
+		gPSDirLights,
+		gPSPointLights, 
+		gPSSpotLights,
+		gPSLightCount.x,
+		gPSLightCount.y,
+		gPSLightCount.z,
+		gPSFogStart,
+		gPSFogRange,
+		gPSFogColor,
 		material,
 		input.positionWorld,
 		n == 0 ? bumpNormalWorld1 : bumpNormalWorld2,
 		color,
 		n == 0 ? specularMapSample1 : specularMapSample2,
-		gUseColorDiffuse,
-		gUseColorSpecular,
-		gEyePositionWorld,
+		gPSUseColorDiffuse,
+		gPSUseColorSpecular,
+		gPSEyePositionWorld,
 		lightPosition,
-		gShadows,
-		gShadowMapStatic,
-		gShadowMapDynamic);
+		gPSShadows,
+		gPSShadowMapStatic,
+		gPSShadowMapDynamic);
 
 	return litColor;
 }
