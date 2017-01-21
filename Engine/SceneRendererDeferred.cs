@@ -11,6 +11,7 @@ using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 using DepthStencilView = SharpDX.Direct3D11.DepthStencilView;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using DepthStencilClearFlags = SharpDX.Direct3D11.DepthStencilClearFlags;
+using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
 {
@@ -823,7 +824,7 @@ namespace Engine
             Vector3[] cv;
             uint[] ci;
             GeometryUtil.CreateSphere(
-                1, 12, 12,
+                1, 12, 5,
                 out cv,
                 out ci);
 
@@ -855,7 +856,7 @@ namespace Engine
             Vector3[] cv;
             uint[] ci;
             GeometryUtil.CreateSphere(
-                1, 12, 12,
+                1, 12, 5,
                 out cv,
                 out ci);
 
@@ -1014,20 +1015,14 @@ namespace Engine
 #endif
             if (spotLights != null && spotLights.Length > 0)
             {
-                var effectTechnique = effect.DeferredSpotLight;
                 var geometry = this.lightGeometry[2];
 
-                deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
-                Counters.IAInputLayoutSets++;
                 deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                 Counters.IAPrimitiveTopologySets++;
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 Counters.IAVertexBuffersSets++;
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
                 Counters.IAIndexBufferSets++;
-
-                this.Game.Graphics.SetRasterizerCullFrontFace();
-                this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
 
                 for (int i = 0; i < spotLights.Length; i++)
                 {
@@ -1039,15 +1034,14 @@ namespace Engine
                         context.World * light.Local,
                         context.ViewProjection);
 
-                    for (int p = 0; p < effectTechnique.Description.PassCount; p++)
-                    {
-                        effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
+                    this.Game.Graphics.SetRasterizerCullNone();
+                    this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
+                    this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
+                    this.DrawSingleLight(geometry, effect, effect.DeferredSpotStencil);
 
-                        deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
-
-                        Counters.DrawCallsPerFrame++;
-                        Counters.InstancesPerFrame++;
-                    }
+                    this.Game.Graphics.SetRasterizerCullFrontFace();
+                    this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
+                    this.DrawSingleLight(geometry, effect, effect.DeferredSpotLight);
                 }
             }
 #if DEBUG
@@ -1061,20 +1055,14 @@ namespace Engine
 #endif
             if (pointLights != null && pointLights.Length > 0)
             {
-                var effectTechnique = effect.DeferredPointLight;
                 var geometry = this.lightGeometry[1];
 
-                deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
-                Counters.IAInputLayoutSets++;
                 deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                 Counters.IAPrimitiveTopologySets++;
                 deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
                 Counters.IAVertexBuffersSets++;
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
                 Counters.IAIndexBufferSets++;
-
-                this.Game.Graphics.SetRasterizerCullFrontFace();
-                this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
 
                 for (int i = 0; i < pointLights.Length; i++)
                 {
@@ -1086,15 +1074,15 @@ namespace Engine
                         context.World * light.Local,
                         context.ViewProjection);
 
-                    for (int p = 0; p < effectTechnique.Description.PassCount; p++)
-                    {
-                        effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
+                    this.Game.Graphics.SetRasterizerCullNone();
+                    this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
+                    this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
+                    this.DrawSingleLight(geometry, effect, effect.DeferredPointStencil);
 
-                        deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
-
-                        Counters.DrawCallsPerFrame++;
-                        Counters.InstancesPerFrame++;
-                    }
+                    this.Game.Graphics.SetRasterizerCullFrontFace();
+                    this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
+                    this.Game.Graphics.DeviceContext.OutputMerger.DepthStencilReference = 0;
+                    this.DrawSingleLight(geometry, effect, effect.DeferredPointLight);
                 }
             }
 #if DEBUG
@@ -1171,6 +1159,27 @@ namespace Engine
 #endif
         }
         /// <summary>
+        /// Draws a single light
+        /// </summary>
+        /// <param name="geometry">Geometry</param>
+        /// <param name="effect">Effect</param>
+        /// <param name="effectTechnique">Technique</param>
+        private void DrawSingleLight(LightGeometry geometry, EffectDeferredComposer effect, EffectTechnique effectTechnique)
+        {
+            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
+            Counters.IAInputLayoutSets++;
+
+            for (int p = 0; p < effectTechnique.Description.PassCount; p++)
+            {
+                effectTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                this.Game.Graphics.DeviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
+
+                Counters.DrawCallsPerFrame++;
+                Counters.InstancesPerFrame++;
+            }
+        }
+        /// <summary>
         /// Draw result
         /// </summary>
         /// <param name="context">Drawing context</param>
@@ -1214,7 +1223,7 @@ namespace Engine
                 deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
                 Counters.IAIndexBufferSets++;
 
-                this.Game.Graphics.SetDepthStencilZDisabled();
+                this.Game.Graphics.SetDepthStencilNone();
                 this.Game.Graphics.SetRasterizerDefault();
                 this.Game.Graphics.SetBlendDefault();
 #if DEBUG

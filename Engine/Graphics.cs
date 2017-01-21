@@ -517,7 +517,7 @@ namespace Engine
                 {
                     IsDepthEnabled = true,
                     DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.Always,
+                    DepthComparison = Comparison.Less,
 
                     IsStencilEnabled = true,
                     StencilReadMask = 0xFF,
@@ -550,26 +550,26 @@ namespace Engine
                 {
                     IsDepthEnabled = false,
                     DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.NotEqual,
+                    DepthComparison = Comparison.Never,
 
                     IsStencilEnabled = true,
                     StencilReadMask = 0xFF,
-                    StencilWriteMask = 0xFF,
+                    StencilWriteMask = 0x00,
 
                     FrontFace = new DepthStencilOperationDescription()
                     {
                         FailOperation = StencilOperation.Keep,
-                        DepthFailOperation = StencilOperation.Increment,
+                        DepthFailOperation = StencilOperation.Keep,
                         PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.Always,
+                        Comparison = Comparison.NotEqual,
                     },
 
                     BackFace = new DepthStencilOperationDescription()
                     {
                         FailOperation = StencilOperation.Keep,
-                        DepthFailOperation = StencilOperation.Increment,
+                        DepthFailOperation = StencilOperation.Keep,
                         PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.Always,
+                        Comparison = Comparison.Never,
                     },
                 });
 

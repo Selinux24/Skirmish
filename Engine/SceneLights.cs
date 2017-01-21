@@ -354,7 +354,7 @@ namespace Engine
             });
             this.visiblePoints = pLights.ToArray();
 
-            var sLights = this.spotLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingBox) != ContainmentType.Disjoint);
+            var sLights = this.spotLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
             sLights.Sort((l1, l2) =>
             {
                 int i = -frustum.Contains(l1.Position).CompareTo(frustum.Contains(l2.Position));
@@ -403,7 +403,6 @@ namespace Engine
 
                 Vector3 keyDir = timeOfDay.LightDirection;
                 Vector3 backDir = new Vector3(keyDir.Y, keyDir.X, keyDir.Z);
-                Vector3 fillDir = Vector3.Cross(keyDir, backDir);
 
                 this.GlobalAmbientLight = ga;
 
@@ -418,17 +417,9 @@ namespace Engine
                 var backLight = this.BackLight;
                 if (backLight != null)
                 {
-                    backLight.Brightness = b;
+                    backLight.Brightness = b * 0.5f;
 
                     backLight.Direction = backDir;
-                }
-
-                var fillLight = this.FillLight;
-                if (fillLight != null)
-                {
-                    fillLight.Brightness = b;
-
-                    fillLight.Direction = fillDir;
                 }
             }
         }

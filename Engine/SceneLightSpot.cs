@@ -61,22 +61,15 @@ namespace Engine
         /// </summary>
         public float Intensity { get; set; }
         /// <summary>
-        /// Gets the bounding box of the active light
+        /// Gets the bounding sphere of the active light
         /// </summary>
-        public BoundingBox BoundingBox
+        public BoundingSphere BoundingSphere
         {
             get
             {
-                var lines = GetVolume();
+                Vector3 center = (this.Position + (Vector3.Normalize(this.Position) * this.Radius)) * 0.5f;
 
-                List<Vector3> points = new List<Vector3>();
-                for (int i = 0; i < lines.Length; i++)
-                {
-                    points.Add(lines[i].Point1);
-                    points.Add(lines[i].Point2);
-                }
-
-                return BoundingBox.FromPoints(points.ToArray());
+                return new BoundingSphere(center, this.Radius);
             }
         }
         /// <summary>
@@ -141,7 +134,10 @@ namespace Engine
             Vector3 position, Vector3 direction, float angle, float radius, float intensity)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.initialTransform = Helper.CreateWorld(position, direction, Vector3.Up);
+            if (direction == Vector3.Zero) throw new ArgumentException("Direction must have magnitude", "direction");
+
+            float f = Math.Abs(Vector3.Dot(direction, Vector3.Up));
+            this.initialTransform = Helper.CreateWorld(position, direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
             this.initialRadius = radius;
             this.initialIntensity = intensity;
 
@@ -168,7 +164,7 @@ namespace Engine
             this.initialTransform = transform;
             this.initialRadius = radius;
             this.initialIntensity = intensity;
-            
+
             this.Angle = angle;
             this.ParentTransform = Matrix.Identity;
         }

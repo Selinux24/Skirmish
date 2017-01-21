@@ -23,9 +23,17 @@ namespace Engine.Effects
         /// </summary>
         public readonly EffectTechnique DeferredDirectionalLight = null;
         /// <summary>
+        /// Point stencil technique
+        /// </summary>
+        public readonly EffectTechnique DeferredPointStencil = null;
+        /// <summary>
         /// Point light technique
         /// </summary>
         public readonly EffectTechnique DeferredPointLight = null;
+        /// <summary>
+        /// Spot stencil technique
+        /// </summary>
+        public readonly EffectTechnique DeferredSpotStencil = null;
         /// <summary>
         /// Spot light technique
         /// </summary>
@@ -441,12 +449,16 @@ namespace Engine.Effects
             : base(device, effect, compile)
         {
             this.DeferredDirectionalLight = this.Effect.GetTechniqueByName("DeferredDirectionalLight");
+            this.DeferredPointStencil = this.Effect.GetTechniqueByName("DeferredPointStencil");
             this.DeferredPointLight = this.Effect.GetTechniqueByName("DeferredPointLight");
+            this.DeferredSpotStencil = this.Effect.GetTechniqueByName("DeferredSpotStencil");
             this.DeferredSpotLight = this.Effect.GetTechniqueByName("DeferredSpotLight");
             this.DeferredCombineLights = this.Effect.GetTechniqueByName("DeferredCombineLights");
 
             this.AddInputLayout(this.DeferredDirectionalLight, VertexPositionTexture.GetInput());
+            this.AddInputLayout(this.DeferredPointStencil, VertexPosition.GetInput());
             this.AddInputLayout(this.DeferredPointLight, VertexPosition.GetInput());
+            this.AddInputLayout(this.DeferredSpotStencil, VertexPosition.GetInput());
             this.AddInputLayout(this.DeferredSpotLight, VertexPosition.GetInput());
             this.AddInputLayout(this.DeferredCombineLights, VertexPositionTexture.GetInput());
 

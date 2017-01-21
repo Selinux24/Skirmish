@@ -436,7 +436,11 @@ inline float4 ComputeLights(
 		V = normalize(ePosition - pPosition);
 		R = 2 * dot(L, pNormal) * pNormal - L;
 
-		cShadowFactor = dirLights[i].CastShadow * CalcShadowFactor(sLightPosition, shadows, shadowMapStatic, shadowMapDynamic);
+		cShadowFactor = 1;
+		if (dirLights[i].CastShadow == 1) 
+		{
+			cShadowFactor = CalcShadowFactor(sLightPosition, shadows, shadowMapStatic, shadowMapDynamic);
+		}
 
 		BlinnPhong(dirLights[i].Diffuse, dirLights[i].Specular, k.Shininess, L, pNormal, V, R, cDiffuse, cSpecular);
 		lDiffuse += cDiffuse * cShadowFactor;

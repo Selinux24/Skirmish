@@ -65,7 +65,7 @@ namespace SceneTest
 
             this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { AlwaysVisible = false, EnableDepthStencil = true }, 5000);
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 30, 00), 0.001f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 30, 00), 5f);
 
             this.SceneVolume = new BoundingSphere(Vector3.Zero, 150f);
         }
