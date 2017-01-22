@@ -4,15 +4,13 @@ using System.Collections.Generic;
 
 namespace Engine.Collections
 {
-    using Engine.Common;
-
     /// <summary>
     /// Use a priority queue (heap) to determine which node is more important.
     /// </summary>
     /// <typeparam name="T">
     /// A type that has a cost for each instance via the <see cref="IValueWithCost"/> interface.
     /// </typeparam>
-    public class PriorityQueue<T> : ICollection<T> where T : class, IValueWithCost
+    public sealed class PriorityQueue<T> : ICollection<T> where T : class, IValueWithCost
     {
         private T[] heap;
         private int capacity;
