@@ -51,11 +51,11 @@ namespace Engine
         /// <summary>
         /// Geometry buffer
         /// </summary>
-        private GBuffer geometryBuffer = null;
+        private RenderTarget geometryBuffer = null;
         /// <summary>
         /// Light buffer
         /// </summary>
-        private LightBuffer lightBuffer = null;
+        private RenderTarget lightBuffer = null;
         /// <summary>
         /// Window vertex buffer
         /// </summary>
@@ -165,13 +165,13 @@ namespace Engine
         /// <summary>
         /// Light map
         /// </summary>
-        protected ShaderResourceView LightMap
+        protected ShaderResourceView[] LightMap
         {
             get
             {
                 if (this.lightBuffer != null)
                 {
-                    return this.lightBuffer.Texture;
+                    return this.lightBuffer.Textures;
                 }
 
                 return null;
@@ -189,8 +189,8 @@ namespace Engine
             this.UpdateRectangleAndView();
 
             this.shadowMapper = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
-            this.geometryBuffer = new GBuffer(game);
-            this.lightBuffer = new LightBuffer(game);
+            this.geometryBuffer = new RenderTarget(game, 3);
+            this.lightBuffer = new RenderTarget(game, 1);
 
             this.UpdateContext = new UpdateContext()
             {
@@ -517,7 +517,7 @@ namespace Engine
                             Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
                             //Draw scene on g-buffer render targets
-                            this.DrawResultComponents(gameTime, this.DrawContext, deferredEnabledComponents);
+                            this.DrawResultComponents(gameTime, this.DrawContext, deferredEnabledComponents, true);
 #if DEBUG
                             swGeometryBufferDraw.Stop();
 #endif
@@ -605,7 +605,7 @@ namespace Engine
                         this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
 
                         //Draw scene
-                        this.DrawResultComponents(gameTime, this.DrawContext, deferredDisabledComponents);
+                        this.DrawResultComponents(gameTime, this.DrawContext, deferredDisabledComponents, false);
 
                         //Set deferred mode
                         this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
@@ -746,7 +746,7 @@ namespace Engine
         {
             if (result == SceneRendererResultEnum.ShadowMapStatic) return this.ShadowMapStatic;
             if (result == SceneRendererResultEnum.ShadowMapDynamic) return this.ShadowMapDynamic;
-            if (result == SceneRendererResultEnum.LightMap) return this.LightMap;
+            if (result == SceneRendererResultEnum.LightMap) return this.LightMap[0];
 
             if (this.GeometryMap != null && this.GeometryMap.Length > 0)
             {
@@ -879,7 +879,7 @@ namespace Engine
 
             //Set g-buffer render targets
             this.Game.Graphics.SetRenderTargets(
-                this.geometryBuffer.RenderTargets, true, Color.Black,
+                this.geometryBuffer.Targets, true, Color.Black,
                 this.Game.Graphics.DefaultDepthStencil, true);
         }
         /// <summary>
@@ -891,8 +891,8 @@ namespace Engine
             this.Game.Graphics.SetViewport(this.viewport);
 
             //Set light buffer to draw lights
-            this.Game.Graphics.SetRenderTarget(
-                this.lightBuffer.RenderTarget, true, Color.Black,
+            this.Game.Graphics.SetRenderTargets(
+                this.lightBuffer.Targets, true, Color.Black,
                 this.Game.Graphics.DefaultDepthStencil, false);
         }
         /// <summary>
@@ -1003,12 +1003,12 @@ namespace Engine
                         context.ViewProjection);
 
                     this.Game.Graphics.SetRasterizerStencilPass();
-                    this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
+                    this.Game.Graphics.SetDepthStencilVolumeMarking();
                     this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
                     this.DrawSingleLight(geometry, effect, effect.DeferredPointStencil);
 
                     this.Game.Graphics.SetRasterizerLightingPass();
-                    this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
+                    this.Game.Graphics.SetDepthStencilVolumeDrawing(0);
                     this.Game.Graphics.DeviceContext.OutputMerger.DepthStencilReference = 0;
                     this.DrawSingleLight(geometry, effect, effect.DeferredPointLight);
                 }
@@ -1037,12 +1037,12 @@ namespace Engine
                         context.ViewProjection);
 
                     this.Game.Graphics.SetRasterizerStencilPass();
-                    this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
+                    this.Game.Graphics.SetDepthStencilVolumeMarking();
                     this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
                     this.DrawSingleLight(geometry, effect, effect.DeferredSpotStencil);
 
                     this.Game.Graphics.SetRasterizerLightingPass();
-                    this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
+                    this.Game.Graphics.SetDepthStencilVolumeDrawing(0);
                     this.DrawSingleLight(geometry, effect, effect.DeferredSpotLight);
                 }
             }
@@ -1170,7 +1170,7 @@ namespace Engine
                     context.Lights.FogRange,
                     context.Lights.FogColor,
                     this.GeometryMap[2],
-                    this.LightMap);
+                    this.LightMap[0]);
 
                 var deviceContext = this.Game.Graphics.DeviceContext;
                 var geometry = this.screenGeometry;
@@ -1241,8 +1241,8 @@ namespace Engine
                     if (c.EnableDepthStencil) this.Game.Graphics.SetDepthStencilZEnabled();
                     else this.Game.Graphics.SetDepthStencilZDisabled();
 
-                    if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                    else this.Game.Graphics.SetBlendDeferredComposer();
+                    if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendTransparent();
+                    else this.Game.Graphics.SetBlendDefault();
 
                     c.Draw(context);
                 });
@@ -1254,7 +1254,8 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
+        /// <param name="deferred">Deferred drawing</param>
+        private void DrawResultComponents(GameTime gameTime, DrawContext context, List<Drawable> components, bool deferred)
         {
             var toDraw = components.FindAll(c => !c.Cull);
             if (toDraw.Count > 0)
@@ -1266,8 +1267,16 @@ namespace Engine
                     if (c.EnableDepthStencil) this.Game.Graphics.SetDepthStencilZEnabled();
                     else this.Game.Graphics.SetDepthStencilZDisabled();
 
-                    if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                    else this.Game.Graphics.SetBlendDeferredComposer();
+                    if (deferred)
+                    {
+                        if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                        else this.Game.Graphics.SetBlendDeferredComposer();
+                    }
+                    else
+                    {
+                        if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendTransparent();
+                        else this.Game.Graphics.SetBlendDefault();
+                    }
 
                     c.Draw(context);
                 });

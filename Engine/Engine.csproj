@@ -315,10 +315,9 @@
     <Compile Include="SceneRendererResultEnum.cs" />
     <Compile Include="Effects\EffectDeferredComposer.cs" />
     <Compile Include="EngineException.cs" />
-    <Compile Include="GBuffer.cs" />
+    <Compile Include="RenderTarget.cs" />
     <Compile Include="Effects\EffectDeferredBasic.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="LightBuffer.cs" />
     <Compile Include="SceneLight.cs" />
     <Compile Include="SceneModesEnum.cs" />
     <Compile Include="SceneRendererDeferred.cs" />

@@ -113,13 +113,13 @@ namespace Engine
         /// </summary>
         private DepthStencilState depthStencilNone = null;
         /// <summary>
-        /// Depth stencil state for deferred lighting for volume marking
+        /// Depth stencil state for volume marking
         /// </summary>
-        private DepthStencilState depthStencilDeferredLightingVolume = null;
+        private DepthStencilState depthStencilVolumeMarking = null;
         /// <summary>
-        /// Depth stencil state for deferred lighting for volume drawing
+        /// Depth stencil state for volume drawing
         /// </summary>
-        private DepthStencilState depthStencilDeferredLightingDrawing = null;
+        private DepthStencilState depthStencilVolumeDrawing = null;
         /// <summary>
         /// Default blend state
         /// </summary>
@@ -145,17 +145,9 @@ namespace Engine
         /// </summary>
         private BlendState blendDeferredComposer = null;
         /// <summary>
-        /// Blend state for defered composer alpha blending
-        /// </summary>
-        private BlendState blendDeferredComposerAlpha = null;
-        /// <summary>
         /// Blend state for transparent defered composer blending
         /// </summary>
         private BlendState blendDeferredComposerTransparent = null;
-        /// <summary>
-        /// Blend state for additive defered composer blending
-        /// </summary>
-        private BlendState blendDeferredComposerAdditive = null;
         /// <summary>
         /// Default rasterizer
         /// </summary>
@@ -517,9 +509,9 @@ namespace Engine
 
             #endregion
 
-            #region Deferred lighting depth-stencil state for volume marking
+            #region Depth-stencil state for volume marking (Value != 0 if object is inside of the current drawing volume)
 
-            this.depthStencilDeferredLightingVolume = new DepthStencilState(
+            this.depthStencilVolumeMarking = new DepthStencilState(
                 this.Device,
                 new DepthStencilStateDescription()
                 {
@@ -550,9 +542,9 @@ namespace Engine
 
             #endregion
 
-            #region Deferred lighting depth-stencil state for drawing
+            #region Depth-stencil state for volume drawing (Process pixels if stencil value != stencil reference)
 
-            this.depthStencilDeferredLightingDrawing = new DepthStencilState(
+            this.depthStencilVolumeDrawing = new DepthStencilState(
                 this.Device,
                 new DepthStencilStateDescription()
                 {
@@ -577,7 +569,7 @@ namespace Engine
                         FailOperation = StencilOperation.Keep,
                         DepthFailOperation = StencilOperation.Keep,
                         PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.Never,
+                        Comparison = Comparison.NotEqual,
                     },
                 });
 
@@ -777,27 +769,6 @@ namespace Engine
             }
             #endregion
 
-            #region Deferred lighting blend state
-            {
-                BlendStateDescription desc = new BlendStateDescription();
-                desc.AlphaToCoverageEnable = false;
-                desc.IndependentBlendEnable = false;
-
-                desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.One;
-
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
-
-                this.blendDeferredLighting = new BlendState(this.Device, desc);
-            }
-            #endregion
-
             #region Deferred composer blend state (no alpha)
             {
                 BlendStateDescription desc = new BlendStateDescription();
@@ -832,44 +803,6 @@ namespace Engine
                 desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
 
                 this.blendDeferredComposer = new BlendState(this.Device, desc);
-            }
-            #endregion
-
-            #region Deferred composer alpha blend state
-            {
-                BlendStateDescription desc = new BlendStateDescription();
-                desc.AlphaToCoverageEnable = false;
-                desc.IndependentBlendEnable = true;
-
-                //Transparent blending only in first buffer
-                desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-
-                desc.RenderTarget[1].IsBlendEnabled = true;
-                desc.RenderTarget[1].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[1].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[1].SourceBlend = BlendOption.One;
-                desc.RenderTarget[1].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[1].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[1].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[1].DestinationAlphaBlend = BlendOption.Zero;
-
-                desc.RenderTarget[2].IsBlendEnabled = true;
-                desc.RenderTarget[2].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[2].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[2].SourceBlend = BlendOption.One;
-                desc.RenderTarget[2].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
-
-                this.blendDeferredComposerAlpha = new BlendState(this.Device, desc);
             }
             #endregion
 
@@ -911,41 +844,22 @@ namespace Engine
             }
             #endregion
 
-            #region Deferred composer additive blend state
+            #region Deferred lighting blend state
             {
                 BlendStateDescription desc = new BlendStateDescription();
                 desc.AlphaToCoverageEnable = false;
-                desc.IndependentBlendEnable = true;
+                desc.IndependentBlendEnable = false;
 
-                //Additive blending only in first buffer
                 desc.RenderTarget[0].IsBlendEnabled = true;
                 desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
                 desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
+                desc.RenderTarget[0].SourceBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationBlend = BlendOption.One;
                 desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
+                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
 
-                desc.RenderTarget[1].IsBlendEnabled = true;
-                desc.RenderTarget[1].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[1].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[1].SourceBlend = BlendOption.One;
-                desc.RenderTarget[1].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[1].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[1].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[1].DestinationAlphaBlend = BlendOption.Zero;
-
-                desc.RenderTarget[2].IsBlendEnabled = true;
-                desc.RenderTarget[2].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[2].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[2].SourceBlend = BlendOption.One;
-                desc.RenderTarget[2].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
-
-                this.blendDeferredComposerAdditive = new BlendState(this.Device, desc);
+                this.blendDeferredLighting = new BlendState(this.Device, desc);
             }
             #endregion
 
@@ -1140,18 +1054,18 @@ namespace Engine
             this.SetDepthStencilState(this.depthStencilNone);
         }
         /// <summary>
-        /// Sets depth stencil for deferred lighting for volume marking
+        /// Sets depth stencil for volume marking
         /// </summary>
-        public void SetDepthStencilDeferredLightingVolume()
+        public void SetDepthStencilVolumeMarking()
         {
-            this.SetDepthStencilState(this.depthStencilDeferredLightingVolume);
+            this.SetDepthStencilState(this.depthStencilVolumeMarking);
         }
         /// <summary>
-        /// Sets depth stencil for deferred lighting for drawing
+        /// Sets depth stencil for volume drawing
         /// </summary>
-        public void SetDepthStencilDeferredLightingDrawing()
+        public void SetDepthStencilVolumeDrawing(int stencilRef)
         {
-            this.SetDepthStencilState(this.depthStencilDeferredLightingDrawing, 0);
+            this.SetDepthStencilState(this.depthStencilVolumeDrawing, stencilRef);
         }
         /// <summary>
         /// Sets default blend state
@@ -1182,25 +1096,11 @@ namespace Engine
             this.SetBlendState(this.blendAdditive, Color.Transparent, -1);
         }
         /// <summary>
-        /// Sets deferred lighting blend state
-        /// </summary>
-        public void SetBlendDeferredLighting()
-        {
-            this.SetBlendState(this.blendDeferredLighting, Color.Transparent, -1);
-        }
-        /// <summary>
         /// Sets deferred composer blend state
         /// </summary>
         public void SetBlendDeferredComposer()
         {
             this.SetBlendState(this.blendDeferredComposer, Color.Transparent, -1);
-        }
-        /// <summary>
-        /// Sets deferred composer alpha blend state
-        /// </summary>
-        public void SetBlendDeferredComposerAlpha()
-        {
-            this.SetBlendState(this.blendDeferredComposerAlpha, Color.Transparent, -1);
         }
         /// <summary>
         /// Sets transparent deferred composer blend state
@@ -1210,11 +1110,11 @@ namespace Engine
             this.SetBlendState(this.blendDeferredComposerTransparent, Color.Transparent, -1);
         }
         /// <summary>
-        /// Sets additive deferred composer blend state
+        /// Sets deferred lighting blend state
         /// </summary>
-        public void SetBlendDeferredComposerAdditive()
+        public void SetBlendDeferredLighting()
         {
-            this.SetBlendState(this.blendDeferredComposerAdditive, Color.Transparent, -1);
+            this.SetBlendState(this.blendDeferredLighting, Color.Transparent, -1);
         }
         /// <summary>
         /// Sets default rasterizer
@@ -1417,8 +1317,8 @@ namespace Engine
             Helper.Dispose(this.depthStencilRDzBufferEnabled);
             Helper.Dispose(this.depthStencilRDzBufferDisabled);
             Helper.Dispose(this.depthStencilNone);
-            Helper.Dispose(this.depthStencilDeferredLightingVolume);
-            Helper.Dispose(this.depthStencilDeferredLightingDrawing);
+            Helper.Dispose(this.depthStencilVolumeMarking);
+            Helper.Dispose(this.depthStencilVolumeDrawing);
 
             Helper.Dispose(this.rasterizerDefault);
             Helper.Dispose(this.rasterizerWireframe);
@@ -1434,7 +1334,6 @@ namespace Engine
             Helper.Dispose(this.blendDeferredLighting);
             Helper.Dispose(this.blendDeferredComposer);
             Helper.Dispose(this.blendDeferredComposerTransparent);
-            Helper.Dispose(this.blendDeferredComposerAdditive);
         }
     }
 }
