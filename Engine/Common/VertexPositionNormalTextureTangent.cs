@@ -74,10 +74,10 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel)
         {
-            if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
-            else if (channel == VertexDataChannels.Normal) return this.Normal.Cast<T>();
-            else if (channel == VertexDataChannels.Texture) return this.Texture.Cast<T>();
-            else if (channel == VertexDataChannels.Tangent) return this.Tangent.Cast<T>();
+            if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
+            else if (channel == VertexDataChannels.Normal) return (T)(object)this.Normal;
+            else if (channel == VertexDataChannels.Texture) return (T)(object)this.Texture;
+            else if (channel == VertexDataChannels.Tangent) return (T)(object)this.Tangent;
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
         /// <summary>
@@ -88,10 +88,10 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
-            if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
-            else if (channel == VertexDataChannels.Normal) this.Normal = value.Cast<Vector3>();
-            else if (channel == VertexDataChannels.Texture) this.Texture = value.Cast<Vector2>();
-            else if (channel == VertexDataChannels.Tangent) this.Tangent = value.Cast<Vector3>();
+            if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Normal) this.Normal = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Texture) this.Texture = (Vector2)(object)value;
+            else if (channel == VertexDataChannels.Tangent) this.Tangent = (Vector3)(object)value;
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
 

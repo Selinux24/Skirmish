@@ -62,8 +62,8 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel)
         {
-            if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
-            else if (channel == VertexDataChannels.Color) return this.Color.Cast<T>();
+            if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
+            else if (channel == VertexDataChannels.Color) return (T)(object)this.Color;
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
         /// <summary>
@@ -74,8 +74,8 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
-            if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
-            else if (channel == VertexDataChannels.Color) this.Color = value.Cast<Color4>();
+            if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Color) this.Color = (Color4)(object)value;
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
 

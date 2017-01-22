@@ -912,6 +912,8 @@ namespace Engine
                 {
                     var model = (Model)curr.Model;
 
+                    model.Manipulator.UpdateInternals(true);
+
                     if (usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) ||
                         usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePathFinding))
                     {
@@ -945,6 +947,8 @@ namespace Engine
                     {
                         Array.ForEach(model.Instances, (m) =>
                         {
+                            m.Manipulator.UpdateInternals(true);
+
                             var vTris = m.GetVolume();
                             if (vTris != null && vTris.Length > 0)
                             {
@@ -965,6 +969,8 @@ namespace Engine
                     {
                         Array.ForEach(model.Instances, (m) =>
                         {
+                            m.Manipulator.UpdateInternals(true);
+
                             //Use full mesh
                             tris.AddRange(m.GetTriangles());
                         });

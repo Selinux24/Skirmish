@@ -40,6 +40,9 @@ namespace DeferredTest
         private LineListDrawer lineDrawer = null;
 
         private Random rnd = new Random(0);
+        private int pointOffset = 0;
+        private int spotOffset = 0;
+        private bool onlyModels = true;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -54,6 +57,8 @@ namespace DeferredTest
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
 
+            #region Cursor
+
             SpriteDescription cursorDesc = new SpriteDescription()
             {
                 Textures = new[] { "target.png" },
@@ -61,6 +66,8 @@ namespace DeferredTest
                 Height = 16,
             };
             this.cursor = this.AddCursor(cursorDesc);
+
+            #endregion
 
             #region Models
 
@@ -128,7 +135,7 @@ namespace DeferredTest
                     Name = "Tank",
                     CastShadow = true,
                 });
-            this.tank.Manipulator.SetScale(0.2f);
+            this.Lights.AddRange(this.tank.Lights);
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -138,10 +145,12 @@ namespace DeferredTest
 
             sw.Restart();
 
+            this.tank.Manipulator.SetScale(0.2f);
+
             var tankbbox = this.tank.GetBoundingBox();
             tankAgent.Height = tankbbox.GetY();
             tankAgent.Radius = tankbbox.GetX() * 0.5f;
-            tankAgent.MaxClimb = tankbbox.GetY() * 0.45f;
+            tankAgent.MaxClimb = tankbbox.GetY() * 0.55f;
 
             var navSettings = NavigationMeshGenerationSettings.Default;
             navSettings.Agents = new[]
@@ -272,7 +281,7 @@ namespace DeferredTest
                 float d;
                 if (this.terrain.FindTopGroundPosition(20, 40, out p, out t, out d))
                 {
-                    this.tank.Manipulator.SetPosition(p, true);
+                    this.tank.Manipulator.SetPosition(p);
                     this.tank.Manipulator.SetNormal(t.Normal);
                     cameraPosition += p;
                     modelCount++;
@@ -364,11 +373,12 @@ namespace DeferredTest
 
             this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { EnableDepthStencil = true }, 1000);
 
-            this.Lights.KeyLight.Enabled = true;
-            this.Lights.BackLight.Enabled = true;
+            this.Lights.KeyLight.Enabled = false;
+            this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = true;
 
-            this.Lights.AddRange(this.tank.Lights);
+            this.pointOffset = this.Lights.PointLights.Length;
+            this.spotOffset = this.Lights.SpotLights.Length;
 
             #endregion
         }
@@ -633,28 +643,11 @@ namespace DeferredTest
                 this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.K))
-            {
-                if (this.spotLight == null)
-                {
-                    this.CreateSpotLights();
-                }
-                else
-                {
-                    this.ClearSpotLights();
-                }
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.L))
             {
-                if (this.Lights.PointLights.Length > 0)
-                {
-                    this.ClearPointLigths();
-                }
-                else
-                {
-                    this.CreatePointLigths();
-                }
+                this.onlyModels = !this.onlyModels;
+
+                this.CreateLights(this.onlyModels);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.P))
@@ -706,7 +699,7 @@ namespace DeferredTest
                     this.spotLight.Intensity = Math.Max(0f, this.spotLight.Intensity);
                 }
 
-                this.lineDrawer.SetLines(Color.White, this.spotLight.GetVolume());
+                this.lineDrawer.SetLines(Color.White, this.spotLight.GetVolume(10));
             }
             else
             {
@@ -783,93 +776,84 @@ namespace DeferredTest
             }
         }
 
-        private void CreateSpotLights()
-        {
-            this.Lights.ClearSpotLights();
-
-            Vector3 lightPosition;
-            Triangle lightTriangle;
-            float lightDistance;
-            if (this.terrain.FindTopGroundPosition(0, 1, out lightPosition, out lightTriangle, out lightDistance))
-            {
-                lightPosition.Y += 10f;
-
-                Vector3 direction = -Vector3.Normalize(lightPosition);
-
-                this.spotLight = new SceneLightSpot(
-                    "Spot the dog",
-                    false,
-                    Color.Yellow,
-                    Color.Yellow,
-                    true,
-                    lightPosition,
-                    direction,
-                    25,
-                    25,
-                    25f);
-
-                this.Lights.Add(this.spotLight);
-
-                this.lineDrawer.Active = true;
-                this.lineDrawer.Visible = true;
-            }
-        }
-        private void ClearSpotLights()
-        {
-            this.Lights.ClearSpotLights();
-
-            this.spotLight = null;
-
-            this.lineDrawer.Active = false;
-            this.lineDrawer.Visible = false;
-        }
-
-        private void CreatePointLigths()
+        private void CreateLights(bool modelsOnly)
         {
             this.Lights.ClearPointLights();
+            this.Lights.ClearSpotLights();
+            this.spotLight = null;
 
-            int sep = 10;
-            int f = 12;
-            int l = (f - 1) * sep;
-            l -= (l / 2);
+            this.Lights.AddRange(this.tank.Lights);
 
-            for (int i = 0; i < f; i++)
+            if (!modelsOnly)
             {
-                for (int x = 0; x < f; x++)
                 {
                     Vector3 lightPosition;
                     Triangle lightTriangle;
                     float lightDistance;
-                    if (!this.terrain.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out lightPosition, out lightTriangle, out lightDistance))
+                    if (this.terrain.FindTopGroundPosition(0, 1, out lightPosition, out lightTriangle, out lightDistance))
                     {
-                        lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
+                        lightPosition.Y += 10f;
+
+                        Vector3 direction = -Vector3.Normalize(lightPosition);
+
+                        this.spotLight = new SceneLightSpot(
+                            "Spot the dog",
+                            false,
+                            Color.Yellow,
+                            Color.Yellow,
+                            true,
+                            lightPosition,
+                            direction,
+                            25,
+                            25,
+                            25f);
+
+                        this.Lights.Add(this.spotLight);
+
+                        this.lineDrawer.Active = true;
+                        this.lineDrawer.Visible = true;
                     }
-                    else
+                }
+
+                int sep = 10;
+                int f = 12;
+                int l = (f - 1) * sep;
+                l -= (l / 2);
+
+                for (int i = 0; i < f; i++)
+                {
+                    for (int x = 0; x < f; x++)
                     {
-                        lightPosition.Y += 1f;
+                        Vector3 lightPosition;
+                        Triangle lightTriangle;
+                        float lightDistance;
+                        if (!this.terrain.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out lightPosition, out lightTriangle, out lightDistance))
+                        {
+                            lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
+                        }
+                        else
+                        {
+                            lightPosition.Y += 1f;
+                        }
+
+                        var color = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f);
+
+                        var pointLight = new SceneLightPoint(
+                            string.Format("Point {0}", this.Lights.PointLights.Length),
+                            false,
+                            color,
+                            color,
+                            true,
+                            lightPosition,
+                            5f,
+                            10f);
+
+                        pointLight.State = rnd.NextFloat(0, 1) >= 0.5f ? 1 : -1;
+
+                        this.Lights.Add(pointLight);
                     }
-
-                    var color = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f);
-
-                    SceneLightPoint pointLight = new SceneLightPoint(
-                        string.Format("Point {0}", this.Lights.PointLights.Length),
-                        false,
-                        color,
-                        color,
-                        true,
-                        lightPosition,
-                        5f,
-                        10f);
-
-                    pointLight.State = rnd.NextFloat(0, 1) >= 0.5f ? 1 : -1;
-
-                    this.Lights.Add(pointLight);
                 }
             }
-        }
-        private void ClearPointLigths()
-        {
-            this.Lights.ClearPointLights();
         }
     }
 }

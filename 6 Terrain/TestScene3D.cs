@@ -76,6 +76,10 @@ namespace TerrainTest
         private Color4 velocityColor = Color.Green;
         private LineListDrawer curveLineDrawer = null;
 
+        private LineListDrawer lightsVolumeDrawer = null;
+        private bool drawDrawVolumes = false;
+        private bool drawCullVolumes = false;
+
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
         {
@@ -85,6 +89,43 @@ namespace TerrainTest
         public override void Initialize()
         {
             base.Initialize();
+
+            #region Lights
+
+            this.Lights.DirectionalLights[0].Enabled = false;
+            this.Lights.DirectionalLights[1].Enabled = false;
+            this.Lights.DirectionalLights[2].Enabled = true;
+            this.Lights.DirectionalLights[2].CastShadow = true;
+
+            this.Lights.Add(new SceneLightPoint(
+                "Blue point",
+                false,
+                Color.Blue,
+                Color.Blue,
+                true,
+                Vector3.Zero,
+                2f,
+                5f));
+            this.Lights.Add(new SceneLightPoint(
+                "Red point",
+                false,
+                Color.Red,
+                Color.Red,
+                true,
+                Vector3.Zero,
+                2f,
+                5f));
+
+            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { AlwaysVisible = false, EnableDepthStencil = true }, 5000);
+
+            #endregion
+
+            #region Camera
+
+            this.Camera.NearPlaneDistance = 0.1f;
+            this.Camera.FarPlaneDistance = 5000f;
+
+            #endregion
 
             #region Texts
 
@@ -119,6 +160,7 @@ namespace TerrainTest
                 "cursor.xml",
                 new ModelDescription()
                 {
+                    Name = "Cursor3D",
                     AlwaysVisible = true,
                     DeferredEnabled = false,
                     CastShadow = false,
@@ -134,6 +176,7 @@ namespace TerrainTest
             sw.Restart();
             this.cursor2D = this.AddCursor(new SpriteDescription()
             {
+                Name = "Cursor2D",
                 ContentPath = "resources/Cursor",
                 Textures = new[] { "target.png" },
                 Width = 16,
@@ -151,6 +194,7 @@ namespace TerrainTest
             sw.Restart();
             this.lensFlare = this.AddLensFlare(new LensFlareDescription()
             {
+                Name = "Flares",
                 ContentPath = "resources/Flare",
                 GlowTexture = "lfGlow.png",
                 Flares = new[]
@@ -182,18 +226,23 @@ namespace TerrainTest
                 "Helicopter.xml",
                 new ModelDescription()
                 {
+                    Name = "Helicopter",
                     CastShadow = true,
                     Static = false,
                     TextureIndex = 2,
                 });
+            sw.Stop();
+            loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.Lights.AddRange(this.helicopter.Lights);
+
             this.helicopter.SetManipulator(new HeliManipulator());
-            this.helicopter.Manipulator.SetScale(0.75f, true);
+            this.helicopter.Manipulator.SetScale(0.75f);
+
             AnimationPath p = new AnimationPath();
             p.AddLoop("default");
             this.helicopter.AnimationController.AddPath(p);
             this.helicopter.AnimationController.Start();
-            sw.Stop();
-            loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
@@ -205,12 +254,21 @@ namespace TerrainTest
                 "Leopard.xml",
                 new ModelDescription()
                 {
+                    Name = "Tank",
                     CastShadow = true,
                     Static = false,
                 });
-            this.tank.Manipulator.SetScale(0.2f, true);
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.Lights.AddRange(this.tank.Lights);
+
+            this.tank.Manipulator.SetScale(0.2f, true);
+
+            var tankbbox = this.tank.GetBoundingBox();
+            tankAgent.Height = tankbbox.GetY();
+            tankAgent.Radius = tankbbox.GetX() * 0.5f;
+            tankAgent.MaxClimb = tankbbox.GetY() * 0.45f;
 
             #endregion
 
@@ -222,11 +280,14 @@ namespace TerrainTest
                 "Helipod.xml",
                 new ModelDescription()
                 {
+                    Name = "Helipod",
                     CastShadow = true,
                     Static = true,
                 });
             sw.Stop();
             loadingText += string.Format("helipod: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.Lights.AddRange(this.helipod.Lights);
 
             #endregion
 
@@ -238,11 +299,14 @@ namespace TerrainTest
                 "Garage.xml",
                 new ModelDescription()
                 {
+                    Name = "Garage",
                     CastShadow = true,
                     Static = true,
                 });
             sw.Stop();
             loadingText += string.Format("garage: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.Lights.AddRange(this.garage.Lights);
 
             #endregion
 
@@ -254,6 +318,7 @@ namespace TerrainTest
                 "Obelisk.xml",
                 new ModelInstancedDescription()
                 {
+                    Name = "Obelisk",
                     CastShadow = true,
                     Static = true,
                     Instances = 4,
@@ -271,7 +336,7 @@ namespace TerrainTest
                 "boulder.xml",
                 new ModelInstancedDescription()
                 {
-                    Name = "DEBUG_CUBE_INSTANCED",
+                    Name = "Rocks",
                     CastShadow = true,
                     Static = true,
                     Instances = 250,
@@ -316,6 +381,7 @@ namespace TerrainTest
             sw.Restart();
             this.skydom = this.AddSkydom(new SkydomDescription()
             {
+                Name = "Skydom",
                 ContentPath = "resources/Skydom",
                 Texture = "sunset.dds",
                 Radius = this.Camera.FarPlaneDistance,
@@ -329,11 +395,6 @@ namespace TerrainTest
 
             sw.Restart();
 
-            var tankbbox = this.tank.GetBoundingBox();
-            tankAgent.Height = tankbbox.GetY();
-            tankAgent.Radius = tankbbox.GetX() * 0.5f;
-            tankAgent.MaxClimb = tankbbox.GetY() * 0.45f;
-
             var navSettings = NavigationMeshGenerationSettings.Default;
             navSettings.Agents = new[]
             {
@@ -343,6 +404,7 @@ namespace TerrainTest
 
             var terrainDescription = new GroundDescription()
             {
+                Name = "Terrain",
                 Vegetation = new GroundDescription.VegetationDescription()
                 {
                     ContentPath = "resources/Terrain/Foliage/Billboard",
@@ -397,7 +459,7 @@ namespace TerrainTest
             float hDist;
             if (this.terrain.FindTopGroundPosition(75, 75, out hPos, out hTri, out hDist))
             {
-                this.helipod.Manipulator.SetPosition(hPos, true);
+                this.helipod.Manipulator.SetPosition(hPos);
             }
             lines.AddRange(Line3D.CreateWiredBox(this.helipod.GetBoundingBox()));
 
@@ -407,8 +469,8 @@ namespace TerrainTest
             float gDist;
             if (this.terrain.FindTopGroundPosition(-10, -40, out gPos, out gTri, out gDist))
             {
-                this.garage.Manipulator.SetPosition(gPos, true);
-                this.garage.Manipulator.SetRotation(MathUtil.PiOverFour + MathUtil.Pi, 0, 0, true);
+                this.garage.Manipulator.SetPosition(gPos);
+                this.garage.Manipulator.SetRotation(MathUtil.PiOverFour + MathUtil.Pi, 0, 0);
             }
             lines.AddRange(Line3D.CreateWiredBox(this.garage.GetBoundingBox()));
 
@@ -423,8 +485,8 @@ namespace TerrainTest
                 float obeliskDist;
                 if (this.terrain.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition, out obeliskTri, out obeliskDist))
                 {
-                    this.obelisk.Instances[i].Manipulator.SetPosition(obeliskPosition, true);
-                    this.obelisk.Instances[i].Manipulator.SetScale(1.5f, true);
+                    this.obelisk.Instances[i].Manipulator.SetPosition(obeliskPosition);
+                    this.obelisk.Instances[i].Manipulator.SetScale(1.5f);
                 }
                 lines.AddRange(Line3D.CreateWiredBox(this.obelisk.Instances[i].GetBoundingBox()));
             }
@@ -453,9 +515,9 @@ namespace TerrainTest
                         scale = posRnd.NextFloat(0.1f, 0.2f);
                     }
 
-                    this.rocks.Instances[i].Manipulator.SetPosition(rockPosition, true);
-                    this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
-                    this.rocks.Instances[i].Manipulator.SetScale(scale, true);
+                    this.rocks.Instances[i].Manipulator.SetPosition(rockPosition);
+                    this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
+                    this.rocks.Instances[i].Manipulator.SetScale(scale);
                 }
                 lines.AddRange(Line3D.CreateWiredBox(this.rocks.Instances[i].GetBoundingBox()));
             }
@@ -470,9 +532,9 @@ namespace TerrainTest
                 float treeDist;
                 if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
                 {
-                    this.tree1.Instances[i].Manipulator.SetPosition(treePosition, true);
-                    this.tree1.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0, true);
-                    this.tree1.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f), true);
+                    this.tree1.Instances[i].Manipulator.SetPosition(treePosition);
+                    this.tree1.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
+                    this.tree1.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
                 }
                 lines.AddRange(Line3D.CreateWiredTriangle(this.tree1.Instances[i].GetVolume()));
             }
@@ -486,9 +548,9 @@ namespace TerrainTest
                 float treeDist;
                 if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
                 {
-                    this.tree2.Instances[i].Manipulator.SetPosition(treePosition, true);
-                    this.tree2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0, true);
-                    this.tree2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f), true);
+                    this.tree2.Instances[i].Manipulator.SetPosition(treePosition);
+                    this.tree2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
+                    this.tree2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
                 }
                 lines.AddRange(Line3D.CreateWiredTriangle(this.tree2.Instances[i].GetVolume()));
             }
@@ -505,7 +567,7 @@ namespace TerrainTest
             float heliDist;
             if (this.terrain.FindTopGroundPosition(this.helipod.Manipulator.Position.X, this.helipod.Manipulator.Position.Z, out heliPos, out heliTri, out heliDist))
             {
-                this.helicopter.Manipulator.SetPosition(heliPos, true);
+                this.helicopter.Manipulator.SetPosition(heliPos);
                 this.helicopter.Manipulator.SetNormal(heliTri.Normal);
             }
 
@@ -517,52 +579,9 @@ namespace TerrainTest
             float tankDist;
             if (this.terrain.FindTopGroundPosition(-60, -60, out tankPosition, out tankTriangle, out tankDist))
             {
-                this.tank.Manipulator.SetPosition(tankPosition, true);
+                this.tank.Manipulator.SetPosition(tankPosition);
                 this.tank.Manipulator.SetNormal(tankTriangle.Normal);
             }
-
-            #endregion
-
-            #region Lights
-
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[0].Brightness = 0.2f;
-            this.Lights.DirectionalLights[1].Enabled = true;
-            this.Lights.DirectionalLights[1].Brightness = 0.2f;
-            this.Lights.DirectionalLights[2].Enabled = true;
-            this.Lights.DirectionalLights[2].Brightness = 0.2f;
-            this.Lights.Add(new SceneLightPoint(
-                "Blue point",
-                false,
-                Color.Blue,
-                Color.Blue,
-                true,
-                Vector3.Zero,
-                2f,
-                5f));
-            this.Lights.Add(new SceneLightPoint(
-                "Red point",
-                false,
-                Color.Red,
-                Color.Red,
-                true,
-                Vector3.Zero,
-                2f,
-                5f));
-
-            this.Lights.AddRange(this.helicopter.Lights);
-            this.Lights.AddRange(this.tank.Lights);
-            this.Lights.AddRange(this.helipod.Lights);
-            this.Lights.AddRange(this.garage.Lights);
-
-            #endregion
-
-            #region Camera
-
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 5000f;
-            this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
-            this.Camera.LookTo(this.helicopter.Manipulator.Position);
 
             #endregion
 
@@ -653,6 +672,9 @@ namespace TerrainTest
             this.curveLineDrawer.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
 
             #endregion
+
+            this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
+            this.Camera.LookTo(this.helicopter.Manipulator.Position);
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
         }
@@ -908,6 +930,28 @@ namespace TerrainTest
             {
                 this.objLineDrawer.Visible = !this.objLineDrawer.Visible;
             }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F11))
+            {
+                if (this.drawDrawVolumes == false && this.drawCullVolumes == false)
+                {
+                    this.drawDrawVolumes = true;
+                    this.drawCullVolumes = false;
+                }
+                else if (this.drawDrawVolumes == true && this.drawCullVolumes == false)
+                {
+                    this.drawDrawVolumes = false;
+                    this.drawCullVolumes = true;
+                }
+                else if (this.drawDrawVolumes == false && this.drawCullVolumes == true)
+                {
+                    this.drawDrawVolumes = false;
+                    this.drawCullVolumes = false;
+                }
+            }
+
+            if (this.drawDrawVolumes) this.DEBUGDrawLightMarks();
+            if (this.drawCullVolumes) this.DEBUGDrawLightVolumes();
 
             if (this.Game.Input.KeyJustReleased(Keys.Add))
             {
@@ -1165,6 +1209,46 @@ namespace TerrainTest
             {
                 this.graphIndex = -1;
             }
+        }
+        private void DEBUGDrawLightVolumes()
+        {
+            this.lightsVolumeDrawer.Clear();
+
+            foreach (var spot in this.Lights.SpotLights)
+            {
+                var lines = spot.GetVolume(10);
+
+                this.lightsVolumeDrawer.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+            }
+
+            foreach (var point in this.Lights.PointLights)
+            {
+                var lines = point.GetVolume(12, 5);
+
+                this.lightsVolumeDrawer.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+            }
+
+            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+        }
+        private void DEBUGDrawLightMarks()
+        {
+            this.lightsVolumeDrawer.Clear();
+
+            foreach (var spot in this.Lights.SpotLights)
+            {
+                var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 10, 10);
+
+                this.lightsVolumeDrawer.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+            }
+
+            foreach (var point in this.Lights.PointLights)
+            {
+                var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 10, 10);
+
+                this.lightsVolumeDrawer.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+            }
+
+            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
     }
 }

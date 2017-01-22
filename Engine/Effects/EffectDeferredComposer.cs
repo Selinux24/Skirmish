@@ -455,12 +455,12 @@ namespace Engine.Effects
             this.DeferredSpotLight = this.Effect.GetTechniqueByName("DeferredSpotLight");
             this.DeferredCombineLights = this.Effect.GetTechniqueByName("DeferredCombineLights");
 
-            this.AddInputLayout(this.DeferredDirectionalLight, VertexPositionTexture.GetInput());
+            this.AddInputLayout(this.DeferredDirectionalLight, VertexPosition.GetInput());
             this.AddInputLayout(this.DeferredPointStencil, VertexPosition.GetInput());
             this.AddInputLayout(this.DeferredPointLight, VertexPosition.GetInput());
             this.AddInputLayout(this.DeferredSpotStencil, VertexPosition.GetInput());
             this.AddInputLayout(this.DeferredSpotLight, VertexPosition.GetInput());
-            this.AddInputLayout(this.DeferredCombineLights, VertexPositionTexture.GetInput());
+            this.AddInputLayout(this.DeferredCombineLights, VertexPosition.GetInput());
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();

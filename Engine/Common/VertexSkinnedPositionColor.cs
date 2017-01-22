@@ -94,10 +94,10 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel)
         {
-            if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
-            else if (channel == VertexDataChannels.Color) return this.Color.Cast<T>();
-            else if (channel == VertexDataChannels.Weights) return (new[] { this.Weight1, this.Weight2, this.Weight3, (1.0f - this.Weight1 - this.Weight2 - this.Weight3) }).Cast<T>();
-            else if (channel == VertexDataChannels.BoneIndices) return (new[] { this.BoneIndex1, this.BoneIndex2, this.BoneIndex3, this.BoneIndex4 }).Cast<T>();
+            if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
+            else if (channel == VertexDataChannels.Color) return (T)(object)this.Color;
+            else if (channel == VertexDataChannels.Weights) return (T)(object)(new[] { this.Weight1, this.Weight2, this.Weight3, (1.0f - this.Weight1 - this.Weight2 - this.Weight3) });
+            else if (channel == VertexDataChannels.BoneIndices) return (T)(object)(new[] { this.BoneIndex1, this.BoneIndex2, this.BoneIndex3, this.BoneIndex4 });
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
         /// <summary>
@@ -108,11 +108,11 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
-            if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
-            else if (channel == VertexDataChannels.Color) this.Color = value.Cast<Color4>();
+            if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Color) this.Color = (Color4)(object)value;
             else if (channel == VertexDataChannels.Weights)
             {
-                float[] weights = value.Cast<float[]>();
+                float[] weights = (float[])(object)value;
 
                 this.Weight1 = weights[0];
                 this.Weight2 = weights[1];
@@ -120,7 +120,7 @@ namespace Engine.Common
             }
             else if (channel == VertexDataChannels.BoneIndices)
             {
-                byte[] boneIndices = value.Cast<byte[]>();
+                byte[] boneIndices = (byte[])(object)value;
 
                 this.BoneIndex1 = boneIndices[0];
                 this.BoneIndex2 = boneIndices[1];

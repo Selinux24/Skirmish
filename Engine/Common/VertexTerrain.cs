@@ -86,12 +86,12 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel)
         {
-            if (channel == VertexDataChannels.Position) return this.Position.Cast<T>();
-            else if (channel == VertexDataChannels.Normal) return this.Normal.Cast<T>();
-            else if (channel == VertexDataChannels.Texture) return this.Texture0.Cast<T>();
-            else if (channel == VertexDataChannels.Texture1) return this.Texture1.Cast<T>();
-            else if (channel == VertexDataChannels.Tangent) return this.Tangent.Cast<T>();
-            else if (channel == VertexDataChannels.Color) return this.Color.Cast<T>();
+            if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
+            else if (channel == VertexDataChannels.Normal) return (T)(object)this.Normal;
+            else if (channel == VertexDataChannels.Texture) return (T)(object)this.Texture0;
+            else if (channel == VertexDataChannels.Texture1) return (T)(object)this.Texture1;
+            else if (channel == VertexDataChannels.Tangent) return (T)(object)this.Tangent;
+            else if (channel == VertexDataChannels.Color) return (T)(object)this.Color;
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
         /// <summary>
@@ -102,12 +102,12 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
-            if (channel == VertexDataChannels.Position) this.Position = value.Cast<Vector3>();
-            else if (channel == VertexDataChannels.Normal) this.Normal = value.Cast<Vector3>();
-            else if (channel == VertexDataChannels.Texture) this.Texture0 = value.Cast<Vector2>();
-            else if (channel == VertexDataChannels.Texture1) this.Texture1 = value.Cast<Vector2>();
-            else if (channel == VertexDataChannels.Tangent) this.Tangent = value.Cast<Vector3>();
-            else if (channel == VertexDataChannels.Color) this.Color = value.Cast<Color4>();
+            if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Normal) this.Normal = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Texture) this.Texture0 = (Vector2)(object)value;
+            else if (channel == VertexDataChannels.Texture1) this.Texture1 = (Vector2)(object)value;
+            else if (channel == VertexDataChannels.Tangent) this.Tangent = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Color) this.Color = (Color4)(object)value;
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
         }
 

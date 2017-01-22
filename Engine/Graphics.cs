@@ -169,9 +169,17 @@ namespace Engine
         /// </summary>
         private RasterizerState rasterizerNoCull = null;
         /// <summary>
-        /// Sets cull counter-clockwise face rasterizer
+        /// Cull counter-clockwise face rasterizer
         /// </summary>
         private RasterizerState rasterizerCullFrontFace = null;
+        /// <summary>
+        /// Stencil pass rasterizer (No Cull, No depth limit)
+        /// </summary>
+        private RasterizerState rasterizerStencilPass = null;
+        /// <summary>
+        /// Lighting pass rasterizer (Cull Front faces, No depth limit)
+        /// </summary>
+        private RasterizerState rasterizerLightingPass = null;
 
         /// <summary>
         /// Back buffer format
@@ -642,6 +650,40 @@ namespace Engine
                     IsMultisampleEnabled = false,
                     IsScissorEnabled = false,
                     IsDepthClipEnabled = true,
+                    DepthBias = 0,
+                    DepthBiasClamp = 0.0f,
+                    SlopeScaledDepthBias = 0.0f,
+                });
+
+            //Stencil pass rasterizer state
+            this.rasterizerStencilPass = new RasterizerState(
+                this.Device,
+                new RasterizerStateDescription()
+                {
+                    CullMode = CullMode.None,
+                    FillMode = FillMode.Solid,
+                    IsFrontCounterClockwise = false,
+                    IsAntialiasedLineEnabled = false,
+                    IsMultisampleEnabled = false,
+                    IsScissorEnabled = false,
+                    IsDepthClipEnabled = false,
+                    DepthBias = 0,
+                    DepthBiasClamp = 0.0f,
+                    SlopeScaledDepthBias = 0.0f,
+                });
+
+            //Counter clockwise cull rasterizer state
+            this.rasterizerLightingPass = new RasterizerState(
+                this.Device,
+                new RasterizerStateDescription()
+                {
+                    CullMode = CullMode.Back,
+                    FillMode = FillMode.Solid,
+                    IsFrontCounterClockwise = true,
+                    IsAntialiasedLineEnabled = false,
+                    IsMultisampleEnabled = false,
+                    IsScissorEnabled = false,
+                    IsDepthClipEnabled = false,
                     DepthBias = 0,
                     DepthBiasClamp = 0.0f,
                     SlopeScaledDepthBias = 0.0f,
@@ -1203,6 +1245,20 @@ namespace Engine
             this.SetRasterizerState(this.rasterizerCullFrontFace);
         }
         /// <summary>
+        /// Sets stencil pass rasterizer
+        /// </summary>
+        public void SetRasterizerStencilPass()
+        {
+            this.SetRasterizerState(this.rasterizerStencilPass);
+        }
+        /// <summary>
+        /// Stes lighting pass rasterizer
+        /// </summary>
+        public void SetRasterizerLightingPass()
+        {
+            this.SetRasterizerState(this.rasterizerLightingPass);
+        }
+        /// <summary>
         /// Dispose created resources
         /// </summary>
         public void Dispose()
@@ -1368,6 +1424,8 @@ namespace Engine
             Helper.Dispose(this.rasterizerWireframe);
             Helper.Dispose(this.rasterizerNoCull);
             Helper.Dispose(this.rasterizerCullFrontFace);
+            Helper.Dispose(this.rasterizerStencilPass);
+            Helper.Dispose(this.rasterizerLightingPass);
 
             Helper.Dispose(this.blendDefault);
             Helper.Dispose(this.blendDefaultAlpha);

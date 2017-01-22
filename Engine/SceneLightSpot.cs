@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Spot light
     /// </summary>
-    public class SceneLightSpot : SceneLight
+    public class SceneLightSpot : SceneLight, ISceneLightPosition
     {
         /// <summary>
         /// Initial transform
@@ -67,9 +67,10 @@ namespace Engine
         {
             get
             {
-                Vector3 center = (this.Position + (Vector3.Normalize(this.Position) * this.Radius)) * 0.5f;
+                float radius = this.Radius * 0.5f;
+                Vector3 center = (this.Position + (Vector3.Normalize(this.Direction) * radius));
 
-                return new BoundingSphere(center, this.Radius);
+                return new BoundingSphere(center, radius);
             }
         }
         /// <summary>
@@ -104,7 +105,10 @@ namespace Engine
         {
             get
             {
-                return Matrix.Scaling(this.Radius) * Matrix.Translation(this.Position);
+                float radius = this.Radius * 0.5f;
+                Vector3 center = (this.Position + (Vector3.Normalize(this.Direction) * radius));
+
+                return Matrix.Scaling(radius) * Matrix.Translation(center);
             }
         }
 
@@ -135,6 +139,9 @@ namespace Engine
             : base(name, castShadow, diffuse, specular, enabled)
         {
             if (direction == Vector3.Zero) throw new ArgumentException("Direction must have magnitude", "direction");
+
+            //The light cone has his basin on the XZ plane. Rotate direction in X axis
+            direction = Vector3.TransformNormal(direction, Matrix.RotationX(MathUtil.PiOverTwo));
 
             float f = Math.Abs(Vector3.Dot(direction, Vector3.Up));
             this.initialTransform = Helper.CreateWorld(position, direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
@@ -172,12 +179,13 @@ namespace Engine
         /// <summary>
         /// Gets the light volume
         /// </summary>
+        /// <param name="sliceCount">Cone slice count</param>
         /// <returns>Returns a line list representing the light volume</returns>
-        public Line3D[] GetVolume()
+        public Line3D[] GetVolume(int sliceCount)
         {
-            var coneLines = Line3D.CreateWiredConeAngle(this.AngleRadians, this.Radius, 10);
+            var coneLines = Line3D.CreateWiredConeAngle(this.AngleRadians, this.Radius, sliceCount);
 
-            //The wired cone has his basin on XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
+            //The wired cone has his basin on the XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
             Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
 
             //Then move and rotate the cone to light position and direction

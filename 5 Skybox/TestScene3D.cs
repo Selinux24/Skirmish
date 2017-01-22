@@ -1,8 +1,11 @@
 ﻿using Engine;
+using Engine.Common;
+using Engine.Content;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Skybox
 {
@@ -47,6 +50,7 @@ namespace Skybox
         private ModelInstanced torchs = null;
         private SceneLightPoint[] torchLights = null;
 
+        private Model movingFire = null;
         private ParticleEmitter movingFireEmitter = null;
         private SceneLightPoint movingFireLight = null;
 
@@ -152,6 +156,36 @@ namespace Skybox
             #endregion
 
             #region Moving fire
+
+            MaterialContent mat = MaterialContent.Default;
+            mat.EmissionColor = Color.Yellow;
+
+            Vector3[] v = null;
+            Vector3[] n = null;
+            Vector2[] uv = null;
+            uint[] ix = null;
+            GeometryUtil.CreateSphere(0.05f, (uint)32, (uint)32, out v, out n, out uv, out ix);
+
+            VertexData[] vertices = new VertexData[v.Length];
+            for (int i = 0; i < v.Length; i++)
+            {
+                vertices[i] = VertexData.CreateVertexPositionNormalTexture(v[i], n[i], uv[i]);
+            }
+
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalColor, vertices, ix, mat);
+
+            var mFireDesc = new ModelDescription()
+            {
+                Name = "Emitter",
+                Static = false,
+                CastShadow = false,
+                AlwaysVisible = false,
+                DeferredEnabled = true,
+                EnableDepthStencil = true,
+                EnableAlphaBlending = false,
+            };
+
+            this.movingFire = this.AddModel(content, mFireDesc);
 
             this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
@@ -269,13 +303,17 @@ namespace Skybox
 
             #region Light
 
+            float r = 5.5f;
+            float h = 1.25f;
             float d = 0.5f;
+            float v = 0.8f;
 
             Vector3 position = Vector3.Zero;
-            position.X = 3.0f * d * (float)Math.Cos(0.4f * this.Game.GameTime.TotalSeconds);
-            position.Y = 1f;
-            position.Z = 3.0f * d * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
+            position.X = r * d * (float)Math.Cos(v * this.Game.GameTime.TotalSeconds);
+            position.Y = h + (0.25f * (1f + (float)Math.Sin(this.Game.GameTime.TotalSeconds)));
+            position.Z = r * d * (float)Math.Sin(v * this.Game.GameTime.TotalSeconds);
 
+            this.movingFire.Manipulator.SetPosition(position);
             this.movingFireEmitter.Position = position;
             this.movingFireLight.Position = position;
 

@@ -1,11 +1,10 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Scene lights
     /// </summary>
@@ -58,14 +57,8 @@ namespace Engine
         /// Visible directional lights
         /// </summary>
         private SceneLightDirectional[] visibleDirectional = null;
-        /// <summary>
-        /// Visible point lights
-        /// </summary>
-        private SceneLightPoint[] visiblePoints = null;
-        /// <summary>
-        /// Visible spot lights
-        /// </summary>
-        private SceneLightSpot[] visibleSpots = null;
+
+        private List<ISceneLightPosition> visiblePositionlights = new List<ISceneLightPosition>();
         /// <summary>
         /// Fog color
         /// </summary>
@@ -345,24 +338,22 @@ namespace Engine
             this.visibleDirectional = this.directionalLights.FindAll(l => l.Enabled == true).ToArray();
 
             var pLights = this.pointLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
-            pLights.Sort((l1, l2) =>
-            {
-                int i = -frustum.Contains(l1.Position).CompareTo(frustum.Contains(l2.Position));
-                if (i != 0) return i;
-
-                return Vector3.DistanceSquared(viewerPosition, l1.Position).CompareTo(Vector3.DistanceSquared(viewerPosition, l2.Position));
-            });
-            this.visiblePoints = pLights.ToArray();
-
             var sLights = this.spotLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
-            sLights.Sort((l1, l2) =>
-            {
-                int i = -frustum.Contains(l1.Position).CompareTo(frustum.Contains(l2.Position));
-                if (i != 0) return i;
 
-                return Vector3.DistanceSquared(viewerPosition, l1.Position).CompareTo(Vector3.DistanceSquared(viewerPosition, l2.Position));
+            this.visiblePositionlights.Clear();
+            if (pLights.Count > 0) pLights.ForEach(l => this.visiblePositionlights.Add(l));
+            if (sLights.Count > 0) sLights.ForEach(l => this.visiblePositionlights.Add(l));
+
+            this.visiblePositionlights.Sort((l1, l2) =>
+            {
+                float d1 = Vector3.Distance(viewerPosition, l1.Position);
+                float d2 = Vector3.Distance(viewerPosition, l2.Position);
+
+                float f1 = l1.Radius / d1 == 0 ? 1 : d1;
+                float f2 = l2.Radius / d2 == 0 ? 1 : d2;
+
+                return f1.CompareTo(f2);
             });
-            this.visibleSpots = sLights.ToArray();
         }
         /// <summary>
         /// Gets the visible directional lights
@@ -378,7 +369,7 @@ namespace Engine
         /// <returns>Returns the visible point lights array</returns>
         public SceneLightPoint[] GetVisiblePointLights()
         {
-            return this.visiblePoints;
+            return this.visiblePositionlights.FindAll(l => l is SceneLightPoint).Cast<SceneLightPoint>().ToArray();
         }
         /// <summary>
         /// Gets the visible spot lights
@@ -386,7 +377,7 @@ namespace Engine
         /// <returns>Returns the visible spot lights array</returns>
         public SceneLightSpot[] GetVisibleSpotLights()
         {
-            return this.visibleSpots;
+            return this.visiblePositionlights.FindAll(l => l is SceneLightSpot).Cast<SceneLightSpot>().ToArray();
         }
 
         /// <summary>

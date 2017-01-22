@@ -359,6 +359,17 @@ namespace Engine.Common
         /// </summary>
         /// <param name="form">Form</param>
         /// <param name="vertices">Resulting positions</param>
+        /// <param name="indices">Resulting indices</param>
+        public static void CreateScreen(EngineForm form, out Vector3[] vertices, out uint[] indices)
+        {
+            Vector2[] uvs;
+            CreateScreen(form, out vertices, out uvs, out indices);
+        }
+        /// <summary>
+        /// Creates a screen of VertexPositionTexture VertexData
+        /// </summary>
+        /// <param name="form">Form</param>
+        /// <param name="vertices">Resulting positions</param>
         /// <param name="uvs">Resulting uv coordinates</param>
         /// <param name="indices">Resulting indices</param>
         public static void CreateScreen(EngineForm form, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)

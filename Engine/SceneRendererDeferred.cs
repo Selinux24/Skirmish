@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 #if DEBUG
 using System.Diagnostics;
 #endif
@@ -29,33 +28,16 @@ namespace Engine
         /// <summary>
         /// Light geometry
         /// </summary>
-        class LightGeometry : IDisposable
+        struct LightGeometry
         {
             /// <summary>
-            /// Window vertex buffer
+            /// Geometry offset
             /// </summary>
-            public Buffer VertexBuffer;
-            /// <summary>
-            /// Vertex buffer binding
-            /// </summary>
-            public VertexBufferBinding VertexBufferBinding;
-            /// <summary>
-            /// Window index buffer
-            /// </summary>
-            public Buffer IndexBuffer;
+            public int Offset;
             /// <summary>
             /// Index count
             /// </summary>
             public int IndexCount;
-
-            /// <summary>
-            /// Dispose objects
-            /// </summary>
-            public void Dispose()
-            {
-                Helper.Dispose(this.VertexBuffer);
-                Helper.Dispose(this.IndexBuffer);
-            }
         }
 
         /// <summary>
@@ -75,9 +57,29 @@ namespace Engine
         /// </summary>
         private LightBuffer lightBuffer = null;
         /// <summary>
-        /// Light geometry collection
+        /// Window vertex buffer
         /// </summary>
-        private LightGeometry[] lightGeometry = null;
+        private Buffer lightGeometryVertexBuffer;
+        /// <summary>
+        /// Vertex buffer binding
+        /// </summary>
+        private VertexBufferBinding lightGeometryVertexBufferBinding;
+        /// <summary>
+        /// Window index buffer
+        /// </summary>
+        private Buffer lightGeometryIndexBuffer;
+        /// <summary>
+        /// Screen geometry
+        /// </summary>
+        private LightGeometry screenGeometry;
+        /// <summary>
+        /// Point light geometry
+        /// </summary>
+        private LightGeometry pointLightGeometry;
+        /// <summary>
+        /// Spot ligth geometry
+        /// </summary>
+        private LightGeometry spotLightGeometry;
 
         /// <summary>
         /// Game
@@ -217,7 +219,8 @@ namespace Engine
             Helper.Dispose(this.shadowMapper);
             Helper.Dispose(this.geometryBuffer);
             Helper.Dispose(this.lightBuffer);
-            Helper.Dispose(this.lightGeometry);
+            Helper.Dispose(this.lightGeometryVertexBuffer);
+            Helper.Dispose(this.lightGeometryIndexBuffer);
         }
         /// <summary>
         /// Resizes buffers
@@ -767,117 +770,87 @@ namespace Engine
 
             this.ViewProjection = Sprite.CreateViewOrthoProjection(this.Width, this.Height);
 
-            if (this.lightGeometry == null)
+            List<VertexPosition> verts = new List<VertexPosition>();
+            List<uint> indx = new List<uint>();
+
             {
-                this.lightGeometry = new[]
+                Vector3[] cv;
+                uint[] indices;
+                GeometryUtil.CreateScreen(
+                    Game.Form,
+                    out cv,
+                    out indices);
+                var vertices = VertexPosition.Generate(cv);
+
+                this.screenGeometry.Offset = indx.Count;
+                this.screenGeometry.IndexCount = indices.Length;
+
+                verts.AddRange(vertices);
+                indx.AddRange(indices);
+            }
+
+            {
+                Vector3[] cv;
+                uint[] indices;
+                GeometryUtil.CreateSphere(
+                    1, 16, 16,
+                    out cv,
+                    out indices);
+                var vertices = VertexPosition.Generate(cv);
+
+                this.pointLightGeometry.Offset = indx.Count;
+                this.pointLightGeometry.IndexCount = indices.Length;
+
+                //Sum offsets
+                for (int i = 0; i < indices.Length; i++)
                 {
-                    new LightGeometry(),
-                    new LightGeometry(),
-                    new LightGeometry(),
-                };
+                    indices[i] += (uint)verts.Count;
+                }
+
+                verts.AddRange(vertices);
+                indx.AddRange(indices);
             }
 
-            this.UpdateDirectionalLightGeometry(ref this.lightGeometry[0]);
-            this.UpdatePointLightGeometry(ref this.lightGeometry[1]);
-            this.UpdateSpotLightGeometry(ref this.lightGeometry[2]);
-        }
-        /// <summary>
-        /// Update directional light buffer
-        /// </summary>
-        /// <param name="geometry">Geometry</param>
-        private void UpdateDirectionalLightGeometry(ref LightGeometry geometry)
-        {
-            Vector3[] cv;
-            Vector2[] cuv;
-            uint[] ci;
-            GeometryUtil.CreateScreen(
-                Game.Form,
-                out cv,
-                out cuv,
-                out ci);
-
-            VertexPositionTexture[] vertices = VertexPositionTexture.Generate(cv, cuv);
-
-            if (geometry.VertexBuffer == null)
             {
-                geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertices);
-                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].GetStride(), 0);
+                Vector3[] cv;
+                uint[] indices;
+                GeometryUtil.CreateSphere(
+                    1, 16, 16,
+                    out cv,
+                    out indices);
+                var vertices = VertexPosition.Generate(cv);
+
+                this.spotLightGeometry.Offset = indx.Count;
+                this.spotLightGeometry.IndexCount = indices.Length;
+
+                //Sum offsets
+                for (int i = 0; i < indices.Length; i++)
+                {
+                    indices[i] += (uint)verts.Count;
+                }
+
+                verts.AddRange(vertices);
+                indx.AddRange(indices);
+            }
+
+            if (this.lightGeometryVertexBuffer == null)
+            {
+                this.lightGeometryVertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(verts.ToArray());
+                this.lightGeometryVertexBufferBinding = new VertexBufferBinding(this.lightGeometryVertexBuffer, verts[0].GetStride(), 0);
             }
             else
             {
-                this.Game.Graphics.DeviceContext.WriteBuffer(geometry.VertexBuffer, vertices);
+                this.Game.Graphics.DeviceContext.WriteBuffer(this.lightGeometryVertexBuffer, verts.ToArray());
             }
 
-            if (geometry.IndexBuffer == null)
+            if (this.lightGeometryIndexBuffer == null)
             {
-                geometry.IndexBuffer = Game.Graphics.Device.CreateIndexBufferImmutable(ci);
-            }
-
-            geometry.IndexCount = ci.Length;
-        }
-        /// <summary>
-        /// Update point light buffer
-        /// </summary>
-        /// <param name="geometry">Geometry</param>
-        private void UpdatePointLightGeometry(ref LightGeometry geometry)
-        {
-            Vector3[] cv;
-            uint[] ci;
-            GeometryUtil.CreateSphere(
-                1, 12, 5,
-                out cv,
-                out ci);
-
-            VertexPosition[] vertices = VertexPosition.Generate(cv);
-
-            if (geometry.VertexBuffer == null)
-            {
-                geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertices);
-                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].GetStride(), 0);
+                this.lightGeometryIndexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(indx.ToArray());
             }
             else
             {
-                this.Game.Graphics.DeviceContext.WriteBuffer(geometry.VertexBuffer, vertices);
+                this.Game.Graphics.DeviceContext.WriteBuffer(this.lightGeometryIndexBuffer, indx.ToArray());
             }
-
-            if (geometry.IndexBuffer == null)
-            {
-                geometry.IndexBuffer = Game.Graphics.Device.CreateIndexBufferImmutable(ci);
-            }
-
-            geometry.IndexCount = ci.Length;
-        }
-        /// <summary>
-        /// Update spot light buffer
-        /// </summary>
-        /// <param name="geometry">Geometry</param>
-        private void UpdateSpotLightGeometry(ref LightGeometry geometry)
-        {
-            Vector3[] cv;
-            uint[] ci;
-            GeometryUtil.CreateSphere(
-                1, 12, 5,
-                out cv,
-                out ci);
-
-            VertexPosition[] vertices = VertexPosition.Generate(cv);
-
-            if (geometry.VertexBuffer == null)
-            {
-                geometry.VertexBuffer = Game.Graphics.Device.CreateVertexBufferWrite(vertices);
-                geometry.VertexBufferBinding = new VertexBufferBinding(geometry.VertexBuffer, vertices[0].GetStride(), 0);
-            }
-            else
-            {
-                this.Game.Graphics.DeviceContext.WriteBuffer(geometry.VertexBuffer, vertices);
-            }
-
-            if (geometry.IndexBuffer == null)
-            {
-                geometry.IndexBuffer = Game.Graphics.Device.CreateIndexBufferImmutable(ci);
-            }
-
-            geometry.IndexCount = ci.Length;
         }
         /// <summary>
         /// Binds graphics for shadow mapping pass
@@ -961,6 +934,14 @@ namespace Engine
 
             this.Game.Graphics.SetDepthStencilRDZDisabled();
             this.Game.Graphics.SetBlendDeferredLighting();
+
+            deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+            Counters.IAPrimitiveTopologySets++;
+            deviceContext.InputAssembler.SetVertexBuffers(0, this.lightGeometryVertexBufferBinding);
+            Counters.IAVertexBuffersSets++;
+            deviceContext.InputAssembler.SetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
+            Counters.IAIndexBufferSets++;
+
 #if DEBUG
             swPrepare.Stop();
 #endif
@@ -973,16 +954,10 @@ namespace Engine
             if (directionalLights != null && directionalLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredDirectionalLight;
-                var geometry = this.lightGeometry[0];
+                var geometry = this.screenGeometry;
 
                 deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
                 Counters.IAInputLayoutSets++;
-                deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-                deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
-                deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
 
                 for (int i = 0; i < directionalLights.Length; i++)
                 {
@@ -997,7 +972,7 @@ namespace Engine
                     {
                         effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
 
-                        deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
+                        deviceContext.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
 
                         Counters.DrawCallsPerFrame++;
                         Counters.InstancesPerFrame++;
@@ -1009,60 +984,13 @@ namespace Engine
 #endif
             #endregion
 
-            #region Spot Lights
-#if DEBUG
-            Stopwatch swSpot = Stopwatch.StartNew();
-#endif
-            if (spotLights != null && spotLights.Length > 0)
-            {
-                var geometry = this.lightGeometry[2];
-
-                deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-                deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
-                deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
-
-                for (int i = 0; i < spotLights.Length; i++)
-                {
-                    var light = spotLights[i];
-
-                    //Draw Pass
-                    effect.UpdatePerLight(
-                        light,
-                        context.World * light.Local,
-                        context.ViewProjection);
-
-                    this.Game.Graphics.SetRasterizerCullNone();
-                    this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
-                    this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
-                    this.DrawSingleLight(geometry, effect, effect.DeferredSpotStencil);
-
-                    this.Game.Graphics.SetRasterizerCullFrontFace();
-                    this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
-                    this.DrawSingleLight(geometry, effect, effect.DeferredSpotLight);
-                }
-            }
-#if DEBUG
-            swSpot.Stop();
-#endif
-            #endregion
-
             #region Point Lights
 #if DEBUG
             Stopwatch swPoint = Stopwatch.StartNew();
 #endif
             if (pointLights != null && pointLights.Length > 0)
             {
-                var geometry = this.lightGeometry[1];
-
-                deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-                deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
-                deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
+                var geometry = this.pointLightGeometry;
 
                 for (int i = 0; i < pointLights.Length; i++)
                 {
@@ -1074,12 +1002,12 @@ namespace Engine
                         context.World * light.Local,
                         context.ViewProjection);
 
-                    this.Game.Graphics.SetRasterizerCullNone();
+                    this.Game.Graphics.SetRasterizerStencilPass();
                     this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
                     this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
                     this.DrawSingleLight(geometry, effect, effect.DeferredPointStencil);
 
-                    this.Game.Graphics.SetRasterizerCullFrontFace();
+                    this.Game.Graphics.SetRasterizerLightingPass();
                     this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
                     this.Game.Graphics.DeviceContext.OutputMerger.DepthStencilReference = 0;
                     this.DrawSingleLight(geometry, effect, effect.DeferredPointLight);
@@ -1087,6 +1015,39 @@ namespace Engine
             }
 #if DEBUG
             swPoint.Stop();
+#endif
+            #endregion
+
+            #region Spot Lights
+#if DEBUG
+            Stopwatch swSpot = Stopwatch.StartNew();
+#endif
+            if (spotLights != null && spotLights.Length > 0)
+            {
+                var geometry = this.spotLightGeometry;
+
+                for (int i = 0; i < spotLights.Length; i++)
+                {
+                    var light = spotLights[i];
+
+                    //Draw Pass
+                    effect.UpdatePerLight(
+                        light,
+                        context.World * light.Local,
+                        context.ViewProjection);
+
+                    this.Game.Graphics.SetRasterizerStencilPass();
+                    this.Game.Graphics.SetDepthStencilDeferredLightingVolume();
+                    this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
+                    this.DrawSingleLight(geometry, effect, effect.DeferredSpotStencil);
+
+                    this.Game.Graphics.SetRasterizerLightingPass();
+                    this.Game.Graphics.SetDepthStencilDeferredLightingDrawing();
+                    this.DrawSingleLight(geometry, effect, effect.DeferredSpotLight);
+                }
+            }
+#if DEBUG
+            swSpot.Stop();
 #endif
             #endregion
 #if DEBUG
@@ -1173,7 +1134,7 @@ namespace Engine
             {
                 effectTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                this.Game.Graphics.DeviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
+                this.Game.Graphics.DeviceContext.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
 
                 Counters.DrawCallsPerFrame++;
                 Counters.InstancesPerFrame++;
@@ -1212,15 +1173,15 @@ namespace Engine
                     this.LightMap);
 
                 var deviceContext = this.Game.Graphics.DeviceContext;
-                var geometry = this.lightGeometry[0];
+                var geometry = this.screenGeometry;
 
                 deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
                 Counters.IAInputLayoutSets++;
                 deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
                 Counters.IAPrimitiveTopologySets++;
-                deviceContext.InputAssembler.SetVertexBuffers(0, geometry.VertexBufferBinding);
+                deviceContext.InputAssembler.SetVertexBuffers(0, this.lightGeometryVertexBufferBinding);
                 Counters.IAVertexBuffersSets++;
-                deviceContext.InputAssembler.SetIndexBuffer(geometry.IndexBuffer, Format.R32_UInt, 0);
+                deviceContext.InputAssembler.SetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
                 Counters.IAIndexBufferSets++;
 
                 this.Game.Graphics.SetDepthStencilNone();
@@ -1238,7 +1199,7 @@ namespace Engine
                 {
                     effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
 
-                    deviceContext.DrawIndexed(geometry.IndexCount, 0, 0);
+                    deviceContext.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
 
                     Counters.DrawCallsPerFrame++;
                     Counters.InstancesPerFrame++;

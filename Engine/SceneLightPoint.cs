@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Point light
     /// </summary>
-    public class SceneLightPoint : SceneLight
+    public class SceneLightPoint : SceneLight, ISceneLightPosition
     {
         /// <summary>
         /// Initial transform
@@ -137,10 +137,12 @@ namespace Engine
         /// <summary>
         /// Gets the light volume
         /// </summary>
+        /// <param name="sliceCount">Sphere slice count (vertical subdivisions - meridians)</param>
+        /// <param name="stackCount">Sphere stack count (horizontal subdivisions - parallels)</param>
         /// <returns>Returns a line list representing the light volume</returns>
-        public Line3D[] GetVolume()
+        public Line3D[] GetVolume(int sliceCount, int stackCount)
         {
-            return Line3D.CreateWiredSphere(this.BoundingSphere, 10, 10);
+            return Line3D.CreateWiredSphere(this.BoundingSphere, sliceCount, stackCount);
         }
         /// <summary>
         /// Gets the text representation of the light

@@ -96,7 +96,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -159,6 +159,7 @@
     <Compile Include="Effects\EffectDefaultSkyScattering.cs" />
     <Compile Include="FoliageMap.cs" />
     <Compile Include="IParticleSystem.cs" />
+    <Compile Include="ISceneLightPosition.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />
     <Compile Include="ParticleSystemCPU.cs" />

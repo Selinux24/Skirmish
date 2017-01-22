@@ -264,14 +264,14 @@ namespace SceneTest
 
             foreach (var spot in this.Lights.SpotLights)
             {
-                var lines = spot.GetVolume();
+                var lines = spot.GetVolume(10);
 
                 this.lightsVolumeDrawer.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
-                var lines = point.GetVolume();
+                var lines = point.GetVolume(12, 5);
 
                 this.lightsVolumeDrawer.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
             }
@@ -284,14 +284,14 @@ namespace SceneTest
 
             foreach (var spot in this.Lights.SpotLights)
             {
-                var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 10, 10);
+                var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 12, 5);
 
                 this.lightsVolumeDrawer.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
-                var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 10, 10);
+                var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 12, 5);
 
                 this.lightsVolumeDrawer.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
             }

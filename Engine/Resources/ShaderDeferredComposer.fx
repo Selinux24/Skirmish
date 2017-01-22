@@ -41,11 +41,6 @@ Texture2D gShadowMapDynamic : register(t4);
 Texture2D gLightMap : register(t5);
 Texture2D gMaterialPalette : register(t6);
 
-struct PSQuadInput
-{
-    float4 positionHomogeneous : SV_POSITION;
-    float2 tex : TEXCOORD0;
-};
 struct PSLightInput
 {
 	float4 positionHomogeneous : SV_POSITION;
@@ -56,23 +51,14 @@ struct PSStencilInput
 	float4 positionHomogeneous : SV_POSITION;
 };
 
-PSQuadInput VSQuad(VSVertexPositionTexture input)
-{
-	PSQuadInput output = (PSQuadInput)0;
-
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-    output.tex = input.tex;
-    
-    return output;
-}
 PSLightInput VSLight(VSVertexPosition input)
 {
 	PSLightInput output = (PSLightInput)0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-    output.positionScreen = output.positionHomogeneous;
-    
-    return output;
+	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
+	output.positionScreen = output.positionHomogeneous;
+
+	return output;
 }
 PSStencilInput VSStencil(VSVertexPosition input)
 {
@@ -83,17 +69,22 @@ PSStencilInput VSStencil(VSVertexPosition input)
 	return output;
 }
 
-float4 PSDirectionalLight(PSQuadInput input) : SV_TARGET
+float4 PSDirectionalLight(PSLightInput input) : SV_TARGET
 {
-    float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, input.tex, 0);
-    float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, input.tex, 0);
+	//Get texture coordinates
+	float4 lPosition = input.positionScreen;
+	lPosition.xy /= lPosition.w;
+	float2 tex = 0.5f * (float2(lPosition.x, -lPosition.y) + 1);
+
+	float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, tex, 0);
+	float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
 
 	float3 normal = tg2.xyz;
 	float doLighting = tg2.a;
 	float3 position = tg3.xyz;
 	float materialIndex = tg3.w;
 
-	if(doLighting == 0)
+	if (doLighting == 0)
 	{
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
@@ -103,7 +94,7 @@ float4 PSDirectionalLight(PSQuadInput input) : SV_TARGET
 		float4 specular = 0;
 
 		ComputeDirectionalLight(
-			gDirLight, 
+			gDirLight,
 			k.Shininess,
 			position,
 			normal,
@@ -124,7 +115,7 @@ float4 PSDirectionalLight(PSQuadInput input) : SV_TARGET
 	{
 		return 0;
 	}
-};
+}
 float4 PSPointLight(PSLightInput input) : SV_TARGET
 {
 	//Get texture coordinates
@@ -132,15 +123,15 @@ float4 PSPointLight(PSLightInput input) : SV_TARGET
 	lPosition.xy /= lPosition.w;
 	float2 tex = 0.5f * (float2(lPosition.x, -lPosition.y) + 1);
 
-    float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, tex, 0);
-    float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
+	float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, tex, 0);
+	float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
 
 	float3 normal = tg2.xyz;
 	float doLighting = tg2.a;
 	float3 position = tg3.xyz;
 	float materialIndex = tg3.w;
 
-	if(doLighting == 0)
+	if (doLighting == 0)
 	{
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
@@ -148,7 +139,7 @@ float4 PSPointLight(PSLightInput input) : SV_TARGET
 		float4 specular = 0;
 
 		ComputePointLight(
-			gPointLight, 
+			gPointLight,
 			k.Shininess,
 			position,
 			normal,
@@ -165,7 +156,7 @@ float4 PSPointLight(PSLightInput input) : SV_TARGET
 	{
 		return 0;
 	}
-};
+}
 float4 PSSpotLight(PSLightInput input) : SV_TARGET
 {
 	//Get texture coordinates
@@ -173,15 +164,15 @@ float4 PSSpotLight(PSLightInput input) : SV_TARGET
 	lPosition.xy /= lPosition.w;
 	float2 tex = 0.5f * (float2(lPosition.x, -lPosition.y) + 1);
 
-    float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, tex, 0);
-    float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
-	
+	float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, tex, 0);
+	float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
+
 	float3 normal = tg2.xyz;
 	float doLighting = tg2.a;
 	float3 position = tg3.xyz;
 	float materialIndex = tg3.w;
 
-	if(doLighting == 0)
+	if (doLighting == 0)
 	{
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
@@ -189,7 +180,7 @@ float4 PSSpotLight(PSLightInput input) : SV_TARGET
 		float4 specular = 0;
 
 		ComputeSpotLight(
-			gSpotLight, 
+			gSpotLight,
 			k.Shininess,
 			position,
 			normal,
@@ -207,15 +198,20 @@ float4 PSSpotLight(PSLightInput input) : SV_TARGET
 		return 0;
 	}
 };
-float4 PSCombineLights(PSQuadInput input) : SV_TARGET
+float4 PSCombineLights(PSLightInput input) : SV_TARGET
 {
-    float4 tg1 = gTG1Map.SampleLevel(SamplerPoint, input.tex, 0);
-    float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, input.tex, 0);
-    float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, input.tex, 0);
-	float4 lmap = gLightMap.Sample(SamplerPoint, input.tex);
+	//Get texture coordinates
+	float4 lPosition = input.positionScreen;
+	lPosition.xy /= lPosition.w;
+	float2 tex = 0.5f * (float2(lPosition.x, -lPosition.y) + 1);
+
+	float4 tg1 = gTG1Map.SampleLevel(SamplerPoint, tex, 0);
+	float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, tex, 0);
+	float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
+	float4 lmap = gLightMap.Sample(SamplerPoint, tex);
 
 	float doLighting = tg2.w;
-	if(doLighting == 0)
+	if (doLighting == 0)
 	{
 		float4 color = tg1;
 		float3 position = tg3.xyz;
@@ -229,7 +225,7 @@ float4 PSCombineLights(PSQuadInput input) : SV_TARGET
 
 		color = (emissive + ambient + light) * (color);
 
-		if(gFogRange > 0)
+		if (gFogRange > 0)
 		{
 			float distToEye = length(gEyePositionWorld - position);
 
@@ -246,12 +242,12 @@ float4 PSCombineLights(PSQuadInput input) : SV_TARGET
 
 technique11 DeferredDirectionalLight
 {
-    pass P0
-    {
-		SetVertexShader(CompileShader(vs_5_0, VSQuad()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSLight()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDirectionalLight()));
-    }
+	}
 }
 technique11 DeferredPointStencil
 {
@@ -264,8 +260,8 @@ technique11 DeferredPointStencil
 }
 technique11 DeferredPointLight
 {
-    pass P0
-    {
+	pass P0
+	{
 		SetVertexShader(CompileShader(vs_5_0, VSLight()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSPointLight()));
@@ -282,8 +278,8 @@ technique11 DeferredSpotStencil
 }
 technique11 DeferredSpotLight
 {
-    pass P0
-    {
+	pass P0
+	{
 		SetVertexShader(CompileShader(vs_5_0, VSLight()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSSpotLight()));
@@ -291,10 +287,10 @@ technique11 DeferredSpotLight
 }
 technique11 DeferredCombineLights
 {
-    pass P0
-    {
-		SetVertexShader(CompileShader(vs_5_0, VSQuad()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSLight()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSCombineLights()));
-    }
+	}
 }

@@ -233,26 +233,6 @@ namespace Engine
             return res;
         }
         /// <summary>
-        /// Cast object as specified type
-        /// </summary>
-        /// <typeparam name="T">Type</typeparam>
-        /// <param name="input">Object to cast as type</param>
-        /// <returns>Return object casted as type</returns>
-        public static T Cast<T>(this object input)
-        {
-            return (T)input;
-        }
-        /// <summary>
-        /// Convert object to specified type
-        /// </summary>
-        /// <typeparam name="T">Type</typeparam>
-        /// <param name="input">Object to convert to type</param>
-        /// <returns>Return object converted to type</returns>
-        public static T Convert<T>(this object input)
-        {
-            return (T)System.Convert.ChangeType(input, typeof(T));
-        }
-        /// <summary>
         /// Dispose disposable object
         /// </summary>
         /// <param name="obj">Disposable object</param>

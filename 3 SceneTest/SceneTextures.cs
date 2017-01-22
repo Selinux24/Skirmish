@@ -38,6 +38,8 @@ namespace SceneTest
         private SkyScattering sky = null;
 
         private LineListDrawer lightsVolumeDrawer = null;
+        private bool drawDrawVolumes = false;
+        private bool drawCullVolumes = false;
 
         public SceneTextures(Game game)
             : base(game)
@@ -50,7 +52,7 @@ namespace SceneTest
             base.Initialize();
 
             this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 500;
+            this.Camera.FarPlaneDistance = 2000;
             this.Camera.Goto(-20, 10, -40f);
             this.Camera.LookTo(0, 0, 0);
 
@@ -63,9 +65,9 @@ namespace SceneTest
             this.InitializeLamps();
             this.InitializeStreetLamps();
 
-            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { AlwaysVisible = false, EnableDepthStencil = true }, 5000);
+            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { AlwaysVisible = false, EnableDepthStencil = true }, 10000);
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 30, 00), 5f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 30, 00), 0.0001f);
 
             this.SceneVolume = new BoundingSphere(Vector3.Zero, 150f);
         }
@@ -336,18 +338,18 @@ namespace SceneTest
             float dist = 0.23f;
             float pitch = MathUtil.DegreesToRadians(165) * -1;
 
-            this.lamp.Manipulator.SetPosition(0, spaceSize, -spaceSize * dist, true);
-            this.lamp.Manipulator.SetRotation(0, pitch, 0, true);
+            this.lamp.Manipulator.SetPosition(0, spaceSize, -spaceSize * dist);
+            this.lamp.Manipulator.SetRotation(0, pitch, 0);
 
-            this.lampI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, spaceSize, -spaceSize * dist, true);
-            this.lampI.Instances[1].Manipulator.SetPosition(spaceSize * 2, spaceSize, -spaceSize * dist, true);
-            this.lampI.Instances[2].Manipulator.SetPosition(-spaceSize * dist, spaceSize, -spaceSize * 2, true);
-            this.lampI.Instances[3].Manipulator.SetPosition(-spaceSize * dist, spaceSize, spaceSize * 2, true);
+            this.lampI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, spaceSize, -spaceSize * dist);
+            this.lampI.Instances[1].Manipulator.SetPosition(spaceSize * 2, spaceSize, -spaceSize * dist);
+            this.lampI.Instances[2].Manipulator.SetPosition(-spaceSize * dist, spaceSize, -spaceSize * 2);
+            this.lampI.Instances[3].Manipulator.SetPosition(-spaceSize * dist, spaceSize, spaceSize * 2);
 
-            this.lampI.Instances[0].Manipulator.SetRotation(0, pitch, 0, true);
-            this.lampI.Instances[1].Manipulator.SetRotation(0, pitch, 0, true);
-            this.lampI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0, true);
-            this.lampI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0, true);
+            this.lampI.Instances[0].Manipulator.SetRotation(0, pitch, 0);
+            this.lampI.Instances[1].Manipulator.SetRotation(0, pitch, 0);
+            this.lampI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
+            this.lampI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
 
             this.Lights.AddRange(this.lamp.Lights);
             this.Lights.AddRange(this.lampI.Instances[0].Lights);
@@ -378,23 +380,23 @@ namespace SceneTest
                     Instances = 9,
                 });
 
-            this.streetlamp.Manipulator.SetPosition(-spaceSize, 0, -spaceSize * -2f, true);
-            this.streetlampI.Instances[0].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * -1f, true);
-            this.streetlampI.Instances[1].Manipulator.SetPosition(-spaceSize, 0, 0, true);
-            this.streetlampI.Instances[2].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 1f, true);
-            this.streetlampI.Instances[3].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 2f, true);
+            this.streetlamp.Manipulator.SetPosition(-spaceSize, 0, -spaceSize * -2f);
+            this.streetlampI.Instances[0].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * -1f);
+            this.streetlampI.Instances[1].Manipulator.SetPosition(-spaceSize, 0, 0);
+            this.streetlampI.Instances[2].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 1f);
+            this.streetlampI.Instances[3].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 2f);
 
-            this.streetlampI.Instances[4].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -2f, true);
-            this.streetlampI.Instances[5].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -1f, true);
-            this.streetlampI.Instances[6].Manipulator.SetPosition(+spaceSize, 0, 0, true);
-            this.streetlampI.Instances[7].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 1f, true);
-            this.streetlampI.Instances[8].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 2f, true);
+            this.streetlampI.Instances[4].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -2f);
+            this.streetlampI.Instances[5].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -1f);
+            this.streetlampI.Instances[6].Manipulator.SetPosition(+spaceSize, 0, 0);
+            this.streetlampI.Instances[7].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 1f);
+            this.streetlampI.Instances[8].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 2f);
 
-            this.streetlampI.Instances[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
-            this.streetlampI.Instances[5].Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
-            this.streetlampI.Instances[6].Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
-            this.streetlampI.Instances[7].Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
-            this.streetlampI.Instances[8].Manipulator.SetRotation(MathUtil.Pi, 0, 0, true);
+            this.streetlampI.Instances[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.streetlampI.Instances[5].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.streetlampI.Instances[6].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.streetlampI.Instances[7].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.streetlampI.Instances[8].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
 
             this.Lights.AddRange(this.streetlamp.Lights);
             this.Lights.AddRange(this.streetlampI.Instances[0].Lights);
@@ -428,35 +430,29 @@ namespace SceneTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
-                this.lightsVolumeDrawer.Clear();
-
-                foreach (var spot in this.Lights.SpotLights)
-                {
-                    var lines = spot.GetVolume();
-
-                    this.lightsVolumeDrawer.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
-                }
-
-                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+                this.drawDrawVolumes = !this.drawDrawVolumes;
+                this.drawCullVolumes = false;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F2))
             {
-                this.lightsVolumeDrawer.Clear();
-
-                foreach (var point in this.Lights.PointLights)
-                {
-                    var lines = point.GetVolume();
-
-                    this.lightsVolumeDrawer.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
-                }
-
-                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+                this.drawCullVolumes = !this.drawCullVolumes;
+                this.drawDrawVolumes = false;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
                 this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
+            }
+
+            if (this.drawDrawVolumes)
+            {
+                this.UpdateLightDrawingVolumes();
+            }
+
+            if (this.drawCullVolumes)
+            {
+                this.UpdateLightCullingVolumes();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
@@ -504,6 +500,46 @@ namespace SceneTest
             {
                 this.Camera.MoveBackward(gameTime, shift);
             }
+        }
+        private void UpdateLightDrawingVolumes()
+        {
+            this.lightsVolumeDrawer.Clear();
+
+            foreach (var spot in this.Lights.SpotLights)
+            {
+                var lines = spot.GetVolume(10);
+
+                this.lightsVolumeDrawer.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+            }
+
+            foreach (var point in this.Lights.PointLights)
+            {
+                var lines = point.GetVolume(12, 5);
+
+                this.lightsVolumeDrawer.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+            }
+
+            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+        }
+        private void UpdateLightCullingVolumes()
+        {
+            this.lightsVolumeDrawer.Clear();
+
+            foreach (var spot in this.Lights.SpotLights)
+            {
+                var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 12, 5);
+
+                this.lightsVolumeDrawer.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+            }
+
+            foreach (var point in this.Lights.PointLights)
+            {
+                var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 12, 5);
+
+                this.lightsVolumeDrawer.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+            }
+
+            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
     }
 }

@@ -161,11 +161,14 @@ namespace Engine
 
             this.Manipulator.Update(context.GameTime);
 
-            if (this.Lights != null)
+            if (this.ManipulatorChanged)
             {
-                for (int i = 0; i < this.Lights.Length; i++)
+                if (this.Lights != null && this.Lights.Length > 0)
                 {
-                    this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
+                    for (int i = 0; i < this.Lights.Length; i++)
+                    {
+                        this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
+                    }
                 }
             }
         }
@@ -340,6 +343,14 @@ namespace Engine
 
             this.boundingSphere = new BoundingSphere();
             this.boundingBox = new BoundingBox();
+
+            if (this.Lights != null && this.Lights.Length > 0)
+            {
+                for (int i = 0; i < this.Lights.Length; i++)
+                {
+                    this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
+                }
+            }
 
             this.ManipulatorChanged = true;
         }

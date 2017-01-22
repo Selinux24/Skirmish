@@ -192,6 +192,16 @@ namespace Engine
             this.UpdateLocalTransform();
         }
         /// <summary>
+        /// Update internal state
+        /// </summary>
+        /// <param name="force">If true, local transforms were forced to update</param>
+        public void UpdateInternals( bool force)
+        {
+            if (force) this.transformUpdateNeeded = true;
+
+            this.UpdateLocalTransform();
+        }
+        /// <summary>
         /// Computes current position and orientation in the curve
         /// </summary>
         /// <param name="gameTime">Game time</param>
@@ -283,10 +293,7 @@ namespace Engine
 
                 this.transformUpdateNeeded = false;
 
-                if (this.Updated != null)
-                {
-                    this.Updated(this, new EventArgs());
-                }
+                this.Updated?.Invoke(this, new EventArgs());
 
                 Counters.UpdatesPerFrame++;
             }
