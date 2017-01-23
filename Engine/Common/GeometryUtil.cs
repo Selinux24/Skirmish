@@ -705,6 +705,94 @@ namespace Engine.Common
             uvs = uvList.ToArray();
             indices = indexList.ToArray();
         }
+        /// <summary>
+        /// Creates a curve plane
+        /// </summary>
+        /// <param name="size">Quad size</param>
+        /// <param name="textureRepeat">Texture repeat</param>
+        /// <param name="planeWidth">Plane width</param>
+        /// <param name="planeTop">Plane top</param>
+        /// <param name="planeBottom">Plane bottom</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="uvs">Result texture uvs</param>
+        /// <param name="indices">Result indices</param>
+        public static void CreateCurvePlane(int size, int textureRepeat, float planeWidth, float planeTop, float planeBottom, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
+        {
+            vertices = new Vector3[(size + 1) * (size + 1)];
+            uvs = new Vector2[(size + 1) * (size + 1)];
+
+            // Determine the size of each quad on the sky plane.
+            float quadSize = planeWidth / (float)size;
+
+            // Calculate the radius of the sky plane based on the width.
+            float radius = planeWidth * 0.5f;
+
+            // Calculate the height constant to increment by.
+            float constant = (planeTop - planeBottom) / (radius * radius);
+
+            // Calculate the texture coordinate increment value.
+            float textureDelta = (float)textureRepeat / (float)size;
+
+            // Loop through the sky plane and build the coordinates based on the increment values given.
+            for (int j = 0; j <= size; j++)
+            {
+                for (int i = 0; i <= size; i++)
+                {
+                    // Calculate the vertex coordinates.
+                    float positionX = (-0.5f * planeWidth) + ((float)i * quadSize);
+                    float positionZ = (-0.5f * planeWidth) + ((float)j * quadSize);
+                    float positionY = planeTop - (constant * ((positionX * positionX) + (positionZ * positionZ)));
+
+                    // Calculate the texture coordinates.
+                    float tu = (float)i * textureDelta;
+                    float tv = (float)j * textureDelta;
+
+                    // Calculate the index into the sky plane array to add this coordinate.
+                    int ix = j * (size + 1) + i;
+
+                    // Add the coordinates to the sky plane array.
+                    vertices[ix] = new Vector3(positionX, positionY, positionZ);
+                    uvs[ix] = new Vector2(tu, tv);
+                }
+            }
+
+
+            // Create the index array.
+            indices = new uint[(size + 1) * (size + 1) * 6];
+
+            // Initialize the index into the vertex array.
+            var index = 0;
+
+            // Load the vertex and index array with the sky plane array data.
+            for (int j = 0; j < size; j++)
+            {
+                for (int i = 0; i < size; i++)
+                {
+                    int index1 = j * (size + 1) + i;
+                    int index2 = j * (size + 1) + (i + 1);
+                    int index3 = (j + 1) * (size + 1) + i;
+                    int index4 = (j + 1) * (size + 1) + (i + 1);
+
+                    // Triangle 1 - Upper Left
+                    indices[index++] = (uint)index1;
+
+                    // Triangle 1 - Upper Right
+                    indices[index++] = (uint)index2;
+
+                    // Triangle 1 - Bottom Left
+                    indices[index++] = (uint)index3;
+
+                    // Triangle 2 - Bottom Left
+                    indices[index++] = (uint)index3;
+
+                    // Triangle 2 - Upper Right
+                    indices[index++] = (uint)index2;
+
+                    // Triangle 2 - Bottom Right
+                    indices[index++] = (uint)index4;
+                }
+            }
+        }
 
         /// <summary>
         /// Compute normal of three points in the same plane

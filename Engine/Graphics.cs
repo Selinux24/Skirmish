@@ -440,8 +440,8 @@ namespace Engine
                 new DepthStencilStateDescription()
                 {
                     IsDepthEnabled = false,
-                    DepthWriteMask = DepthWriteMask.All,
-                    DepthComparison = Comparison.Less,
+                    DepthWriteMask = DepthWriteMask.Zero,
+                    DepthComparison = Comparison.Never,
 
                     IsStencilEnabled = true,
                     StencilReadMask = 0xFF,
@@ -487,7 +487,7 @@ namespace Engine
                 {
                     IsDepthEnabled = false,
                     DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.Less,
+                    DepthComparison = Comparison.Never,
                 });
 
             #endregion
@@ -500,7 +500,7 @@ namespace Engine
                 {
                     IsDepthEnabled = false,
                     DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.Always,
+                    DepthComparison = Comparison.Never,
 
                     IsStencilEnabled = false,
                     StencilReadMask = 0xFF,

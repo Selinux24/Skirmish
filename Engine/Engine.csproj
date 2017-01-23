@@ -152,6 +152,7 @@
     <Compile Include="Common\UseMaterials.cs" />
     <Compile Include="Common\UseSkinningData.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
+    <Compile Include="Effects\EffectDefaultClouds.cs" />
     <Compile Include="Effects\EffectPostBlur.cs" />
     <Compile Include="Effects\EffectShadowBillboard.cs" />
     <Compile Include="Effects\EffectDeferredTerrain.cs" />
@@ -173,7 +174,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SkyPlane.cs" />
+    <Compile Include="SkyPlaneMode.cs" />
     <Compile Include="SkyScattering.cs" />
+    <Compile Include="SkyPlaneDescription.cs" />
     <Compile Include="SkyScatteringDescription.cs" />
     <Compile Include="TimeOfDay.cs" />
     <Compile Include="TransitionDescription.cs" />
@@ -433,6 +437,7 @@
     <None Include="app.config" />
     <None Include="Engine.snk" />
     <None Include="packages.config" />
+    <None Include="Resources\ShaderDefaultClouds.fxo" />
     <None Include="Resources\ShaderPostBlur.fx" />
     <None Include="Resources\ShaderPostBlur.fxo" />
     <None Include="Resources\IncScattering.fx" />
@@ -475,6 +480,7 @@
     <None Include="Resources\ShaderNull.fx" />
     <None Include="Resources\ShaderDefaultSprite.fx" />
     <None Include="Resources\ShaderDefaultTerrain.fx" />
+    <None Include="Resources\ShaderDefaultClouds.fx" />
     <Content Include="sharpdx_direct3d11_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

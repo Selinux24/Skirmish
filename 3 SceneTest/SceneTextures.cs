@@ -36,6 +36,7 @@ namespace SceneTest
         private ModelInstanced streetlampI = null;
 
         private SkyScattering sky = null;
+        private SkyPlane skyPlane = null;
 
         private LineListDrawer lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
@@ -67,7 +68,7 @@ namespace SceneTest
 
             this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { AlwaysVisible = false, EnableDepthStencil = true }, 10000);
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 30, 00), 0.0001f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(6, 30, 00), 0.0001f);
 
             this.SceneVolume = new BoundingSphere(Vector3.Zero, 150f);
         }
@@ -108,6 +109,15 @@ namespace SceneTest
             });
 
             this.sky = this.AddSkyScattering(new SkyScatteringDescription() { Name = "Sky" });
+
+            this.skyPlane = this.AddSkyPlane(new SkyPlaneDescription()
+            {
+                Name = "Clouds",
+                ContentPath = "SceneTextures/sky",
+                Texture1Name = "perturb001.dds",
+                Texture2Name = "cloud001.dds",
+                Mode = SkyPlaneMode.Perturbed,
+            });
         }
         private void InitializeFloorAsphalt()
         {

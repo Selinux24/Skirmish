@@ -33,6 +33,10 @@ namespace Engine.Effects
         /// </summary>
         public static EffectDefaultBillboard EffectDefaultBillboard { get; private set; }
         /// <summary>
+        /// Clouds effect
+        /// </summary>
+        public static EffectDefaultClouds EffectDefaultClouds { get; private set; }
+        /// <summary>
         /// Basic effect
         /// </summary>
         public static EffectDefaultBasic EffectDefaultBasic { get; private set; }
@@ -96,6 +100,7 @@ namespace Engine.Effects
             EffectDefaultFont = CreateEffect<EffectDefaultFont>(device, Resources.ShaderDefaultFontFxo, Resources.ShaderDefaultFontFxo);
             EffectDefaultCubemap = CreateEffect<EffectDefaultCubemap>(device, Resources.ShaderDefaultCubemapFxo, Resources.ShaderDefaultCubemapFx);
             EffectDefaultBillboard = CreateEffect<EffectDefaultBillboard>(device, Resources.ShaderDefaultBillboardFxo, Resources.ShaderDefaultBillboardFx);
+            EffectDefaultClouds = CreateEffect<EffectDefaultClouds>(device, Resources.ShaderDefaultCloudsFxo, Resources.ShaderDefaultCloudsFx);
             EffectDefaultBasic = CreateEffect<EffectDefaultBasic>(device, Resources.ShaderDefaultBasicFxo, Resources.ShaderDefaultBasicFx);
             EffectDefaultTerrain = CreateEffect<EffectDefaultTerrain>(device, Resources.ShaderDefaultTerrainFxo, Resources.ShaderDefaultTerrainFx);
             EffectDefaultSkyScattering = CreateEffect<EffectDefaultSkyScattering>(device, Resources.ShaderDefaultSkyScatteringFxo, Resources.ShaderDefaultSkyScatteringFx);
@@ -123,6 +128,7 @@ namespace Engine.Effects
             Helper.Dispose(EffectDefaultFont);
             Helper.Dispose(EffectDefaultCubemap);
             Helper.Dispose(EffectDefaultBillboard);
+            Helper.Dispose(EffectDefaultClouds);
             Helper.Dispose(EffectDefaultBasic);
             Helper.Dispose(EffectDefaultTerrain);
             Helper.Dispose(EffectDefaultSkyScattering);

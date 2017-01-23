@@ -675,6 +675,26 @@ namespace Engine
             return (float)Math.Acos(dot);
         }
         /// <summary>
+        /// Gets angle between two vectors with sign
+        /// </summary>
+        /// <param name="one">First vector</param>
+        /// <param name="two">Second vector</param>
+        /// <returns>Returns angle value</returns>
+        public static float AngleSigned(Vector2 one, Vector2 two)
+        {
+            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two)) * MathUtil.Pi;
+        }
+        /// <summary>
+        /// Performs cross product between two vectors
+        /// </summary>
+        /// <param name="one">First vector</param>
+        /// <param name="two">Second vector</param>
+        /// <returns>Returns the cross product</returns>
+        public static float Cross(Vector2 one, Vector2 two)
+        {
+            return one.X * two.Y - one.Y * two.X;
+        }
+        /// <summary>
         /// Gets angle between two vectors
         /// </summary>
         /// <param name="one">First vector</param>

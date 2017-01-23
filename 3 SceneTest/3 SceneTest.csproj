@@ -211,6 +211,12 @@
     <Content Include="SceneTextures\Lamps\Lamp.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneTextures\Sky\cloud001.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTextures\Sky\perturb001.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneTextures\Vehicles\Leopard\Leopard.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

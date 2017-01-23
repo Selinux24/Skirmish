@@ -594,11 +594,23 @@ namespace Engine
         /// Adds new sky scattering component
         /// </summary>
         /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
         public SkyScattering AddSkyScattering(SkyScatteringDescription description)
         {
             SkyScattering newModel = new SkyScattering(this.Game, description);
+
+            this.AddComponent(newModel, -1);
+
+            return newModel;
+        }
+        /// <summary>
+        /// Adds new sky plane component
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <returns>Returns new model</returns>
+        public SkyPlane AddSkyPlane(SkyPlaneDescription description)
+        {
+            SkyPlane newModel = new SkyPlane(this.Game, description);
 
             this.AddComponent(newModel, -1);
 

@@ -160,6 +160,12 @@
   <data name="ShaderDefaultBillboardFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderDefaultbillboard.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="ShaderDefaultCloudsFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\ShaderDefaultClouds.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDefaultCloudsFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderDefaultClouds.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="ShaderDefaultBasicFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ShaderDefaultBasic.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

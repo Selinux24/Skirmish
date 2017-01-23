@@ -35,6 +35,7 @@ namespace HeightmapTest
         private Cursor cursor;
         private LensFlare lensFlare = null;
         private SkyScattering skydom = null;
+        private SkyPlane clouds = null;
         private Terrain terrain = null;
         private LineListDrawer bboxesDrawer = null;
 
@@ -311,6 +312,27 @@ namespace HeightmapTest
             this.skydom = this.AddSkyScattering(new SkyScatteringDescription());
             sw.Stop();
             loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Clouds
+
+            sw.Restart();
+            this.clouds = this.AddSkyPlane(new SkyPlaneDescription()
+            {
+                Name = "Clouds",
+                ContentPath = "Resources/sky",
+                Texture1Name = "perturb001.dds",
+                Texture2Name = "cloud001.dds",
+                Mode = SkyPlaneMode.Perturbed,
+                MaxBrightness = 0.8f,
+                MinBrightness = 0.1f,
+                Repeat = 5,
+                Velocity = 1,
+                Direction = new Vector2(1, 1),
+            });
+            sw.Stop();
+            loadingText += string.Format("clouds: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
