@@ -150,11 +150,7 @@ namespace Engine
             scene.Lights.Cull(this.UpdateContext.Frustum, this.UpdateContext.EyePosition);
 
             //Update active components
-            var activeComponents = scene.Components.FindAll(c => c.Active);
-            for (int i = 0; i < activeComponents.Count; i++)
-            {
-                activeComponents[i].Update(this.UpdateContext);
-            }
+            scene.Components.FindAll(c => c.Active).ForEach(c => c.Update(this.UpdateContext));
 
             this.Updated = true;
 #if DEBUG
@@ -256,7 +252,9 @@ namespace Engine
 #if DEBUG
                                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                                staticObjs.ForEach(o => o.SetCulling(false));
+                                var cntType = this.DrawContext.Frustum.Contains(scene.SceneVolume);
+
+                                staticObjs.ForEach(o => o.SetCulling(cntType == ContainmentType.Disjoint));
 
                                 this.shadowMapper.Update(
                                     shadowCastingLights[0],
@@ -498,10 +496,9 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawShadowComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
         {
-            var toDraw = components.FindAll(c => !c.Cull);
-            if (toDraw.Count > 0)
+            components.ForEach((c) =>
             {
-                toDraw.ForEach((c) =>
+                if (!c.Cull)
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
 
@@ -512,8 +509,8 @@ namespace Engine
                     else this.Game.Graphics.SetBlendDefault();
 
                     c.Draw(context);
-                });
-            }
+                }
+            });
         }
         /// <summary>
         /// Draw components
@@ -523,10 +520,11 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawResultComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
         {
-            var toDraw = components.FindAll(c => !c.Cull);
-            if (toDraw.Count > 0)
+            components.ForEach((c) =>
             {
-                toDraw.ForEach((c) =>
+                Counters.MaxInstancesPerFrame += c.MaxInstances;
+
+                if (!c.Cull)
                 {
                     this.Game.Graphics.SetRasterizerDefault();
 
@@ -537,8 +535,8 @@ namespace Engine
                     else this.Game.Graphics.SetBlendDefault();
 
                     c.Draw(context);
-                });
-            }
+                }
+            });
         }
     }
 }

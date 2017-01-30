@@ -114,7 +114,7 @@ namespace HeightmapTest
                 @"boulder.xml",
                 new ModelInstancedDescription()
                 {
-                    Name = "DEBUG_CUBE_INSTANCED",
+                    Name = "Rocks",
                     CastShadow = true,
                     Static = true,
                     Instances = 250,
@@ -131,6 +131,7 @@ namespace HeightmapTest
                 @"soldier_anim2.xml",
                 new ModelDescription()
                 {
+                    Name = "Soldier",
                     TextureIndex = 0,
                 });
 
@@ -145,6 +146,7 @@ namespace HeightmapTest
                 @"soldier_anim2.xml",
                 new ModelInstancedDescription()
                 {
+                    Name = "Troops",
                     Instances = 4,
                 });
 
@@ -155,7 +157,7 @@ namespace HeightmapTest
             this.helicopter = this.AddModel(
                 @"Resources/m24",
                 @"m24.xml",
-                new ModelDescription() { });
+                new ModelDescription() { Name = "M24", });
 
             #endregion
 
@@ -166,6 +168,7 @@ namespace HeightmapTest
                 "Helicopter.xml",
                 new ModelDescription()
                 {
+                    Name = "Helicopter",
                     CastShadow = true,
                     Static = false,
                     TextureIndex = 2,
@@ -180,6 +183,7 @@ namespace HeightmapTest
                 @"torch.xml",
                 new ModelInstancedDescription()
                 {
+                    Name = "Torchs",
                     Instances = 50,
                     CastShadow = true,
                 });
@@ -285,6 +289,7 @@ namespace HeightmapTest
 
             this.lensFlare = this.AddLensFlare(new LensFlareDescription()
             {
+                Name = "Flares",
                 ContentPath = @"Resources/Scenery/Flare",
                 GlowTexture = "lfGlow.png",
                 Flares = new[]
@@ -309,7 +314,7 @@ namespace HeightmapTest
             #region Skydom
 
             sw.Restart();
-            this.skydom = this.AddSkyScattering(new SkyScatteringDescription());
+            this.skydom = this.AddSkyScattering(new SkyScatteringDescription() { Name = "Sky", });
             sw.Stop();
             loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
 

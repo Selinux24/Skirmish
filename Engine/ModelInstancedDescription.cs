@@ -1,6 +1,8 @@
 ﻿
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Instanced model description
     /// </summary>

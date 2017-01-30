@@ -211,7 +211,7 @@
     <Compile Include="CubemapDescription.cs" />
     <Compile Include="CameraFollower.cs" />
     <Compile Include="AttachedModel.cs" />
-    <Compile Include="DrawableDescription.cs" />
+    <Compile Include="Common\DrawableDescription.cs" />
     <Compile Include="GameResourceManager.cs" />
     <Compile Include="Flare.cs" />
     <Compile Include="HeightmapDescription.cs" />

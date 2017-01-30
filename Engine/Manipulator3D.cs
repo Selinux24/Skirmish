@@ -195,7 +195,7 @@ namespace Engine
         /// Update internal state
         /// </summary>
         /// <param name="force">If true, local transforms were forced to update</param>
-        public void UpdateInternals( bool force)
+        public void UpdateInternals(bool force)
         {
             if (force) this.transformUpdateNeeded = true;
 
@@ -235,15 +235,17 @@ namespace Engine
         {
             if (this.PathTarget < this.Path.Length)
             {
+                var velocity = this.PathVelocity * gameTime.ElapsedSeconds;
+
                 Vector3 p = this.Path[this.PathTarget];
 
-                if (Helper.WithinEpsilon(this.position, p, this.PathVelocity))
+                if (Helper.WithinEpsilon(this.position, p, velocity))
                 {
                     this.PathTarget++;
                 }
                 else
                 {
-                    Vector3 newPosition = this.position + (Vector3.Normalize(p - this.position) * this.PathVelocity);
+                    Vector3 newPosition = this.position + (Vector3.Normalize(p - this.position) * velocity);
                     Vector3 newNormal = this.Up;
 
                     if (this.Ground != null)
@@ -293,7 +295,10 @@ namespace Engine
 
                 this.transformUpdateNeeded = false;
 
-                this.Updated?.Invoke(this, new EventArgs());
+                if (this.Updated != null)
+                {
+                    this.Updated.Invoke(this, new EventArgs());
+                }
 
                 Counters.UpdatesPerFrame++;
             }

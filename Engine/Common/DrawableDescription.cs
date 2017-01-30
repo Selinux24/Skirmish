@@ -1,5 +1,5 @@
 ﻿
-namespace Engine
+namespace Engine.Common
 {
     /// <summary>
     /// Drawable description
@@ -34,5 +34,10 @@ namespace Engine
         /// Enables transparent blending
         /// </summary>
         public bool EnableAlphaBlending = false;
+
+        /// <summary>
+        /// Use spheric volume for culling by default
+        /// </summary>
+        public bool SphericVolume = true;
     }
 }

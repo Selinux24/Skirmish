@@ -384,7 +384,9 @@ namespace Engine
 #if DEBUG
                                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                                staticObjs.ForEach(o => o.SetCulling(false));
+                                var cntType = this.DrawContext.Frustum.Contains(scene.SceneVolume);
+
+                                staticObjs.ForEach(o => o.SetCulling(cntType == ContainmentType.Disjoint));
 
                                 this.shadowMapper.Update(
                                     shadowCastingLights[0],
@@ -913,6 +915,10 @@ namespace Engine
 #if DEBUG
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
+            Counters.MaxInstancesPerFrame += context.Lights.DirectionalLights.Length;
+            Counters.MaxInstancesPerFrame += context.Lights.PointLights.Length;
+            Counters.MaxInstancesPerFrame += context.Lights.SpotLights.Length;
+
             #region Initialization
 #if DEBUG
             Stopwatch swPrepare = Stopwatch.StartNew();
@@ -1231,10 +1237,9 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawShadowsComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
         {
-            var toDraw = components.FindAll(c => !c.Cull);
-            if (toDraw.Count > 0)
+            components.ForEach((c) =>
             {
-                toDraw.ForEach((c) =>
+                if (!c.Cull)
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
 
@@ -1245,8 +1250,8 @@ namespace Engine
                     else this.Game.Graphics.SetBlendDefault();
 
                     c.Draw(context);
-                });
-            }
+                }
+            });
         }
         /// <summary>
         /// Draw components
@@ -1257,10 +1262,11 @@ namespace Engine
         /// <param name="deferred">Deferred drawing</param>
         private void DrawResultComponents(GameTime gameTime, DrawContext context, List<Drawable> components, bool deferred)
         {
-            var toDraw = components.FindAll(c => !c.Cull);
-            if (toDraw.Count > 0)
+            components.ForEach((c) =>
             {
-                toDraw.ForEach((c) =>
+                Counters.MaxInstancesPerFrame += c.MaxInstances;
+
+                if (!c.Cull)
                 {
                     this.Game.Graphics.SetRasterizerDefault();
 
@@ -1279,8 +1285,8 @@ namespace Engine
                     }
 
                     c.Draw(context);
-                });
-            }
+                }
+            });
         }
     }
 }

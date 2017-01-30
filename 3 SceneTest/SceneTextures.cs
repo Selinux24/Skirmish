@@ -154,6 +154,7 @@ namespace SceneTest
                 DeferredEnabled = true,
                 EnableDepthStencil = true,
                 EnableAlphaBlending = false,
+                SphericVolume = false,
             };
 
             var descI = new ModelInstancedDescription()
@@ -165,6 +166,7 @@ namespace SceneTest
                 DeferredEnabled = true,
                 EnableDepthStencil = true,
                 EnableAlphaBlending = false,
+                SphericVolume = false,
                 Instances = 8,
             };
 
@@ -192,6 +194,7 @@ namespace SceneTest
                     Name = "Obelisk",
                     CastShadow = true,
                     Static = true,
+                    SphericVolume = false,
                 });
 
             this.buildingObeliskI = this.AddInstancingModel(
@@ -202,6 +205,7 @@ namespace SceneTest
                     Name = "ObeliskI",
                     CastShadow = true,
                     Static = true,
+                    SphericVolume = false,
                     Instances = 4,
                 });
 
@@ -288,6 +292,7 @@ namespace SceneTest
                     Name = "Leopard",
                     CastShadow = true,
                     Static = false,
+                    SphericVolume = false,
                 });
 
             this.vehicleLeopardI = this.AddInstancingModel(
@@ -298,6 +303,7 @@ namespace SceneTest
                     Name = "LeopardI",
                     CastShadow = true,
                     Static = false,
+                    SphericVolume = false,
                     Instances = 4,
                 });
 
@@ -332,6 +338,7 @@ namespace SceneTest
                     Name = "Lamp",
                     CastShadow = true,
                     Static = true,
+                    SphericVolume = false,
                 });
 
             this.lampI = this.AddInstancingModel(
@@ -342,6 +349,7 @@ namespace SceneTest
                     Name = "LampI",
                     CastShadow = true,
                     Static = true,
+                    SphericVolume = false,
                     Instances = 4,
                 });
 
@@ -377,6 +385,7 @@ namespace SceneTest
                     Name = "Street Lamp",
                     CastShadow = true,
                     Static = true,
+                    SphericVolume = false,
                 });
 
             this.streetlampI = this.AddInstancingModel(
@@ -387,6 +396,7 @@ namespace SceneTest
                     Name = "Street LampI",
                     CastShadow = true,
                     Static = true,
+                    SphericVolume = false,
                     Instances = 9,
                 });
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 namespace Engine
 {
     using Engine.PathFinding;
+    using Engine.Common;
 
     /// <summary>
     /// Ground description

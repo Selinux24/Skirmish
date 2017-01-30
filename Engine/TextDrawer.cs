@@ -124,6 +124,16 @@ namespace Engine
         /// Gets or sets relative position of shadow
         /// </summary>
         public Vector2 ShadowRelative { get; set; }
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 0;
+            }
+        }
 
         /// <summary>
         /// Gets or sest text position in 2D screen
@@ -175,7 +185,7 @@ namespace Engine
         /// Gets text height
         /// </summary>
         public int Height { get; private set; }
-      
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -239,13 +249,13 @@ namespace Engine
             if (!string.IsNullOrWhiteSpace(this.text))
             {
                 this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
-                Counters.IAInputLayoutSets++;
+                //Counters.IAInputLayoutSets++;
                 this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
+                //Counters.IAPrimitiveTopologySets++;
                 this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
+                //Counters.IAVertexBuffersSets++;
                 this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
+                //Counters.IAIndexBufferSets++;
 
                 if (this.ShadowColor != Color.Transparent)
                 {
@@ -255,6 +265,8 @@ namespace Engine
 
                 //Draw text
                 this.DrawText(context, this.Position, this.TextColor);
+
+                //Counters.InstancesPerFrame++;
             }
         }
         /// <summary>
@@ -298,17 +310,15 @@ namespace Engine
                 {
                     this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
 
-                    Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexCount / 3;
+                    //Counters.DrawCallsPerFrame++;
+                    //Counters.PrimitivesPerFrame += this.indexCount / 3;
                 }
                 else
                 {
                     this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
 
-                    Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.vertexCount / 3;
+                    //Counters.DrawCallsPerFrame++;
+                    //Counters.PrimitivesPerFrame += this.vertexCount / 3;
                 }
             }
         }

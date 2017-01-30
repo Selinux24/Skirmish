@@ -233,6 +233,8 @@ namespace Engine
             /// <param name="sceneryEffect">Scenery effect</param>
             public void DrawScenery(SceneryDrawContext context, Drawer sceneryEffect)
             {
+                int count = 0;
+
                 foreach (string meshName in this.DrawingData.Meshes.Keys)
                 {
                     var dictionary = this.DrawingData.Meshes[meshName];
@@ -276,13 +278,23 @@ namespace Engine
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.BaseContext.DrawerMode);
                         mesh.SetInputAssembler(this.Game.Graphics.DeviceContext, sceneryEffect.GetInputLayout(technique));
 
+                        count += mesh.IndexCount > 0 ? mesh.IndexCount : mesh.VertexCount;
+
                         for (int p = 0; p < technique.Description.PassCount; p++)
                         {
                             technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
                             mesh.Draw(this.Game.Graphics.DeviceContext);
+
+                            Counters.DrawCallsPerFrame++;
                         }
                     }
+                }
+
+                if (context.BaseContext.DrawerMode != DrawerModesEnum.ShadowMap)
+                {
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += count / 3;
                 }
             }
             /// <summary>
@@ -294,6 +306,8 @@ namespace Engine
             {
                 if (this.foliageCount > 0)
                 {
+                    Counters.PrimitivesPerFrame += this.foliageCount;
+
                     this.AttachFoliage();
 
                     this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.foliageBufferBinding);
@@ -308,8 +322,6 @@ namespace Engine
                         this.Game.Graphics.DeviceContext.Draw(this.foliageCount, 0);
 
                         Counters.DrawCallsPerFrame++;
-                        Counters.InstancesPerFrame++;
-                        Counters.PrimitivesPerFrame += this.foliageCount;
                     }
                 }
             }
@@ -469,17 +481,7 @@ namespace Engine
         /// <summary>
         /// Visible Nodes
         /// </summary>
-        public PickingQuadTreeNode[] visibleNodes;
-        /// <summary>
-        /// Gets the visible node count
-        /// </summary>
-        public int VisiblePatchesCount
-        {
-            get
-            {
-                return this.visibleNodes != null ? this.visibleNodes.Length : 0;
-            }
-        }
+        private PickingQuadTreeNode[] visibleNodes;
         /// <summary>
         /// Random texture
         /// </summary>
@@ -526,6 +528,26 @@ namespace Engine
                 }
 
                 return matList.ToArray();
+            }
+        }
+        /// <summary>
+        /// Gets the visible node count
+        /// </summary>
+        public int VisiblePatchesCount
+        {
+            get
+            {
+                return this.visibleNodes != null ? this.visibleNodes.Length : 0;
+            }
+        }
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 1;
             }
         }
 

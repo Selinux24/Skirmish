@@ -3,14 +3,14 @@ using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
 using Buffer = SharpDX.Direct3D11.Buffer;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
+using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
-    using Content;
-    using Effects;
     using Engine.Common;
+    using Engine.Content;
+    using Engine.Effects;
     using Engine.Helpers;
 
     /// <summary>
@@ -42,22 +42,73 @@ namespace Engine
         /// Sky texture 2
         /// </summary>
         private ShaderResourceView skyTexture2 = null;
-
+        /// <summary>
+        /// Brightness
+        /// </summary>
         private float brightness;
+        /// <summary>
+        /// Translation
+        /// </summary>
         private float translation = 0;
+        /// <summary>
+        /// First layer translation
+        /// </summary>
         private Vector2 firstLayerTranslation;
+        /// <summary>
+        /// Second layer translation
+        /// </summary>
         private Vector2 secondLayerTranslation;
+        /// <summary>
+        /// Plane mode
+        /// </summary>
         private SkyPlaneMode mode;
+        /// <summary>
+        /// Plane rotation (Y)
+        /// </summary>
         private Matrix rotation;
 
-        public Vector2 FirstLayerTranslation;
-        public Vector2 SecondLayerTranslation;
-        public float MaxBrightness;
-        public float MinBrightness;
-        public float FadingDistance;
-        public float Velocity;
-        public Vector2 Direction;
-        public float PerturbationScale;
+        /// <summary>
+        /// First layer translation
+        /// </summary>
+        public Vector2 FirstLayerTranslation { get; set; }
+        /// <summary>
+        /// Second layer translation
+        /// </summary>
+        public Vector2 SecondLayerTranslation { get; set; }
+        /// <summary>
+        /// Maximum brightness
+        /// </summary>
+        public float MaxBrightness { get; set; }
+        /// <summary>
+        /// Minimum brightness
+        /// </summary>
+        public float MinBrightness { get; set; }
+        /// <summary>
+        /// Fading distance
+        /// </summary>
+        public float FadingDistance { get; set; }
+        /// <summary>
+        /// Velocity
+        /// </summary>
+        public float Velocity { get; set; }
+        /// <summary>
+        /// Direction
+        /// </summary>
+        public Vector2 Direction { get; set; }
+        /// <summary>
+        /// Perturbation scale
+        /// </summary>
+        public float PerturbationScale { get; set; }
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 1;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -158,51 +209,58 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            var effect = DrawerPool.EffectDefaultClouds;
-            var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
-
-            effect.UpdatePerFrame(
-                this.rotation * Matrix.Translation(context.EyePosition),
-                context.ViewProjection,
-                this.brightness,
-                this.FadingDistance,
-                this.skyTexture1,
-                this.skyTexture2);
-
-            if (this.mode == SkyPlaneMode.Static)
+            if (this.indexCount > 0)
             {
-                effect.UpdatePerFrameStatic(
-                    this.firstLayerTranslation,
-                    this.secondLayerTranslation);
-            }
-            else
-            {
-                effect.UpdatePerFramePerturbed(
-                    this.translation,
-                    this.PerturbationScale);
-            }
+                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                {
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += this.indexCount / 3;
+                }
 
-            //Sets vertex and index buffer
-            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-            Counters.IAInputLayoutSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-            Counters.IAVertexBuffersSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            Counters.IAPrimitiveTopologySets++;
+                var effect = DrawerPool.EffectDefaultClouds;
+                var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
 
-            this.Game.Graphics.SetBlendAdditive();
+                effect.UpdatePerFrame(
+                    this.rotation * Matrix.Translation(context.EyePosition),
+                    context.ViewProjection,
+                    this.brightness,
+                    this.FadingDistance,
+                    this.skyTexture1,
+                    this.skyTexture2);
 
-            for (int p = 0; p < technique.Description.PassCount; p++)
-            {
-                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                if (this.mode == SkyPlaneMode.Static)
+                {
+                    effect.UpdatePerFrameStatic(
+                        this.firstLayerTranslation,
+                        this.secondLayerTranslation);
+                }
+                else
+                {
+                    effect.UpdatePerFramePerturbed(
+                        this.translation,
+                        this.PerturbationScale);
+                }
 
-                this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+                //Sets vertex and index buffer
+                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                Counters.IAInputLayoutSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+                Counters.IAVertexBuffersSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
+                Counters.IAIndexBufferSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
 
-                Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += this.indexCount / 3;
+                this.Game.Graphics.SetBlendAdditive();
+
+                for (int p = 0; p < technique.Description.PassCount; p++)
+                {
+                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+
+                    Counters.DrawCallsPerFrame++;
+                }
             }
         }
     }

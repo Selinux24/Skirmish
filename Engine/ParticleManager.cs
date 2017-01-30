@@ -22,6 +22,16 @@ namespace Engine
         /// Current particle count
         /// </summary>
         public int AllocatedParticleCount { get; private set; }
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return this.particleSystems.Count;
+            }
+        }
 
         /// <summary>
         /// Constructor

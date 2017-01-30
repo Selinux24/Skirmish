@@ -41,6 +41,16 @@ namespace Engine
         /// Reference to the objects that we render in the minimap
         /// </summary>
         public Drawable[] Drawables;
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 1;
+            }
+        }
 
         /// <summary>
         /// Contructor

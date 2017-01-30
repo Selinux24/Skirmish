@@ -311,7 +311,6 @@ namespace Engine
                 }
 
                 Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
             }
 
             this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(null);
@@ -336,6 +335,11 @@ namespace Engine
         /// <param name="drawerMode">Drawe mode</param>
         private void Draw(EffectDefaultGPUParticles effect, DrawerModesEnum drawerMode)
         {
+            if (drawerMode != DrawerModesEnum.ShadowMap)
+            {
+                Counters.InstancesPerFrame++;
+            }
+
             var techniqueForDrawing = effect.GetTechniqueForDrawing(
                 VertexTypes.GPUParticle,
                 false,
@@ -372,7 +376,6 @@ namespace Engine
                 this.Game.Graphics.DeviceContext.DrawAuto();
 
                 Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
             }
         }
 

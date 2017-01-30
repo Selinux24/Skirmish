@@ -38,6 +38,10 @@ namespace Engine
         /// </summary>
         public static int InstancesPerFrame = 0;
         /// <summary>
+        /// Maximum count of single draw calls and instance draw calls * instance count of this call
+        /// </summary>
+        public static int MaxInstancesPerFrame = 0;
+        /// <summary>
         /// Sum of primitives drawn per frame
         /// </summary>
         public static int PrimitivesPerFrame = 0;
@@ -155,6 +159,7 @@ namespace Engine
             DrawCallsPerFrame = 0;
 
             InstancesPerFrame = 0;
+            MaxInstancesPerFrame = 0;
             PrimitivesPerFrame = 0;
 
             UpdatesPerFrame = 0;
@@ -194,6 +199,7 @@ namespace Engine
             DrawCallsPerFrame = 0;
 
             InstancesPerFrame = 0;
+            MaxInstancesPerFrame = 0;
             PrimitivesPerFrame = 0;
 
             UpdatesPerFrame = 0;

@@ -32,6 +32,17 @@ namespace Engine
         private Vector2 lightProjectedDirection;
 
         /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 1 + (this.flares != null ? this.flares.Length : 0);
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game instance</param>

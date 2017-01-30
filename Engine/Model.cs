@@ -48,7 +48,9 @@ namespace Engine
         {
             get
             {
-                return this.positionCache != null && this.positionCache.Length > 0;
+                var points = this.GetPoints();
+
+                return points != null && points.Length > 0;
             }
         }
         /// <summary>
@@ -100,6 +102,16 @@ namespace Engine
         /// Gets the current model lights collection
         /// </summary>
         public SceneLight[] Lights { get; protected set; }
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 1;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -178,8 +190,13 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            int count = 0;
+            int instanceCount = 0;
+
             if (this.DrawingData != null)
             {
+                instanceCount++;
+
                 Drawer effect = null;
                 if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectDefaultBasic;
                 else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectDeferredBasic;
@@ -259,15 +276,25 @@ namespace Engine
                             var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
                             mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 
+                            count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
+
                             for (int p = 0; p < technique.Description.PassCount; p++)
                             {
                                 technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
                                 mesh.Draw(this.DeviceContext);
+
+                                Counters.DrawCallsPerFrame++;
                             }
                         }
                     }
                 }
+            }
+
+            if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+            {
+                Counters.InstancesPerFrame += instanceCount;
+                Counters.PrimitivesPerFrame += count;
             }
         }
         /// <summary>
@@ -278,7 +305,14 @@ namespace Engine
         {
             if (this.hasVolumes)
             {
-                this.Cull = frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
+                if (this.SphericVolume)
+                {
+                    this.Cull = frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
+                }
+                else
+                {
+                    this.Cull = frustum.Contains(this.GetBoundingBox()) == ContainmentType.Disjoint;
+                }
             }
             else
             {
@@ -288,11 +322,8 @@ namespace Engine
             if (!this.Cull)
             {
                 var pars = frustum.GetCameraParams();
-                var dist = Vector3.DistanceSquared(this.Manipulator.Position, pars.Position);
-                if (dist < 100f) { this.LevelOfDetail = LevelOfDetailEnum.High; }
-                else if (dist < 400f) { this.LevelOfDetail = LevelOfDetailEnum.Medium; }
-                else if (dist < 1600f) { this.LevelOfDetail = LevelOfDetailEnum.Low; }
-                else { this.LevelOfDetail = LevelOfDetailEnum.Minimum; }
+
+                this.SetLOD(pars.Position);
             }
         }
         /// <summary>
@@ -303,7 +334,14 @@ namespace Engine
         {
             if (this.hasVolumes)
             {
-                this.Cull = this.GetBoundingSphere().Contains(ref sphere) == ContainmentType.Disjoint;
+                if (this.SphericVolume)
+                {
+                    this.Cull = this.GetBoundingSphere().Contains(ref sphere) == ContainmentType.Disjoint;
+                }
+                else
+                {
+                    this.Cull = this.GetBoundingBox().Contains(ref sphere) == ContainmentType.Disjoint;
+                }
             }
             else
             {
@@ -312,11 +350,31 @@ namespace Engine
 
             if (!this.Cull)
             {
-                var dist = Vector3.DistanceSquared(this.Manipulator.Position, sphere.Center);
-                if (dist < 100f) { this.LevelOfDetail = LevelOfDetailEnum.High; }
-                else if (dist < 400f) { this.LevelOfDetail = LevelOfDetailEnum.Medium; }
-                else if (dist < 1600f) { this.LevelOfDetail = LevelOfDetailEnum.Low; }
-                else { this.LevelOfDetail = LevelOfDetailEnum.Minimum; }
+                this.SetLOD(sphere.Center);
+            }
+        }
+        /// <summary>
+        /// Set level of detail values
+        /// </summary>
+        /// <param name="origin">Origin point</param>
+        private void SetLOD(Vector3 origin)
+        {
+            var dist = Vector3.Distance(this.Manipulator.Position, origin) - this.GetBoundingSphere().Radius;
+            if (dist < 10f)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.High;
+            }
+            else if (dist < 20f)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Medium;
+            }
+            else if (dist < 40f)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Low;
+            }
+            else
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Minimum;
             }
         }
 

@@ -72,6 +72,10 @@ namespace Engine.Common
                 return skList.ToArray();
             }
         }
+        /// <summary>
+        /// Use spheric volume for culling test
+        /// </summary>
+        public bool SphericVolume { get; set; }
 
         /// <summary>
         /// Base model

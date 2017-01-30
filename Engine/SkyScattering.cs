@@ -72,6 +72,16 @@ namespace Engine
         protected float ScatteringScale { get; private set; }
 
         /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 1;
+            }
+        }
+        /// <summary>
         /// Planet radius
         /// </summary>
         public float PlanetRadius { get; set; }
@@ -229,8 +239,14 @@ namespace Engine
         public override void Draw(DrawContext context)
         {
             var keyLight = context.Lights.KeyLight;
-            if (keyLight != null)
+            if (keyLight != null && this.indexCount > 0)
             {
+                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                {
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += this.indexCount / 3;
+                }
+
                 var effect = DrawerPool.EffectDefaultSkyScattering;
                 var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
 
@@ -269,8 +285,6 @@ namespace Engine
                     this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
 
                     Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexCount / 3;
                 }
             }
         }

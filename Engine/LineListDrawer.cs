@@ -38,6 +38,17 @@ namespace Engine
         private bool dictionaryChanged = false;
 
         /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return this.dictionary.Count;
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
@@ -108,43 +119,50 @@ namespace Engine
                 this.WriteDataInBuffer();
             }
 
-            var effect = DrawerPool.EffectDefaultBasic;
-            var technique = effect.GetTechnique(VertexTypes.PositionColor, false, DrawingStages.Drawing, context.DrawerMode);
-
-            #region Per frame update
-
-            effect.UpdatePerFrame(context.World, context.ViewProjection);
-
-            #endregion
-
-            #region Per object update
-
-            effect.UpdatePerObject(null, null, null, 0, 0, 0);
-
-            #endregion
-
-            //Sets vertex and index buffer
-            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-            Counters.IAInputLayoutSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-            Counters.IAVertexBuffersSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.LineList;
-            Counters.IAPrimitiveTopologySets++;
-
-            if (this.EnableAlphaBlending) this.Game.Graphics.SetBlendDefaultAlpha();
-            else this.Game.Graphics.SetBlendDefault();
-
-            for (int p = 0; p < technique.Description.PassCount; p++)
+            if (this.vertexCount > 0)
             {
-                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                {
+                    Counters.InstancesPerFrame += this.dictionary.Count;
+                    Counters.PrimitivesPerFrame += this.vertexCount / 2;
+                }
 
-                this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
+                var effect = DrawerPool.EffectDefaultBasic;
+                var technique = effect.GetTechnique(VertexTypes.PositionColor, false, DrawingStages.Drawing, context.DrawerMode);
 
-                Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += this.vertexCount / 2;
+                #region Per frame update
+
+                effect.UpdatePerFrame(context.World, context.ViewProjection);
+
+                #endregion
+
+                #region Per object update
+
+                effect.UpdatePerObject(null, null, null, 0, 0, 0);
+
+                #endregion
+
+                //Sets vertex and index buffer
+                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                Counters.IAInputLayoutSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+                Counters.IAVertexBuffersSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, Format.R32_UInt, 0);
+                Counters.IAIndexBufferSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.LineList;
+                Counters.IAPrimitiveTopologySets++;
+
+                if (this.EnableAlphaBlending) this.Game.Graphics.SetBlendDefaultAlpha();
+                else this.Game.Graphics.SetBlendDefault();
+
+                for (int p = 0; p < technique.Description.PassCount; p++)
+                {
+                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                    this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
+
+                    Counters.DrawCallsPerFrame++;
+                }
             }
         }
         /// <summary>

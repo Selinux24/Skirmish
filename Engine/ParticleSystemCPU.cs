@@ -211,62 +211,69 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Draw(DrawContext context)
         {
-            var effect = DrawerPool.EffectDefaultCPUParticles;
-             
-            var technique = effect.GetTechnique(
-                VertexTypes.Particle, 
-                false, 
-                DrawingStages.Drawing, 
-                context.DrawerMode,
-                this.RotateSpeed != Vector2.Zero);
-
-            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-            Counters.IAInputLayoutSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
-            Counters.IAPrimitiveTopologySets++;
-
-            this.Game.Graphics.SetDepthStencilRDZEnabled();
-
-            if (this.Transparent)
+            if (this.ActiveParticles > 0)
             {
-                this.Game.Graphics.SetBlendDefaultAlpha();
-            }
-            else
-            {
-                this.Game.Graphics.SetBlendDefault();
-            }
+                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                {
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += this.ActiveParticles;
+                }
 
-            effect.UpdatePerFrame(
-                context.World,
-                context.ViewProjection,
-                context.EyePosition,
-                this.Emitter.TotalTime,
-                this.MaximumAge,
-                this.MaximumAgeVariation,
-                this.VelocityAtEnd,
-                this.Gravity,
-                this.StartSize,
-                this.EndSize,
-                this.MinimumColor,
-                this.MaximumColor,
-                this.RotateSpeed,
-                this.TextureCount,
-                this.Texture);
+                var effect = DrawerPool.EffectDefaultCPUParticles;
 
-            this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-            Counters.IAVertexBuffersSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
+                var technique = effect.GetTechnique(
+                    VertexTypes.Particle,
+                    false,
+                    DrawingStages.Drawing,
+                    context.DrawerMode,
+                    this.RotateSpeed != Vector2.Zero);
 
-            for (int p = 0; p < technique.Description.PassCount; p++)
-            {
-                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                Counters.IAInputLayoutSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
+                Counters.IAPrimitiveTopologySets++;
 
-                this.Game.Graphics.DeviceContext.Draw(this.ActiveParticles, 0);
+                this.Game.Graphics.SetDepthStencilRDZEnabled();
 
-                Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += this.ActiveParticles;
+                if (this.Transparent)
+                {
+                    this.Game.Graphics.SetBlendDefaultAlpha();
+                }
+                else
+                {
+                    this.Game.Graphics.SetBlendDefault();
+                }
+
+                effect.UpdatePerFrame(
+                    context.World,
+                    context.ViewProjection,
+                    context.EyePosition,
+                    this.Emitter.TotalTime,
+                    this.MaximumAge,
+                    this.MaximumAgeVariation,
+                    this.VelocityAtEnd,
+                    this.Gravity,
+                    this.StartSize,
+                    this.EndSize,
+                    this.MinimumColor,
+                    this.MaximumColor,
+                    this.RotateSpeed,
+                    this.TextureCount,
+                    this.Texture);
+
+                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+                Counters.IAVertexBuffersSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
+                Counters.IAIndexBufferSets++;
+
+                for (int p = 0; p < technique.Description.PassCount; p++)
+                {
+                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                    this.Game.Graphics.DeviceContext.Draw(this.ActiveParticles, 0);
+
+                    Counters.DrawCallsPerFrame++;
+                }
             }
         }
 

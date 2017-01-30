@@ -114,6 +114,16 @@ namespace Engine
         {
             get { return this.button.Rectangle; }
         }
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 1;
+            }
+        }
 
         /// <summary>
         /// Constructor

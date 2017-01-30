@@ -55,7 +55,9 @@ namespace Engine
         {
             get
             {
-                return this.positionCache != null && this.positionCache.Length > 0;
+                var points = this.GetPoints();
+
+                return points != null && points.Length > 0;
             }
         }
         /// <summary>
@@ -445,7 +447,14 @@ namespace Engine
         {
             if (this.hasVolumes)
             {
-                this.Cull = frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
+                if (this.model.SphericVolume)
+                {
+                    this.Cull = frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
+                }
+                else
+                {
+                    this.Cull = frustum.Contains(this.GetBoundingBox()) == ContainmentType.Disjoint;
+                }
             }
             else
             {
@@ -455,11 +464,8 @@ namespace Engine
             if (!this.Cull)
             {
                 var pars = frustum.GetCameraParams();
-                var dist = Vector3.DistanceSquared(this.Manipulator.Position, pars.Position);
-                if (dist < 100f) { this.LevelOfDetail = LevelOfDetailEnum.High; }
-                else if (dist < 400f) { this.LevelOfDetail = LevelOfDetailEnum.Medium; }
-                else if (dist < 1600f) { this.LevelOfDetail = LevelOfDetailEnum.Low; }
-                else { this.LevelOfDetail = LevelOfDetailEnum.Minimum; }
+             
+                this.SetLOD(pars.Position);
             }
         }
         /// <summary>
@@ -470,7 +476,14 @@ namespace Engine
         {
             if (this.hasVolumes)
             {
-                this.Cull = this.GetBoundingSphere().Contains(ref sphere) == ContainmentType.Disjoint;
+                if (this.model.SphericVolume)
+                {
+                    this.Cull = this.GetBoundingSphere().Contains(ref sphere) == ContainmentType.Disjoint;
+                }
+                else
+                {
+                    this.Cull = this.GetBoundingBox().Contains(ref sphere) == ContainmentType.Disjoint;
+                }
             }
             else
             {
@@ -479,11 +492,7 @@ namespace Engine
 
             if (!this.Cull)
             {
-                var dist = Vector3.DistanceSquared(this.Manipulator.Position, sphere.Center);
-                if (dist < 100f) { this.LevelOfDetail = LevelOfDetailEnum.High; }
-                else if (dist < 400f) { this.LevelOfDetail = LevelOfDetailEnum.Medium; }
-                else if (dist < 1600f) { this.LevelOfDetail = LevelOfDetailEnum.Low; }
-                else { this.LevelOfDetail = LevelOfDetailEnum.Minimum; }
+                this.SetLOD(sphere.Center);
             }
         }
         /// <summary>
@@ -493,6 +502,44 @@ namespace Engine
         public virtual void SetCulling(bool value)
         {
             this.Cull = value;
+        }
+        /// <summary>
+        /// Set level of detail values
+        /// </summary>
+        /// <param name="origin">Origin point</param>
+        private void SetLOD(Vector3 origin)
+        {
+            var dist = Vector3.Distance(this.Manipulator.Position, origin) - this.GetBoundingSphere().Radius;
+            if (dist < 10f)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.High;
+            }
+            else if (dist < 20f)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Medium;
+            }
+            else if (dist < 40f)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Low;
+            }
+            else
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Minimum;
+            }
+        }
+
+        /// <summary>
+        /// Gets the text representation of the current instance
+        /// </summary>
+        /// <returns>Returns the text representation of the current instance</returns>
+        public override string ToString()
+        {
+            return string.Format(
+                "Id: {0}; Active: {1}; Visible: {2}; Cull: {3}",
+                this.Id,
+                this.Active,
+                this.Visible,
+                this.Cull);
         }
     }
 }

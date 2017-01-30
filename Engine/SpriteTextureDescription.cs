@@ -1,6 +1,8 @@
 ﻿
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Minimap description
     /// </summary>

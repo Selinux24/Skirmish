@@ -42,6 +42,10 @@ namespace Engine.Common
         /// </summary>
         /// <remarks>True if passes culling test</remarks>
         public bool Cull { get; protected set; }
+        /// <summary>
+        /// Maximum instance count
+        /// </summary>
+        public abstract int MaxInstances { get; }
 
         /// <summary>
         /// Gets or sets whether the object is static

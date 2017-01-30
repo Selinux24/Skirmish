@@ -188,10 +188,6 @@ namespace Engine.Common
                 if (this.IndexCount > 0)
                 {
                     deviceContext.DrawIndexed(this.IndexCount, 0, 0);
-
-                    Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.IndexCount / 3;
                 }
             }
             else
@@ -199,10 +195,6 @@ namespace Engine.Common
                 if (this.VertexCount > 0)
                 {
                     deviceContext.Draw(this.VertexCount, 0);
-
-                    Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.VertexCount / 3;
                 }
             }
         }
@@ -225,10 +217,6 @@ namespace Engine.Common
                             this.IndexCount,
                             count,
                             0, 0, startInstanceLocation);
-
-                        Counters.DrawCallsPerFrame++;
-                        Counters.InstancesPerFrame += count;
-                        Counters.PrimitivesPerFrame += (this.IndexCount / 3) * count;
                     }
                 }
                 else
@@ -239,10 +227,6 @@ namespace Engine.Common
                             this.VertexCount,
                             count,
                             0, startInstanceLocation);
-
-                        Counters.DrawCallsPerFrame++;
-                        Counters.InstancesPerFrame += count;
-                        Counters.PrimitivesPerFrame += (this.VertexCount / 3) * count;
                     }
                 }
             }

@@ -847,7 +847,7 @@ namespace TerrainTest
                     var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, pickedPosition);
                     if (p != null)
                     {
-                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.1f, this.terrain);
+                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 10f, this.terrain);
 
                         this.DEBUGDrawTankPath(this.tank.Manipulator.Position, p);
                     }

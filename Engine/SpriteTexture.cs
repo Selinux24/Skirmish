@@ -66,6 +66,16 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 1;
+            }
+        }
 
         /// <summary>
         /// Contructor
@@ -133,6 +143,12 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+            {
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += 2;
+            }
+
             var technique = effect.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode, this.Channels);
 
             this.DeviceContext.InputAssembler.InputLayout = this.effect.GetInputLayout(technique);
@@ -154,8 +170,6 @@ namespace Engine
                 this.DeviceContext.DrawIndexed(6, 0, 0);
 
                 Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += 2;
             }
         }
         /// <summary>

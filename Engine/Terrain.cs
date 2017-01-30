@@ -1306,6 +1306,12 @@ namespace Engine
             {
                 if (this.indexCount > 0)
                 {
+                    if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                    {
+                        Counters.InstancesPerFrame++;
+                        Counters.PrimitivesPerFrame += this.indexCount / 3;
+                    }
+
                     //Sets vertex and index buffer
                     this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
                     Counters.IAVertexBuffersSets++;
@@ -1319,8 +1325,6 @@ namespace Engine
                         this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
 
                         Counters.DrawCallsPerFrame++;
-                        Counters.InstancesPerFrame++;
-                        Counters.PrimitivesPerFrame += this.indexCount / 3;
                     }
                 }
             }
@@ -1682,6 +1686,12 @@ namespace Engine
             {
                 if (this.vertexCount > 0)
                 {
+                    if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                    {
+                        Counters.InstancesPerFrame++;
+                        Counters.PrimitivesPerFrame += this.vertexCount / 3;
+                    }
+
                     //Sets vertex and index buffer
                     this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.bufferBinding);
                     Counters.IAVertexBuffersSets++;
@@ -1695,8 +1705,6 @@ namespace Engine
                         this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
 
                         Counters.DrawCallsPerFrame++;
-                        Counters.InstancesPerFrame++;
-                        Counters.PrimitivesPerFrame += this.vertexCount;
                     }
                 }
             }
@@ -1717,6 +1725,16 @@ namespace Engine
             get
             {
                 return new[] { this.patches.TerrainMaterial };
+            }
+        }
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 1;
             }
         }
 

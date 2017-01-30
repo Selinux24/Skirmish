@@ -73,6 +73,16 @@ namespace Engine
         /// Instances
         /// </summary>
         public int InstanceCount { get; protected set; }
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return this.InstanceCount;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -89,7 +99,6 @@ namespace Engine
             this.InstanceCount = description.Instances;
 
             this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this));
-            this.instancesTmp = new ModelInstance[this.InstanceCount];
             this.instancingData = new VertexInstancingData[this.InstanceCount];
 
             this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.instancingData);
@@ -112,7 +121,6 @@ namespace Engine
             this.InstanceCount = description.Instances;
 
             this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this));
-            this.instancesTmp = new ModelInstance[this.InstanceCount];
             this.instancingData = new VertexInstancingData[this.InstanceCount];
 
             this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.instancingData);
@@ -145,30 +153,31 @@ namespace Engine
                 {
                     if (i.Active) i.Update(context);
                 });
+            }
+        }
+        /// <summary>
+        /// Draw
+        /// </summary>
+        /// <param name="context">Context</param>
+        public override void Draw(DrawContext context)
+        {
+            int count = 0;
+            int instanceCount = 0;
+
+            if (this.VisibleCount > 0)
+            {
+                #region Update instancing data
 
                 //Process only visible instances
-                this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && !i.Cull && i.LevelOfDetail != LevelOfDetailEnum.None);
                 if (this.instancesTmp != null && this.instancesTmp.Length > 0)
                 {
-                    //Sort by LOD
-                    Array.Sort(this.instancesTmp, (i1, i2) =>
-                    {
-                        var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
-                        if (i == 0)
-                        {
-                            i = i1.Id.CompareTo(i2.Id);
-                        }
-
-                        return i;
-                    });
-
                     LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;
                     DrawingData drawingData = null;
                     int instanceIndex = 0;
+
                     for (int i = 0; i < this.instancesTmp.Length; i++)
                     {
                         var current = this.instancesTmp[i];
-
                         if (current != null)
                         {
                             if (lastLod != current.LevelOfDetail)
@@ -200,16 +209,9 @@ namespace Engine
                         this.WriteInstancingData(this.DeviceContext, this.instancingData);
                     }
                 }
-            }
-        }
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Draw(DrawContext context)
-        {
-            if (this.VisibleCount > 0)
-            {
+
+                #endregion
+
                 Drawer effect = null;
                 if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectDefaultBasic;
                 else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectDeferredBasic;
@@ -261,6 +263,8 @@ namespace Engine
                                 var index = Array.IndexOf(this.instancesTmp, ins[0]);
                                 var length = ins.Length;
 
+                                instanceCount += length;
+
                                 foreach (string meshName in drawingData.Meshes.Keys)
                                 {
                                     var dictionary = drawingData.Meshes[meshName];
@@ -304,11 +308,16 @@ namespace Engine
                                         var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
                                         mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
 
+                                        count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
+                                        count *= instanceCount;
+
                                         for (int p = 0; p < technique.Description.PassCount; p++)
                                         {
                                             technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
                                             mesh.Draw(this.DeviceContext, index, length);
+
+                                            Counters.DrawCallsPerFrame++;
                                         }
                                     }
                                 }
@@ -316,6 +325,12 @@ namespace Engine
                         }
                     }
                 }
+            }
+
+            if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+            {
+                Counters.InstancesPerFrame += instanceCount;
+                Counters.PrimitivesPerFrame += count;
             }
         }
         /// <summary>
@@ -327,18 +342,20 @@ namespace Engine
             //Cull was made per instance
             this.Cull = true;
 
-            for (int i = 0; i < this.Instances.Length; i++)
+            Array.ForEach(this.Instances, i =>
             {
-                if (this.Instances[i].Visible)
+                if (i.Visible)
                 {
-                    this.Instances[i].Culling(frustum);
+                    i.Culling(frustum);
 
-                    if (!this.Instances[i].Cull)
+                    if (!i.Cull)
                     {
                         this.Cull = false;
                     }
                 }
-            }
+            });
+
+            this.UpdateInstacesTmp();
         }
         /// <summary>
         /// Culling test
@@ -349,18 +366,20 @@ namespace Engine
             //Cull was made per instance
             this.Cull = true;
 
-            for (int i = 0; i < this.Instances.Length; i++)
+            Array.ForEach(this.Instances, i =>
             {
-                if (this.Instances[i].Visible)
+                if (i.Visible)
                 {
-                    this.Instances[i].Culling(sphere);
+                    i.Culling(sphere);
 
-                    if (!this.Instances[i].Cull)
+                    if (!i.Cull)
                     {
                         this.Cull = false;
                     }
                 }
-            }
+            });
+
+            this.UpdateInstacesTmp();
         }
         /// <summary>
         /// Sets cull value
@@ -372,11 +391,29 @@ namespace Engine
 
             if (this.instances != null && this.instances.Length > 0)
             {
-                for (int i = 0; i < this.instances.Length; i++)
-                {
-                    this.instances[i].SetCulling(value);
-                }
+                Array.ForEach(this.instances, i => i.SetCulling(value));
             }
+
+            this.UpdateInstacesTmp();
+        }
+        /// <summary>
+        /// Updates the instance tmp list
+        /// </summary>
+        private void UpdateInstacesTmp()
+        {
+            this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && !i.Cull && i.LevelOfDetail != LevelOfDetailEnum.None);
+
+            //Sort by LOD
+            Array.Sort(this.instancesTmp, (i1, i2) =>
+            {
+                var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+                if (i == 0)
+                {
+                    i = i1.Id.CompareTo(i2.Id);
+                }
+
+                return i;
+            });
         }
         /// <summary>
         /// Set instance positions

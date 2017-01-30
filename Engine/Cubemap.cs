@@ -48,6 +48,16 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; set; }
+        /// <summary>
+        /// Maximum number of instances
+        /// </summary>
+        public override int MaxInstances
+        {
+            get
+            {
+                return 1;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -88,40 +98,47 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            var effect = DrawerPool.EffectDefaultCubemap;
-            var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
-
-            #region Per frame update
-
-            effect.UpdatePerFrame(this.local, context.ViewProjection);
-
-            #endregion
-
-            #region Per object update
-
-            effect.UpdatePerObject(this.cubeMapTexture);
-
-            #endregion
-
-            //Sets vertex and index buffer
-            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-            Counters.IAInputLayoutSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-            Counters.IAVertexBuffersSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            Counters.IAPrimitiveTopologySets++;
-
-            for (int p = 0; p < technique.Description.PassCount; p++)
+            if (this.indexCount > 0)
             {
-                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                {
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += this.indexCount / 3;
+                }
 
-                this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+                var effect = DrawerPool.EffectDefaultCubemap;
+                var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
 
-                Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += this.indexCount / 3;
+                #region Per frame update
+
+                effect.UpdatePerFrame(this.local, context.ViewProjection);
+
+                #endregion
+
+                #region Per object update
+
+                effect.UpdatePerObject(this.cubeMapTexture);
+
+                #endregion
+
+                //Sets vertex and index buffer
+                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
+                Counters.IAInputLayoutSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
+                Counters.IAVertexBuffersSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
+                Counters.IAIndexBufferSets++;
+                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+                Counters.IAPrimitiveTopologySets++;
+
+                for (int p = 0; p < technique.Description.PassCount; p++)
+                {
+                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+
+                    Counters.DrawCallsPerFrame++;
+                }
             }
         }
 
