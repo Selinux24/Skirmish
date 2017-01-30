@@ -510,21 +510,25 @@ namespace Engine
         private void SetLOD(Vector3 origin)
         {
             var dist = Vector3.Distance(this.Manipulator.Position, origin) - this.GetBoundingSphere().Radius;
-            if (dist < 10f)
+            if (dist < GameEnvironment.LODDistanceHigh)
             {
                 this.LevelOfDetail = LevelOfDetailEnum.High;
             }
-            else if (dist < 20f)
+            else if (dist < GameEnvironment.LODDistanceMedium)
             {
                 this.LevelOfDetail = LevelOfDetailEnum.Medium;
             }
-            else if (dist < 40f)
+            else if (dist < GameEnvironment.LODDistanceLow)
             {
                 this.LevelOfDetail = LevelOfDetailEnum.Low;
             }
-            else
+            else if (dist < GameEnvironment.LODDistanceMinimum)
             {
                 this.LevelOfDetail = LevelOfDetailEnum.Minimum;
+            }
+            else
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.None;
             }
         }
 
@@ -535,8 +539,9 @@ namespace Engine
         public override string ToString()
         {
             return string.Format(
-                "Id: {0}; Active: {1}; Visible: {2}; Cull: {3}",
+                "Id: {0}; LOD: {1}; Active: {2}; Visible: {3}; Cull: {4}",
                 this.Id,
+                this.LevelOfDetail,
                 this.Active,
                 this.Visible,
                 this.Cull);

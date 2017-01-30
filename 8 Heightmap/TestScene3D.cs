@@ -29,6 +29,7 @@ namespace HeightmapTest
 
         private TextDrawer title = null;
         private TextDrawer load = null;
+        private TextDrawer stats = null;
         private TextDrawer help = null;
         private TextDrawer help2 = null;
 
@@ -85,17 +86,20 @@ namespace HeightmapTest
 
             this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
             this.load = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
+            this.stats = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
             this.help = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
             this.help2 = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange));
 
             this.title.Text = "Heightmap Terrain test";
             this.load.Text = "";
+            this.stats.Text = "";
             this.help.Text = "";
             this.help2.Text = "";
 
             this.title.Position = Vector2.Zero;
             this.load.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
-            this.help.Position = new Vector2(5, this.load.Top + this.load.Height + 3);
+            this.stats.Position = new Vector2(5, this.load.Top + this.load.Height + 3);
+            this.help.Position = new Vector2(5, this.stats.Top + this.stats.Height + 3);
             this.help2.Position = new Vector2(5, this.help.Top + this.help.Height + 3);
 
             #endregion
@@ -234,10 +238,10 @@ namespace HeightmapTest
                     {
                         MaximumDepth = 3,
                     },
-                    //PathFinder = new GroundDescription.PathFinderDescription()
-                    //{
-                    //    Settings = pfSettings,
-                    //},
+                    PathFinder = new GroundDescription.PathFinderDescription()
+                    {
+                        Settings = pfSettings,
+                    },
                     Vegetation = new GroundDescription.VegetationDescription()
                     {
                         ContentPath = "Resources/Scenery/Foliage/Billboard",
@@ -823,6 +827,12 @@ namespace HeightmapTest
                 this.Lights.KeyLight.Brightness);
 
             this.help2.Text = this.Game.RuntimeText;
+        }
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
+
+            this.stats.Text = this.Game.RuntimeText;
         }
 
         private void Fly()

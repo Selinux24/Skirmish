@@ -355,7 +355,9 @@ namespace Engine
                 }
             });
 
-            this.UpdateInstacesTmp();
+            var par = frustum.GetCameraParams();
+
+            this.UpdateInstacesTmp(par.Position);
         }
         /// <summary>
         /// Culling test
@@ -379,7 +381,7 @@ namespace Engine
                 }
             });
 
-            this.UpdateInstacesTmp();
+            this.UpdateInstacesTmp(sphere.Center);
         }
         /// <summary>
         /// Sets cull value
@@ -394,22 +396,42 @@ namespace Engine
                 Array.ForEach(this.instances, i => i.SetCulling(value));
             }
 
-            this.UpdateInstacesTmp();
+            this.UpdateInstacesTmp(Vector3.Zero);
         }
         /// <summary>
         /// Updates the instance tmp list
         /// </summary>
-        private void UpdateInstacesTmp()
+        private void UpdateInstacesTmp(Vector3 origin)
         {
             this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && !i.Cull && i.LevelOfDetail != LevelOfDetailEnum.None);
 
             //Sort by LOD
             Array.Sort(this.instancesTmp, (i1, i2) =>
             {
-                var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+                ModelInstance a;
+                ModelInstance b;
+
+                if (this.EnableAlphaBlending)
+                {
+                    a = i2;
+                    b = i1;
+                }
+                else
+                {
+                    a = i1;
+                    b = i2;
+                }
+
+                var i = a.LevelOfDetail.CompareTo(b.LevelOfDetail);
                 if (i == 0)
                 {
-                    i = i1.Id.CompareTo(i2.Id);
+                    var da = Vector3.DistanceSquared(a.Manipulator.Position, origin);
+                    var db = Vector3.DistanceSquared(b.Manipulator.Position, origin);
+                    i = da.CompareTo(db);
+                }
+                if (i == 0)
+                {
+                    i = a.Id.CompareTo(b.Id);
                 }
 
                 return i;

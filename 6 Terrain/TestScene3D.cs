@@ -34,6 +34,7 @@ namespace TerrainTest
 
         private TextDrawer title = null;
         private TextDrawer load = null;
+        private TextDrawer stats = null;
         private TextDrawer counters1 = null;
         private TextDrawer counters2 = null;
 
@@ -45,6 +46,7 @@ namespace TerrainTest
 
         private LensFlare lensFlare = null;
         private Skydom skydom = null;
+        private SkyPlane clouds = null;
         private Scenery terrain = null;
         private Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
@@ -92,10 +94,10 @@ namespace TerrainTest
 
             #region Lights
 
-            this.Lights.DirectionalLights[0].Enabled = false;
-            this.Lights.DirectionalLights[1].Enabled = false;
+            this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[0].CastShadow = true;
+            this.Lights.DirectionalLights[1].Enabled = true;
             this.Lights.DirectionalLights[2].Enabled = true;
-            this.Lights.DirectionalLights[2].CastShadow = true;
 
             this.Lights.Add(new SceneLightPoint(
                 "Blue point",
@@ -131,18 +133,21 @@ namespace TerrainTest
 
             this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
             this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.stats = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
             this.counters1 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow));
             this.counters2 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow));
 
             this.title.Text = "Terrain collision and trajectories test";
             this.load.Text = "";
+            this.stats.Text = "";
             this.counters1.Text = "";
             this.counters2.Text = "";
 
             this.title.Position = Vector2.Zero;
             this.load.Position = new Vector2(0, 24);
-            this.counters1.Position = new Vector2(0, 46);
-            this.counters2.Position = new Vector2(0, 68);
+            this.stats.Position = new Vector2(0, 46);
+            this.counters1.Position = new Vector2(0, 68);
+            this.counters2.Position = new Vector2(0, 90);
 
             #endregion
 
@@ -388,6 +393,27 @@ namespace TerrainTest
             });
             sw.Stop();
             loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Clouds
+
+            sw.Restart();
+            this.clouds = this.AddSkyPlane(new SkyPlaneDescription()
+            {
+                Name = "Clouds",
+                ContentPath = "Resources/clouds",
+                Texture1Name = "perturb001.dds",
+                Texture2Name = "cloud001.dds",
+                Mode = SkyPlaneMode.Perturbed,
+                MaxBrightness = 0.8f,
+                MinBrightness = 0.1f,
+                Repeat = 5,
+                Velocity = 1,
+                Direction = new Vector2(1, 1),
+            });
+            sw.Stop();
+            loadingText += string.Format("clouds: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
@@ -1025,6 +1051,8 @@ namespace TerrainTest
             this.shadowMapDrawer.Texture = this.useDebugTex ? this.debugTex : this.Renderer.GetResource(this.shadowResult);
 
             #region Texts
+
+            this.stats.Text = this.Game.RuntimeText;
 
             string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Primitives: {6}", Counters.Buffers, Counters.AllocatedMemoryInBuffers, Counters.BufferReads, Counters.BufferWrites, this.RenderMode, this.shadowResult, Counters.PrimitivesPerFrame);
             string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets, this.terrain.VisiblePatchesCount);
