@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SharpDX;
+using SharpDX.Direct3D;
+using SharpDX.DXGI;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.DXGI;
 using BindFlags = SharpDX.Direct3D11.BindFlags;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using BufferDescription = SharpDX.Direct3D11.BufferDescription;
@@ -721,7 +721,6 @@ namespace Engine.Helpers
 
             return new Texture2D(device, description);
         }
-
 
         /// <summary>
         /// Create vertex buffer from vertices

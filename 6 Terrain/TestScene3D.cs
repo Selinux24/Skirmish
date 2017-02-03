@@ -48,6 +48,7 @@ namespace TerrainTest
         private Skydom skydom = null;
         private SkyPlane clouds = null;
         private Scenery terrain = null;
+        private GroundGardener gardener = null;
         private Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
         private List<Line3D> oks = new List<Line3D>();
@@ -431,19 +432,6 @@ namespace TerrainTest
             var terrainDescription = new GroundDescription()
             {
                 Name = "Terrain",
-                Vegetation = new GroundDescription.VegetationDescription()
-                {
-                    ContentPath = "resources/Terrain/Foliage/Billboard",
-                    ChannelRed = new GroundDescription.VegetationDescription.Channel()
-                    {
-                        VegetarionTextures = new[] { "grass.png" },
-                        Saturation = 2f,
-                        StartRadius = 0f,
-                        EndRadius = 50f,
-                        MinSize = new Vector2(0.25f, 0.25f),
-                        MaxSize = new Vector2(0.5f, 0.75f),
-                    }
-                },
                 Quadtree = new GroundDescription.QuadtreeDescription()
                 {
                     MaximumDepth = 1,
@@ -467,6 +455,51 @@ namespace TerrainTest
 
             #endregion
 
+            #region Gardener
+
+            sw.Restart();
+
+            GroundGardenerDescription gDesc = new GroundGardenerDescription()
+            {
+                ContentPath = "resources/Terrain/Foliage/Billboard",
+                ChannelRed = new GroundGardenerDescription.Channel()
+                {
+                    VegetarionTextures = new[] { "grass.png" },
+                    Saturation = 2f,
+                    StartRadius = 0f,
+                    EndRadius = 50f,
+                    MinSize = new Vector2(0.25f, 0.25f),
+                    MaxSize = new Vector2(0.5f, 0.75f),
+                },
+                ChannelGreen = new GroundGardenerDescription.Channel()
+                {
+                    VegetarionTextures = new[] { "grass.png" },
+                    Saturation = 2f,
+                    StartRadius = 0f,
+                    EndRadius = 50f,
+                    MinSize = new Vector2(0.25f, 0.25f),
+                    MaxSize = new Vector2(0.5f, 0.75f),
+                },
+                ChannelBlue = new GroundGardenerDescription.Channel()
+                {
+                    VegetarionTextures = new[] { "grass.png" },
+                    Saturation = 2f,
+                    StartRadius = 0f,
+                    EndRadius = 50f,
+                    MinSize = new Vector2(0.25f, 0.25f),
+                    MaxSize = new Vector2(0.5f, 0.75f),
+                }
+            };
+
+            this.gardener = this.AddGardener(gDesc);
+            this.gardener.ParentGround = this.terrain;
+
+            sw.Stop();
+
+            loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
             this.load.Text = loadingText;
 
             #endregion
@@ -477,7 +510,7 @@ namespace TerrainTest
 
             List<Line3D> lines = new List<Line3D>();
 
-            this.terrain.SetWind(this.windDirection, this.windStrength);
+            this.gardener.SetWind(this.windDirection, this.windStrength);
 
             //Helipod
             Vector3 hPos;

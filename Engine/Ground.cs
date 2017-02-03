@@ -700,5 +700,8 @@ namespace Engine
 
             return false;
         }
+
+
+        public abstract PickingQuadTreeNode[] GetVisibleNodes();
     }
 }

@@ -549,6 +549,20 @@ namespace Engine
             return newModel;
         }
         /// <summary>
+        /// Adds new gardener
+        /// </summary>
+        /// <param name="description">Gardener description</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns new model</returns>
+        public GroundGardener AddGardener(GroundGardenerDescription description, int order = 0)
+        {
+            GroundGardener newModel = new GroundGardener(this.Game, description);
+
+            this.AddComponent(newModel, order);
+
+            return newModel;
+        }
+        /// <summary>
         /// Adds new mini-map
         /// </summary>
         /// <param name="description">Mini-map description</param>

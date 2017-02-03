@@ -22,6 +22,7 @@ namespace Collada
         private TextDrawer fps = null;
         private TextDrawer picks = null;
         private Scenery ground = null;
+        private GroundGardener gardener = null;
         private ModelInstanced lampsModel = null;
         private ModelInstanced helicoptersModel = null;
 
@@ -64,21 +65,6 @@ namespace Collada
 
             GroundDescription terrainDescription = new GroundDescription()
             {
-                Vegetation = new GroundDescription.VegetationDescription()
-                {
-                    ContentPath = "Resources/Vegetation",
-                    ChannelRed=new GroundDescription.VegetationDescription.Channel()
-                    {
-                        VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
-                        Saturation = 5f,
-                        StartRadius = 0f,
-                        EndRadius = 300f,
-                        MinSize = new Vector2(0.10f, 0.20f),
-                        MaxSize = new Vector2(0.15f, 0.25f),
-                        Seed = 24,
-                    },
-                    CastShadow = false,
-                },
                 PathFinder = new GroundDescription.PathFinderDescription()
                 {
                     Settings = new GridGenerationSettings()
@@ -89,6 +75,25 @@ namespace Collada
                 DelayGeneration = true,
             };
             this.ground = this.AddScenery("resources", "ground.xml", terrainDescription);
+
+            GroundGardenerDescription vegetation = new GroundGardenerDescription()
+            {
+                ContentPath = "Resources/Vegetation",
+                ChannelRed = new GroundGardenerDescription.Channel()
+                {
+                    VegetarionTextures = new[] { "tree0.dds", "tree1.dds", "tree2.dds", "tree3.dds", "tree4.png", "tree5.png" },
+                    Saturation = 5f,
+                    StartRadius = 0f,
+                    EndRadius = 10f,
+                    MinSize = new Vector2(0.10f, 0.20f),
+                    MaxSize = new Vector2(0.15f, 0.25f),
+                    Seed = 24,
+                },
+                CastShadow = false,
+            };
+            this.gardener = this.AddGardener(vegetation);
+            this.gardener.ParentGround = this.ground;
+            this.gardener.SetWind(Vector3.ForwardLH * 0.005f, 0.05f);
 
             this.helicoptersModel = this.AddInstancingModel(
                 "resources",

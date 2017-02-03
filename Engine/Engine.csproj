@@ -159,6 +159,8 @@
     <Compile Include="Effects\EffectShadowTerrain.cs" />
     <Compile Include="Effects\EffectDefaultSkyScattering.cs" />
     <Compile Include="FoliageMap.cs" />
+    <Compile Include="GroundGardener.cs" />
+    <Compile Include="GroundGardenerDescription.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="ISceneLightPosition.cs" />
     <Compile Include="ParticleManager.cs" />

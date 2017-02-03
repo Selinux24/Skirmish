@@ -28,6 +28,7 @@ namespace DeferredTest
         private ModelInstanced helicopters = null;
         private Skydom skydom = null;
         private Scenery terrain = null;
+        private GroundGardener gardener = null;
 
         Model tree = null;
         ModelInstanced trees = null;
@@ -164,19 +165,6 @@ namespace DeferredTest
                 new GroundDescription()
                 {
                     Name = "Terrain",
-                    Vegetation = new GroundDescription.VegetationDescription()
-                    {
-                        ContentPath = "Resources/Vegetation",
-                        ChannelRed = new GroundDescription.VegetationDescription.Channel()
-                        {
-                            VegetarionTextures = new[] { "grass.png" },
-                            Saturation = 20f,
-                            StartRadius = 0f,
-                            EndRadius = 50f,
-                            MinSize = Vector2.One * 0.20f,
-                            MaxSize = Vector2.One * 0.25f,
-                        }
-                    },
                     Quadtree = new GroundDescription.QuadtreeDescription()
                     {
                         MaximumDepth = 2,
@@ -190,6 +178,31 @@ namespace DeferredTest
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
+
+            #endregion
+
+            #region Gardener
+
+            sw.Restart();
+
+            this.gardener = this.AddGardener(
+                new GroundGardenerDescription()
+                {
+                    ContentPath = "Resources/Vegetation",
+                    ChannelRed = new GroundGardenerDescription.Channel()
+                    {
+                        VegetarionTextures = new[] { "grass.png" },
+                        Saturation = 20f,
+                        StartRadius = 0f,
+                        EndRadius = 50f,
+                        MinSize = Vector2.One * 0.20f,
+                        MaxSize = Vector2.One * 0.25f,
+                    }
+                });
+            sw.Stop();
+            loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.gardener.ParentGround = this.terrain;
 
             #endregion
 
@@ -582,7 +595,7 @@ namespace DeferredTest
                     var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, position);
                     if (p != null)
                     {
-                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 0.1f, this.terrain);
+                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 10f, this.terrain);
                     }
                 }
             }
