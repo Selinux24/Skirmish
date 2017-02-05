@@ -75,6 +75,10 @@ namespace Engine
             /// Heightmap maximum height
             /// </summary>
             private float heightMapHeight;
+            /// <summary>
+            /// Heightmap texture resolution
+            /// </summary>
+            private float textureResolution;
 
             /// <summary>
             /// Gets or sets whether use alpha mapping or not
@@ -151,6 +155,7 @@ namespace Engine
                     this.heightMap = HeightMap.FromStream(heightMapImage.Stream, colorMapImage.Stream);
                     this.heightMapCellSize = description.CellSize;
                     this.heightMapHeight = description.MaximumHeight;
+                    this.textureResolution = description.TextureResolution;
                 }
 
                 #endregion
@@ -775,6 +780,7 @@ namespace Engine
                 this.heightMap.BuildGeometry(
                     this.heightMapCellSize,
                     this.heightMapHeight,
+                    this.textureResolution,
                     out vertices, out indices);
             }
             /// <summary>

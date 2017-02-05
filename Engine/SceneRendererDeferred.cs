@@ -842,7 +842,7 @@ namespace Engine
             }
             else
             {
-                this.Game.Graphics.DeviceContext.WriteBuffer(this.lightGeometryVertexBuffer, verts.ToArray());
+                this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.lightGeometryVertexBuffer, verts.ToArray());
             }
 
             if (this.lightGeometryIndexBuffer == null)
@@ -851,7 +851,7 @@ namespace Engine
             }
             else
             {
-                this.Game.Graphics.DeviceContext.WriteBuffer(this.lightGeometryIndexBuffer, indx.ToArray());
+                this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.lightGeometryIndexBuffer, indx.ToArray());
             }
         }
         /// <summary>

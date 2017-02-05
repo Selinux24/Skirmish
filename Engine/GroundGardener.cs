@@ -294,7 +294,7 @@ namespace Engine
             /// Attachs the specified patch to buffer
             /// </summary>
             /// <param name="patch">Patch</param>
-            public void AttachFoliage(FoliagePatch patch)
+            public void AttachFoliage(Vector3 eyePosition, FoliagePatch patch)
             {
                 this.vertexCount = 0;
                 this.Attached = false;
@@ -302,8 +302,17 @@ namespace Engine
 
                 if (patch.FoliageData != null && patch.FoliageData.Length > 0)
                 {
+                    //Sort data
+                    Array.Sort(patch.FoliageData, (f1, f2) =>
+                    {
+                        float d1 = Vector3.DistanceSquared(f1.Position, eyePosition);
+                        float d2 = Vector3.DistanceSquared(f2.Position, eyePosition);
+
+                        return -d1.CompareTo(d2);
+                    });
+
                     //Attach data
-                    this.Game.Graphics.DeviceContext.WriteBuffer(this.buffer, patch.FoliageData);
+                    this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.buffer, patch.FoliageData);
 
                     this.vertexCount = patch.FoliageData.Length;
                     this.Attached = true;
@@ -574,12 +583,12 @@ namespace Engine
                                 float d1 = f1.CurrentPatch == null ? -1 : Vector3.DistanceSquared(f1.CurrentPatch.CurrentNode.Center, context.EyePosition);
                                 float d2 = f2.CurrentPatch == null ? -1 : Vector3.DistanceSquared(f2.CurrentPatch.CurrentNode.Center, context.EyePosition);
 
-                                return d2.CompareTo(d1);
+                                return -d1.CompareTo(d2);
                             });
 
                             while (toAssign.Count > 0 && freeBuffers.Count > 0)
                             {
-                                freeBuffers[0].AttachFoliage(toAssign[0]);
+                                freeBuffers[0].AttachFoliage(context.EyePosition, toAssign[0]);
 
                                 toAssign.RemoveAt(0);
                                 freeBuffers.RemoveAt(0);
@@ -623,6 +632,15 @@ namespace Engine
 
                 if (visibleNodes != null && visibleNodes.Length > 0)
                 {
+                    //Sort fartest first
+                    Array.Sort(visibleNodes, (f1, f2) =>
+                    {
+                        float d1 = Vector3.DistanceSquared(f1.Center, context.EyePosition);
+                        float d2 = Vector3.DistanceSquared(f2.Center, context.EyePosition);
+
+                        return -d1.CompareTo(d2);
+                    });
+
                     foreach (var item in visibleNodes)
                     {
                         var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch != null && b.CurrentPatch.CurrentNode == item);

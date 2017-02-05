@@ -294,7 +294,7 @@ namespace Engine.Common
 
                     if (this.IndexBuffer != null)
                     {
-                        deviceContext.WriteBuffer(this.IndexBuffer, this.Indices);
+                        deviceContext.WriteDiscardBuffer(this.IndexBuffer, this.Indices);
                     }
                 }
                 else

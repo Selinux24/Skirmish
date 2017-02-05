@@ -12,8 +12,8 @@ namespace HeightmapTest
     {
         private const float near = 0.5f;
         private const float far = 1000f;
-        private const float fogStart = 0.01f;
-        private const float fogRange = 0.50f;
+        private const float fogStart = 0.50f;
+        private const float fogRange = 0.75f;
 
         private Random rnd = new Random();
 
@@ -39,6 +39,7 @@ namespace HeightmapTest
         private SkyPlane clouds = null;
         private Terrain terrain = null;
         private GroundGardener gardener = null;
+        private GroundGardener gardener2 = null;
         private LineListDrawer bboxesDrawer = null;
 
         private ModelInstanced torchs = null;
@@ -211,6 +212,7 @@ namespace HeightmapTest
                     ColormapFileName = "desert0cm.bmp",
                     CellSize = 5,
                     MaximumHeight = 50,
+                    TextureResolution = 20f,
                     Textures = new HeightmapDescription.TexturesDescription()
                     {
                         ContentPath = "Textures",
@@ -240,10 +242,10 @@ namespace HeightmapTest
                     {
                         MaximumDepth = 3,
                     },
-                    PathFinder = new GroundDescription.PathFinderDescription()
-                    {
-                        Settings = pfSettings,
-                    },
+                    //PathFinder = new GroundDescription.PathFinderDescription()
+                    //{
+                    //    Settings = pfSettings,
+                    //},
                 };
             this.terrain = this.AddTerrain(hDesc, gDesc);
             sw.Stop();
@@ -264,7 +266,7 @@ namespace HeightmapTest
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetarionTextures = new[] { "grass0.png" },
-                    Saturation = 0.5f,
+                    Saturation = 0.05f,
                     StartRadius = 0f,
                     EndRadius = 150f,
                     MinSize = new Vector2(1f, 1f),
@@ -274,32 +276,78 @@ namespace HeightmapTest
                 },
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "grass1.png" },
-                    Saturation = 0.25f,
-                    StartRadius = 0f,
-                    EndRadius = 150f,
-                    MinSize = new Vector2(2f, 2f),
-                    MaxSize = new Vector2(2.5f, 3f),
-                    Seed = 2,
-                    WindEffect = 0.3f,
-                },
-                ChannelBlue = new GroundGardenerDescription.Channel()
-                {
                     VegetarionTextures = new[] { "grass2.png" },
-                    Saturation = 1f,
+                    Saturation = 10f,
                     StartRadius = 0f,
                     EndRadius = 140f,
                     MinSize = new Vector2(1f, 0.5f),
                     MaxSize = new Vector2(2f, 1f),
+                    Seed = 2,
+                    WindEffect = 0.2f,
+                },
+                ChannelBlue = new GroundGardenerDescription.Channel()
+                {
+                    VegetarionTextures = new[] { "grass1.png" },
+                    Saturation = 0.05f,
+                    StartRadius = 0f,
+                    EndRadius = 150f,
+                    MinSize = new Vector2(2f, 2f),
+                    MaxSize = new Vector2(2.5f, 3f),
                     Seed = 3,
-                    WindEffect = 1.2f,
+                    WindEffect = 0.3f,
                 },
             };
             this.gardener = this.AddGardener(vDesc);
-            this.gardener.ParentGround = this.terrain;
-            this.gardener.SetWind(this.windDirection, this.windStrength);
             sw.Stop();
             loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Gardener 2
+
+            sw.Restart();
+
+            var vDesc2 = new GroundGardenerDescription()
+            {
+                ContentPath = "Resources/Scenery/Foliage/Billboard",
+                VegetationMap = "map_flowers.png",
+                ChannelRed = new GroundGardenerDescription.Channel()
+                {
+                    VegetarionTextures = new[] { "flower0.dds" },
+                    Saturation = 0.1f,
+                    StartRadius = 0f,
+                    EndRadius = 150f,
+                    MinSize = new Vector2(1f, 1f),
+                    MaxSize = new Vector2(1.5f, 1.5f),
+                    Seed = 1,
+                    WindEffect = 0.5f,
+                },
+                ChannelGreen = new GroundGardenerDescription.Channel()
+                {
+                    VegetarionTextures = new[] { "flower1.dds" },
+                    Saturation = 0.1f,
+                    StartRadius = 0f,
+                    EndRadius = 150f,
+                    MinSize = new Vector2(1f, 1f),
+                    MaxSize = new Vector2(1.5f, 1.5f),
+                    Seed = 2,
+                    WindEffect = 0.5f,
+                },
+                ChannelBlue = new GroundGardenerDescription.Channel()
+                {
+                    VegetarionTextures = new[] { "flower2.dds" },
+                    Saturation = 0.1f,
+                    StartRadius = 0f,
+                    EndRadius = 140f,
+                    MinSize = new Vector2(1f, 1f),
+                    MaxSize = new Vector2(1.5f, 1.5f),
+                    Seed = 3,
+                    WindEffect = 0.5f,
+                },
+            };
+            this.gardener2 = this.AddGardener(vDesc2);
+            sw.Stop();
+            loadingText += string.Format("gardener2: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
@@ -349,9 +397,9 @@ namespace HeightmapTest
                 Texture2Name = "cloud001.dds",
                 Mode = SkyPlaneMode.Perturbed,
                 MaxBrightness = 0.8f,
-                MinBrightness = 0.1f,
+                MinBrightness = 0.5f,
                 Repeat = 5,
-                Velocity = 1,
+                Velocity = 1f,
                 Direction = new Vector2(1, 1),
             });
             sw.Stop();
@@ -367,7 +415,7 @@ namespace HeightmapTest
 
             //Rocks
             {
-                Random posRnd = new Random(1);
+                Random posRnd = new Random(1024);
 
                 for (int i = 0; i < this.rocks.Instances.Length; i++)
                 {
@@ -486,14 +534,18 @@ namespace HeightmapTest
             this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.torchs, this.rocks }, false);
             this.terrain.UpdateInternals();
 
+            this.gardener.ParentGround = this.terrain;
+            this.gardener2.ParentGround = this.terrain;
+
             //M24
             {
                 Vector3 position;
                 Triangle triangle;
                 float distance;
-                if (this.terrain.FindTopGroundPosition(100, 100, out position, out triangle, out distance))
+                if (this.terrain.FindTopGroundPosition(100, 50, out position, out triangle, out distance))
                 {
                     this.helicopter.Manipulator.SetPosition(position, true);
+                    this.helicopter.Manipulator.SetRotation(MathUtil.Pi / 5f, 0, 0, true);
                 }
             }
 
@@ -502,9 +554,10 @@ namespace HeightmapTest
                 Vector3 position;
                 Triangle triangle;
                 float distance;
-                if (this.terrain.FindTopGroundPosition(-100, -100, out position, out triangle, out distance))
+                if (this.terrain.FindTopGroundPosition(-100, -10, out position, out triangle, out distance))
                 {
                     this.helicopter2.Manipulator.SetPosition(position, true);
+                    this.helicopter2.Manipulator.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
                     this.helicopter2.Manipulator.SetScale(5, true);
                 }
 
@@ -571,11 +624,9 @@ namespace HeightmapTest
             this.skydom.RayleighScattering *= 0.8f;
             this.skydom.MieScattering *= 0.1f;
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 55, 00), 0.1f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(10, 55, 00), 0.005f);
 
-            this.Lights.FogColor = new Color((byte)54, (byte)56, (byte)68);
-            this.Lights.FogStart = 0;
-            this.Lights.FogRange = 0;
+            this.Lights.FogColor = new Color((byte)95, (byte)147, (byte)233);
             this.ToggleFog();
 
             this.lantern = new SceneLightSpot("lantern", false, Color.White, Color.White, true, this.Camera.Position, this.Camera.Forward, 25f, 100, 50);
@@ -736,6 +787,7 @@ namespace HeightmapTest
             }
 
             this.gardener.SetWind(this.windDirection, this.windStrength);
+            this.gardener2.SetWind(this.windDirection, this.windStrength);
 
             #endregion
 

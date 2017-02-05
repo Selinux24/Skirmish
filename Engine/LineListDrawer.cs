@@ -357,7 +357,7 @@ namespace Engine
                 this.vertexCount = data.Count;
                 if (data.Count > 0)
                 {
-                    this.Game.Graphics.DeviceContext.WriteBuffer(this.vertexBuffer, data.ToArray());
+                    this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.vertexBuffer, data.ToArray());
                 }
 
                 this.dictionaryChanged = false;

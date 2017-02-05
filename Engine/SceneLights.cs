@@ -56,9 +56,11 @@ namespace Engine
         /// <summary>
         /// Visible directional lights
         /// </summary>
-        private SceneLightDirectional[] visibleDirectional = null;
-
-        private List<ISceneLightPosition> visiblePositionlights = new List<ISceneLightPosition>();
+        private SceneLightDirectional[] visibleDirectionalLights = null;
+        /// <summary>
+        /// Visible position lights
+        /// </summary>
+        private List<ISceneLightPosition> visiblePositionLights = new List<ISceneLightPosition>();
         /// <summary>
         /// Fog color
         /// </summary>
@@ -335,16 +337,16 @@ namespace Engine
         /// <param name="viewerPosition">Viewer position</param>
         public void Cull(BoundingFrustum frustum, Vector3 viewerPosition)
         {
-            this.visibleDirectional = this.directionalLights.FindAll(l => l.Enabled == true).ToArray();
+            this.visibleDirectionalLights = this.directionalLights.FindAll(l => l.Enabled == true).ToArray();
 
             var pLights = this.pointLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
             var sLights = this.spotLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
 
-            this.visiblePositionlights.Clear();
-            if (pLights.Count > 0) pLights.ForEach(l => this.visiblePositionlights.Add(l));
-            if (sLights.Count > 0) sLights.ForEach(l => this.visiblePositionlights.Add(l));
+            this.visiblePositionLights.Clear();
+            if (pLights.Count > 0) pLights.ForEach(l => this.visiblePositionLights.Add(l));
+            if (sLights.Count > 0) sLights.ForEach(l => this.visiblePositionLights.Add(l));
 
-            this.visiblePositionlights.Sort((l1, l2) =>
+            this.visiblePositionLights.Sort((l1, l2) =>
             {
                 float d1 = Vector3.Distance(viewerPosition, l1.Position);
                 float d2 = Vector3.Distance(viewerPosition, l2.Position);
@@ -361,7 +363,7 @@ namespace Engine
         /// <returns>Returns the visible directional lights array</returns>
         public SceneLightDirectional[] GetVisibleDirectionalLights()
         {
-            return this.visibleDirectional;
+            return this.visibleDirectionalLights;
         }
         /// <summary>
         /// Gets the visible point lights
@@ -369,7 +371,7 @@ namespace Engine
         /// <returns>Returns the visible point lights array</returns>
         public SceneLightPoint[] GetVisiblePointLights()
         {
-            return this.visiblePositionlights.FindAll(l => l is SceneLightPoint).Cast<SceneLightPoint>().ToArray();
+            return this.visiblePositionLights.FindAll(l => l is SceneLightPoint).Cast<SceneLightPoint>().ToArray();
         }
         /// <summary>
         /// Gets the visible spot lights
@@ -377,7 +379,7 @@ namespace Engine
         /// <returns>Returns the visible spot lights array</returns>
         public SceneLightSpot[] GetVisibleSpotLights()
         {
-            return this.visiblePositionlights.FindAll(l => l is SceneLightSpot).Cast<SceneLightSpot>().ToArray();
+            return this.visiblePositionLights.FindAll(l => l is SceneLightSpot).Cast<SceneLightSpot>().ToArray();
         }
 
         /// <summary>
@@ -393,7 +395,7 @@ namespace Engine
                 float ga = MathUtil.Clamp(e, 0.2f, 0.8f);
 
                 Vector3 keyDir = timeOfDay.LightDirection;
-                Vector3 backDir = new Vector3(keyDir.Y, keyDir.X, keyDir.Z);
+                Vector3 backDir = new Vector3(-keyDir.X, keyDir.Y, -keyDir.Z);
 
                 this.GlobalAmbientLight = ga;
 

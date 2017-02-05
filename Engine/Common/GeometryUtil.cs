@@ -845,7 +845,7 @@ namespace Engine.Common
             binormal.Normalize();
 
             // Calculate the cross product of the tangent and binormal which will give the normal vector.
-            normal = Vector3.Cross(binormal, tangent);
+            normal = Vector3.Cross(tangent, binormal);
         }
 
         /// <summary>

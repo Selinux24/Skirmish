@@ -334,8 +334,8 @@ namespace Engine
                 this.text,
                 out v, out i, out size);
 
-            this.Game.Graphics.DeviceContext.WriteBuffer(this.vertexBuffer, v);
-            this.Game.Graphics.DeviceContext.WriteBuffer(this.indexBuffer, i);
+            this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.vertexBuffer, v);
+            this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.indexBuffer, i);
 
             this.vertexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
             this.indexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;

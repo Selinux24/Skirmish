@@ -64,6 +64,8 @@ void vertexPhase(
 		float3 sampleRay = rayDir * sampleLength;
 		float3 samplePoint = rayStart + sampleRay * 0.5;
 
+		color = 0;
+
 		// Now loop through the sample rays
 		for(uint i = 0; i < gSamples; i++)
 		{

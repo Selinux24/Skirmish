@@ -24,17 +24,17 @@ namespace Engine
 
             using (bitmap)
             {
-                for (int x = 0; x < bitmap.Width + 1; x++)
+                for (int w = 0; w < bitmap.Width + 1; w++)
                 {
-                    int xx = x < bitmap.Width ? x : x - 1;
+                    int ww = w < bitmap.Width ? w : w - 1;
 
-                    for (int y = 0; y < bitmap.Height + 1; y++)
+                    for (int h = 0; h < bitmap.Height + 1; h++)
                     {
-                        int yy = y < bitmap.Height ? y : y - 1;
+                        int hh = h < bitmap.Height ? h : h - 1;
 
-                        var color = bitmap.GetPixel(xx, yy);
+                        var color = bitmap.GetPixel(hh, ww);
 
-                        colors[x, y] = new SharpDX.Color(color.R, color.G, color.B, color.A);
+                        colors[w, h] = new SharpDX.Color(color.R, color.G, color.B, color.A);
                     }
                 }
             }

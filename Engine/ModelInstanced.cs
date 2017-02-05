@@ -478,7 +478,7 @@ namespace Engine
 
                 if (this.InstancingBuffer != null)
                 {
-                    deviceContext.WriteBuffer(this.InstancingBuffer, data);
+                    deviceContext.WriteDiscardBuffer(this.InstancingBuffer, data);
                 }
             }
             else

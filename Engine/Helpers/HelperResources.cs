@@ -192,10 +192,22 @@ namespace Engine.Helpers
         /// <param name="deviceContext">Graphic context</param>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, params T[] data)
+        public static void WriteDiscardBuffer<T>(this DeviceContext deviceContext, Buffer buffer, params T[] data)
             where T : struct
         {
-            WriteBuffer<T>(deviceContext, buffer, 0, data);
+            WriteDiscardBuffer<T>(deviceContext, buffer, 0, data);
+        }
+        /// <summary>
+        /// Write data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="data">Complete data</param>
+        public static void WriteNoOverwriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, params T[] data)
+            where T : struct
+        {
+            WriteNoOverwriteBuffer<T>(deviceContext, buffer, 0, data);
         }
         /// <summary>
         /// Write data into buffer
@@ -205,7 +217,7 @@ namespace Engine.Helpers
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        public static void WriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, long offset, params T[] data)
+        public static void WriteDiscardBuffer<T>(this DeviceContext deviceContext, Buffer buffer, long offset, params T[] data)
             where T : struct
         {
             Counters.BufferWrites++;
@@ -214,6 +226,31 @@ namespace Engine.Helpers
             {
                 DataStream stream;
                 deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out stream);
+                using (stream)
+                {
+                    stream.Position = Marshal.SizeOf(default(T)) * offset;
+                    stream.WriteRange(data);
+                }
+                deviceContext.UnmapSubresource(buffer, 0);
+            }
+        }
+        /// <summary>
+        /// Write data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Buffer element offset to write</param>
+        /// <param name="data">Complete data</param>
+        public static void WriteNoOverwriteBuffer<T>(this DeviceContext deviceContext, Buffer buffer, long offset, params T[] data)
+            where T : struct
+        {
+            Counters.BufferWrites++;
+
+            if (data != null && data.Length > 0)
+            {
+                DataStream stream;
+                deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out stream);
                 using (stream)
                 {
                     stream.Position = Marshal.SizeOf(default(T)) * offset;
@@ -838,59 +875,59 @@ namespace Engine.Helpers
         {
             if (vertices[0].VertexType == VertexTypes.Billboard)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexBillboard)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexBillboard)v));
             }
             else if (vertices[0].VertexType == VertexTypes.Position)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPosition)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPosition)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionColor)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionColor)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionColor)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalColor)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalColor)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionTexture)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionTexture)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionTexture)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTexture)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTexture)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTextureTangent)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTextureTangent)v));
             }
             else if (vertices[0].VertexType == VertexTypes.Terrain)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexTerrain)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexTerrain)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPosition)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPosition)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionColor)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionColor)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalColor)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalColor)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionTexture)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionTexture)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
             {
-                deviceContext.WriteBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
+                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
             }
             else
             {

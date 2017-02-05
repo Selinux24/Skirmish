@@ -314,7 +314,7 @@ namespace Engine
             this.particles[this.currentParticleIndex].RandomValues = randomValues;
             this.particles[this.currentParticleIndex].MaxAge = this.Emitter.TotalTime;
 
-            this.Game.Graphics.DeviceContext.WriteBuffer(this.vertexBuffer, this.particles);
+            this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.vertexBuffer, this.particles);
 
             this.currentParticleIndex = nextFreeParticle;
         }

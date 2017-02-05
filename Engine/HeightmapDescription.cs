@@ -141,6 +141,10 @@ namespace Engine
         /// </summary>
         public float MaximumHeight = 1;
         /// <summary>
+        /// Texture resolution
+        /// </summary>
+        public float TextureResolution = 10;
+        /// <summary>
         /// Textures
         /// </summary>
         public TexturesDescription Textures = new TexturesDescription();

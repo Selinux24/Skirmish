@@ -39,24 +39,146 @@ namespace Engine
             using (colorBitmap)
             using (heightBitmap)
             {
-                for (int x = 0; x < heightBitmap.Width + 1; x++)
+                for (int h = 0; h < heightBitmap.Height + 1; h++)
                 {
-                    int xx = x < heightBitmap.Width ? x : x - 1;
+                    int hh = h < heightBitmap.Height ? h : h - 1;
 
-                    for (int y = 0; y < heightBitmap.Height + 1; y++)
+                    for (int w = 0; w < heightBitmap.Width + 1; w++)
                     {
-                        int yy = y < heightBitmap.Height ? y : y - 1;
+                        int ww = w < heightBitmap.Width ? w : w - 1;
 
-                        var height = heightBitmap.GetPixel(xx, yy);
-                        var color = colorBitmap != null ? colorBitmap.GetPixel(xx, yy) : System.Drawing.Color.Gray;
+                        var height = heightBitmap.GetPixel(hh, ww);
+                        var color = colorBitmap != null ? colorBitmap.GetPixel(hh, ww) : System.Drawing.Color.Gray;
 
-                        heights[x, y] = (float)height.B / 255f;
-                        colors[x, y] = new SharpDX.Color(color.R, color.G, color.B, color.A);
+                        heights[w, h] = (float)height.B / 255f;
+                        colors[w, h] = new SharpDX.Color(color.R, color.G, color.B, color.A);
                     }
                 }
             }
 
             return new HeightMap(heights, colors);
+        }
+        /// <summary>
+        /// Generates the height map normals
+        /// </summary>
+        /// <param name="cellSize">Cell size</param>
+        /// <returns>Returns the generated normals array</returns>
+        private static void ComputeHeightMapNormals(VertexData[] vertList, long width, long depth)
+        {
+            for (long x = 0; x < depth; x++)
+            {
+                for (long y = 0; y < width; y++)
+                {
+                    long index1 = (y * width) + x;
+
+                    Vector3 normal;
+                    Vector3 tangent;
+                    Vector3 binormal;
+
+                    if (x == 0 || y == 0 || x == (depth - 1) || y == (width - 1))
+                    {
+                        // The vertices in the borders have always the up normal
+                        normal = Vector3.UnitY;
+                        tangent = Vector3.UnitX;
+                        binormal = Vector3.UnitZ;
+                    }
+                    else
+                    {
+                        Vector3 norm1;
+                        Vector3 norm2;
+                        Vector3 norm3;
+                        Vector3 norm4;
+                        Vector3 norm5;
+                        Vector3 norm6;
+
+                        Vector3 tan1;
+                        Vector3 tan2;
+                        Vector3 tan3;
+                        Vector3 tan4;
+                        Vector3 tan5;
+                        Vector3 tan6;
+
+                        Vector3 biNorm1;
+                        Vector3 biNorm2;
+                        Vector3 biNorm3;
+                        Vector3 biNorm4;
+                        Vector3 biNorm5;
+                        Vector3 biNorm6;
+
+                        long index2;
+                        long index3;
+                        VertexData pos1 = vertList[index1];
+                        VertexData pos2;
+                        VertexData pos3;
+
+                        index2 = ((y - 1) * width) + x;
+                        index3 = (y * width) + (x - 1);
+                        pos2 = vertList[index2];
+                        pos3 = vertList[index3];
+                        GeometryUtil.ComputeNormals(
+                            pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
+                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            out tan1, out biNorm1, out norm1);
+
+                        index2 = (y * width) + (x - 1);
+                        index3 = ((y + 1) * width) + (x - 1);
+                        pos2 = vertList[index2];
+                        pos3 = vertList[index3];
+                        GeometryUtil.ComputeNormals(
+                            pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
+                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            out tan2, out biNorm2, out norm2);
+
+                        index2 = ((y + 1) * width) + (x - 1);
+                        index3 = ((y + 1) * width) + x;
+                        pos2 = vertList[index2];
+                        pos3 = vertList[index3];
+                        GeometryUtil.ComputeNormals(
+                            pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
+                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            out tan3, out biNorm3, out norm3);
+
+                        index2 = ((y + 1) * width) + x;
+                        index3 = (y * width) + (x + 1);
+                        pos2 = vertList[index2];
+                        pos3 = vertList[index3];
+                        GeometryUtil.ComputeNormals(
+                            pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
+                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            out tan4, out biNorm4, out norm4);
+
+                        index2 = (y * width) + (x + 1);
+                        index3 = ((y - 1) * width) + (x + 1);
+                        pos2 = vertList[index2];
+                        pos3 = vertList[index3];
+                        GeometryUtil.ComputeNormals(
+                            pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
+                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            out tan5, out biNorm5, out norm5);
+
+                        index2 = ((y - 1) * width) + (x + 1);
+                        index3 = ((y - 1) * width) + x;
+                        pos2 = vertList[index2];
+                        pos3 = vertList[index3];
+                        GeometryUtil.ComputeNormals(
+                            pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
+                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            out tan6, out biNorm6, out norm6);
+
+                        Vector3 norm = (norm1 + norm2 + norm3 + norm4 + norm5 + norm6) / 6.0f;
+                        Vector3 tang = (tan1 + tan2 + tan3 + tan4 + tan5 + tan6) / 6.0f;
+                        Vector3 binorm = (biNorm1 + biNorm2 + biNorm3 + biNorm4 + biNorm5 + biNorm6) / 6.0f;
+
+                        normal = Vector3.Normalize(norm);
+                        tangent = Vector3.Normalize(tang);
+                        binormal = Vector3.Normalize(binorm);
+                    }
+
+                    vertList[index1].Normal = normal;
+                    vertList[index1].Tangent = tangent;
+                    vertList[index1].BiNormal = binormal;
+                }
+            }
         }
 
         /// <summary>
@@ -67,15 +189,15 @@ namespace Engine
         /// Color map data
         /// </summary>
         private Color4[,] m_ColorData;
+
         /// <summary>
         /// Minimum height
         /// </summary>
-        public readonly float Min;
+        public float Min { get; private set; }
         /// <summary>
         /// Maximum height
         /// </summary>
-        public readonly float Max;
-
+        public float Max { get; private set; }
         /// <summary>
         /// Width
         /// </summary>
@@ -158,8 +280,11 @@ namespace Engine
         /// Generates the vertex data from the height map
         /// </summary>
         /// <param name="cellSize">Cell size</param>
-        /// <returns>Returns the generated vertex data array</returns>
-        public void BuildGeometry(float cellSize, float cellHeight, out VertexData[] vertices, out uint[] indices)
+        /// <param name="cellHeight">Cell height</param>
+        /// <param name="textureResolution">Texture resolution</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="indices">Result indices</param>
+        public void BuildGeometry(float cellSize, float cellHeight, float textureResolution, out VertexData[] vertices, out uint[] indices)
         {
             float totalWidth = cellSize * (this.Width - 1);
             float totalDepth = cellSize * (this.Depth - 1);
@@ -172,19 +297,25 @@ namespace Engine
 
             long vertexCount = 0;
 
-            for (long width = 0; width < vertexCountX; width++)
+            for (long depth = 0; depth < vertexCountZ; depth++)
             {
-                for (long depth = 0; depth < vertexCountZ; depth++)
+                for (long width = 0; width < vertexCountX; width++)
                 {
-                    float posX = (width * cellSize) - (totalWidth * 0.5f);
+                    float posX = (depth * cellSize) - (totalDepth * 0.5f);
                     float posY = this.m_HeightData[depth, width] * cellHeight;
-                    float posZ = (depth * cellSize) - (totalDepth * 0.5f);
+                    float posZ = (width * cellSize) - (totalWidth * 0.5f);
+
+                    float tu0 = width * cellSize / textureResolution;
+                    float tv0 = depth * cellSize / textureResolution;
+
+                    float tu1 = width * cellSize / totalWidth;
+                    float tv1 = depth * cellSize / totalDepth;
 
                     VertexData newVertex = new VertexData()
                     {
                         Position = new Vector3(posX, posY, posZ),
-                        Texture0 = new Vector2(width * cellSize / 12f, depth * cellSize / 12f),
-                        Texture1 = new Vector2(width * cellSize / totalWidth, depth * cellSize / totalDepth),
+                        Texture0 = new Vector2(tu0, tv0),
+                        Texture1 = new Vector2(tu1, tv1),
                         Color = this.m_ColorData[depth, width],
                     };
 
@@ -204,120 +335,16 @@ namespace Engine
                     long index4 = (vertexCountZ * (depth + 1)) + (width + 1); // bottom right
 
                     indices[indexCount++] = (uint)index1;
-                    indices[indexCount++] = (uint)index2;
                     indices[indexCount++] = (uint)index3;
+                    indices[indexCount++] = (uint)index2;
 
                     indices[indexCount++] = (uint)index2;
+                    indices[indexCount++] = (uint)index3;
                     indices[indexCount++] = (uint)index4;
-                    indices[indexCount++] = (uint)index3;
                 }
             }
 
-            ComputeNormals(vertices, this.Width, this.Depth);
-        }
-        /// <summary>
-        /// Generates the height map normals
-        /// </summary>
-        /// <param name="cellSize">Cell size</param>
-        /// <returns>Returns the generated normals array</returns>
-        private static void ComputeNormals(VertexData[] vertList, long width, long depth)
-        {
-            for (long y = 0; y < width; y++)
-            {
-                for (long x = 0; x < depth; x++)
-                {
-                    long index1 = (y * width) + x;
-
-                    Vector3 normal;
-                    Vector3 tangent;
-                    Vector3 binormal;
-
-                    if (x == 0 || y == 0 || x == (depth - 1) || y == (width - 1))
-                    {
-                        // The vertices in the borders have always the up normal
-                        normal = Vector3.UnitY;
-                        tangent = Vector3.UnitX;
-                        binormal = Vector3.UnitZ;
-                    }
-                    else
-                    {
-                        Vector3 norm1;
-                        Vector3 norm2;
-                        Vector3 norm3;
-                        Vector3 norm4;
-                        Vector3 norm5;
-                        Vector3 norm6;
-
-                        Vector3 tan1;
-                        Vector3 tan2;
-                        Vector3 tan3;
-                        Vector3 tan4;
-                        Vector3 tan5;
-                        Vector3 tan6;
-
-                        Vector3 biNorm1;
-                        Vector3 biNorm2;
-                        Vector3 biNorm3;
-                        Vector3 biNorm4;
-                        Vector3 biNorm5;
-                        Vector3 biNorm6;
-
-                        long index2;
-                        long index3;
-                        VertexData pos1 = vertList[index1];
-                        VertexData pos2;
-                        VertexData pos3;
-
-                        index2 = ((y - 1) * width) + x;
-                        index3 = (y * width) + (x - 1);
-                        pos2 = vertList[index2];
-                        pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value, out tan1, out biNorm1, out norm1);
-
-                        index2 = (y * width) + (x - 1);
-                        index3 = ((y + 1) * width) + (x - 1);
-                        pos2 = vertList[index2];
-                        pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value, out tan2, out biNorm2, out norm2);
-
-                        index2 = ((y + 1) * width) + (x - 1);
-                        index3 = ((y + 1) * width) + x;
-                        pos2 = vertList[index2];
-                        pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value, out tan3, out biNorm3, out norm3);
-
-                        index2 = ((y + 1) * width) + x;
-                        index3 = (y * width) + (x + 1);
-                        pos2 = vertList[index2];
-                        pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value, out tan4, out biNorm4, out norm4);
-
-                        index2 = (y * width) + (x + 1);
-                        index3 = ((y - 1) * width) + (x + 1);
-                        pos2 = vertList[index2];
-                        pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value, out tan5, out biNorm5, out norm5);
-
-                        index2 = ((y - 1) * width) + (x + 1);
-                        index3 = ((y - 1) * width) + x;
-                        pos2 = vertList[index2];
-                        pos3 = vertList[index3];
-                        GeometryUtil.ComputeNormals(pos1.Position.Value, pos3.Position.Value, pos2.Position.Value, pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value, out tan6, out biNorm6, out norm6);
-
-                        Vector3 norm = (norm1 + norm2 + norm3 + norm4 + norm5 + norm6) / 6.0f;
-                        Vector3 tang = (tan1 + tan2 + tan3 + tan4 + tan5 + tan6) / 6.0f;
-                        Vector3 binorm = (biNorm1 + biNorm2 + biNorm3 + biNorm4 + biNorm5 + biNorm6) / 6.0f;
-
-                        normal = Vector3.Normalize(norm);
-                        tangent = Vector3.Normalize(tang);
-                        binormal = Vector3.Normalize(binorm);
-                    }
-
-                    vertList[index1].Normal = normal;
-                    vertList[index1].Tangent = tangent;
-                    vertList[index1].BiNormal = binormal;
-                }
-            }
+            ComputeHeightMapNormals(vertices, this.Width, this.Depth);
         }
         /// <summary>
         /// Gets the number of triangles of the note for the specified partition level

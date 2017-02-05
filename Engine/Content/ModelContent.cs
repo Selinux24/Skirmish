@@ -481,8 +481,9 @@ namespace Engine.Content
         /// <param name="textures">Texture list</param>
         /// <param name="cellSize">Cell size</param>
         /// <param name="cellHeight">Cell height</param>
+        /// <param name="textureResolution">Texture resolution</param>
         /// <returns>Returns a new model content</returns>
-        public static ModelContent FromHeightmap(string contentFolder, string heightMap, string[] textures, float cellSize, float cellHeight)
+        public static ModelContent FromHeightmap(string contentFolder, string heightMap, string[] textures, float cellSize, float cellHeight, float textureResolution)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -507,7 +508,7 @@ namespace Engine.Content
 
             VertexData[] vertices;
             uint[] indices;
-            hm.BuildGeometry(cellSize, cellHeight, out vertices, out indices);
+            hm.BuildGeometry(cellSize, cellHeight, textureResolution, out vertices, out indices);
 
             SubMeshContent geo = new SubMeshContent()
             {
