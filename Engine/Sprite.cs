@@ -286,13 +286,13 @@ namespace Engine
 
             VertexPositionTexture[] vertices = VertexPositionTexture.Generate(vData, uvs);
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(vertices);
+            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(this.Name, vertices);
             this.vertexBufferBinding = new[]
             {
                 new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),
             };
 
-            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(iData);
+            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(this.Name,iData);
             this.indexCount = iData.Length;
         }
         /// <summary>

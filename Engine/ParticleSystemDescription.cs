@@ -18,6 +18,8 @@ namespace Engine
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
 
+            settings.Name = "Dust";
+
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
 
@@ -62,6 +64,8 @@ namespace Engine
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
 
+            settings.Name = "Fire";
+
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
 
@@ -101,6 +105,8 @@ namespace Engine
         public static ParticleSystemDescription InitializeSmokePlume(string contentPath, string texture, float scale = 1f)
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
+
+            settings.Name = "SmokePlume";
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
@@ -142,6 +148,8 @@ namespace Engine
         public static ParticleSystemDescription InitializeProjectileTrail(string contentPath, string texture, float scale = 1f)
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
+
+            settings.Name = "ProjectileTrail";
 
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
@@ -186,6 +194,8 @@ namespace Engine
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
 
+            settings.Name = "Explosion";
+
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
 
@@ -229,6 +239,8 @@ namespace Engine
         {
             ParticleSystemDescription settings = new ParticleSystemDescription();
 
+            settings.Name = "SmokeExplosion";
+
             settings.ContentPath = contentPath;
             settings.TextureName = texture;
 
@@ -267,6 +279,11 @@ namespace Engine
         /// Particle type
         /// </summary>
         public ParticleTypes ParticleType { get; set; }
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; set; }
 
         /// <summary>
         /// Content path

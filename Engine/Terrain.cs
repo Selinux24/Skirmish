@@ -222,8 +222,8 @@ namespace Engine
 
                 int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(groundDescription.Quadtree.MaximumDepth);
 
-                this.InitializeTerrainPatches(trianglesPerNode);
-                this.InitializeTerrainIndices(trianglesPerNode);
+                this.InitializeTerrainPatches(groundDescription.Name, trianglesPerNode);
+                this.InitializeTerrainIndices(groundDescription.Name, trianglesPerNode);
 
                 this.tmp = new Dictionary<LevelOfDetailEnum, List<PickingQuadTreeNode>>();
                 tmp.Add(LevelOfDetailEnum.High, new List<PickingQuadTreeNode>());
@@ -255,8 +255,9 @@ namespace Engine
             /// <summary>
             /// Initialize patch dictionary
             /// </summary>
+            /// <param name="name">Name</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
-            private void InitializeTerrainPatches(int trianglesPerNode)
+            private void InitializeTerrainPatches(string name, int trianglesPerNode)
             {
                 this.patches = new Dictionary<LevelOfDetailEnum, TerrainPatch[]>();
 
@@ -267,33 +268,34 @@ namespace Engine
 
                 for (int i = 0; i < MaxPatchesHighLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, LevelOfDetailEnum.High, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, name, LevelOfDetailEnum.High, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.High][i] = patch;
                 }
 
                 for (int i = 0; i < MaxPatchesMediumLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, LevelOfDetailEnum.Medium, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, name, LevelOfDetailEnum.Medium, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.Medium][i] = patch;
                 }
 
                 for (int i = 0; i < MaxPatchesLowLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, LevelOfDetailEnum.Low, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, name, LevelOfDetailEnum.Low, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.Low][i] = patch;
                 }
 
                 for (int i = 0; i < MaxPatchesMinimumLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, LevelOfDetailEnum.Minimum, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, name, LevelOfDetailEnum.Minimum, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.Minimum][i] = patch;
                 }
             }
             /// <summary>
             /// Initialize index dictionary
             /// </summary>
+            /// <param name="name">Name</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
-            private void InitializeTerrainIndices(int trianglesPerNode)
+            private void InitializeTerrainIndices(string name, int trianglesPerNode)
             {
                 this.indices = new Dictionary<LevelOfDetailEnum, Dictionary<IndexBufferShapeEnum, TerrainIndexBuffer>>();
 
@@ -309,7 +311,7 @@ namespace Engine
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode);
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
-                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(indexList),
+                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(name + "_HIGHLOD", indexList),
                         Count = indexList.Length,
                     };
                     this.indices[LevelOfDetailEnum.High].Add(shape, buffer);
@@ -323,7 +325,7 @@ namespace Engine
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4);
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
-                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(indexList),
+                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(name + "_MEDIUMLOD", indexList),
                         Count = indexList.Length,
                     };
                     this.indices[LevelOfDetailEnum.Medium].Add(shape, buffer);
@@ -336,7 +338,7 @@ namespace Engine
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4 / 4);
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
-                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(indexList),
+                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(name + "_LOWLOD", indexList),
                         Count = indexList.Length,
                     };
                     this.indices[LevelOfDetailEnum.Low].Add(shape, buffer);
@@ -769,7 +771,7 @@ namespace Engine
 
                 return technique;
             }
-            
+
             /// <summary>
             /// Build geometry
             /// </summary>
@@ -805,10 +807,11 @@ namespace Engine
             /// Creates a new patch of the specified level of detail
             /// </summary>
             /// <param name="game">Game</param>
+            /// <param name="name">Name</param>
             /// <param name="lod">Level of detail</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static TerrainPatch CreatePatch(Game game, LevelOfDetailEnum lod, int trianglesPerNode)
+            public static TerrainPatch CreatePatch(Game game, string name, LevelOfDetailEnum lod, int trianglesPerNode)
             {
                 int triangleCount = 0;
 
@@ -824,7 +827,7 @@ namespace Engine
 
                     VertexTerrain[] vertexData = new VertexTerrain[vertices];
 
-                    patch.vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(vertexData);
+                    patch.vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(name + lod.ToString(), vertexData);
                     patch.vertexBufferBinding = new[]
                     {
                         new VertexBufferBinding(patch.vertexBuffer, default(VertexTerrain).GetStride(), 0),

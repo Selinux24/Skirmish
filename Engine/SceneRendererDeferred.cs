@@ -837,7 +837,7 @@ namespace Engine
 
             if (this.lightGeometryVertexBuffer == null)
             {
-                this.lightGeometryVertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(verts.ToArray());
+                this.lightGeometryVertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite("Deferred Redenderer Light Geometry", verts.ToArray());
                 this.lightGeometryVertexBufferBinding = new VertexBufferBinding(this.lightGeometryVertexBuffer, verts[0].GetStride(), 0);
             }
             else
@@ -847,7 +847,7 @@ namespace Engine
 
             if (this.lightGeometryIndexBuffer == null)
             {
-                this.lightGeometryIndexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(indx.ToArray());
+                this.lightGeometryIndexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable("Deferred Redenderer Light Geometry", indx.ToArray());
             }
             else
             {

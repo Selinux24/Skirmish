@@ -98,9 +98,9 @@ namespace Engine
 
             VertexPositionTexture[] vertices = VertexPositionTexture.Generate(cv, cuv);
 
-            this.vertexBuffer = this.Device.CreateVertexBufferImmutable(vertices);
+            this.vertexBuffer = this.Device.CreateVertexBufferImmutable(description.Name, vertices);
             this.vertexBufferBinding = new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0);
-            this.indexBuffer = this.Device.CreateIndexBufferImmutable(ci);
+            this.indexBuffer = this.Device.CreateIndexBufferImmutable(description.Name, ci);
 
             this.effect = DrawerPool.EffectDefaultSprite;
             this.Channels = description.Channel;

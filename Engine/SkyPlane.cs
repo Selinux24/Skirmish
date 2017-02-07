@@ -164,13 +164,13 @@ namespace Engine
 
             var indices = iData;
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(vertices);
+            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(description.Name, vertices);
             this.vertexBufferBinding = new[]
             {
                 new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),
             };
 
-            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(indices);
+            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(description.Name, indices);
             this.indexCount = indices.Length;
         }
         /// <summary>

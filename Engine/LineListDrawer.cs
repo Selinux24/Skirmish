@@ -190,7 +190,7 @@ namespace Engine
         {
             VertexPositionColor[] vertices = new VertexPositionColor[vertexCount];
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(vertices);
+            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.Name, vertices);
             this.vertexBufferBinding = new[]
             {
                 new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),

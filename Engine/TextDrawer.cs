@@ -207,7 +207,7 @@ namespace Engine
 
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(vertices);
+            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(description.Name, vertices);
             this.vertexBufferStride = vertices[0].GetStride();
             this.vertexBufferOffset = 0;
             this.vertexCount = 0;
@@ -216,7 +216,7 @@ namespace Engine
                 new VertexBufferBinding(this.vertexBuffer, this.vertexBufferStride, this.vertexBufferOffset),
             };
 
-            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferWrite(new uint[FontMap.MAXTEXTLENGTH * 6]);
+            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferWrite(description.Name, new uint[FontMap.MAXTEXTLENGTH * 6]);
             this.indexCount = 0;
 
             this.TextColor = description.TextColor;

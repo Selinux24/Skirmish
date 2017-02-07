@@ -230,7 +230,7 @@ namespace Engine
         /// <param name="context">Updating context</param>
         public override void Update(UpdateContext context)
         {
-            
+
         }
         /// <summary>
         /// Draws content
@@ -302,13 +302,13 @@ namespace Engine
 
             var indices = GeometryUtil.ChangeCoordinate(iData);
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(vertices);
+            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(this.Name, vertices);
             this.vertexBufferBinding = new[]
             {
                 new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),
             };
 
-            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(indices);
+            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(this.Name, indices);
             this.indexCount = indices.Length;
         }
         /// <summary>

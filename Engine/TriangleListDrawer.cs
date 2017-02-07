@@ -108,7 +108,7 @@ namespace Engine
                 {
                     Counters.InstancesPerFrame += this.dictionary.Count;
                     Counters.PrimitivesPerFrame += this.vertexCount / 3;
-                } 
+                }
 
                 var effect = DrawerPool.EffectDefaultBasic;
                 var technique = effect.GetTechnique(VertexTypes.PositionColor, false, DrawingStages.Drawing, context.DrawerMode);
@@ -173,7 +173,7 @@ namespace Engine
         {
             VertexPositionColor[] vertices = new VertexPositionColor[vertexCount];
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(vertices);
+            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.Name, vertices);
             this.vertexBufferBinding = new[]
             {
                 new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),

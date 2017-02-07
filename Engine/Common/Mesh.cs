@@ -130,7 +130,7 @@ namespace Engine.Common
         {
             if (this.Vertices != null && this.Vertices.Length > 0)
             {
-                this.VertexBuffer = device.CreateVertexBuffer(this.Vertices, this.dynamicBuffers);
+                this.VertexBuffer = device.CreateVertexBuffer(this.Name, this.Vertices, this.dynamicBuffers);
                 this.VertexBufferStride = this.Vertices[0].GetStride();
                 this.VertexCount = this.Vertices.Length;
 
@@ -141,11 +141,11 @@ namespace Engine.Common
             {
                 if (this.dynamicBuffers)
                 {
-                    this.IndexBuffer = device.CreateIndexBufferWrite((uint[])this.Indices);
+                    this.IndexBuffer = device.CreateIndexBufferWrite(this.Name, (uint[])this.Indices);
                 }
                 else
                 {
-                    this.IndexBuffer = device.CreateIndexBufferImmutable((uint[])this.Indices);
+                    this.IndexBuffer = device.CreateIndexBufferImmutable(this.Name, (uint[])this.Indices);
                 }
                 this.IndexCount = this.Indices.Length;
             }

@@ -270,13 +270,14 @@ namespace Engine
             /// Constructor
             /// </summary>
             /// <param name="game">Game</param>
-            public FoliageBuffer(Game game)
+            /// <param name="name">Name</param>
+            public FoliageBuffer(Game game, string name)
             {
                 this.Game = game;
 
                 VertexBillboard[] vertexData = new VertexBillboard[FoliagePatch.MAX];
 
-                this.buffer = this.Game.Graphics.Device.CreateVertexBufferWrite(vertexData);
+                this.buffer = this.Game.Graphics.Device.CreateVertexBufferWrite(name, vertexData);
                 this.bufferBinding = new[]
                 {
                     new VertexBufferBinding(this.buffer, default(VertexBillboard).GetStride(), 0),
@@ -476,7 +477,7 @@ namespace Engine
 
                 for (int i = 0; i < MaxFoliageBuffers; i++)
                 {
-                    this.foliageBuffers.Add(new FoliageBuffer(game));
+                    this.foliageBuffers.Add(new FoliageBuffer(game, description.Name));
                 }
             }
         }

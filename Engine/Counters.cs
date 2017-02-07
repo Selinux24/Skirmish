@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using BindFlags = SharpDX.Direct3D11.BindFlags;
+using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
 
 namespace Engine
 {
+    using Engine.Helpers;
+
     /// <summary>
     /// Game counters
     /// </summary>
@@ -86,9 +90,47 @@ namespace Engine
         /// </summary>
         public static int Buffers = 0;
         /// <summary>
-        /// Allocated memory in buffers
+        /// Total buffer bytes
         /// </summary>
-        public static long AllocatedMemoryInBuffers = 0;
+        public static long BufferBytes
+        {
+            get
+            {
+                long kBytes = 0;
+
+                foreach (var item in gData.Values)
+                {
+                    var rs = item as Engine.Helpers.ResourceStatus;
+                    if (rs != null)
+                    {
+                        kBytes += rs.Size;
+                    }
+                }
+
+                return kBytes;
+            }
+        }
+        /// <summary>
+        /// Total buffer elements
+        /// </summary>
+        public static int BufferElements
+        {
+            get
+            {
+                int elements = 0;
+
+                foreach (var item in gData.Values)
+                {
+                    var rs = item as Engine.Helpers.ResourceStatus;
+                    if (rs != null)
+                    {
+                        elements += rs.Elements;
+                    }
+                }
+
+                return elements;
+            }
+        }
         /// <summary>
         /// Buffer reads
         /// </summary>
@@ -176,7 +218,6 @@ namespace Engine
             DepthStencilStateChanges = 0;
 
             Buffers = 0;
-            AllocatedMemoryInBuffers = 0;
             BufferReads = 0;
             BufferWrites = 0;
 
@@ -291,6 +332,31 @@ namespace Engine
             {
                 gFrameDataKeys.Add(key);
             }
+        }
+
+        /// <summary>
+        /// Buffer registration
+        /// </summary>
+        /// <param name="type">Type of buffer</param>
+        /// <param name="name">Name</param>
+        /// <param name="usage">Resource usage</param>
+        /// <param name="binding">Binding flags</param>
+        /// <param name="sizeInBytes">Size in bytes</param>
+        /// <param name="length">Number of elements</param>
+        public static void RegBuffer(Type type, string name, ResourceUsage usage, BindFlags binding, long sizeInBytes, int length)
+        {
+            Buffers++;
+
+            var key = string.Format("{0}.{1}", usage, type);
+
+            var c = Counters.GetStatistics(key) as ResourceStatus;
+            if (c == null)
+            {
+                c = new ResourceStatus();
+                Counters.SetStatistics(key, c, true);
+            }
+
+            c.Add(name, usage, binding, sizeInBytes, length);
         }
     }
 }
