@@ -105,11 +105,10 @@ namespace AnimationTest
                 var desc = new ModelDescription()
                 {
                     Static = true,
-                    AlwaysVisible = false,
                     CastShadow = true,
                     DeferredEnabled = true,
-                    EnableDepthStencil = true,
-                    EnableAlphaBlending = false,
+                    DepthEnabled = true,
+                    AlphaEnabled = false,
                 };
 
                 this.floor = this.AddModel(content, desc);

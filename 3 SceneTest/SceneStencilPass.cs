@@ -1,5 +1,4 @@
 ﻿using Engine;
-using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
@@ -43,7 +42,7 @@ namespace SceneTest
             this.InitializeEmitter();
             this.InitializeLights();
 
-            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { AlwaysVisible = false, EnableDepthStencil = true }, 5000);
+            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 5000);
 
             this.SceneVolume = new BoundingSphere(Vector3.Zero, 50f);
         }
@@ -79,10 +78,9 @@ namespace SceneTest
                 Name = "Floor",
                 Static = true,
                 CastShadow = true,
-                AlwaysVisible = false,
                 DeferredEnabled = true,
-                EnableDepthStencil = true,
-                EnableAlphaBlending = false,
+                DepthEnabled = true,
+                AlphaEnabled = false,
             };
 
             this.floorAsphalt = this.AddModel(content, desc);
@@ -125,10 +123,9 @@ namespace SceneTest
                 Name = "Emitter",
                 Static = false,
                 CastShadow = false,
-                AlwaysVisible = false,
                 DeferredEnabled = true,
-                EnableDepthStencil = true,
-                EnableAlphaBlending = false,
+                DepthEnabled = true,
+                AlphaEnabled = false,
             };
 
             this.lightEmitter1 = this.AddModel(content, desc);

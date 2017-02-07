@@ -152,7 +152,7 @@ namespace Engine
                 this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.LineList;
                 Counters.IAPrimitiveTopologySets++;
 
-                if (this.EnableAlphaBlending) this.Game.Graphics.SetBlendDefaultAlpha();
+                if (this.AlphaEnabled) this.Game.Graphics.SetBlendDefaultAlpha();
                 else this.Game.Graphics.SetBlendDefault();
 
                 for (int p = 0; p < technique.Description.PassCount; p++)

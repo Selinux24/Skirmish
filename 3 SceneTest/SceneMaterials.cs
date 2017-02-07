@@ -119,10 +119,9 @@ namespace SceneTest
             {
                 Static = true,
                 CastShadow = true,
-                AlwaysVisible = false,
                 DeferredEnabled = true,
-                EnableDepthStencil = true,
-                EnableAlphaBlending = false,
+                DepthEnabled = true,
+                AlphaEnabled = false,
             };
 
             this.floor = this.AddModel(content, desc);

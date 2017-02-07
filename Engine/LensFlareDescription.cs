@@ -67,11 +67,10 @@ namespace Engine
             : base()
         {
             this.Static = false;
-            this.AlwaysVisible = false;
             this.CastShadow = false;
             this.DeferredEnabled = false;
-            this.EnableDepthStencil = false;
-            this.EnableAlphaBlending = true;
+            this.DepthEnabled = false;
+            this.AlphaEnabled = true;
         }
     }
 }

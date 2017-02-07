@@ -217,8 +217,8 @@ namespace DeferredTest
                     Name = "Lonely tree",
                     Static = true,
                     CastShadow = true,
-                    EnableAlphaBlending = true,
-                    EnableDepthStencil = true,
+                    AlphaEnabled = true,
+                    DepthEnabled = true,
                 });
             sw.Stop();
             loadingText += string.Format("tree: {0} ", sw.Elapsed.TotalSeconds);
@@ -232,8 +232,8 @@ namespace DeferredTest
                     Name = "Bunch of trees",
                     Static = true,
                     CastShadow = true,
-                    EnableAlphaBlending = true,
-                    EnableDepthStencil = true,
+                    AlphaEnabled = true,
+                    DepthEnabled = true,
                     Instances = 10,
                 });
             sw.Stop();
@@ -384,7 +384,7 @@ namespace DeferredTest
 
             #region Lights
 
-            this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { EnableDepthStencil = true }, 1000);
+            this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 1000);
 
             this.Lights.KeyLight.Enabled = false;
             this.Lights.BackLight.Enabled = false;

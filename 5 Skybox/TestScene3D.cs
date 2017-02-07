@@ -179,10 +179,9 @@ namespace Skybox
                 Name = "Emitter",
                 Static = false,
                 CastShadow = false,
-                AlwaysVisible = false,
                 DeferredEnabled = true,
-                EnableDepthStencil = true,
-                EnableAlphaBlending = false,
+                DepthEnabled = true,
+                AlphaEnabled = false,
             };
 
             this.movingFire = this.AddModel(content, mFireDesc);

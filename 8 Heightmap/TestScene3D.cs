@@ -639,8 +639,7 @@ namespace HeightmapTest
 
             var bboxesDrawerDesc = new LineListDrawerDescription()
             {
-                AlwaysVisible = false,
-                EnableDepthStencil = true,
+                DepthEnabled = true,
             };
             this.bboxesDrawer = this.AddLineListDrawer(bboxesDrawerDesc, listBoxes, new Color(1.0f, 0.0f, 0.0f, 0.5f));
             this.bboxesDrawer.Visible = false;
@@ -856,7 +855,7 @@ namespace HeightmapTest
                 Triangle[] tris = this.soldier.GetTriangles(true);
                 if (this.soldierTris == null)
                 {
-                    this.soldierTris = this.AddTriangleListDrawer(new TriangleListDrawerDescription() { EnableDepthStencil = false }, tris, color);
+                    this.soldierTris = this.AddTriangleListDrawer(new TriangleListDrawerDescription() { DepthEnabled = false }, tris, color);
                 }
                 else
                 {

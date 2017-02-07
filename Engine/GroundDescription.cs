@@ -58,11 +58,10 @@
             : base()
         {
             this.Static = true;
-            this.AlwaysVisible = false;
             this.CastShadow = true;
             this.DeferredEnabled = true;
-            this.EnableDepthStencil = true;
-            this.EnableAlphaBlending = false;
+            this.DepthEnabled = true;
+            this.AlphaEnabled = false;
         }
     }
 }

@@ -1243,10 +1243,10 @@ namespace Engine
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
 
-                    if (c.EnableDepthStencil) this.Game.Graphics.SetDepthStencilZEnabled();
+                    if (c.DepthEnabled) this.Game.Graphics.SetDepthStencilZEnabled();
                     else this.Game.Graphics.SetDepthStencilZDisabled();
 
-                    if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendTransparent();
+                    if (c.AlphaEnabled) this.Game.Graphics.SetBlendTransparent();
                     else this.Game.Graphics.SetBlendDefault();
 
                     c.Draw(context);
@@ -1270,17 +1270,17 @@ namespace Engine
                 {
                     this.Game.Graphics.SetRasterizerDefault();
 
-                    if (c.EnableDepthStencil) this.Game.Graphics.SetDepthStencilZEnabled();
+                    if (c.DepthEnabled) this.Game.Graphics.SetDepthStencilZEnabled();
                     else this.Game.Graphics.SetDepthStencilZDisabled();
 
                     if (deferred)
                     {
-                        if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendDeferredComposerTransparent();
+                        if (c.AlphaEnabled) this.Game.Graphics.SetBlendDeferredComposerTransparent();
                         else this.Game.Graphics.SetBlendDeferredComposer();
                     }
                     else
                     {
-                        if (c.EnableAlphaBlending) this.Game.Graphics.SetBlendTransparent();
+                        if (c.AlphaEnabled) this.Game.Graphics.SetBlendTransparent();
                         else this.Game.Graphics.SetBlendDefault();
                     }
 

@@ -52,10 +52,6 @@ namespace Engine.Common
         /// </summary>
         public bool Static { get; set; }
         /// <summary>
-        /// Always visible
-        /// </summary>
-        public bool AlwaysVisible { get; set; }
-        /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>
         public bool CastShadow { get; set; }
@@ -64,13 +60,13 @@ namespace Engine.Common
         /// </summary>
         public bool DeferredEnabled { get; set; }
         /// <summary>
-        /// Enables z-buffer writting
+        /// Uses depth info
         /// </summary>
-        public bool EnableDepthStencil { get; set; }
+        public bool DepthEnabled { get; set; }
         /// <summary>
         /// Enables transparent blending
         /// </summary>
-        public bool EnableAlphaBlending { get; set; }
+        public bool AlphaEnabled { get; set; }
 
         /// <summary>
         /// Constructor
@@ -85,11 +81,10 @@ namespace Engine.Common
 
             this.Name = description.Name;
             this.Static = description.Static;
-            this.AlwaysVisible = description.AlwaysVisible;
             this.CastShadow = description.CastShadow;
             this.DeferredEnabled = description.DeferredEnabled;
-            this.EnableDepthStencil = description.EnableDepthStencil;
-            this.EnableAlphaBlending = description.EnableAlphaBlending;
+            this.DepthEnabled = description.DepthEnabled;
+            this.AlphaEnabled = description.AlphaEnabled;
         }
 
         /// <summary>

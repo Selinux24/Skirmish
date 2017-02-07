@@ -78,11 +78,10 @@ namespace Engine
             : base()
         {
             this.Static = true;
-            this.AlwaysVisible = false;
             this.CastShadow = false;
             this.DeferredEnabled = true;
-            this.EnableDepthStencil = false;
-            this.EnableAlphaBlending = false;
+            this.DepthEnabled = false;
+            this.AlphaEnabled = false;
 
             this.MaxBrightness = 0.75f;
             this.MinBrightness = 0.15f;

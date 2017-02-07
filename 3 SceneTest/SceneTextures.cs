@@ -66,7 +66,7 @@ namespace SceneTest
             this.InitializeLamps();
             this.InitializeStreetLamps();
 
-            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { AlwaysVisible = false, EnableDepthStencil = true }, 10000);
+            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 10000);
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(6, 30, 00), 0.0001f);
 
@@ -150,10 +150,9 @@ namespace SceneTest
                 Name = "Floor",
                 Static = true,
                 CastShadow = true,
-                AlwaysVisible = false,
                 DeferredEnabled = true,
-                EnableDepthStencil = true,
-                EnableAlphaBlending = false,
+                DepthEnabled = true,
+                AlphaEnabled = false,
                 SphericVolume = false,
             };
 
@@ -162,10 +161,9 @@ namespace SceneTest
                 Name = "FloorI",
                 Static = true,
                 CastShadow = true,
-                AlwaysVisible = false,
                 DeferredEnabled = true,
-                EnableDepthStencil = true,
-                EnableAlphaBlending = false,
+                DepthEnabled = true,
+                AlphaEnabled = false,
                 SphericVolume = false,
                 Instances = 8,
             };

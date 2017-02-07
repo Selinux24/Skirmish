@@ -15,10 +15,6 @@ namespace Engine.Common
         /// </summary>
         public bool Static = false;
         /// <summary>
-        /// Always visible
-        /// </summary>
-        public bool AlwaysVisible = false;
-        /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>
         public bool CastShadow = false;
@@ -27,13 +23,13 @@ namespace Engine.Common
         /// </summary>
         public bool DeferredEnabled = true;
         /// <summary>
-        /// Enables z-buffer writting
+        /// Uses depth info
         /// </summary>
-        public bool EnableDepthStencil = true;
+        public bool DepthEnabled = true;
         /// <summary>
         /// Enables transparent blending
         /// </summary>
-        public bool EnableAlphaBlending = false;
+        public bool AlphaEnabled = false;
 
         /// <summary>
         /// Use spheric volume for culling by default

@@ -102,11 +102,10 @@ namespace Engine
             this.Brightness = EarthSkyBrightness;
 
             this.Static = true;
-            this.AlwaysVisible = false;
             this.CastShadow = false;
             this.DeferredEnabled = true;
-            this.EnableDepthStencil = false;
-            this.EnableAlphaBlending = false;
+            this.DepthEnabled = false;
+            this.AlphaEnabled = false;
         }
     }
 }

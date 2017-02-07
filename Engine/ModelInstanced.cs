@@ -411,7 +411,7 @@ namespace Engine
                 ModelInstance a;
                 ModelInstance b;
 
-                if (this.EnableAlphaBlending)
+                if (this.AlphaEnabled)
                 {
                     a = i2;
                     b = i1;

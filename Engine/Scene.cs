@@ -854,16 +854,12 @@ namespace Engine
                 this.components.Add(component);
                 this.components.Sort((p1, p2) =>
                 {
-                    //First always visible objects
-                    int i = p1.AlwaysVisible.CompareTo(p2.AlwaysVisible);
-                    if (i != 0) return i;
-
-                    //Then opaques
-                    i = p1.EnableAlphaBlending.CompareTo(p2.EnableAlphaBlending);
+                    //First opaques
+                    int i = p1.AlphaEnabled.CompareTo(p2.AlphaEnabled);
                     if (i != 0) return i;
 
                     //Then z-buffer writers
-                    i = p1.EnableDepthStencil.CompareTo(p2.EnableDepthStencil);
+                    i = p1.DepthEnabled.CompareTo(p2.DepthEnabled);
                     if (i != 0) return i;
 
                     //Then by order property

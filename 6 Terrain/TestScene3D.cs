@@ -119,7 +119,7 @@ namespace TerrainTest
                 2f,
                 5f));
 
-            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { AlwaysVisible = false, EnableDepthStencil = true }, 5000);
+            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 5000);
 
             #endregion
 
@@ -167,10 +167,9 @@ namespace TerrainTest
                 new ModelDescription()
                 {
                     Name = "Cursor3D",
-                    AlwaysVisible = true,
                     DeferredEnabled = false,
                     CastShadow = false,
-                    EnableDepthStencil = false,
+                    DepthEnabled = false,
                 });
             sw.Stop();
             loadingText += string.Format("cursor3D: {0} ", sw.Elapsed.TotalSeconds);
@@ -363,7 +362,7 @@ namespace TerrainTest
                     Name = "birch_a",
                     CastShadow = true,
                     Static = true,
-                    EnableAlphaBlending = true,
+                    AlphaEnabled = true,
                     Instances = 100,
                 });
             this.tree2 = this.AddInstancingModel(
@@ -374,7 +373,7 @@ namespace TerrainTest
                     Name = "birch_b",
                     CastShadow = true,
                     Static = true,
-                    EnableAlphaBlending = true,
+                    AlphaEnabled = true,
                     Instances = 100,
                 });
             sw.Stop();
