@@ -39,6 +39,11 @@ namespace Engine.Effects
         private EffectShaderResourceVariable texture = null;
 
         /// <summary>
+        /// Current font texture
+        /// </summary>
+        private ShaderResourceView currentTexture = null;
+
+        /// <summary>
         /// World matrix
         /// </summary>
         protected Matrix World
@@ -91,7 +96,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.texture.SetResource(value);
+                if (this.currentTexture != value)
+                {
+                    this.texture.SetResource(value);
+
+                    this.currentTexture = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
 

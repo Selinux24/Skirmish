@@ -68,6 +68,11 @@ namespace Engine.Effects
         private EffectShaderResourceVariable textures = null;
 
         /// <summary>
+        /// Current texture array
+        /// </summary>
+        private ShaderResourceView currentTextures = null;
+
+        /// <summary>
         /// World matrix
         /// </summary>
         protected Matrix World
@@ -134,7 +139,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.textures.SetResource(value);
+                if (this.currentTextures != value)
+                {
+                    this.textures.SetResource(value);
+
+                    this.currentTextures = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
 

@@ -238,6 +238,7 @@ namespace HeightmapTest
             var gDesc =
                 new GroundDescription()
                 {
+                    Name = "Terrain",
                     Quadtree = new GroundDescription.QuadtreeDescription()
                     {
                         MaximumDepth = 3,

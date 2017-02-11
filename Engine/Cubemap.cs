@@ -174,7 +174,7 @@ namespace Engine
                 new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),
             };
 
-            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(this.Name, iData);
+            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBuffer(this.Name, iData, false);
             this.indexCount = iData.Length;
         }
         /// <summary>

@@ -249,6 +249,35 @@ namespace Engine.Effects
         private EffectShaderResourceVariable materialPalette = null;
 
         /// <summary>
+        /// Current diffuse map
+        /// </summary>
+        private ShaderResourceView currentDiffuseMap = null;
+        /// <summary>
+        /// Current normal map
+        /// </summary>
+        private ShaderResourceView currentNormalMap = null;
+        /// <summary>
+        /// Current specular map
+        /// </summary>
+        private ShaderResourceView currentSpecularMap = null;
+        /// <summary>
+        /// Current static shadow map
+        /// </summary>
+        private ShaderResourceView currentShadowMapStatic = null;
+        /// <summary>
+        /// Current dynamic shadow map
+        /// </summary>
+        private ShaderResourceView currentShadowMapDynamic = null;
+        /// <summary>
+        /// Current animation palette
+        /// </summary>
+        private ShaderResourceView currentAnimationPalette = null;
+        /// <summary>
+        /// Current material palette
+        /// </summary>
+        private ShaderResourceView currentMaterialPalette = null;
+
+        /// <summary>
         /// Directional lights
         /// </summary>
         protected BufferDirectionalLight[] DirLights
@@ -553,7 +582,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.diffuseMap.SetResource(value);
+                if (this.currentDiffuseMap != value)
+                {
+                    this.diffuseMap.SetResource(value);
+
+                    this.currentDiffuseMap = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -567,7 +603,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.normalMap.SetResource(value);
+                if (this.currentNormalMap != value)
+                {
+                    this.normalMap.SetResource(value);
+
+                    this.currentNormalMap = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -581,7 +624,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.specularMap.SetResource(value);
+                if (this.currentSpecularMap != value)
+                {
+                    this.specularMap.SetResource(value);
+
+                    this.currentSpecularMap = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -595,7 +645,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.shadowMapStatic.SetResource(value);
+                if (this.currentShadowMapStatic != value)
+                {
+                    this.shadowMapStatic.SetResource(value);
+
+                    this.currentShadowMapStatic = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -609,7 +666,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.shadowMapDynamic.SetResource(value);
+                if (this.currentShadowMapDynamic != value)
+                {
+                    this.shadowMapDynamic.SetResource(value);
+
+                    this.currentShadowMapDynamic = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -637,7 +701,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.animationPalette.SetResource(value);
+                if (this.currentAnimationPalette != value)
+                {
+                    this.animationPalette.SetResource(value);
+
+                    this.currentAnimationPalette = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -665,7 +736,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.materialPalette.SetResource(value);
+                if (this.currentMaterialPalette != value)
+                {
+                    this.materialPalette.SetResource(value);
+
+                    this.currentMaterialPalette = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
 

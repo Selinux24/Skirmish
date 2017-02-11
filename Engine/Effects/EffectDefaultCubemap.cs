@@ -30,6 +30,11 @@ namespace Engine.Effects
         private EffectShaderResourceVariable cubeTexture = null;
 
         /// <summary>
+        /// Current cube texture
+        /// </summary>
+        private ShaderResourceView currentCubeTexture = null;
+
+        /// <summary>
         /// World view projection matrix
         /// </summary>
         protected Matrix WorldViewProjection
@@ -54,7 +59,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.cubeTexture.SetResource(value);
+                if (this.currentCubeTexture != value)
+                {
+                    this.cubeTexture.SetResource(value);
+
+                    this.currentCubeTexture = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
 

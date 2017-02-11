@@ -39,6 +39,11 @@ namespace Engine.Effects
         private EffectShaderResourceVariable diffuseMap = null;
 
         /// <summary>
+        /// Current diffuse map
+        /// </summary>
+        private ShaderResourceView currentDiffuseMap = null;
+
+        /// <summary>
         /// World view projection matrix
         /// </summary>
         protected Matrix WorldViewProjection
@@ -99,7 +104,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.diffuseMap.SetResource(value);
+                if (this.currentDiffuseMap != value)
+                {
+                    this.diffuseMap.SetResource(value);
+
+                    this.currentDiffuseMap = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
 

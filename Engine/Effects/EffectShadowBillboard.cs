@@ -68,6 +68,15 @@ namespace Engine.Effects
         private EffectShaderResourceVariable textureRandom = null;
 
         /// <summary>
+        /// Current texture array
+        /// </summary>
+        private ShaderResourceView currentTextures = null;
+        /// <summary>
+        /// Current random texture
+        /// </summary>
+        private ShaderResourceView currentTextureRandom = null;
+
+        /// <summary>
         /// World view projection matrix
         /// </summary>
         protected Matrix WorldViewProjection
@@ -212,7 +221,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.textures.SetResource(value);
+                if (this.currentTextures != value)
+                {
+                    this.textures.SetResource(value);
+
+                    this.currentTextures = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -226,7 +242,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.textureRandom.SetResource(value);
+                if (this.currentTextureRandom != value)
+                {
+                    this.textureRandom.SetResource(value);
+
+                    this.currentTextureRandom = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
 

@@ -89,6 +89,11 @@ namespace Engine.Effects
         private EffectVectorVariable rotateSpeed = null;
 
         /// <summary>
+        /// Current texture array
+        /// </summary>
+        private ShaderResourceView currentTextureArray = null;
+
+        /// <summary>
         /// World matrix
         /// </summary>
         protected Matrix World
@@ -173,7 +178,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.textureArray.SetResource(value);
+                if (this.currentTextureArray != value)
+                {
+                    this.textureArray.SetResource(value);
+
+                    this.currentTextureArray = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using SharpDX.DXGI;
 using RenderTargetView = SharpDX.Direct3D11.RenderTargetView;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
@@ -74,7 +75,7 @@ namespace Engine
 
             this.viewport = new Viewport(0, 0, description.Width, description.Height);
 
-            using (var texture = this.Device.CreateRenderTargetTexture(description.Width, description.Height))
+            using (var texture = this.Device.CreateRenderTargetTexture(Format.R8G8B8A8_UNorm, description.Width, description.Height))
             {
                 this.renderTarget = new RenderTargetView(this.Device, texture);
                 this.renderTexture = new ShaderResourceView(this.Device, texture);

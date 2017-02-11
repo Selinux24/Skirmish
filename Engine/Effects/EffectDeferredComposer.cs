@@ -125,6 +125,35 @@ namespace Engine.Effects
         private EffectShaderResourceVariable materialPalette = null;
 
         /// <summary>
+        /// Current target 1
+        /// </summary>
+        private ShaderResourceView currentTG1Map = null;
+        /// <summary>
+        /// Current target 2
+        /// </summary>
+        private ShaderResourceView currentTG2Map = null;
+        /// <summary>
+        /// Current target 3
+        /// </summary>
+        private ShaderResourceView currentTG3Map = null;
+        /// <summary>
+        /// Current static shadow map
+        /// </summary>
+        private ShaderResourceView currentShadowMapStatic = null;
+        /// <summary>
+        /// Current dynamic shadow map
+        /// </summary>
+        private ShaderResourceView currentShadowMapDynamic = null;
+        /// <summary>
+        /// Current light map
+        /// </summary>
+        private ShaderResourceView currentLightMap = null;
+        /// <summary>
+        /// Current material palette
+        /// </summary>
+        private ShaderResourceView currentMaterialPalette = null;
+
+        /// <summary>
         /// World matrix
         /// </summary>
         protected Matrix World
@@ -337,7 +366,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.tg1Map.SetResource(value);
+                if (this.currentTG1Map != value)
+                {
+                    this.tg1Map.SetResource(value);
+
+                    this.currentTG1Map = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -351,7 +387,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.tg2Map.SetResource(value);
+                if (this.currentTG2Map != value)
+                {
+                    this.tg2Map.SetResource(value);
+
+                    this.currentTG2Map = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -365,7 +408,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.tg3Map.SetResource(value);
+                if (this.currentTG3Map != value)
+                {
+                    this.tg3Map.SetResource(value);
+
+                    this.currentTG3Map = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -379,7 +429,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.shadowMapStatic.SetResource(value);
+                if (this.currentShadowMapStatic != value)
+                {
+                    this.shadowMapStatic.SetResource(value);
+
+                    this.currentShadowMapStatic = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -393,7 +450,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.shadowMapDynamic.SetResource(value);
+                if (this.currentShadowMapDynamic != value)
+                {
+                    this.shadowMapDynamic.SetResource(value);
+
+                    this.currentShadowMapDynamic = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -407,7 +471,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.lightMap.SetResource(value);
+                if (this.currentLightMap != value)
+                {
+                    this.lightMap.SetResource(value);
+
+                    this.currentLightMap = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -435,7 +506,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.materialPalette.SetResource(value);
+                if (this.currentMaterialPalette != value)
+                {
+                    this.materialPalette.SetResource(value);
+
+                    this.currentMaterialPalette = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
 
@@ -549,7 +627,7 @@ namespace Engine.Effects
             ShaderResourceView shadowMapDynamic)
         {
             this.DirectionalLight = new BufferDirectionalLight(light);
-           
+
             this.LightViewProjection = lightViewProjection;
             this.ShadowMapStatic = shadowMapStatic;
             this.ShadowMapDynamic = shadowMapDynamic;
@@ -562,8 +640,8 @@ namespace Engine.Effects
         /// <param name="transform">Translation matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
         public void UpdatePerLight(
-            SceneLightPoint light, 
-            Matrix transform, 
+            SceneLightPoint light,
+            Matrix transform,
             Matrix viewProjection)
         {
             this.PointLight = new BufferPointLight(light);
@@ -577,8 +655,8 @@ namespace Engine.Effects
         /// <param name="transform">Translation and rotation matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
         public void UpdatePerLight(
-            SceneLightSpot light, 
-            Matrix transform, 
+            SceneLightSpot light,
+            Matrix transform,
             Matrix viewProjection)
         {
             this.SpotLight = new BufferSpotLight(light);
@@ -615,7 +693,7 @@ namespace Engine.Effects
             this.FogStart = fogStart;
             this.FogRange = fogRange;
             this.FogColor = fogColor;
-            
+
             this.TG3Map = depthMap;
             this.LightMap = lightMap;
         }

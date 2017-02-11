@@ -189,8 +189,8 @@ namespace Engine
             this.UpdateRectangleAndView();
 
             this.shadowMapper = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
-            this.geometryBuffer = new RenderTarget(game, 3);
-            this.lightBuffer = new RenderTarget(game, 1);
+            this.geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 3);
+            this.lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 1);
 
             this.UpdateContext = new UpdateContext()
             {
@@ -847,7 +847,7 @@ namespace Engine
 
             if (this.lightGeometryIndexBuffer == null)
             {
-                this.lightGeometryIndexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable("Deferred Redenderer Light Geometry", indx.ToArray());
+                this.lightGeometryIndexBuffer = this.Game.Graphics.Device.CreateIndexBufferWrite("Deferred Redenderer Light Geometry", indx.ToArray());
             }
             else
             {

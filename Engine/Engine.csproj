@@ -147,6 +147,7 @@
     <Compile Include="AnimationClipDescription.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
+    <Compile Include="Common\Batcher.cs" />
     <Compile Include="Common\IndexBufferShapeEnum.cs" />
     <Compile Include="Common\Intersection.cs" />
     <Compile Include="Common\UseMaterials.cs" />

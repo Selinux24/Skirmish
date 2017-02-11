@@ -133,6 +133,27 @@ namespace Engine.Effects
         private EffectShaderResourceVariable materialPalette = null;
 
         /// <summary>
+        /// Current texture array
+        /// </summary>
+        private ShaderResourceView currentTextures = null;
+        /// <summary>
+        /// Current static shadow map
+        /// </summary>
+        private ShaderResourceView currentShadowMapStatic = null;
+        /// <summary>
+        /// Current dynamic shadow map
+        /// </summary>
+        private ShaderResourceView currentShadowMapDynamic = null;
+        /// <summary>
+        /// Current random texture
+        /// </summary>
+        private ShaderResourceView currentTextureRandom = null;
+        /// <summary>
+        /// Current material palette
+        /// </summary>
+        private ShaderResourceView currentMaterialPalette = null;
+
+        /// <summary>
         /// Directional lights
         /// </summary>
         protected BufferDirectionalLight[] DirLights
@@ -433,7 +454,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.textures.SetResource(value);
+                if (this.currentTextures != value)
+                {
+                    this.textures.SetResource(value);
+
+                    this.currentTextures = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -447,7 +475,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.shadowMapStatic.SetResource(value);
+                if (this.currentShadowMapStatic != value)
+                {
+                    this.shadowMapStatic.SetResource(value);
+
+                    this.currentShadowMapStatic = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -461,7 +496,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.shadowMapDynamic.SetResource(value);
+                if (this.currentShadowMapDynamic != value)
+                {
+                    this.shadowMapDynamic.SetResource(value);
+
+                    this.currentShadowMapDynamic = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -521,7 +563,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.textureRandom.SetResource(value);
+                if (this.currentTextureRandom != value)
+                {
+                    this.textureRandom.SetResource(value);
+
+                    this.currentTextureRandom = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -549,7 +598,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.materialPalette.SetResource(value);
+                if (this.currentMaterialPalette != value)
+                {
+                    this.materialPalette.SetResource(value);
+
+                    this.currentMaterialPalette = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
 

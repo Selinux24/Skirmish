@@ -1,19 +1,15 @@
 ﻿using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
-using BindFlags = SharpDX.Direct3D11.BindFlags;
-using CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags;
 using RenderTargetView = SharpDX.Direct3D11.RenderTargetView;
 using RenderTargetViewDescription = SharpDX.Direct3D11.RenderTargetViewDescription;
-using ResourceOptionFlags = SharpDX.Direct3D11.ResourceOptionFlags;
-using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using ShaderResourceViewDescription = SharpDX.Direct3D11.ShaderResourceViewDescription;
-using Texture2D = SharpDX.Direct3D11.Texture2D;
-using Texture2DDescription = SharpDX.Direct3D11.Texture2DDescription;
 
 namespace Engine
 {
+    using Engine.Helpers;
+
     /// <summary>
     /// Render target
     /// </summary>
@@ -24,6 +20,10 @@ namespace Engine
         /// </summary>
         protected Game Game { get; private set; }
 
+        /// <summary>
+        /// Render target format
+        /// </summary>
+        public Format RenderTargetFormat { get; protected set; }
         /// <summary>
         /// Buffer count
         /// </summary>
@@ -41,10 +41,12 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="format">Format</param>
         /// <param name="count">Buffer count</param>
-        public RenderTarget(Game game, int count)
+        public RenderTarget(Game game, Format format, int count)
         {
             this.Game = game;
+            this.RenderTargetFormat = format;
             this.BufferCount = count;
 
             this.CreateTargets();
@@ -72,82 +74,40 @@ namespace Engine
         {
             int width = this.Game.Form.RenderWidth;
             int height = this.Game.Form.RenderHeight;
-            Format rtFormat = Format.R32G32B32A32_Float;
 
             this.Textures = new ShaderResourceView[this.BufferCount];
             this.Targets = new RenderTargetView[this.BufferCount];
 
             for (int i = 0; i < this.BufferCount; i++)
             {
-                Texture2DDescription txDesc = new Texture2DDescription()
+                var tex = this.Game.Graphics.Device.CreateRenderTargetTexture(this.RenderTargetFormat, width, height);
+
+                var rtvDesc = new RenderTargetViewDescription()
                 {
-                    Width = width,
-                    Height = height,
-                    MipLevels = 1,
-                    ArraySize = 1,
-                    Format = rtFormat,
-                    SampleDescription = new SampleDescription(1, 0),
-                    Usage = ResourceUsage.Default,
-                    BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                    CpuAccessFlags = CpuAccessFlags.None,
-                    OptionFlags = ResourceOptionFlags.None
+                    Format = this.RenderTargetFormat,
+                    Dimension = SharpDX.Direct3D11.RenderTargetViewDimension.Texture2D,
+                    Texture2D = new RenderTargetViewDescription.Texture2DResource()
+                    {
+                        MipSlice = 0,
+                    },
                 };
 
-                var tex = new Texture2D(
-                    this.Game.Graphics.Device,
-                    new Texture2DDescription()
+                var srvDesc = new ShaderResourceViewDescription()
+                {
+                    Format = this.RenderTargetFormat,
+                    Dimension = ShaderResourceViewDimension.Texture2D,
+                    Texture2D = new ShaderResourceViewDescription.Texture2DResource()
                     {
-                        Width = width,
-                        Height = height,
+                        MostDetailedMip = 0,
                         MipLevels = 1,
-                        ArraySize = 1,
-                        Format = rtFormat,
-                        SampleDescription = new SampleDescription(1, 0),
-                        Usage = ResourceUsage.Default,
-                        BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                        CpuAccessFlags = CpuAccessFlags.None,
-                        OptionFlags = ResourceOptionFlags.None
-                    });
+                    },
+                };
 
                 using (tex)
                 {
-                    this.Targets[i] = new RenderTargetView(
-                        this.Game.Graphics.Device,
-                        tex,
-                        new RenderTargetViewDescription()
-                        {
-                            Format = rtFormat,
-                            Dimension = SharpDX.Direct3D11.RenderTargetViewDimension.Texture2D,
-                            Texture2D = new RenderTargetViewDescription.Texture2DResource()
-                            {
-                                MipSlice = 0,
-                            },
-                        });
+                    this.Targets[i] = new RenderTargetView(this.Game.Graphics.Device, tex, rtvDesc);
 
-                    ShaderResourceViewDescription srDesc = new ShaderResourceViewDescription()
-                    {
-                        Format = rtFormat,
-                        Dimension = ShaderResourceViewDimension.Texture2D,
-                        Texture2D = new ShaderResourceViewDescription.Texture2DResource()
-                        {
-                            MostDetailedMip = 0,
-                            MipLevels = 1,
-                        },
-                    };
-
-                    this.Textures[i] = new ShaderResourceView(
-                        this.Game.Graphics.Device,
-                        tex,
-                        new ShaderResourceViewDescription()
-                        {
-                            Format = rtFormat,
-                            Dimension = ShaderResourceViewDimension.Texture2D,
-                            Texture2D = new ShaderResourceViewDescription.Texture2DResource()
-                            {
-                                MostDetailedMip = 0,
-                                MipLevels = 1,
-                            },
-                        });
+                    this.Textures[i] = new ShaderResourceView(this.Game.Graphics.Device, tex, srvDesc);
                 }
             }
         }

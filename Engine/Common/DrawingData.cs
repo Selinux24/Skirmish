@@ -14,6 +14,10 @@ namespace Engine.Common
     public class DrawingData : IDisposable
     {
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; protected set; }
+        /// <summary>
         /// Materials dictionary
         /// </summary>
         public MaterialDictionary Materials = new MaterialDictionary();
@@ -42,12 +46,15 @@ namespace Engine.Common
         /// Model initialization
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="name">Name</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Data description</param>
         /// <returns>Returns the generated drawing data objects</returns>
-        public static DrawingData Build(Game game, ModelContent modelContent, DrawingDataDescription description)
+        public static DrawingData Build(Game game, string name, ModelContent modelContent, DrawingDataDescription description)
         {
             DrawingData res = new DrawingData();
+
+            res.Name = name;
 
             //Animation
             if (description.LoadAnimation)
@@ -255,6 +262,7 @@ namespace Engine.Common
                         if (vertexList.Length > 0)
                         {
                             Mesh nMesh = new Mesh(
+                                drw,
                                 meshName,
                                 geometry.Material,
                                 geometry.Topology,

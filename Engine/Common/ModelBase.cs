@@ -100,7 +100,7 @@ namespace Engine.Common
                 DynamicBuffers = dynamic,
             };
 
-            var drawable = DrawingData.Build(game, content, desc);
+            var drawable = DrawingData.Build(game, this.Name, content, desc);
 
             this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
 
@@ -136,7 +136,7 @@ namespace Engine.Common
                     this.defaultLevelOfDetail = lod;
                 }
 
-                var drawable = DrawingData.Build(game, content[lod], desc);
+                var drawable = DrawingData.Build(game, this.Name, content[lod], desc);
 
                 this.meshesByLOD.Add(lod, drawable);
             }

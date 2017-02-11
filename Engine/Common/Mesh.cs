@@ -32,6 +32,10 @@ namespace Engine.Common
         private Triangle[] triangleCache = null;
 
         /// <summary>
+        /// Parent
+        /// </summary>
+        protected DrawingData Parent = null;
+        /// <summary>
         /// Vertex buffer
         /// </summary>
         protected Buffer VertexBuffer;
@@ -100,6 +104,7 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="drawingData">Parent drawing data</param>
         /// <param name="name">Mesh name</param>
         /// <param name="material">Material name</param>
         /// <param name="topology">Topology</param>
@@ -107,10 +112,11 @@ namespace Engine.Common
         /// <param name="indices">Indices</param>
         /// <param name="instanced">Instanced</param>
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        public Mesh(string name, string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced, bool dynamic = false)
+        public Mesh(DrawingData drawingData, string name, string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced, bool dynamic = false)
         {
             this.dynamicBuffers = dynamic;
 
+            this.Parent = drawingData;
             this.Name = name;
             this.Material = material;
             this.Topology = topology;
@@ -128,9 +134,11 @@ namespace Engine.Common
         /// <param name="device">Device</param>
         public virtual void Initialize(Device device)
         {
+            string name = this.Parent.Name + this.Name;
+
             if (this.Vertices != null && this.Vertices.Length > 0)
             {
-                this.VertexBuffer = device.CreateVertexBuffer(this.Name, this.Vertices, this.dynamicBuffers);
+                this.VertexBuffer = device.CreateVertexBuffer(name, this.Vertices, this.dynamicBuffers);
                 this.VertexBufferStride = this.Vertices[0].GetStride();
                 this.VertexCount = this.Vertices.Length;
 
@@ -139,14 +147,7 @@ namespace Engine.Common
 
             if (this.Indices != null && this.Indices.Length > 0)
             {
-                if (this.dynamicBuffers)
-                {
-                    this.IndexBuffer = device.CreateIndexBufferWrite(this.Name, (uint[])this.Indices);
-                }
-                else
-                {
-                    this.IndexBuffer = device.CreateIndexBufferImmutable(this.Name, (uint[])this.Indices);
-                }
+                this.IndexBuffer = device.CreateIndexBuffer(name, (uint[])this.Indices, this.dynamicBuffers);
                 this.IndexCount = this.Indices.Length;
             }
         }

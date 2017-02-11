@@ -120,6 +120,11 @@ namespace Engine.Effects
         private EffectShaderResourceVariable animationPalette = null;
 
         /// <summary>
+        /// Current animation palette
+        /// </summary>
+        private ShaderResourceView currentAnimationPalette = null;
+
+        /// <summary>
         /// World view projection matrix
         /// </summary>
         protected Matrix WorldViewProjection
@@ -190,7 +195,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.animationPalette.SetResource(value);
+                if (this.currentAnimationPalette != value)
+                {
+                    this.animationPalette.SetResource(value);
+
+                    this.currentAnimationPalette = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
 

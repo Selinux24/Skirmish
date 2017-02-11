@@ -42,7 +42,9 @@ namespace Engine.Effects
         /// Brightness
         /// </summary>
         private EffectScalarVariable brightness = null;
-
+        /// <summary>
+        /// Clouds fadding distance effect variable
+        /// </summary>
         private EffectScalarVariable fadingDistance = null;
 
         /// <summary>
@@ -53,10 +55,23 @@ namespace Engine.Effects
         /// Second layer translation effect variable
         /// </summary>
         private EffectVectorVariable secondTranslation = null;
-
+        /// <summary>
+        /// Clouds translation effect variable
+        /// </summary>
         private EffectScalarVariable translation = null;
-
+        /// <summary>
+        /// Clouds scale effect variable
+        /// </summary>
         private EffectScalarVariable scale = null;
+
+        /// <summary>
+        /// Current first texture
+        /// </summary>
+        private ShaderResourceView currentFirstTexture = null;
+        /// <summary>
+        /// Current second texture
+        /// </summary>
+        private ShaderResourceView currentSecondTexture = null;
 
         /// <summary>
         /// World view projection matrix
@@ -83,7 +98,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.firstTexture.SetResource(value);
+                if (this.currentFirstTexture != value)
+                {
+                    this.firstTexture.SetResource(value);
+
+                    this.currentFirstTexture = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -97,7 +119,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.secondTexture.SetResource(value);
+                if (this.currentSecondTexture != value)
+                {
+                    this.secondTexture.SetResource(value);
+
+                    this.currentSecondTexture = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -114,7 +143,9 @@ namespace Engine.Effects
                 this.brightness.Set(value);
             }
         }
-
+        /// <summary>
+        /// Clouds fadding distance
+        /// </summary>
         protected float FadingDistance
         {
             get
@@ -126,7 +157,6 @@ namespace Engine.Effects
                 this.fadingDistance.Set(value);
             }
         }
-
         /// <summary>
         /// First layer translation
         /// </summary>
@@ -163,7 +193,9 @@ namespace Engine.Effects
                 this.secondTranslation.Set(v);
             }
         }
-
+        /// <summary>
+        /// Clouds translation
+        /// </summary>
         protected float Translation
         {
             get
@@ -175,7 +207,9 @@ namespace Engine.Effects
                 this.translation.Set(value);
             }
         }
-
+        /// <summary>
+        /// Clouds scale
+        /// </summary>
         protected float Scale
         {
             get
@@ -254,7 +288,6 @@ namespace Engine.Effects
             this.FirstTexture = firstTexture;
             this.SecondTexture = secondTexture;
         }
-
         /// <summary>
         /// Update static clouds
         /// </summary>
@@ -267,7 +300,6 @@ namespace Engine.Effects
             this.FirstTranslation = firstTranslation;
             this.SecondTranslation = secondTranslation;
         }
-
         /// <summary>
         /// Update perturbed clouds
         /// </summary>

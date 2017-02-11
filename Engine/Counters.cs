@@ -62,6 +62,10 @@ namespace Engine
         /// </summary>
         public static int UpdatesPerInstance = 0;
         /// <summary>
+        /// Texture count
+        /// </summary>
+        public static int Textures = 0;
+        /// <summary>
         /// Texture updates
         /// </summary>
         public static int TextureUpdates = 0;
@@ -208,6 +212,7 @@ namespace Engine
             UpdatesPerObject = 0;
             UpdatesPerInstance = 0;
 
+            Textures = 0;
             TextureUpdates = 0;
 
             PicksPerFrame = 0;

@@ -65,6 +65,31 @@ namespace Engine.Effects
         private EffectScalarVariable materialIndex = null;
 
         /// <summary>
+        /// Current low resolution diffuse map
+        /// </summary>
+        private ShaderResourceView currentDiffuseMapLR = null;
+        /// <summary>
+        /// Current hihg resolution diffuse map
+        /// </summary>
+        private ShaderResourceView currentDiffuseMapHR = null;
+        /// <summary>
+        /// Current normal map
+        /// </summary>
+        private ShaderResourceView currentNormalMap = null;
+        /// <summary>
+        /// Current specular map
+        /// </summary>
+        private ShaderResourceView currentSpecularMap = null;
+        /// <summary>
+        /// Current color texture array
+        /// </summary>
+        private ShaderResourceView currentColorTextures = null;
+        /// <summary>
+        /// Current alpha map
+        /// </summary>
+        private ShaderResourceView currentAlphaMap = null;
+
+        /// <summary>
         /// World matrix
         /// </summary>
         protected Matrix World
@@ -103,7 +128,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.diffuseMapLR.SetResource(value);
+                if (this.currentDiffuseMapLR != value)
+                {
+                    this.diffuseMapLR.SetResource(value);
+
+                    this.currentDiffuseMapLR = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -117,7 +149,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.diffuseMapHR.SetResource(value);
+                if (this.currentDiffuseMapHR != value)
+                {
+                    this.diffuseMapHR.SetResource(value);
+
+                    this.currentDiffuseMapHR = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -131,7 +170,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.normalMap.SetResource(value);
+                if (this.currentNormalMap != value)
+                {
+                    this.normalMap.SetResource(value);
+
+                    this.currentNormalMap = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -145,7 +191,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.specularMap.SetResource(value);
+                if (this.currentSpecularMap != value)
+                {
+                    this.specularMap.SetResource(value);
+
+                    this.currentSpecularMap = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -159,7 +212,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.colorTextures.SetResource(value);
+                if (this.currentColorTextures != value)
+                {
+                    this.colorTextures.SetResource(value);
+
+                    this.currentColorTextures = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>
@@ -173,7 +233,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.alphaMap.SetResource(value);
+                if (this.currentAlphaMap != value)
+                {
+                    this.alphaMap.SetResource(value);
+
+                    this.currentAlphaMap = value;
+
+                    Counters.TextureUpdates++;
+                }
             }
         }
         /// <summary>

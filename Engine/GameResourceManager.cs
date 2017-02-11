@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -285,7 +286,7 @@ namespace Engine
         {
             if (!this.resources.ContainsKey(path))
             {
-                var view = this.game.Graphics.Device.LoadTextureCube(path, size);
+                var view = this.game.Graphics.Device.LoadTextureCube(path, Format.R8G8B8A8_UNorm, size);
                 this.resources.Add(path, view);
             }
 
@@ -303,7 +304,7 @@ namespace Engine
             if (!this.resources.ContainsKey(md5))
             {
                 stream.Position = 0;
-                var view = this.game.Graphics.Device.LoadTextureCube(stream, size);
+                var view = this.game.Graphics.Device.LoadTextureCube(stream, Format.R8G8B8A8_UNorm, size);
                 this.resources.Add(md5, view);
             }
 
