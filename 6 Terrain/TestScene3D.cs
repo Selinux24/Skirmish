@@ -32,6 +32,11 @@ namespace TerrainTest
         private ShaderResourceView debugTex = null;
         private int graphIndex = -1;
 
+        private int layerHud = 99;
+        private int layerObjects = 0;
+        private int layerTerrain = 1;
+        private int layerEffects = 2;
+
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer stats = null;
@@ -119,7 +124,7 @@ namespace TerrainTest
                 2f,
                 5f));
 
-            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 5000);
+            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 5000, this.layerEffects);
 
             #endregion
 
@@ -132,11 +137,11 @@ namespace TerrainTest
 
             #region Texts
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
-            this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
-            this.stats = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
-            this.counters1 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow));
-            this.counters2 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow));
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), this.layerHud);
+            this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), this.layerHud);
+            this.stats = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), this.layerHud);
+            this.counters1 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), this.layerHud);
+            this.counters2 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), this.layerHud);
 
             this.title.Text = "Terrain collision and trajectories test";
             this.load.Text = "";
@@ -161,16 +166,14 @@ namespace TerrainTest
             #region Cursor 3D
 
             sw.Restart();
-            this.cursor3D = this.AddModel(
-                "resources/cursor",
-                "cursor.xml",
-                new ModelDescription()
-                {
-                    Name = "Cursor3D",
-                    DeferredEnabled = false,
-                    CastShadow = false,
-                    DepthEnabled = false,
-                });
+            var c3DDesc = new ModelDescription()
+            {
+                Name = "Cursor3D",
+                DeferredEnabled = false,
+                CastShadow = false,
+                DepthEnabled = false,
+            };
+            this.cursor3D = this.AddModel("resources/cursor", "cursor.xml", c3DDesc, true, this.layerHud);
             sw.Stop();
             loadingText += string.Format("cursor3D: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -179,14 +182,15 @@ namespace TerrainTest
             #region Cursor 2D
 
             sw.Restart();
-            this.cursor2D = this.AddCursor(new SpriteDescription()
+            var c2DDesc = new SpriteDescription()
             {
                 Name = "Cursor2D",
                 ContentPath = "resources/Cursor",
                 Textures = new[] { "target.png" },
                 Width = 16,
                 Height = 16,
-            });
+            };
+            this.cursor2D = this.AddCursor(c2DDesc, this.layerHud);
             this.cursor2D.Color = Color.Red;
             this.cursor2D.Visible = false;
             sw.Stop();
@@ -197,7 +201,7 @@ namespace TerrainTest
             #region Lens flare
 
             sw.Restart();
-            this.lensFlare = this.AddLensFlare(new LensFlareDescription()
+            var lfDesc = new LensFlareDescription()
             {
                 Name = "Flares",
                 ContentPath = "resources/Flare",
@@ -217,7 +221,8 @@ namespace TerrainTest
                     new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
-            });
+            };
+            this.lensFlare = this.AddLensFlare(lfDesc, this.layerEffects);
             sw.Stop();
             loadingText += string.Format("lensFlare: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -226,16 +231,14 @@ namespace TerrainTest
             #region Helicopter
 
             sw.Restart();
-            this.helicopter = this.AddModel(
-                "resources/Helicopter",
-                "Helicopter.xml",
-                new ModelDescription()
-                {
-                    Name = "Helicopter",
-                    CastShadow = true,
-                    Static = false,
-                    TextureIndex = 2,
-                });
+            var hDesc = new ModelDescription()
+            {
+                Name = "Helicopter",
+                CastShadow = true,
+                Static = false,
+                TextureIndex = 2,
+            };
+            this.helicopter = this.AddModel("resources/Helicopter", "Helicopter.xml", hDesc, true, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -254,15 +257,13 @@ namespace TerrainTest
             #region Tank
 
             sw.Restart();
-            this.tank = this.AddModel(
-                "resources/Leopard",
-                "Leopard.xml",
-                new ModelDescription()
-                {
-                    Name = "Tank",
-                    CastShadow = true,
-                    Static = false,
-                });
+            var tDesc = new ModelDescription()
+            {
+                Name = "Tank",
+                CastShadow = true,
+                Static = false,
+            };
+            this.tank = this.AddModel("resources/Leopard", "Leopard.xml", tDesc, true, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -280,15 +281,13 @@ namespace TerrainTest
             #region Helipod
 
             sw.Restart();
-            this.helipod = this.AddModel(
-                "resources/Helipod",
-                "Helipod.xml",
-                new ModelDescription()
-                {
-                    Name = "Helipod",
-                    CastShadow = true,
-                    Static = true,
-                });
+            var hpDesc = new ModelDescription()
+            {
+                Name = "Helipod",
+                CastShadow = true,
+                Static = true,
+            };
+            this.helipod = this.AddModel("resources/Helipod", "Helipod.xml", hpDesc, true, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("helipod: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -299,15 +298,13 @@ namespace TerrainTest
             #region Garage
 
             sw.Restart();
-            this.garage = this.AddModel(
-                "resources/Garage",
-                "Garage.xml",
-                new ModelDescription()
-                {
-                    Name = "Garage",
-                    CastShadow = true,
-                    Static = true,
-                });
+            var gDesc = new ModelDescription()
+            {
+                Name = "Garage",
+                CastShadow = true,
+                Static = true,
+            };
+            this.garage = this.AddModel("resources/Garage", "Garage.xml", gDesc, true, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("garage: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -318,16 +315,14 @@ namespace TerrainTest
             #region Obelisk
 
             sw.Restart();
-            this.obelisk = this.AddInstancingModel(
-                "resources/Obelisk",
-                "Obelisk.xml",
-                new ModelInstancedDescription()
-                {
-                    Name = "Obelisk",
-                    CastShadow = true,
-                    Static = true,
-                    Instances = 4,
-                });
+            var oDesc = new ModelInstancedDescription()
+            {
+                Name = "Obelisk",
+                CastShadow = true,
+                Static = true,
+                Instances = 4,
+            };
+            this.obelisk = this.AddInstancingModel("resources/Obelisk", "Obelisk.xml", oDesc, true, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("obelisk: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -336,16 +331,14 @@ namespace TerrainTest
             #region Rocks
 
             sw.Restart();
-            this.rocks = this.AddInstancingModel(
-                "resources/Rocks",
-                "boulder.xml",
-                new ModelInstancedDescription()
-                {
-                    Name = "Rocks",
-                    CastShadow = true,
-                    Static = true,
-                    Instances = 250,
-                });
+            var rDesc = new ModelInstancedDescription()
+            {
+                Name = "Rocks",
+                CastShadow = true,
+                Static = true,
+                Instances = 250,
+            };
+            this.rocks = this.AddInstancingModel("resources/Rocks", "boulder.xml", rDesc, true, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("rocks: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -354,28 +347,24 @@ namespace TerrainTest
             #region Trees
 
             sw.Restart();
-            this.tree1 = this.AddInstancingModel(
-                "resources/Trees",
-                "birch_a.xml",
-                new ModelInstancedDescription()
-                {
-                    Name = "birch_a",
-                    CastShadow = true,
-                    Static = true,
-                    AlphaEnabled = true,
-                    Instances = 100,
-                });
-            this.tree2 = this.AddInstancingModel(
-                "resources/Trees",
-                "birch_b.xml",
-                new ModelInstancedDescription()
-                {
-                    Name = "birch_b",
-                    CastShadow = true,
-                    Static = true,
-                    AlphaEnabled = true,
-                    Instances = 100,
-                });
+            var t1Desc = new ModelInstancedDescription()
+            {
+                Name = "birch_a",
+                CastShadow = true,
+                Static = true,
+                AlphaEnabled = true,
+                Instances = 100,
+            };
+            var t2Desc = new ModelInstancedDescription()
+            {
+                Name = "birch_b",
+                CastShadow = true,
+                Static = true,
+                AlphaEnabled = true,
+                Instances = 100,
+            };
+            this.tree1 = this.AddInstancingModel("resources/Trees", "birch_a.xml", t1Desc, true, this.layerTerrain);
+            this.tree2 = this.AddInstancingModel("resources/Trees", "birch_b.xml", t2Desc, true, this.layerTerrain);
             sw.Stop();
             loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -420,14 +409,12 @@ namespace TerrainTest
             #region Terrain
 
             sw.Restart();
-
             var navSettings = NavigationMeshGenerationSettings.Default;
             navSettings.Agents = new[]
             {
                 walkerAgent,
                 tankAgent,
             };
-
             var terrainDescription = new GroundDescription()
             {
                 Name = "Terrain",
@@ -443,11 +430,7 @@ namespace TerrainTest
                 Static = true,
                 DelayGeneration = true,
             };
-            this.terrain = this.AddScenery(
-                "resources/Terrain",
-                "two_levels.xml",
-                terrainDescription);
-
+            this.terrain = this.AddScenery("resources/Terrain", "two_levels.xml", terrainDescription, true, this.layerTerrain);
             sw.Stop();
 
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
@@ -457,8 +440,7 @@ namespace TerrainTest
             #region Gardener
 
             sw.Restart();
-
-            GroundGardenerDescription gDesc = new GroundGardenerDescription()
+            var grDesc = new GroundGardenerDescription()
             {
                 ContentPath = "resources/Terrain/Foliage/Billboard",
                 ChannelRed = new GroundGardenerDescription.Channel()
@@ -489,13 +471,12 @@ namespace TerrainTest
                     MaxSize = new Vector2(0.5f, 0.75f),
                 }
             };
-
-            this.gardener = this.AddGardener(gDesc);
-            this.gardener.ParentGround = this.terrain;
-
+            this.gardener = this.AddGardener(grDesc, this.layerTerrain);
             sw.Stop();
 
             loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
+
+            this.gardener.ParentGround = this.terrain;
 
             #endregion
 
@@ -657,7 +638,7 @@ namespace TerrainTest
                 Height = height,
                 Channel = SpriteTextureChannelsEnum.Red,
             };
-            this.shadowMapDrawer = this.AddSpriteTexture(stDescription, 99);
+            this.shadowMapDrawer = this.AddSpriteTexture(stDescription, this.layerHud);
             this.shadowMapDrawer.Visible = false;
             this.shadowMapDrawer.DeferredEnabled = false;
 
@@ -667,7 +648,7 @@ namespace TerrainTest
 
             #region DEBUG Path finding Graph
 
-            this.terrainGraphDrawer = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), MaxGridDrawer);
+            this.terrainGraphDrawer = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), MaxGridDrawer, this.layerEffects);
             this.terrainGraphDrawer.Visible = false;
 
             #endregion
@@ -695,7 +676,7 @@ namespace TerrainTest
                 }
             }
 
-            this.terrainLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), oks.Count + errs.Count);
+            this.terrainLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), oks.Count + errs.Count, this.layerEffects);
             this.terrainLineDrawer.Visible = false;
 
             if (this.oks.Count > 0)
@@ -711,21 +692,21 @@ namespace TerrainTest
 
             #region DEBUG Picking test
 
-            this.terrainPointDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), MaxPickingTest);
+            this.terrainPointDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), MaxPickingTest, this.layerEffects);
             this.terrainPointDrawer.Visible = false;
 
             #endregion
 
             #region DEBUG Helicopter manipulator
 
-            this.helicopterLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 1000);
+            this.helicopterLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 1000, this.layerEffects);
             this.helicopterLineDrawer.Visible = false;
 
             #endregion
 
             #region DEBUG Trajectory
 
-            this.curveLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 20000);
+            this.curveLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 20000, this.layerEffects);
             this.curveLineDrawer.Visible = false;
             this.curveLineDrawer.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
 

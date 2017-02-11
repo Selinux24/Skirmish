@@ -842,11 +842,7 @@ namespace Engine
         {
             if (!this.components.Contains(component))
             {
-                if (order == 0)
-                {
-                    component.Order = this.components.Count + 1;
-                }
-                else
+                if (order != 0)
                 {
                     component.Order = order;
                 }
@@ -854,16 +850,17 @@ namespace Engine
                 this.components.Add(component);
                 this.components.Sort((p1, p2) =>
                 {
-                    //First opaques
-                    int i = p1.AlphaEnabled.CompareTo(p2.AlphaEnabled);
+                    //First by order index
+                    int i = p1.Order.CompareTo(p2.Order);
+                    if (i != 0) return i;
+
+                    //Then opaques
+                    i = p1.AlphaEnabled.CompareTo(p2.AlphaEnabled);
                     if (i != 0) return i;
 
                     //Then z-buffer writers
                     i = p1.DepthEnabled.CompareTo(p2.DepthEnabled);
-                    if (i != 0) return i;
 
-                    //Then by order property
-                    i = p1.Order.CompareTo(p2.Order);
                     return i;
                 });
 

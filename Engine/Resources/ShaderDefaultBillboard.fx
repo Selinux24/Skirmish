@@ -68,7 +68,7 @@ GSVertexBillboard VSBillboard(VSVertexBillboard input)
 	GSVertexBillboard output;
 
 	output.centerWorld = input.positionWorld;
-	output.centerWorld.y += (input.sizeWorld.y * 0.45f);
+	output.centerWorld.y += (input.sizeWorld.y * 0.40f);
 	output.sizeWorld = input.sizeWorld;
 
 	return output;
@@ -162,7 +162,9 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 
 	float distToEye = length(gEyePositionWorld - input.positionWorld);
 
-	return float4(litColor.rgb, textureColor.a * (1.0f - (distToEye / gEndRadius * 0.5f)));
+	float alpha = saturate(textureColor.a * (1.0f - (distToEye / gEndRadius) + 0.5f));
+
+	return float4(litColor.rgb, alpha);
 }
 
 technique11 ForwardBillboard

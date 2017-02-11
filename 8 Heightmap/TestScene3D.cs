@@ -15,6 +15,11 @@ namespace HeightmapTest
         private const float fogStart = 0.50f;
         private const float fogRange = 0.75f;
 
+        private const int layerObjects = 0;
+        private const int layerTerrain = 1;
+        private const int layerEffects = 2;
+        private const int layerHUD = 99;
+
         private Random rnd = new Random();
 
         private Vector3 playerHeight = Vector3.UnitY * 5f;
@@ -73,24 +78,24 @@ namespace HeightmapTest
 
             #region Cursor
 
-            SpriteDescription cursorDesc = new SpriteDescription()
+            var cursorDesc = new SpriteDescription()
             {
                 Textures = new[] { "target.png" },
                 Width = 20,
                 Height = 20,
             };
 
-            this.cursor = this.AddCursor(cursorDesc);
+            this.cursor = this.AddCursor(cursorDesc, layerHUD);
 
             #endregion
 
             #region Texts
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
-            this.load = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
-            this.stats = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
-            this.help = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
-            this.help2 = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange));
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
+            this.load = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), layerHUD);
+            this.stats = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), layerHUD);
+            this.help = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), layerHUD);
+            this.help2 = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange), layerHUD);
 
             this.title.Text = "Heightmap Terrain test";
             this.load.Text = "";
@@ -115,31 +120,30 @@ namespace HeightmapTest
             #region Rocks
 
             sw.Restart();
-            this.rocks = this.AddInstancingModel(
-                @"Resources/Rocks",
-                @"boulder.xml",
-                new ModelInstancedDescription()
-                {
-                    Name = "Rocks",
-                    CastShadow = true,
-                    Static = true,
-                    Instances = 250,
-                });
+            var rDesc = new ModelInstancedDescription()
+            {
+                Name = "Rocks",
+                CastShadow = true,
+                Static = true,
+                Instances = 250,
+            };
+            this.rocks = this.AddInstancingModel(@"Resources/Rocks", @"boulder.xml", rDesc, true, layerObjects);
             sw.Stop();
-            loadingText += string.Format("rocks: {0} ", sw.Elapsed.TotalSeconds);
+            loadingText += string.Format("Rocks: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
             #region Soldier
 
-            this.soldier = this.AddModel(
-                @"Resources/Soldier",
-                @"soldier_anim2.xml",
-                new ModelDescription()
-                {
-                    Name = "Soldier",
-                    TextureIndex = 0,
-                });
+            sw.Restart();
+            var sDesc = new ModelDescription()
+            {
+                Name = "Soldier",
+                TextureIndex = 0,
+            };
+            this.soldier = this.AddModel(@"Resources/Soldier", @"soldier_anim2.xml", sDesc, true, layerObjects);
+            sw.Stop();
+            loadingText += string.Format("Soldier: {0} ", sw.Elapsed.TotalSeconds);
 
             this.playerHeight.Y = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
@@ -147,63 +151,68 @@ namespace HeightmapTest
 
             #region Troops
 
-            this.troops = this.AddInstancingModel(
-                @"Resources/Soldier",
-                @"soldier_anim2.xml",
-                new ModelInstancedDescription()
-                {
-                    Name = "Troops",
-                    Instances = 4,
-                });
+            sw.Restart();
+            var tDesc = new ModelInstancedDescription()
+            {
+                Name = "Troops",
+                Instances = 4,
+            };
+            this.troops = this.AddInstancingModel(@"Resources/Soldier", @"soldier_anim2.xml", tDesc, true, layerObjects);
+            sw.Stop();
+            loadingText += string.Format("Troops: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
             #region M24
 
-            this.helicopter = this.AddModel(
-                @"Resources/m24",
-                @"m24.xml",
-                new ModelDescription() { Name = "M24", });
+            sw.Restart();
+            var mDesc = new ModelDescription()
+            {
+                Name = "M24"
+            };
+            this.helicopter = this.AddModel(@"Resources/m24", @"m24.xml", mDesc, true, layerObjects);
+            sw.Stop();
+            loadingText += string.Format("M24: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
             #region Helicopter
 
-            this.helicopter2 = this.AddModel(
-                "resources/Helicopter",
-                "Helicopter.xml",
-                new ModelDescription()
-                {
-                    Name = "Helicopter",
-                    CastShadow = true,
-                    Static = false,
-                    TextureIndex = 2,
-                });
+            sw.Restart();
+            var hcDesc = new ModelDescription()
+            {
+                Name = "Helicopter",
+                CastShadow = true,
+                Static = false,
+                TextureIndex = 2,
+            };
+            this.helicopter2 = this.AddModel("resources/Helicopter", "Helicopter.xml", hcDesc, true, layerObjects);
+            sw.Stop();
+            loadingText += string.Format("Helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
             #region Torchs
 
-            this.torchs = this.AddInstancingModel(
-                @"Resources/Scenery/Objects",
-                @"torch.xml",
-                new ModelInstancedDescription()
-                {
-                    Name = "Torchs",
-                    Instances = 50,
-                    CastShadow = true,
-                });
+            sw.Restart();
+            var tcDesc = new ModelInstancedDescription()
+            {
+                Name = "Torchs",
+                Instances = 50,
+                CastShadow = true,
+            };
+            this.torchs = this.AddInstancingModel(@"Resources/Scenery/Objects", @"torch.xml", tcDesc, true, layerObjects);
+            sw.Stop();
+            loadingText += string.Format("Torchs: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
             #region Terrain
 
             sw.Restart();
-
             var pfSettings = NavigationMeshGenerationSettings.Default;
             pfSettings.CellHeight = 20f;
             pfSettings.CellSize = 20f;
-
             var hDesc =
                 new HeightmapDescription()
                 {
@@ -248,18 +257,15 @@ namespace HeightmapTest
                     //    Settings = pfSettings,
                     //},
                 };
-            this.terrain = this.AddTerrain(hDesc, gDesc);
+            this.terrain = this.AddTerrain(hDesc, gDesc, true, layerTerrain);
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
-
-            this.SceneVolume = this.terrain.GetBoundingSphere();
 
             #endregion
 
             #region Gardener
 
             sw.Restart();
-
             var vDesc = new GroundGardenerDescription()
             {
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
@@ -298,7 +304,7 @@ namespace HeightmapTest
                     WindEffect = 0.3f,
                 },
             };
-            this.gardener = this.AddGardener(vDesc);
+            this.gardener = this.AddGardener(vDesc, layerTerrain);
             sw.Stop();
             loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -307,7 +313,6 @@ namespace HeightmapTest
             #region Gardener 2
 
             sw.Restart();
-
             var vDesc2 = new GroundGardenerDescription()
             {
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
@@ -318,8 +323,8 @@ namespace HeightmapTest
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
-                    MinSize = new Vector2(1f, 1f),
-                    MaxSize = new Vector2(1.5f, 1.5f),
+                    MinSize = new Vector2(1f, 1f) * 0.5f,
+                    MaxSize = new Vector2(1.5f, 1.5f) * 0.5f,
                     Seed = 1,
                     WindEffect = 0.5f,
                 },
@@ -329,8 +334,8 @@ namespace HeightmapTest
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
-                    MinSize = new Vector2(1f, 1f),
-                    MaxSize = new Vector2(1.5f, 1.5f),
+                    MinSize = new Vector2(1f, 1f) * 0.5f,
+                    MaxSize = new Vector2(1.5f, 1.5f) * 0.5f,
                     Seed = 2,
                     WindEffect = 0.5f,
                 },
@@ -340,13 +345,13 @@ namespace HeightmapTest
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 140f,
-                    MinSize = new Vector2(1f, 1f),
-                    MaxSize = new Vector2(1.5f, 1.5f),
+                    MinSize = new Vector2(1f, 1f) * 0.5f,
+                    MaxSize = new Vector2(1.5f, 1.5f) * 0.5f,
                     Seed = 3,
                     WindEffect = 0.5f,
                 },
             };
-            this.gardener2 = this.AddGardener(vDesc2);
+            this.gardener2 = this.AddGardener(vDesc2, layerTerrain);
             sw.Stop();
             loadingText += string.Format("gardener2: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -354,7 +359,8 @@ namespace HeightmapTest
 
             #region Lens flare
 
-            this.lensFlare = this.AddLensFlare(new LensFlareDescription()
+            sw.Restart();
+            var lfDesc = new LensFlareDescription()
             {
                 Name = "Flares",
                 ContentPath = @"Resources/Scenery/Flare",
@@ -374,23 +380,30 @@ namespace HeightmapTest
                     new LensFlareDescription.Flare( 0.0f, 0.6f, new Color( 25,  25,  25), "lfFlare3.png"),
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
-            });
+            };
+            this.lensFlare = this.AddLensFlare(lfDesc, layerEffects);
+            sw.Stop();
+            loadingText += string.Format("Flares: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
             #region Skydom
 
             sw.Restart();
-            this.skydom = this.AddSkyScattering(new SkyScatteringDescription() { Name = "Sky", });
+            var skDesc = new SkyScatteringDescription()
+            {
+                Name = "Sky",
+            };
+            this.skydom = this.AddSkyScattering(skDesc);
             sw.Stop();
-            loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
+            loadingText += string.Format("Sky: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
             #region Clouds
 
             sw.Restart();
-            this.clouds = this.AddSkyPlane(new SkyPlaneDescription()
+            var scDesc = new SkyPlaneDescription()
             {
                 Name = "Clouds",
                 ContentPath = "Resources/sky",
@@ -402,9 +415,10 @@ namespace HeightmapTest
                 Repeat = 5,
                 Velocity = 1f,
                 Direction = new Vector2(1, 1),
-            });
+            };
+            this.clouds = this.AddSkyPlane(scDesc);
             sw.Stop();
-            loadingText += string.Format("clouds: {0} ", sw.Elapsed.TotalSeconds);
+            loadingText += string.Format("Clouds: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
@@ -616,6 +630,8 @@ namespace HeightmapTest
             }
 
             #endregion
+
+            this.SceneVolume = this.terrain.GetBoundingSphere();
 
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
