@@ -105,6 +105,19 @@ namespace Engine.Common
         {
             return Marshal.SizeOf(typeof(VertexPositionTexture));
         }
+        /// <summary>
+        /// Get input elements
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <returns>Returns input elements</returns>
+        public InputElement[] GetInput(int slot)
+        {
+            return new InputElement[]
+            {
+                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
+                new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 12, slot, InputClassification.PerVertexData, 0),
+            };
+        }
 
         /// <summary>
         /// Text representation of vertex

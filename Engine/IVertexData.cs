@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX.Direct3D11;
+
 namespace Engine
 {
     using Engine.Common;
@@ -32,5 +33,11 @@ namespace Engine
         /// <param name="channel">Channel</param>
         /// <param name="value">Value</param>
         void SetChannelValue<T>(VertexDataChannels channel, T value);
+        /// <summary>
+        /// Get input elements
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <returns>Returns input elements</returns>
+        InputElement[] GetInput(int slot);
     }
 }

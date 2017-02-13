@@ -70,6 +70,7 @@ namespace Skybox
 
             SpriteDescription cursorDesc = new SpriteDescription()
             {
+                Name = "Cursor",
                 Textures = new[] { "target.png" },
                 Width = 16,
                 Height = 16,
@@ -103,6 +104,7 @@ namespace Skybox
 
             this.skydom = this.AddSkydom(new SkydomDescription()
             {
+                Name = "Skydom",
                 ContentPath = "Resources",
                 Radius = this.Camera.FarPlaneDistance,
                 Texture = "sunset.dds",
@@ -117,6 +119,7 @@ namespace Skybox
                 "torch.xml",
                 new ModelInstancedDescription()
                 {
+                    Name = "Torchs",
                     Instances = this.firePositions.Length,
                     CastShadow = true,
                 });
@@ -130,6 +133,7 @@ namespace Skybox
 
             GroundDescription desc = new GroundDescription()
             {
+                Name = "Terrain",
                 PathFinder = new GroundDescription.PathFinderDescription()
                 {
                     Settings = nvSettings,
@@ -147,7 +151,7 @@ namespace Skybox
 
             #region Particle Systems
 
-            this.pManager = this.AddParticleManager(new ParticleManagerDescription());
+            this.pManager = this.AddParticleManager(new ParticleManagerDescription() { Name = "Particle Systems" });
 
             this.pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
             this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);

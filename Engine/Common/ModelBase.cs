@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
+using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine.Common
 {
@@ -77,6 +78,8 @@ namespace Engine.Common
         /// </summary>
         public bool SphericVolume { get; set; }
 
+        protected BufferManager BufferManager = new BufferManager();
+
         /// <summary>
         /// Base model
         /// </summary>
@@ -100,11 +103,15 @@ namespace Engine.Common
                 DynamicBuffers = dynamic,
             };
 
-            var drawable = DrawingData.Build(game, this.Name, content, desc);
+            var drawable = DrawingData.Build(game, this.Name, this.BufferManager, content, desc);
 
             this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
 
             this.LevelOfDetail = LevelOfDetailEnum.None;
+
+            DrawingData.UpdateOffsets(ref drawable, this.BufferManager, instances);
+
+            this.BufferManager.CreateBuffers(game.Graphics.Device, this.Name, dynamic, instances);
         }
         /// <summary>
         /// Base model
@@ -136,12 +143,21 @@ namespace Engine.Common
                     this.defaultLevelOfDetail = lod;
                 }
 
-                var drawable = DrawingData.Build(game, this.Name, content[lod], desc);
+                var drawable = DrawingData.Build(game, this.Name, this.BufferManager, content[lod], desc);
 
                 this.meshesByLOD.Add(lod, drawable);
             }
 
             this.LevelOfDetail = this.defaultLevelOfDetail;
+
+            foreach (var lod in content.Keys)
+            {
+                var drawable = this.meshesByLOD[lod];
+
+                DrawingData.UpdateOffsets(ref drawable, this.BufferManager, instances);
+            }
+
+            this.BufferManager.CreateBuffers(game.Graphics.Device, this.Name, dynamic, instances);
         }
 
         /// <summary>
@@ -167,21 +183,7 @@ namespace Engine.Common
         /// <param name="vertexBufferBinding">Binding to add</param>
         internal void AddVertexBufferBinding(VertexBufferBinding vertexBufferBinding)
         {
-            foreach (var lod in this.meshesByLOD.Keys)
-            {
-                var drawingData = this.meshesByLOD[lod];
-
-                foreach (var meshList in drawingData.Meshes.Values)
-                {
-                    foreach (var mesh in meshList)
-                    {
-                        if (mesh.Value.Instanced)
-                        {
-                            mesh.Value.AddVertexBufferBinding(vertexBufferBinding);
-                        }
-                    }
-                }
-            }
+            this.BufferManager.AddVertexBufferBinding(vertexBufferBinding);
         }
         /// <summary>
         /// Gets the nearest level of detail for the specified level of detail

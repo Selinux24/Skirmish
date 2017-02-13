@@ -637,7 +637,14 @@ namespace Engine
         /// <returns>Returns true if the specified position is walkable</returns>
         public virtual bool IsWalkable(Agent agent, Vector3 position, out Vector3? nearest)
         {
-            return this.navigationGraph.IsWalkable(agent, position, out nearest);
+            if (this.navigationGraph != null)
+            {
+                return this.navigationGraph.IsWalkable(agent, position, out nearest);
+            }
+
+            nearest = position;
+
+            return true;
         }
         /// <summary>
         /// Gets final position for agents walking over the ground if exists

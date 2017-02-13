@@ -43,7 +43,7 @@ namespace Engine
             /// <param name="content">Content</param>
             /// <param name="node">Quadtree node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static SceneryPatch CreatePatch(Game game, Scenery parent, ModelContent content, PickingQuadTreeNode node)
+            public static SceneryPatch CreatePatch(Game game, Scenery parent, BufferManager bufferManager, ModelContent content, PickingQuadTreeNode node)
             {
                 var desc = new DrawingDataDescription()
                 {
@@ -56,7 +56,7 @@ namespace Engine
                     Constraint = node.BoundingBox,
                 };
 
-                var drawingData = DrawingData.Build(game, parent.Name, content, desc);
+                var drawingData = DrawingData.Build(game, parent.Name, bufferManager, content, desc);
 
                 return new SceneryPatch(game, parent, drawingData);
             }
@@ -72,7 +72,7 @@ namespace Engine
             /// <summary>
             /// Drawing data
             /// </summary>
-            protected DrawingData DrawingData = null;
+            public DrawingData DrawingData = null;
 
             /// <summary>
             /// Current quadtree node
@@ -158,7 +158,7 @@ namespace Engine
 
                         var mesh = dictionary[material];
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                        mesh.SetInputAssembler(this.Game.Graphics.DeviceContext, sceneryEffect.GetInputLayout(technique));
+                        mesh.SetInputAssembler(this.Game.Graphics, technique);
 
                         count += mesh.IndexCount > 0 ? mesh.IndexCount : mesh.VertexCount;
 
@@ -235,6 +235,8 @@ namespace Engine
         /// </summary>
         private PickingQuadTreeNode[] visibleNodes;
 
+        private BufferManager bufferManager = new BufferManager();
+
         /// <summary>
         /// Gets the used material list
         /// </summary>
@@ -295,9 +297,16 @@ namespace Engine
             var nodes = this.pickingQuadtree.GetTailNodes();
             for (int i = 0; i < nodes.Length; i++)
             {
-                var patch = SceneryPatch.CreatePatch(game, this, content, nodes[i]);
+                var patch = SceneryPatch.CreatePatch(game, this, this.bufferManager, content, nodes[i]);
                 this.patchDictionary.Add(nodes[i].Id, patch);
             }
+
+            foreach (var item in this.patchDictionary.Values)
+            {
+                DrawingData.UpdateOffsets(ref item.DrawingData, this.bufferManager, 0);
+            }
+
+            this.bufferManager.CreateBuffers(game.Graphics.Device, this.Name, false, 0);
 
             #endregion
 
@@ -349,6 +358,8 @@ namespace Engine
 
             if (nodes != null && nodes.Length > 0)
             {
+                this.bufferManager.SetInputAssembler(this.Game.Graphics.DeviceContext);
+
                 Drawer sceneryEffect = null;
 
                 if (context.DrawerMode == DrawerModesEnum.Forward)
