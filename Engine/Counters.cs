@@ -90,6 +90,16 @@ namespace Engine
         /// </summary>
         public static int DepthStencilStateChanges = 0;
         /// <summary>
+        /// State changes count per frame (rasterizer, blend and depth-stencil states)
+        /// </summary>
+        public static int StateChanges
+        {
+            get
+            {
+                return RasterizerStateChanges + BlendStateChanges + DepthStencilStateChanges;
+            }
+        }
+        /// <summary>
         /// Active buffers
         /// </summary>
         public static int Buffers = 0;

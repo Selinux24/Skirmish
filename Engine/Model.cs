@@ -195,6 +195,8 @@ namespace Engine
 
             if (this.DrawingData != null)
             {
+                this.BufferManager.SetInputAssembler(this.DeviceContext);
+
                 instanceCount++;
 
                 Drawer effect = null;
@@ -274,7 +276,7 @@ namespace Engine
 
                             var mesh = dictionary[material];
                             var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                            mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
+                            mesh.SetInputAssembler(this.Game.Graphics, technique);
 
                             count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
 

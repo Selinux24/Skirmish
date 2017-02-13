@@ -30,11 +30,6 @@ namespace Engine
         private ModelInstance[] instancesTmp = null;
 
         /// <summary>
-        /// Instancing data buffer
-        /// </summary>
-        protected Buffer InstancingBuffer = null;
-
-        /// <summary>
         /// Gets manipulator per instance list
         /// </summary>
         /// <returns>Gets manipulator per instance list</returns>
@@ -66,10 +61,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Stride of instancing data
-        /// </summary>
-        public int InstancingBufferStride { get; protected set; }
-        /// <summary>
         /// Instances
         /// </summary>
         public int InstanceCount { get; protected set; }
@@ -100,11 +91,6 @@ namespace Engine
 
             this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this));
             this.instancingData = new VertexInstancingData[this.InstanceCount];
-
-            this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(description.Name, this.instancingData);
-            this.InstancingBufferStride = instancingData[0].GetStride();
-
-            this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
         }
         /// <summary>
         /// Constructor
@@ -122,24 +108,6 @@ namespace Engine
 
             this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this));
             this.instancingData = new VertexInstancingData[this.InstanceCount];
-
-            this.InstancingBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(description.Name, this.instancingData);
-            this.InstancingBufferStride = instancingData[0].GetStride();
-
-            this.AddVertexBufferBinding(new VertexBufferBinding(this.InstancingBuffer, this.InstancingBufferStride, 0));
-        }
-        /// <summary>
-        /// Dispose model buffers
-        /// </summary>
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            if (this.InstancingBuffer != null)
-            {
-                this.InstancingBuffer.Dispose();
-                this.InstancingBuffer = null;
-            }
         }
         /// <summary>
         /// Update
@@ -206,7 +174,7 @@ namespace Engine
                     //Writes instancing data
                     if (instanceIndex > 0)
                     {
-                        this.WriteInstancingData(this.DeviceContext, this.instancingData);
+                        this.BufferManager.WriteInstancingData(this.DeviceContext, this.instancingData);
                     }
                 }
 
@@ -219,6 +187,8 @@ namespace Engine
 
                 if (effect != null)
                 {
+                    this.BufferManager.SetInputAssembler(this.DeviceContext);
+
                     #region Per frame update
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)
@@ -306,7 +276,7 @@ namespace Engine
 
                                         var mesh = dictionary[material];
                                         var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                                        mesh.SetInputAssembler(this.DeviceContext, effect.GetInputLayout(technique));
+                                        mesh.SetInputAssembler(this.Game.Graphics, technique);
 
                                         count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
                                         count *= instanceCount;
@@ -462,28 +432,6 @@ namespace Engine
                         }
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Writes instancing data
-        /// </summary>
-        /// <param name="deviceContext">Immediate context</param>
-        /// <param name="data">Instancig data</param>
-        protected virtual void WriteInstancingData(DeviceContext deviceContext, VertexInstancingData[] data)
-        {
-            if (data != null && data.Length > 0)
-            {
-                this.InstanceCount = data.Length;
-
-                if (this.InstancingBuffer != null)
-                {
-                    deviceContext.WriteDiscardBuffer(this.InstancingBuffer, data);
-                }
-            }
-            else
-            {
-                this.InstanceCount = 0;
             }
         }
     }

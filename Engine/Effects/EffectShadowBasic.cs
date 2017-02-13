@@ -246,16 +246,16 @@ namespace Engine.Effects
             this.AddInputLayout(this.ShadowMapPositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput());
             this.AddInputLayout(this.ShadowMapPositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput());
             this.AddInputLayout(this.ShadowMapPositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput());
-            this.AddInputLayout(this.InstancingShadowMapPositionColor, VertexPositionColor.GetInput().Merge(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.InstancingShadowMapPositionColorSkinned, VertexSkinnedPositionColor.GetInput().Merge(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.InstancingShadowMapPositionNormalColor, VertexPositionNormalColor.GetInput().Merge(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.InstancingShadowMapPositionNormalColorSkinned, VertexSkinnedPositionNormalColor.GetInput().Merge(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.InstancingShadowMapPositionTexture, VertexPositionTexture.GetInput().Merge(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.InstancingShadowMapPositionTextureSkinned, VertexSkinnedPositionTexture.GetInput().Merge(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.InstancingShadowMapPositionNormalTexture, VertexPositionNormalTexture.GetInput().Merge(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput().Merge(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput().Merge(VertexInstancingData.GetInput()));
-            this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput().Merge(VertexInstancingData.GetInput()));
+            this.AddInputLayout(this.InstancingShadowMapPositionColor, VertexPositionColor.GetInput().Merge(VertexInstancingData.GetInput(1)));
+            this.AddInputLayout(this.InstancingShadowMapPositionColorSkinned, VertexSkinnedPositionColor.GetInput().Merge(VertexInstancingData.GetInput(1)));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalColor, VertexPositionNormalColor.GetInput().Merge(VertexInstancingData.GetInput(1)));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalColorSkinned, VertexSkinnedPositionNormalColor.GetInput().Merge(VertexInstancingData.GetInput(1)));
+            this.AddInputLayout(this.InstancingShadowMapPositionTexture, VertexPositionTexture.GetInput().Merge(VertexInstancingData.GetInput(1)));
+            this.AddInputLayout(this.InstancingShadowMapPositionTextureSkinned, VertexSkinnedPositionTexture.GetInput().Merge(VertexInstancingData.GetInput(1)));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalTexture, VertexPositionNormalTexture.GetInput().Merge(VertexInstancingData.GetInput(1)));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureSkinned, VertexSkinnedPositionNormalTexture.GetInput().Merge(VertexInstancingData.GetInput(1)));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureTangent, VertexPositionNormalTextureTangent.GetInput().Merge(VertexInstancingData.GetInput(1)));
+            this.AddInputLayout(this.InstancingShadowMapPositionNormalTextureTangentSkinned, VertexSkinnedPositionNormalTextureTangent.GetInput().Merge(VertexInstancingData.GetInput(1)));
 
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.animationData = this.Effect.GetVariableByName("gAnimationData").AsVector();

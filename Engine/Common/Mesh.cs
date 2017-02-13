@@ -3,6 +3,8 @@ using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
+using InputElement = SharpDX.Direct3D11.InputElement;
+using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using Device = SharpDX.Direct3D11.Device;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
@@ -19,10 +21,6 @@ namespace Engine.Common
     public class Mesh : IDisposable
     {
         /// <summary>
-        /// Dynamic or inmutable buffers
-        /// </summary>
-        private bool dynamicBuffers = false;
-        /// <summary>
         /// Position list cache
         /// </summary>
         private Vector3[] positionCache = null;
@@ -32,33 +30,24 @@ namespace Engine.Common
         private Triangle[] triangleCache = null;
 
         /// <summary>
-        /// Parent
-        /// </summary>
-        protected DrawingData Parent = null;
-        /// <summary>
-        /// Vertex buffer
-        /// </summary>
-        protected Buffer VertexBuffer;
-        /// <summary>
-        /// Vertex buffer binding
-        /// </summary>
-        protected VertexBufferBinding[] VertexBufferBinding = new VertexBufferBinding[0];
-        /// <summary>
         /// Vertices cache
         /// </summary>
-        protected IVertexData[] Vertices = null;
+        public IVertexData[] Vertices = null;
         /// <summary>
         /// Indexed model
         /// </summary>
-        protected bool Indexed = false;
-        /// <summary>
-        /// Index buffer
-        /// </summary>
-        protected Buffer IndexBuffer;
+        public bool Indexed = false;
         /// <summary>
         /// Indices cache
         /// </summary>
-        protected uint[] Indices = null;
+        public uint[] Indices = null;
+
+        public int BufferSlot = -1;
+        public int VertexBufferOffset = -1;
+        public int IndexBufferOffset = -1;
+        public int InstancingBufferOffset = 2;
+
+        private Dictionary<EffectTechnique, InputLayout> dict = new Dictionary<EffectTechnique, InputLayout>();
 
         /// <summary>
         /// Name
@@ -87,15 +76,15 @@ namespace Engine.Common
         /// <summary>
         /// Stride
         /// </summary>
-        public int VertexBufferStride { get; protected set; }
+        public int VertexBufferStride { get; internal set; }
         /// <summary>
         /// Vertex count
         /// </summary>
-        public int VertexCount { get; protected set; }
+        public int VertexCount { get; internal set; }
         /// <summary>
         /// Index count
         /// </summary>
-        public int IndexCount { get; protected set; }
+        public int IndexCount { get; internal set; }
         /// <summary>
         /// Is instanced
         /// </summary>
@@ -104,19 +93,14 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="drawingData">Parent drawing data</param>
         /// <param name="name">Mesh name</param>
         /// <param name="material">Material name</param>
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         /// <param name="instanced">Instanced</param>
-        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        public Mesh(DrawingData drawingData, string name, string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced, bool dynamic = false)
+        public Mesh(string name, string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced)
         {
-            this.dynamicBuffers = dynamic;
-
-            this.Parent = drawingData;
             this.Name = name;
             this.Material = material;
             this.Topology = topology;
@@ -134,49 +118,14 @@ namespace Engine.Common
         /// <param name="device">Device</param>
         public virtual void Initialize(Device device)
         {
-            string name = this.Parent.Name + this.Name;
 
-            if (this.Vertices != null && this.Vertices.Length > 0)
-            {
-                this.VertexBuffer = device.CreateVertexBuffer(name, this.Vertices, this.dynamicBuffers);
-                this.VertexBufferStride = this.Vertices[0].GetStride();
-                this.VertexCount = this.Vertices.Length;
-
-                this.AddVertexBufferBinding(new VertexBufferBinding(this.VertexBuffer, this.VertexBufferStride, 0));
-            }
-
-            if (this.Indices != null && this.Indices.Length > 0)
-            {
-                this.IndexBuffer = device.CreateIndexBuffer(name, (uint[])this.Indices, this.dynamicBuffers);
-                this.IndexCount = this.Indices.Length;
-            }
-        }
-        /// <summary>
-        /// Adds binding to precached buffer bindings for input assembler
-        /// </summary>
-        /// <param name="binding">Binding</param>
-        public virtual void AddVertexBufferBinding(VertexBufferBinding binding)
-        {
-            Array.Resize(ref this.VertexBufferBinding, this.VertexBufferBinding.Length + 1);
-
-            this.VertexBufferBinding[this.VertexBufferBinding.Length - 1] = binding;
         }
         /// <summary>
         /// Dispose
         /// </summary>
         public virtual void Dispose()
         {
-            if (this.VertexBuffer != null)
-            {
-                this.VertexBuffer.Dispose();
-                this.VertexBuffer = null;
-            }
 
-            if (this.IndexBuffer != null)
-            {
-                this.IndexBuffer.Dispose();
-                this.IndexBuffer = null;
-            }
         }
         /// <summary>
         /// Draw mesh geometry
@@ -188,14 +137,14 @@ namespace Engine.Common
             {
                 if (this.IndexCount > 0)
                 {
-                    deviceContext.DrawIndexed(this.IndexCount, 0, 0);
+                    deviceContext.DrawIndexed(this.IndexCount, this.IndexBufferOffset, 0);
                 }
             }
             else
             {
                 if (this.VertexCount > 0)
                 {
-                    deviceContext.Draw(this.VertexCount, 0);
+                    deviceContext.Draw(this.VertexCount, this.VertexBufferOffset);
                 }
             }
         }
@@ -217,7 +166,7 @@ namespace Engine.Common
                         deviceContext.DrawIndexedInstanced(
                             this.IndexCount,
                             count,
-                            0, 0, startInstanceLocation);
+                            this.IndexBufferOffset, 0, startInstanceLocation);
                     }
                 }
                 else
@@ -227,7 +176,7 @@ namespace Engine.Common
                         deviceContext.DrawInstanced(
                             this.VertexCount,
                             count,
-                            0, startInstanceLocation);
+                            this.VertexBufferOffset, startInstanceLocation);
                     }
                 }
             }
@@ -237,76 +186,26 @@ namespace Engine.Common
         /// </summary>
         /// <param name="deviceContext">Immediate context</param>
         /// <param name="inputLayout">Layout</param>
-        public virtual void SetInputAssembler(DeviceContext deviceContext, InputLayout inputLayout)
+        public virtual void SetInputAssembler(Graphics graphics, EffectTechnique technique)
         {
-            deviceContext.InputAssembler.InputLayout = inputLayout;
+            if (!dict.ContainsKey(technique))
+            {
+                List<InputElement> input = new List<InputElement>(this.Vertices[0].GetInput(this.BufferSlot));
+
+                if (this.Instanced)
+                {
+                    input.AddRange(VertexInstancingData.GetInput(this.InstancingBufferOffset));
+                }
+
+                var desc = technique.GetPassByIndex(0).Description;
+
+                dict.Add(technique, new InputLayout(graphics.Device, desc.Signature, input.ToArray()));
+            }
+
+            graphics.DeviceContext.InputAssembler.InputLayout = dict[technique];
             Counters.IAInputLayoutSets++;
-            deviceContext.InputAssembler.PrimitiveTopology = this.Topology;
+            graphics.DeviceContext.InputAssembler.PrimitiveTopology = this.Topology;
             Counters.IAPrimitiveTopologySets++;
-            deviceContext.InputAssembler.SetVertexBuffers(0, this.VertexBufferBinding);
-            Counters.IAVertexBuffersSets++;
-            deviceContext.InputAssembler.SetIndexBuffer(this.IndexBuffer, Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
-        }
-        /// <summary>
-        /// Writes vertex data
-        /// </summary>
-        /// <param name="deviceContext">Immediate context</param>
-        /// <param name="data">Vertex data</param>
-        public virtual void WriteVertexData(DeviceContext deviceContext, IVertexData[] data)
-        {
-            if (this.dynamicBuffers)
-            {
-                this.Vertices = data;
-
-                if (this.Vertices != null && this.Vertices.Length > 0)
-                {
-                    this.VertexCount = this.Vertices.Length;
-
-                    if (this.VertexBuffer != null)
-                    {
-                        deviceContext.WriteVertexBuffer(this.VertexBuffer, this.Vertices);
-                    }
-                }
-                else
-                {
-                    this.VertexCount = 0;
-                }
-            }
-            else
-            {
-                throw new Exception("Attemp to write in inmutable buffers");
-            }
-        }
-        /// <summary>
-        /// Writes index data
-        /// </summary>
-        /// <param name="deviceContext">Immediate context</param>
-        /// <param name="data">Index data</param>
-        public virtual void WriteIndexData(DeviceContext deviceContext, uint[] data)
-        {
-            if (this.dynamicBuffers)
-            {
-                this.Indices = data;
-
-                if (this.Indices != null && this.Indices.Length > 0)
-                {
-                    this.IndexCount = this.Indices.Length;
-
-                    if (this.IndexBuffer != null)
-                    {
-                        deviceContext.WriteDiscardBuffer(this.IndexBuffer, this.Indices);
-                    }
-                }
-                else
-                {
-                    this.IndexCount = 0;
-                }
-            }
-            else
-            {
-                throw new Exception("Attemp to write in inmutable buffers");
-            }
         }
 
         /// <summary>

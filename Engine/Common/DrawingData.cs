@@ -1,18 +1,30 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using SharpDX.DXGI;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
+using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
+using DeviceContext = SharpDX.Direct3D11.DeviceContext;
+using Buffer = SharpDX.Direct3D11.Buffer;
+using InputElement = SharpDX.Direct3D11.InputElement;
+using InputLayout = SharpDX.Direct3D11.InputLayout;
+using Device = SharpDX.Direct3D11.Device;
+using Effect = SharpDX.Direct3D11.Effect;
+using SharpDX.D3DCompiler;
 
 namespace Engine.Common
 {
     using Engine.Animation;
     using Engine.Content;
+    using Engine.Helpers;
 
     /// <summary>
     /// Mesh data
     /// </summary>
     public class DrawingData : IDisposable
     {
+        protected bool DynamicBuffers = false;
+
         /// <summary>
         /// Name
         /// </summary>
@@ -50,11 +62,13 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         /// <param name="description">Data description</param>
         /// <returns>Returns the generated drawing data objects</returns>
-        public static DrawingData Build(Game game, string name, ModelContent modelContent, DrawingDataDescription description)
+        public static DrawingData Build(Game game, string name, BufferManager bufferManager, ModelContent modelContent, DrawingDataDescription description)
         {
             DrawingData res = new DrawingData();
 
             res.Name = name;
+
+            res.DynamicBuffers = description.DynamicBuffers;
 
             //Animation
             if (description.LoadAnimation)
@@ -72,7 +86,7 @@ namespace Engine.Common
             InitializeGeometry(ref res, game, modelContent, description);
 
             //Update meshes into device
-            InitializeMeshes(ref res, game);
+            InitializeMeshes(ref res, bufferManager);
 
             //Lights
             InitializeLights(ref res, game, modelContent);
@@ -262,14 +276,12 @@ namespace Engine.Common
                         if (vertexList.Length > 0)
                         {
                             Mesh nMesh = new Mesh(
-                                drw,
                                 meshName,
                                 geometry.Material,
                                 geometry.Topology,
                                 vertexList,
                                 indices,
-                                description.Instanced,
-                                description.DynamicBuffers);
+                                description.Instanced);
 
                             drw.Meshes.Add(meshName, geometry.Material, nMesh);
                         }
@@ -295,7 +307,7 @@ namespace Engine.Common
                 InitializeJoints(modelContent, modelContent.SkinningInfo.Skeleton.Root, animations);
 
                 drw.SkinningData = new SkinningData(
-                    modelContent.SkinningInfo.Skeleton, 
+                    modelContent.SkinningInfo.Skeleton,
                     animations.ToArray(),
                     modelContent.Animations.Definition);
             }
@@ -354,13 +366,13 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="game">Game</param>
-        private static void InitializeMeshes(ref DrawingData drw, Game game)
+        private static void InitializeMeshes(ref DrawingData drw, BufferManager bufferManager)
         {
             foreach (MeshMaterialsDictionary dictionary in drw.Meshes.Values)
             {
                 foreach (Mesh mesh in dictionary.Values)
                 {
-                    mesh.Initialize(game.Graphics.Device);
+                    bufferManager.Add(mesh);
                 }
             }
         }
@@ -408,6 +420,19 @@ namespace Engine.Common
 
             drw.Lights = lights.ToArray();
         }
+
+
+        public static void UpdateOffsets(ref DrawingData drw, BufferManager bufferManager, int instances)
+        {
+            foreach (MeshMaterialsDictionary dictionary in drw.Meshes.Values)
+            {
+                foreach (Mesh mesh in dictionary.Values)
+                {
+                    bufferManager.Update(mesh, instances);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Constructor
@@ -570,5 +595,178 @@ namespace Engine.Common
 
             return triangles.ToArray();
         }
+    }
+
+
+    public class BufferManager : IDisposable
+    {
+        /// <summary>
+        /// Vertex buffer
+        /// </summary>
+        protected Buffer[] VertexBuffers = null;
+        /// <summary>
+        /// Index buffer
+        /// </summary>
+        protected Buffer IndexBuffer = null;
+        /// <summary>
+        /// Vertex buffer binding
+        /// </summary>
+        protected VertexBufferBinding[] VertexBufferBindings = null;
+        /// <summary>
+        /// Input elements
+        /// </summary>
+        protected InputElement[][] InputElements = null;
+
+        private Dictionary<VertexTypes, List<BufferData>> dict = new Dictionary<VertexTypes, List<BufferData>>();
+        private Dictionary<VertexTypes, List<IVertexData>> vList = new Dictionary<VertexTypes, List<IVertexData>>();
+        private List<uint> indices = new List<uint>();
+        private Dictionary<Mesh, int> vDict = new Dictionary<Mesh, int>();
+        private Dictionary<Mesh, int> iDict = new Dictionary<Mesh, int>();
+
+        public string Name;
+
+        /// <summary>
+        /// Free resources from memory
+        /// </summary>
+        public void Dispose()
+        {
+            Helper.Dispose(this.VertexBuffers);
+            this.VertexBuffers = null;
+
+            Helper.Dispose(this.IndexBuffer);
+            this.IndexBuffer = null;
+        }
+
+        public void Add(Mesh mesh)
+        {
+            if (mesh.Vertices != null && mesh.Vertices.Length > 0)
+            {
+                if (!vList.ContainsKey(mesh.VertextType))
+                {
+                    vList.Add(mesh.VertextType, new List<IVertexData>());
+                }
+
+                var vertices = vList[mesh.VertextType];
+
+                vDict.Add(mesh, vertices.Count);
+
+                vertices.AddRange(mesh.Vertices);
+                mesh.VertexBufferStride = mesh.Vertices[0].GetStride();
+                mesh.VertexCount = mesh.Vertices.Length;
+            }
+
+            if (mesh.Indices != null && mesh.Indices.Length > 0)
+            {
+                iDict.Add(mesh, indices.Count);
+
+                indices.AddRange(mesh.Indices);
+                mesh.IndexCount = mesh.Indices.Length;
+            }
+        }
+
+        public void Update(Mesh mesh, int instances)
+        {
+            var vTypes = vList.Keys.ToArray();
+
+            if (vDict.ContainsKey(mesh))
+            {
+                mesh.VertexBufferOffset = vDict[mesh];
+                mesh.BufferSlot = Array.IndexOf(vTypes, mesh.VertextType);
+            }
+
+            if (iDict.ContainsKey(mesh))
+            {
+                mesh.IndexBufferOffset = iDict[mesh];
+            }
+
+            if (instances > 0)
+            {
+                mesh.InstancingBufferOffset = vList.Keys.Count + (instances > 0 ? 1 : 0) - 1;
+            }
+        }
+
+        public void CreateBuffers(Device device, string name, bool dynamic, int instances)
+        {
+            this.Name = name;
+
+            this.VertexBuffers = new Buffer[vList.Keys.Count + (instances > 0 ? 1 : 0)];
+            this.VertexBufferBindings = new VertexBufferBinding[vList.Keys.Count + (instances > 0 ? 1 : 0)];
+            this.InputElements = new InputElement[vList.Keys.Count][];
+
+            var vTypes = vList.Keys.ToArray();
+
+            for (int i = 0; i < vTypes.Length; i++)
+            {
+                var verts = vList[vTypes[i]].ToArray();
+
+                this.VertexBuffers[i] = device.CreateVertexBuffer(name, verts, dynamic);
+                this.VertexBufferBindings[i] = new VertexBufferBinding(this.VertexBuffers[i], verts[0].GetStride(), i);
+                this.InputElements[i] = verts[0].GetInput(i);
+            }
+
+            if (instances > 0)
+            {
+                int instancingBufferOffset = this.VertexBuffers.Length - 1;
+
+                var instancingData = new VertexInstancingData[instances];
+                this.VertexBuffers[instancingBufferOffset] = device.CreateVertexBufferWrite(name, instancingData);
+                this.VertexBufferBindings[instancingBufferOffset] = new VertexBufferBinding(this.VertexBuffers[instancingBufferOffset], instancingData[0].GetStride(), instancingBufferOffset);
+            }
+
+            if (indices.Count > 0)
+            {
+                this.IndexBuffer = device.CreateIndexBuffer(name, indices.ToArray(), dynamic);
+            }
+        }
+
+        /// <summary>
+        /// Adds binding to precached buffer bindings for input assembler
+        /// </summary>
+        /// <param name="binding">Binding to add</param>
+        public void AddVertexBufferBinding(VertexBufferBinding binding)
+        {
+            List<VertexBufferBinding> bindings = new List<VertexBufferBinding>();
+
+            foreach (var bnd in this.VertexBufferBindings)
+            {
+                bindings.Add(bnd);
+                binding.Offset = bnd.Offset;
+                bindings.Add(binding);
+            }
+
+            this.VertexBufferBindings = bindings.ToArray();
+        }
+        /// <summary>
+        /// Sets input layout to assembler
+        /// </summary>
+        /// <param name="deviceContext">Immediate context</param>
+        public virtual void SetInputAssembler(DeviceContext deviceContext)
+        {
+            deviceContext.InputAssembler.SetVertexBuffers(0, this.VertexBufferBindings);
+            Counters.IAVertexBuffersSets++;
+            deviceContext.InputAssembler.SetIndexBuffer(this.IndexBuffer, Format.R32_UInt, 0);
+            Counters.IAIndexBufferSets++;
+        }
+
+        /// <summary>
+        /// Writes instancing data
+        /// </summary>
+        /// <param name="deviceContext">Immediate context</param>
+        /// <param name="data">Instancig data</param>
+        public virtual void WriteInstancingData(DeviceContext deviceContext, VertexInstancingData[] data)
+        {
+            if (data != null && data.Length > 0)
+            {
+                var instanceCount = data.Length;
+                var instancingBuffer = this.VertexBuffers[this.VertexBuffers.Length - 1];
+
+                deviceContext.WriteDiscardBuffer(instancingBuffer, data);
+            }
+        }
+    }
+
+    public class BufferData
+    {
+
     }
 }
