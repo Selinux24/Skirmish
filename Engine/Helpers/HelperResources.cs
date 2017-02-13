@@ -380,66 +380,136 @@ namespace Engine.Helpers
         /// Writes data into buffer
         /// </summary>
         /// <param name="deviceContext">Graphics context</param>
-        /// <param name="name">Buffer name</param>
         /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Offset</param>
         /// <param name="vertices">Vertices</param>
-        public static void WriteVertexBuffer(this DeviceContext deviceContext, Buffer buffer, IVertexData[] vertices)
+        public static void WriteDiscardBuffer(this DeviceContext deviceContext, Buffer buffer, long offset, IVertexData[] vertices)
         {
             if (vertices[0].VertexType == VertexTypes.Billboard)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexBillboard)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexBillboard)v));
             }
             else if (vertices[0].VertexType == VertexTypes.Position)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPosition)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPosition)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionColor)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionColor)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPositionColor)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalColor)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPositionNormalColor)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionTexture)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionTexture)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPositionTexture)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTexture)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPositionNormalTexture)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexPositionNormalTextureTangent)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPositionNormalTextureTangent)v));
             }
             else if (vertices[0].VertexType == VertexTypes.Terrain)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexTerrain)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexTerrain)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPosition)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPosition)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionColor)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPositionColor)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalColor)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPositionNormalColor)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionTexture)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPositionTexture)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTexture)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPositionNormalTexture)v));
             }
             else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
             {
-                deviceContext.WriteDiscardBuffer(buffer, Array.ConvertAll((IVertexData[])vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
+                deviceContext.WriteDiscardBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
+            }
+            else
+            {
+                throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
+            }
+        }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <param name="deviceContext">Graphics context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Offset</param>
+        /// <param name="vertices">Vertices</param>
+        public static void WriteNoOverwriteBuffer(this DeviceContext deviceContext, Buffer buffer, long offset, IVertexData[] vertices)
+        {
+            if (vertices[0].VertexType == VertexTypes.Billboard)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexBillboard)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.Position)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPosition)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionColor)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPositionColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPositionNormalColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionTexture)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPositionTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPositionNormalTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexPositionNormalTextureTangent)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.Terrain)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexTerrain)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPosition)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPositionColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPositionNormalColor)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPositionTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPositionNormalTexture)v));
+            }
+            else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
+            {
+                deviceContext.WriteNoOverwriteBuffer(buffer, offset, Array.ConvertAll(vertices, v => (VertexSkinnedPositionNormalTextureTangent)v));
             }
             else
             {

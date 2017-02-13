@@ -1,25 +1,20 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
-using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
-using InputElement = SharpDX.Direct3D11.InputElement;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using Device = SharpDX.Direct3D11.Device;
-using DeviceContext = SharpDX.Direct3D11.DeviceContext;
-using InputLayout = SharpDX.Direct3D11.InputLayout;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine.Common
 {
-    using Engine.Helpers;
-
     /// <summary>
     /// Mesh
     /// </summary>
     public class Mesh : IDisposable
     {
+        /// <summary>
+        /// Static id counter
+        /// </summary>
+        private static int ID = 0;
+
         /// <summary>
         /// Position list cache
         /// </summary>
@@ -29,6 +24,10 @@ namespace Engine.Common
         /// </summary>
         private Triangle[] triangleCache = null;
 
+        /// <summary>
+        /// Mesh id
+        /// </summary>
+        public int Id = -1;
         /// <summary>
         /// Vertices cache
         /// </summary>
@@ -41,13 +40,18 @@ namespace Engine.Common
         /// Indices cache
         /// </summary>
         public uint[] Indices = null;
-
-        public int BufferSlot = -1;
+        /// <summary>
+        /// Vertex buffer offset
+        /// </summary>
         public int VertexBufferOffset = -1;
+        /// <summary>
+        /// Vertex buffer slot
+        /// </summary>
+        public int VertexBufferSlot = -1;
+        /// <summary>
+        /// Index buffer offset
+        /// </summary>
         public int IndexBufferOffset = -1;
-        public int InstancingBufferOffset = 2;
-
-        private Dictionary<EffectTechnique, InputLayout> dict = new Dictionary<EffectTechnique, InputLayout>();
 
         /// <summary>
         /// Name
@@ -101,24 +105,20 @@ namespace Engine.Common
         /// <param name="instanced">Instanced</param>
         public Mesh(string name, string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced)
         {
+            this.Id = ++ID;
             this.Name = name;
             this.Material = material;
             this.Topology = topology;
             this.Vertices = vertices;
+            this.VertexCount = vertices.Length;
             this.Indexed = (indices != null && indices.Length > 0);
             this.Indices = indices;
+            this.IndexCount = (indices != null ? indices.Length : 0);
             this.VertextType = vertices[0].VertexType;
+            this.VertexBufferStride = vertices[0].GetStride();
             this.Textured = VertexData.IsTextured(vertices[0].VertexType);
             this.Skinned = VertexData.IsSkinned(vertices[0].VertexType);
             this.Instanced = instanced;
-        }
-        /// <summary>
-        /// Initializes the mesh graphics content
-        /// </summary>
-        /// <param name="device">Device</param>
-        public virtual void Initialize(Device device)
-        {
-
         }
         /// <summary>
         /// Dispose
@@ -130,32 +130,35 @@ namespace Engine.Common
         /// <summary>
         /// Draw mesh geometry
         /// </summary>
-        /// <param name="deviceContext">Immediate context</param>
-        public virtual void Draw(DeviceContext deviceContext)
+        /// <param name="graphics">Graphics</param>
+        public virtual void Draw(Graphics graphics)
         {
             if (this.Indexed)
             {
                 if (this.IndexCount > 0)
                 {
-                    deviceContext.DrawIndexed(this.IndexCount, this.IndexBufferOffset, 0);
+                    graphics.DeviceContext.DrawIndexed(
+                        this.IndexCount,
+                        this.IndexBufferOffset, this.VertexBufferOffset);
                 }
             }
             else
             {
                 if (this.VertexCount > 0)
                 {
-                    deviceContext.Draw(this.VertexCount, this.VertexBufferOffset);
+                    graphics.DeviceContext.Draw(
+                        this.VertexCount,
+                        this.VertexBufferOffset);
                 }
             }
         }
         /// <summary>
         /// Draw mesh geometry
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="deviceContext">Immediate context</param>
+        /// <param name="graphics">Graphics</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        /// <param name="count">Instances to draw</param>
-        public virtual void Draw(DeviceContext deviceContext, int startInstanceLocation, int count)
+        /// <param name="count">Instance count</param>
+        public virtual void Draw(Graphics graphics, int startInstanceLocation, int count)
         {
             if (count > 0)
             {
@@ -163,49 +166,23 @@ namespace Engine.Common
                 {
                     if (this.IndexCount > 0)
                     {
-                        deviceContext.DrawIndexedInstanced(
+                        graphics.DeviceContext.DrawIndexedInstanced(
                             this.IndexCount,
                             count,
-                            this.IndexBufferOffset, 0, startInstanceLocation);
+                            this.IndexBufferOffset, this.VertexBufferOffset, startInstanceLocation);
                     }
                 }
                 else
                 {
                     if (this.VertexCount > 0)
                     {
-                        deviceContext.DrawInstanced(
+                        graphics.DeviceContext.DrawInstanced(
                             this.VertexCount,
                             count,
                             this.VertexBufferOffset, startInstanceLocation);
                     }
                 }
             }
-        }
-        /// <summary>
-        /// Sets input layout to assembler
-        /// </summary>
-        /// <param name="deviceContext">Immediate context</param>
-        /// <param name="inputLayout">Layout</param>
-        public virtual void SetInputAssembler(Graphics graphics, EffectTechnique technique)
-        {
-            if (!dict.ContainsKey(technique))
-            {
-                List<InputElement> input = new List<InputElement>(this.Vertices[0].GetInput(this.BufferSlot));
-
-                if (this.Instanced)
-                {
-                    input.AddRange(VertexInstancingData.GetInput(this.InstancingBufferOffset));
-                }
-
-                var desc = technique.GetPassByIndex(0).Description;
-
-                dict.Add(technique, new InputLayout(graphics.Device, desc.Signature, input.ToArray()));
-            }
-
-            graphics.DeviceContext.InputAssembler.InputLayout = dict[technique];
-            Counters.IAInputLayoutSets++;
-            graphics.DeviceContext.InputAssembler.PrimitiveTopology = this.Topology;
-            Counters.IAPrimitiveTopologySets++;
         }
 
         /// <summary>

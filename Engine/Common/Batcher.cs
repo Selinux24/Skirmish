@@ -159,7 +159,7 @@ namespace Engine.Common
 
             bufferIndex++;
             this.Buffers[bufferIndex] = game.Graphics.Device.CreateVertexBufferImmutable("SpritesBuffer", bcp.sprites.ToArray());
-            this.BufferBindings[bufferIndex] = new VertexBufferBinding[] { new VertexBufferBinding(this.Buffers[bufferIndex], Marshal.SizeOf(typeof(Sprite)), 0) };
+            this.BufferBindings[bufferIndex] = new VertexBufferBinding[] { new VertexBufferBinding(this.Buffers[bufferIndex], Marshal.SizeOf(typeof(SpriteData)), 0) };
             inputElements.Add(BatchChannels.Normal, new InputElement[]
             {
                 new InputElement("POSITION", 0, Format.R32G32B32_Float, 0, bufferIndex, InputClassification.PerVertexData, 0),
@@ -269,7 +269,7 @@ namespace Engine.Common
         public float EmissionTime;
     }
 
-    public struct Sprite
+    public struct SpriteData
     {
         /// <summary>
         /// Position
@@ -313,7 +313,7 @@ namespace Engine.Common
         public List<Billboard> billboards = new List<Billboard>();
         public List<ParticleData> particles = new List<ParticleData>();
         public List<EmitterData> emitters = new List<EmitterData>();
-        public List<Sprite> sprites = new List<Sprite>();
+        public List<SpriteData> sprites = new List<SpriteData>();
 
         public int AddPositions(Vector3[] positions)
         {
@@ -414,7 +414,7 @@ namespace Engine.Common
             return offset;
         }
 
-        public int AddSprites(Sprite[] sprites)
+        public int AddSprites(SpriteData[] sprites)
         {
             int offset = this.sprites.Count;
 

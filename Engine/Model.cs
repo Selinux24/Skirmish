@@ -59,7 +59,7 @@ namespace Engine
         private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
 
         /// <summary>
-        /// Datos renderización
+        /// Current drawing data
         /// </summary>
         protected DrawingData DrawingData { get; private set; }
         /// <summary>
@@ -195,7 +195,7 @@ namespace Engine
 
             if (this.DrawingData != null)
             {
-                this.BufferManager.SetInputAssembler(this.DeviceContext);
+                this.BufferManager.SetBuffers(this.Game.Graphics);
 
                 instanceCount++;
 
@@ -276,7 +276,7 @@ namespace Engine
 
                             var mesh = dictionary[material];
                             var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                            mesh.SetInputAssembler(this.Game.Graphics, technique);
+                            this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertextType, mesh.Topology);
 
                             count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
 
@@ -284,7 +284,7 @@ namespace Engine
                             {
                                 technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
-                                mesh.Draw(this.DeviceContext);
+                                mesh.Draw(this.Game.Graphics);
 
                                 Counters.DrawCallsPerFrame++;
                             }

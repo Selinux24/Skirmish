@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine.Common
 {
@@ -20,6 +18,12 @@ namespace Engine.Common
         /// Default level of detail
         /// </summary>
         private readonly LevelOfDetailEnum defaultLevelOfDetail = LevelOfDetailEnum.Minimum;
+
+        /// <summary>
+        /// Buffer manager
+        /// </summary>
+        protected BufferManager BufferManager = new BufferManager();
+
         /// <summary>
         /// Level of detail
         /// </summary>
@@ -78,8 +82,6 @@ namespace Engine.Common
         /// </summary>
         public bool SphericVolume { get; set; }
 
-        protected BufferManager BufferManager = new BufferManager();
-
         /// <summary>
         /// Base model
         /// </summary>
@@ -103,15 +105,13 @@ namespace Engine.Common
                 DynamicBuffers = dynamic,
             };
 
-            var drawable = DrawingData.Build(game, this.Name, this.BufferManager, content, desc);
+            var drawable = DrawingData.Build(game, this.BufferManager, content, desc);
 
             this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
 
             this.LevelOfDetail = LevelOfDetailEnum.None;
 
-            DrawingData.UpdateOffsets(ref drawable, this.BufferManager, instances);
-
-            this.BufferManager.CreateBuffers(game.Graphics.Device, this.Name, dynamic, instances);
+            this.BufferManager.CreateBuffers(game.Graphics, this.Name, dynamic, instances);
         }
         /// <summary>
         /// Base model
@@ -143,48 +143,27 @@ namespace Engine.Common
                     this.defaultLevelOfDetail = lod;
                 }
 
-                var drawable = DrawingData.Build(game, this.Name, this.BufferManager, content[lod], desc);
+                var drawable = DrawingData.Build(game, this.BufferManager, content[lod], desc);
 
                 this.meshesByLOD.Add(lod, drawable);
             }
 
             this.LevelOfDetail = this.defaultLevelOfDetail;
 
-            foreach (var lod in content.Keys)
-            {
-                var drawable = this.meshesByLOD[lod];
-
-                DrawingData.UpdateOffsets(ref drawable, this.BufferManager, instances);
-            }
-
-            this.BufferManager.CreateBuffers(game.Graphics.Device, this.Name, dynamic, instances);
+            this.BufferManager.CreateBuffers(game.Graphics, this.Name, dynamic, instances);
         }
-
         /// <summary>
         /// Dispose model buffers
         /// </summary>
         public override void Dispose()
         {
-            if (this.meshesByLOD != null)
-            {
-                foreach (var lod in this.meshesByLOD.Keys)
-                {
-                    this.meshesByLOD[lod].Dispose();
-                }
+            Helper.Dispose(this.meshesByLOD);
+            this.meshesByLOD = null;
 
-                this.meshesByLOD.Clear();
-                this.meshesByLOD = null;
-            }
+            Helper.Dispose(this.BufferManager);
+            this.BufferManager = null;
         }
 
-        /// <summary>
-        /// Adds the specified vertex buffer binding to all elements of the drawing data dictionary
-        /// </summary>
-        /// <param name="vertexBufferBinding">Binding to add</param>
-        internal void AddVertexBufferBinding(VertexBufferBinding vertexBufferBinding)
-        {
-            this.BufferManager.AddVertexBufferBinding(vertexBufferBinding);
-        }
         /// <summary>
         /// Gets the nearest level of detail for the specified level of detail
         /// </summary>

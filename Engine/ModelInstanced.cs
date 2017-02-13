@@ -1,15 +1,11 @@
 ﻿using SharpDX;
 using System;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using DeviceContext = SharpDX.Direct3D11.DeviceContext;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
-    using Engine.Helpers;
 
     /// <summary>
     /// Instaced model
@@ -174,7 +170,7 @@ namespace Engine
                     //Writes instancing data
                     if (instanceIndex > 0)
                     {
-                        this.BufferManager.WriteInstancingData(this.DeviceContext, this.instancingData);
+                        this.BufferManager.WriteInstancingData(this.Game.Graphics, this.instancingData);
                     }
                 }
 
@@ -187,7 +183,7 @@ namespace Engine
 
                 if (effect != null)
                 {
-                    this.BufferManager.SetInputAssembler(this.DeviceContext);
+                    this.BufferManager.SetBuffers(this.Game.Graphics);
 
                     #region Per frame update
 
@@ -276,7 +272,7 @@ namespace Engine
 
                                         var mesh = dictionary[material];
                                         var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                                        mesh.SetInputAssembler(this.Game.Graphics, technique);
+                                        this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertextType, mesh.Topology);
 
                                         count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
                                         count *= instanceCount;
@@ -285,7 +281,7 @@ namespace Engine
                                         {
                                             technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
-                                            mesh.Draw(this.DeviceContext, index, length);
+                                            mesh.Draw(this.Game.Graphics, index, length);
 
                                             Counters.DrawCallsPerFrame++;
                                         }

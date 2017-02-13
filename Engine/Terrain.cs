@@ -1,11 +1,10 @@
 ﻿using SharpDX;
+using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Buffer = SharpDX.Direct3D11.Buffer;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
@@ -13,7 +12,6 @@ namespace Engine
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
-    using Engine.Helpers;
     using Engine.PathFinding;
 
     /// <summary>
@@ -130,10 +128,10 @@ namespace Engine
             /// Constructor
             /// </summary>
             /// <param name="game">Game</param>
-            /// <param name="trianglesPerNode">Triangles per node</param>
-            /// <param name="foliageMap">Foliage map</param>
-            /// <param name="foliageChannels">Foliage channels</param>
-            public TerrainPatchDictionary(Game game, HeightmapDescription description, GroundDescription groundDescription)
+            /// <param name="bufferManager">Buffer manager</param>
+            /// <param name="description">Heightmap description</param>
+            /// <param name="groundDescription">Ground description</param>
+            public TerrainPatchDictionary(Game game, BufferManager bufferManager, HeightmapDescription description, GroundDescription groundDescription)
                 : base()
             {
                 this.game = game;
@@ -222,8 +220,8 @@ namespace Engine
 
                 int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(groundDescription.Quadtree.MaximumDepth);
 
-                this.InitializeTerrainPatches(groundDescription.Name, trianglesPerNode);
-                this.InitializeTerrainIndices(groundDescription.Name, trianglesPerNode);
+                this.InitializeTerrainPatches(bufferManager, trianglesPerNode);
+                this.InitializeTerrainIndices(bufferManager, trianglesPerNode);
 
                 this.tmp = new Dictionary<LevelOfDetailEnum, List<PickingQuadTreeNode>>();
                 tmp.Add(LevelOfDetailEnum.High, new List<PickingQuadTreeNode>());
@@ -257,7 +255,7 @@ namespace Engine
             /// </summary>
             /// <param name="name">Name</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
-            private void InitializeTerrainPatches(string name, int trianglesPerNode)
+            private void InitializeTerrainPatches(BufferManager bufferManager, int trianglesPerNode)
             {
                 this.patches = new Dictionary<LevelOfDetailEnum, TerrainPatch[]>();
 
@@ -266,27 +264,29 @@ namespace Engine
                 this.patches.Add(LevelOfDetailEnum.Low, new TerrainPatch[MaxPatchesLowLevel]);
                 this.patches.Add(LevelOfDetailEnum.Minimum, new TerrainPatch[MaxPatchesMinimumLevel]);
 
+                int id = 0;
+
                 for (int i = 0; i < MaxPatchesHighLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, name, LevelOfDetailEnum.High, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, ++id, LevelOfDetailEnum.High, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.High][i] = patch;
                 }
 
                 for (int i = 0; i < MaxPatchesMediumLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, name, LevelOfDetailEnum.Medium, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, ++id, LevelOfDetailEnum.Medium, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.Medium][i] = patch;
                 }
 
                 for (int i = 0; i < MaxPatchesLowLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, name, LevelOfDetailEnum.Low, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, ++id, LevelOfDetailEnum.Low, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.Low][i] = patch;
                 }
 
                 for (int i = 0; i < MaxPatchesMinimumLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, name, LevelOfDetailEnum.Minimum, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, ++id, LevelOfDetailEnum.Minimum, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.Minimum][i] = patch;
                 }
             }
@@ -295,7 +295,7 @@ namespace Engine
             /// </summary>
             /// <param name="name">Name</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
-            private void InitializeTerrainIndices(string name, int trianglesPerNode)
+            private void InitializeTerrainIndices(BufferManager bufferManager, int trianglesPerNode)
             {
                 this.indices = new Dictionary<LevelOfDetailEnum, Dictionary<IndexBufferShapeEnum, TerrainIndexBuffer>>();
 
@@ -303,15 +303,20 @@ namespace Engine
                 this.indices.Add(LevelOfDetailEnum.Medium, new Dictionary<IndexBufferShapeEnum, TerrainIndexBuffer>());
                 this.indices.Add(LevelOfDetailEnum.Low, new Dictionary<IndexBufferShapeEnum, TerrainIndexBuffer>());
 
+                int id = 0;
+
                 //High level
                 for (int i = 0; i < 9; i++)
                 {
                     IndexBufferShapeEnum shape = (IndexBufferShapeEnum)i;
 
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode);
+                    int ibOffset;
+                    bufferManager.Add(++id, indexList, out ibOffset);
+
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
-                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(name + "_HIGHLOD", indexList),
+                        Offset = ibOffset,
                         Count = indexList.Length,
                     };
                     this.indices[LevelOfDetailEnum.High].Add(shape, buffer);
@@ -323,9 +328,12 @@ namespace Engine
                     IndexBufferShapeEnum shape = (IndexBufferShapeEnum)i;
 
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4);
+                    int ibOffset;
+                    bufferManager.Add(++id, indexList, out ibOffset);
+
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
-                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(name + "_MEDIUMLOD", indexList),
+                        Offset = ibOffset,
                         Count = indexList.Length,
                     };
                     this.indices[LevelOfDetailEnum.Medium].Add(shape, buffer);
@@ -336,9 +344,12 @@ namespace Engine
                     IndexBufferShapeEnum shape = IndexBufferShapeEnum.Full;
 
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4 / 4);
+                    int ibOffset;
+                    bufferManager.Add(++id, indexList, out ibOffset);
+
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
-                        Buffer = this.game.Graphics.Device.CreateIndexBufferImmutable(name + "_LOWLOD", indexList),
+                        Offset = ibOffset,
                         Count = indexList.Length,
                     };
                     this.indices[LevelOfDetailEnum.Low].Add(shape, buffer);
@@ -391,7 +402,7 @@ namespace Engine
             /// </summary>
             /// <param name="context">Update context</param>
             /// <param name="visibleNodes">Visible nodes</param>
-            public void Update(UpdateContext context, PickingQuadTreeNode[] visibleNodes)
+            public void Update(UpdateContext context, PickingQuadTreeNode[] visibleNodes, BufferManager bufferManager)
             {
                 if (visibleNodes != null && visibleNodes.Length > 0)
                 {
@@ -454,7 +465,7 @@ namespace Engine
                             {
                                 //Discard node
                                 patch.Visible = false;
-                                patch.SetVertexData(null);
+                                patch.SetVertexData(null, bufferManager);
 
                                 changes++;
                             }
@@ -474,14 +485,14 @@ namespace Engine
                                 {
                                     //Discard node
                                     currentPatch.Visible = false;
-                                    currentPatch.SetVertexData(null);
+                                    currentPatch.SetVertexData(null, bufferManager);
 
                                     //Add node
                                     var freePatch = this.GetFree(newLod);
                                     if (freePatch != null)
                                     {
                                         freePatch.Visible = true;
-                                        freePatch.SetVertexData(node);
+                                        freePatch.SetVertexData(node, bufferManager);
                                     }
 
                                     changes++;
@@ -506,7 +517,7 @@ namespace Engine
                                 if (freePatch != null)
                                 {
                                     freePatch.Visible = true;
-                                    freePatch.SetVertexData(node);
+                                    freePatch.SetVertexData(node, bufferManager);
 
                                     changes++;
                                 }
@@ -617,11 +628,17 @@ namespace Engine
             /// Draw patches
             /// </summary>
             /// <param name="context">Drawing context</param>
-            public void Draw(DrawContext context)
+            public void Draw(DrawContext context, BufferManager bufferManager)
             {
                 var terrainTechnique = this.SetTechniqueTerrain(context);
                 if (terrainTechnique != null)
                 {
+                    bufferManager.SetInputAssembler(
+                        this.game.Graphics,
+                        terrainTechnique,
+                        VertexTypes.Terrain,
+                        PrimitiveTopology.TriangleList);
+
                     foreach (var lod in this.patches.Keys)
                     {
                         foreach (var item in this.patches[lod])
@@ -811,7 +828,7 @@ namespace Engine
             /// <param name="lod">Level of detail</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static TerrainPatch CreatePatch(Game game, string name, LevelOfDetailEnum lod, int trianglesPerNode)
+            public static TerrainPatch CreatePatch(Game game, BufferManager bufferManager, int id, LevelOfDetailEnum lod, int trianglesPerNode)
             {
                 int triangleCount = 0;
 
@@ -827,11 +844,11 @@ namespace Engine
 
                     VertexTerrain[] vertexData = new VertexTerrain[vertices];
 
-                    patch.vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(name + lod.ToString(), vertexData);
-                    patch.vertexBufferBinding = new[]
-                    {
-                        new VertexBufferBinding(patch.vertexBuffer, default(VertexTerrain).GetStride(), 0),
-                    };
+                    bufferManager.Add(
+                        id, 
+                        vertexData, 
+                        out patch.VertexBufferOffset, 
+                        out patch.VertexBufferSlot);
 
                     return patch;
                 }
@@ -874,23 +891,6 @@ namespace Engine
             }
 
             /// <summary>
-            /// Index buffer
-            /// </summary>
-            private Buffer indexBuffer = null;
-            /// <summary>
-            /// Index count
-            /// </summary>
-            private int indexCount = 0;
-            /// <summary>
-            /// Vertex buffer
-            /// </summary>
-            private Buffer vertexBuffer = null;
-            /// <summary>
-            /// Vertex buffer binding
-            /// </summary>
-            private VertexBufferBinding[] vertexBufferBinding = null;
-
-            /// <summary>
             /// Game
             /// </summary>
             public readonly Game Game = null;
@@ -908,6 +908,23 @@ namespace Engine
             public bool Visible { get; set; }
 
             /// <summary>
+            /// Vertex buffer slot
+            /// </summary>
+            public int VertexBufferSlot;
+            /// <summary>
+            /// Vertex buffer offset
+            /// </summary>
+            public int VertexBufferOffset;
+            /// <summary>
+            /// Index buffer offset
+            /// </summary>
+            public int IndexBufferOffset;
+            /// <summary>
+            /// Indexes count
+            /// </summary>
+            public int IndexCount = 0;
+
+            /// <summary>
             /// Cosntructor
             /// </summary>
             /// <param name="game">Game</param>
@@ -922,17 +939,16 @@ namespace Engine
             /// </summary>
             public void Dispose()
             {
-                Helper.Dispose(this.indexBuffer);
-                Helper.Dispose(this.vertexBuffer);
+
             }
 
             /// <summary>
             /// Sets vertex data
             /// </summary>
             /// <param name="node">Node to attach to the vertex buffer</param>
-            public void SetVertexData(PickingQuadTreeNode node)
+            public void SetVertexData(PickingQuadTreeNode node, BufferManager bufferManager)
             {
-                if (this.vertexBuffer != null)
+                if (bufferManager != null)
                 {
                     if (this.Current != node)
                     {
@@ -955,7 +971,7 @@ namespace Engine
                             //    Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(1f, 0.5f, 0.5f, 1f)));
                             //}
 
-                            this.Game.Graphics.DeviceContext.WriteVertexBuffer(this.vertexBuffer, data);
+                            bufferManager.WriteBuffer(this.Game.Graphics, this.VertexBufferSlot, this.VertexBufferOffset, data);
                         }
                     }
                 }
@@ -968,13 +984,13 @@ namespace Engine
             {
                 if (buffer != null)
                 {
-                    this.indexBuffer = buffer.Buffer;
-                    this.indexCount = buffer.Count;
+                    this.IndexBufferOffset = buffer.Offset;
+                    this.IndexCount = buffer.Count;
                 }
                 else
                 {
-                    this.indexBuffer = null;
-                    this.indexCount = 0;
+                    this.IndexBufferOffset = -1;
+                    this.IndexCount = 0;
                 }
             }
             /// <summary>
@@ -984,25 +1000,19 @@ namespace Engine
             /// <param name="technique">Technique</param>
             public void DrawTerrain(DrawContext context, EffectTechnique technique)
             {
-                if (this.indexCount > 0)
+                if (this.IndexCount > 0)
                 {
                     if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                     {
                         Counters.InstancesPerFrame++;
-                        Counters.PrimitivesPerFrame += this.indexCount / 3;
+                        Counters.PrimitivesPerFrame += this.IndexCount / 3;
                     }
-
-                    //Sets vertex and index buffer
-                    this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-                    Counters.IAVertexBuffersSets++;
-                    this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, SharpDX.DXGI.Format.R32_UInt, 0);
-                    Counters.IAIndexBufferSets++;
 
                     for (int p = 0; p < technique.Description.PassCount; p++)
                     {
                         technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                        this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+                        this.Game.Graphics.DeviceContext.DrawIndexed(this.IndexCount, this.IndexBufferOffset, this.VertexBufferOffset);
 
                         Counters.DrawCallsPerFrame++;
                     }
@@ -1043,31 +1053,23 @@ namespace Engine
                 return string.Format("LOD: {0}; Visible: {1}; Indices: {2}; {3}",
                     this.LevelOfDetail,
                     this.Visible,
-                    this.indexCount,
+                    this.IndexCount,
                     this.Current);
             }
         }
         /// <summary>
         /// Index buffer descriptor
         /// </summary>
-        class TerrainIndexBuffer : IDisposable
+        class TerrainIndexBuffer
         {
             /// <summary>
-            /// Buffer
+            /// Buffer Offset
             /// </summary>
-            public Buffer Buffer;
+            public int Offset;
             /// <summary>
             /// Index count in buffer
             /// </summary>
             public int Count;
-
-            /// <summary>
-            /// Dispose
-            /// </summary>
-            public void Dispose()
-            {
-                Helper.Dispose(this.Buffer);
-            }
         }
 
         #endregion
@@ -1076,6 +1078,10 @@ namespace Engine
         /// Patch dictionary
         /// </summary>
         private TerrainPatchDictionary patches = null;
+        /// <summary>
+        /// Buffer manager
+        /// </summary>
+        private BufferManager bufferManager = new BufferManager();
 
         /// <summary>
         /// Gets the used material list
@@ -1108,7 +1114,9 @@ namespace Engine
             : base(game, description)
         {
             //Initialize patch dictionary
-            this.patches = new TerrainPatchDictionary(game, content, description);
+            this.patches = new TerrainPatchDictionary(game, this.bufferManager, content, description);
+
+            this.bufferManager.CreateBuffers(game.Graphics, description.Name, true, 0);
 
             if (!this.Description.DelayGeneration)
             {
@@ -1121,6 +1129,7 @@ namespace Engine
         public override void Dispose()
         {
             Helper.Dispose(this.patches);
+            Helper.Dispose(this.bufferManager);
         }
         /// <summary>
         /// Updates the state of the terrain components
@@ -1132,7 +1141,7 @@ namespace Engine
             {
                 var visibleNodes = this.pickingQuadtree.GetNodesInVolume(ref context.Frustum);
 
-                this.patches.Update(context, visibleNodes);
+                this.patches.Update(context, visibleNodes, this.bufferManager);
             }
         }
         /// <summary>
@@ -1143,7 +1152,9 @@ namespace Engine
         {
             if (this.patches != null)
             {
-                this.patches.Draw(context);
+                this.bufferManager.SetBuffers(this.Game.Graphics);
+
+                this.patches.Draw(context, this.bufferManager);
             }
         }
 

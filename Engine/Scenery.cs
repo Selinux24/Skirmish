@@ -39,11 +39,10 @@ namespace Engine
             /// Creates a new patch
             /// </summary>
             /// <param name="game">Game</param>
-            /// <param name="parent">Parent</param>
             /// <param name="content">Content</param>
             /// <param name="node">Quadtree node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static SceneryPatch CreatePatch(Game game, Scenery parent, BufferManager bufferManager, ModelContent content, PickingQuadTreeNode node)
+            public static SceneryPatch CreatePatch(Game game, BufferManager bufferManager, ModelContent content, PickingQuadTreeNode node)
             {
                 var desc = new DrawingDataDescription()
                 {
@@ -56,19 +55,15 @@ namespace Engine
                     Constraint = node.BoundingBox,
                 };
 
-                var drawingData = DrawingData.Build(game, parent.Name, bufferManager, content, desc);
+                var drawingData = DrawingData.Build(game, bufferManager, content, desc);
 
-                return new SceneryPatch(game, parent, drawingData);
+                return new SceneryPatch(game, drawingData);
             }
 
             /// <summary>
             /// Game
             /// </summary>
             protected Game Game = null;
-            /// <summary>
-            /// Parent scenery instance
-            /// </summary>
-            protected Scenery Parent = null;
             /// <summary>
             /// Drawing data
             /// </summary>
@@ -83,12 +78,10 @@ namespace Engine
             /// Cosntructor
             /// </summary>
             /// <param name="game">Game</param>
-            /// <param name="parent">Parent scenery instance</param>
             /// <param name="drawingData">Drawing data</param>
-            public SceneryPatch(Game game, Scenery parent, DrawingData drawingData)
+            public SceneryPatch(Game game, DrawingData drawingData)
             {
                 this.Game = game;
-                this.Parent = parent;
                 this.DrawingData = drawingData;
             }
             /// <summary>
@@ -113,7 +106,7 @@ namespace Engine
             /// </summary>
             /// <param name="context">Drawing context</param>
             /// <param name="sceneryEffect">Scenery effect</param>
-            public void DrawScenery(DrawContext context, Drawer sceneryEffect)
+            public void DrawScenery(DrawContext context, Drawer sceneryEffect, BufferManager bufferManager)
             {
                 int count = 0;
 
@@ -158,7 +151,7 @@ namespace Engine
 
                         var mesh = dictionary[material];
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                        mesh.SetInputAssembler(this.Game.Graphics, technique);
+                        bufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertextType, mesh.Topology);
 
                         count += mesh.IndexCount > 0 ? mesh.IndexCount : mesh.VertexCount;
 
@@ -166,7 +159,7 @@ namespace Engine
                         {
                             technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                            mesh.Draw(this.Game.Graphics.DeviceContext);
+                            mesh.Draw(this.Game.Graphics);
 
                             Counters.DrawCallsPerFrame++;
                         }
@@ -234,7 +227,9 @@ namespace Engine
         /// Visible Nodes
         /// </summary>
         private PickingQuadTreeNode[] visibleNodes;
-
+        /// <summary>
+        /// Buffer manager
+        /// </summary>
         private BufferManager bufferManager = new BufferManager();
 
         /// <summary>
@@ -297,16 +292,11 @@ namespace Engine
             var nodes = this.pickingQuadtree.GetTailNodes();
             for (int i = 0; i < nodes.Length; i++)
             {
-                var patch = SceneryPatch.CreatePatch(game, this, this.bufferManager, content, nodes[i]);
+                var patch = SceneryPatch.CreatePatch(game, this.bufferManager, content, nodes[i]);
                 this.patchDictionary.Add(nodes[i].Id, patch);
             }
 
-            foreach (var item in this.patchDictionary.Values)
-            {
-                DrawingData.UpdateOffsets(ref item.DrawingData, this.bufferManager, 0);
-            }
-
-            this.bufferManager.CreateBuffers(game.Graphics.Device, this.Name, false, 0);
+            this.bufferManager.CreateBuffers(game.Graphics, this.Name, false, 0);
 
             #endregion
 
@@ -321,6 +311,7 @@ namespace Engine
         public override void Dispose()
         {
             Helper.Dispose(this.patchDictionary);
+            Helper.Dispose(this.bufferManager);
         }
         /// <summary>
         /// Objects updating
@@ -358,7 +349,7 @@ namespace Engine
 
             if (nodes != null && nodes.Length > 0)
             {
-                this.bufferManager.SetInputAssembler(this.Game.Graphics.DeviceContext);
+                this.bufferManager.SetBuffers(this.Game.Graphics);
 
                 Drawer sceneryEffect = null;
 
@@ -409,7 +400,7 @@ namespace Engine
 
                 for (int i = 0; i < nodes.Length; i++)
                 {
-                    this.patchDictionary[nodes[i].Id].DrawScenery(context, sceneryEffect);
+                    this.patchDictionary[nodes[i].Id].DrawScenery(context, sceneryEffect, this.bufferManager);
                 }
             }
         }
