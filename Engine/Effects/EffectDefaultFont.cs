@@ -19,7 +19,7 @@ namespace Engine.Effects
         /// <summary>
         /// Font drawing technique
         /// </summary>
-        protected readonly EffectTechnique FontDrawer = null;
+        public readonly EffectTechnique FontDrawer = null;
 
         /// <summary>
         /// World matrix effect variable

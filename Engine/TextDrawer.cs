@@ -1,16 +1,11 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
-using SharpDX.DXGI;
-using Buffer = SharpDX.Direct3D11.Buffer;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using InputLayout = SharpDX.Direct3D11.InputLayout;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
-    using Engine.Helpers;
 
     /// <summary>
     /// Text drawer
@@ -18,42 +13,29 @@ namespace Engine
     public class TextDrawer : Drawable, IScreenFitted
     {
         /// <summary>
-        /// Technique name
-        /// </summary>
-        private EffectTechnique technique = null;
-        /// <summary>
-        /// Input layout
-        /// </summary>
-        private InputLayout inputLayout = null;
-
-        /// <summary>
-        /// Vertex buffer
-        /// </summary>
-        private Buffer vertexBuffer = null;
-        /// <summary>
         /// Vertex couunt
         /// </summary>
         private int vertexCount = 0;
         /// <summary>
-        /// Vertex stride
-        /// </summary>
-        private int vertexBufferStride = 0;
-        /// <summary>
         /// Vertex offset
         /// </summary>
-        private int vertexBufferOffset = 0;
+        private int vertexBufferOffset = -1;
         /// <summary>
-        /// Vertex buffer binding
+        /// Vertex buffer slot
         /// </summary>
-        private VertexBufferBinding[] vertexBufferBinding = null;
-        /// <summary>
-        /// Index buffer
-        /// </summary>
-        private Buffer indexBuffer = null;
+        private int vertexBufferSlot = -1;
         /// <summary>
         /// Index count
         /// </summary>
         private int indexCount = 0;
+        /// <summary>
+        /// Index buffer offset
+        /// </summary>
+        private int indexBufferOffset = -1;
+        /// <summary>
+        /// Buffer manager
+        /// </summary>
+        private BufferManager bufferManager = new BufferManager();
 
         /// <summary>
         /// View * projection matrix
@@ -196,9 +178,6 @@ namespace Engine
         {
             this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
 
-            this.technique = DrawerPool.EffectDefaultFont.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, DrawerModesEnum.Forward);
-            this.inputLayout = DrawerPool.EffectDefaultFont.GetInputLayout(this.technique);
-
             this.viewProjection = Sprite.CreateViewOrthoProjection(
                 game.Form.RenderWidth.NextPair(),
                 game.Form.RenderHeight.NextPair());
@@ -206,17 +185,13 @@ namespace Engine
             this.fontMap = FontMap.Map(game.Graphics.Device, description.Font, description.FontSize);
 
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
+            uint[] indices = new uint[FontMap.MAXTEXTLENGTH * 6];
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(description.Name, vertices);
-            this.vertexBufferStride = vertices[0].GetStride();
-            this.vertexBufferOffset = 0;
+            this.bufferManager.Add(0, vertices, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.bufferManager.Add(0, indices, out this.indexBufferOffset);
+            this.bufferManager.CreateBuffers(game.Graphics, this.Name, true, 0);
+
             this.vertexCount = 0;
-            this.vertexBufferBinding = new VertexBufferBinding[]
-            {
-                new VertexBufferBinding(this.vertexBuffer, this.vertexBufferStride, this.vertexBufferOffset),
-            };
-
-            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferWrite(description.Name, new uint[FontMap.MAXTEXTLENGTH * 6]);
             this.indexCount = 0;
 
             this.TextColor = description.TextColor;
@@ -230,7 +205,7 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-
+            Helper.Dispose(this.bufferManager);
         }
         /// <summary>
         /// Update component state
@@ -248,25 +223,20 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
-                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
-                //Counters.IAInputLayoutSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                //Counters.IAPrimitiveTopologySets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-                //Counters.IAVertexBuffersSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-                //Counters.IAIndexBufferSets++;
+                this.bufferManager.SetBuffers(this.Game.Graphics);
+
+                var technique = DrawerPool.EffectDefaultFont.FontDrawer;
+
+                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, PrimitiveTopology.TriangleList);
 
                 if (this.ShadowColor != Color.Transparent)
                 {
                     //Draw shadow
-                    this.DrawText(context, this.Position + this.ShadowRelative, this.ShadowColor);
+                    this.DrawText(context, technique, this.Position + this.ShadowRelative, this.ShadowColor);
                 }
 
                 //Draw text
-                this.DrawText(context, this.Position, this.TextColor);
-
-                //Counters.InstancesPerFrame++;
+                this.DrawText(context, technique, this.Position, this.TextColor);
             }
         }
         /// <summary>
@@ -283,9 +253,10 @@ namespace Engine
         /// Draw text
         /// </summary>
         /// <param name="context">Context</param>
+        /// <param name="technique">Technique</param>
         /// <param name="position">Position</param>
         /// <param name="color">Color</param>
-        private void DrawText(DrawContext context, Vector2 position, Color4 color)
+        private void DrawText(DrawContext context, EffectTechnique technique, Vector2 position, Color4 color)
         {
             #region Per frame update
 
@@ -302,24 +273,11 @@ namespace Engine
 
             #endregion
 
-            for (int p = 0; p < this.technique.Description.PassCount; p++)
+            for (int p = 0; p < technique.Description.PassCount; p++)
             {
-                this.technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                if (this.indexBuffer != null)
-                {
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
-
-                    //Counters.DrawCallsPerFrame++;
-                    //Counters.PrimitivesPerFrame += this.indexCount / 3;
-                }
-                else
-                {
-                    this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
-
-                    //Counters.DrawCallsPerFrame++;
-                    //Counters.PrimitivesPerFrame += this.vertexCount / 3;
-                }
+                this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, this.indexBufferOffset, this.vertexBufferOffset);
             }
         }
         /// <summary>
@@ -334,8 +292,8 @@ namespace Engine
                 this.text,
                 out v, out i, out size);
 
-            this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.vertexBuffer, v);
-            this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.indexBuffer, i);
+            this.bufferManager.WriteBuffer(this.Game.Graphics, this.vertexBufferSlot, this.vertexBufferOffset, v);
+            this.bufferManager.WriteBuffer(this.Game.Graphics, this.indexBufferOffset, i);
 
             this.vertexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
             this.indexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;

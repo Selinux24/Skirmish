@@ -265,5 +265,20 @@ namespace Engine.Common
                 graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, vertexBufferOffset, data);
             }
         }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="indexBufferOffset">Offset</param>
+        /// <param name="data">Data to write</param>
+        public void WriteBuffer(Graphics graphics, int indexBufferOffset, uint[] data)
+        {
+            if (data != null && data.Length > 0)
+            {
+                var buffer = this.IndexBuffer;
+
+                graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, indexBufferOffset, data);
+            }
+        }
     }
 }
