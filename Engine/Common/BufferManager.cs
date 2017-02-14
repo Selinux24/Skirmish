@@ -240,6 +240,22 @@ namespace Engine.Common
         /// <param name="vertexBufferSlot">Slot</param>
         /// <param name="vertexBufferOffset">Offset</param>
         /// <param name="data">Data to write</param>
+        public void WriteBuffer<T>(Graphics graphics, int vertexBufferSlot, int vertexBufferOffset, T[] data) where T : struct, IVertexData
+        {
+            if (data != null && data.Length > 0)
+            {
+                var buffer = this.VertexBuffers[vertexBufferSlot];
+
+                graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, vertexBufferOffset, data);
+            }
+        }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="vertexBufferSlot">Slot</param>
+        /// <param name="vertexBufferOffset">Offset</param>
+        /// <param name="data">Data to write</param>
         public void WriteBuffer(Graphics graphics, int vertexBufferSlot, int vertexBufferOffset, IVertexData[] data)
         {
             if (data != null && data.Length > 0)

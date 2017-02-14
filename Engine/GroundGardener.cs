@@ -1,11 +1,10 @@
 ﻿using SharpDX;
+using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Buffer = SharpDX.Direct3D11.Buffer;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
@@ -13,7 +12,6 @@ namespace Engine
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
-    using Engine.Helpers;
 
     /// <summary>
     /// Ground garden planter
@@ -32,10 +30,6 @@ namespace Engine
             /// </summary>
             public const int MAX = 1024 * 8;
 
-            /// <summary>
-            /// Game
-            /// </summary>
-            protected readonly Game Game = null;
             /// <summary>
             /// Foliage populating flag
             /// </summary>
@@ -61,13 +55,17 @@ namespace Engine
             /// <summary>
             /// Constructor
             /// </summary>
-            /// <param name="game">Game</param>
-            public FoliagePatch(Game game)
+            public FoliagePatch()
             {
-                this.Game = game;
-
                 this.CurrentNode = null;
                 this.Channel = -1;
+            }
+            /// <summary>
+            /// Dispose
+            /// </summary>
+            public void Dispose()
+            {
+                this.FoliageData = null;
             }
 
             /// <summary>
@@ -171,14 +169,6 @@ namespace Engine
                 this.Planted = true;
                 this.FoliageData = vData;
             }
-
-            /// <summary>
-            /// Dispose
-            /// </summary>
-            public void Dispose()
-            {
-                this.FoliageData = null;
-            }
         }
         /// <summary>
         /// Foliage map channel
@@ -240,23 +230,32 @@ namespace Engine
         class FoliageBuffer : IDisposable
         {
             /// <summary>
-            /// Vertex buffer with foliage data
+            /// Foliage buffer id static counter
             /// </summary>
-            private Buffer buffer = null;
+            private static int ID = 0;
+
+            /// <summary>
+            /// Buffer slot
+            /// </summary>
+            private int vertexBufferSlot = -1;
+            /// <summary>
+            /// Vertex buffer offset
+            /// </summary>
+            private int vertexBufferOffset = -1;
             /// <summary>
             /// Vertex count
             /// </summary>
             private int vertexCount = 0;
-            /// <summary>
-            /// Vertex buffer binding for foliage buffer
-            /// </summary>
-            private VertexBufferBinding[] bufferBinding = null;
 
             /// <summary>
             /// Game
             /// </summary>
             protected readonly Game Game = null;
 
+            /// <summary>
+            /// Buffer id
+            /// </summary>
+            public int Id = 0;
             /// <summary>
             /// Foliage attached to buffer flag
             /// </summary>
@@ -270,32 +269,33 @@ namespace Engine
             /// Constructor
             /// </summary>
             /// <param name="game">Game</param>
-            /// <param name="name">Name</param>
-            public FoliageBuffer(Game game, string name)
+            /// <param name="bufferManager">Buffer manager</param>
+            public FoliageBuffer(Game game, BufferManager bufferManager)
             {
                 this.Game = game;
+                this.Id = ++ID;
 
-                VertexBillboard[] vertexData = new VertexBillboard[FoliagePatch.MAX];
-
-                this.buffer = this.Game.Graphics.Device.CreateVertexBufferWrite(name, vertexData);
-                this.bufferBinding = new[]
-                {
-                    new VertexBufferBinding(this.buffer, default(VertexBillboard).GetStride(), 0),
-                };
+                bufferManager.Add(
+                    this.Id,
+                    new VertexBillboard[FoliagePatch.MAX], 
+                    out this.vertexBufferOffset, 
+                    out this.vertexBufferSlot); 
             }
             /// <summary>
             /// Dispose
             /// </summary>
             public void Dispose()
             {
-                Helper.Dispose(this.buffer);
+                
             }
 
             /// <summary>
             /// Attachs the specified patch to buffer
             /// </summary>
+            /// <param name="eyePosition">Eye position</param>
             /// <param name="patch">Patch</param>
-            public void AttachFoliage(Vector3 eyePosition, FoliagePatch patch)
+            /// <param name="bufferManager">Buffer manager</param>
+            public void AttachFoliage(Vector3 eyePosition, FoliagePatch patch, BufferManager bufferManager)
             {
                 this.vertexCount = 0;
                 this.Attached = false;
@@ -313,7 +313,11 @@ namespace Engine
                     });
 
                     //Attach data
-                    this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.buffer, patch.FoliageData);
+                    bufferManager.WriteBuffer(
+                        this.Game.Graphics, 
+                        this.vertexBufferSlot, 
+                        this.vertexBufferOffset, 
+                        patch.FoliageData);
 
                     this.vertexCount = patch.FoliageData.Length;
                     this.Attached = true;
@@ -335,17 +339,11 @@ namespace Engine
                         Counters.PrimitivesPerFrame += this.vertexCount / 3;
                     }
 
-                    //Sets vertex and index buffer
-                    this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.bufferBinding);
-                    Counters.IAVertexBuffersSets++;
-                    this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
-                    Counters.IAIndexBufferSets++;
-
                     for (int p = 0; p < technique.Description.PassCount; p++)
                     {
                         technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                        this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
+                        this.Game.Graphics.DeviceContext.Draw(this.vertexCount, this.vertexBufferOffset);
 
                         Counters.DrawCallsPerFrame++;
                     }
@@ -368,6 +366,10 @@ namespace Engine
         /// Game
         /// </summary>
         private Game game = null;
+        /// <summary>
+        /// Buffer manager
+        /// </summary>
+        private BufferManager bufferManager = new BufferManager();
 
         /// <summary>
         /// Foliage patches list
@@ -477,8 +479,10 @@ namespace Engine
 
                 for (int i = 0; i < MaxFoliageBuffers; i++)
                 {
-                    this.foliageBuffers.Add(new FoliageBuffer(game, description.Name));
+                    this.foliageBuffers.Add(new FoliageBuffer(game, this.bufferManager));
                 }
+
+                this.bufferManager.CreateBuffers(game.Graphics, description.Name, true, 0);
             }
         }
         /// <summary>
@@ -486,6 +490,8 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
+            Helper.Dispose(this.bufferManager);
+
             Helper.Dispose(this.foliageBuffers);
             Helper.Dispose(this.foliagePatches);
             Helper.Dispose(this.foliageMap);
@@ -530,7 +536,7 @@ namespace Engine
 
                             for (int i = 0; i < count; i++)
                             {
-                                this.foliagePatches[node].Add(new FoliagePatch(this.game));
+                                this.foliagePatches[node].Add(new FoliagePatch());
                             }
                         }
 
@@ -589,7 +595,7 @@ namespace Engine
 
                             while (toAssign.Count > 0 && freeBuffers.Count > 0)
                             {
-                                freeBuffers[0].AttachFoliage(context.EyePosition, toAssign[0]);
+                                freeBuffers[0].AttachFoliage(context.EyePosition, toAssign[0], this.bufferManager);
 
                                 toAssign.RemoveAt(0);
                                 freeBuffers.RemoveAt(0);
@@ -633,6 +639,8 @@ namespace Engine
 
                 if (visibleNodes != null && visibleNodes.Length > 0)
                 {
+                    this.bufferManager.SetBuffers(this.Game.Graphics);
+
                     //Sort fartest first
                     Array.Sort(visibleNodes, (f1, f2) =>
                     {
@@ -652,6 +660,12 @@ namespace Engine
                                 var vegetationTechnique = this.SetTechniqueVegetation(context, buffer.CurrentPatch.Channel);
                                 if (vegetationTechnique != null)
                                 {
+                                    this.bufferManager.SetInputAssembler(
+                                        this.Game.Graphics, 
+                                        vegetationTechnique, 
+                                        VertexTypes.Billboard, 
+                                        PrimitiveTopology.PointList);
+
                                     buffer.DrawFoliage(context, vegetationTechnique);
                                 }
                             }
@@ -681,7 +695,7 @@ namespace Engine
         /// <returns>Returns the selected technique</returns>
         private EffectTechnique SetTechniqueVegetationDefault(DrawContext context, int channel)
         {
-            EffectDefaultBillboard effect = DrawerPool.EffectDefaultBillboard;
+            var effect = DrawerPool.EffectDefaultBillboard;
 
             this.game.Graphics.SetBlendTransparent();
 
@@ -709,14 +723,7 @@ namespace Engine
 
             #endregion
 
-            var technique = effect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.DrawerMode);
-
-            this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-            Counters.IAInputLayoutSets++;
-            this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.PointList;
-            Counters.IAPrimitiveTopologySets++;
-
-            return technique;
+            return effect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.DrawerMode);
         }
         /// <summary>
         /// Sets thecnique for vegetation drawing in shadow mapping
@@ -726,7 +733,7 @@ namespace Engine
         /// <returns>Returns the selected technique</returns>
         private EffectTechnique SetTechniqueVegetationShadowMap(DrawContext context, int channel)
         {
-            EffectShadowBillboard effect = DrawerPool.EffectShadowBillboard;
+            var effect = DrawerPool.EffectShadowBillboard;
 
             this.game.Graphics.SetBlendTransparent();
 
@@ -754,14 +761,7 @@ namespace Engine
 
             #endregion
 
-            var technique = effect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.DrawerMode);
-
-            this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-            Counters.IAInputLayoutSets++;
-            this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.PointList;
-            Counters.IAPrimitiveTopologySets++;
-
-            return technique;
+            return effect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.DrawerMode);
         }
 
         /// <summary>

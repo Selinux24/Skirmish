@@ -82,10 +82,15 @@ namespace Engine
         /// <returns>Returns the pixel color</returns>
         public Color4 Get(float x, float y)
         {
-            float pX = x.GetRelative(this.MaxX, 0, 1);
-            float pZ = y.GetRelative(this.MaxY, 0, 1);
+            if (this.m_Data != null)
+            {
+                float pX = x.GetRelative(this.MaxX, 0, 1);
+                float pZ = y.GetRelative(this.MaxY, 0, 1);
 
-            return this.m_Data[(int)pX, (int)pZ];
+                return this.m_Data[(int)pX, (int)pZ];
+            }
+
+            return Color4.Black;
         }
         /// <summary>
         /// Gets the pixel data by absolute coordinates
@@ -95,7 +100,12 @@ namespace Engine
         /// <returns>Returns the pixel color</returns>
         public Color4 GetAbsolute(int x, int y)
         {
-            return this.m_Data[x, y];
+            if (this.m_Data != null)
+            {
+                return this.m_Data[x, y];
+            }
+
+            return Color4.Black;
         }
         /// <summary>
         /// Gets the pixel data by relative coordinates
@@ -106,10 +116,15 @@ namespace Engine
         /// <returns>Returns the pixel color</returns>
         public Color4 GetRelative(Vector3 pos, Vector2 min, Vector2 max)
         {
-            float x = pos.X.GetRelative(this.MaxX, min.X, max.X);
-            float z = pos.Z.GetRelative(this.MaxY, min.Y, max.Y);
+            if (this.m_Data != null)
+            {
+                float x = pos.X.GetRelative(this.MaxX, min.X, max.X);
+                float z = pos.Z.GetRelative(this.MaxY, min.Y, max.Y);
 
-            return this.m_Data[(int)x, (int)z];
+                return this.m_Data[(int)x, (int)z];
+            }
+
+            return Color4.Black;
         }
     }
 }
