@@ -65,7 +65,7 @@ namespace Engine.Common
             InitializeGeometry(ref res, modelContent, description);
 
             //Update meshes into device
-            InitializeMeshes(ref res, bufferManager);
+            InitializeMeshes(ref res, bufferManager, description.Instances);
 
             //Lights
             InitializeLights(ref res, modelContent);
@@ -342,7 +342,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drw">Drawing data</param>
         /// <param name="game">Game</param>
-        private static void InitializeMeshes(ref DrawingData drw, BufferManager bufferManager)
+        private static void InitializeMeshes(ref DrawingData drw, BufferManager bufferManager, int instances)
         {
             foreach (MeshMaterialsDictionary dictionary in drw.Meshes.Values)
             {
@@ -352,6 +352,8 @@ namespace Engine.Common
                     bufferManager.Add(
                         mesh.Id, 
                         mesh.Vertices,
+                        false,
+                        mesh.Instanced ? instances : 0,
                         out mesh.VertexBufferOffset, 
                         out mesh.VertexBufferSlot);
 
@@ -361,7 +363,9 @@ namespace Engine.Common
                         bufferManager.Add(
                             mesh.Id,
                             mesh.Indices,
-                            out mesh.IndexBufferOffset);
+                            false,
+                            out mesh.IndexBufferOffset,
+                            out mesh.IndexBufferSlot);
                     }
                 }
             }

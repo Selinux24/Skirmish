@@ -150,8 +150,10 @@ namespace Engine
                         #endregion
 
                         var mesh = dictionary[material];
+                        bufferManager.SetIndexBuffer(this.Game.Graphics, mesh.IndexBufferSlot);
+
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                        bufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertextType, mesh.Topology);
+                        bufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertextType, false, mesh.Topology);
 
                         count += mesh.IndexCount > 0 ? mesh.IndexCount : mesh.VertexCount;
 
@@ -296,7 +298,7 @@ namespace Engine
                 this.patchDictionary.Add(nodes[i].Id, patch);
             }
 
-            this.bufferManager.CreateBuffers(game.Graphics, this.Name, false, 0);
+            this.bufferManager.CreateBuffers(game.Graphics, this.Name);
 
             #endregion
 
@@ -349,7 +351,7 @@ namespace Engine
 
             if (nodes != null && nodes.Length > 0)
             {
-                this.bufferManager.SetBuffers(this.Game.Graphics);
+                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
 
                 Drawer sceneryEffect = null;
 

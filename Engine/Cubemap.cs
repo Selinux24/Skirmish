@@ -39,6 +39,10 @@ namespace Engine
         /// </summary>
         private int indexBufferOffset;
         /// <summary>
+        /// Index buffer slot
+        /// </summary>
+        private int indexBufferSlot;
+        /// <summary>
         /// Index count
         /// </summary>
         private int indexCount = 0;
@@ -76,7 +80,7 @@ namespace Engine
             this.InitializeBuffers(description.Geometry, description.ReverseFaces);
             this.InitializeTexture(description.ContentPath, description.Texture);
 
-            this.bufferManager.CreateBuffers(game.Graphics, this.Name, false, 0);
+            this.bufferManager.CreateBuffers(game.Graphics, this.Name);
         }
         /// <summary>
         /// Resource releasing
@@ -104,7 +108,8 @@ namespace Engine
         {
             if (this.indexCount > 0)
             {
-                this.bufferManager.SetBuffers(this.Game.Graphics);
+                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
+                this.bufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
@@ -115,7 +120,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultCubemap;
                 var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
 
-                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.Position, PrimitiveTopology.TriangleList);
+                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.Position, false, PrimitiveTopology.TriangleList);
 
                 #region Per frame update
 
@@ -166,8 +171,8 @@ namespace Engine
 
             if (reverse) iData = GeometryUtil.ChangeCoordinate(iData);
 
-            this.bufferManager.Add(0, vertices, out this.vertexBuferOffset, out this.vertexBufferSlot);
-            this.bufferManager.Add(0, iData, out this.indexBufferOffset);
+            this.bufferManager.Add(0, vertices, false, 0, out this.vertexBuferOffset, out this.vertexBufferSlot);
+            this.bufferManager.Add(0, iData, false, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = vertices.Length;
             this.indexCount = iData.Length;

@@ -277,7 +277,9 @@ namespace Engine
 
                 bufferManager.Add(
                     this.Id,
-                    new VertexBillboard[FoliagePatch.MAX], 
+                    new VertexBillboard[FoliagePatch.MAX],
+                    true,
+                    0,
                     out this.vertexBufferOffset, 
                     out this.vertexBufferSlot); 
             }
@@ -482,7 +484,7 @@ namespace Engine
                     this.foliageBuffers.Add(new FoliageBuffer(game, this.bufferManager));
                 }
 
-                this.bufferManager.CreateBuffers(game.Graphics, description.Name, true, 0);
+                this.bufferManager.CreateBuffers(game.Graphics, description.Name);
             }
         }
         /// <summary>
@@ -639,7 +641,7 @@ namespace Engine
 
                 if (visibleNodes != null && visibleNodes.Length > 0)
                 {
-                    this.bufferManager.SetBuffers(this.Game.Graphics);
+                    this.bufferManager.SetVertexBuffers(this.Game.Graphics);
 
                     //Sort fartest first
                     Array.Sort(visibleNodes, (f1, f2) =>
@@ -664,6 +666,7 @@ namespace Engine
                                         this.Game.Graphics, 
                                         vegetationTechnique, 
                                         VertexTypes.Billboard, 
+                                        true,
                                         PrimitiveTopology.PointList);
 
                                     buffer.DrawFoliage(context, vegetationTechnique);

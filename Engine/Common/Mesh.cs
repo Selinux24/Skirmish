@@ -52,6 +52,10 @@ namespace Engine.Common
         /// Index buffer offset
         /// </summary>
         public int IndexBufferOffset = -1;
+        /// <summary>
+        /// Index buffer slot
+        /// </summary>
+        public int IndexBufferSlot = -1;
 
         /// <summary>
         /// Name

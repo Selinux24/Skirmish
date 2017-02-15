@@ -35,6 +35,10 @@ namespace Engine
         /// </summary>
         private int indexBufferOffset = -1;
         /// <summary>
+        /// Index buffer slot
+        /// </summary>
+        private int indexBufferSlot = -1;
+        /// <summary>
         /// Index count
         /// </summary>
         private int indexCount = 0;
@@ -168,13 +172,13 @@ namespace Engine
 
             var indices = iData;
 
-            this.bufferManager.Add(0, vertices, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.bufferManager.Add(0, indices, out this.indexBufferOffset);
+            this.bufferManager.Add(0, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.bufferManager.Add(0, indices, false, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = vertices.Length;
             this.indexCount = indices.Length;
 
-            this.bufferManager.CreateBuffers(game.Graphics, this.Name, false, 0);
+            this.bufferManager.CreateBuffers(game.Graphics, this.Name);
         }
         /// <summary>
         /// Resource releasing
@@ -213,7 +217,8 @@ namespace Engine
         {
             if (this.indexCount > 0)
             {
-                this.bufferManager.SetBuffers(this.Game.Graphics);
+                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
+                this.bufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
@@ -224,7 +229,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultClouds;
                 var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
 
-                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, PrimitiveTopology.TriangleList);
+                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, false, PrimitiveTopology.TriangleList);
 
                 effect.UpdatePerFrame(
                     this.rotation * Matrix.Translation(context.EyePosition),

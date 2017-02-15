@@ -111,7 +111,7 @@ namespace Engine.Common
 
             this.LevelOfDetail = LevelOfDetailEnum.None;
 
-            this.BufferManager.CreateBuffers(game.Graphics, this.Name, dynamic, instances);
+            this.BufferManager.CreateBuffers(game.Graphics, this.Name);
         }
         /// <summary>
         /// Base model
@@ -150,7 +150,7 @@ namespace Engine.Common
 
             this.LevelOfDetail = this.defaultLevelOfDetail;
 
-            this.BufferManager.CreateBuffers(game.Graphics, this.Name, dynamic, instances);
+            this.BufferManager.CreateBuffers(game.Graphics, this.Name);
         }
         /// <summary>
         /// Dispose model buffers

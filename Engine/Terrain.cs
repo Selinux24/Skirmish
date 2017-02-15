@@ -312,10 +312,12 @@ namespace Engine
 
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode);
                     int ibOffset;
-                    bufferManager.Add(++id, indexList, out ibOffset);
+                    int ibSlot;
+                    bufferManager.Add(++id, indexList, false, out ibOffset, out ibSlot);
 
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
+                        Slot = ibSlot,
                         Offset = ibOffset,
                         Count = indexList.Length,
                     };
@@ -329,10 +331,12 @@ namespace Engine
 
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4);
                     int ibOffset;
-                    bufferManager.Add(++id, indexList, out ibOffset);
+                    int ibSlot;
+                    bufferManager.Add(++id, indexList, false, out ibOffset, out ibSlot);
 
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
+                        Slot = ibSlot,
                         Offset = ibOffset,
                         Count = indexList.Length,
                     };
@@ -345,10 +349,12 @@ namespace Engine
 
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4 / 4);
                     int ibOffset;
-                    bufferManager.Add(++id, indexList, out ibOffset);
+                    int ibSlot;
+                    bufferManager.Add(++id, indexList, false, out ibOffset, out ibSlot);
 
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
+                        Slot = ibSlot,
                         Offset = ibOffset,
                         Count = indexList.Length,
                     };
@@ -637,6 +643,7 @@ namespace Engine
                         this.game.Graphics,
                         terrainTechnique,
                         VertexTypes.Terrain,
+                        true,
                         PrimitiveTopology.TriangleList);
 
                     foreach (var lod in this.patches.Keys)
@@ -645,6 +652,10 @@ namespace Engine
                         {
                             if (item.Visible)
                             {
+                                bufferManager.SetIndexBuffer(
+                                    this.game.Graphics,
+                                    item.IndexBufferSlot);
+
                                 item.DrawTerrain(context, terrainTechnique);
                             }
                         }
@@ -845,9 +856,11 @@ namespace Engine
                     VertexTerrain[] vertexData = new VertexTerrain[vertices];
 
                     bufferManager.Add(
-                        id, 
-                        vertexData, 
-                        out patch.VertexBufferOffset, 
+                        id,
+                        vertexData,
+                        true,
+                        0,
+                        out patch.VertexBufferOffset,
                         out patch.VertexBufferSlot);
 
                     return patch;
@@ -915,6 +928,10 @@ namespace Engine
             /// Vertex buffer offset
             /// </summary>
             public int VertexBufferOffset;
+            /// <summary>
+            /// Index buffer slot
+            /// </summary>
+            public int IndexBufferSlot;
             /// <summary>
             /// Index buffer offset
             /// </summary>
@@ -984,11 +1001,13 @@ namespace Engine
             {
                 if (buffer != null)
                 {
+                    this.IndexBufferSlot = buffer.Slot;
                     this.IndexBufferOffset = buffer.Offset;
                     this.IndexCount = buffer.Count;
                 }
                 else
                 {
+                    this.IndexBufferSlot = -1;
                     this.IndexBufferOffset = -1;
                     this.IndexCount = 0;
                 }
@@ -1063,6 +1082,10 @@ namespace Engine
         class TerrainIndexBuffer
         {
             /// <summary>
+            /// Buffer Slot
+            /// </summary>
+            public int Slot;
+            /// <summary>
             /// Buffer Offset
             /// </summary>
             public int Offset;
@@ -1116,7 +1139,7 @@ namespace Engine
             //Initialize patch dictionary
             this.patches = new TerrainPatchDictionary(game, this.bufferManager, content, description);
 
-            this.bufferManager.CreateBuffers(game.Graphics, description.Name, true, 0);
+            this.bufferManager.CreateBuffers(game.Graphics, description.Name);
 
             if (!this.Description.DelayGeneration)
             {
@@ -1152,7 +1175,7 @@ namespace Engine
         {
             if (this.patches != null)
             {
-                this.bufferManager.SetBuffers(this.Game.Graphics);
+                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
 
                 this.patches.Draw(context, this.bufferManager);
             }

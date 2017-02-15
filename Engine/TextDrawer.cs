@@ -33,6 +33,10 @@ namespace Engine
         /// </summary>
         private int indexBufferOffset = -1;
         /// <summary>
+        /// Index buffer slot
+        /// </summary>
+        private int indexBufferSlot = -1;
+        /// <summary>
         /// Buffer manager
         /// </summary>
         private BufferManager bufferManager = new BufferManager();
@@ -187,9 +191,9 @@ namespace Engine
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
             uint[] indices = new uint[FontMap.MAXTEXTLENGTH * 6];
 
-            this.bufferManager.Add(0, vertices, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.bufferManager.Add(0, indices, out this.indexBufferOffset);
-            this.bufferManager.CreateBuffers(game.Graphics, this.Name, true, 0);
+            this.bufferManager.Add(0, vertices, true, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.bufferManager.Add(0, indices, true, out this.indexBufferOffset, out this.indexBufferSlot);
+            this.bufferManager.CreateBuffers(game.Graphics, this.Name);
 
             this.vertexCount = 0;
             this.indexCount = 0;
@@ -223,11 +227,12 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
-                this.bufferManager.SetBuffers(this.Game.Graphics);
+                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
+                this.bufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
 
                 var technique = DrawerPool.EffectDefaultFont.FontDrawer;
 
-                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, PrimitiveTopology.TriangleList);
+                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, true, PrimitiveTopology.TriangleList);
 
                 if (this.ShadowColor != Color.Transparent)
                 {
@@ -293,7 +298,7 @@ namespace Engine
                 out v, out i, out size);
 
             this.bufferManager.WriteBuffer(this.Game.Graphics, this.vertexBufferSlot, this.vertexBufferOffset, v);
-            this.bufferManager.WriteBuffer(this.Game.Graphics, this.indexBufferOffset, i);
+            this.bufferManager.WriteBuffer(this.Game.Graphics, this.indexBufferSlot, this.indexBufferOffset, i);
 
             this.vertexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
             this.indexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;

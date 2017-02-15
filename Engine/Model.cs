@@ -195,7 +195,7 @@ namespace Engine
 
             if (this.DrawingData != null)
             {
-                this.BufferManager.SetBuffers(this.Game.Graphics);
+                this.BufferManager.SetVertexBuffers(this.Game.Graphics);
 
                 instanceCount++;
 
@@ -275,8 +275,10 @@ namespace Engine
                             #endregion
 
                             var mesh = dictionary[material];
+                            this.BufferManager.SetIndexBuffer(this.Game.Graphics, mesh.IndexBufferSlot);
+
                             var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                            this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertextType, mesh.Topology);
+                            this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertextType, false, mesh.Topology);
 
                             count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
 
