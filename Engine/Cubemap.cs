@@ -1,17 +1,13 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
-using SharpDX.DXGI;
 using System;
-using Buffer = SharpDX.Direct3D11.Buffer;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
-    using Engine.Helpers;
 
     /// <summary>
     /// Cube-map drawer
@@ -19,30 +15,37 @@ namespace Engine
     public class Cubemap : Drawable
     {
         /// <summary>
-        /// Index buffer
-        /// </summary>
-        protected Buffer indexBuffer = null;
-        /// <summary>
-        /// Index count
-        /// </summary>
-        protected int indexCount = 0;
-        /// <summary>
-        /// Vertex buffer
-        /// </summary>
-        protected Buffer vertexBuffer = null;
-        /// <summary>
-        /// Vertex buffer binding
-        /// </summary>
-        protected VertexBufferBinding[] vertexBufferBinding = null;
-        /// <summary>
-        /// Cube map texture
-        /// </summary>
-        protected ShaderResourceView cubeMapTexture = null;
-
-        /// <summary>
         /// Local transform
         /// </summary>
         private Matrix local = Matrix.Identity;
+        /// <summary>
+        /// Buffer manager
+        /// </summary>
+        private BufferManager bufferManager = new BufferManager();
+        /// <summary>
+        /// Vertex buffer offset
+        /// </summary>
+        private int vertexBuferOffset;
+        /// <summary>
+        /// Vertex buffer offset
+        /// </summary>
+        private int vertexBufferSlot;
+        /// <summary>
+        /// Vertex count
+        /// </summary>
+        private int vertexCount;
+        /// <summary>
+        /// Index buffer offset
+        /// </summary>
+        private int indexBufferOffset;
+        /// <summary>
+        /// Index count
+        /// </summary>
+        private int indexCount = 0;
+        /// <summary>
+        /// Cube map texture
+        /// </summary>
+        private ShaderResourceView cubeMapTexture = null;
 
         /// <summary>
         /// Manipulator
@@ -72,14 +75,15 @@ namespace Engine
 
             this.InitializeBuffers(description.Geometry, description.ReverseFaces);
             this.InitializeTexture(description.ContentPath, description.Texture);
+
+            this.bufferManager.CreateBuffers(game.Graphics, this.Name, false, 0);
         }
         /// <summary>
         /// Resource releasing
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.vertexBuffer);
-            Helper.Dispose(this.indexBuffer);
+            Helper.Dispose(this.bufferManager);
         }
 
         /// <summary>
@@ -100,6 +104,8 @@ namespace Engine
         {
             if (this.indexCount > 0)
             {
+                this.bufferManager.SetBuffers(this.Game.Graphics);
+
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
                     Counters.InstancesPerFrame++;
@@ -108,6 +114,8 @@ namespace Engine
 
                 var effect = DrawerPool.EffectDefaultCubemap;
                 var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
+
+                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.Position, PrimitiveTopology.TriangleList);
 
                 #region Per frame update
 
@@ -121,21 +129,11 @@ namespace Engine
 
                 #endregion
 
-                //Sets vertex and index buffer
-                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                Counters.IAInputLayoutSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-
                 for (int p = 0; p < technique.Description.PassCount; p++)
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, this.indexBufferOffset, this.vertexBuferOffset);
 
                     Counters.DrawCallsPerFrame++;
                 }
@@ -168,13 +166,10 @@ namespace Engine
 
             if (reverse) iData = GeometryUtil.ChangeCoordinate(iData);
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(this.Name, vertices);
-            this.vertexBufferBinding = new[]
-            {
-                new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),
-            };
+            this.bufferManager.Add(0, vertices, out this.vertexBuferOffset, out this.vertexBufferSlot);
+            this.bufferManager.Add(0, iData, out this.indexBufferOffset);
 
-            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBuffer(this.Name, iData, false);
+            this.vertexCount = vertices.Length;
             this.indexCount = iData.Length;
         }
         /// <summary>
@@ -184,7 +179,7 @@ namespace Engine
         /// <param name="textures">Texture names</param>
         protected virtual void InitializeTexture(string contentPath, params string[] textures)
         {
-            ImageContent image = ImageContent.Array(contentPath, textures);
+            var image = ImageContent.Array(contentPath, textures);
             this.cubeMapTexture = this.Game.ResourceManager.CreateResource(image);
         }
     }

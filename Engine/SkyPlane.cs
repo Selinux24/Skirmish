@@ -1,17 +1,13 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
-using SharpDX.DXGI;
 using System;
-using Buffer = SharpDX.Direct3D11.Buffer;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
-    using Engine.Helpers;
 
     /// <summary>
     /// Sky plane
@@ -19,21 +15,29 @@ namespace Engine
     public class SkyPlane : Drawable
     {
         /// <summary>
-        /// Index buffer
+        /// Buffer manager
         /// </summary>
-        private Buffer indexBuffer = null;
+        private BufferManager bufferManager = new BufferManager();
+        /// <summary>
+        /// Vertex buffer offset
+        /// </summary>
+        private int vertexBufferOffset = -1;
+        /// <summary>
+        /// Vertex buffer slot
+        /// </summary>
+        private int vertexBufferSlot = -1;
+        /// <summary>
+        /// Vertex count
+        /// </summary>
+        private int vertexCount = 0;
+        /// <summary>
+        /// Index buffer offset
+        /// </summary>
+        private int indexBufferOffset = -1;
         /// <summary>
         /// Index count
         /// </summary>
         private int indexCount = 0;
-        /// <summary>
-        /// Vertex buffer
-        /// </summary>
-        private Buffer vertexBuffer = null;
-        /// <summary>
-        /// Vertex buffer binding
-        /// </summary>
-        private VertexBufferBinding[] vertexBufferBinding = null;
         /// <summary>
         /// Sky texture 1
         /// </summary>
@@ -120,13 +124,13 @@ namespace Engine
         {
             this.Cull = false;
 
-            ImageContent img1 = new ImageContent()
+            var img1 = new ImageContent()
             {
                 Streams = ContentManager.FindContent(description.ContentPath, description.Texture1Name),
             };
             this.skyTexture1 = game.ResourceManager.CreateResource(img1);
 
-            ImageContent img2 = new ImageContent()
+            var img2 = new ImageContent()
             {
                 Streams = ContentManager.FindContent(description.ContentPath, description.Texture2Name),
             };
@@ -164,22 +168,20 @@ namespace Engine
 
             var indices = iData;
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(description.Name, vertices);
-            this.vertexBufferBinding = new[]
-            {
-                new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),
-            };
+            this.bufferManager.Add(0, vertices, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.bufferManager.Add(0, indices, out this.indexBufferOffset);
 
-            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(description.Name, indices);
+            this.vertexCount = vertices.Length;
             this.indexCount = indices.Length;
+
+            this.bufferManager.CreateBuffers(game.Graphics, this.Name, false, 0);
         }
         /// <summary>
         /// Resource releasing
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.vertexBuffer);
-            Helper.Dispose(this.indexBuffer);
+            Helper.Dispose(this.bufferManager);
             Helper.Dispose(this.skyTexture1);
             Helper.Dispose(this.skyTexture2);
         }
@@ -211,6 +213,8 @@ namespace Engine
         {
             if (this.indexCount > 0)
             {
+                this.bufferManager.SetBuffers(this.Game.Graphics);
+
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
                     Counters.InstancesPerFrame++;
@@ -219,6 +223,8 @@ namespace Engine
 
                 var effect = DrawerPool.EffectDefaultClouds;
                 var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
+
+                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, PrimitiveTopology.TriangleList);
 
                 effect.UpdatePerFrame(
                     this.rotation * Matrix.Translation(context.EyePosition),
@@ -241,23 +247,13 @@ namespace Engine
                         this.PerturbationScale);
                 }
 
-                //Sets vertex and index buffer
-                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                Counters.IAInputLayoutSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-
                 this.Game.Graphics.SetBlendAdditive();
 
                 for (int p = 0; p < technique.Description.PassCount; p++)
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, this.indexBufferOffset, this.vertexBufferOffset);
 
                     Counters.DrawCallsPerFrame++;
                 }

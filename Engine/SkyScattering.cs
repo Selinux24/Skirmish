@@ -1,15 +1,11 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
-using SharpDX.DXGI;
 using System;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
-    using Engine.Helpers;
 
     /// <summary>
     /// Scattered sky
@@ -17,22 +13,29 @@ namespace Engine
     public class SkyScattering : Drawable
     {
         /// <summary>
-        /// Index buffer
+        /// Buffer manager
         /// </summary>
-        private Buffer indexBuffer = null;
+        private BufferManager bufferManager = new BufferManager();
+        /// <summary>
+        /// Vertex buffer offset
+        /// </summary>
+        private int vertexBufferOffset = -1;
+        /// <summary>
+        /// Vertex buffer slot
+        /// </summary>
+        private int vertexBufferSlot = -1;
+        /// <summary>
+        /// Vertex count
+        /// </summary>
+        private int vertexCount = 0;
+        /// <summary>
+        /// Index buffer offset
+        /// </summary>
+        private int indexBufferOffset = -1;
         /// <summary>
         /// Index count
         /// </summary>
         private int indexCount = 0;
-        /// <summary>
-        /// Vertex buffer
-        /// </summary>
-        private Buffer vertexBuffer = null;
-        /// <summary>
-        /// Vertex buffer binding
-        /// </summary>
-        private VertexBufferBinding[] vertexBufferBinding = null;
-
         /// <summary>
         /// Rayleigh scattering constant value
         /// </summary>
@@ -214,14 +217,15 @@ namespace Engine
             this.CalcScale();
 
             this.InitializeBuffers();
+
+            this.bufferManager.CreateBuffers(game.Graphics, this.Name, false, 0);
         }
         /// <summary>
         /// Resource releasing
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.vertexBuffer);
-            Helper.Dispose(this.indexBuffer);
+            Helper.Dispose(this.bufferManager);
         }
 
         /// <summary>
@@ -241,6 +245,8 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null && this.indexCount > 0)
             {
+                this.bufferManager.SetBuffers(this.Game.Graphics);
+
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
                     Counters.InstancesPerFrame++;
@@ -249,6 +255,8 @@ namespace Engine
 
                 var effect = DrawerPool.EffectDefaultSkyScattering;
                 var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
+
+                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.Position, PrimitiveTopology.TriangleList);
 
                 effect.UpdatePerFrame(
                     Matrix.Translation(context.EyePosition),
@@ -268,21 +276,11 @@ namespace Engine
                     context.Lights.FogColor,
                     keyLight.Direction);
 
-                //Sets vertex and index buffer
-                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                Counters.IAInputLayoutSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-
                 for (int p = 0; p < technique.Description.PassCount; p++)
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, 0, 0);
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, this.indexBufferOffset, this.vertexBufferOffset);
 
                     Counters.DrawCallsPerFrame++;
                 }
@@ -302,13 +300,10 @@ namespace Engine
 
             var indices = GeometryUtil.ChangeCoordinate(iData);
 
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferImmutable(this.Name, vertices);
-            this.vertexBufferBinding = new[]
-            {
-                new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),
-            };
+            this.bufferManager.Add(0, vertices, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.bufferManager.Add(0, indices, out this.indexBufferOffset);
 
-            this.indexBuffer = this.Game.Graphics.Device.CreateIndexBufferImmutable(this.Name, indices);
+            this.vertexCount = vertices.Length;
             this.indexCount = indices.Length;
         }
         /// <summary>

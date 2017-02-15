@@ -1,15 +1,11 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
-using SharpDX.DXGI;
-using Buffer = SharpDX.Direct3D11.Buffer;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
-    using Engine.Helpers;
 
     /// <summary>
     /// Minimap
@@ -17,21 +13,29 @@ namespace Engine
     public class SpriteTexture : Drawable, IScreenFitted
     {
         /// <summary>
-        /// Minimap vertex buffer
+        /// Buffer manager
         /// </summary>
-        private Buffer vertexBuffer;
+        private BufferManager bufferManager = new BufferManager();
         /// <summary>
-        /// Vertex buffer binding
+        /// Vertex buffer offset
         /// </summary>
-        private VertexBufferBinding vertexBufferBinding;
+        private int vertexBufferOffset = -1;
         /// <summary>
-        /// Minimap index buffer
+        /// Vertex buffer slot
         /// </summary>
-        private Buffer indexBuffer;
+        private int vertexBufferSlot = -1;
         /// <summary>
-        /// Drawer
+        /// Vertex count
         /// </summary>
-        private EffectDefaultSprite effect;
+        private int vertexCount = 0;
+        /// <summary>
+        /// Index buffer offset
+        /// </summary>
+        private int indexBufferOffset = -1;
+        /// <summary>
+        /// Index count
+        /// </summary>
+        private int indexCount = 0;
         /// <summary>
         /// View * projection for 2D projection
         /// </summary>
@@ -98,14 +102,24 @@ namespace Engine
 
             VertexPositionTexture[] vertices = VertexPositionTexture.Generate(cv, cuv);
 
-            this.vertexBuffer = this.Device.CreateVertexBufferImmutable(description.Name, vertices);
-            this.vertexBufferBinding = new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0);
-            this.indexBuffer = this.Device.CreateIndexBufferImmutable(description.Name, ci);
+            this.bufferManager.Add(0, vertices, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.bufferManager.Add(0, ci, out this.indexBufferOffset);
 
-            this.effect = DrawerPool.EffectDefaultSprite;
+            this.vertexCount = vertices.Length;
+            this.indexCount = ci.Length;
+
             this.Channels = description.Channel;
 
             this.InitializeContext(description.Left, description.Top, description.Width, description.Height);
+
+            this.bufferManager.CreateBuffers(game.Graphics, this.Name, false, 0);
+        }
+        /// <summary>
+        /// Dispose objects
+        /// </summary>
+        public override void Dispose()
+        {
+            Helper.Dispose(this.bufferManager);
         }
         /// <summary>
         /// Initialize minimap context
@@ -143,31 +157,26 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            this.bufferManager.SetBuffers(this.Game.Graphics);
+
             if (context.DrawerMode != DrawerModesEnum.ShadowMap)
             {
                 Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += 2;
+                Counters.PrimitivesPerFrame += this.indexCount / 3;
             }
 
-            var technique = effect.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode, this.Channels);
+            var technique = DrawerPool.EffectDefaultSprite.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode, this.Channels);
 
-            this.DeviceContext.InputAssembler.InputLayout = this.effect.GetInputLayout(technique);
-            Counters.IAInputLayoutSets++;
-            this.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            Counters.IAPrimitiveTopologySets++;
-            this.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-            Counters.IAVertexBuffersSets++;
-            this.DeviceContext.InputAssembler.SetIndexBuffer(this.indexBuffer, Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
+            this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, PrimitiveTopology.TriangleList);
 
-            this.effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-            this.effect.UpdatePerObject(Color.White, this.Texture, 0);
+            DrawerPool.EffectDefaultSprite.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
+            DrawerPool.EffectDefaultSprite.UpdatePerObject(Color.White, this.Texture, 0);
 
             for (int p = 0; p < technique.Description.PassCount; p++)
             {
                 technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
-                this.DeviceContext.DrawIndexed(6, 0, 0);
+                this.DeviceContext.DrawIndexed(this.indexCount, this.indexBufferOffset, this.vertexBufferOffset);
 
                 Counters.DrawCallsPerFrame++;
             }
@@ -187,23 +196,6 @@ namespace Engine
         public virtual void ResizeSprite(float width, float height)
         {
             this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
-        }
-        /// <summary>
-        /// Dispose objects
-        /// </summary>
-        public override void Dispose()
-        {
-            if (this.vertexBuffer != null)
-            {
-                this.vertexBuffer.Dispose();
-                this.vertexBuffer = null;
-            }
-
-            if (this.indexBuffer != null)
-            {
-                this.indexBuffer.Dispose();
-                this.indexBuffer = null;
-            }
         }
     }
 }
