@@ -53,6 +53,7 @@ namespace HeightmapTest
         private SceneLightSpot spotLight2 = null;
 
         private ModelInstanced rocks = null;
+        private ModelInstanced trees = null;
 
         private Model soldier = null;
         private TriangleListDrawer soldierTris = null;
@@ -130,6 +131,23 @@ namespace HeightmapTest
             this.rocks = this.AddInstancingModel(@"Resources/Rocks", @"boulder.xml", rDesc, true, layerObjects);
             sw.Stop();
             loadingText += string.Format("Rocks: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Trees
+
+            sw.Restart();
+            var treeDesc = new ModelInstancedDescription()
+            {
+                Name = "Trees",
+                CastShadow = true,
+                Static = true,
+                Instances = 300,
+                AlphaEnabled = true,
+            };
+            this.trees = this.AddInstancingModel(@"Resources/Trees", @"tree.xml", treeDesc, true, layerTerrain);
+            sw.Stop();
+            loadingText += string.Format("Trees: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
@@ -432,9 +450,11 @@ namespace HeightmapTest
             {
                 Random posRnd = new Random(1024);
 
+                BoundingBox bbox = this.terrain.GetBoundingBox();
+
                 for (int i = 0; i < this.rocks.Instances.Length; i++)
                 {
-                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
 
                     Vector3 rockPosition;
                     Triangle rockTri;
@@ -458,6 +478,25 @@ namespace HeightmapTest
                         this.rocks.Instances[i].Manipulator.SetPosition(rockPosition, true);
                         this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
                         this.rocks.Instances[i].Manipulator.SetScale(scale, true);
+                    }
+                }
+
+                bbox = new BoundingBox(new Vector3(-300, 0, -300), new Vector3(-1000, 1000, -1000));
+
+                for (int i = 0; i < this.trees.Instances.Length; i++)
+                {
+                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
+
+                    Vector3 treePosition;
+                    Triangle treeTri;
+                    float treeDist;
+                    if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                    {
+                        treePosition.Y -= posRnd.NextFloat(1f, 5f);
+
+                        this.trees.Instances[i].Manipulator.SetPosition(treePosition, true);
+                        this.trees.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0, true);
+                        this.trees.Instances[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
                     }
                 }
             }
@@ -933,10 +972,8 @@ namespace HeightmapTest
             this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
         }
 
-        private Vector3 GetRandomPoint(Random rnd, Vector3 offset)
+        private Vector3 GetRandomPoint(Random rnd, Vector3 offset, BoundingBox bbox)
         {
-            BoundingBox bbox = this.terrain.GetBoundingBox();
-
             while (true)
             {
                 Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);

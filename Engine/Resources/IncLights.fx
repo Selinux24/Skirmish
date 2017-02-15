@@ -275,7 +275,7 @@ inline float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float
 {
 	float fogLerp = saturate((fogRange - distToEye) / (fogRange - fogStart));
 
-	return lerp(fogColor, litColor, fogLerp);
+	return float4(lerp(fogColor.rgb, litColor.rgb, fogLerp), litColor.a);
 }
 
 inline void Phong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, float3 N, float3 V, float3 R, out float4 diffuse, out float4 specular)

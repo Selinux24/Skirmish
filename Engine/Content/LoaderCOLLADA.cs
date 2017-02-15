@@ -76,10 +76,10 @@ namespace Engine.Content
                             {
                                 foreach (Node node in vScene.Nodes)
                                 {
-                                    #region Lights
-
                                     if (node.IsLight)
                                     {
+                                        #region Lights
+
                                         Matrix trn = node.ReadMatrix();
 
                                         if (!trn.IsIdentity)
@@ -97,14 +97,13 @@ namespace Engine.Content
                                                 }
                                             }
                                         }
+
+                                        #endregion
                                     }
-
-                                    #endregion
-
-                                    #region Armatures (Skeletons)
-
-                                    if (node.IsArmature)
+                                    else if (node.IsArmature)
                                     {
+                                        #region Armatures (Skeletons)
+
                                         if (skeleton != null)
                                         {
                                             throw new Exception("Only one armature definition per file!");
@@ -118,14 +117,13 @@ namespace Engine.Content
 
                                             skeleton = new Skeleton(root);
                                         }
+
+                                        #endregion
                                     }
-
-                                    #endregion
-
-                                    #region Geometry nodes
-
-                                    if (node.HasGeometry)
+                                    else if (node.HasGeometry)
                                     {
+                                        #region Geometry nodes
+
                                         Matrix trn = node.ReadMatrix();
 
                                         if (!trn.IsIdentity)
@@ -146,14 +144,13 @@ namespace Engine.Content
                                                 }
                                             }
                                         }
+
+                                        #endregion
                                     }
-
-                                    #endregion
-
-                                    #region Controllers
-
-                                    if (node.HasController)
+                                    else if (node.HasController)
                                     {
+                                        #region Controllers
+
                                         //TODO: Where to apply this transform?
                                         Matrix trn = node.ReadMatrix();
 
@@ -166,9 +163,46 @@ namespace Engine.Content
                                                 controllers.Add(controllerName);
                                             }
                                         }
-                                    }
 
-                                    #endregion
+                                        #endregion
+                                    }
+                                    else
+                                    {
+                                        #region Default node
+
+                                        //TODO: Where to apply this transform?
+                                        Matrix trn = node.ReadMatrix();
+
+                                        if (node.Nodes != null)
+                                        {
+                                            foreach (var child in node.Nodes)
+                                            {
+                                                Matrix childTrn = child.ReadMatrix();
+
+                                                if (child.InstanceGeometry != null && child.InstanceGeometry.Length > 0)
+                                                {
+                                                    foreach (InstanceGeometry ig in child.InstanceGeometry)
+                                                    {
+                                                        string meshName = ig.Url.Replace("#", "");
+
+                                                        foreach (var submesh in modelContent.Geometry[meshName].Values)
+                                                        {
+                                                            if (!childTrn.IsIdentity)
+                                                            {
+                                                                for (int v = 0; v < submesh.Vertices.Length; v++)
+                                                                {
+                                                                    submesh.Vertices[v].Transform(childTrn);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+
+                                            }
+                                        }
+
+                                        #endregion
+                                    }
                                 }
                             }
                         }
@@ -354,6 +388,8 @@ namespace Engine.Content
                     {
                         foreach (SubMeshContent subMesh in info)
                         {
+                            subMesh.Material = FindMaterialTarget(subMesh.Material, dae.LibraryVisualScenes);
+
                             modelContent.Geometry.Add(geometry.Id, subMesh.Material, subMesh);
                         }
                     }
@@ -560,7 +596,7 @@ namespace Engine.Content
 
             int sourceCount = meshSources.Length;
 
-            foreach (PolyList polyList in polyLists)
+            foreach (var polyList in polyLists)
             {
                 List<VertexData> verts = new List<VertexData>();
 
@@ -650,7 +686,88 @@ namespace Engine.Content
         /// <returns>Returns sub mesh content</returns>
         private static SubMeshContent[] ProcessPolygons(Polygons[] polygons, Source[] meshSources, bool isVolume)
         {
-            throw new NotImplementedException();
+            List<SubMeshContent> res = new List<SubMeshContent>();
+
+            foreach (var polygon in polygons)
+            {
+                List<VertexData> verts = new List<VertexData>();
+
+                VertexTypes vertexType = EnumerateSemantics(polygon.Inputs);
+
+                Input vertexInput = polygon[EnumSemantics.Vertex];
+                Input normalInput = polygon[EnumSemantics.Normal];
+                Input texCoordInput = polygon[EnumSemantics.TexCoord];
+
+                Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
+                Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
+                Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
+
+                int inputCount = polygon.Inputs.Length;
+
+                for (int i = 0; i < polygon.Count; i++)
+                {
+                    var indices = polygon.P[i];
+                    var n = indices.Values.Length / inputCount;
+
+                    for (int v = 0; v < n; v++)
+                    {
+                        int index = (v * inputCount);
+
+                        VertexData vert = new VertexData()
+                        {
+                            FaceIndex = i,
+                        };
+
+                        if (vertexInput != null)
+                        {
+                            var vIndex = indices[index + vertexInput.Offset];
+                            vert.VertexIndex = vIndex;
+                            vert.Position = positions[vIndex];
+                        }
+
+                        if (normalInput != null)
+                        {
+                            var nIndex = indices[index + normalInput.Offset];
+                            vert.Normal = normals[nIndex];
+                        }
+
+                        if (texCoordInput != null)
+                        {
+                            var tIndex = indices[index + texCoordInput.Offset];
+                            Vector2 tex = texCoords[tIndex];
+
+                            //Invert Vertical coordinate
+                            tex.Y = -tex.Y;
+
+                            vert.Texture0 = tex;
+                        }
+
+                        verts.Add(vert);
+                    }
+                }
+
+                //Reorder vertices
+                VertexData[] data = new VertexData[verts.Count];
+                for (int i = 0; i < data.Length; i += 3)
+                {
+                    data[i + 0] = verts[i + 0];
+                    data[i + 1] = verts[i + 2];
+                    data[i + 2] = verts[i + 1];
+                }
+
+                SubMeshContent meshInfo = new SubMeshContent()
+                {
+                    Topology = PrimitiveTopology.TriangleList,
+                    VertexType = vertexType,
+                    Vertices = data,
+                    Material = polygon.Material,
+                    IsVolume = isVolume,
+                };
+
+                res.Add(meshInfo);
+            }
+
+            return res.ToArray();
         }
         /// <summary>
         /// Enumerate semantics
@@ -695,6 +812,52 @@ namespace Engine.Content
             {
                 return VertexTypes.Unknown;
             }
+        }
+
+        #endregion
+
+        #region Materials
+
+        private static string FindMaterialTarget(string material, VisualScene[] libraryVisualScenes)
+        {
+            foreach (var vs in libraryVisualScenes)
+            {
+                string res = FindMaterialTarget(material, vs.Nodes);
+
+                if (res != null) return res;
+            }
+
+            return material;
+        }
+
+        private static string FindMaterialTarget(string material, Node[] nodes)
+        {
+            foreach (var node in nodes)
+            {
+                if (node.HasGeometry)
+                {
+                    foreach (var geo in node.InstanceGeometry)
+                    {
+                        if (geo.BindMaterial != null)
+                        {
+                            var m = geo.BindMaterial.TechniqueCOMMON[0].InstanceMaterial[0];
+                            if (string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase))
+                            {
+                                return m.Target.Replace("#", "");
+                            }
+                        }
+                    }
+                }
+
+                if (node.Nodes != null)
+                {
+                    string res = FindMaterialTarget(material, node.Nodes);
+
+                    if (res != null) return res;
+                }
+            }
+
+            return null;
         }
 
         #endregion

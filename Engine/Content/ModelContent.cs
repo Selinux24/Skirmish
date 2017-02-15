@@ -552,9 +552,18 @@ namespace Engine.Content
                         {
                             List<SubMeshContent> skinnedM = new List<SubMeshContent>();
 
-                            if (this.Geometry[skin].ContainsKey(material))
+                            var dict = this.Geometry[skin];
+
+                            if (dict.ContainsKey(material))
                             {
-                                skinnedM.Add(this.Geometry[skin][material]);
+                                if (dict[material].IsVolume)
+                                {
+                                    newDict.Add(skin, material, dict[material]);
+                                }
+                                else
+                                {
+                                    skinnedM.Add(dict[material]);
+                                }
                             }
 
                             if (skinnedM.Count > 0)
@@ -586,9 +595,18 @@ namespace Engine.Content
                     {
                         if (!Array.Exists(this.Controllers.Skins, s => s == mesh))
                         {
-                            if (this.Geometry[mesh].ContainsKey(material))
+                            var dict = this.Geometry[mesh];
+
+                            if (dict.ContainsKey(material))
                             {
-                                staticM.Add(this.Geometry[mesh][material]);
+                                if (dict[material].IsVolume)
+                                {
+                                    newDict.Add(StaticMesh, material, dict[material]);
+                                }
+                                else
+                                {
+                                    staticM.Add(dict[material]);
+                                }
                             }
                         }
                     }
