@@ -13,10 +13,6 @@ namespace Engine
     public class SpriteTexture : Drawable, IScreenFitted
     {
         /// <summary>
-        /// Buffer manager
-        /// </summary>
-        private BufferManager bufferManager = new BufferManager();
-        /// <summary>
         /// Vertex buffer offset
         /// </summary>
         private int vertexBufferOffset = -1;
@@ -89,9 +85,10 @@ namespace Engine
         /// Contructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Sprite texture description</param>
-        public SpriteTexture(Game game, SpriteTextureDescription description)
-            : base(game, description)
+        public SpriteTexture(Game game, BufferManager bufferManager, SpriteTextureDescription description)
+            : base(game, bufferManager, description)
         {
             Vector3[] cv;
             Vector2[] cuv;
@@ -106,8 +103,8 @@ namespace Engine
 
             VertexPositionTexture[] vertices = VertexPositionTexture.Generate(cv, cuv);
 
-            this.bufferManager.Add(0, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.bufferManager.Add(0, ci, false, out this.indexBufferOffset, out this.indexBufferSlot);
+            this.BufferManager.Add(0, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.BufferManager.Add(0, ci, false, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = vertices.Length;
             this.indexCount = ci.Length;
@@ -115,15 +112,13 @@ namespace Engine
             this.Channels = description.Channel;
 
             this.InitializeContext(description.Left, description.Top, description.Width, description.Height);
-
-            this.bufferManager.CreateBuffers(game.Graphics, this.Name);
         }
         /// <summary>
         /// Dispose objects
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.bufferManager);
+
         }
         /// <summary>
         /// Initialize minimap context
@@ -161,8 +156,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            this.bufferManager.SetVertexBuffers(this.Game.Graphics);
-            this.bufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
+            this.BufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
 
             if (context.DrawerMode != DrawerModesEnum.ShadowMap)
             {
@@ -172,7 +166,7 @@ namespace Engine
 
             var technique = DrawerPool.EffectDefaultSprite.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode, this.Channels);
 
-            this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, false, PrimitiveTopology.TriangleList);
+            this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, false, PrimitiveTopology.TriangleList);
 
             DrawerPool.EffectDefaultSprite.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
             DrawerPool.EffectDefaultSprite.UpdatePerObject(Color.White, this.Texture, 0);

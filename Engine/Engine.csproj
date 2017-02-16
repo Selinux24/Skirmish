@@ -149,8 +149,11 @@
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Common\Batcher.cs" />
     <Compile Include="Common\BufferManager.cs" />
+    <Compile Include="Common\DrawContext.cs" />
+    <Compile Include="Common\DrawerModesEnum.cs" />
     <Compile Include="Common\IndexBufferShapeEnum.cs" />
     <Compile Include="Common\Intersection.cs" />
+    <Compile Include="Common\UpdateContext.cs" />
     <Compile Include="Common\UseMaterials.cs" />
     <Compile Include="Common\UseSkinningData.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />

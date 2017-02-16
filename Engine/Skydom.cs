@@ -15,10 +15,11 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="content">Content</param>
         /// <param name="description">Skydom description</param>
-        public Skydom(Game game, SkydomDescription description)
-            : base(game, description)
+        public Skydom(Game game, BufferManager bufferManager, SkydomDescription description)
+            : base(game, bufferManager, description)
         {
             this.Cull = false;
         }

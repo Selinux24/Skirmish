@@ -46,11 +46,12 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game instance</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
-        public LensFlare(Game game, LensFlareDescription description)
-            : base(game, description)
+        public LensFlare(Game game, BufferManager bufferManager, LensFlareDescription description)
+            : base(game, bufferManager, description)
         {
-            this.glowSprite = new Sprite(game, new SpriteDescription()
+            this.glowSprite = new Sprite(game, bufferManager, new SpriteDescription()
             {
                 ContentPath = description.ContentPath,
                 Height = 100,
@@ -76,7 +77,7 @@ namespace Engine
 
                     this.flares[i] = new Flare()
                     {
-                        FlareSprite = new Sprite(game, sprDesc),
+                        FlareSprite = new Sprite(game, bufferManager, sprDesc),
                         Position = flareDesc.Position,
                         Scale = flareDesc.Scale,
                         Color = flareDesc.Color,

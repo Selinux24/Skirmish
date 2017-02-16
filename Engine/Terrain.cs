@@ -1101,10 +1101,6 @@ namespace Engine
         /// Patch dictionary
         /// </summary>
         private TerrainPatchDictionary patches = null;
-        /// <summary>
-        /// Buffer manager
-        /// </summary>
-        private BufferManager bufferManager = new BufferManager();
 
         /// <summary>
         /// Gets the used material list
@@ -1131,15 +1127,14 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="content">Heightmap content</param>
         /// <param name="description">Terrain description</param>
-        public Terrain(Game game, HeightmapDescription content, GroundDescription description)
-            : base(game, description)
+        public Terrain(Game game, BufferManager bufferManager, HeightmapDescription content, GroundDescription description)
+            : base(game, bufferManager, description)
         {
             //Initialize patch dictionary
-            this.patches = new TerrainPatchDictionary(game, this.bufferManager, content, description);
-
-            this.bufferManager.CreateBuffers(game.Graphics, description.Name);
+            this.patches = new TerrainPatchDictionary(game, this.BufferManager, content, description);
 
             if (!this.Description.DelayGeneration)
             {
@@ -1152,7 +1147,6 @@ namespace Engine
         public override void Dispose()
         {
             Helper.Dispose(this.patches);
-            Helper.Dispose(this.bufferManager);
         }
         /// <summary>
         /// Updates the state of the terrain components
@@ -1164,7 +1158,7 @@ namespace Engine
             {
                 var visibleNodes = this.pickingQuadtree.GetNodesInVolume(ref context.Frustum);
 
-                this.patches.Update(context, visibleNodes, this.bufferManager);
+                this.patches.Update(context, visibleNodes, this.BufferManager);
             }
         }
         /// <summary>
@@ -1175,9 +1169,7 @@ namespace Engine
         {
             if (this.patches != null)
             {
-                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
-
-                this.patches.Draw(context, this.bufferManager);
+                this.patches.Draw(context, this.BufferManager);
             }
         }
 

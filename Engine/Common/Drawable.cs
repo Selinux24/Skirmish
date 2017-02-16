@@ -22,6 +22,10 @@ namespace Engine.Common
         /// </summary>
         public virtual DeviceContext DeviceContext { get { return this.Game.Graphics.DeviceContext; } }
         /// <summary>
+        /// Buffer manager
+        /// </summary>
+        public virtual BufferManager BufferManager { get; protected set; }
+        /// <summary>
         /// Name
         /// </summary>
         public string Name { get; set; }
@@ -72,9 +76,12 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        public Drawable(Game game, DrawableDescription description)
+        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="description">Description</param>
+        public Drawable(Game game, BufferManager bufferManager, DrawableDescription description)
         {
             this.Game = game;
+            this.BufferManager = bufferManager;
             this.Active = true;
             this.Visible = true;
             this.Order = 0;
@@ -135,146 +142,5 @@ namespace Engine.Common
         {
             return string.Format("Type: {0}; Name: {1}; Order: {2}", this.GetType(), this.Name, this.Order);
         }
-    }
-
-    /// <summary>
-    /// Updating context
-    /// </summary>
-    public class UpdateContext
-    {
-        /// <summary>
-        /// Context name
-        /// </summary>
-        public string Name = "";
-        /// <summary>
-        /// Game time
-        /// </summary>
-        public GameTime GameTime;
-        /// <summary>
-        /// World matrix
-        /// </summary>
-        public Matrix World;
-        /// <summary>
-        /// View matrix
-        /// </summary>
-        public Matrix View;
-        /// <summary>
-        /// Projection matrix
-        /// </summary>
-        public Matrix Projection;
-        /// <summary>
-        /// Projection near plane distance
-        /// </summary>
-        public float NearPlaneDistance;
-        /// <summary>
-        /// Projection far plane distance
-        /// </summary>
-        public float FarPlaneDistance;
-        /// <summary>
-        /// View * projection matrix
-        /// </summary>
-        public Matrix ViewProjection;
-        /// <summary>
-        /// Bounding frustum
-        /// </summary>
-        public BoundingFrustum Frustum;
-        /// <summary>
-        /// Eye position
-        /// </summary>
-        public Vector3 EyePosition;
-        /// <summary>
-        /// Eye view direction
-        /// </summary>
-        public Vector3 EyeDirection;
-        /// <summary>
-        /// Lights
-        /// </summary>
-        public SceneLights Lights;
-    }
-
-    /// <summary>
-    /// Drawing context
-    /// </summary>
-    public class DrawContext
-    {
-        /// <summary>
-        /// Context name
-        /// </summary>
-        public string Name = "";
-        /// <summary>
-        /// Game time
-        /// </summary>
-        public GameTime GameTime;
-        /// <summary>
-        /// Drawer mode
-        /// </summary>
-        public DrawerModesEnum DrawerMode = DrawerModesEnum.Forward;
-        /// <summary>
-        /// World matrix
-        /// </summary>
-        public Matrix World;
-        /// <summary>
-        /// View matrix
-        /// </summary>
-        public Matrix View;
-        /// <summary>
-        /// Projection matrix
-        /// </summary>
-        public Matrix Projection;
-        /// <summary>
-        /// View * projection matrix
-        /// </summary>
-        public Matrix ViewProjection;
-        /// <summary>
-        /// Bounding frustum
-        /// </summary>
-        public BoundingFrustum Frustum;
-        /// <summary>
-        /// Eye position
-        /// </summary>
-        public Vector3 EyePosition;
-        /// <summary>
-        /// Eye target
-        /// </summary>
-        public Vector3 EyeTarget;
-        /// <summary>
-        /// Lights
-        /// </summary>
-        public SceneLights Lights;
-        /// <summary>
-        /// View * projection from light matrix
-        /// </summary>
-        public Matrix FromLightViewProjection;
-        /// <summary>
-        /// Shadow maps
-        /// </summary>
-        public int ShadowMaps;
-        /// <summary>
-        /// Static shadow map
-        /// </summary>
-        public ShaderResourceView ShadowMapStatic;
-        /// <summary>
-        /// Dynamic shadow map
-        /// </summary>
-        public ShaderResourceView ShadowMapDynamic;
-    }
-
-    /// <summary>
-    /// Drawer modes
-    /// </summary>
-    public enum DrawerModesEnum
-    {
-        /// <summary>
-        /// Forward rendering (default)
-        /// </summary>
-        Forward,
-        /// <summary>
-        /// Deferred rendering
-        /// </summary>
-        Deferred,
-        /// <summary>
-        /// Shadow map
-        /// </summary>
-        ShadowMap,
     }
 }

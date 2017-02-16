@@ -229,10 +229,6 @@ namespace Engine
         /// Visible Nodes
         /// </summary>
         private PickingQuadTreeNode[] visibleNodes;
-        /// <summary>
-        /// Buffer manager
-        /// </summary>
-        private BufferManager bufferManager = new BufferManager();
 
         /// <summary>
         /// Gets the used material list
@@ -284,8 +280,8 @@ namespace Engine
         /// <param name="game">Game class</param>
         /// <param name="content">Geometry content</param>
         /// <param name="description">Terrain description</param>
-        public Scenery(Game game, ModelContent content, GroundDescription description)
-            : base(game, description)
+        public Scenery(Game game, BufferManager bufferManager, ModelContent content, GroundDescription description)
+            : base(game, bufferManager, description)
         {
             #region Patches
 
@@ -294,11 +290,9 @@ namespace Engine
             var nodes = this.pickingQuadtree.GetTailNodes();
             for (int i = 0; i < nodes.Length; i++)
             {
-                var patch = SceneryPatch.CreatePatch(game, this.bufferManager, content, nodes[i]);
+                var patch = SceneryPatch.CreatePatch(game, this.BufferManager, content, nodes[i]);
                 this.patchDictionary.Add(nodes[i].Id, patch);
             }
-
-            this.bufferManager.CreateBuffers(game.Graphics, this.Name);
 
             #endregion
 
@@ -313,7 +307,6 @@ namespace Engine
         public override void Dispose()
         {
             Helper.Dispose(this.patchDictionary);
-            Helper.Dispose(this.bufferManager);
         }
         /// <summary>
         /// Objects updating
@@ -351,8 +344,6 @@ namespace Engine
 
             if (nodes != null && nodes.Length > 0)
             {
-                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
-
                 Drawer sceneryEffect = null;
 
                 if (context.DrawerMode == DrawerModesEnum.Forward)
@@ -402,7 +393,7 @@ namespace Engine
 
                 for (int i = 0; i < nodes.Length; i++)
                 {
-                    this.patchDictionary[nodes[i].Id].DrawScenery(context, sceneryEffect, this.bufferManager);
+                    this.patchDictionary[nodes[i].Id].DrawScenery(context, sceneryEffect, this.BufferManager);
                 }
             }
         }

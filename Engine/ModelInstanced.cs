@@ -75,11 +75,12 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="content">Content</param>
         /// <param name="description">Description</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelInstanced(Game game, ModelContent content, ModelInstancedDescription description, bool dynamic = false)
-            : base(game, content, description, true, description.Instances, true, true, dynamic)
+        public ModelInstanced(Game game, BufferManager bufferManager, ModelContent content, ModelInstancedDescription description, bool dynamic = false)
+            : base(game, bufferManager, content, description, true, description.Instances, true, true, dynamic)
         {
             if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 
@@ -92,11 +93,12 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="content">Content</param>
         /// <param name="description">Description</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelInstanced(Game game, LODModelContent content, ModelInstancedDescription description, bool dynamic = false)
-            : base(game, content, description, true, description.Instances, true, true, dynamic)
+        public ModelInstanced(Game game, BufferManager bufferManager, LODModelContent content, ModelInstancedDescription description, bool dynamic = false)
+            : base(game, bufferManager, content, description, true, description.Instances, true, true, dynamic)
         {
             if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 
@@ -183,8 +185,6 @@ namespace Engine
 
                 if (effect != null)
                 {
-                    this.BufferManager.SetVertexBuffers(this.Game.Graphics);
-
                     #region Per frame update
 
                     if (context.DrawerMode == DrawerModesEnum.Forward)

@@ -52,10 +52,11 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Component description</param>
         /// <param name="count">Maximum line count</param>
-        public LineListDrawer(Game game, LineListDrawerDescription description, int count)
-            : base(game, description)
+        public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description, int count)
+            : base(game, bufferManager, description)
         {
             this.dictionaryChanged = false;
 
@@ -65,11 +66,12 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Component description</param>
         /// <param name="lines">Line list</param>
         /// <param name="color">Color</param>
-        public LineListDrawer(Game game, LineListDrawerDescription description, Line3D[] lines, Color4 color)
-            : base(game, description)
+        public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description, Line3D[] lines, Color4 color)
+            : base(game, bufferManager, description)
         {
             this.dictionary.Add(color, new List<Line3D>(lines));
             this.dictionaryChanged = true;
@@ -80,11 +82,12 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Component description</param>
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
-        public LineListDrawer(Game game, LineListDrawerDescription description, Triangle[] triangles, Color4 color)
-            : base(game, description)
+        public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description, Triangle[] triangles, Color4 color)
+            : base(game, bufferManager, description)
         {
             var lines = Line3D.CreateWiredTriangle(triangles);
 

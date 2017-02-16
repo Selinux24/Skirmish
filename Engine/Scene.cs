@@ -74,6 +74,10 @@ namespace Engine
         /// Flag to update the scene global resources
         /// </summary>
         protected bool UpdateGlobalResources { get; set; }
+        /// <summary>
+        /// Buffer manager
+        /// </summary>
+        protected BufferManager BufferManager = new BufferManager();
 
         /// <summary>
         /// Gets the scen world matrix
@@ -193,7 +197,14 @@ namespace Engine
         /// </summary>
         public virtual void Initialize()
         {
-
+            
+        }
+        /// <summary>
+        /// Generates scene resources
+        /// </summary>
+        public virtual void SetResources()
+        {
+            this.BufferManager.CreateBuffers(this.Game.Graphics, null);
         }
         /// <summary>
         /// Update scene objects
@@ -253,6 +264,8 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Draw(GameTime gameTime)
         {
+            this.BufferManager.SetVertexBuffers(this.Game.Graphics);
+
             this.Renderer.Draw(gameTime, this);
         }
         /// <summary>
@@ -375,13 +388,13 @@ namespace Engine
             {
                 if (optimize) geo[0].Optimize();
 
-                newModel = new Model(this.Game, geo[0], description);
+                newModel = new Model(this.Game, this.BufferManager, geo[0], description);
             }
             else
             {
                 var lod = new LODModelContent(geo, optimize);
 
-                newModel = new Model(this.Game, lod, description);
+                newModel = new Model(this.Game, this.BufferManager, lod, description);
             }
 
             this.AddComponent(newModel, order);
@@ -397,7 +410,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Model AddModel(ModelContent content, ModelDescription description, int order = 0)
         {
-            Model newModel = new Model(this.Game, content, description);
+            Model newModel = new Model(this.Game, this.BufferManager, content, description);
 
             this.AddComponent(newModel, order);
 
@@ -436,13 +449,13 @@ namespace Engine
             {
                 if (optimize) geo[0].Optimize();
 
-                newModel = new ModelInstanced(this.Game, geo[0], description);
+                newModel = new ModelInstanced(this.Game, this.BufferManager, geo[0], description);
             }
             else
             {
                 var lod = new LODModelContent(geo, optimize);
 
-                newModel = new ModelInstanced(this.Game, lod, description);
+                newModel = new ModelInstanced(this.Game, this.BufferManager, lod, description);
             }
 
             this.AddComponent(newModel, order);
@@ -458,7 +471,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public ModelInstanced AddInstancingModel(ModelContent content, ModelInstancedDescription description, int order = 0)
         {
-            ModelInstanced newModel = new ModelInstanced(this.Game, content, description);
+            ModelInstanced newModel = new ModelInstanced(this.Game, this.BufferManager, content, description);
 
             this.AddComponent(newModel, order);
 
@@ -527,7 +540,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Scenery AddScenery(ModelContent content, GroundDescription description, int order = 0)
         {
-            Scenery newModel = new Scenery(this.Game, content, description);
+            Scenery newModel = new Scenery(this.Game, this.BufferManager, content, description);
 
             this.AddComponent(newModel, order);
 
@@ -543,7 +556,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Terrain AddTerrain(HeightmapDescription content, GroundDescription description, bool optimize = true, int order = 0)
         {
-            Terrain newModel = new Terrain(this.Game, content, description);
+            Terrain newModel = new Terrain(this.Game, this.BufferManager, content, description);
 
             this.AddComponent(newModel, order);
 
@@ -557,7 +570,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public GroundGardener AddGardener(GroundGardenerDescription description, int order = 0)
         {
-            GroundGardener newModel = new GroundGardener(this.Game, description);
+            GroundGardener newModel = new GroundGardener(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 
@@ -571,7 +584,7 @@ namespace Engine
         /// <returns>Returns new mini-map</returns>
         public Minimap AddMinimap(MinimapDescription description, int order = 0)
         {
-            Minimap newModel = new Minimap(this.Game, description);
+            Minimap newModel = new Minimap(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 
@@ -585,7 +598,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Cubemap AddCubemap(CubemapDescription description, int order = 0)
         {
-            Cubemap newModel = new Cubemap(this.Game, description);
+            Cubemap newModel = new Cubemap(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 
@@ -599,7 +612,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Skydom AddSkydom(SkydomDescription description)
         {
-            Skydom newModel = new Skydom(this.Game, description);
+            Skydom newModel = new Skydom(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, -1);
 
@@ -612,7 +625,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public SkyScattering AddSkyScattering(SkyScatteringDescription description)
         {
-            SkyScattering newModel = new SkyScattering(this.Game, description);
+            SkyScattering newModel = new SkyScattering(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, -1);
 
@@ -625,7 +638,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public SkyPlane AddSkyPlane(SkyPlaneDescription description)
         {
-            SkyPlane newModel = new SkyPlane(this.Game, description);
+            SkyPlane newModel = new SkyPlane(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, -1);
 
@@ -639,7 +652,7 @@ namespace Engine
         /// <returns>Return new model</returns>
         public Sprite AddBackgroud(SpriteBackgroundDescription description, int order = 0)
         {
-            Sprite newModel = new Sprite(this.Game, description);
+            Sprite newModel = new Sprite(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 
@@ -653,9 +666,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Sprite AddSprite(SpriteDescription description, int order = 0)
         {
-            Sprite newModel = new Sprite(
-                this.Game,
-                description);
+            Sprite newModel = new Sprite(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 
@@ -669,9 +680,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public SpriteTexture AddSpriteTexture(SpriteTextureDescription description, int order = 0)
         {
-            SpriteTexture newModel = new SpriteTexture(
-                this.Game,
-                description);
+            SpriteTexture newModel = new SpriteTexture(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 
@@ -688,9 +697,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public SpriteButton AddSpriteButton(SpriteButtonDescription description, int order = 0)
         {
-            SpriteButton newModel = new SpriteButton(
-                this.Game,
-                description);
+            SpriteButton newModel = new SpriteButton(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 
@@ -704,9 +711,7 @@ namespace Engine
         /// <returns>Returns new model</returns>
         public Cursor AddCursor(SpriteDescription description, int order = 0)
         {
-            Cursor newModel = new Cursor(
-                this.Game,
-                description);
+            Cursor newModel = new Cursor(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 
@@ -720,7 +725,7 @@ namespace Engine
         /// <returns>Returns new text</returns>
         public TextDrawer AddText(TextDrawerDescription description, int order = 0)
         {
-            TextDrawer newModel = new TextDrawer(this.Game, description);
+            TextDrawer newModel = new TextDrawer(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 
@@ -734,7 +739,7 @@ namespace Engine
         /// <returns>Returns new particle manager</returns>
         public ParticleManager AddParticleManager(ParticleManagerDescription description, int order = 0)
         {
-            ParticleManager newModel = new ParticleManager(this.Game, description);
+            ParticleManager newModel = new ParticleManager(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 
@@ -749,7 +754,7 @@ namespace Engine
         /// <returns>Returns new line list drawer</returns>
         public LineListDrawer AddLineListDrawer(LineListDrawerDescription description, int count, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, description, count);
+            LineListDrawer newModel = new LineListDrawer(this.Game, this.BufferManager, description, count);
 
             this.AddComponent(newModel, order);
 
@@ -765,7 +770,7 @@ namespace Engine
         /// <returns>Returns new line list drawer</returns>
         public LineListDrawer AddLineListDrawer(LineListDrawerDescription description, Line3D[] lines, Color4 color, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, description, lines, color);
+            LineListDrawer newModel = new LineListDrawer(this.Game, this.BufferManager, description, lines, color);
 
             this.AddComponent(newModel, order);
 
@@ -781,7 +786,7 @@ namespace Engine
         /// <returns>Returns new line list drawer</returns>
         public LineListDrawer AddLineListDrawer(LineListDrawerDescription description, Triangle[] triangles, Color4 color, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, description, triangles, color);
+            LineListDrawer newModel = new LineListDrawer(this.Game, this.BufferManager, description, triangles, color);
 
             this.AddComponent(newModel, order);
 
@@ -796,7 +801,7 @@ namespace Engine
         /// <returns>Returns new triangle list drawer</returns>
         public TriangleListDrawer AddTriangleListDrawer(TriangleListDrawerDescription description, int count, int order = 0)
         {
-            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, description, count);
+            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, this.BufferManager, description, count);
 
             this.AddComponent(newModel, order);
 
@@ -812,7 +817,7 @@ namespace Engine
         /// <returns>Returns new triangle list drawer</returns>
         public TriangleListDrawer AddTriangleListDrawer(TriangleListDrawerDescription description, Triangle[] triangles, Color4 color, int order = 0)
         {
-            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, description, triangles, color);
+            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, this.BufferManager, description, triangles, color);
 
             this.AddComponent(newModel, order);
 
@@ -826,7 +831,7 @@ namespace Engine
         /// <returns>Returns new lens flare drawer</returns>
         public LensFlare AddLensFlare(LensFlareDescription description, int order = 0)
         {
-            LensFlare newModel = new LensFlare(this.Game, description);
+            LensFlare newModel = new LensFlare(this.Game, this.BufferManager, description);
 
             this.AddComponent(newModel, order);
 

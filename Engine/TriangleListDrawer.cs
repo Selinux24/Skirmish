@@ -52,10 +52,11 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
         /// <param name="count">Maximum triangle count</param>
-        public TriangleListDrawer(Game game, TriangleListDrawerDescription description, int count)
-            : base(game, description)
+        public TriangleListDrawer(Game game, BufferManager bufferManager, TriangleListDrawerDescription description, int count)
+            : base(game, bufferManager, description)
         {
             this.dictionaryChanged = false;
 
@@ -65,11 +66,12 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
-        public TriangleListDrawer(Game game, TriangleListDrawerDescription description, Triangle[] triangles, Color4 color)
-            : base(game, description)
+        public TriangleListDrawer(Game game, BufferManager bufferManager, TriangleListDrawerDescription description, Triangle[] triangles, Color4 color)
+            : base(game, bufferManager, description)
         {
             this.dictionary.Add(color, new List<Triangle>(triangles));
             this.dictionaryChanged = true;

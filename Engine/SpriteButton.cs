@@ -129,12 +129,14 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Button description</param>
-        public SpriteButton(Game game, SpriteButtonDescription description)
-            : base(game, description)
+        public SpriteButton(Game game, BufferManager bufferManager, SpriteButtonDescription description)
+            : base(game, bufferManager, description)
         {
             this.button = new Sprite(
                 game,
+                bufferManager,
                 new SpriteDescription()
                 {
                     Textures = new[] { description.TextureReleased, description.TexturePressed },
@@ -147,6 +149,7 @@ namespace Engine
             {
                 this.text = new TextDrawer(
                     game,
+                    bufferManager,
                     description.TextDescription);
             }
 

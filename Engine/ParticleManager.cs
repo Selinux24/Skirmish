@@ -37,9 +37,10 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Particle manager description</param>
-        public ParticleManager(Game game, ParticleManagerDescription description)
-            : base(game, description)
+        public ParticleManager(Game game, BufferManager bufferManager, ParticleManagerDescription description)
+            : base(game, bufferManager, description)
         {
 
         }

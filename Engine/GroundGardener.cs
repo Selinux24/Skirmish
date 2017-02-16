@@ -280,15 +280,15 @@ namespace Engine
                     new VertexBillboard[FoliagePatch.MAX],
                     true,
                     0,
-                    out this.vertexBufferOffset, 
-                    out this.vertexBufferSlot); 
+                    out this.vertexBufferOffset,
+                    out this.vertexBufferSlot);
             }
             /// <summary>
             /// Dispose
             /// </summary>
             public void Dispose()
             {
-                
+
             }
 
             /// <summary>
@@ -316,9 +316,9 @@ namespace Engine
 
                     //Attach data
                     bufferManager.WriteBuffer(
-                        this.Game.Graphics, 
-                        this.vertexBufferSlot, 
-                        this.vertexBufferOffset, 
+                        this.Game.Graphics,
+                        this.vertexBufferSlot,
+                        this.vertexBufferOffset,
                         patch.FoliageData);
 
                     this.vertexCount = patch.FoliageData.Length;
@@ -368,10 +368,6 @@ namespace Engine
         /// Game
         /// </summary>
         private Game game = null;
-        /// <summary>
-        /// Buffer manager
-        /// </summary>
-        private BufferManager bufferManager = new BufferManager();
 
         /// <summary>
         /// Foliage patches list
@@ -427,8 +423,10 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
-        public GroundGardener(Game game, GroundGardenerDescription description) : base(game, description)
+        public GroundGardener(Game game, BufferManager bufferManager, GroundGardenerDescription description) :
+            base(game, bufferManager, description)
         {
             this.game = game;
 
@@ -481,10 +479,8 @@ namespace Engine
 
                 for (int i = 0; i < MaxFoliageBuffers; i++)
                 {
-                    this.foliageBuffers.Add(new FoliageBuffer(game, this.bufferManager));
+                    this.foliageBuffers.Add(new FoliageBuffer(game, this.BufferManager));
                 }
-
-                this.bufferManager.CreateBuffers(game.Graphics, description.Name);
             }
         }
         /// <summary>
@@ -492,8 +488,6 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.bufferManager);
-
             Helper.Dispose(this.foliageBuffers);
             Helper.Dispose(this.foliagePatches);
             Helper.Dispose(this.foliageMap);
@@ -597,7 +591,7 @@ namespace Engine
 
                             while (toAssign.Count > 0 && freeBuffers.Count > 0)
                             {
-                                freeBuffers[0].AttachFoliage(context.EyePosition, toAssign[0], this.bufferManager);
+                                freeBuffers[0].AttachFoliage(context.EyePosition, toAssign[0], this.BufferManager);
 
                                 toAssign.RemoveAt(0);
                                 freeBuffers.RemoveAt(0);
@@ -641,8 +635,6 @@ namespace Engine
 
                 if (visibleNodes != null && visibleNodes.Length > 0)
                 {
-                    this.bufferManager.SetVertexBuffers(this.Game.Graphics);
-
                     //Sort fartest first
                     Array.Sort(visibleNodes, (f1, f2) =>
                     {
@@ -662,10 +654,10 @@ namespace Engine
                                 var vegetationTechnique = this.SetTechniqueVegetation(context, buffer.CurrentPatch.Channel);
                                 if (vegetationTechnique != null)
                                 {
-                                    this.bufferManager.SetInputAssembler(
-                                        this.Game.Graphics, 
-                                        vegetationTechnique, 
-                                        VertexTypes.Billboard, 
+                                    this.BufferManager.SetInputAssembler(
+                                        this.Game.Graphics,
+                                        vegetationTechnique,
+                                        VertexTypes.Billboard,
                                         true,
                                         PrimitiveTopology.PointList);
 

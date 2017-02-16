@@ -13,10 +13,6 @@ namespace Engine
     public class SkyScattering : Drawable
     {
         /// <summary>
-        /// Buffer manager
-        /// </summary>
-        private BufferManager bufferManager = new BufferManager();
-        /// <summary>
         /// Vertex buffer offset
         /// </summary>
         private int vertexBufferOffset = -1;
@@ -198,9 +194,10 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Sky scattering description class</param>
-        public SkyScattering(Game game, SkyScatteringDescription description)
-            : base(game, description)
+        public SkyScattering(Game game, BufferManager bufferManager, SkyScatteringDescription description)
+            : base(game, bufferManager, description)
         {
             this.Cull = false;
 
@@ -221,15 +218,13 @@ namespace Engine
             this.CalcScale();
 
             this.InitializeBuffers();
-
-            this.bufferManager.CreateBuffers(game.Graphics, this.Name);
         }
         /// <summary>
         /// Resource releasing
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.bufferManager);
+            
         }
 
         /// <summary>
@@ -249,8 +244,7 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null && this.indexCount > 0)
             {
-                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
-                this.bufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
+                this.BufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
@@ -261,7 +255,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultSkyScattering;
                 var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
 
-                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.Position, false, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.Position, false, PrimitiveTopology.TriangleList);
 
                 effect.UpdatePerFrame(
                     Matrix.Translation(context.EyePosition),
@@ -305,8 +299,8 @@ namespace Engine
 
             var indices = GeometryUtil.ChangeCoordinate(iData);
 
-            this.bufferManager.Add(0, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.bufferManager.Add(0, indices, false, out this.indexBufferOffset, out this.indexBufferSlot);
+            this.BufferManager.Add(0, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.BufferManager.Add(0, indices, false, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = vertices.Length;
             this.indexCount = indices.Length;

@@ -19,10 +19,6 @@ namespace Engine
         /// </summary>
         private Matrix local = Matrix.Identity;
         /// <summary>
-        /// Buffer manager
-        /// </summary>
-        private BufferManager bufferManager = new BufferManager();
-        /// <summary>
         /// Vertex buffer offset
         /// </summary>
         private int vertexBuferOffset;
@@ -70,24 +66,23 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="content">Content</param>
         /// <param name="description">Description</param>
-        public Cubemap(Game game, CubemapDescription description)
-            : base(game, description)
+        public Cubemap(Game game, BufferManager bufferManager, CubemapDescription description)
+            : base(game, bufferManager, description)
         {
             this.Manipulator = new Manipulator3D();
 
             this.InitializeBuffers(description.Geometry, description.ReverseFaces);
             this.InitializeTexture(description.ContentPath, description.Texture);
-
-            this.bufferManager.CreateBuffers(game.Graphics, this.Name);
         }
         /// <summary>
         /// Resource releasing
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.bufferManager);
+            
         }
 
         /// <summary>
@@ -108,8 +103,7 @@ namespace Engine
         {
             if (this.indexCount > 0)
             {
-                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
-                this.bufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
+                this.BufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
@@ -120,7 +114,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultCubemap;
                 var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
 
-                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.Position, false, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.Position, false, PrimitiveTopology.TriangleList);
 
                 #region Per frame update
 
@@ -171,8 +165,8 @@ namespace Engine
 
             if (reverse) iData = GeometryUtil.ChangeCoordinate(iData);
 
-            this.bufferManager.Add(0, vertices, false, 0, out this.vertexBuferOffset, out this.vertexBufferSlot);
-            this.bufferManager.Add(0, iData, false, out this.indexBufferOffset, out this.indexBufferSlot);
+            this.BufferManager.Add(0, vertices, false, 0, out this.vertexBuferOffset, out this.vertexBufferSlot);
+            this.BufferManager.Add(0, iData, false, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = vertices.Length;
             this.indexCount = iData.Length;

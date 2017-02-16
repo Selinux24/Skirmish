@@ -15,10 +15,6 @@ namespace Engine
     public class SkyPlane : Drawable
     {
         /// <summary>
-        /// Buffer manager
-        /// </summary>
-        private BufferManager bufferManager = new BufferManager();
-        /// <summary>
         /// Vertex buffer offset
         /// </summary>
         private int vertexBufferOffset = -1;
@@ -122,9 +118,10 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Sky plane description class</param>
-        public SkyPlane(Game game, SkyPlaneDescription description)
-            : base(game, description)
+        public SkyPlane(Game game, BufferManager bufferManager, SkyPlaneDescription description)
+            : base(game, bufferManager, description)
         {
             this.Cull = false;
 
@@ -172,20 +169,17 @@ namespace Engine
 
             var indices = iData;
 
-            this.bufferManager.Add(0, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.bufferManager.Add(0, indices, false, out this.indexBufferOffset, out this.indexBufferSlot);
+            this.BufferManager.Add(0, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.BufferManager.Add(0, indices, false, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = vertices.Length;
             this.indexCount = indices.Length;
-
-            this.bufferManager.CreateBuffers(game.Graphics, this.Name);
         }
         /// <summary>
         /// Resource releasing
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.bufferManager);
             Helper.Dispose(this.skyTexture1);
             Helper.Dispose(this.skyTexture2);
         }
@@ -217,8 +211,7 @@ namespace Engine
         {
             if (this.indexCount > 0)
             {
-                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
-                this.bufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
+                this.BufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
@@ -229,7 +222,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultClouds;
                 var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
 
-                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, false, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, false, PrimitiveTopology.TriangleList);
 
                 effect.UpdatePerFrame(
                     this.rotation * Matrix.Translation(context.EyePosition),

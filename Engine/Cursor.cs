@@ -53,10 +53,11 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Sprite description</param>
         /// <param name="centered">Cursor positioned on center of the image</param>
-        public Cursor(Game game, SpriteDescription description, bool centered = true)
-            : base(game, description)
+        public Cursor(Game game, BufferManager bufferManager, SpriteDescription description, bool centered = true)
+            : base(game, bufferManager, description)
         {
             this.Centered = centered;
         }

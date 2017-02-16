@@ -20,11 +20,6 @@ namespace Engine.Common
         private readonly LevelOfDetailEnum defaultLevelOfDetail = LevelOfDetailEnum.Minimum;
 
         /// <summary>
-        /// Buffer manager
-        /// </summary>
-        protected BufferManager BufferManager = new BufferManager();
-
-        /// <summary>
         /// Level of detail
         /// </summary>
         public virtual LevelOfDetailEnum LevelOfDetail { get; set; }
@@ -86,14 +81,16 @@ namespace Engine.Common
         /// Base model
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="content">Model content</param>
+        /// <param name="description">Description</param>
         /// <param name="instanced">Is instanced</param>
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelBase(Game game, ModelContent content, DrawableDescription description, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
-            : base(game, description)
+        public ModelBase(Game game, BufferManager bufferManager, ModelContent content, DrawableDescription description, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
+            : base(game, bufferManager, description)
         {
             var desc = new DrawingDataDescription()
             {
@@ -110,21 +107,21 @@ namespace Engine.Common
             this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
 
             this.LevelOfDetail = LevelOfDetailEnum.None;
-
-            this.BufferManager.CreateBuffers(game.Graphics, this.Name);
         }
         /// <summary>
         /// Base model
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="content">Model content</param>
+        /// <param name="description">Description</param>
         /// <param name="instanced">Is instanced</param>
         /// <param name="instances">Instance count</param>
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelBase(Game game, LODModelContent content, DrawableDescription description, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
-            : base(game, description)
+        public ModelBase(Game game, BufferManager bufferManager, LODModelContent content, DrawableDescription description, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
+            : base(game, bufferManager, description)
         {
             var desc = new DrawingDataDescription()
             {
@@ -149,8 +146,6 @@ namespace Engine.Common
             }
 
             this.LevelOfDetail = this.defaultLevelOfDetail;
-
-            this.BufferManager.CreateBuffers(game.Graphics, this.Name);
         }
         /// <summary>
         /// Dispose model buffers
@@ -159,9 +154,6 @@ namespace Engine.Common
         {
             Helper.Dispose(this.meshesByLOD);
             this.meshesByLOD = null;
-
-            Helper.Dispose(this.BufferManager);
-            this.BufferManager = null;
         }
 
         /// <summary>

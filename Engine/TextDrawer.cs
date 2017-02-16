@@ -36,10 +36,6 @@ namespace Engine
         /// Index buffer slot
         /// </summary>
         private int indexBufferSlot = -1;
-        /// <summary>
-        /// Buffer manager
-        /// </summary>
-        private BufferManager bufferManager = new BufferManager();
 
         /// <summary>
         /// View * projection matrix
@@ -57,6 +53,8 @@ namespace Engine
         /// Text
         /// </summary>
         private string text = null;
+
+        private bool map = false;
 
         /// <summary>
         /// Font name
@@ -77,7 +75,7 @@ namespace Engine
                 {
                     this.text = value;
 
-                    this.MapText();
+                    this.map = true;
                 }
             }
         }
@@ -176,9 +174,10 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
+        /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Text description</param>
-        public TextDrawer(Game game, TextDrawerDescription description)
-            : base(game, description)
+        public TextDrawer(Game game, BufferManager bufferManager, TextDrawerDescription description)
+            : base(game, bufferManager, description)
         {
             this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
 
@@ -191,9 +190,8 @@ namespace Engine
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
             uint[] indices = new uint[FontMap.MAXTEXTLENGTH * 6];
 
-            this.bufferManager.Add(0, vertices, true, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.bufferManager.Add(0, indices, true, out this.indexBufferOffset, out this.indexBufferSlot);
-            this.bufferManager.CreateBuffers(game.Graphics, this.Name);
+            this.BufferManager.Add(0, vertices, true, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.BufferManager.Add(0, indices, true, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = 0;
             this.indexCount = 0;
@@ -201,15 +199,13 @@ namespace Engine
             this.TextColor = description.TextColor;
             this.ShadowColor = description.ShadowColor;
             this.ShadowRelative = Vector2.One * 1f;
-
-            this.MapText();
         }
         /// <summary>
         /// Dispose
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.bufferManager);
+
         }
         /// <summary>
         /// Update component state
@@ -227,12 +223,18 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
-                this.bufferManager.SetVertexBuffers(this.Game.Graphics);
-                this.bufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
+                if (this.map)
+                {
+                    this.MapText();
+
+                    this.map = false;
+                }
+
+                this.BufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
 
                 var technique = DrawerPool.EffectDefaultFont.FontDrawer;
 
-                this.bufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, true, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, true, PrimitiveTopology.TriangleList);
 
                 if (this.ShadowColor != Color.Transparent)
                 {
@@ -297,8 +299,8 @@ namespace Engine
                 this.text,
                 out v, out i, out size);
 
-            this.bufferManager.WriteBuffer(this.Game.Graphics, this.vertexBufferSlot, this.vertexBufferOffset, v);
-            this.bufferManager.WriteBuffer(this.Game.Graphics, this.indexBufferSlot, this.indexBufferOffset, i);
+            this.BufferManager.WriteBuffer(this.Game.Graphics, this.vertexBufferSlot, this.vertexBufferOffset, v);
+            this.BufferManager.WriteBuffer(this.Game.Graphics, this.indexBufferSlot, this.indexBufferOffset, i);
 
             this.vertexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
             this.indexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
