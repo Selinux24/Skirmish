@@ -234,7 +234,7 @@ namespace Engine
 
                 var technique = DrawerPool.EffectDefaultFont.FontDrawer;
 
-                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, true, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
 
                 if (this.ShadowColor != Color.Transparent)
                 {

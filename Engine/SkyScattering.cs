@@ -255,7 +255,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultSkyScattering;
                 var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
 
-                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.Position, false, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
 
                 effect.UpdatePerFrame(
                     Matrix.Translation(context.EyePosition),

@@ -278,7 +278,7 @@ namespace Engine
                             this.BufferManager.SetIndexBuffer(this.Game.Graphics, mesh.IndexBufferSlot);
 
                             var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                            this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertextType, false, mesh.Topology);
+                            this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertexBufferSlot, mesh.Topology);
 
                             count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
 

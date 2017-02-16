@@ -26,14 +26,28 @@ namespace Engine.Common
             /// Vertices
             /// </summary>
             public List<IVertexData> Vertices = new List<IVertexData>();
-            /// <summary>
-            /// Input elements
-            /// </summary>
-            public List<InputElement> Input = new List<InputElement>();
+        }
+
+        class BufferKey
+        {
+            static int ID = 0;
+
+            public readonly int Id;
+            public VertexTypes Type;
+            public bool Dynamic;
             /// <summary>
             /// Instances
             /// </summary>
             public int Instances = 0;
+            /// <summary>
+            /// Input elements
+            /// </summary>
+            public List<InputElement> Input = new List<InputElement>();
+
+            public BufferKey()
+            {
+                this.Id = ID++;
+            }
         }
 
         /// <summary>
@@ -45,20 +59,18 @@ namespace Engine.Common
         /// <param name="dynamic">Create dynamic buffers</param>
         /// <param name="vertexBuffers">Vertex buffer collection</param>
         /// <param name="vertexBufferBindings">Vertex buffer bindings</param>
-        private static void CreateVertexBuffers(Graphics graphics, string name, Dictionary<VertexTypes, VertexData> vList, bool dynamic, List<Buffer> vertexBuffers, List<VertexBufferBinding> vertexBufferBindings)
+        private static void CreateVertexBuffers(Graphics graphics, string name, List<BufferKey> vKeys, List<VertexData> vList, List<Buffer> vertexBuffers, List<VertexBufferBinding> vertexBufferBindings)
         {
-            var vTypes = vList.Keys.ToArray();
-
-            for (int i = 0; i < vTypes.Length; i++)
+            for (int i = 0; i < vKeys.Count; i++)
             {
-                var vData = vList[vTypes[i]];
+                var vData = vList[vKeys[i].Id];
                 var verts = vData.Vertices.ToArray();
                 int slot = vertexBuffers.Count;
 
-                vertexBuffers.Add(graphics.Device.CreateVertexBuffer(name, verts, dynamic));
+                vertexBuffers.Add(graphics.Device.CreateVertexBuffer(name, verts, vKeys[i].Dynamic));
                 vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[slot], verts[0].GetStride(), 0));
 
-                vData.Input.AddRange(verts[0].GetInput(slot));
+                vKeys[i].Input.AddRange(verts[0].GetInput(slot));
             }
         }
         /// <summary>
@@ -71,7 +83,7 @@ namespace Engine.Common
         /// <param name="instances">Total instance count</param>
         /// <param name="vertexBuffers">Vertex buffer collection</param>
         /// <param name="vertexBufferBindings">Vertex buffer bindings</param>
-        private static void CreateInstancingBuffers(Graphics graphics, string name, Dictionary<VertexTypes, VertexData> vList1, Dictionary<VertexTypes, VertexData> vList2, int instances, List<Buffer> vertexBuffers, List<VertexBufferBinding> vertexBufferBindings)
+        private static void CreateInstancingBuffers(Graphics graphics, string name, List<BufferKey> vKeys, List<VertexData> vList, int instances, List<Buffer> vertexBuffers, List<VertexBufferBinding> vertexBufferBindings)
         {
             int instancingBufferOffset = vertexBuffers.Count;
 
@@ -79,15 +91,7 @@ namespace Engine.Common
             vertexBuffers.Add(graphics.Device.CreateVertexBufferWrite(name, instancingData));
             vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[instancingBufferOffset], instancingData[0].GetStride(), 0));
 
-            foreach (var item in vList1.Values)
-            {
-                if (item.Instances > 0)
-                {
-                    item.Input.AddRange(VertexInstancingData.GetInput(instancingBufferOffset));
-                }
-            }
-
-            foreach (var item in vList2.Values)
+            foreach (var item in vKeys)
             {
                 if (item.Instances > 0)
                 {
@@ -114,13 +118,13 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Static vertex data dictionary by vertex type
+        /// Keys
         /// </summary>
-        private Dictionary<VertexTypes, VertexData> staticVertexList = new Dictionary<VertexTypes, VertexData>();
+        private List<BufferKey> keys = new List<BufferKey>();
         /// <summary>
-        /// Dynamic vertex data dictionary by vertex type
+        /// Vertex data dictionary by vertex type
         /// </summary>
-        private Dictionary<VertexTypes, VertexData> dynamicVertexList = new Dictionary<VertexTypes, VertexData>();
+        private List<VertexData> vertexList = new List<VertexData>();
         /// <summary>
         /// Static index data list
         /// </summary>
@@ -155,12 +159,7 @@ namespace Engine.Common
             {
                 int count = 0;
 
-                foreach (var item in this.staticVertexList.Values)
-                {
-                    count += item.Instances;
-                }
-
-                foreach (var item in this.dynamicVertexList.Values)
+                foreach (var item in this.keys)
                 {
                     count += item.Instances;
                 }
@@ -219,20 +218,22 @@ namespace Engine.Common
             {
                 VertexTypes vType = vertexData[0].VertexType;
 
-                var vList = dynamic ? this.dynamicVertexList : this.staticVertexList;
-
-                if (!vList.ContainsKey(vType))
+                var keyIndex = this.keys.FindIndex(k => k.Type == vType && k.Dynamic == dynamic && (k.Instances > 0 == instances > 0));
+                if (keyIndex < 0)
                 {
-                    vList.Add(vType, new VertexData());
+                    keyIndex = this.keys.Count;
+
+                    this.keys.Add(new BufferKey() { Type = vType, Dynamic = dynamic, Instances = instances });
+                    this.vertexList.Add(new VertexData());
                 }
 
-                var vData = vList[vType];
+                var vId = this.keys[keyIndex].Id;
+
+                var vData = this.vertexList[vId];
                 offset = vData.Vertices.Count;
                 vData.Vertices.AddRange(vertexData);
-                vData.Instances = instances;
 
-                var vTypes = vList.Keys.ToArray();
-                slot = Array.IndexOf(vTypes, vType);
+                slot = vId;
             }
         }
         /// <summary>
@@ -272,11 +273,10 @@ namespace Engine.Common
             List<VertexBufferBinding> vertexBufferBindings = new List<VertexBufferBinding>();
             List<Buffer> indexBuffers = new List<Buffer>();
 
-            CreateVertexBuffers(graphics, name, this.staticVertexList, false, vertexBuffers, vertexBufferBindings);
-            CreateVertexBuffers(graphics, name, this.dynamicVertexList, true, vertexBuffers, vertexBufferBindings);
+            CreateVertexBuffers(graphics, name, this.keys, this.vertexList, vertexBuffers, vertexBufferBindings);
             if (instances > 0)
             {
-                CreateInstancingBuffers(graphics, name, this.staticVertexList, this.dynamicVertexList, instances, vertexBuffers, vertexBufferBindings);
+                CreateInstancingBuffers(graphics, name, this.keys, this.vertexList, instances, vertexBuffers, vertexBufferBindings);
             }
             CreateIndexBuffers(graphics, name, this.staticIndexList, false, indexBuffers);
             CreateIndexBuffers(graphics, name, this.dynamicIndexList, true, indexBuffers);
@@ -315,17 +315,17 @@ namespace Engine.Common
         /// <param name="technique">Technique</param>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="topology">Topology</param>
-        public void SetInputAssembler(Graphics graphics, EffectTechnique technique, VertexTypes vertexType, bool dynamic, PrimitiveTopology topology)
+        public void SetInputAssembler(Graphics graphics, EffectTechnique technique, int slot, PrimitiveTopology topology)
         {
             //The technique defines the vertex type
             if (!inputLayouts.ContainsKey(technique))
             {
                 var desc = technique.GetPassByIndex(0).Description;
-                var vList = dynamic ? this.dynamicVertexList : this.staticVertexList;
+                var key = this.keys[slot];
 
                 this.inputLayouts.Add(
                     technique,
-                    new InputLayout(graphics.Device, desc.Signature, vList[vertexType].Input.ToArray()));
+                    new InputLayout(graphics.Device, desc.Signature, key.Input.ToArray()));
             }
 
             graphics.DeviceContext.InputAssembler.InputLayout = inputLayouts[technique];

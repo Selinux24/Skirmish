@@ -639,19 +639,18 @@ namespace Engine
                 var terrainTechnique = this.SetTechniqueTerrain(context);
                 if (terrainTechnique != null)
                 {
-                    bufferManager.SetInputAssembler(
-                        this.game.Graphics,
-                        terrainTechnique,
-                        VertexTypes.Terrain,
-                        true,
-                        PrimitiveTopology.TriangleList);
-
                     foreach (var lod in this.patches.Keys)
                     {
                         foreach (var item in this.patches[lod])
                         {
                             if (item.Visible)
                             {
+                                bufferManager.SetInputAssembler(
+                                    this.game.Graphics,
+                                    terrainTechnique,
+                                    item.VertexBufferSlot,
+                                    PrimitiveTopology.TriangleList);
+
                                 bufferManager.SetIndexBuffer(
                                     this.game.Graphics,
                                     item.IndexBufferSlot);

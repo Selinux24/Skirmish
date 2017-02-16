@@ -237,7 +237,7 @@ namespace Engine
             /// <summary>
             /// Buffer slot
             /// </summary>
-            private int vertexBufferSlot = -1;
+            public int vertexBufferSlot = -1;
             /// <summary>
             /// Vertex buffer offset
             /// </summary>
@@ -657,8 +657,7 @@ namespace Engine
                                     this.BufferManager.SetInputAssembler(
                                         this.Game.Graphics,
                                         vegetationTechnique,
-                                        VertexTypes.Billboard,
-                                        true,
+                                        buffer.vertexBufferSlot,
                                         PrimitiveTopology.PointList);
 
                                     buffer.DrawFoliage(context, vegetationTechnique);

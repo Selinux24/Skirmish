@@ -222,7 +222,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultClouds;
                 var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
 
-                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, false, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
 
                 effect.UpdatePerFrame(
                     this.rotation * Matrix.Translation(context.EyePosition),

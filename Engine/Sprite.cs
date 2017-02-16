@@ -247,7 +247,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultSprite;
                 var technique = effect.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode);
 
-                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, false, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
 
                 #region Per frame update
 

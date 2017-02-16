@@ -166,7 +166,7 @@ namespace Engine
 
             var technique = DrawerPool.EffectDefaultSprite.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode, this.Channels);
 
-            this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, VertexTypes.PositionTexture, false, PrimitiveTopology.TriangleList);
+            this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
 
             DrawerPool.EffectDefaultSprite.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
             DrawerPool.EffectDefaultSprite.UpdatePerObject(Color.White, this.Texture, 0);
