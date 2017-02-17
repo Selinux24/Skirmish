@@ -18,23 +18,26 @@ namespace Engine.Common
     public class BufferManager : IDisposable
     {
         /// <summary>
-        /// Vertex data
+        /// Vertex buffer description
         /// </summary>
-        class VertexData
+        class VertexBufferDescription
         {
             /// <summary>
-            /// Vertices
+            /// Name
             /// </summary>
-            public List<IVertexData> Vertices = new List<IVertexData>();
-        }
-
-        class BufferKey
-        {
-            static int ID = 0;
-
-            public readonly int Id;
-            public VertexTypes Type;
-            public bool Dynamic;
+            public string Name = null;
+            /// <summary>
+            /// Vertex type
+            /// </summary>
+            public readonly VertexTypes Type;
+            /// <summary>
+            /// Dynamic buffer
+            /// </summary>
+            public readonly bool Dynamic;
+            /// <summary>
+            /// Vertex data
+            /// </summary>
+            public List<IVertexData> Data = new List<IVertexData>();
             /// <summary>
             /// Instances
             /// </summary>
@@ -44,9 +47,40 @@ namespace Engine.Common
             /// </summary>
             public List<InputElement> Input = new List<InputElement>();
 
-            public BufferKey()
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public VertexBufferDescription(VertexTypes type, bool dynamic)
             {
-                this.Id = ID++;
+                this.Type = type;
+                this.Dynamic = dynamic;
+            }
+        }
+
+        /// <summary>
+        /// Index buffer description
+        /// </summary>
+        class IndexBufferDescription
+        {
+            /// <summary>
+            /// Name
+            /// </summary>
+            public string Name = null;
+            /// <summary>
+            /// Dynamic
+            /// </summary>
+            public readonly bool Dynamic = false;
+            /// <summary>
+            /// Index data
+            /// </summary>
+            public List<uint> Data = new List<uint>();
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public IndexBufferDescription(bool dynamic)
+            {
+                this.Dynamic = dynamic;
             }
         }
 
@@ -54,41 +88,36 @@ namespace Engine.Common
         /// Creates the vertex buffers
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        /// <param name="name">Name</param>
-        /// <param name="vList">Vertex list</param>
-        /// <param name="dynamic">Create dynamic buffers</param>
+        /// <param name="vKeys">Vertices</param>
         /// <param name="vertexBuffers">Vertex buffer collection</param>
         /// <param name="vertexBufferBindings">Vertex buffer bindings</param>
-        private static void CreateVertexBuffers(Graphics graphics, string name, List<BufferKey> vKeys, List<VertexData> vList, List<Buffer> vertexBuffers, List<VertexBufferBinding> vertexBufferBindings)
+        private static void CreateVertexBuffers(Graphics graphics, List<VertexBufferDescription> vKeys, List<Buffer> vertexBuffers, List<VertexBufferBinding> vertexBufferBindings)
         {
             for (int i = 0; i < vKeys.Count; i++)
             {
-                var vData = vList[vKeys[i].Id];
-                var verts = vData.Vertices.ToArray();
+                var data = vKeys[i].Data.ToArray();
                 int slot = vertexBuffers.Count;
 
-                vertexBuffers.Add(graphics.Device.CreateVertexBuffer(name, verts, vKeys[i].Dynamic));
-                vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[slot], verts[0].GetStride(), 0));
+                vertexBuffers.Add(graphics.Device.CreateVertexBuffer(vKeys[i].Name, data, vKeys[i].Dynamic));
+                vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[slot], data[0].GetStride(), 0));
 
-                vKeys[i].Input.AddRange(verts[0].GetInput(slot));
+                vKeys[i].Input.AddRange(data[0].GetInput(slot));
             }
         }
         /// <summary>
         /// Creates the instancing buffer
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        /// <param name="name">Name</param>
-        /// <param name="vList1">Static list</param>
-        /// <param name="vList2">Dynamic list</param>
+        /// <param name="vKeys">Vertices</param>
         /// <param name="instances">Total instance count</param>
         /// <param name="vertexBuffers">Vertex buffer collection</param>
         /// <param name="vertexBufferBindings">Vertex buffer bindings</param>
-        private static void CreateInstancingBuffers(Graphics graphics, string name, List<BufferKey> vKeys, List<VertexData> vList, int instances, List<Buffer> vertexBuffers, List<VertexBufferBinding> vertexBufferBindings)
+        private static void CreateInstancingBuffers(Graphics graphics, List<VertexBufferDescription> vKeys, int instances, List<Buffer> vertexBuffers, List<VertexBufferBinding> vertexBufferBindings)
         {
             int instancingBufferOffset = vertexBuffers.Count;
 
             var instancingData = new VertexInstancingData[instances];
-            vertexBuffers.Add(graphics.Device.CreateVertexBufferWrite(name, instancingData));
+            vertexBuffers.Add(graphics.Device.CreateVertexBufferWrite(null, instancingData));
             vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[instancingBufferOffset], instancingData[0].GetStride(), 0));
 
             foreach (var item in vKeys)
@@ -103,36 +132,30 @@ namespace Engine.Common
         /// Creates index buffers
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        /// <param name="name">Name</param>
-        /// <param name="iList">Index list</param>
-        /// <param name="dynamic">Create dynamic buffers</param>
+        /// <param name="iKeys">Indices</param>
         /// <param name="indexBuffers">Index buffer list</param>
-        private static void CreateIndexBuffers(Graphics graphics, string name, List<uint> iList, bool dynamic, List<Buffer> indexBuffers)
+        private static void CreateIndexBuffers(Graphics graphics, List<IndexBufferDescription> iKeys, List<Buffer> indexBuffers)
         {
-            if (iList.Count > 0)
+            for (int i = 0; i < iKeys.Count; i++)
             {
-                int slot = indexBuffers.Count;
+                var data = iKeys[i].Data.ToArray();
 
-                indexBuffers.Add(graphics.Device.CreateIndexBuffer(name, iList.ToArray(), dynamic));
+                indexBuffers.Add(graphics.Device.CreateIndexBuffer(iKeys[i].Name, data, iKeys[i].Dynamic));
             }
         }
 
         /// <summary>
-        /// Keys
+        /// Game instance
         /// </summary>
-        private List<BufferKey> keys = new List<BufferKey>();
+        private Game game = null;
         /// <summary>
-        /// Vertex data dictionary by vertex type
+        /// Vertex keys
         /// </summary>
-        private List<VertexData> vertexList = new List<VertexData>();
+        private List<VertexBufferDescription> vertexData = new List<VertexBufferDescription>();
         /// <summary>
-        /// Static index data list
+        /// Index keys
         /// </summary>
-        private List<uint> staticIndexList = new List<uint>();
-        /// <summary>
-        /// Dynamic index data list
-        /// </summary>
-        private List<uint> dynamicIndexList = new List<uint>();
+        private List<IndexBufferDescription> indexData = new List<IndexBufferDescription>();
         /// <summary>
         /// Input layouts by technique
         /// </summary>
@@ -159,7 +182,7 @@ namespace Engine.Common
             {
                 int count = 0;
 
-                foreach (var item in this.keys)
+                foreach (var item in this.vertexData)
                 {
                     count += item.Instances;
                 }
@@ -171,9 +194,10 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        public BufferManager()
+        /// <param name="game">Game</param>
+        public BufferManager(Game game)
         {
-
+            this.game = game;
         }
         /// <summary>
         /// Free resources from memory
@@ -185,6 +209,9 @@ namespace Engine.Common
 
             Helper.Dispose(this.IndexBuffers);
             this.IndexBuffers = null;
+
+            Helper.Dispose(this.inputLayouts);
+            this.inputLayouts = null;
         }
 
         /// <summary>
@@ -195,7 +222,7 @@ namespace Engine.Common
         /// <param name="vertexData">Vertex list</param>
         /// <param name="offset">Returns the assigned offset in buffer</param>
         /// <param name="slot">Returns the assigned buffer slot</param>
-        public void Add<T>(int id, T[] vertexData, bool dynamic, int instances, out int offset, out int slot) where T : struct, IVertexData
+        public void Add<T>(string id, T[] vertexData, bool dynamic, int instances, out int offset, out int slot) where T : struct, IVertexData
         {
             List<IVertexData> verts = new List<IVertexData>();
             Array.ForEach(vertexData, v => verts.Add(v));
@@ -209,7 +236,7 @@ namespace Engine.Common
         /// <param name="vertexData">Vertex list</param>
         /// <param name="offset">Returns the assigned offset in buffer</param>
         /// <param name="slot">Returns the assigned buffer slot</param>
-        public void Add(int id, IVertexData[] vertexData, bool dynamic, int instances, out int offset, out int slot)
+        public void Add(string id, IVertexData[] vertexData, bool dynamic, int instances, out int offset, out int slot)
         {
             offset = -1;
             slot = -1;
@@ -218,22 +245,22 @@ namespace Engine.Common
             {
                 VertexTypes vType = vertexData[0].VertexType;
 
-                var keyIndex = this.keys.FindIndex(k => k.Type == vType && k.Dynamic == dynamic && (k.Instances > 0 == instances > 0));
+                var keyIndex = this.vertexData.FindIndex(k => k.Type == vType && k.Dynamic == dynamic && (k.Instances > 0 == instances > 0));
                 if (keyIndex < 0)
                 {
-                    keyIndex = this.keys.Count;
+                    keyIndex = this.vertexData.Count;
 
-                    this.keys.Add(new BufferKey() { Type = vType, Dynamic = dynamic, Instances = instances });
-                    this.vertexList.Add(new VertexData());
+                    this.vertexData.Add(new VertexBufferDescription(vType, dynamic) { Name = id });
                 }
 
-                var vId = this.keys[keyIndex].Id;
+                var key = this.vertexData[keyIndex];
 
-                var vData = this.vertexList[vId];
-                offset = vData.Vertices.Count;
-                vData.Vertices.AddRange(vertexData);
+                offset = key.Data.Count;
 
-                slot = vId;
+                key.Data.AddRange(vertexData);
+                key.Instances += instances;
+
+                slot = keyIndex;
             }
         }
         /// <summary>
@@ -242,44 +269,47 @@ namespace Engine.Common
         /// <param name="id">Id</param>
         /// <param name="indexData">Index list</param>
         /// <param name="offset">Returns the assigned offset in buffer</param>
-        public void Add(int id, uint[] indexData, bool dynamic, out int offset, out int slot)
+        public void Add(string id, uint[] indexData, bool dynamic, out int offset, out int slot)
         {
             offset = -1;
             slot = -1;
 
             if (indexData != null && indexData.Length > 0)
             {
-                var iList = dynamic ? this.dynamicIndexList : this.staticIndexList;
+                var keyIndex = this.indexData.FindIndex(k => k.Dynamic == dynamic);
+                if (keyIndex < 0)
+                {
+                    keyIndex = this.indexData.Count;
 
-                offset = iList.Count;
-                iList.AddRange(indexData);
+                    this.indexData.Add(new IndexBufferDescription(dynamic) { Name = id });
+                }
 
-                slot = dynamic && this.staticIndexList.Count > 0 ? 1 : 0;
+                var key = this.indexData[keyIndex];
+
+                offset = key.Data.Count;
+                key.Data.AddRange(indexData);
+
+                slot = keyIndex;
             }
         }
 
         /// <summary>
         /// Creates and populates the buffer
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="name">Name</param>
-        /// <param name="dynamic">Use dynamic buffers</param>
-        /// <param name="instances">Instance count</param>
-        public void CreateBuffers(Graphics graphics, string name)
+        public void CreateBuffers()
         {
             int instances = this.TotalInstances;
 
-            List<Buffer> vertexBuffers = new List<Buffer>();
-            List<VertexBufferBinding> vertexBufferBindings = new List<VertexBufferBinding>();
-            List<Buffer> indexBuffers = new List<Buffer>();
+            var vertexBuffers = new List<Buffer>();
+            var vertexBufferBindings = new List<VertexBufferBinding>();
+            var indexBuffers = new List<Buffer>();
 
-            CreateVertexBuffers(graphics, name, this.keys, this.vertexList, vertexBuffers, vertexBufferBindings);
+            CreateVertexBuffers(this.game.Graphics, this.vertexData, vertexBuffers, vertexBufferBindings);
             if (instances > 0)
             {
-                CreateInstancingBuffers(graphics, name, this.keys, this.vertexList, instances, vertexBuffers, vertexBufferBindings);
+                CreateInstancingBuffers(this.game.Graphics, this.vertexData, instances, vertexBuffers, vertexBufferBindings);
             }
-            CreateIndexBuffers(graphics, name, this.staticIndexList, false, indexBuffers);
-            CreateIndexBuffers(graphics, name, this.dynamicIndexList, true, indexBuffers);
+            CreateIndexBuffers(this.game.Graphics, this.indexData, indexBuffers);
 
             this.VertexBuffers = vertexBuffers.ToArray();
             this.VertexBufferBindings = vertexBufferBindings.ToArray();
@@ -289,110 +319,99 @@ namespace Engine.Common
         /// <summary>
         /// Sets vertex buffers to device context
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public void SetVertexBuffers(Graphics graphics)
+        public void SetVertexBuffers()
         {
-            graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.VertexBufferBindings);
-            Counters.IAVertexBuffersSets++;
+            this.game.Graphics.IASetVertexBuffers(0, this.VertexBufferBindings);
         }
         /// <summary>
         /// Sets index buffers to device context
         /// </summary>
-        /// <param name="graphics">Graphics</param>
         /// <param name="slot">Slot</param>
-        public void SetIndexBuffer(Graphics graphics, int slot)
+        public void SetIndexBuffer(int slot)
         {
             if (slot >= 0)
             {
-                graphics.DeviceContext.InputAssembler.SetIndexBuffer(this.IndexBuffers[slot], Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
+                this.game.Graphics.IASetIndexBuffer(this.IndexBuffers[slot], Format.R32_UInt, 0);
             }
         }
         /// <summary>
         /// Sets input layout to device context
         /// </summary>
-        /// <param name="graphics">Graphics</param>
         /// <param name="technique">Technique</param>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="topology">Topology</param>
-        public void SetInputAssembler(Graphics graphics, EffectTechnique technique, int slot, PrimitiveTopology topology)
+        public void SetInputAssembler(EffectTechnique technique, int slot, PrimitiveTopology topology)
         {
             //The technique defines the vertex type
             if (!inputLayouts.ContainsKey(technique))
             {
                 var desc = technique.GetPassByIndex(0).Description;
-                var key = this.keys[slot];
+                var key = this.vertexData[slot];
 
                 this.inputLayouts.Add(
                     technique,
-                    new InputLayout(graphics.Device, desc.Signature, key.Input.ToArray()));
+                    new InputLayout(this.game.Graphics.Device, desc.Signature, key.Input.ToArray()));
             }
 
-            graphics.DeviceContext.InputAssembler.InputLayout = inputLayouts[technique];
-            Counters.IAInputLayoutSets++;
-            graphics.DeviceContext.InputAssembler.PrimitiveTopology = topology;
-            Counters.IAPrimitiveTopologySets++;
+            this.game.Graphics.IAInputLayout = inputLayouts[technique];
+            this.game.Graphics.IAPrimitiveTopology = topology;
         }
 
         /// <summary>
         /// Writes instancing data
         /// </summary>
-        /// <param name="graphics">Graphics</param>
         /// <param name="data">Instancig data</param>
-        public void WriteInstancingData(Graphics graphics, VertexInstancingData[] data)
+        public void WriteInstancingData(VertexInstancingData[] data)
         {
             if (data != null && data.Length > 0)
             {
                 var instancingBuffer = this.VertexBuffers[this.VertexBuffers.Length - 1];
 
-                graphics.DeviceContext.WriteDiscardBuffer(instancingBuffer, data);
+                this.game.Graphics.DeviceContext.WriteDiscardBuffer(instancingBuffer, data);
             }
         }
         /// <summary>
         /// Writes data into buffer
         /// </summary>
-        /// <param name="graphics">Graphics</param>
         /// <param name="vertexBufferSlot">Slot</param>
         /// <param name="vertexBufferOffset">Offset</param>
         /// <param name="data">Data to write</param>
-        public void WriteBuffer<T>(Graphics graphics, int vertexBufferSlot, int vertexBufferOffset, T[] data) where T : struct, IVertexData
+        public void WriteBuffer<T>(int vertexBufferSlot, int vertexBufferOffset, T[] data) where T : struct, IVertexData
         {
             if (data != null && data.Length > 0)
             {
                 var buffer = this.VertexBuffers[vertexBufferSlot];
 
-                graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, vertexBufferOffset, data);
+                this.game.Graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, vertexBufferOffset, data);
             }
         }
         /// <summary>
         /// Writes data into buffer
         /// </summary>
-        /// <param name="graphics">Graphics</param>
         /// <param name="vertexBufferSlot">Slot</param>
         /// <param name="vertexBufferOffset">Offset</param>
         /// <param name="data">Data to write</param>
-        public void WriteBuffer(Graphics graphics, int vertexBufferSlot, int vertexBufferOffset, IVertexData[] data)
+        public void WriteBuffer(int vertexBufferSlot, int vertexBufferOffset, IVertexData[] data)
         {
             if (data != null && data.Length > 0)
             {
                 var buffer = this.VertexBuffers[vertexBufferSlot];
 
-                graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, vertexBufferOffset, data);
+                this.game.Graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, vertexBufferOffset, data);
             }
         }
         /// <summary>
         /// Writes data into buffer
         /// </summary>
-        /// <param name="graphics">Graphics</param>
         /// <param name="indexBufferOffset">Offset</param>
         /// <param name="data">Data to write</param>
-        public void WriteBuffer(Graphics graphics, int indexBufferSlot, int indexBufferOffset, uint[] data)
+        public void WriteBuffer(int indexBufferSlot, int indexBufferOffset, uint[] data)
         {
             if (data != null && data.Length > 0)
             {
                 var buffer = this.IndexBuffers[indexBufferSlot];
 
-                graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, indexBufferOffset, data);
+                this.game.Graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, indexBufferOffset, data);
             }
         }
     }

@@ -220,8 +220,8 @@ namespace Engine
 
                 int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(groundDescription.Quadtree.MaximumDepth);
 
-                this.InitializeTerrainPatches(bufferManager, trianglesPerNode);
-                this.InitializeTerrainIndices(bufferManager, trianglesPerNode);
+                this.InitializeTerrainPatches(groundDescription.Name, bufferManager, trianglesPerNode);
+                this.InitializeTerrainIndices(groundDescription.Name, bufferManager, trianglesPerNode);
 
                 this.tmp = new Dictionary<LevelOfDetailEnum, List<PickingQuadTreeNode>>();
                 tmp.Add(LevelOfDetailEnum.High, new List<PickingQuadTreeNode>());
@@ -254,8 +254,9 @@ namespace Engine
             /// Initialize patch dictionary
             /// </summary>
             /// <param name="name">Name</param>
+            /// <param name="bufferManager">Buffer manager</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
-            private void InitializeTerrainPatches(BufferManager bufferManager, int trianglesPerNode)
+            private void InitializeTerrainPatches(string name, BufferManager bufferManager, int trianglesPerNode)
             {
                 this.patches = new Dictionary<LevelOfDetailEnum, TerrainPatch[]>();
 
@@ -268,25 +269,25 @@ namespace Engine
 
                 for (int i = 0; i < MaxPatchesHighLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, ++id, LevelOfDetailEnum.High, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, string.Format("{0}.{1}", name, ++id), LevelOfDetailEnum.High, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.High][i] = patch;
                 }
 
                 for (int i = 0; i < MaxPatchesMediumLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, ++id, LevelOfDetailEnum.Medium, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, string.Format("{0}.{1}", name, ++id), LevelOfDetailEnum.Medium, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.Medium][i] = patch;
                 }
 
                 for (int i = 0; i < MaxPatchesLowLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, ++id, LevelOfDetailEnum.Low, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, string.Format("{0}.{1}", name, ++id), LevelOfDetailEnum.Low, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.Low][i] = patch;
                 }
 
                 for (int i = 0; i < MaxPatchesMinimumLevel; i++)
                 {
-                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, ++id, LevelOfDetailEnum.Minimum, trianglesPerNode);
+                    var patch = TerrainPatch.CreatePatch(this.game, bufferManager, string.Format("{0}.{1}", name, ++id), LevelOfDetailEnum.Minimum, trianglesPerNode);
                     this.patches[LevelOfDetailEnum.Minimum][i] = patch;
                 }
             }
@@ -294,8 +295,9 @@ namespace Engine
             /// Initialize index dictionary
             /// </summary>
             /// <param name="name">Name</param>
+            /// <param name="bufferManager">Buffer manager</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
-            private void InitializeTerrainIndices(BufferManager bufferManager, int trianglesPerNode)
+            private void InitializeTerrainIndices(string name, BufferManager bufferManager, int trianglesPerNode)
             {
                 this.indices = new Dictionary<LevelOfDetailEnum, Dictionary<IndexBufferShapeEnum, TerrainIndexBuffer>>();
 
@@ -313,7 +315,7 @@ namespace Engine
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode);
                     int ibOffset;
                     int ibSlot;
-                    bufferManager.Add(++id, indexList, false, out ibOffset, out ibSlot);
+                    bufferManager.Add(string.Format("{0}.{1}", name, ++id), indexList, false, out ibOffset, out ibSlot);
 
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
@@ -332,7 +334,7 @@ namespace Engine
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4);
                     int ibOffset;
                     int ibSlot;
-                    bufferManager.Add(++id, indexList, false, out ibOffset, out ibSlot);
+                    bufferManager.Add(string.Format("{0}.{1}", name, ++id), indexList, false, out ibOffset, out ibSlot);
 
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
@@ -350,7 +352,7 @@ namespace Engine
                     uint[] indexList = GeometryUtil.GenerateIndices(shape, trianglesPerNode / 4 / 4);
                     int ibOffset;
                     int ibSlot;
-                    bufferManager.Add(++id, indexList, false, out ibOffset, out ibSlot);
+                    bufferManager.Add(string.Format("{0}.{1}", name, ++id), indexList, false, out ibOffset, out ibSlot);
 
                     TerrainIndexBuffer buffer = new TerrainIndexBuffer()
                     {
@@ -645,15 +647,9 @@ namespace Engine
                         {
                             if (item.Visible)
                             {
-                                bufferManager.SetInputAssembler(
-                                    this.game.Graphics,
-                                    terrainTechnique,
-                                    item.VertexBufferSlot,
-                                    PrimitiveTopology.TriangleList);
+                                bufferManager.SetInputAssembler(terrainTechnique, item.VertexBufferSlot, PrimitiveTopology.TriangleList);
 
-                                bufferManager.SetIndexBuffer(
-                                    this.game.Graphics,
-                                    item.IndexBufferSlot);
+                                bufferManager.SetIndexBuffer(item.IndexBufferSlot);
 
                                 item.DrawTerrain(context, terrainTechnique);
                             }
@@ -716,14 +712,7 @@ namespace Engine
 
                 #endregion
 
-                var technique = effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.DrawerMode);
-
-                this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                Counters.IAInputLayoutSets++;
-                this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-
-                return technique;
+                return effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.DrawerMode);
             }
             /// <summary>
             /// Sets thecnique for terrain drawing with deferred renderer
@@ -761,14 +750,7 @@ namespace Engine
 
                 #endregion
 
-                var technique = effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.DrawerMode);
-
-                this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                Counters.IAInputLayoutSets++;
-                this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-
-                return technique;
+                return effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.DrawerMode);
             }
             /// <summary>
             /// Sets thecnique for terrain drawing in shadow mapping
@@ -789,14 +771,7 @@ namespace Engine
 
                 #endregion
 
-                var technique = effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.DrawerMode);
-
-                this.game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                Counters.IAInputLayoutSets++;
-                this.game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-
-                return technique;
+                return effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.DrawerMode);
             }
 
             /// <summary>
@@ -834,11 +809,12 @@ namespace Engine
             /// Creates a new patch of the specified level of detail
             /// </summary>
             /// <param name="game">Game</param>
-            /// <param name="name">Name</param>
+            /// <param name="bufferManager">Buffer manager</param>
+            /// <param name="id">Identifier</param>
             /// <param name="lod">Level of detail</param>
             /// <param name="trianglesPerNode">Triangles per node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static TerrainPatch CreatePatch(Game game, BufferManager bufferManager, int id, LevelOfDetailEnum lod, int trianglesPerNode)
+            public static TerrainPatch CreatePatch(Game game, BufferManager bufferManager, string id, LevelOfDetailEnum lod, int trianglesPerNode)
             {
                 int triangleCount = 0;
 
@@ -987,7 +963,7 @@ namespace Engine
                             //    Array.ForEach(data, d => d.SetChannelValue(VertexDataChannels.Color, new Color4(1f, 0.5f, 0.5f, 1f)));
                             //}
 
-                            bufferManager.WriteBuffer(this.Game.Graphics, this.VertexBufferSlot, this.VertexBufferOffset, data);
+                            bufferManager.WriteBuffer(this.VertexBufferSlot, this.VertexBufferOffset, data);
                         }
                     }
                 }

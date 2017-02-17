@@ -281,16 +281,10 @@ namespace Engine
         {
             var techniqueForStreamOut = effect.GetTechniqueForStreamOut(VertexTypes.GPUParticle);
 
-            var inputLayout = effect.GetInputLayout(techniqueForStreamOut);
-            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
-            Counters.IAInputLayoutSets++;
-
-            this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.firstRun ? this.emitterBinding : this.drawingBinding);
-            Counters.IAVertexBuffersSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
-            Counters.IAPrimitiveTopologySets++;
+            this.Game.Graphics.IAInputLayout = effect.GetInputLayout(techniqueForStreamOut);
+            this.Game.Graphics.IASetVertexBuffers(0, this.firstRun ? this.emitterBinding : this.drawingBinding);
+            this.Game.Graphics.IASetIndexBuffer(null, Format.R32_UInt, 0);
+            this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
             this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(this.streamOutBinding);
             Counters.SOTargetsSet++;
@@ -347,16 +341,10 @@ namespace Engine
                 drawerMode,
                 this.RotateSpeed != Vector2.Zero);
 
-            var inputLayout = effect.GetInputLayout(techniqueForDrawing);
-            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = inputLayout;
-            Counters.IAInputLayoutSets++;
-
-            this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.drawingBinding);
-            Counters.IAVertexBuffersSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
-            this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
-            Counters.IAPrimitiveTopologySets++;
+            this.Game.Graphics.IAInputLayout = effect.GetInputLayout(techniqueForDrawing);
+            this.Game.Graphics.IASetVertexBuffers(0, this.drawingBinding);
+            this.Game.Graphics.IASetIndexBuffer(null, Format.R32_UInt, 0);
+            this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
             this.Game.Graphics.SetDepthStencilRDZEnabled();
 

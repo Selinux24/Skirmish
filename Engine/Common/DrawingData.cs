@@ -350,7 +350,7 @@ namespace Engine.Common
                 {
                     //Vertices
                     bufferManager.Add(
-                        mesh.Id, 
+                        mesh.Name, 
                         mesh.Vertices,
                         false,
                         mesh.Instanced ? instances : 0,
@@ -361,7 +361,7 @@ namespace Engine.Common
                     {
                         //Indices
                         bufferManager.Add(
-                            mesh.Id,
+                            mesh.Name,
                             mesh.Indices,
                             false,
                             out mesh.IndexBufferOffset,

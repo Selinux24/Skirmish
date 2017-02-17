@@ -150,10 +150,10 @@ namespace Engine
                         #endregion
 
                         var mesh = dictionary[material];
-                        bufferManager.SetIndexBuffer(this.Game.Graphics, mesh.IndexBufferSlot);
+                        bufferManager.SetIndexBuffer(mesh.IndexBufferSlot);
 
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                        bufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertexBufferSlot, mesh.Topology);
+                        bufferManager.SetInputAssembler(technique, mesh.VertexBufferSlot, mesh.Topology);
 
                         count += mesh.IndexCount > 0 ? mesh.IndexCount : mesh.VertexCount;
 

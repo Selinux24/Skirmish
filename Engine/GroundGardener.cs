@@ -270,13 +270,14 @@ namespace Engine
             /// </summary>
             /// <param name="game">Game</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public FoliageBuffer(Game game, BufferManager bufferManager)
+            /// <param name="name">Name</param>
+            public FoliageBuffer(Game game, BufferManager bufferManager, string name)
             {
                 this.Game = game;
                 this.Id = ++ID;
 
                 bufferManager.Add(
-                    this.Id,
+                    string.Format("{1}.{0}", this.Id, name),
                     new VertexBillboard[FoliagePatch.MAX],
                     true,
                     0,
@@ -316,7 +317,6 @@ namespace Engine
 
                     //Attach data
                     bufferManager.WriteBuffer(
-                        this.Game.Graphics,
                         this.vertexBufferSlot,
                         this.vertexBufferOffset,
                         patch.FoliageData);
@@ -479,7 +479,7 @@ namespace Engine
 
                 for (int i = 0; i < MaxFoliageBuffers; i++)
                 {
-                    this.foliageBuffers.Add(new FoliageBuffer(game, this.BufferManager));
+                    this.foliageBuffers.Add(new FoliageBuffer(game, this.BufferManager, this.Name));
                 }
             }
         }
@@ -655,7 +655,6 @@ namespace Engine
                                 if (vegetationTechnique != null)
                                 {
                                     this.BufferManager.SetInputAssembler(
-                                        this.Game.Graphics,
                                         vegetationTechnique,
                                         buffer.vertexBufferSlot,
                                         PrimitiveTopology.PointList);

@@ -1,15 +1,11 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
-using SharpDX.DXGI;
 using System.Collections.Generic;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
-    using Engine.Helpers;
 
     /// <summary>
     /// Line list drawer
@@ -17,17 +13,17 @@ namespace Engine
     public class LineListDrawer : Drawable
     {
         /// <summary>
-        /// Vertex buffer
+        /// Buffer offset
         /// </summary>
-        private Buffer vertexBuffer = null;
+        private int vertexBufferOffset = -1;
+        /// <summary>
+        /// Buffer slot
+        /// </summary>
+        private int vertexBufferSlot = -1;
         /// <summary>
         /// Vertex count
         /// </summary>
         private int vertexCount = 0;
-        /// <summary>
-        /// Vertex buffer binding
-        /// </summary>
-        private VertexBufferBinding[] vertexBufferBinding = null;
         /// <summary>
         /// Lines dictionary by color
         /// </summary>
@@ -101,7 +97,7 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.vertexBuffer);
+
         }
         /// <summary>
         /// Update content
@@ -145,15 +141,7 @@ namespace Engine
 
                 #endregion
 
-                //Sets vertex and index buffer
-                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                Counters.IAInputLayoutSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.LineList;
-                Counters.IAPrimitiveTopologySets++;
+                this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.LineList);
 
                 if (this.AlphaEnabled) this.Game.Graphics.SetBlendDefaultAlpha();
                 else this.Game.Graphics.SetBlendDefault();
@@ -162,7 +150,7 @@ namespace Engine
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    this.Game.Graphics.DeviceContext.Draw(this.vertexCount, 0);
+                    this.Game.Graphics.DeviceContext.Draw(this.vertexCount, this.vertexBufferOffset);
 
                     Counters.DrawCallsPerFrame++;
                 }
@@ -191,13 +179,12 @@ namespace Engine
         /// <param name="vertexCount">Vertex count</param>
         private void InitializeBuffers(int vertexCount)
         {
-            VertexPositionColor[] vertices = new VertexPositionColor[vertexCount];
-
-            this.vertexBuffer = this.Game.Graphics.Device.CreateVertexBufferWrite(this.Name, vertices);
-            this.vertexBufferBinding = new[]
-            {
-                new VertexBufferBinding(this.vertexBuffer, vertices[0].GetStride(), 0),
-            };
+            this.BufferManager.Add(
+                this.Name,
+                new VertexPositionColor[vertexCount],
+                true,
+                0,
+                out this.vertexBufferOffset, out this.vertexBufferSlot);
         }
         /// <summary>
         /// Set line
@@ -360,7 +347,7 @@ namespace Engine
                 this.vertexCount = data.Count;
                 if (data.Count > 0)
                 {
-                    this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.vertexBuffer, data.ToArray());
+                    this.BufferManager.WriteBuffer(this.vertexBufferSlot, this.vertexBufferOffset, data.ToArray());
                 }
 
                 this.dictionaryChanged = false;

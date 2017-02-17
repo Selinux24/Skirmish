@@ -236,7 +236,7 @@ namespace Engine
         {
             if (this.indexCount > 0)
             {
-                this.BufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
+                this.BufferManager.SetIndexBuffer(this.indexBufferSlot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
@@ -247,7 +247,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultSprite;
                 var technique = effect.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode);
 
-                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
 
                 #region Per frame update
 
@@ -283,8 +283,8 @@ namespace Engine
 
             VertexPositionTexture[] vertices = VertexPositionTexture.Generate(vData, uvs);
 
-            this.BufferManager.Add(0, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.BufferManager.Add(0, iData, false, out this.indexBufferOffset, out this.indexBufferSlot);
+            this.BufferManager.Add(this.Name, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.BufferManager.Add(this.Name, iData, false, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = vertices.Length;
             this.indexCount = iData.Length;

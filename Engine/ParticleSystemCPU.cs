@@ -228,10 +228,8 @@ namespace Engine
                     context.DrawerMode,
                     this.RotateSpeed != Vector2.Zero);
 
-                this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(technique);
-                Counters.IAInputLayoutSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
-                Counters.IAPrimitiveTopologySets++;
+                this.Game.Graphics.IAInputLayout = effect.GetInputLayout(technique);
+                this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
                 this.Game.Graphics.SetDepthStencilRDZEnabled();
 
@@ -261,10 +259,8 @@ namespace Engine
                     this.TextureCount,
                     this.Texture);
 
-                this.Game.Graphics.DeviceContext.InputAssembler.SetVertexBuffers(0, this.vertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
-                this.Game.Graphics.DeviceContext.InputAssembler.SetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
+                this.Game.Graphics.IASetVertexBuffers(0, this.vertexBufferBinding);
+                this.Game.Graphics.IASetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
 
                 for (int p = 0; p < technique.Description.PassCount; p++)
                 {

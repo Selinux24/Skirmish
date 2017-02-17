@@ -169,8 +169,8 @@ namespace Engine
 
             var indices = iData;
 
-            this.BufferManager.Add(0, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.BufferManager.Add(0, indices, false, out this.indexBufferOffset, out this.indexBufferSlot);
+            this.BufferManager.Add(this.Name, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.BufferManager.Add(this.Name, indices, false, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = vertices.Length;
             this.indexCount = indices.Length;
@@ -211,7 +211,7 @@ namespace Engine
         {
             if (this.indexCount > 0)
             {
-                this.BufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
+                this.BufferManager.SetIndexBuffer(this.indexBufferSlot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
@@ -222,7 +222,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultClouds;
                 var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
 
-                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
 
                 effect.UpdatePerFrame(
                     this.rotation * Matrix.Translation(context.EyePosition),

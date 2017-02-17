@@ -36,7 +36,26 @@ namespace Engine
         /// Index buffer slot
         /// </summary>
         private int indexBufferSlot = -1;
-
+        /// <summary>
+        /// Vertices
+        /// </summary>
+        private VertexPositionTexture[] vertices;
+        /// <summary>
+        /// Indices
+        /// </summary>
+        private uint[] indices;
+        /// <summary>
+        /// Update buffers flag
+        /// </summary>
+        private bool updateBuffers = false;
+        /// <summary>
+        /// Text translation matrix
+        /// </summary>
+        private Matrix local;
+        /// <summary>
+        /// Text shadow translarion matrix
+        /// </summary>
+        private Matrix localShadow;
         /// <summary>
         /// View * projection matrix
         /// </summary>
@@ -53,8 +72,6 @@ namespace Engine
         /// Text
         /// </summary>
         private string text = null;
-
-        private bool map = false;
 
         /// <summary>
         /// Font name
@@ -75,7 +92,7 @@ namespace Engine
                 {
                     this.text = value;
 
-                    this.map = true;
+                    this.MapText();
                 }
             }
         }
@@ -131,6 +148,8 @@ namespace Engine
             set
             {
                 this.position = value;
+
+                this.UpdatePosition();
             }
         }
         /// <summary>
@@ -145,6 +164,8 @@ namespace Engine
             set
             {
                 this.position.X = value;
+
+                this.UpdatePosition();
             }
         }
         /// <summary>
@@ -159,6 +180,8 @@ namespace Engine
             set
             {
                 this.position.Y = value;
+
+                this.UpdatePosition();
             }
         }
         /// <summary>
@@ -190,8 +213,8 @@ namespace Engine
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
             uint[] indices = new uint[FontMap.MAXTEXTLENGTH * 6];
 
-            this.BufferManager.Add(0, vertices, true, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.BufferManager.Add(0, indices, true, out this.indexBufferOffset, out this.indexBufferSlot);
+            this.BufferManager.Add(this.Name, vertices, true, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.BufferManager.Add(this.Name, indices, true, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = 0;
             this.indexCount = 0;
@@ -199,6 +222,8 @@ namespace Engine
             this.TextColor = description.TextColor;
             this.ShadowColor = description.ShadowColor;
             this.ShadowRelative = Vector2.One * 1f;
+
+            this.MapText();
         }
         /// <summary>
         /// Dispose
@@ -223,27 +248,31 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(this.text))
             {
-                if (this.map)
+                if (this.updateBuffers)
                 {
-                    this.MapText();
+                    this.BufferManager.WriteBuffer(this.vertexBufferSlot, this.vertexBufferOffset, this.vertices);
+                    this.BufferManager.WriteBuffer(this.indexBufferSlot, this.indexBufferOffset, this.indices);
 
-                    this.map = false;
+                    this.vertexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
+                    this.indexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
+
+                    this.updateBuffers = false;
                 }
 
-                this.BufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
+                this.BufferManager.SetIndexBuffer(this.indexBufferSlot);
 
                 var technique = DrawerPool.EffectDefaultFont.FontDrawer;
 
-                this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
 
                 if (this.ShadowColor != Color.Transparent)
                 {
                     //Draw shadow
-                    this.DrawText(context, technique, this.Position + this.ShadowRelative, this.ShadowColor);
+                    this.DrawText(context, technique, this.localShadow, this.ShadowColor);
                 }
 
                 //Draw text
-                this.DrawText(context, technique, this.Position, this.TextColor);
+                this.DrawText(context, technique, this.local, this.TextColor);
             }
         }
         /// <summary>
@@ -263,17 +292,12 @@ namespace Engine
         /// <param name="technique">Technique</param>
         /// <param name="position">Position</param>
         /// <param name="color">Color</param>
-        private void DrawText(DrawContext context, EffectTechnique technique, Vector2 position, Color4 color)
+        private void DrawText(DrawContext context, EffectTechnique technique, Matrix local, Color4 color)
         {
             #region Per frame update
 
-            float x = +position.X - this.Game.Form.RelativeCenter.X;
-            float y = -position.Y + this.Game.Form.RelativeCenter.Y;
-
-            Matrix world = Matrix.Translation(x, y, 0f);
-
             DrawerPool.EffectDefaultFont.UpdatePerFrame(
-                world,
+                local,
                 this.viewProjection,
                 color,
                 this.fontMap.Texture);
@@ -292,21 +316,30 @@ namespace Engine
         /// </summary>
         private void MapText()
         {
-            VertexPositionTexture[] v;
-            uint[] i;
             Vector2 size;
             this.fontMap.MapSentence(
                 this.text,
-                out v, out i, out size);
-
-            this.BufferManager.WriteBuffer(this.Game.Graphics, this.vertexBufferSlot, this.vertexBufferOffset, v);
-            this.BufferManager.WriteBuffer(this.Game.Graphics, this.indexBufferSlot, this.indexBufferOffset, i);
-
-            this.vertexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
-            this.indexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
+                out this.vertices, out this.indices, out size);
 
             this.Width = (int)size.X;
             this.Height = (int)size.Y;
+
+            this.updateBuffers = true;
+        }
+        /// <summary>
+        /// Update text translation matrices
+        /// </summary>
+        private void UpdatePosition()
+        {
+            float x = +this.position.X - this.Game.Form.RelativeCenter.X;
+            float y = -this.position.Y + this.Game.Form.RelativeCenter.Y;
+
+            this.local = Matrix.Translation(x, y, 0f);
+
+            x = +this.position.X + this.ShadowRelative.X - this.Game.Form.RelativeCenter.X;
+            y = -this.position.Y + this.ShadowRelative.Y + this.Game.Form.RelativeCenter.Y;
+
+            this.localShadow = Matrix.Translation(x, y, 0f);
         }
     }
 }

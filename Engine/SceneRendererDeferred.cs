@@ -923,7 +923,6 @@ namespace Engine
 #if DEBUG
             Stopwatch swPrepare = Stopwatch.StartNew();
 #endif
-            var deviceContext = this.Game.Graphics.DeviceContext;
             var effect = DrawerPool.EffectDeferredComposer;
 
             var directionalLights = context.Lights.GetVisibleDirectionalLights();
@@ -941,12 +940,9 @@ namespace Engine
             this.Game.Graphics.SetDepthStencilRDZDisabled();
             this.Game.Graphics.SetBlendDeferredLighting();
 
-            deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            Counters.IAPrimitiveTopologySets++;
-            deviceContext.InputAssembler.SetVertexBuffers(0, this.lightGeometryVertexBufferBinding);
-            Counters.IAVertexBuffersSets++;
-            deviceContext.InputAssembler.SetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
-            Counters.IAIndexBufferSets++;
+            this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
+            this.Game.Graphics.IASetVertexBuffers(0, this.lightGeometryVertexBufferBinding);
+            this.Game.Graphics.IASetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
 
 #if DEBUG
             swPrepare.Stop();
@@ -960,10 +956,8 @@ namespace Engine
             if (directionalLights != null && directionalLights.Length > 0)
             {
                 var effectTechnique = effect.DeferredDirectionalLight;
-                var geometry = this.screenGeometry;
 
-                deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
-                Counters.IAInputLayoutSets++;
+                this.Game.Graphics.IAInputLayout = effect.GetInputLayout(effectTechnique);
 
                 for (int i = 0; i < directionalLights.Length; i++)
                 {
@@ -976,9 +970,9 @@ namespace Engine
 
                     for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                     {
-                        effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
+                        effectTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                        deviceContext.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
+                        this.Game.Graphics.DeviceContext.DrawIndexed(this.screenGeometry.IndexCount, this.screenGeometry.Offset, 0);
 
                         Counters.DrawCallsPerFrame++;
                         Counters.InstancesPerFrame++;
@@ -1133,8 +1127,7 @@ namespace Engine
         /// <param name="effectTechnique">Technique</param>
         private void DrawSingleLight(LightGeometry geometry, EffectDeferredComposer effect, EffectTechnique effectTechnique)
         {
-            this.Game.Graphics.DeviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
-            Counters.IAInputLayoutSets++;
+            this.Game.Graphics.IAInputLayout = effect.GetInputLayout(effectTechnique);
 
             for (int p = 0; p < effectTechnique.Description.PassCount; p++)
             {
@@ -1178,17 +1171,10 @@ namespace Engine
                     this.GeometryMap[2],
                     this.LightMap[0]);
 
-                var deviceContext = this.Game.Graphics.DeviceContext;
-                var geometry = this.screenGeometry;
-
-                deviceContext.InputAssembler.InputLayout = effect.GetInputLayout(effectTechnique);
-                Counters.IAInputLayoutSets++;
-                deviceContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-                Counters.IAPrimitiveTopologySets++;
-                deviceContext.InputAssembler.SetVertexBuffers(0, this.lightGeometryVertexBufferBinding);
-                Counters.IAVertexBuffersSets++;
-                deviceContext.InputAssembler.SetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
-                Counters.IAIndexBufferSets++;
+                this.Game.Graphics.IAInputLayout = effect.GetInputLayout(effectTechnique);
+                this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
+                this.Game.Graphics.IASetVertexBuffers(0, this.lightGeometryVertexBufferBinding);
+                this.Game.Graphics.IASetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
 
                 this.Game.Graphics.SetDepthStencilNone();
                 this.Game.Graphics.SetRasterizerDefault();
@@ -1203,9 +1189,9 @@ namespace Engine
 #endif
                 for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                 {
-                    effectTechnique.GetPassByIndex(p).Apply(deviceContext, 0);
+                    effectTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    deviceContext.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.screenGeometry.IndexCount, this.screenGeometry.Offset, 0);
 
                     Counters.DrawCallsPerFrame++;
                     Counters.InstancesPerFrame++;

@@ -172,7 +172,7 @@ namespace Engine
                     //Writes instancing data
                     if (instanceIndex > 0)
                     {
-                        this.BufferManager.WriteInstancingData(this.Game.Graphics, this.instancingData);
+                        this.BufferManager.WriteInstancingData(this.instancingData);
                     }
                 }
 
@@ -271,10 +271,10 @@ namespace Engine
                                         #endregion
 
                                         var mesh = dictionary[material];
-                                        this.BufferManager.SetIndexBuffer(this.Game.Graphics, mesh.IndexBufferSlot);
+                                        this.BufferManager.SetIndexBuffer(mesh.IndexBufferSlot);
 
                                         var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                                        this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, mesh.VertexBufferSlot, mesh.Topology);
+                                        this.BufferManager.SetInputAssembler(technique, mesh.VertexBufferSlot, mesh.Topology);
 
                                         count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
                                         count *= instanceCount;

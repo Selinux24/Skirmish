@@ -77,7 +77,7 @@ namespace Engine
         /// <summary>
         /// Buffer manager
         /// </summary>
-        protected BufferManager BufferManager = new BufferManager();
+        protected BufferManager BufferManager = null;
 
         /// <summary>
         /// Gets the scen world matrix
@@ -171,6 +171,8 @@ namespace Engine
 
             this.Game.Graphics.Resized += new EventHandler(Resized);
 
+            this.BufferManager = new BufferManager(game);
+
             this.TimeOfDay = new TimeOfDay();
 
             this.camera = Camera.CreateFree(
@@ -204,7 +206,7 @@ namespace Engine
         /// </summary>
         public virtual void SetResources()
         {
-            this.BufferManager.CreateBuffers(this.Game.Graphics, null);
+            this.BufferManager.CreateBuffers();
         }
         /// <summary>
         /// Update scene objects
@@ -264,7 +266,7 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Draw(GameTime gameTime)
         {
-            this.BufferManager.SetVertexBuffers(this.Game.Graphics);
+            this.BufferManager.SetVertexBuffers();
 
             this.Renderer.Draw(gameTime, this);
         }

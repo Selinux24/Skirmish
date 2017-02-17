@@ -103,8 +103,8 @@ namespace Engine
 
             VertexPositionTexture[] vertices = VertexPositionTexture.Generate(cv, cuv);
 
-            this.BufferManager.Add(0, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.BufferManager.Add(0, ci, false, out this.indexBufferOffset, out this.indexBufferSlot);
+            this.BufferManager.Add(this.Name, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.BufferManager.Add(this.Name, ci, false, out this.indexBufferOffset, out this.indexBufferSlot);
 
             this.vertexCount = vertices.Length;
             this.indexCount = ci.Length;
@@ -156,7 +156,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            this.BufferManager.SetIndexBuffer(this.Game.Graphics, this.indexBufferSlot);
+            this.BufferManager.SetIndexBuffer(this.indexBufferSlot);
 
             if (context.DrawerMode != DrawerModesEnum.ShadowMap)
             {
@@ -166,7 +166,7 @@ namespace Engine
 
             var technique = DrawerPool.EffectDefaultSprite.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode, this.Channels);
 
-            this.BufferManager.SetInputAssembler(this.Game.Graphics, technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
+            this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
 
             DrawerPool.EffectDefaultSprite.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
             DrawerPool.EffectDefaultSprite.UpdatePerObject(Color.White, this.Texture, 0);

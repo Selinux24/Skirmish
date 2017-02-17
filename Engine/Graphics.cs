@@ -7,6 +7,7 @@ using BlendOperation = SharpDX.Direct3D11.BlendOperation;
 using BlendOption = SharpDX.Direct3D11.BlendOption;
 using BlendState = SharpDX.Direct3D11.BlendState;
 using BlendStateDescription = SharpDX.Direct3D11.BlendStateDescription;
+using Buffer = SharpDX.Direct3D11.Buffer;
 using ColorWriteMaskFlags = SharpDX.Direct3D11.ColorWriteMaskFlags;
 using Comparison = SharpDX.Direct3D11.Comparison;
 using CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags;
@@ -23,6 +24,7 @@ using Device = SharpDX.Direct3D11.Device;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 using DeviceCreationFlags = SharpDX.Direct3D11.DeviceCreationFlags;
 using FillMode = SharpDX.Direct3D11.FillMode;
+using InputLayout = SharpDX.Direct3D11.InputLayout;
 using RasterizerState = SharpDX.Direct3D11.RasterizerState;
 using RasterizerStateDescription = SharpDX.Direct3D11.RasterizerStateDescription;
 using RenderTargetView = SharpDX.Direct3D11.RenderTargetView;
@@ -32,6 +34,7 @@ using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
 using StencilOperation = SharpDX.Direct3D11.StencilOperation;
 using Texture2D = SharpDX.Direct3D11.Texture2D;
 using Texture2DDescription = SharpDX.Direct3D11.Texture2DDescription;
+using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
@@ -172,6 +175,34 @@ namespace Engine
         /// Lighting pass rasterizer (Cull Front faces, No depth limit)
         /// </summary>
         private RasterizerState rasterizerLightingPass = null;
+        /// <summary>
+        /// Current vertex buffer first slot
+        /// </summary>
+        private int currentVertexBufferFirstSlot = -1;
+        /// <summary>
+        /// Current vertex buffer bindings
+        /// </summary>
+        private VertexBufferBinding[] currentVertexBufferBindings = null;
+        /// <summary>
+        /// Current index buffer reference
+        /// </summary>
+        private Buffer currentIndexBufferRef = null;
+        /// <summary>
+        /// Current index buffer format
+        /// </summary>
+        private Format currentIndexFormat = Format.Unknown;
+        /// <summary>
+        /// Current index buffer offset
+        /// </summary>
+        private int currentIndexOffset = -1;
+        /// <summary>
+        /// Current primitive topology set in input assembler
+        /// </summary>
+        private PrimitiveTopology currentIAPrimitiveTopology = PrimitiveTopology.Undefined;
+        /// <summary>
+        /// Current input layout set in input assembler
+        /// </summary>
+        private InputLayout currentIAInputLayout = null;
 
         /// <summary>
         /// Back buffer format
@@ -1157,6 +1188,80 @@ namespace Engine
         public void SetRasterizerLightingPass()
         {
             this.SetRasterizerState(this.rasterizerLightingPass);
+        }
+        /// <summary>
+        /// Bind an array of vertex buffers to the input-assembler stage.
+        /// </summary>
+        /// <param name="firstSlot">The first input slot for binding</param>
+        /// <param name="vertexBufferBindings">A reference to an array of SharpDX.Direct3D11.VertexBufferBinding</param>
+        public void IASetVertexBuffers(int firstSlot, params VertexBufferBinding[] vertexBufferBindings)
+        {
+            if (this.currentVertexBufferFirstSlot != firstSlot || this.currentVertexBufferBindings != vertexBufferBindings)
+            {
+                this.DeviceContext.InputAssembler.SetVertexBuffers(firstSlot, vertexBufferBindings);
+                Counters.IAVertexBuffersSets++;
+
+                this.currentVertexBufferFirstSlot = firstSlot;
+                this.currentVertexBufferBindings = vertexBufferBindings;
+            }
+        }
+        /// <summary>
+        /// Bind an index buffer to the input-assembler stage.
+        /// </summary>
+        /// <param name="indexBufferRef">A reference to an SharpDX.Direct3D11.Buffer object</param>
+        /// <param name="format">A SharpDX.DXGI.Format that specifies the format of the data in the index buffer</param>
+        /// <param name="offset">Offset (in bytes) from the start of the index buffer to the first index to use</param>
+        public void IASetIndexBuffer(Buffer indexBufferRef, Format format, int offset)
+        {
+            if (this.currentIndexBufferRef != indexBufferRef || this.currentIndexFormat != format || this.currentIndexOffset != offset)
+            {
+                this.DeviceContext.InputAssembler.SetIndexBuffer(indexBufferRef, format, offset);
+                Counters.IAIndexBufferSets++;
+
+                this.currentIndexBufferRef = indexBufferRef;
+                this.currentIndexFormat = format;
+                this.currentIndexOffset = offset;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the input assembler's primitive topology
+        /// </summary>
+        public PrimitiveTopology IAPrimitiveTopology
+        {
+            get
+            {
+                return this.currentIAPrimitiveTopology;
+            }
+            set
+            {
+                if (this.currentIAPrimitiveTopology != value)
+                {
+                    this.DeviceContext.InputAssembler.PrimitiveTopology = value;
+                    Counters.IAPrimitiveTopologySets++;
+
+                    this.currentIAPrimitiveTopology = value;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets or sets the input assembler's input layout
+        /// </summary>
+        public InputLayout IAInputLayout
+        {
+            get
+            {
+                return this.currentIAInputLayout;
+            }
+            set
+            {
+                if (this.currentIAInputLayout != value)
+                {
+                    this.DeviceContext.InputAssembler.InputLayout = value;
+                    Counters.IAInputLayoutSets++;
+
+                    this.currentIAInputLayout = value;
+                }
+            }
         }
         /// <summary>
         /// Dispose created resources
