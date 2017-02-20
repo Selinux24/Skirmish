@@ -9,19 +9,19 @@ namespace Engine.Common
         /// <summary>
         /// X map coordinate
         /// </summary>
-        public int X { get; set; }
+        public float X { get; set; }
         /// <summary>
         /// Y map coordinate
         /// </summary>
-        public int Y { get; set; }
+        public float Y { get; set; }
         /// <summary>
         /// Character map width
         /// </summary>
-        public int Width { get; set; }
+        public float Width { get; set; }
         /// <summary>
         /// Character map height
         /// </summary>
-        public int Height { get; set; }
+        public float Height { get; set; }
 
         /// <summary>
         /// Gets text representation of character map

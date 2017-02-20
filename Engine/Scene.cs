@@ -981,7 +981,7 @@ namespace Engine
 
             int texWidth = Helper.GetTextureSize(values.Count);
 
-            materialPalette = this.Game.ResourceManager.CreateGlobalResource("MaterialPalette", values.ToArray(), texWidth);
+            materialPalette = this.Game.ResourceManager.CreateGlobalResourceTexture2D("MaterialPalette", values.ToArray(), texWidth);
             materialPaletteWidth = (uint)texWidth;
         }
         /// <summary>
@@ -1036,7 +1036,7 @@ namespace Engine
 
             int texWidth = Helper.GetTextureSize(values.Count);
 
-            animationPalette = this.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
+            animationPalette = this.Game.ResourceManager.CreateGlobalResourceTexture2D("AnimationPalette", values.ToArray(), texWidth);
             animationPaletteWidth = (uint)texWidth;
         }
     }

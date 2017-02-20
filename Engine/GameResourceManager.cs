@@ -111,6 +111,22 @@ namespace Engine
             return this.Get(path);
         }
         /// <summary>
+        /// Creates a 2d texture of byte values
+        /// </summary>
+        /// <param name="values">Values</param>
+        /// <returns>Returns the created resource view</returns>
+        public ShaderResourceView CreateResource(byte[] values)
+        {
+            string md5 = values.GetMd5Sum();
+            if (!this.resources.ContainsKey(md5))
+            {
+                var view = this.game.Graphics.Device.LoadTexture(values);
+                this.resources.Add(md5, view);
+            }
+
+            return this.resources[md5];
+        }
+        /// <summary>
         /// Creates a 2d texture of Vector4 values
         /// </summary>
         /// <param name="identifier">Identifier</param>
@@ -148,7 +164,6 @@ namespace Engine
 
             return this.resources[md5];
         }
-
         /// <summary>
         /// Creates a new global resource by name
         /// </summary>
@@ -156,7 +171,7 @@ namespace Engine
         /// <param name="values">Values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateGlobalResource(string name, Vector4[] values, int size)
+        public ShaderResourceView CreateGlobalResourceTexture2D(string name, Vector4[] values, int size)
         {
             var view = this.game.Graphics.Device.CreateTexture2D(size, values);
             this.SetGlobalResource(name, view);
@@ -165,13 +180,25 @@ namespace Engine
         /// <summary>
         /// Creates a new global resource by name
         /// </summary>
-        /// <param name="identifier">Identifier</param>
+        /// <param name="name">Resource name</param>
+        /// <param name="bytes">Resource bytes</param>
+        /// <returns></returns>
+        public ShaderResourceView CreateGlobalResourceTexture2D(string name, byte[] bytes)
+        {
+            var view = this.game.Graphics.Device.LoadTexture(bytes);
+            this.SetGlobalResource(name, view);
+            return view;
+        }
+        /// <summary>
+        /// Creates a new global resource by name
+        /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="size">Texture size</param>
         /// <param name="min">Minimum value</param>
         /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateGlobalResource(string name, int size, float min, float max, int seed = 0)
+        public ShaderResourceView CreateGlobalResourceRandomTexture(string name, int size, float min, float max, int seed = 0)
         {
             var view = this.game.Graphics.Device.CreateRandomTexture(size, min, max, seed);
             this.SetGlobalResource(name, view);

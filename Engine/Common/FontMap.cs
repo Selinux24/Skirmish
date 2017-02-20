@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using Bitmap = System.Drawing.Bitmap;
 using Brushes = System.Drawing.Brushes;
-using Device = SharpDX.Direct3D11.Device;
 using Font = System.Drawing.Font;
 using FontStyle = System.Drawing.FontStyle;
 using Graph = System.Drawing.Graphics;
@@ -19,8 +18,6 @@ using TextRenderingHint = System.Drawing.Text.TextRenderingHint;
 
 namespace Engine.Common
 {
-    using Engine.Helpers;
-
     /// <summary>
     /// Font map
     /// </summary>
@@ -69,7 +66,7 @@ namespace Engine.Common
         /// <summary>
         /// Font size
         /// </summary>
-        public int Size { get; private set; }
+        public float Size { get; private set; }
         /// <summary>
         /// Font texture
         /// </summary>
@@ -98,16 +95,16 @@ namespace Engine.Common
         /// <summary>
         /// Creates a font map of the specified font and size
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="game">Game</param>
         /// <param name="font">Font name</param>
         /// <param name="size">Size</param>
         /// <returns>Returns created font map</returns>
-        public static FontMap Map(Device device, string font, int size)
+        public static FontMap Map(Game game, string font, float size)
         {
-            FontMap map = gCache.Find(f => f.Font == font && f.Size == size);
-            if (map == null)
+            FontMap fMap = gCache.Find(f => f.Font == font && f.Size == size);
+            if (fMap == null)
             {
-                map = new FontMap()
+                fMap = new FontMap()
                 {
                     Font = font,
                     Size = size,
@@ -116,8 +113,7 @@ namespace Engine.Common
                 using (Bitmap bmp = new Bitmap(TEXTURESIZE, TEXTURESIZE))
                 using (Graph gra = Graph.FromImage(bmp))
                 {
-                    gra.TextContrast = 12;
-                    gra.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;
+                    gra.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
                     gra.FillRegion(
                         Brushes.Transparent,
@@ -149,7 +145,7 @@ namespace Engine.Common
                             if (left + s.Width >= TEXTURESIZE)
                             {
                                 left = 0f;
-                                top += s.Height;
+                                top += s.Height + 1;
                             }
 
                             gra.DrawString(
@@ -162,13 +158,13 @@ namespace Engine.Common
 
                             FontMapChar chr = new FontMapChar()
                             {
-                                X = (int)left,
-                                Y = (int)top,
-                                Width = (int)Math.Round(s.Width),
-                                Height = (int)Math.Round(s.Height),
+                                X = left,
+                                Y = top,
+                                Width = s.Width,
+                                Height = s.Height,
                             };
 
-                            map.map.Add(c, chr);
+                            fMap.map.Add(c, chr);
 
                             left += s.Width;
                         }
@@ -178,14 +174,14 @@ namespace Engine.Common
                     {
                         bmp.Save(mstr, ImageFormat.Png);
 
-                        map.Texture = device.LoadTexture(mstr.GetBuffer());
+                        fMap.Texture = game.ResourceManager.CreateResource(mstr.GetBuffer());
                     }
                 }
 
-                gCache.Add(map);
+                gCache.Add(fMap);
             }
 
-            return map;
+            return fMap;
         }
 
         /// <summary>
@@ -234,7 +230,7 @@ namespace Engine.Common
                 text = text.Substring(0, MAXTEXTLENGTH);
             }
 
-            int height = 0;
+            float height = 0;
 
             foreach (char c in text)
             {
@@ -270,7 +266,7 @@ namespace Engine.Common
 
                     vertList.AddRange(VertexPositionTexture.Generate(cv, cuv));
 
-                    pos.X += chr.Width - (int)(this.Size / 6);
+                    pos.X += chr.Width - (this.Size / 6f);
                     if (chr.Height > height) height = chr.Height;
                 }
             }

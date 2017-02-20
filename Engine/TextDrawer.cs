@@ -208,7 +208,7 @@ namespace Engine
                 game.Form.RenderWidth.NextPair(),
                 game.Form.RenderHeight.NextPair());
 
-            this.fontMap = FontMap.Map(game.Graphics.Device, description.Font, description.FontSize);
+            this.fontMap = FontMap.Map(game, description.Font, description.FontSize);
 
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
             uint[] indices = new uint[FontMap.MAXTEXTLENGTH * 6];
