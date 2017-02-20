@@ -1,9 +1,9 @@
 ﻿using SharpDX;
-using SharpDX.DXGI;
 using System;
 using BindFlags = SharpDX.Direct3D11.BindFlags;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags;
+using InputLayout = SharpDX.Direct3D11.InputLayout;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
@@ -22,6 +22,8 @@ namespace Engine
     /// </summary>
     public class ParticleSystemGPU : IParticleSystem
     {
+        public static int BufferSlot = 13;
+
         /// <summary>
         /// Emitter initialization buffer
         /// </summary>
@@ -46,6 +48,18 @@ namespace Engine
         /// Buffer binding for stream output buffer
         /// </summary>
         private StreamOutputBufferBinding[] streamOutBinding;
+        /// <summary>
+        /// Input layout for stream out
+        /// </summary>
+        private InputLayout streamOutInputLayout;
+        /// <summary>
+        /// Input layout for rotating particles
+        /// </summary>
+        private InputLayout rotatingInputLayout;
+        /// <summary>
+        /// Input layout for non rotating particles
+        /// </summary>
+        private InputLayout nonRotatingInputLayout;
         /// <summary>
         /// Vertex input stride
         /// </summary>
@@ -210,6 +224,21 @@ namespace Engine
             this.emitterBinding = new[] { new VertexBufferBinding(this.emittersBuffer, this.inputStride, 0) };
             this.drawingBinding = new[] { new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0) };
             this.streamOutBinding = new[] { new StreamOutputBufferBinding(this.streamOutBuffer, 0) };
+
+            this.streamOutInputLayout = new InputLayout(
+                game.Graphics.Device,
+                DrawerPool.EffectDefaultGPUParticles.ParticleStreamOut.GetPassByIndex(0).Description.Signature,
+                VertexGPUParticle.Input(BufferSlot));
+
+            this.rotatingInputLayout = new InputLayout(
+                game.Graphics.Device,
+                DrawerPool.EffectDefaultGPUParticles.RotationDraw.GetPassByIndex(0).Description.Signature,
+                VertexGPUParticle.Input(BufferSlot));
+
+            this.nonRotatingInputLayout = new InputLayout(
+                game.Graphics.Device,
+                DrawerPool.EffectDefaultGPUParticles.NonRotationDraw.GetPassByIndex(0).Description.Signature,
+                VertexGPUParticle.Input(BufferSlot));
         }
         /// <summary>
         /// Dispose resources
@@ -219,6 +248,9 @@ namespace Engine
             Helper.Dispose(this.emittersBuffer);
             Helper.Dispose(this.drawingBuffer);
             Helper.Dispose(this.streamOutBuffer);
+            Helper.Dispose(this.streamOutInputLayout);
+            Helper.Dispose(this.rotatingInputLayout);
+            Helper.Dispose(this.nonRotatingInputLayout);
         }
 
         /// <summary>
@@ -281,9 +313,8 @@ namespace Engine
         {
             var techniqueForStreamOut = effect.GetTechniqueForStreamOut(VertexTypes.GPUParticle);
 
-            this.Game.Graphics.IAInputLayout = effect.GetInputLayout(techniqueForStreamOut);
-            this.Game.Graphics.IASetVertexBuffers(0, this.firstRun ? this.emitterBinding : this.drawingBinding);
-            this.Game.Graphics.IASetIndexBuffer(null, Format.R32_UInt, 0);
+            this.Game.Graphics.IAInputLayout = this.streamOutInputLayout;
+            this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.firstRun ? this.emitterBinding : this.drawingBinding);
             this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
             this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(this.streamOutBinding);
@@ -334,16 +365,17 @@ namespace Engine
                 Counters.InstancesPerFrame++;
             }
 
+            var rot = this.RotateSpeed != Vector2.Zero;
+
             var techniqueForDrawing = effect.GetTechniqueForDrawing(
                 VertexTypes.GPUParticle,
                 false,
                 DrawingStages.Drawing,
                 drawerMode,
-                this.RotateSpeed != Vector2.Zero);
+                rot);
 
-            this.Game.Graphics.IAInputLayout = effect.GetInputLayout(techniqueForDrawing);
-            this.Game.Graphics.IASetVertexBuffers(0, this.drawingBinding);
-            this.Game.Graphics.IASetIndexBuffer(null, Format.R32_UInt, 0);
+            this.Game.Graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
+            this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.drawingBinding);
             this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
             this.Game.Graphics.SetDepthStencilRDZEnabled();

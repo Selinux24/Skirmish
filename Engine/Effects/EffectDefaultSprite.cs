@@ -167,14 +167,6 @@ namespace Engine.Effects
             this.PositionTextureBLUE = this.Effect.GetTechniqueByName("PositionTextureBLUE");
             this.PositionTextureALPHA = this.Effect.GetTechniqueByName("PositionTextureALPHA");
 
-            this.AddInputLayout(this.PositionColor, VertexPositionColor.GetInput());
-            this.AddInputLayout(this.PositionTexture, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureNOALPHA, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureRED, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureGREEN, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureBLUE, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.PositionTextureALPHA, VertexPositionTexture.GetInput());
-
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();

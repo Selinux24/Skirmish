@@ -15,11 +15,11 @@ namespace Engine.Common
         /// Defined input colection
         /// </summary>
         /// <returns></returns>
-        public static InputElement[] GetInput()
+        public static InputElement[] Input(int slot = 0)
         {
             return new InputElement[]
             {
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
+                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
             };
         }
         /// <summary>
@@ -101,10 +101,7 @@ namespace Engine.Common
         /// <returns>Returns input elements</returns>
         public InputElement[] GetInput(int slot)
         {
-            return new InputElement[]
-            {
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
-            };
+            return VertexPosition.Input(slot);
         }
 
         /// <summary>

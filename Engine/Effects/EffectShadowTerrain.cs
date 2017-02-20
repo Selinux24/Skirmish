@@ -49,8 +49,6 @@ namespace Engine.Effects
         {
             this.TerrainShadowMap = this.Effect.GetTechniqueByName("TerrainShadowMap");
 
-            this.AddInputLayout(this.TerrainShadowMap, VertexTerrain.GetInput());
-
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
         }
         /// <summary>

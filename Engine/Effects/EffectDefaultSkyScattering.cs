@@ -164,8 +164,6 @@ namespace Engine.Effects
         {
             this.SkyScattering = this.Effect.GetTechniqueByName("SkyScattering");
 
-            this.AddInputLayout(this.SkyScattering, VertexPosition.GetInput());
-
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.sphereRadii = this.Effect.GetVariableByName("gSphereRadii").AsVector();
             this.scatteringCoefficients = this.Effect.GetVariableByName("gScatteringCoeffs").AsVector();

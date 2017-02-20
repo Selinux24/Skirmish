@@ -81,8 +81,6 @@ namespace Engine.Effects
         {
             this.ForwardCubemap = this.Effect.GetTechniqueByName("ForwardCubemap");
 
-            this.AddInputLayout(this.ForwardCubemap, VertexPosition.GetInput());
-
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.cubeTexture = this.Effect.GetVariableByName("gCubemap").AsShaderResource();
         }

@@ -1,12 +1,11 @@
 ﻿using SharpDX;
-using System;
 using Device = SharpDX.Direct3D11.Device;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
+using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
-using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
+using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
 {
@@ -233,9 +232,6 @@ namespace Engine.Effects
         {
             this.CloudsStatic = this.Effect.GetTechniqueByName("CloudsStatic");
             this.CloudsPerturbed = this.Effect.GetTechniqueByName("CloudsPerturbed");
-
-            this.AddInputLayout(this.CloudsStatic, VertexPositionTexture.GetInput());
-            this.AddInputLayout(this.CloudsPerturbed, VertexPositionTexture.GetInput());
 
             this.firstTexture = this.Effect.GetVariableByName("gCloudTexture1").AsShaderResource();
             this.secondTexture = this.Effect.GetVariableByName("gCloudTexture2").AsShaderResource();

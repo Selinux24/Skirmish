@@ -620,8 +620,6 @@ namespace Engine.Effects
         {
             this.ForwardBillboard = this.Effect.GetTechniqueByName("ForwardBillboard");
 
-            this.AddInputLayout(this.ForwardBillboard, VertexBillboard.GetInput());
-
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.fromLightViewProjection = this.Effect.GetVariableByName("gLightViewProjection").AsMatrix();

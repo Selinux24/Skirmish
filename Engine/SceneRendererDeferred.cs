@@ -11,6 +11,7 @@ using DepthStencilView = SharpDX.Direct3D11.DepthStencilView;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using DepthStencilClearFlags = SharpDX.Direct3D11.DepthStencilClearFlags;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
+using InputLayout = SharpDX.Direct3D11.InputLayout;
 
 namespace Engine
 {
@@ -23,6 +24,8 @@ namespace Engine
     /// </summary>
     public class SceneRendererDeferred : ISceneRenderer
     {
+        public static int BufferSlot = 15;
+
         private const int ShadowMapSize = 1024 * 4;
 
         /// <summary>
@@ -80,6 +83,22 @@ namespace Engine
         /// Spot ligth geometry
         /// </summary>
         private LightGeometry spotLightGeometry;
+        /// <summary>
+        /// Input layout for directional lights
+        /// </summary>
+        private InputLayout dirLightInputLayout;
+        /// <summary>
+        /// Input layout for point lights
+        /// </summary>
+        private InputLayout pointLightInputLayout;
+        /// <summary>
+        /// Input layout for spot ligths
+        /// </summary>
+        private InputLayout spotLightInputLayout;
+        /// <summary>
+        /// Input layout for result light map
+        /// </summary>
+        private InputLayout combineLightsInputLayout;
 
         /// <summary>
         /// Game
@@ -192,6 +211,26 @@ namespace Engine
             this.geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 3);
             this.lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 1);
 
+            this.dirLightInputLayout = new InputLayout(
+                game.Graphics.Device, 
+                DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.GetPassByIndex(0).Description.Signature,
+                VertexPosition.Input(BufferSlot));
+
+            this.pointLightInputLayout = new InputLayout(
+                game.Graphics.Device,
+                DrawerPool.EffectDeferredComposer.DeferredPointLight.GetPassByIndex(0).Description.Signature,
+                VertexPosition.Input(BufferSlot));
+
+            this.spotLightInputLayout = new InputLayout(
+                game.Graphics.Device,
+                DrawerPool.EffectDeferredComposer.DeferredSpotLight.GetPassByIndex(0).Description.Signature,
+                VertexPosition.Input(BufferSlot));
+
+            this.combineLightsInputLayout = new InputLayout(
+                game.Graphics.Device,
+                DrawerPool.EffectDeferredComposer.DeferredCombineLights.GetPassByIndex(0).Description.Signature,
+                VertexPosition.Input(BufferSlot));
+
             this.UpdateContext = new UpdateContext()
             {
                 Name = "Primary",
@@ -221,6 +260,11 @@ namespace Engine
             Helper.Dispose(this.lightBuffer);
             Helper.Dispose(this.lightGeometryVertexBuffer);
             Helper.Dispose(this.lightGeometryIndexBuffer);
+
+            Helper.Dispose(this.dirLightInputLayout);
+            Helper.Dispose(this.pointLightInputLayout);
+            Helper.Dispose(this.spotLightInputLayout);
+            Helper.Dispose(this.combineLightsInputLayout);
         }
         /// <summary>
         /// Resizes buffers
@@ -941,7 +985,7 @@ namespace Engine
             this.Game.Graphics.SetBlendDeferredLighting();
 
             this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
-            this.Game.Graphics.IASetVertexBuffers(0, this.lightGeometryVertexBufferBinding);
+            this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.lightGeometryVertexBufferBinding);
             this.Game.Graphics.IASetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
 
 #if DEBUG
@@ -957,7 +1001,8 @@ namespace Engine
             {
                 var effectTechnique = effect.DeferredDirectionalLight;
 
-                this.Game.Graphics.IAInputLayout = effect.GetInputLayout(effectTechnique);
+                this.Game.Graphics.IAInputLayout = this.dirLightInputLayout;
+                Counters.IAInputLayoutSets++;
 
                 for (int i = 0; i < directionalLights.Length; i++)
                 {
@@ -972,10 +1017,12 @@ namespace Engine
                     {
                         effectTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                        this.Game.Graphics.DeviceContext.DrawIndexed(this.screenGeometry.IndexCount, this.screenGeometry.Offset, 0);
+                        this.Game.Graphics.DeviceContext.DrawIndexed(
+                            this.screenGeometry.IndexCount, 
+                            this.screenGeometry.Offset, 
+                            0);
 
                         Counters.DrawCallsPerFrame++;
-                        Counters.InstancesPerFrame++;
                     }
                 }
             }
@@ -991,6 +1038,9 @@ namespace Engine
             if (pointLights != null && pointLights.Length > 0)
             {
                 var geometry = this.pointLightGeometry;
+
+                this.Game.Graphics.IAInputLayout = this.pointLightInputLayout;
+                Counters.IAInputLayoutSets++;
 
                 for (int i = 0; i < pointLights.Length; i++)
                 {
@@ -1025,6 +1075,9 @@ namespace Engine
             if (spotLights != null && spotLights.Length > 0)
             {
                 var geometry = this.spotLightGeometry;
+
+                this.Game.Graphics.IAInputLayout = this.spotLightInputLayout;
+                Counters.IAInputLayoutSets++;
 
                 for (int i = 0; i < spotLights.Length; i++)
                 {
@@ -1127,8 +1180,6 @@ namespace Engine
         /// <param name="effectTechnique">Technique</param>
         private void DrawSingleLight(LightGeometry geometry, EffectDeferredComposer effect, EffectTechnique effectTechnique)
         {
-            this.Game.Graphics.IAInputLayout = effect.GetInputLayout(effectTechnique);
-
             for (int p = 0; p < effectTechnique.Description.PassCount; p++)
             {
                 effectTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
@@ -1136,7 +1187,6 @@ namespace Engine
                 this.Game.Graphics.DeviceContext.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
 
                 Counters.DrawCallsPerFrame++;
-                Counters.InstancesPerFrame++;
             }
         }
         /// <summary>
@@ -1171,9 +1221,9 @@ namespace Engine
                     this.GeometryMap[2],
                     this.LightMap[0]);
 
-                this.Game.Graphics.IAInputLayout = effect.GetInputLayout(effectTechnique);
+                this.Game.Graphics.IAInputLayout = this.combineLightsInputLayout;
                 this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
-                this.Game.Graphics.IASetVertexBuffers(0, this.lightGeometryVertexBufferBinding);
+                this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.lightGeometryVertexBufferBinding);
                 this.Game.Graphics.IASetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
 
                 this.Game.Graphics.SetDepthStencilNone();
@@ -1194,7 +1244,6 @@ namespace Engine
                     this.Game.Graphics.DeviceContext.DrawIndexed(this.screenGeometry.IndexCount, this.screenGeometry.Offset, 0);
 
                     Counters.DrawCallsPerFrame++;
-                    Counters.InstancesPerFrame++;
                 }
 #if DEBUG
                 swDraw.Stop();

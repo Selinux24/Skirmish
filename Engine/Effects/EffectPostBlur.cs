@@ -126,8 +126,6 @@ namespace Engine.Effects
         {
             this.Blur = this.Effect.GetTechniqueByName("Blur");
 
-            this.AddInputLayout(this.Blur, VertexPositionTexture.GetInput());
-
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.blurDirection = this.Effect.GetVariableByName("gBlurDirection").AsVector();
             this.textureSize = this.Effect.GetVariableByName("gTextureSize").AsVector();

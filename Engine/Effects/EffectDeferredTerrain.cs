@@ -1,9 +1,8 @@
 ﻿using SharpDX;
 using System;
 using Device = SharpDX.Direct3D11.Device;
-using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
-using EffectVariable = SharpDX.Direct3D11.EffectVariable;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
+using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
 using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
@@ -282,8 +281,6 @@ namespace Engine.Effects
             : base(device, effect, compile)
         {
             this.TerrainDeferred = this.Effect.GetTechniqueByName("TerrainDeferred");
-
-            this.AddInputLayout(this.TerrainDeferred, VertexTerrain.GetInput());
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();

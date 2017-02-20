@@ -49,8 +49,6 @@ namespace Engine.Effects
         {
             this.Null = this.Effect.GetTechniqueByName("Null");
 
-            this.AddInputLayout(this.Null, VertexPosition.GetInput());
-
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
         }
         /// <summary>

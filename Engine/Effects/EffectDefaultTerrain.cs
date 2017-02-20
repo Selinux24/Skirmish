@@ -660,8 +660,6 @@ namespace Engine.Effects
         {
             this.TerrainForward = this.Effect.GetTechniqueByName("TerrainForward");
 
-            this.AddInputLayout(this.TerrainForward, VertexTerrain.GetInput());
-
             //Globals
             this.materialPaletteWidth = this.Effect.GetVariableByName("gMaterialPaletteWidth").AsScalar();
             this.materialPalette = this.Effect.GetVariableByName("gMaterialPalette").AsShaderResource();

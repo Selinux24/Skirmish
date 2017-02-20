@@ -15,14 +15,15 @@ namespace Engine.Common
         /// <summary>
         /// Defined input colection
         /// </summary>
-        public static InputElement[] GetInput()
+        /// <param name="slot">Slot</param>
+        public static InputElement[] Input(int slot = 0)
         {
             return new InputElement[]
             {
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
-                new InputElement("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, 0, InputClassification.PerVertexData, 0),
-                new InputElement("RANDOM", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 24, 0, InputClassification.PerVertexData, 0),
-                new InputElement("MAX_AGE", 0, SharpDX.DXGI.Format.R32_Float, 40, 0, InputClassification.PerVertexData, 0),
+                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
+                new InputElement("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
+                new InputElement("RANDOM", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 24, slot, InputClassification.PerVertexData, 0),
+                new InputElement("MAX_AGE", 0, SharpDX.DXGI.Format.R32_Float, 40, slot, InputClassification.PerVertexData, 0),
             };
         }
 
@@ -101,13 +102,7 @@ namespace Engine.Common
         /// <returns>Returns input elements</returns>
         public InputElement[] GetInput(int slot)
         {
-            return new InputElement[]
-            {
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
-                new InputElement("VELOCITY", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
-                new InputElement("RANDOM", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 24, slot, InputClassification.PerVertexData, 0),
-                new InputElement("MAX_AGE", 0, SharpDX.DXGI.Format.R32_Float, 40, slot, InputClassification.PerVertexData, 0),
-            };
+            return VertexCPUParticle.Input(slot);
         }
 
         /// <summary>

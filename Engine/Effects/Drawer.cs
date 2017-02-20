@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using SharpDX.Direct3D11;
+﻿using SharpDX.Direct3D11;
 
 namespace Engine.Effects
 {
@@ -11,11 +10,6 @@ namespace Engine.Effects
     /// </summary>
     public abstract class Drawer : IDrawer
     {
-        /// <summary>
-        /// Layout dictionary
-        /// </summary>
-        private Dictionary<EffectTechnique, InputLayout> layouts = new Dictionary<EffectTechnique, InputLayout>();
-
         /// <summary>
         /// Graphics device
         /// </summary>
@@ -63,37 +57,5 @@ namespace Engine.Effects
         /// <param name="mode">Mode</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
         public abstract EffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode);
-        /// <summary>
-        /// Gets input layout by technique name
-        /// </summary>
-        /// <param name="technique">Technique name</param>
-        /// <returns>Returns input layout for technique</returns>
-        public InputLayout GetInputLayout(EffectTechnique technique)
-        {
-            return this.layouts[technique];
-        }
-        /// <summary>
-        /// Add input layout to dictionary
-        /// </summary>
-        /// <param name="technique">Technique name</param>
-        /// <param name="input">Input elements</param>
-        public void AddInputLayout(EffectTechnique technique, InputElement[] input)
-        {
-            EffectPassDescription desc = technique.GetPassByIndex(0).Description;
-
-            InputLayout layout = new InputLayout(
-                this.Device,
-                desc.Signature,
-                input);
-
-            if (!this.layouts.ContainsKey(technique))
-            {
-                this.layouts.Add(technique, layout);
-            }
-            else
-            {
-                this.layouts[technique] = layout;
-            }
-        }
     }
 }

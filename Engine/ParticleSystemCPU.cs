@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using Buffer = SharpDX.Direct3D11.Buffer;
+using InputLayout = SharpDX.Direct3D11.InputLayout;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
@@ -17,6 +18,8 @@ namespace Engine
     /// </summary>
     public class ParticleSystemCPU : IParticleSystem
     {
+        public static int BufferSlot = 14;
+
         /// <summary>
         /// Particle list
         /// </summary>
@@ -29,6 +32,14 @@ namespace Engine
         /// Vertex buffer binding
         /// </summary>
         private VertexBufferBinding[] vertexBufferBinding;
+        /// <summary>
+        /// Input layout for rotating particles
+        /// </summary>
+        private InputLayout rotatingInputLayout;
+        /// <summary>
+        /// Input layout for non rotating particles
+        /// </summary>
+        private InputLayout nonRotatingInputLayout;
         /// <summary>
         /// Current particle index to update data
         /// </summary>
@@ -178,6 +189,16 @@ namespace Engine
             };
 
             this.TimeToEnd = this.Emitter.Duration + this.MaximumAge;
+
+            this.rotatingInputLayout = new InputLayout(
+                game.Graphics.Device,
+                DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetPassByIndex(0).Description.Signature,
+                VertexCPUParticle.Input(BufferSlot));
+
+            this.nonRotatingInputLayout = new InputLayout(
+                game.Graphics.Device,
+                DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetPassByIndex(0).Description.Signature,
+                VertexCPUParticle.Input(BufferSlot));
         }
         /// <summary>
         /// Resource disposal
@@ -185,6 +206,9 @@ namespace Engine
         public void Dispose()
         {
             Helper.Dispose(this.vertexBuffer);
+
+            Helper.Dispose(this.rotatingInputLayout);
+            Helper.Dispose(this.nonRotatingInputLayout);
         }
 
         /// <summary>
@@ -219,6 +243,8 @@ namespace Engine
                     Counters.PrimitivesPerFrame += this.ActiveParticles;
                 }
 
+                var rot = this.RotateSpeed != Vector2.Zero;
+
                 var effect = DrawerPool.EffectDefaultCPUParticles;
 
                 var technique = effect.GetTechnique(
@@ -226,9 +252,10 @@ namespace Engine
                     false,
                     DrawingStages.Drawing,
                     context.DrawerMode,
-                    this.RotateSpeed != Vector2.Zero);
+                    rot);
 
-                this.Game.Graphics.IAInputLayout = effect.GetInputLayout(technique);
+                this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.vertexBufferBinding);
+                this.Game.Graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
                 this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
                 this.Game.Graphics.SetDepthStencilRDZEnabled();
@@ -258,9 +285,6 @@ namespace Engine
                     this.RotateSpeed,
                     this.TextureCount,
                     this.Texture);
-
-                this.Game.Graphics.IASetVertexBuffers(0, this.vertexBufferBinding);
-                this.Game.Graphics.IASetIndexBuffer(null, SharpDX.DXGI.Format.R32_UInt, 0);
 
                 for (int p = 0; p < technique.Description.PassCount; p++)
                 {

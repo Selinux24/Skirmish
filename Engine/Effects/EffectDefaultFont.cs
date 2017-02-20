@@ -118,8 +118,6 @@ namespace Engine.Effects
         {
             this.FontDrawer = this.Effect.GetTechniqueByName("FontDrawer");
 
-            this.AddInputLayout(this.FontDrawer, VertexPositionTexture.GetInput());
-
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.color = this.Effect.GetVariableByName("gColor").AsVector();

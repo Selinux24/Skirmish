@@ -264,8 +264,6 @@ namespace Engine.Effects
         {
             this.ShadowMapBillboard = this.Effect.GetTechniqueByName("ShadowMapBillboard");
 
-            this.AddInputLayout(this.ShadowMapBillboard, VertexBillboard.GetInput());
-
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
             this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
             this.startRadius = this.Effect.GetVariableByName("gStartRadius").AsScalar();

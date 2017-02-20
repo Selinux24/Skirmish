@@ -20,15 +20,15 @@ namespace Engine.Effects
         /// <summary>
         /// Fire stream out technique
         /// </summary>
-        protected readonly EffectTechnique ParticleStreamOut = null;
+        public readonly EffectTechnique ParticleStreamOut = null;
         /// <summary>
         /// Non rotation particles drawing technique
         /// </summary>
-        protected readonly EffectTechnique NonRotationDraw = null;
+        public readonly EffectTechnique NonRotationDraw = null;
         /// <summary>
         /// Rotation particles drawing technique
         /// </summary>
-        protected readonly EffectTechnique RotationDraw = null;
+        public readonly EffectTechnique RotationDraw = null;
 
         /// <summary>
         /// World effect variable
@@ -466,10 +466,6 @@ namespace Engine.Effects
             this.ParticleStreamOut = this.Effect.GetTechniqueByName("ParticleStreamOut");
             this.NonRotationDraw = this.Effect.GetTechniqueByName("NonRotationParticle");
             this.RotationDraw = this.Effect.GetTechniqueByName("RotationParticle");
-
-            this.AddInputLayout(this.ParticleStreamOut, VertexGPUParticle.GetInput());
-            this.AddInputLayout(this.NonRotationDraw, VertexGPUParticle.GetInput());
-            this.AddInputLayout(this.RotationDraw, VertexGPUParticle.GetInput());
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
