@@ -14,17 +14,18 @@ namespace Engine.Common
         /// <summary>
         /// Defined input colection
         /// </summary>
-        /// <returns></returns>
-        public static InputElement[] GetInput()
+        /// <param name="slot">Slot</param>
+        /// <returns>Returns input elements</returns>
+        public static InputElement[] Input(int slot)
         {
             return new InputElement[]
             {
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, 0, InputClassification.PerVertexData, 0),
-                new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, 0, InputClassification.PerVertexData, 0),
-                new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, 0, InputClassification.PerVertexData, 0),
-                new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 32, 0, InputClassification.PerVertexData, 0),
-                new InputElement("WEIGHTS", 0, SharpDX.DXGI.Format.R32G32B32_Float, 48, 0, InputClassification.PerVertexData, 0),
-                new InputElement("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 60, 0, InputClassification.PerVertexData, 0 ),
+                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
+                new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
+                new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
+                new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 32, slot, InputClassification.PerVertexData, 0),
+                new InputElement("WEIGHTS", 0, SharpDX.DXGI.Format.R32G32B32_Float, 48, slot, InputClassification.PerVertexData, 0),
+                new InputElement("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 60, slot, InputClassification.PerVertexData, 0 ),
             };
         }
 
@@ -160,15 +161,7 @@ namespace Engine.Common
         /// <returns>Returns input elements</returns>
         public InputElement[] GetInput(int slot)
         {
-            return new InputElement[]
-            {
-                new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
-                new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
-                new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
-                new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 32, slot, InputClassification.PerVertexData, 0),
-                new InputElement("WEIGHTS", 0, SharpDX.DXGI.Format.R32G32B32_Float, 48, slot, InputClassification.PerVertexData, 0),
-                new InputElement("BONEINDICES", 0, SharpDX.DXGI.Format.R8G8B8A8_UInt, 60, slot, InputClassification.PerVertexData, 0 ),
-            };
+            return Input(slot);
         }
 
         /// <summary>

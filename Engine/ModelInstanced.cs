@@ -159,7 +159,6 @@ namespace Engine
                             {
                                 current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
 
-                                this.instancingData[instanceIndex].ClipIndex = 0;
                                 this.instancingData[instanceIndex].AnimationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
 
                                 current.InvalidateCache();

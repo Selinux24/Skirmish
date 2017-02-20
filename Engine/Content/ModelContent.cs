@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using SharpDX.Direct3D;
+﻿using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -367,18 +366,6 @@ namespace Engine.Content
         /// <param name="topology">Topology</param>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="vertices">Vertex list</param>
-        /// <param name="material">Material</param>
-        /// <returns>Returns new model content</returns>
-        public static ModelContent Generate(PrimitiveTopology topology, VertexTypes vertexType, VertexData[] vertices, MaterialContent material = null)
-        {
-            return Generate(topology, vertexType, vertices, null, material);
-        }
-        /// <summary>
-        /// Generate model content from scratch
-        /// </summary>
-        /// <param name="topology">Topology</param>
-        /// <param name="vertexType">Vertex type</param>
-        /// <param name="vertices">Vertex list</param>
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
@@ -404,72 +391,6 @@ namespace Engine.Content
 
             modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
             modelContent.Optimize();
-
-            return modelContent;
-        }
-        /// <summary>
-        /// Generate model content for line list
-        /// </summary>
-        /// <param name="lines">Lines</param>
-        /// <param name="color">Color</param>
-        /// <param name="material">Material</param>
-        /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateLineList(Line3D[] lines, Color4 color, MaterialContent material = null)
-        {
-            ModelContent modelContent = new ModelContent();
-
-            if (material != null)
-            {
-                modelContent.Images.Import(ref material);
-
-                modelContent.Materials.Add(ModelContent.DefaultMaterial, material);
-            }
-
-            VertexData[] verts = null;
-            VertexData.CreateLineList(lines, color, out verts);
-
-            SubMeshContent geo = new SubMeshContent()
-            {
-                Topology = PrimitiveTopology.LineList,
-                VertexType = VertexTypes.PositionColor,
-                Vertices = verts,
-                Material = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial,
-            };
-
-            modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
-
-            return modelContent;
-        }
-        /// <summary>
-        /// Generate model content for triangle list
-        /// </summary>
-        /// <param name="triangles">Triangles</param>
-        /// <param name="color">Color</param>
-        /// <param name="material">Material</param>
-        /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateTriangleList(Triangle[] triangles, Color4 color, MaterialContent material = null)
-        {
-            ModelContent modelContent = new ModelContent();
-
-            if (material != null)
-            {
-                modelContent.Images.Import(ref material);
-
-                modelContent.Materials.Add(ModelContent.DefaultMaterial, material);
-            }
-
-            VertexData[] verts = null;
-            VertexData.CreateTriangleList(triangles, color, out verts);
-
-            SubMeshContent geo = new SubMeshContent()
-            {
-                Topology = PrimitiveTopology.TriangleList,
-                VertexType = VertexTypes.PositionColor,
-                Vertices = verts,
-                Material = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial,
-            };
-
-            modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
 
             return modelContent;
         }

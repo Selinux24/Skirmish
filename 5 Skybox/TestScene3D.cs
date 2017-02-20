@@ -173,7 +173,12 @@ namespace Skybox
             VertexData[] vertices = new VertexData[v.Length];
             for (int i = 0; i < v.Length; i++)
             {
-                vertices[i] = VertexData.CreateVertexPositionNormalTexture(v[i], n[i], uv[i]);
+                vertices[i] = new VertexData()
+                {
+                    Position = v[i],
+                    Normal = n[i],
+                    Texture0 = uv[i],
+                };
             }
 
             var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalColor, vertices, ix, mat);

@@ -120,7 +120,7 @@ namespace Engine.Collections
 
             if (treeDepth <= maxDepth)
             {
-                VertexData[] nodeVertices = Array.FindAll(vertices, p =>
+                var nodeVertices = Array.FindAll(vertices, p =>
                 {
                     var containment = bbox.Contains(p.Position.Value);
 

@@ -826,7 +826,11 @@ namespace Engine
                     Game.Form,
                     out cv,
                     out indices);
-                var vertices = VertexPosition.Generate(cv);
+                var vertices = new VertexPosition[cv.Length];
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    vertices[i] = new VertexPosition() { Position = cv[i] };
+                }
 
                 this.screenGeometry.Offset = indx.Count;
                 this.screenGeometry.IndexCount = indices.Length;
@@ -842,7 +846,11 @@ namespace Engine
                     1, 16, 16,
                     out cv,
                     out indices);
-                var vertices = VertexPosition.Generate(cv);
+                var vertices = new VertexPosition[cv.Length];
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    vertices[i] = new VertexPosition() { Position = cv[i] };
+                }
 
                 this.pointLightGeometry.Offset = indx.Count;
                 this.pointLightGeometry.IndexCount = indices.Length;
@@ -864,7 +872,11 @@ namespace Engine
                     1, 16, 16,
                     out cv,
                     out indices);
-                var vertices = VertexPosition.Generate(cv);
+                var vertices = new VertexPosition[cv.Length];
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    vertices[i] = new VertexPosition() { Position = cv[i] };
+                }
 
                 this.spotLightGeometry.Offset = indx.Count;
                 this.spotLightGeometry.IndexCount = indices.Length;

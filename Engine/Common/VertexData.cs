@@ -60,305 +60,6 @@ namespace Engine.Common
         public byte[] BoneIndices;
 
         /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="size">Sprite size</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexBillboard(Vector3 position, Vector2 size)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Size = size,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="size">Sprite size</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexParticle(Vector3 position, Vector2 size)
-        {
-            return new VertexData
-            {
-                Position = position,
-                Size = size,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexPosition(Vector3 position)
-        {
-            return new VertexData()
-            {
-                Position = position,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="color">Color</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexPositionColor(Vector3 position, Color4 color)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Color = color,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="texture">Texture</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexPositionTexture(Vector3 position, Vector2 texture)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Texture0 = texture,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="normal">Normal</param>
-        /// <param name="color">Color</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexPositionNormalColor(Vector3 position, Vector3 normal, Color4 color)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Normal = normal,
-                Color = color,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="normal">Normal</param>
-        /// <param name="texture">Texture</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 texture)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Normal = normal,
-                Texture0 = texture,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="normal">Normal</param>
-        /// <param name="tangent">Tangent</param>
-        /// <param name="binormal">Binormal</param>
-        /// <param name="texture">Texture</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexPositionNormalTextureTangent(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Normal = normal,
-                Tangent = tangent,
-                BiNormal = binormal,
-                Texture0 = texture,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="weights">Weights</param>
-        /// <param name="boneIndices">Bone indices</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexSkinnedPosition(Vector3 position, float[] weights, byte[] boneIndices)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Weights = weights,
-                BoneIndices = boneIndices,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="color">Color</param>
-        /// <param name="weights">Weights</param>
-        /// <param name="boneIndices">Bone indices</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexSkinnedPositionColor(Vector3 position, Color4 color, float[] weights, byte[] boneIndices)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Color = color,
-                Weights = weights,
-                BoneIndices = boneIndices,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="texture">Texture</param>
-        /// <param name="weights">Weights</param>
-        /// <param name="boneIndices">Bone indices</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexSkinnedPositionTexture(Vector3 position, Vector2 texture, float[] weights, byte[] boneIndices)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Texture0 = texture,
-                Weights = weights,
-                BoneIndices = boneIndices,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="normal">Normal</param>
-        /// <param name="color">Color</param>
-        /// <param name="weights">Weights</param>
-        /// <param name="boneIndices">Bone indices</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexSkinnedPositionNormalColor(Vector3 position, Vector3 normal, Color4 color, float[] weights, byte[] boneIndices)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Normal = normal,
-                Color = color,
-                Weights = weights,
-                BoneIndices = boneIndices,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="normal">Normal</param>
-        /// <param name="texture">Texture</param>
-        /// <param name="weights">Weights</param>
-        /// <param name="boneIndices">Bone indices</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexSkinnedPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 texture, float[] weights, byte[] boneIndices)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Normal = normal,
-                Texture0 = texture,
-                Weights = weights,
-                BoneIndices = boneIndices,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="normal">Normal</param>
-        /// <param name="tangent">Tangent</param>
-        /// <param name="binormal">Binormal</param>
-        /// <param name="texture">Texture</param>
-        /// <param name="weights">Weights</param>
-        /// <param name="boneIndices">Bone indices</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexSkinnedPositionNormalTextureTangent(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture, float[] weights, byte[] boneIndices)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Normal = normal,
-                Tangent = tangent,
-                BiNormal = binormal,
-                Texture0 = texture,
-                Weights = weights,
-                BoneIndices = boneIndices,
-            };
-        }
-        /// <summary>
-        /// Generates vertex helper from components
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="normal">Normal</param>
-        /// <param name="tangent">Tangent</param>
-        /// <param name="binormal">Binormal</param>
-        /// <param name="texture">Texture</param>
-        /// <param name="color">Color</param>
-        /// <returns>Returns helper</returns>
-        public static VertexData CreateVertexTerrain(Vector3 position, Vector3 normal, Vector3 tangent, Vector3 binormal, Vector2 texture0, Vector2 texture1, Color4 color)
-        {
-            return new VertexData()
-            {
-                Position = position,
-                Normal = normal,
-                Tangent = tangent,
-                BiNormal = binormal,
-                Texture0 = texture0,
-                Texture1 = texture1,
-                Color = color,
-            };
-        }
-
-        /// <summary>
-        /// Generates vertex from helper
-        /// </summary>
-        /// <param name="v">Helper</param>
-        /// <returns>Returns the generated vertex</returns>
-        public static VertexBillboard CreateVertexBillboard(VertexData v)
-        {
-            return new VertexBillboard
-            {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Size = v.Size.HasValue ? v.Size.Value : Vector2.One,
-            };
-        }
-        /// <summary>
-        /// Generates vertex from helper
-        /// </summary>
-        /// <param name="v">Helper</param>
-        /// <returns>Returns the generated vertex</returns>
-        public static VertexCPUParticle CreateVertexCPUParticle(VertexData v)
-        {
-            return new VertexCPUParticle
-            {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Velocity = Vector3.Zero,
-            };
-        }
-        /// <summary>
-        /// Generates vertex from helper
-        /// </summary>
-        /// <param name="v">Helper</param>
-        /// <returns>Returns the generated vertex</returns>
-        public static VertexGPUParticle CreateVertexGPUParticle(VertexData v)
-        {
-            return new VertexGPUParticle
-            {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Velocity = Vector3.Zero,
-            };
-        }
-        /// <summary>
         /// Generates vertex from helper
         /// </summary>
         /// <param name="v">Helper</param>
@@ -437,23 +138,6 @@ namespace Engine.Common
                 Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
                 Texture = v.Texture0.HasValue ? v.Texture0.Value : Vector2.Zero,
                 Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
-            };
-        }
-        /// <summary>
-        /// Generates vertex from helper
-        /// </summary>
-        /// <param name="v">Helper</param>
-        /// <returns>Returns the generated vertex</returns>
-        public static VertexTerrain CreateVertexTerrain(VertexData v)
-        {
-            return new VertexTerrain
-            {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture0 = v.Texture0.HasValue ? v.Texture0.Value : Vector2.Zero,
-                Texture1 = v.Texture1.HasValue ? v.Texture1.Value : Vector2.Zero,
-                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
             };
         }
         /// <summary>
@@ -586,6 +270,23 @@ namespace Engine.Common
             };
         }
         /// <summary>
+        /// Generates vertex from helper
+        /// </summary>
+        /// <param name="v">Helper</param>
+        /// <returns>Returns the generated vertex</returns>
+        public static VertexTerrain CreateVertexTerrain(VertexData v)
+        {
+            return new VertexTerrain
+            {
+                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
+                Texture0 = v.Texture0.HasValue ? v.Texture0.Value : Vector2.Zero,
+                Texture1 = v.Texture1.HasValue ? v.Texture1.Value : Vector2.Zero,
+                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
+                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
+            };
+        }
+        /// <summary>
         /// Finds bone index by name
         /// </summary>
         /// <param name="jointNames">Bone names list</param>
@@ -600,44 +301,6 @@ namespace Engine.Common
             }
 
             return (byte)0;
-        }
-
-        /// <summary>
-        /// Creates a line list of VertexPositionColor VertexData
-        /// </summary>
-        /// <param name="lines">Line list</param>
-        /// <param name="color">Color</param>
-        /// <param name="v">Result vertices</param>
-        public static void CreateLineList(Line3D[] lines, Color4 color, out VertexData[] v)
-        {
-            List<VertexData> data = new List<VertexData>();
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                data.Add(VertexData.CreateVertexPositionColor(lines[i].Point1, color));
-                data.Add(VertexData.CreateVertexPositionColor(lines[i].Point2, color));
-            }
-
-            v = data.ToArray();
-        }
-        /// <summary>
-        /// Creates a triangle list of VertexPositionColor VertexData
-        /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <param name="color">Color</param>
-        /// <param name="v">Result vertices</param>
-        public static void CreateTriangleList(Triangle[] triangles, Color4 color, out VertexData[] v)
-        {
-            List<VertexData> vList = new List<VertexData>();
-
-            for (int i = 0; i < triangles.Length; i++)
-            {
-                vList.Add(VertexData.CreateVertexPositionColor(triangles[i].Point1, color));
-                vList.Add(VertexData.CreateVertexPositionColor(triangles[i].Point2, color));
-                vList.Add(VertexData.CreateVertexPositionColor(triangles[i].Point3, color));
-            }
-
-            v = vList.ToArray();
         }
 
         /// <summary>
@@ -733,19 +396,7 @@ namespace Engine.Common
                 }
             }
 
-            if (vertexType == VertexTypes.Billboard)
-            {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexBillboard(v)); });
-            }
-            else if (vertexType == VertexTypes.Particle)
-            {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexCPUParticle(v)); });
-            }
-            else if (vertexType == VertexTypes.GPUParticle)
-            {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexGPUParticle(v)); });
-            }
-            else if (vertexType == VertexTypes.Position)
+            if (vertexType == VertexTypes.Position)
             {
                 Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPosition(v)); });
             }
@@ -768,10 +419,6 @@ namespace Engine.Common
             else if (vertexType == VertexTypes.PositionNormalTextureTangent)
             {
                 Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionNormalTextureTangent(v)); });
-            }
-            else if (vertexType == VertexTypes.Terrain)
-            {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexTerrain(v)); });
             }
             else if (vertexType == VertexTypes.PositionSkinned)
             {
@@ -827,6 +474,10 @@ namespace Engine.Common
                     vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalTextureTangent(v, vw, skinBoneNames));
                 });
             }
+            else if (vertexType == VertexTypes.Terrain)
+            {
+                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexTerrain(v)); });
+            }
 
             else
             {
@@ -872,26 +523,6 @@ namespace Engine.Common
             {
                 return position;
             }
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="v">Vertex data</param>
-        public VertexData(VertexData v)
-        {
-            this.FaceIndex = v.FaceIndex;
-            this.VertexIndex = v.VertexIndex;
-            this.Position = v.Position;
-            this.Normal = v.Normal;
-            this.Tangent = v.Tangent;
-            this.BiNormal = v.BiNormal;
-            this.Texture0 = v.Texture0;
-            this.Texture1 = v.Texture1;
-            this.Color = v.Color;
-            this.Size = v.Size;
-            this.Weights = v.Weights;
-            this.BoneIndices = v.BoneIndices;
         }
 
         /// <summary>

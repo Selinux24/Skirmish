@@ -194,7 +194,7 @@ namespace Engine.Effects
         /// <summary>
         /// Animation data effect variable
         /// </summary>
-        private EffectVectorVariable animationData = null;
+        private EffectScalarVariable animationOffset = null;
         /// <summary>
         /// Material index effect variable
         /// </summary>
@@ -500,19 +500,15 @@ namespace Engine.Effects
         /// <summary>
         /// Animation data
         /// </summary>
-        protected UInt32[] AnimationData
+        protected uint AnimationOffset
         {
             get
             {
-                Int4 v = this.animationData.GetIntVector();
-
-                return new UInt32[] { (uint)v.X, (uint)v.Y, (uint)v.Z };
+                return (uint)this.animationOffset.GetFloat();
             }
             set
             {
-                Int4 v4 = new Int4((int)value[0], (int)value[1], (int)value[2], 0);
-
-                this.animationData.Set(v4);
+                this.animationOffset.Set((float)value);
             }
         }
         /// <summary>
@@ -818,7 +814,7 @@ namespace Engine.Effects
             this.specularMap = this.Effect.GetVariableByName("gPSSpecularMapArray").AsShaderResource();
 
             //Per instance
-            this.animationData = this.Effect.GetVariableByName("gVSAnimationData").AsVector();
+            this.animationOffset = this.Effect.GetVariableByName("gVSAnimationOffset").AsScalar();
             this.materialIndex = this.Effect.GetVariableByName("gPSMaterialIndex").AsScalar();
             this.textureIndex = this.Effect.GetVariableByName("gPSTextureIndex").AsScalar();
         }
@@ -998,14 +994,14 @@ namespace Engine.Effects
         /// <param name="specularMap">Specular map</param>
         /// <param name="materialIndex">Material index</param>
         /// <param name="textureIndex">Texture index</param>
-        /// <param name="animationIndex">Animation index</param>
+        /// <param name="animationOffset">Animation index</param>
         public void UpdatePerObject(
             ShaderResourceView diffuseMap,
             ShaderResourceView normalMap,
             ShaderResourceView specularMap,
             uint materialIndex,
             uint textureIndex,
-            uint animationIndex)
+            uint animationOffset)
         {
             this.DiffuseMap = diffuseMap;
             this.NormalMap = normalMap;
@@ -1015,7 +1011,7 @@ namespace Engine.Effects
             this.MaterialIndex = materialIndex;
             this.TextureIndex = textureIndex;
 
-            this.AnimationData = new uint[] { 0, animationIndex, 0 };
+            this.AnimationOffset = animationOffset;
         }
     }
 }

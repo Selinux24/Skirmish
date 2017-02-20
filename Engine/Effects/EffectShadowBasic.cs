@@ -5,7 +5,6 @@ using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
 using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
 using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
@@ -105,7 +104,7 @@ namespace Engine.Effects
         /// <summary>
         /// Animation data effect variable
         /// </summary>
-        private EffectVectorVariable animationData = null;
+        private EffectScalarVariable animationOffset = null;
         /// <summary>
         /// Texture index effect variable
         /// </summary>
@@ -141,19 +140,15 @@ namespace Engine.Effects
         /// <summary>
         /// Animation data
         /// </summary>
-        protected UInt32[] AnimationData
+        protected uint AnimationOffset
         {
             get
             {
-                Int4 v = this.animationData.GetIntVector();
-
-                return new UInt32[] { (uint)v.X, (uint)v.Y, (uint)v.Z };
+                return (uint)this.animationOffset.GetInt();
             }
             set
             {
-                Int4 v4 = new Int4((int)value[0], (int)value[1], (int)value[2], 0);
-
-                this.animationData.Set(v4);
+                this.animationOffset.Set(value);
             }
         }
         /// <summary>
@@ -237,7 +232,7 @@ namespace Engine.Effects
             this.InstancingShadowMapPositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentSkinnedI");
 
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.animationData = this.Effect.GetVariableByName("gAnimationData").AsVector();
+            this.animationOffset = this.Effect.GetVariableByName("gAnimationOffset").AsScalar();
             this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
             this.animationPaletteWidth = this.Effect.GetVariableByName("gAnimationPaletteWidth").AsScalar();
             this.animationPalette = this.Effect.GetVariableByName("gAnimationPalette").AsShaderResource();
@@ -320,14 +315,14 @@ namespace Engine.Effects
         /// Update per model object data
         /// </summary>
         /// <param name="textureIndex">Texture index</param>
-        /// <param name="animationIndex">Animation index</param>
+        /// <param name="animationOffset">Animation index</param>
         public void UpdatePerObject(
             uint textureIndex,
-            uint animationIndex)
+            uint animationOffset)
         {
             this.TextureIndex = textureIndex;
 
-            this.AnimationData = new uint[] { 0, animationIndex, 0 };
+            this.AnimationOffset = animationOffset;
         }
     }
 }

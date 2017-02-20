@@ -124,7 +124,7 @@ namespace Engine.Common
             {
                 if (item.Instances > 0)
                 {
-                    item.Input.AddRange(VertexInstancingData.GetInput(instancingBufferOffset));
+                    item.Input.AddRange(VertexInstancingData.Input(instancingBufferOffset));
                 }
             }
         }

@@ -16,7 +16,7 @@ namespace Engine.Common
         /// Defined input colection
         /// </summary>
         /// <returns>Returns input elements</returns>
-        public static InputElement[] Input(int slot = 0)
+        public static InputElement[] Input(int slot)
         {
             return new InputElement[]
             {
@@ -114,7 +114,7 @@ namespace Engine.Common
         /// <returns>Returns input elements</returns>
         public InputElement[] GetInput(int slot)
         {
-            return VertexGPUParticle.Input(slot);
+            return Input(slot);
         }
 
         /// <summary>

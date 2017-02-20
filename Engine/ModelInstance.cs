@@ -80,7 +80,7 @@ namespace Engine
         /// <summary>
         /// Texture index
         /// </summary>
-        public int TextureIndex = 0;
+        public uint TextureIndex = 0;
         /// <summary>
         /// Active
         /// </summary>

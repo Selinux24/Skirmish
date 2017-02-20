@@ -208,9 +208,9 @@ namespace Engine.Common
         /// </summary>
         public Matrix Local;
         /// <summary>
-        /// Clip index in animation palette
+        /// Texture index
         /// </summary>
-        public uint ClipIndex;
+        public uint TextureIndex;
         /// <summary>
         /// Animation offset in current clip
         /// </summary>
@@ -218,11 +218,11 @@ namespace Engine.Common
         /// <summary>
         /// Padding
         /// </summary>
-        public uint Padding;
+        public uint Padding1;
         /// <summary>
-        /// Texture index
+        /// Padding
         /// </summary>
-        public float TextureIndex;
+        public uint Padding2;
     }
 
     public struct Billboard

@@ -295,7 +295,11 @@ namespace Engine
             uint[] iData;
             GeometryUtil.CreateSphere(1, 10, 75, out vData, out iData);
 
-            VertexPosition[] vertices = VertexPosition.Generate(vData);
+            VertexPosition[] vertices = new VertexPosition[vData.Length];
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = new VertexPosition() { Position = vData[i] };
+            }
 
             var indices = GeometryUtil.ChangeCoordinate(iData);
 

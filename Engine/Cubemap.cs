@@ -161,7 +161,11 @@ namespace Engine
             else if (geometry == CubemapDescription.CubeMapGeometryEnum.Sphere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
             else throw new ArgumentException("Bad geometry enum type");
 
-            VertexPosition[] vertices = VertexPosition.Generate(vData);
+            VertexPosition[] vertices = new VertexPosition[vData.Length];
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = new VertexPosition() { Position = vData[i] };
+            }
 
             if (reverse) iData = GeometryUtil.ChangeCoordinate(iData);
 

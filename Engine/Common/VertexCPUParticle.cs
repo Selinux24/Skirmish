@@ -16,7 +16,7 @@ namespace Engine.Common
         /// Defined input colection
         /// </summary>
         /// <param name="slot">Slot</param>
-        public static InputElement[] Input(int slot = 0)
+        public static InputElement[] Input(int slot)
         {
             return new InputElement[]
             {
