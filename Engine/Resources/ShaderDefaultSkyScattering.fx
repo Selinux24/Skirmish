@@ -1,4 +1,5 @@
 #include "IncScattering.fx"
+#include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
 /**********************************************************************************************************
@@ -13,6 +14,7 @@ cbuffer cbPerFrame : register (b0)
 	float4 gMisc;
 	float4 gBackColor;
 	float3 gLightDirection;
+	float gHDRExposure;
 };
 
 PSVertexSkyScattering VSScattering(VSVertexPosition input)
@@ -38,7 +40,7 @@ PSVertexSkyScattering VSScattering(VSVertexPosition input)
 
 float4 PSScattering(PSVertexSkyScattering input) : SV_TARGET
 {
-	return pixelPhase(gLightDirection, input.direction, input.colorR, input.colorM);
+	return hdr(pixelPhase(gLightDirection, input.direction, input.colorR, input.colorM), gHDRExposure);
 }
 
 /**********************************************************************************************************

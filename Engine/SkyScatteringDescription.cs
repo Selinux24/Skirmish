@@ -82,6 +82,10 @@ namespace Engine
         /// Sky brightness
         /// </summary>
         public float Brightness { get; set; }
+        /// <summary>
+        /// HDR exposure
+        /// </summary>
+        public float HDRExposure { get; set; }
 
         /// <summary>
         /// Constructor
@@ -100,6 +104,7 @@ namespace Engine
 
             this.WaveLength = SunLightWaveLength;
             this.Brightness = EarthSkyBrightness;
+            this.HDRExposure = 2.0f;
 
             this.Static = true;
             this.CastShadow = false;

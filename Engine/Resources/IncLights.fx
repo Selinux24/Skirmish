@@ -495,3 +495,13 @@ inline float4 ComputeLights(
 
 	return saturate(color);
 }
+
+float4 hdr(float4 color, float exposure) {
+    float4 hdrColor = float4(color.rgb * exposure, color.a);
+
+    hdrColor.r = hdrColor.r < 1.413f ? pow(abs(hdrColor.r) * 0.38317f, 1.0f / 2.2f) : 1.0f - exp(-hdrColor.r);
+    hdrColor.g = hdrColor.g < 1.413f ? pow(abs(hdrColor.g) * 0.38317f, 1.0f / 2.2f) : 1.0f - exp(-hdrColor.g);
+    hdrColor.b = hdrColor.b < 1.413f ? pow(abs(hdrColor.b) * 0.38317f, 1.0f / 2.2f) : 1.0f - exp(-hdrColor.b);
+
+	return hdrColor;
+}

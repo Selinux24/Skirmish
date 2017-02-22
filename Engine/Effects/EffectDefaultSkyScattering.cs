@@ -2,6 +2,7 @@
 using System;
 using Device = SharpDX.Direct3D11.Device;
 using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
+using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
 using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
 
@@ -47,6 +48,10 @@ namespace Engine.Effects
         /// Light direction effect variable
         /// </summary>
         private EffectVectorVariable lightDirectionWorld = null;
+        /// <summary>
+        /// HDR exposure effect variable
+        /// </summary>
+        private EffectScalarVariable hdrExposure = null;
 
         /// <summary>
         /// World view projection matrix
@@ -152,6 +157,20 @@ namespace Engine.Effects
                 this.lightDirectionWorld.Set(v4);
             }
         }
+        /// <summary>
+        /// HDR exposure
+        /// </summary>
+        protected float HDRExposure
+        {
+            get
+            {
+                return this.hdrExposure.GetFloat();
+            }
+            set
+            {
+                this.hdrExposure.Set(value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -171,6 +190,7 @@ namespace Engine.Effects
             this.misc = this.Effect.GetVariableByName("gMisc").AsVector();
             this.backColor = this.Effect.GetVariableByName("gBackColor").AsVector();
             this.lightDirectionWorld = this.Effect.GetVariableByName("gLightDirection").AsVector();
+            this.hdrExposure = this.Effect.GetVariableByName("gHDRExposure").AsScalar();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -226,6 +246,7 @@ namespace Engine.Effects
         /// <param name="rayleighScaleDepth">Rayleigh scale depth</param>
         /// <param name="backColor">Back color</param>
         /// <param name="lightDirection">Light direction</param>
+        /// <param name="hdrExposure">HDR exposure</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
@@ -242,7 +263,8 @@ namespace Engine.Effects
             float scale,
             float rayleighScaleDepth,
             Color4 backColor,
-            Vector3 lightDirection)
+            Vector3 lightDirection,
+            float hdrExposure)
         {
             this.WorldViewProjection = world * viewProjection;
 
@@ -261,6 +283,7 @@ namespace Engine.Effects
             this.BackColor = backColor;
 
             this.LightDirectionWorld = -lightDirection;
+            this.HDRExposure = hdrExposure;
         }
     }
 }

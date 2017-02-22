@@ -586,7 +586,7 @@ namespace GameLogic
 
             float soldierSeparation = 10f;
             int instanceIndex = 0;
-            int teamIndex = 0;
+            uint teamIndex = 0;
             foreach (Team team in this.skirmishGame.Teams)
             {
                 float teamWidth = team.Soldiers.Length * soldierSeparation;

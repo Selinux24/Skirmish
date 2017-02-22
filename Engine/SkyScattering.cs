@@ -60,19 +60,19 @@ namespace Engine
         /// <summary>
         /// Rayleigh scattering * 4 * PI
         /// </summary>
-        protected float RayleighScattering4PI { get; private set; }
+        public float RayleighScattering4PI { get; private set; }
         /// <summary>
         /// Mie scattering * 4 * PI
         /// </summary>
-        protected float MieScattering4PI { get; private set; }
+        public float MieScattering4PI { get; private set; }
         /// <summary>
         /// Inverse wave length * 4
         /// </summary>
-        protected Color4 InvWaveLength4 { get; private set; }
+        public Color4 InvWaveLength4 { get; private set; }
         /// <summary>
         /// Scattering Scale
         /// </summary>
-        protected float ScatteringScale { get; private set; }
+        public float ScatteringScale { get; private set; }
 
         /// <summary>
         /// Maximum number of instances
@@ -189,6 +189,10 @@ namespace Engine
                 this.CalcScale();
             }
         }
+        /// <summary>
+        /// HDR exposure
+        /// </summary>
+        public float HDRExposure { get; set; }
 
         /// <summary>
         /// Constructor
@@ -212,6 +216,7 @@ namespace Engine
 
             this.WaveLength = description.WaveLength;
             this.Brightness = description.Brightness;
+            this.HDRExposure = description.HDRExposure;
 
             this.sphereInnerRadius = 1.0f;
             this.sphereOuterRadius = this.sphereInnerRadius * 1.025f;
@@ -273,7 +278,8 @@ namespace Engine
                     this.ScatteringScale,
                     this.RayleighScaleDepth,
                     context.Lights.FogColor,
-                    keyLight.Direction);
+                    keyLight.Direction,
+                    this.HDRExposure);
 
                 for (int p = 0; p < technique.Description.PassCount; p++)
                 {

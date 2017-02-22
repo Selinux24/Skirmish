@@ -173,7 +173,7 @@ namespace Collada
 
             for (int i = 0; i < this.helicoptersModel.Count; i++)
             {
-                this.helicoptersModel.Instances[i].TextureIndex = rnd.Next(0, 2);
+                this.helicoptersModel.Instances[i].TextureIndex = (uint)rnd.Next(0, 2);
                 AnimationPath ap = new AnimationPath();
                 ap.AddLoop("roll");
                 this.helicoptersModel.Instances[i].AnimationController.AddPath(ap);
