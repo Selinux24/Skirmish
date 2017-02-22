@@ -923,6 +923,15 @@ namespace Engine
             return result;
         }
         /// <summary>
+        /// Gets the bounding box center
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the center of the current bounding box</returns>
+        public static Vector3 GetCenter(this BoundingBox bbox)
+        {
+            return bbox.Minimum + bbox.Maximum * 0.5f;
+        }
+        /// <summary>
         /// Gets the x maganitude of the current bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>

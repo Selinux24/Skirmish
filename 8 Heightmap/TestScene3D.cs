@@ -52,8 +52,16 @@ namespace HeightmapTest
         private SceneLightSpot spotLight1 = null;
         private SceneLightSpot spotLight2 = null;
 
+        private ParticleManager pManager = null;
+        private ParticleSystemDescription pPlume = null;
+        private ParticleSystemDescription pFire = null;
+        private ParticleSystemDescription pDust = null;
+        private float nextDust = 0;
+        private float dustTime = 0.33f;
+
         private ModelInstanced rocks = null;
         private ModelInstanced trees = null;
+        private ModelInstanced trees2 = null;
 
         private Model soldier = null;
         private TriangleListDrawer soldierTris = null;
@@ -142,12 +150,25 @@ namespace HeightmapTest
                 Name = "Trees",
                 CastShadow = true,
                 Static = true,
-                Instances = 300,
+                Instances = 200,
                 AlphaEnabled = true,
             };
             this.trees = this.AddInstancingModel(@"Resources/Trees", @"tree.xml", treeDesc, true, layerTerrain);
             sw.Stop();
             loadingText += string.Format("Trees: {0} ", sw.Elapsed.TotalSeconds);
+
+            sw.Restart();
+            var tree2Desc = new ModelInstancedDescription()
+            {
+                Name = "Trees",
+                CastShadow = true,
+                Static = true,
+                Instances = 200,
+                AlphaEnabled = true,
+            };
+            this.trees2 = this.AddInstancingModel(@"Resources/Trees2", @"tree.xml", tree2Desc, true, layerTerrain);
+            sw.Stop();
+            loadingText += string.Format("Trees2: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
 
@@ -222,6 +243,24 @@ namespace HeightmapTest
             this.torchs = this.AddInstancingModel(@"Resources/Scenery/Objects", @"torch.xml", tcDesc, true, layerObjects);
             sw.Stop();
             loadingText += string.Format("Torchs: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Particle Systems
+
+            this.pManager = this.AddParticleManager(new ParticleManagerDescription() { Name = "Particle Systems" }, layerEffects);
+
+            this.pFire = ParticleSystemDescription.InitializeFire("resources/particles", "fire.png", 0.5f);
+            this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources/particles", "smoke.png", 0.5f);
+            this.pDust = ParticleSystemDescription.InitializeDust("resources/particles", "dust.png", 2f);
+            this.pDust.MinHorizontalVelocity = 10f;
+            this.pDust.MaxHorizontalVelocity = 15f;
+            this.pDust.MinVerticalVelocity = 0f;
+            this.pDust.MaxVerticalVelocity = 0f;
+            this.pDust.MinColor = new Color(Color.SandyBrown.ToColor3(), 0.05f);
+            this.pDust.MaxColor = new Color(Color.SandyBrown.ToColor3(), 0.10f);
+            this.pDust.MinEndSize = 2f;
+            this.pDust.MaxEndSize = 20f;
 
             #endregion
 
@@ -481,7 +520,7 @@ namespace HeightmapTest
                     }
                 }
 
-                bbox = new BoundingBox(new Vector3(-300, 0, -300), new Vector3(-1000, 1000, -1000));
+                bbox = new BoundingBox(new Vector3(-400, 0, -400), new Vector3(-1000, 1000, -1000));
 
                 for (int i = 0; i < this.trees.Instances.Length; i++)
                 {
@@ -497,6 +536,25 @@ namespace HeightmapTest
                         this.trees.Instances[i].Manipulator.SetPosition(treePosition, true);
                         this.trees.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0, true);
                         this.trees.Instances[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                    }
+                }
+
+                bbox = new BoundingBox(new Vector3(-300, 0, -300), new Vector3(-1000, 1000, -1000));
+
+                for (int i = 0; i < this.trees2.Instances.Length; i++)
+                {
+                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
+
+                    Vector3 treePosition;
+                    Triangle treeTri;
+                    float treeDist;
+                    if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                    {
+                        treePosition.Y -= posRnd.NextFloat(0f, 2f);
+
+                        this.trees2.Instances[i].Manipulator.SetPosition(treePosition, true);
+                        this.trees2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.15f, MathUtil.PiOverFour * 0.15f), 0, true);
+                        this.trees2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
                     }
                 }
             }
@@ -581,6 +639,9 @@ namespace HeightmapTest
                         5f);
 
                     this.Lights.Add(this.torchLights[i - 1]);
+
+                    this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f });
+                    this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
                 }
             }
 
@@ -672,6 +733,11 @@ namespace HeightmapTest
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
 
+            GameEnvironment.LODDistanceHigh = 25f;
+            GameEnvironment.LODDistanceMedium = 100f;
+            GameEnvironment.LODDistanceLow = 250f;
+            GameEnvironment.LODDistanceMinimum = 500f;
+
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
             this.Camera.Position = new Vector3(12, 8, 7);
@@ -680,9 +746,9 @@ namespace HeightmapTest
             this.skydom.RayleighScattering *= 0.8f;
             this.skydom.MieScattering *= 0.1f;
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(10, 55, 00), 0.005f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(7, 55, 00), 0.005f);
 
-            this.Lights.FogColor = new Color((byte)95, (byte)147, (byte)233);
+            this.Lights.FogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
             this.ToggleFog();
 
             this.lantern = new SceneLightSpot("lantern", false, Color.White, Color.White, true, this.Camera.Position, this.Camera.Forward, 25f, 100, 50);
@@ -846,6 +912,24 @@ namespace HeightmapTest
 
             #endregion
 
+            #region Particles
+
+            this.nextDust -= gameTime.ElapsedSeconds;
+
+            if (this.nextDust <= 0)
+            {
+                this.nextDust = this.dustTime;
+
+                var hbsph = this.helicopter2.GetBoundingSphere();
+                hbsph.Radius *= 0.8f;
+
+                this.GenerateDust(this.rnd, hbsph);
+                this.GenerateDust(this.rnd, hbsph);
+                this.GenerateDust(this.rnd, hbsph);
+            }
+
+            #endregion
+
             #region Lights
 
             {
@@ -949,6 +1033,7 @@ namespace HeightmapTest
 
             this.help2.Text = this.Game.RuntimeText;
         }
+
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
@@ -986,6 +1071,44 @@ namespace HeightmapTest
                     return p + offset;
                 }
             }
+        }
+        private Vector3 GetRandomPoint(Random rnd, Vector3 offset, BoundingSphere bsph)
+        {
+            while (true)
+            {
+                float dist = rnd.NextFloat(0, bsph.Radius);
+
+                Vector3 dir = new Vector3(rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1));
+
+                Vector3 v = bsph.Center + (dist * Vector3.Normalize(dir));
+
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (terrain.FindTopGroundPosition(v.X, v.Z, out p, out t, out d))
+                {
+                    return p + offset;
+                }
+            }
+        }
+        private void GenerateDust(Random rnd, BoundingSphere bsph)
+        {
+            var pos = GetRandomPoint(rnd, Vector3.Zero, bsph);
+
+            var velocity = Vector3.Normalize(bsph.Center + pos);
+
+            var emitter = new ParticleEmitter()
+            {
+                EmissionRate = 0.01f,
+                Duration = 1,
+                MaximumDistance = 250f,
+                Position = pos,
+                Velocity = velocity,
+            };
+
+            this.pDust.Gravity = (this.windStrength * this.windDirection);
+
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
         }
     }
 }

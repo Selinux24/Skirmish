@@ -11,11 +11,11 @@ namespace Engine.Collada
         [XmlElement("contributor", typeof(Contributor))]
         public Contributor Contributor { get; set; }
         [XmlElement("created")]
-        public DateTime Created { get; set; }
+        public string Created { get; set; }
         [XmlElement("keywords")]
         public string Keywords { get; set; }
         [XmlElement("modified")]
-        public DateTime Modified { get; set; }
+        public string Modified { get; set; }
         [XmlElement("revision")]
         public string Revision { get; set; }
         [XmlElement("subject")]
