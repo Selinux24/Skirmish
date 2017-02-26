@@ -645,7 +645,7 @@ namespace Engine.Content
                             //Invert Vertical coordinate
                             tex.Y = -tex.Y;
 
-                            vert.Texture0 = tex;
+                            vert.Texture = tex;
                         }
 
                         verts.Add(vert);
@@ -739,7 +739,7 @@ namespace Engine.Content
                             //Invert Vertical coordinate
                             tex.Y = -tex.Y;
 
-                            vert.Texture0 = tex;
+                            vert.Texture = tex;
                         }
 
                         verts.Add(vert);

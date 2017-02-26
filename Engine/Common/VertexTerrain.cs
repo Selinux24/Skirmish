@@ -23,9 +23,8 @@ namespace Engine.Common
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
                 new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
                 new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
-                new InputElement("TEXCOORD", 1, SharpDX.DXGI.Format.R32G32_Float, 32, slot, InputClassification.PerVertexData, 0),
-                new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32_Float, 40, slot, InputClassification.PerVertexData, 0),
-                new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 52, slot, InputClassification.PerVertexData, 0),
+                new InputElement("TANGENT", 0, SharpDX.DXGI.Format.R32G32B32_Float, 32, slot, InputClassification.PerVertexData, 0),
+                new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 44, slot, InputClassification.PerVertexData, 0),
             };
         }
 
@@ -38,13 +37,9 @@ namespace Engine.Common
         /// </summary>
         public Vector3 Normal;
         /// <summary>
-        /// Texture UV 0
+        /// Texture UV
         /// </summary>
-        public Vector2 Texture0;
-        /// <summary>
-        /// Texture UV 1
-        /// </summary>
-        public Vector2 Texture1;
+        public Vector2 Texture;
         /// <summary>
         /// Tangent
         /// </summary>
@@ -74,7 +69,6 @@ namespace Engine.Common
             if (channel == VertexDataChannels.Position) return true;
             else if (channel == VertexDataChannels.Normal) return true;
             else if (channel == VertexDataChannels.Texture) return true;
-            else if (channel == VertexDataChannels.Texture1) return true;
             else if (channel == VertexDataChannels.Tangent) return true;
             else if (channel == VertexDataChannels.Color) return true;
             else return false;
@@ -89,8 +83,7 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
             else if (channel == VertexDataChannels.Normal) return (T)(object)this.Normal;
-            else if (channel == VertexDataChannels.Texture) return (T)(object)this.Texture0;
-            else if (channel == VertexDataChannels.Texture1) return (T)(object)this.Texture1;
+            else if (channel == VertexDataChannels.Texture) return (T)(object)this.Texture;
             else if (channel == VertexDataChannels.Tangent) return (T)(object)this.Tangent;
             else if (channel == VertexDataChannels.Color) return (T)(object)this.Color;
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
@@ -105,8 +98,7 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Normal) this.Normal = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Texture) this.Texture0 = (Vector2)(object)value;
-            else if (channel == VertexDataChannels.Texture1) this.Texture1 = (Vector2)(object)value;
+            else if (channel == VertexDataChannels.Texture) this.Texture = (Vector2)(object)value;
             else if (channel == VertexDataChannels.Tangent) this.Tangent = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Color) this.Color = (Color4)(object)value;
             else throw new Exception(string.Format("Channel data not found: {0}", channel));
@@ -136,10 +128,10 @@ namespace Engine.Common
         public override string ToString()
         {
             return string.Format(
-                "Position: {0}; Normal: {1}; Texture0: {2}; Texture1: {3}; Tangent: {4}",
+                "Position: {0}; Normal: {1}; Texture: {2}; Tangent: {3}",
                 this.Position,
                 this.Normal,
-                this.Texture0, this.Texture1,
+                this.Texture,
                 this.Tangent);
         }
     };

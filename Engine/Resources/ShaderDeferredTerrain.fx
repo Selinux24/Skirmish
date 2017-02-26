@@ -4,15 +4,18 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbPerFrame : register (b0)
+cbuffer cbPerFrame : register (b1)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
 	float4 gParams;
+	float gTextureResolution;
+	float3 PAD_B1;
 };
-cbuffer cbPerObject : register (b1)
+cbuffer cbPerObject : register (b4)
 {
 	uint gMaterialIndex;
+	uint3 PAD_B4;
 };
 
 Texture2DArray gDiffuseMapLRArray;
@@ -31,8 +34,8 @@ PSVertexTerrain VSTerrain(VSVertexTerrain input)
     output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gWorld));
 	output.tangentWorld = normalize(mul(input.tangentLocal, (float3x3)gWorld));
-	output.tex0 = input.tex0;
-	output.tex1 = input.tex1;
+	output.tex0 = input.tex * gTextureResolution;
+	output.tex1 = input.tex;
 	output.color = input.color;
     
     return output;

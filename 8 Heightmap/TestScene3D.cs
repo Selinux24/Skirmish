@@ -17,7 +17,8 @@ namespace HeightmapTest
 
         private const int layerObjects = 0;
         private const int layerTerrain = 1;
-        private const int layerEffects = 2;
+        private const int layerFoliage = 2;
+        private const int layerEffects = 3;
         private const int layerHUD = 99;
 
         private Random rnd = new Random();
@@ -278,7 +279,7 @@ namespace HeightmapTest
                     ColormapFileName = "desert0cm.bmp",
                     CellSize = 5,
                     MaximumHeight = 50,
-                    TextureResolution = 20f,
+                    TextureResolution = 75f,
                     Textures = new HeightmapDescription.TexturesDescription()
                     {
                         ContentPath = "Textures",
@@ -361,7 +362,7 @@ namespace HeightmapTest
                     WindEffect = 0.3f,
                 },
             };
-            this.gardener = this.AddGardener(vDesc, layerTerrain);
+            this.gardener = this.AddGardener(vDesc, layerFoliage);
             sw.Stop();
             loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -408,7 +409,7 @@ namespace HeightmapTest
                     WindEffect = 0.5f,
                 },
             };
-            this.gardener2 = this.AddGardener(vDesc2, layerTerrain);
+            this.gardener2 = this.AddGardener(vDesc2, layerFoliage);
             sw.Stop();
             loadingText += string.Format("gardener2: {0} ", sw.Elapsed.TotalSeconds);
 

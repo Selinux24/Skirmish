@@ -117,7 +117,7 @@ namespace Engine
                         pos3 = vertList[index3];
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
                             out tan1, out biNorm1, out norm1);
 
                         index2 = (y * width) + (x - 1);
@@ -126,7 +126,7 @@ namespace Engine
                         pos3 = vertList[index3];
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
                             out tan2, out biNorm2, out norm2);
 
                         index2 = ((y + 1) * width) + (x - 1);
@@ -135,7 +135,7 @@ namespace Engine
                         pos3 = vertList[index3];
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
                             out tan3, out biNorm3, out norm3);
 
                         index2 = ((y + 1) * width) + x;
@@ -144,7 +144,7 @@ namespace Engine
                         pos3 = vertList[index3];
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
                             out tan4, out biNorm4, out norm4);
 
                         index2 = (y * width) + (x + 1);
@@ -153,7 +153,7 @@ namespace Engine
                         pos3 = vertList[index3];
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
                             out tan5, out biNorm5, out norm5);
 
                         index2 = ((y - 1) * width) + (x + 1);
@@ -162,7 +162,7 @@ namespace Engine
                         pos3 = vertList[index3];
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
-                            pos1.Texture0.Value, pos3.Texture0.Value, pos2.Texture0.Value,
+                            pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
                             out tan6, out biNorm6, out norm6);
 
                         Vector3 norm = (norm1 + norm2 + norm3 + norm4 + norm5 + norm6) / 6.0f;
@@ -281,10 +281,9 @@ namespace Engine
         /// </summary>
         /// <param name="cellSize">Cell size</param>
         /// <param name="cellHeight">Cell height</param>
-        /// <param name="textureResolution">Texture resolution</param>
         /// <param name="vertices">Result vertices</param>
         /// <param name="indices">Result indices</param>
-        public void BuildGeometry(float cellSize, float cellHeight, float textureResolution, out VertexData[] vertices, out uint[] indices)
+        public void BuildGeometry(float cellSize, float cellHeight, out VertexData[] vertices, out uint[] indices)
         {
             float totalWidth = cellSize * (this.Width - 1);
             float totalDepth = cellSize * (this.Depth - 1);
@@ -305,17 +304,13 @@ namespace Engine
                     float posY = this.m_HeightData[depth, width] * cellHeight;
                     float posZ = (width * cellSize) - (totalWidth * 0.5f);
 
-                    float tu0 = width * cellSize / textureResolution;
-                    float tv0 = depth * cellSize / textureResolution;
-
-                    float tu1 = width * cellSize / totalWidth;
-                    float tv1 = depth * cellSize / totalDepth;
+                    float tu = width * cellSize / totalWidth;
+                    float tv = depth * cellSize / totalDepth;
 
                     VertexData newVertex = new VertexData()
                     {
                         Position = new Vector3(posX, posY, posZ),
-                        Texture0 = new Vector2(tu0, tv0),
-                        Texture1 = new Vector2(tu1, tv1),
+                        Texture = new Vector2(tu, tv),
                         Color = this.m_ColorData[depth, width],
                     };
 

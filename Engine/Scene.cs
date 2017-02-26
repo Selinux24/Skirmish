@@ -526,8 +526,7 @@ namespace Engine
                 content.HeightmapFileName,
                 content.Textures.TexturesLR,
                 content.CellSize,
-                content.MaximumHeight,
-                content.TextureResolution);
+                content.MaximumHeight);
 
             if (optimize) geo.Optimize();
 

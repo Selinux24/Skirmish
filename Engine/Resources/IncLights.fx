@@ -153,9 +153,7 @@ struct PointLight
 	float3 Position;
 	float Intensity;
 	float Radius;
-	float Pad1;
-	float Pad2;
-	float Pad3;
+	float3 Pad;
 };
 struct SpotLight
 {
@@ -166,9 +164,7 @@ struct SpotLight
 	float3 Direction;
 	float Intensity;
 	float Radius;
-	float Pad1;
-	float Pad2;
-	float Pad3;
+	float3 Pad;
 };
 
 inline Material GetMaterialData(Texture2D materialsTexture, uint materialIndex, uint paletteWidth)

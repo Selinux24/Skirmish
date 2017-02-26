@@ -64,8 +64,7 @@ struct VSVertexTerrain
     float3 positionLocal : POSITION;
     float3 normalLocal : NORMAL;
     float3 tangentLocal : TANGENT;
-    float2 tex0 : TEXCOORD0;
-	float2 tex1 : TEXCOORD1;
+    float2 tex : TEXCOORD0;
     float4 color : COLOR0;
 };
 

@@ -180,7 +180,7 @@ namespace Engine.Content
                         Vector3 normal;
                         GeometryUtil.ComputeNormals(
                             v0.Position.Value, v1.Position.Value, v2.Position.Value,
-                            v0.Texture0.Value, v1.Texture0.Value, v2.Texture0.Value,
+                            v0.Texture.Value, v1.Texture.Value, v2.Texture.Value,
                             out tangent, out binormal, out normal);
 
                         v0.Tangent = tangent;
@@ -209,7 +209,7 @@ namespace Engine.Content
                         Vector3 normal;
                         GeometryUtil.ComputeNormals(
                             v0.Position.Value, v1.Position.Value, v2.Position.Value,
-                            v0.Texture0.Value, v1.Texture0.Value, v2.Texture0.Value,
+                            v0.Texture.Value, v1.Texture.Value, v2.Texture.Value,
                             out tangent, out binormal, out normal);
 
                         v0.Tangent = tangent;

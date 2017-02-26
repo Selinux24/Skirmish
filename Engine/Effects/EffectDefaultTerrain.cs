@@ -72,6 +72,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
+        /// Texture resolution effect variable
+        /// </summary>
+        private EffectScalarVariable textureResolution = null;
+        /// <summary>
         /// From light View * Projection transform
         /// </summary>
         private EffectMatrixVariable fromLightViewProjection = null;
@@ -376,6 +380,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Texture resolution
+        /// </summary>
+        protected float TextureResolution
+        {
+            get
+            {
+                return this.textureResolution.GetFloat();
+            }
+            set
+            {
+                this.textureResolution.Set(value);
+            }
+        }
+        /// <summary>
         /// From light View * Projection transform
         /// </summary>
         protected Matrix FromLightViewProjection
@@ -667,6 +685,7 @@ namespace Engine.Effects
             //Per frame
             this.world = this.Effect.GetVariableByName("gVSWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gVSWorldViewProjection").AsMatrix();
+            this.textureResolution = this.Effect.GetVariableByName("gVSTextureResolution").AsScalar();
 
             this.fromLightViewProjection = this.Effect.GetVariableByName("gPSLightViewProjection").AsMatrix();
             this.eyePositionWorld = this.Effect.GetVariableByName("gPSEyePositionWorld").AsVector();
@@ -740,6 +759,7 @@ namespace Engine.Effects
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="textureResolution">Texture resolution</param>
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMaps">Shadow map flags</param>
         /// <param name="shadowMapStatic">Static shadow map texture</param>
@@ -748,6 +768,7 @@ namespace Engine.Effects
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
+            float textureResolution,
             Vector3 eyePositionWorld,
             SceneLights lights,
             int shadowMaps,
@@ -757,6 +778,7 @@ namespace Engine.Effects
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
+            this.TextureResolution = textureResolution;
 
             var globalAmbient = 0f;
             var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];

@@ -686,6 +686,7 @@ namespace Engine
                 effect.UpdatePerFrame(
                     context.World,
                     context.ViewProjection,
+                    this.textureResolution,
                     context.EyePosition,
                     context.Lights,
                     context.ShadowMaps,
@@ -729,7 +730,8 @@ namespace Engine
 
                 effect.UpdatePerFrame(
                     context.World,
-                    context.ViewProjection);
+                    context.ViewProjection,
+                    this.textureResolution);
 
                 #endregion
 
@@ -784,7 +786,6 @@ namespace Engine
                 this.heightMap.BuildGeometry(
                     this.heightMapCellSize,
                     this.heightMapHeight,
-                    this.textureResolution,
                     out vertices, out indices);
             }
             /// <summary>
@@ -1259,6 +1260,93 @@ namespace Engine
         public override PickingQuadTreeNode[] GetVisibleNodes()
         {
             return this.patches.GetVisibleNodes(LevelOfDetailEnum.High);
+        }
+    }
+
+    /// <summary>
+    /// Map grid
+    /// </summary>
+    public class MapGrid
+    {
+        /// <summary>
+        /// High resolution nodes
+        /// </summary>
+        public MapGridNode[] NodesHigh = new MapGridNode[9];
+        /// <summary>
+        /// Medium resolution nodes
+        /// </summary>
+        public MapGridNode[] NodesMedium = new MapGridNode[16];
+        /// <summary>
+        /// Low resolution nodes
+        /// </summary>
+        public MapGridNode[] NodesLow = new MapGridNode[24];
+        /// <summary>
+        /// Minimum resolution nodes
+        /// </summary>
+        public MapGridNode[] NodesMinimum = new MapGridNode[32];
+
+        /// <summary>
+        /// Updates map from quad-tree and position
+        /// </summary>
+        /// <param name="tree">Quadtree</param>
+        /// <param name="position">Position</param>
+        public void Update(PickingQuadTree tree, Vector3 position)
+        {
+            
+        }
+    }
+    /// <summary>
+    /// Map grid node
+    /// </summary>
+    public class MapGridNode
+    {
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        public LevelOfDetailEnum LevelOfDetail;
+        /// <summary>
+        /// Vertices
+        /// </summary>
+        public VertexTerrain[] Vertices;
+        /// <summary>
+        /// Shape
+        /// </summary>
+        public IndexBufferShapeEnum Shape;
+        /// <summary>
+        /// Vertex buffer slot
+        /// </summary>
+        public int VertexBufferSlot;
+        /// <summary>
+        /// Vertex buffer offset
+        /// </summary>
+        public int VertexBufferOffset;
+        /// <summary>
+        /// Index buffer slot
+        /// </summary>
+        public int IndexBufferSlot;
+        /// <summary>
+        /// Index buffer offset
+        /// </summary>
+        public int IndexBufferOffset;
+        /// <summary>
+        /// Indexes count
+        /// </summary>
+        public int IndexCount = 0;
+
+        /// <summary>
+        /// Changes level of detail
+        /// </summary>
+        /// <param name="newLOD">New level of detail</param>
+        public void ChangeLOD(LevelOfDetailEnum newLOD)
+        {
+            if (newLOD > this.LevelOfDetail)
+            {
+                //Downgrade
+            }
+            else
+            {
+                //Upgrade
+            }
         }
     }
 }

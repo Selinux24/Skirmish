@@ -7,6 +7,7 @@ BUFFERS & VARIABLES
 cbuffer cbGlobals : register (b0)
 {
     uint gMaterialPaletteWidth;
+	uint3 PAD_B0;
 };
 Texture2D gMaterialPalette;
 
@@ -14,6 +15,8 @@ cbuffer cbVSPerFrame : register (b1)
 {
 	float4x4 gVSWorld;
 	float4x4 gVSWorldViewProjection;
+	float gVSTextureResolution;
+	float3 PAD_B1;
 };
 
 cbuffer cbPSPerFrame : register (b3)
@@ -26,8 +29,7 @@ cbuffer cbPSPerFrame : register (b3)
 	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
-	float PAD1;
-	float PAD2;
+	float2 PAD_B3;
 	DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
@@ -41,6 +43,7 @@ cbuffer cbPSPerObject : register (b4)
 	bool gPSUseColorDiffuse;
 	bool gPSUseColorSpecular;
 	uint gPSMaterialIndex;
+	uint PAD_B4;
 };
 Texture2DArray gPSNormalMapArray;
 Texture2DArray gPSSpecularMapArray;
@@ -60,8 +63,8 @@ PSVertexTerrain VSTerrain(VSVertexTerrain input)
     output.positionWorld = mul(float4(input.positionLocal, 1), gVSWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gVSWorld));
 	output.tangentWorld = normalize(mul(input.tangentLocal, (float3x3)gVSWorld));
-	output.tex0 = input.tex0;
-	output.tex1 = input.tex1;
+	output.tex0 = input.tex * gVSTextureResolution;
+	output.tex1 = input.tex;
 	output.color = input.color;
     
     return output;

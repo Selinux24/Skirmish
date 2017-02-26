@@ -31,6 +31,10 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
+        /// Texture resolution effect variable
+        /// </summary>
+        private EffectScalarVariable textureResolution = null;
+        /// <summary>
         /// Low resolution textures effect variable
         /// </summary>
         private EffectShaderResourceVariable diffuseMapLR = null;
@@ -114,6 +118,20 @@ namespace Engine.Effects
             set
             {
                 this.worldViewProjection.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// Texture resolution
+        /// </summary>
+        protected float TextureResolution
+        {
+            get
+            {
+                return this.textureResolution.GetFloat();
+            }
+            set
+            {
+                this.textureResolution.Set(value);
             }
         }
         /// <summary>
@@ -284,6 +302,7 @@ namespace Engine.Effects
 
             this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.textureResolution = this.Effect.GetVariableByName("gTextureResolution").AsScalar();
             this.diffuseMapLR = this.Effect.GetVariableByName("gDiffuseMapLRArray").AsShaderResource();
             this.diffuseMapHR = this.Effect.GetVariableByName("gDiffuseMapHRArray").AsShaderResource();
             this.normalMap = this.Effect.GetVariableByName("gNormalMapArray").AsShaderResource();
@@ -326,12 +345,15 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
+        /// <param name="textureResolution">Texture resolution</param>
         public void UpdatePerFrame(
             Matrix world,
-            Matrix viewProjection)
+            Matrix viewProjection,
+            float textureResolution)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
+            this.TextureResolution = textureResolution;
         }
         /// <summary>
         /// Update per model object data

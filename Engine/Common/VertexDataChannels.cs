@@ -27,10 +27,6 @@ namespace Engine.Common
         /// </summary>
         Texture,
         /// <summary>
-        /// Texture UV
-        /// </summary>
-        Texture1,
-        /// <summary>
         /// Color
         /// </summary>
         Color,
