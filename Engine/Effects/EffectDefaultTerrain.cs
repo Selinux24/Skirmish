@@ -19,9 +19,17 @@ namespace Engine.Effects
     public class EffectDefaultTerrain : Drawer
     {
         /// <summary>
-        /// Forward drawing technique
+        /// Forward with alpha map drawing technique
         /// </summary>
-        protected readonly EffectTechnique TerrainForward = null;
+        public readonly EffectTechnique TerrainAlphaMapForward = null;
+        /// <summary>
+        /// Forward with slopes drawing technique
+        /// </summary>
+        public readonly EffectTechnique TerrainSlopesForward = null;
+        /// <summary>
+        /// Forward full drawing technique
+        /// </summary>
+        public readonly EffectTechnique TerrainFullForward = null;
 
         /// <summary>
         /// Directional lights effect variable
@@ -676,7 +684,9 @@ namespace Engine.Effects
         public EffectDefaultTerrain(Device device, byte[] effect, bool compile)
             : base(device, effect, compile)
         {
-            this.TerrainForward = this.Effect.GetTechniqueByName("TerrainForward");
+            this.TerrainAlphaMapForward = this.Effect.GetTechniqueByName("TerrainAlphaMapForward");
+            this.TerrainSlopesForward = this.Effect.GetTechniqueByName("TerrainSlopesForward");
+            this.TerrainFullForward = this.Effect.GetTechniqueByName("TerrainFullForward");
 
             //Globals
             this.materialPaletteWidth = this.Effect.GetVariableByName("gMaterialPaletteWidth").AsScalar();
@@ -729,7 +739,7 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Terrain)
                 {
-                    if (mode == DrawerModesEnum.Forward) technique = this.TerrainForward;
+                    if (mode == DrawerModesEnum.Forward) technique = this.TerrainFullForward;
                 }
             }
 
@@ -881,11 +891,7 @@ namespace Engine.Effects
             this.DiffuseMapLR = diffuseMapLR;
             this.DiffuseMapHR = diffuseMapHR;
 
-            float usage = 0f;
-            if (useAlphaMap) usage += 1;
-            if (useSlopes) usage += 2;
-
-            this.Parameters = new Vector4(usage, proportion, slopeRanges.X, slopeRanges.Y);
+            this.Parameters = new Vector4(0, proportion, slopeRanges.X, slopeRanges.Y);
 
             this.MaterialIndex = materialIndex;
         }

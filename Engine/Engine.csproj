@@ -488,6 +488,7 @@
     <None Include="Resources\ShaderDefaultSprite.fx" />
     <None Include="Resources\ShaderDefaultTerrain.fx" />
     <None Include="Resources\ShaderDefaultClouds.fx" />
+    <None Include="Resources\IncTerrain.fx" />
     <Content Include="sharpdx_direct3d11_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

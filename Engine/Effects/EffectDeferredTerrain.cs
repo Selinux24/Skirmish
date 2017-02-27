@@ -18,9 +18,17 @@ namespace Engine.Effects
     public class EffectDeferredTerrain : Drawer
     {
         /// <summary>
-        /// Deferred drawing technique
+        /// Deferred with alpha map drawing technique
         /// </summary>
-        protected readonly EffectTechnique TerrainDeferred = null;
+        public readonly EffectTechnique TerrainAlphaMapDeferred = null;
+        /// <summary>
+        /// Deferred with slopes drawing technique
+        /// </summary>
+        public readonly EffectTechnique TerrainSlopesDeferred = null;
+        /// <summary>
+        /// Deferred full drawing technique
+        /// </summary>
+        public readonly EffectTechnique TerrainFullDeferred = null;
 
         /// <summary>
         /// World matrix effect variable
@@ -298,19 +306,22 @@ namespace Engine.Effects
         public EffectDeferredTerrain(Device device, byte[] effect, bool compile)
             : base(device, effect, compile)
         {
-            this.TerrainDeferred = this.Effect.GetTechniqueByName("TerrainDeferred");
+            this.TerrainAlphaMapDeferred = this.Effect.GetTechniqueByName("TerrainAlphaMapDeferred");
+            this.TerrainSlopesDeferred = this.Effect.GetTechniqueByName("TerrainSlopesDeferred");
+            this.TerrainFullDeferred = this.Effect.GetTechniqueByName("TerrainFullDeferred");
 
-            this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
-            this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.textureResolution = this.Effect.GetVariableByName("gTextureResolution").AsScalar();
-            this.diffuseMapLR = this.Effect.GetVariableByName("gDiffuseMapLRArray").AsShaderResource();
-            this.diffuseMapHR = this.Effect.GetVariableByName("gDiffuseMapHRArray").AsShaderResource();
-            this.normalMap = this.Effect.GetVariableByName("gNormalMapArray").AsShaderResource();
-            this.specularMap = this.Effect.GetVariableByName("gSpecularMapArray").AsShaderResource();
-            this.colorTextures = this.Effect.GetVariableByName("gColorTextureArray").AsShaderResource();
-            this.alphaMap = this.Effect.GetVariableByName("gAlphaTexture").AsShaderResource();
-            this.parameters = this.Effect.GetVariableByName("gParams").AsVector();
-            this.materialIndex = this.Effect.GetVariableByName("gMaterialIndex").AsScalar();
+            this.world = this.Effect.GetVariableByName("gVSWorld").AsMatrix();
+            this.worldViewProjection = this.Effect.GetVariableByName("gVSWorldViewProjection").AsMatrix();
+            this.textureResolution = this.Effect.GetVariableByName("gVSTextureResolution").AsScalar();
+
+            this.diffuseMapLR = this.Effect.GetVariableByName("gPSDiffuseMapLRArray").AsShaderResource();
+            this.diffuseMapHR = this.Effect.GetVariableByName("gPSDiffuseMapHRArray").AsShaderResource();
+            this.normalMap = this.Effect.GetVariableByName("gPSNormalMapArray").AsShaderResource();
+            this.specularMap = this.Effect.GetVariableByName("gPSSpecularMapArray").AsShaderResource();
+            this.colorTextures = this.Effect.GetVariableByName("gPSColorTextureArray").AsShaderResource();
+            this.alphaMap = this.Effect.GetVariableByName("gPSAlphaTexture").AsShaderResource();
+            this.parameters = this.Effect.GetVariableByName("gPSParams").AsVector();
+            this.materialIndex = this.Effect.GetVariableByName("gPSMaterialIndex").AsScalar();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -328,7 +339,7 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Terrain)
                 {
-                    if (mode == DrawerModesEnum.Deferred) technique = this.TerrainDeferred;
+                    if (mode == DrawerModesEnum.Deferred) technique = this.TerrainFullDeferred;
                 }
             }
 
@@ -392,11 +403,7 @@ namespace Engine.Effects
             this.DiffuseMapLR = diffuseMapLR;
             this.DiffuseMapHR = diffuseMapHR;
 
-            float usage = 0f;
-            if (useAlphaMap) usage += 1;
-            if (useSlopes) usage += 2;
-
-            this.Parameters = new Vector4(usage, proportion, slopeRanges.X, slopeRanges.Y);
+            this.Parameters = new Vector4(0, proportion, slopeRanges.X, slopeRanges.Y);
         }
     }
 }

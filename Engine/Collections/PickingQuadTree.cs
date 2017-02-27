@@ -176,6 +176,11 @@ namespace Engine.Collections
             return this.Root.GetTailNodes();
         }
 
+        public PickingQuadTreeNode GetNode(Vector3 position)
+        {
+            return this.Root.GetNode(position);
+        }
+
         /// <summary>
         /// Gets the text representation of the instance
         /// </summary>

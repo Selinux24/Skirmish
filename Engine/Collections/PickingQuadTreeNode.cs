@@ -242,6 +242,15 @@ namespace Engine.Collections
         /// </summary>
         public PickingQuadTreeNode RightNeighbour { get; private set; }
 
+        public PickingQuadTreeNode TopLeftNeighbour { get; private set; }
+
+        public PickingQuadTreeNode TopRightNeighbour { get; private set; }
+
+        public PickingQuadTreeNode BottomLeftNeighbour { get; private set; }
+
+        public PickingQuadTreeNode BottomRightNeighbour { get; private set; }
+
+
         /// <summary>
         /// Node Id
         /// </summary>
@@ -296,6 +305,11 @@ namespace Engine.Collections
             this.BottomNeighbour = this.FindNeighbourNodeAtBottom();
             this.LeftNeighbour = this.FindNeighbourNodeAtLeft();
             this.RightNeighbour = this.FindNeighbourNodeAtRight();
+
+            this.TopLeftNeighbour = this.TopNeighbour != null ? this.TopNeighbour.FindNeighbourNodeAtLeft() : null;
+            this.TopRightNeighbour = this.TopNeighbour != null ? this.TopNeighbour.FindNeighbourNodeAtRight() : null;
+            this.BottomLeftNeighbour = this.BottomNeighbour != null ? this.BottomNeighbour.FindNeighbourNodeAtLeft() : null;
+            this.BottomRightNeighbour = this.BottomNeighbour != null ? this.BottomNeighbour.FindNeighbourNodeAtRight() : null;
 
             if (this.Children != null && this.Children.Length > 0)
             {
@@ -913,6 +927,30 @@ namespace Engine.Collections
             }
 
             return nodes.ToArray();
+        }
+
+        public PickingQuadTreeNode GetNode(Vector3 position)
+        {
+            if (this.Children == null)
+            {
+                if (this.BoundingBox.Contains(position) != ContainmentType.Disjoint)
+                {
+                    return this;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < this.Children.Length; i++)
+                {
+                    var childNode = this.Children[i].GetNode(position);
+                    if (childNode != null)
+                    {
+                        return childNode;
+                    }
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

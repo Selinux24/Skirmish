@@ -713,7 +713,11 @@ namespace Engine
 
                 #endregion
 
-                return effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.DrawerMode);
+                if (this.useAlphaMap && this.useSlopes) { return effect.TerrainFullForward; }
+                if (this.useAlphaMap) { return effect.TerrainAlphaMapForward; }
+                if (this.useSlopes) { return effect.TerrainSlopesForward; }
+
+                return null;
             }
             /// <summary>
             /// Sets thecnique for terrain drawing with deferred renderer
@@ -752,7 +756,11 @@ namespace Engine
 
                 #endregion
 
-                return effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.DrawerMode);
+                if (this.useAlphaMap && this.useSlopes) { return effect.TerrainFullDeferred; }
+                if (this.useAlphaMap) { return effect.TerrainAlphaMapDeferred; }
+                if (this.useSlopes) { return effect.TerrainSlopesDeferred; }
+
+                return null;
             }
             /// <summary>
             /// Sets thecnique for terrain drawing in shadow mapping
@@ -1078,6 +1086,8 @@ namespace Engine
         /// </summary>
         private TerrainPatchDictionary patches = null;
 
+        //private MapGrid Map = new MapGrid();
+
         /// <summary>
         /// Gets the used material list
         /// </summary>
@@ -1130,6 +1140,8 @@ namespace Engine
         /// <param name="context">Update context</param>
         public override void Update(UpdateContext context)
         {
+            //this.Map.Update(this.pickingQuadtree, context.EyePosition);
+
             if (this.patches != null)
             {
                 var visibleNodes = this.pickingQuadtree.GetNodesInVolume(ref context.Frustum);
@@ -1292,7 +1304,41 @@ namespace Engine
         /// <param name="position">Position</param>
         public void Update(PickingQuadTree tree, Vector3 position)
         {
-            
+            var node = tree.GetNode(position);
+            if (node != null)
+            {
+                this.NodesHigh[0] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node, Shape = IndexBufferShapeEnum.Full };
+                this.NodesHigh[1] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.TopLeftNeighbour, Shape = IndexBufferShapeEnum.CornerTopLeft };
+                this.NodesHigh[2] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.TopNeighbour, Shape = IndexBufferShapeEnum.SideTop };
+                this.NodesHigh[3] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.TopRightNeighbour, Shape = IndexBufferShapeEnum.CornerTopRight };
+                this.NodesHigh[4] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.RightNeighbour, Shape = IndexBufferShapeEnum.SideRight };
+                this.NodesHigh[5] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.BottomRightNeighbour, Shape = IndexBufferShapeEnum.CornerBottomRight };
+                this.NodesHigh[6] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.BottomNeighbour, Shape = IndexBufferShapeEnum.SideBottom };
+                this.NodesHigh[7] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.BottomLeftNeighbour, Shape = IndexBufferShapeEnum.CornerBottomLeft };
+                this.NodesHigh[8] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.LeftNeighbour, Shape = IndexBufferShapeEnum.SideLeft };
+
+                for (int i = 1; i < this.NodesHigh.Length; i++)
+                {
+                    var mpNode = this.NodesHigh[i];
+                    if (mpNode.Node != null)
+                    {
+                        if (mpNode.Shape == IndexBufferShapeEnum.CornerTopLeft)
+                        {
+                            this.NodesMedium[9] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.Medium, Node = mpNode.Node.TopLeftNeighbour, Shape = IndexBufferShapeEnum.CornerTopLeft };
+                            this.NodesMedium[10] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.Medium, Node = mpNode.Node.TopNeighbour, Shape = IndexBufferShapeEnum.SideTop };
+                            this.NodesMedium[15] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.Medium, Node = mpNode.Node.TopRightNeighbour, Shape = IndexBufferShapeEnum.CornerTopRight };
+                        }
+
+                        if (mpNode.Shape == IndexBufferShapeEnum.SideTop)
+                        {
+                            this.NodesMedium[11] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.Medium, Node = mpNode.Node.TopNeighbour, Shape = IndexBufferShapeEnum.SideTop };
+                        }
+
+
+                    }
+
+                }
+            }
         }
     }
     /// <summary>
@@ -1305,9 +1351,9 @@ namespace Engine
         /// </summary>
         public LevelOfDetailEnum LevelOfDetail;
         /// <summary>
-        /// Vertices
+        /// Node
         /// </summary>
-        public VertexTerrain[] Vertices;
+        public PickingQuadTreeNode Node;
         /// <summary>
         /// Shape
         /// </summary>
@@ -1331,7 +1377,7 @@ namespace Engine
         /// <summary>
         /// Indexes count
         /// </summary>
-        public int IndexCount = 0;
+        public int IndexCount;
 
         /// <summary>
         /// Changes level of detail
@@ -1342,10 +1388,26 @@ namespace Engine
             if (newLOD > this.LevelOfDetail)
             {
                 //Downgrade
+                if (this.LevelOfDetail == LevelOfDetailEnum.Minimum)
+                {
+                    //Clear
+                }
+                else
+                {
+                    //Set buffer shape
+                }
             }
-            else
+            else if (newLOD < this.LevelOfDetail)
             {
                 //Upgrade
+                if (newLOD == LevelOfDetailEnum.Minimum)
+                {
+                    //Fill
+                }
+                else
+                {
+                    //Set buffer shape
+                }
             }
         }
     }
