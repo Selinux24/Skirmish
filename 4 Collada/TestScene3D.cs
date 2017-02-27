@@ -128,7 +128,7 @@ namespace Collada
 
             this.Lights.FogStart = this.Camera.FarPlaneDistance * fogStartRel;
             this.Lights.FogRange = this.Camera.FarPlaneDistance * fogRangeRel;
-            this.Lights.FogColor = Color.WhiteSmoke;
+            this.Lights.BaseFogColor = Color.WhiteSmoke;
 
             this.Lights.Add(new SceneLightPoint(
                 "Point light",

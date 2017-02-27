@@ -749,7 +749,7 @@ namespace HeightmapTest
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(7, 55, 00), 0.005f);
 
-            this.Lights.FogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
+            this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
             this.ToggleFog();
 
             this.lantern = new SceneLightSpot("lantern", false, Color.White, Color.White, true, this.Camera.Position, this.Camera.Forward, 25f, 100, 50);

@@ -32,9 +32,9 @@ namespace Engine
                 GlobalAmbientLight = 0.1f,
                 DirectionalLights = new[]
                 {
-                    SceneLightDirectional.Primary,
-                    SceneLightDirectional.Secondary,
-                    SceneLightDirectional.Tertiary,
+                    SceneLightDirectional.KeyLight,
+                    SceneLightDirectional.FillLight,
+                    SceneLightDirectional.BackLight,
                 },
             };
         }
@@ -61,10 +61,6 @@ namespace Engine
         /// Visible position lights
         /// </summary>
         private List<ISceneLightPosition> visiblePositionLights = new List<ISceneLightPosition>();
-        /// <summary>
-        /// Fog color
-        /// </summary>
-        private Color4 fogColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
 
         /// <summary>
         /// Gets or sets directional lights
@@ -134,9 +130,9 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Back light
+        /// Fill light
         /// </summary>
-        public SceneLightDirectional BackLight
+        public SceneLightDirectional FillLight
         {
             get
             {
@@ -144,9 +140,9 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Fill light
+        /// Back light
         /// </summary>
-        public SceneLightDirectional FillLight
+        public SceneLightDirectional BackLight
         {
             get
             {
@@ -166,19 +162,13 @@ namespace Engine
         /// </summary>
         public float FogRange = 0f;
         /// <summary>
+        /// Base fog color
+        /// </summary>
+        public Color4 BaseFogColor { get; set; }
+        /// <summary>
         /// Fog color
         /// </summary>
-        public Color4 FogColor
-        {
-            get
-            {
-                return this.fogColor * (this.KeyLight != null ? this.KeyLight.Brightness : 1f);
-            }
-            set
-            {
-                this.fogColor = value;
-            }
-        }
+        public Color4 FogColor { get; protected set; }
         /// <summary>
         /// Gets light by name
         /// </summary>
@@ -390,30 +380,54 @@ namespace Engine
         {
             if (timeOfDay.Running)
             {
-                float e = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation));
-                float b = Math.Min(e + (8f * e), 1);
-                float ga = MathUtil.Clamp(e, 0.2f, 0.8f);
+                float e = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation)+0.15f) * 2.5f;
+                float b = e;
+                float ga = Math.Max(e * 15f, 1f);
+                float f = Math.Min(e, 1f);
 
                 Vector3 keyDir = timeOfDay.LightDirection;
                 Vector3 backDir = new Vector3(-keyDir.X, keyDir.Y, -keyDir.Z);
+                Vector3 fillDir = Vector3.Left;
+                if (timeOfDay.Elevation > MathUtil.Pi)
+                {
+                    fillDir = Vector3.Cross(keyDir, backDir);
+                }
+                else
+                {
+                    fillDir = Vector3.Cross(backDir, keyDir);
+                }
 
                 this.GlobalAmbientLight = ga;
 
                 var keyLight = this.KeyLight;
                 if (keyLight != null)
                 {
-                    keyLight.Brightness = b;
+                    keyLight.Brightness = keyLight.BaseBrightness * b;
 
                     keyLight.Direction = keyDir;
+                }
+
+                var fillLight = this.FillLight;
+                if (fillLight != null)
+                {
+                    fillLight.Brightness = fillLight.BaseBrightness * b;
+
+                    fillLight.Direction = fillDir;
                 }
 
                 var backLight = this.BackLight;
                 if (backLight != null)
                 {
-                    backLight.Brightness = b * 0.5f;
+                    backLight.Brightness = backLight.BaseBrightness * b;
 
                     backLight.Direction = backDir;
                 }
+
+                this.FogColor = this.BaseFogColor * f;
+            }
+            else
+            {
+                this.FogColor = this.BaseFogColor;
             }
         }
     }

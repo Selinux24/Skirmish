@@ -10,7 +10,7 @@ namespace Engine
         /// <summary>
         /// Primary default light source
         /// </summary>
-        public static SceneLightDirectional Primary
+        public static SceneLightDirectional KeyLight
         {
             get
             {
@@ -20,13 +20,14 @@ namespace Engine
                     new Color4(1, 0.9607844f, 0.8078432f, 1f),
                     new Color4(1, 0.9607844f, 0.8078432f, 1f),
                     true,
-                    new Vector3(-0.5265408f, -0.5735765f, -0.6275069f));
+                    new Vector3(-0.5265408f, -0.5735765f, -0.6275069f),
+                    1f);
             }
         }
         /// <summary>
         /// Secondary default light source
         /// </summary>
-        public static SceneLightDirectional Secondary
+        public static SceneLightDirectional FillLight
         {
             get
             {
@@ -36,13 +37,14 @@ namespace Engine
                     new Color4(0.9647059f, 0.7607844f, 0.4078432f, 1f),
                     new Color4(0, 0, 0, 0),
                     true,
-                    new Vector3(0.7198464f, 0.3420201f, 0.6040227f));
+                    new Vector3(0.7198464f, 0.3420201f, 0.6040227f),
+                    1f);
             }
         }
         /// <summary>
         /// Tertiary default light source
         /// </summary>
-        public static SceneLightDirectional Tertiary
+        public static SceneLightDirectional BackLight
         {
             get
             {
@@ -52,7 +54,8 @@ namespace Engine
                     new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
                     new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
                     true,
-                    new Vector3(0.4545195f, -0.7660444f, 0.4545195f));
+                    new Vector3(0.4545195f, -0.7660444f, 0.4545195f),
+                    1f);
             }
         }
 
@@ -69,6 +72,10 @@ namespace Engine
         /// Light direction
         /// </summary>
         public Vector3 Direction = Vector3.Zero;
+        /// <summary>
+        /// Base brightness
+        /// </summary>
+        public float BaseBrightness { get; protected set; }
         /// <summary>
         /// Light brightness
         /// </summary>
@@ -113,10 +120,12 @@ namespace Engine
         /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Lights is enabled</param>
         /// <param name="direction">Direction</param>
-        public SceneLightDirectional(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled, Vector3 direction)
+        /// <param name="brigthness">Brightness</param>
+        public SceneLightDirectional(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled, Vector3 direction, float brigthness)
             : base(name, castShadow, diffuse, specular, enabled)
         {
             this.Direction = direction;
+            this.BaseBrightness = this.Brightness = brigthness;
         }
 
         /// <summary>

@@ -177,7 +177,7 @@ namespace Skybox
                 {
                     Position = v[i],
                     Normal = n[i],
-                    Texture0 = uv[i],
+                    Texture = uv[i],
                 };
             }
 

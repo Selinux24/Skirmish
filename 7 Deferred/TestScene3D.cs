@@ -646,7 +646,7 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F))
             {
-                this.Lights.FogColor = new Color((byte)54, (byte)56, (byte)68);
+                this.Lights.BaseFogColor = new Color((byte)54, (byte)56, (byte)68);
                 this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
                 this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
             }
