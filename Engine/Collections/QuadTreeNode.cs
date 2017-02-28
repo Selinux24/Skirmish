@@ -105,21 +105,21 @@ namespace Engine.Collections
         /// </summary>
         public QuadTreeNode BottomRightChild { get; private set; }
         /// <summary>
-        /// Gets the neighbour at top position (from above)
+        /// Gets the neighbor at top position (from above)
         /// </summary>
-        public QuadTreeNode TopNeighbour { get; private set; }
+        public QuadTreeNode TopNeighbor { get; private set; }
         /// <summary>
-        /// Gets the neighbour at bottom position (from above)
+        /// Gets the neighbor at bottom position (from above)
         /// </summary>
-        public QuadTreeNode BottomNeighbour { get; private set; }
+        public QuadTreeNode BottomNeighbor { get; private set; }
         /// <summary>
-        /// Gets the neighbour at left position (from above)
+        /// Gets the neighbor at left position (from above)
         /// </summary>
-        public QuadTreeNode LeftNeighbour { get; private set; }
+        public QuadTreeNode LeftNeighbor { get; private set; }
         /// <summary>
-        /// Gets the neighbour at right position (from above)
+        /// Gets the neighbor at right position (from above)
         /// </summary>
-        public QuadTreeNode RightNeighbour { get; private set; }
+        public QuadTreeNode RightNeighbor { get; private set; }
         /// <summary>
         /// Node Id
         /// </summary>
@@ -162,10 +162,10 @@ namespace Engine.Collections
         /// </summary>
         public void ConnectNodes()
         {
-            this.TopNeighbour = this.FindNeighbourNodeAtTop();
-            this.BottomNeighbour = this.FindNeighbourNodeAtBottom();
-            this.LeftNeighbour = this.FindNeighbourNodeAtLeft();
-            this.RightNeighbour = this.FindNeighbourNodeAtRight();
+            this.TopNeighbor = this.FindNeighborNodeAtTop();
+            this.BottomNeighbor = this.FindNeighborNodeAtBottom();
+            this.LeftNeighbor = this.FindNeighborNodeAtLeft();
+            this.RightNeighbor = this.FindNeighborNodeAtRight();
 
             if (this.Children != null && this.Children.Length > 0)
             {
@@ -176,16 +176,16 @@ namespace Engine.Collections
             }
         }
         /// <summary>
-        /// Searchs for the neighbour node at top position (from above)
+        /// Searchs for the neighbor node at top position (from above)
         /// </summary>
-        /// <returns>Returns the neighbour node at top position if exists.</returns>
-        private QuadTreeNode FindNeighbourNodeAtTop()
+        /// <returns>Returns the neighbor node at top position if exists.</returns>
+        private QuadTreeNode FindNeighborNodeAtTop()
         {
             if (this.Parent != null)
             {
                 if (this == this.Parent.TopLeftChild)
                 {
-                    var node = this.Parent.FindNeighbourNodeAtTop();
+                    var node = this.Parent.FindNeighborNodeAtTop();
                     if (node != null)
                     {
                         return node.BottomLeftChild;
@@ -193,7 +193,7 @@ namespace Engine.Collections
                 }
                 else if (this == this.Parent.TopRightChild)
                 {
-                    var node = this.Parent.FindNeighbourNodeAtTop();
+                    var node = this.Parent.FindNeighborNodeAtTop();
                     if (node != null)
                     {
                         return node.BottomRightChild;
@@ -212,10 +212,10 @@ namespace Engine.Collections
             return null;
         }
         /// <summary>
-        /// Searchs for the neighbour node at bottom position (from above)
+        /// Searchs for the neighbor node at bottom position (from above)
         /// </summary>
-        /// <returns>Returns the neighbour node at bottom position if exists.</returns>
-        private QuadTreeNode FindNeighbourNodeAtBottom()
+        /// <returns>Returns the neighbor node at bottom position if exists.</returns>
+        private QuadTreeNode FindNeighborNodeAtBottom()
         {
             if (this.Parent != null)
             {
@@ -229,7 +229,7 @@ namespace Engine.Collections
                 }
                 else if (this == this.Parent.BottomLeftChild)
                 {
-                    var node = this.Parent.FindNeighbourNodeAtBottom();
+                    var node = this.Parent.FindNeighborNodeAtBottom();
                     if (node != null)
                     {
                         return node.TopLeftChild;
@@ -237,7 +237,7 @@ namespace Engine.Collections
                 }
                 else if (this == this.Parent.BottomRightChild)
                 {
-                    var node = this.Parent.FindNeighbourNodeAtBottom();
+                    var node = this.Parent.FindNeighborNodeAtBottom();
                     if (node != null)
                     {
                         return node.TopRightChild;
@@ -248,10 +248,10 @@ namespace Engine.Collections
             return null;
         }
         /// <summary>
-        /// Searchs for the neighbour node at right position(from above)
+        /// Searchs for the neighbor node at right position(from above)
         /// </summary>
-        /// <returns>Returns the neighbour node at top position if exists.</returns>
-        private QuadTreeNode FindNeighbourNodeAtRight()
+        /// <returns>Returns the neighbor node at top position if exists.</returns>
+        private QuadTreeNode FindNeighborNodeAtRight()
         {
             if (this.Parent != null)
             {
@@ -261,7 +261,7 @@ namespace Engine.Collections
                 }
                 else if (this == this.Parent.TopRightChild)
                 {
-                    var node = this.Parent.FindNeighbourNodeAtRight();
+                    var node = this.Parent.FindNeighborNodeAtRight();
                     if (node != null)
                     {
                         return node.TopLeftChild;
@@ -273,7 +273,7 @@ namespace Engine.Collections
                 }
                 else if (this == this.Parent.BottomRightChild)
                 {
-                    var node = this.Parent.FindNeighbourNodeAtRight();
+                    var node = this.Parent.FindNeighborNodeAtRight();
                     if (node != null)
                     {
                         return node.BottomLeftChild;
@@ -284,16 +284,16 @@ namespace Engine.Collections
             return null;
         }
         /// <summary>
-        /// Searchs for the neighbour node at left position (from above)
+        /// Searchs for the neighbor node at left position (from above)
         /// </summary>
-        /// <returns>Returns the neighbour node at left position if exists.</returns>
-        private QuadTreeNode FindNeighbourNodeAtLeft()
+        /// <returns>Returns the neighbor node at left position if exists.</returns>
+        private QuadTreeNode FindNeighborNodeAtLeft()
         {
             if (this.Parent != null)
             {
                 if (this == this.Parent.TopLeftChild)
                 {
-                    var node = this.Parent.FindNeighbourNodeAtLeft();
+                    var node = this.Parent.FindNeighborNodeAtLeft();
                     if (node != null)
                     {
                         return node.TopRightChild;
@@ -305,7 +305,7 @@ namespace Engine.Collections
                 }
                 else if (this == this.Parent.BottomLeftChild)
                 {
-                    var node = this.Parent.FindNeighbourNodeAtLeft();
+                    var node = this.Parent.FindNeighborNodeAtLeft();
                     if (node != null)
                     {
                         return node.BottomRightChild;
@@ -433,6 +433,34 @@ namespace Engine.Collections
             }
 
             return nodes.ToArray();
+        }
+        /// <summary>
+        /// Gets node at position
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns the tail node wich contains the specified position</returns>
+        public QuadTreeNode GetNode(Vector3 position)
+        {
+            if (this.Children == null)
+            {
+                if (this.BoundingBox.Contains(position) != ContainmentType.Disjoint)
+                {
+                    return this;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < this.Children.Length; i++)
+                {
+                    var childNode = this.Children[i].GetNode(position);
+                    if (childNode != null)
+                    {
+                        return childNode;
+                    }
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

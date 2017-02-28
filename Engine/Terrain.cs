@@ -436,7 +436,7 @@ namespace Engine
                     var startPoint = visibleNodes[0].Center;
                     //Get node side size
                     float side = visibleNodes[0].BoundingBox.Maximum.X - visibleNodes[0].BoundingBox.Minimum.X;
-                    //Apply thales theorem to get the distance to a corner neighbour node
+                    //Apply thales theorem to get the distance to a corner neighbor node
                     float maxDistance = (float)Math.Sqrt((side * side) * 2f);
 
                     //Assign level of detail by distance, making quads from start point node
@@ -1037,10 +1037,10 @@ namespace Engine
                     }
                     else
                     {
-                        if (this.Current.TopNeighbour == terrainPatch.Current) return IndexBufferShapeEnum.SideTop;
-                        else if (this.Current.BottomNeighbour == terrainPatch.Current) return IndexBufferShapeEnum.SideBottom;
-                        else if (this.Current.LeftNeighbour == terrainPatch.Current) return IndexBufferShapeEnum.SideLeft;
-                        else if (this.Current.RightNeighbour == terrainPatch.Current) return IndexBufferShapeEnum.SideRight;
+                        if (this.Current.TopNeighbor == terrainPatch.Current) return IndexBufferShapeEnum.SideTop;
+                        else if (this.Current.BottomNeighbor == terrainPatch.Current) return IndexBufferShapeEnum.SideBottom;
+                        else if (this.Current.LeftNeighbor == terrainPatch.Current) return IndexBufferShapeEnum.SideLeft;
+                        else if (this.Current.RightNeighbor == terrainPatch.Current) return IndexBufferShapeEnum.SideRight;
                     }
                 }
 
@@ -1086,7 +1086,7 @@ namespace Engine
         /// </summary>
         private TerrainPatchDictionary patches = null;
 
-        //private MapGrid Map = new MapGrid();
+        private MapGrid Map = new MapGrid();
 
         /// <summary>
         /// Gets the used material list
@@ -1140,7 +1140,7 @@ namespace Engine
         /// <param name="context">Update context</param>
         public override void Update(UpdateContext context)
         {
-            //this.Map.Update(this.pickingQuadtree, context.EyePosition);
+            this.Map.Update(this.pickingQuadtree, context.EyePosition);
 
             if (this.patches != null)
             {
@@ -1298,6 +1298,14 @@ namespace Engine
         public MapGridNode[] NodesMinimum = new MapGridNode[32];
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        public MapGrid()
+        {
+            
+        }
+
+        /// <summary>
         /// Updates map from quad-tree and position
         /// </summary>
         /// <param name="tree">Quadtree</param>
@@ -1307,38 +1315,86 @@ namespace Engine
             var node = tree.GetNode(position);
             if (node != null)
             {
-                this.NodesHigh[0] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node, Shape = IndexBufferShapeEnum.Full };
-                this.NodesHigh[1] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.TopLeftNeighbour, Shape = IndexBufferShapeEnum.CornerTopLeft };
-                this.NodesHigh[2] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.TopNeighbour, Shape = IndexBufferShapeEnum.SideTop };
-                this.NodesHigh[3] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.TopRightNeighbour, Shape = IndexBufferShapeEnum.CornerTopRight };
-                this.NodesHigh[4] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.RightNeighbour, Shape = IndexBufferShapeEnum.SideRight };
-                this.NodesHigh[5] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.BottomRightNeighbour, Shape = IndexBufferShapeEnum.CornerBottomRight };
-                this.NodesHigh[6] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.BottomNeighbour, Shape = IndexBufferShapeEnum.SideBottom };
-                this.NodesHigh[7] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.BottomLeftNeighbour, Shape = IndexBufferShapeEnum.CornerBottomLeft };
-                this.NodesHigh[8] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.High, Node = node.LeftNeighbour, Shape = IndexBufferShapeEnum.SideLeft };
+                this.NodesHigh[0] = this.Find(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideTop, node);
+                this.NodesHigh[1] = this.Find(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideBottom, node);
+                this.NodesHigh[2] = this.Find(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideLeft, node);
+                this.NodesHigh[3] = this.Find(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideRight, node);
+                this.NodesHigh[4] = this.Find(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerTopLeft, node);
+                this.NodesHigh[5] = this.Find(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerTopRight, node);
+                this.NodesHigh[6] = this.Find(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerBottomLeft, node);
+                this.NodesHigh[7] = this.Find(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerBottomRight, node);
+                this.NodesHigh[8] = this.Find(LevelOfDetailEnum.High, IndexBufferShapeEnum.Full, node);
 
-                for (int i = 1; i < this.NodesHigh.Length; i++)
-                {
-                    var mpNode = this.NodesHigh[i];
-                    if (mpNode.Node != null)
-                    {
-                        if (mpNode.Shape == IndexBufferShapeEnum.CornerTopLeft)
-                        {
-                            this.NodesMedium[9] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.Medium, Node = mpNode.Node.TopLeftNeighbour, Shape = IndexBufferShapeEnum.CornerTopLeft };
-                            this.NodesMedium[10] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.Medium, Node = mpNode.Node.TopNeighbour, Shape = IndexBufferShapeEnum.SideTop };
-                            this.NodesMedium[15] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.Medium, Node = mpNode.Node.TopRightNeighbour, Shape = IndexBufferShapeEnum.CornerTopRight };
-                        }
+                this.NodesMedium[0] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideTop, this.NodesHigh[0].Node);
+                this.NodesMedium[1] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, this.NodesMedium[0].Node);
+                this.NodesMedium[2] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, this.NodesMedium[0].Node);
+                this.NodesMedium[3] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, this.NodesMedium[1].Node);
+                this.NodesMedium[4] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, this.NodesMedium[2].Node);
 
-                        if (mpNode.Shape == IndexBufferShapeEnum.SideTop)
-                        {
-                            this.NodesMedium[11] = new MapGridNode() { LevelOfDetail = LevelOfDetailEnum.Medium, Node = mpNode.Node.TopNeighbour, Shape = IndexBufferShapeEnum.SideTop };
-                        }
+                this.NodesMedium[5] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideBottom, this.NodesHigh[1].Node);
+                this.NodesMedium[6] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, this.NodesMedium[5].Node);
+                this.NodesMedium[7] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, this.NodesMedium[5].Node);
+                this.NodesMedium[8] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, this.NodesMedium[6].Node);
+                this.NodesMedium[9] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, this.NodesMedium[7].Node);
 
+                this.NodesMedium[10] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, this.NodesHigh[2].Node);
+                this.NodesMedium[11] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideTop, this.NodesMedium[10].Node);
+                this.NodesMedium[12] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideBottom, this.NodesMedium[10].Node);
 
-                    }
+                this.NodesMedium[13] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, this.NodesHigh[3].Node);
+                this.NodesMedium[14] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideTop, this.NodesMedium[13].Node);
+                this.NodesMedium[15] = this.Find(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideBottom, this.NodesMedium[13].Node);
 
-                }
+                this.NodesLow[0] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, this.NodesMedium[0].Node);
+                this.NodesLow[1] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, this.NodesLow[0].Node);
+                this.NodesLow[2] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, this.NodesLow[1].Node);
+                this.NodesLow[3] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, this.NodesLow[2].Node);
+                this.NodesLow[4] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, this.NodesLow[0].Node);
+                this.NodesLow[5] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, this.NodesLow[4].Node);
+                this.NodesLow[6] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, this.NodesLow[5].Node);
+
+                this.NodesLow[7] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, this.NodesMedium[5].Node);
+                this.NodesLow[8] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, this.NodesLow[7].Node);
+                this.NodesLow[9] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, this.NodesLow[8].Node);
+                this.NodesLow[10] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, this.NodesLow[9].Node);
+                this.NodesLow[11] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, this.NodesLow[7].Node);
+                this.NodesLow[12] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, this.NodesLow[11].Node);
+                this.NodesLow[13] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, this.NodesLow[12].Node);
+
+                this.NodesLow[14] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, this.NodesMedium[10].Node);
+                this.NodesLow[15] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, this.NodesLow[14].Node);
+                this.NodesLow[16] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, this.NodesLow[15].Node);
+                this.NodesLow[17] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, this.NodesLow[14].Node);
+                this.NodesLow[18] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, this.NodesLow[17].Node);
+
+                this.NodesLow[19] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, this.NodesMedium[13].Node);
+                this.NodesLow[20] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, this.NodesLow[19].Node);
+                this.NodesLow[21] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, this.NodesLow[20].Node);
+                this.NodesLow[22] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, this.NodesLow[19].Node);
+                this.NodesLow[23] = this.Find(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, this.NodesLow[22].Node);
             }
+        }
+
+        private MapGridNode Find(LevelOfDetailEnum lod, IndexBufferShapeEnum shape, PickingQuadTreeNode node)
+        {
+            PickingQuadTreeNode nNode = null;
+
+            if (node != null)
+            {
+                if (shape == IndexBufferShapeEnum.Full) nNode = node;
+
+                else if (shape == IndexBufferShapeEnum.CornerTopLeft) nNode = node.TopLeftNeighbor;
+                else if (shape == IndexBufferShapeEnum.CornerTopRight) nNode = node.TopRightNeighbor;
+                else if (shape == IndexBufferShapeEnum.CornerBottomLeft) nNode = node.BottomLeftNeighbor;
+                else if (shape == IndexBufferShapeEnum.CornerBottomRight) nNode = node.BottomRightNeighbor;
+
+                else if (shape == IndexBufferShapeEnum.SideTop) nNode = node.TopNeighbor;
+                else if (shape == IndexBufferShapeEnum.SideBottom) nNode = node.BottomNeighbor;
+                else if (shape == IndexBufferShapeEnum.SideLeft) nNode = node.LeftNeighbor;
+                else if (shape == IndexBufferShapeEnum.SideRight) nNode = node.RightNeighbor;
+            }
+
+            return new MapGridNode() { LevelOfDetail = lod, Node = nNode, Shape = shape };
         }
     }
     /// <summary>
@@ -1380,6 +1436,14 @@ namespace Engine
         public int IndexCount;
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        public MapGridNode()
+        {
+
+        }
+
+        /// <summary>
         /// Changes level of detail
         /// </summary>
         /// <param name="newLOD">New level of detail</param>
@@ -1409,6 +1473,12 @@ namespace Engine
                     //Set buffer shape
                 }
             }
+        }
+
+
+        public override string ToString()
+        {
+            return string.Format("{0}", this.Node != null ? (int?)this.Node.Id : null);
         }
     }
 }
