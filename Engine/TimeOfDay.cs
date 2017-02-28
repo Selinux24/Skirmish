@@ -163,11 +163,11 @@ namespace Engine
         /// <summary>
         /// Gets whether the instance is animating the day cycle
         /// </summary>
-        public bool Running
+        public bool Updated
         {
             get
             {
-                return this.Animate && this.AnimateSpeed > 0f;
+                return this.PreviuosElevation != this.Elevation;
             }
         }
 
@@ -197,7 +197,7 @@ namespace Engine
             this.Azimuth = 0.0f;
 
             this.Animate = false;
-            this.AnimateSpeed = 1.0f;
+            this.AnimateSpeed = 0f;
         }
 
         /// <summary>

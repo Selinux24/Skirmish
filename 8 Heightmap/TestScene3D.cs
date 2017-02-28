@@ -23,6 +23,8 @@ namespace HeightmapTest
 
         private Random rnd = new Random();
 
+        private float time = 0.23f;
+
         private Vector3 playerHeight = Vector3.UnitY * 5f;
         private bool playerFlying = true;
         private SceneLightSpot lantern = null;
@@ -747,7 +749,7 @@ namespace HeightmapTest
             this.skydom.RayleighScattering *= 0.8f;
             this.skydom.MieScattering *= 0.1f;
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(7, 55, 00), 0.005f);
+            //this.TimeOfDay.BeginAnimation(new TimeSpan(7, 55, 00), 1f);
 
             this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
             this.ToggleFog();
@@ -971,6 +973,18 @@ namespace HeightmapTest
                 this.lantern.Position = this.Camera.Position;
                 this.lantern.Direction = this.Camera.Forward;
             }
+
+            if (this.Game.Input.KeyPressed(Keys.Left))
+            {
+                this.time -= gameTime.ElapsedSeconds * 0.01f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Right))
+            {
+                this.time += gameTime.ElapsedSeconds * 0.01f;
+            }
+
+            this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
 
             #endregion
 

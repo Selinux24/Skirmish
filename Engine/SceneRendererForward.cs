@@ -146,6 +146,8 @@ namespace Engine
             this.UpdateContext.EyeDirection = scene.Camera.Direction;
             this.UpdateContext.Lights = scene.Lights;
 
+            this.UpdateShadowMapStatic = scene.TimeOfDay.Updated;
+
             //Cull lights
             scene.Lights.Cull(this.UpdateContext.Frustum, this.UpdateContext.EyePosition);
 
@@ -273,7 +275,7 @@ namespace Engine
 
                             #endregion
 
-                            this.UpdateShadowMapStatic = scene.TimeOfDay.Running;
+                            this.UpdateShadowMapStatic = false;
                         }
 
                         #region Dynamic shadow map

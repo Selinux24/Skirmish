@@ -378,24 +378,18 @@ namespace Engine
         /// <param name="timeOfDay">Time of day</param>
         public void UpdateLights(TimeOfDay timeOfDay)
         {
-            if (timeOfDay.Running)
+            if (timeOfDay.Updated)
             {
-                float e = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation)+0.15f) * 2.5f;
+                float e = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
                 float b = e;
-                float ga = Math.Max(e * 15f, 1f);
+                float ga = Math.Min(e, 0.5f);
                 float f = Math.Min(e, 1f);
 
                 Vector3 keyDir = timeOfDay.LightDirection;
                 Vector3 backDir = new Vector3(-keyDir.X, keyDir.Y, -keyDir.Z);
-                Vector3 fillDir = Vector3.Left;
-                if (timeOfDay.Elevation > MathUtil.Pi)
-                {
-                    fillDir = Vector3.Cross(keyDir, backDir);
-                }
-                else
-                {
-                    fillDir = Vector3.Cross(backDir, keyDir);
-                }
+
+                float tan = (float)Math.Tan(timeOfDay.Elevation);
+                Vector3 fillDir = tan >= 0f ? Vector3.Cross(keyDir, backDir) : Vector3.Cross(backDir, keyDir);
 
                 this.GlobalAmbientLight = ga;
 
@@ -424,10 +418,6 @@ namespace Engine
                 }
 
                 this.FogColor = this.BaseFogColor * f;
-            }
-            else
-            {
-                this.FogColor = this.BaseFogColor;
             }
         }
     }
