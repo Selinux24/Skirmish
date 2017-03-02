@@ -1037,6 +1037,8 @@ namespace HeightmapTest
 
             #endregion
 
+            this.Lights.BaseFogColor = this.skydom.GetFogColor(this.Lights.KeyLight.Direction);
+
             base.Update(gameTime);
 
             this.help.Text = string.Format(

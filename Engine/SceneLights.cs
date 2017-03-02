@@ -417,7 +417,8 @@ namespace Engine
                     backLight.Direction = backDir;
                 }
 
-                this.FogColor = this.BaseFogColor * f;
+                //this.FogColor = this.BaseFogColor * f;
+                this.FogColor = this.BaseFogColor;
             }
         }
     }

@@ -322,5 +322,154 @@ namespace Engine
         {
             this.ScatteringScale = 1.0f / (this.SphereOuterRadius - this.SphereInnerRadius);
         }
+
+
+        public Color4 GetFogColor(Vector3 lightDirection)
+        {
+            Color4 outColor = new Color4(0f, 0f, 0f, 0f);
+
+            Vector3 fwd = Vector3.ForwardLH;
+
+            float yaw = 0;
+            float pitch = 0;
+            Helper.GetAnglesFromVector(fwd, out yaw, out pitch);
+            float originalYaw = yaw;
+            pitch = MathUtil.DegreesToRadians(10.0f);
+
+            uint i = 0;
+            for (i = 0; i < 10; i++)
+            {
+                Vector3 scatterPos;
+                Helper.GetVectorFromAngles(yaw, pitch, out scatterPos);
+
+                scatterPos.X *= this.PlanetRadius + this.PlanetAtmosphereRadius;
+                scatterPos.Y *= this.PlanetRadius + this.PlanetAtmosphereRadius;
+                scatterPos.Z *= this.PlanetRadius + this.PlanetAtmosphereRadius;
+                scatterPos.Y -= this.PlanetRadius;
+
+                Color4 tmpColor;
+                this.GetColor(scatterPos, lightDirection, out tmpColor);
+
+                outColor += tmpColor;
+
+                if (i <= 5)
+                {
+                    yaw += MathUtil.DegreesToRadians(5.0f);
+                }
+                else
+                {
+                    originalYaw += MathUtil.DegreesToRadians(-5.0f);
+                    yaw = originalYaw;
+                }
+
+                yaw = MathUtil.Mod(yaw, MathUtil.TwoPi);
+            }
+
+            if (i > 0)
+            {
+                outColor = outColor * (1f / (float)i);
+            }
+
+            return outColor;
+        }
+
+        private void GetColor(Vector3 pos, Vector3 lightDirection, out Color4 outColor)
+        {
+            float scale = 1.0f / (this.SphereOuterRadius - this.SphereInnerRadius);
+            float scaleOverScaleDepth = scale / this.RayleighScaleDepth;
+            float rayleighBrightness = this.RayleighScattering * this.Brightness * 0.25f;
+            float mieBrightness = this.MieScattering * this.Brightness * 0.25f;
+
+            Vector3 v3Pos = pos / this.PlanetRadius;
+            v3Pos.Z += this.SphereInnerRadius;
+
+            float viewerHeight = 1;
+
+            Vector3 newCamPos = new Vector3(0, 0, viewerHeight);
+
+            Vector3 v3Ray = v3Pos - newCamPos;
+            float fFar = v3Ray.Length();
+            v3Ray.Normalize();
+
+            Vector3 v3Start = newCamPos;
+            float fDepth1 = (float)Math.Exp(scaleOverScaleDepth * (this.SphereInnerRadius - viewerHeight));
+            float fStartAngle = Vector3.Dot(v3Ray, v3Start);
+
+            float vStartAngle = this.VernierScale(fStartAngle);
+            float fStartOffset = fDepth1 * vStartAngle;
+
+            float fSampleLength = fFar / 2.0f;
+            float fScaledLength = fSampleLength * this.MieScaleDepth;
+            Vector3 v3SampleRay = v3Ray * fSampleLength;
+            Vector3 v3SamplePoint = v3Start + v3SampleRay * 0.5f;
+
+            Vector3 v3FrontColor = new Vector3(0, 0, 0);
+            for (uint i = 0; i < 2; i++)
+            {
+                float fHeight = v3SamplePoint.Length();
+                float fDepth = (float)Math.Exp(scaleOverScaleDepth * (this.SphereInnerRadius - viewerHeight));
+                float fLightAngle = Vector3.Dot(lightDirection, v3SamplePoint) / fHeight;
+                float fCameraAngle = Vector3.Dot(v3Ray, v3SamplePoint) / fHeight;
+
+                float vLightAngle = this.VernierScale(fLightAngle);
+                float vCameraAngle = this.VernierScale(fCameraAngle);
+
+                float fScatter = (fStartOffset + fDepth * (vLightAngle - vCameraAngle));
+                Vector3 v3Attenuate = new Vector3(0, 0, 0);
+
+                float tmp = (float)Math.Exp(-fScatter * (this.InvWaveLength4[0] * this.RayleighScattering4PI + this.MieScattering4PI));
+                v3Attenuate.X = tmp;
+
+                tmp = (float)Math.Exp(-fScatter * (this.InvWaveLength4[1] * this.RayleighScattering4PI + this.MieScattering4PI));
+                v3Attenuate.Y = tmp;
+
+                tmp = (float)Math.Exp(-fScatter * (this.InvWaveLength4[2] * this.RayleighScattering4PI + this.MieScattering4PI));
+                v3Attenuate.Z = tmp;
+
+                v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
+                v3SamplePoint += v3SampleRay;
+            }
+
+            Vector3 mieColor = v3FrontColor * mieBrightness;
+            Vector3 rayleighColor = v3FrontColor * (this.InvWaveLength4.ToVector3() * rayleighBrightness);
+            Vector3 v3Direction = newCamPos - v3Pos;
+            v3Direction.Normalize();
+
+            float fCos = Vector3.Dot(lightDirection, v3Direction) / v3Direction.Length();
+
+            float miePhase = this.GetMiePhase(fCos);
+
+            Vector3 color = rayleighColor + (miePhase * mieColor);
+            Color4 tmpc = new Color4(color.X, color.Y, color.Z, color.Y);
+
+            Vector3 expColor = new Vector3(0, 0, 0);
+            expColor.X = 1.0f - (float)Math.Exp(-this.HDRExposure * color.X);
+            expColor.Y = 1.0f - (float)Math.Exp(-this.HDRExposure * color.Y);
+            expColor.Z = 1.0f - (float)Math.Exp(-this.HDRExposure * color.Z);
+
+            tmpc = new Color4(expColor.X, expColor.Y, expColor.Z, 1.0f);
+
+            float len = expColor.Length();
+            if (len > 0)
+                expColor /= len;
+
+            outColor = new Color4(expColor.X, expColor.Y, expColor.Z, 1.0f);
+        }
+
+        private float VernierScale(float fCos)
+        {
+            float x = 1.0f - fCos;
+
+            return 0.25f * (float)Math.Exp(-0.00287f + x * (0.459f + x * (3.83f + x * ((-6.80f + (x * 5.25f))))));
+        }
+
+        private float GetMiePhase(float fCos)
+        {
+            float fCos2 = fCos * fCos;
+            float g = -0.991f;
+            float g2 = g * g;
+
+            return 1.5f * ((1.0f - g2) / (2.0f + g2)) * (1.0f + fCos2) / (float)Math.Pow(Math.Abs(1.0f + g2 - 2.0f * g * fCos), 1.5f);
+        }
     }
 }
