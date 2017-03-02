@@ -737,6 +737,48 @@ namespace Engine
             return angle;
         }
         /// <summary>
+        /// Gets yaw and pitch values from vector
+        /// </summary>
+        /// <param name="vec">Vector</param>
+        /// <param name="yaw">Yaw</param>
+        /// <param name="pitch">Pitch</param>
+        public static void GetAnglesFromVector(Vector3 vec, out float yaw, out float pitch)
+        {
+            yaw = (float)Math.Atan2(vec.X, vec.Y);
+
+            if (yaw < 0.0f)
+            {
+                yaw += MathUtil.TwoPi;
+            }
+
+            if (Math.Abs(vec.X) > Math.Abs(vec.Y))
+            {
+                pitch = (float)Math.Atan2(Math.Abs(vec.Z), Math.Abs(vec.X));
+            }
+            else
+            {
+                pitch = (float)Math.Atan2(Math.Abs(vec.Z), Math.Abs(vec.Y));
+            }
+
+            if (vec.Z < 0.0f)
+            {
+                pitch = -pitch;
+            }
+        }
+        /// <summary>
+        /// Get vector from yaw and pitch angles
+        /// </summary>
+        /// <param name="yaw">Yaw angle</param>
+        /// <param name="pitch">Pitch angle</param>
+        /// <param name="vec">Vector</param>
+        public static void GetVectorFromAngles(float yaw, float pitch, out Vector3 vec)
+        {
+            Quaternion rot = Quaternion.RotationYawPitchRoll(-yaw, pitch, 0.0f);
+            Matrix mat = Matrix.RotationQuaternion(rot);
+
+            vec = Vector3.TransformCoordinate(Vector3.Up, mat);
+        }
+        /// <summary>
         /// Gets the area of the triangle projected onto the XZ-plane.
         /// </summary>
         /// <param name="a">The first point.</param>
@@ -1046,44 +1088,6 @@ namespace Engine
 
             return texHeight;
         }
-
-        public static void GetAnglesFromVector(Vector3 vec, out float yawAng, out float pitchAng)
-        {
-            yawAng = (float)Math.Atan2(vec.X, vec.Y);
-
-            if (yawAng < 0.0f)
-            {
-                yawAng += MathUtil.TwoPi;
-            }
-
-            if (Math.Abs(vec.X) > Math.Abs(vec.Y))
-            {
-                pitchAng = (float)Math.Atan2(Math.Abs(vec.Z), Math.Abs(vec.X));
-            }
-            else
-            {
-                pitchAng = (float)Math.Atan2(Math.Abs(vec.Z), Math.Abs(vec.Y));
-            }
-
-            if (vec.Z < 0.0f)
-            {
-                pitchAng = -pitchAng;
-            }
-        }
-
-        public static void GetVectorFromAngles(float yaw, float pitch, out Vector3 pnt)
-        {
-            Quaternion rot = Quaternion.RotationYawPitchRoll(-pitch, 0.0f, 0.0f);
-            Matrix mat = Matrix.RotationQuaternion(rot);
-
-            Quaternion rot2 = Quaternion.RotationYawPitchRoll(0.0f, 0.0f, yaw);
-            Matrix mat2 = Matrix.RotationQuaternion(rot2);
-
-            pnt = new Vector3(0.0f, 1.0f, 0.0f);
-            pnt = Vector3.TransformCoordinate(pnt, mat);
-            pnt = Vector3.TransformCoordinate(pnt, mat2);
-        }
-
 
         /// <summary>
         /// Gets matrix description

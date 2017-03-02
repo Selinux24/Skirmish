@@ -11,9 +11,9 @@ namespace HeightmapTest
     public class TestScene3D : Scene
     {
         private const float near = 0.5f;
-        private const float far = 1000f;
-        private const float fogStart = 0.50f;
-        private const float fogRange = 0.75f;
+        private const float far = 3000f;
+        private const float fogStart = 500f;
+        private const float fogRange = 1500f;
 
         private const int layerObjects = 0;
         private const int layerTerrain = 1;
@@ -279,8 +279,8 @@ namespace HeightmapTest
                     ContentPath = "Resources/Scenery/Heightmap",
                     HeightmapFileName = "desert0hm.bmp",
                     ColormapFileName = "desert0cm.bmp",
-                    CellSize = 5,
-                    MaximumHeight = 50,
+                    CellSize = 15,
+                    MaximumHeight = 150,
                     TextureResolution = 75f,
                     Textures = new HeightmapDescription.TexturesDescription()
                     {
@@ -749,7 +749,7 @@ namespace HeightmapTest
             this.skydom.RayleighScattering *= 0.8f;
             this.skydom.MieScattering *= 0.1f;
 
-            //this.TimeOfDay.BeginAnimation(new TimeSpan(7, 55, 00), 1f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(7, 55, 00), 1f);
 
             this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
             this.ToggleFog();
@@ -976,15 +976,15 @@ namespace HeightmapTest
 
             if (this.Game.Input.KeyPressed(Keys.Left))
             {
-                this.time -= gameTime.ElapsedSeconds * 0.01f;
+                this.time -= gameTime.ElapsedSeconds * 0.1f;
+                this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
             }
 
             if (this.Game.Input.KeyPressed(Keys.Right))
             {
-                this.time += gameTime.ElapsedSeconds * 0.01f;
+                this.time += gameTime.ElapsedSeconds * 0.1f;
+                this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
             }
-
-            this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
 
             #endregion
 
@@ -1037,8 +1037,6 @@ namespace HeightmapTest
 
             #endregion
 
-            this.Lights.BaseFogColor = this.skydom.GetFogColor(this.Lights.KeyLight.Direction);
-
             base.Update(gameTime);
 
             this.help.Text = string.Format(
@@ -1070,8 +1068,8 @@ namespace HeightmapTest
         }
         private void ToggleFog()
         {
-            this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
-            this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
+            this.Lights.FogStart = this.Lights.FogStart == 0f ? fogStart : 0f;
+            this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
         }
 
         private Vector3 GetRandomPoint(Random rnd, Vector3 offset, BoundingBox bbox)

@@ -269,9 +269,9 @@ inline float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shad
 }
 inline float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRange, float4 fogColor)
 {
-	float fogLerp = saturate((fogRange - distToEye) / (fogRange - fogStart));
+	float fogLerp = saturate((distToEye - fogStart) / fogRange);
 
-	return float4(lerp(fogColor.rgb, litColor.rgb, fogLerp), litColor.a);
+	return float4(lerp(litColor.rgb, fogColor.rgb, fogLerp), litColor.a);
 }
 
 inline void Phong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, float3 N, float3 V, float3 R, out float4 diffuse, out float4 specular)

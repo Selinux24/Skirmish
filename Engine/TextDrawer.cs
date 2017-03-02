@@ -221,7 +221,7 @@ namespace Engine
 
             this.TextColor = description.TextColor;
             this.ShadowColor = description.ShadowColor;
-            this.ShadowRelative = Vector2.One * 1f;
+            this.ShadowRelative = new Vector2(1, -1);
 
             this.MapText();
         }
