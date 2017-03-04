@@ -586,10 +586,10 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets the visible nodes collection
+        /// Gets the node list suitable for foliage planting
         /// </summary>
-        /// <returns>Returns a list of visible nodes</returns>
-        public override PickingQuadTreeNode[] GetVisibleNodes()
+        /// <returns>Returns a node list</returns>
+        public override PickingQuadTreeNode[] GetFoliageNodes()
         {
             return this.visibleNodes;
         }

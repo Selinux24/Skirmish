@@ -13,7 +13,7 @@ namespace HeightmapTest
         private const float near = 0.5f;
         private const float far = 3000f;
         private const float fogStart = 500f;
-        private const float fogRange = 1500f;
+        private const float fogRange = 500f;
 
         private const int layerObjects = 0;
         private const int layerTerrain = 1;
@@ -316,6 +316,7 @@ namespace HeightmapTest
                     //{
                     //    Settings = pfSettings,
                     //},
+                    DelayGeneration = true,
                 };
             this.terrain = this.AddTerrain(hDesc, gDesc, true, layerTerrain);
             sw.Stop();
@@ -745,6 +746,7 @@ namespace HeightmapTest
             this.Camera.FarPlaneDistance = far;
             this.Camera.Position = new Vector3(12, 8, 7);
             this.Camera.Interest = new Vector3(0, 7, 0);
+            this.Camera.MovementDelta *= 10f;
 
             this.skydom.RayleighScattering *= 0.8f;
             this.skydom.MieScattering *= 0.1f;

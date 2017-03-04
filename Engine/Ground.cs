@@ -709,7 +709,10 @@ namespace Engine
             return false;
         }
 
-
-        public abstract PickingQuadTreeNode[] GetVisibleNodes();
+        /// <summary>
+        /// Gets the node list suitable for foliage planting
+        /// </summary>
+        /// <returns>Returns a node list</returns>
+        public abstract PickingQuadTreeNode[] GetFoliageNodes();
     }
 }

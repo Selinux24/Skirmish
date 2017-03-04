@@ -61,6 +61,34 @@ namespace Engine.Collections
         {
             return this.Root.GetTailNodes();
         }
+        /// <summary>
+        /// Gets the closest node to the specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns the closest node to the specified position</returns>
+        public QuadTreeNode FindNode(Vector3 position)
+        {
+            var node = this.Root.GetNode(position);
+
+            if (node == null)
+            {
+                //Look for the closest node
+                var tailNodes = this.GetTailNodes();
+
+                float dist = float.MaxValue;
+                for (int i = 0; i < tailNodes.Length; i++)
+                {
+                    float d = Vector3.DistanceSquared(position, tailNodes[i].Center);
+                    if (d < dist)
+                    {
+                        dist = d;
+                        node = tailNodes[i];
+                    }
+                }
+            }
+
+            return node;
+        }
 
         /// <summary>
         /// Gets the text representation of the instance

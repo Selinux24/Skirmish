@@ -506,7 +506,7 @@ namespace Engine
 
             if (this.ParentGround != null)
             {
-                var visibleNodes = this.ParentGround.GetVisibleNodes();
+                var visibleNodes = this.ParentGround.GetFoliageNodes();
 
                 if (visibleNodes != null && visibleNodes.Length > 0)
                 {
@@ -631,7 +631,7 @@ namespace Engine
         {
             if (this.ParentGround != null)
             {
-                var visibleNodes = this.ParentGround.GetVisibleNodes();
+                var visibleNodes = this.ParentGround.GetFoliageNodes();
 
                 if (visibleNodes != null && visibleNodes.Length > 0)
                 {

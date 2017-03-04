@@ -17,7 +17,23 @@ namespace Engine.Common
         /// <returns>Returns the generated index list</returns>
         public static uint[] GenerateIndices(IndexBufferShapeEnum bufferShape, int triangles)
         {
-            int nodes = triangles / 2;
+            return GenerateIndices(LevelOfDetailEnum.High, bufferShape, triangles);
+        }
+        /// <summary>
+        /// Generates a index for a triangle soup quad with the specified shape
+        /// </summary>
+        /// <param name="lod">Level of detail</param>
+        /// <param name="bufferShape">Buffer shape</param>
+        /// <param name="triangles">Triangle count</param>
+        /// <returns>Returns the generated index list</returns>
+        public static uint[] GenerateIndices(LevelOfDetailEnum lod, IndexBufferShapeEnum bufferShape, int triangles)
+        {
+            uint offset = (uint)lod;
+            uint fullSide = (uint)Math.Sqrt(triangles / 2);
+
+            int tris = triangles / (int)Math.Pow(offset, 2);
+
+            int nodes = tris / 2;
             uint side = (uint)Math.Sqrt(nodes);
             uint sideLoss = side / 2;
 
@@ -41,7 +57,7 @@ namespace Engine.Common
                 bufferShape == IndexBufferShapeEnum.CornerTopRight ||
                 bufferShape == IndexBufferShapeEnum.SideRight;
 
-            uint totalTriangles = (uint)triangles;
+            uint totalTriangles = (uint)tris;
             if (topSide) totalTriangles -= sideLoss;
             if (bottomSide) totalTriangles -= sideLoss;
             if (leftSide) totalTriangles -= sideLoss;
@@ -55,28 +71,28 @@ namespace Engine.Common
             {
                 for (uint x = 1; x < side; x += 2)
                 {
-                    uint indexPRow = ((y - 1) * (side + 1)) + x;
-                    uint indexCRow = ((y + 0) * (side + 1)) + x;
-                    uint indexNRow = ((y + 1) * (side + 1)) + x;
+                    uint indexPRow = (((y - 1) * offset) * (fullSide + 1)) + (x * offset);
+                    uint indexCRow = (((y + 0) * offset) * (fullSide + 1)) + (x * offset);
+                    uint indexNRow = (((y + 1) * offset) * (fullSide + 1)) + (x * offset);
 
                     //Top side
                     if (y == 1 && topSide)
                     {
                         //Top
                         indices[index++] = indexCRow;
-                        indices[index++] = indexPRow - 1;
-                        indices[index++] = indexPRow + 1;
+                        indices[index++] = indexPRow - (1 * offset);
+                        indices[index++] = indexPRow + (1 * offset);
                     }
                     else
                     {
                         //Top left
                         indices[index++] = indexCRow;
-                        indices[index++] = indexPRow - 1;
+                        indices[index++] = indexPRow - (1 * offset);
                         indices[index++] = indexPRow;
                         //Top right
                         indices[index++] = indexCRow;
                         indices[index++] = indexPRow;
-                        indices[index++] = indexPRow + 1;
+                        indices[index++] = indexPRow + (1 * offset);
                     }
 
                     //Bottom side
@@ -84,18 +100,18 @@ namespace Engine.Common
                     {
                         //Bottom only
                         indices[index++] = indexCRow;
-                        indices[index++] = indexNRow + 1;
-                        indices[index++] = indexNRow - 1;
+                        indices[index++] = indexNRow + (1 * offset);
+                        indices[index++] = indexNRow - (1 * offset);
                     }
                     else
                     {
                         //Bottom left
                         indices[index++] = indexCRow;
                         indices[index++] = indexNRow;
-                        indices[index++] = indexNRow - 1;
+                        indices[index++] = indexNRow - (1 * offset);
                         //Bottom right
                         indices[index++] = indexCRow;
-                        indices[index++] = indexNRow + 1;
+                        indices[index++] = indexNRow + (1 * offset);
                         indices[index++] = indexNRow;
                     }
 
@@ -104,19 +120,19 @@ namespace Engine.Common
                     {
                         //Left only
                         indices[index++] = indexCRow;
-                        indices[index++] = indexNRow - 1;
-                        indices[index++] = indexPRow - 1;
+                        indices[index++] = indexNRow - (1 * offset);
+                        indices[index++] = indexPRow - (1 * offset);
                     }
                     else
                     {
                         //Left top
                         indices[index++] = indexCRow;
-                        indices[index++] = indexCRow - 1;
-                        indices[index++] = indexPRow - 1;
+                        indices[index++] = indexCRow - (1 * offset);
+                        indices[index++] = indexPRow - (1 * offset);
                         //Left bottom
                         indices[index++] = indexCRow;
-                        indices[index++] = indexNRow - 1;
-                        indices[index++] = indexCRow - 1;
+                        indices[index++] = indexNRow - (1 * offset);
+                        indices[index++] = indexCRow - (1 * offset);
                     }
 
                     //Right side
@@ -124,19 +140,19 @@ namespace Engine.Common
                     {
                         //Right only
                         indices[index++] = indexCRow;
-                        indices[index++] = indexPRow + 1;
-                        indices[index++] = indexNRow + 1;
+                        indices[index++] = indexPRow + (1 * offset);
+                        indices[index++] = indexNRow + (1 * offset);
                     }
                     else
                     {
                         //Right top
                         indices[index++] = indexCRow;
-                        indices[index++] = indexPRow + 1;
-                        indices[index++] = indexCRow + 1;
+                        indices[index++] = indexPRow + (1 * offset);
+                        indices[index++] = indexCRow + (1 * offset);
                         //Right bottom
                         indices[index++] = indexCRow;
-                        indices[index++] = indexCRow + 1;
-                        indices[index++] = indexNRow + 1;
+                        indices[index++] = indexCRow + (1 * offset);
+                        indices[index++] = indexNRow + (1 * offset);
                     }
                 }
             }
